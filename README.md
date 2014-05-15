@@ -1,6 +1,8 @@
 Universal Pokemon Randomizer
+
 By Dabomstew
-http://pokehacks.dabomstew.com/randomizer/
+
+Homepage: http://pokehacks.dabomstew.com/randomizer/
 
 # For Program Users
 If you're looking to actually *use* the randomizer as opposed to looking at the 
