@@ -133,6 +133,10 @@ public class QuickSettingsUpdater {
 			dataBlock[13] |= 0x04;
 		}
 
+		// 160 to 161: no change
+		// the only changes were in implementation, which broke presets, but
+		// leaves settings files the same
+
 		// fix checksum
 		CRC32 checksum = new CRC32();
 		checksum.update(dataBlock, 0, actualDataLength - 16);
