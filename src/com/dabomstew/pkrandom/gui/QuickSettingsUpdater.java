@@ -144,10 +144,7 @@ public class QuickSettingsUpdater {
 		// convert crc32 to int bytes
 		byte[] crcBuf = ByteBuffer.allocate(4)
 				.putInt((int) checksum.getValue()).array();
-		dataBlock[actualDataLength - 16] = crcBuf[0];
-		dataBlock[actualDataLength - 15] = crcBuf[1];
-		dataBlock[actualDataLength - 14] = crcBuf[2];
-		dataBlock[actualDataLength - 13] = crcBuf[3];
+		System.arraycopy(crcBuf, 0, dataBlock, actualDataLength - 16, 4);
 
 		// have to make a new byte array to convert to base64
 		byte[] finalConfigString = new byte[actualDataLength];
@@ -155,6 +152,16 @@ public class QuickSettingsUpdater {
 		return DatatypeConverter.printBase64Binary(finalConfigString);
 	}
 
+	/**
+	 * Insert a 4-byte int field in the data block at the given position. Shift
+	 * everything else up. Do nothing if there's no room left (should never
+	 * happen)
+	 * 
+	 * @param position
+	 *            The offset to add the field
+	 * @param value
+	 *            The value to give to the field
+	 */
 	private void insertIntField(int position, int value) {
 		if (actualDataLength + 4 > dataBlock.length) {
 			// can't do
@@ -168,6 +175,16 @@ public class QuickSettingsUpdater {
 		actualDataLength += 4;
 	}
 
+	/**
+	 * Insert a byte-field in the data block at the given position. Shift
+	 * everything else up. Do nothing if there's no room left (should never
+	 * happen)
+	 * 
+	 * @param position
+	 *            The offset to add the field
+	 * @param value
+	 *            The value to give to the field
+	 */
 	private void insertExtraByte(int position, byte value) {
 		if (actualDataLength == dataBlock.length) {
 			// can't do
