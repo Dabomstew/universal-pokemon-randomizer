@@ -59,7 +59,8 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 	private boolean completed = false;
 	private String requiredName = null;
 	private volatile boolean changeFieldsWithoutCheck = false;
-	private byte[] trainerClasses = null, trainerNames = null, nicknames = null;
+	private byte[] trainerClasses = null, trainerNames = null,
+			nicknames = null;
 
 	/**
 	 * Creates new form PresetLoadDialog
@@ -117,10 +118,39 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 			invalidValues();
 			return false;
 		}
+		// 161 onwards: look for version number
+		String configString = this.configStringField.getText();
+		if (configString.length() < 3) {
+			invalidValues();
+			return false;
+		}
+
+		try {
+			int presetVersionNumber = Integer.parseInt(configString.substring(
+					0, 3));
+			if (presetVersionNumber != RandomizerGUI.PRESET_FILE_VERSION) {
+				promptForDifferentRandomizerVersion(presetVersionNumber);
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						changeFieldsWithoutCheck = true;
+						configStringField.setText("");
+						randomSeedField.setText("");
+						changeFieldsWithoutCheck = false;
+					}
+				});
+				invalidValues();
+				return false;
+			}
+		} catch (NumberFormatException ex) {
+			invalidValues();
+			return false;
+		}
+
 		try {
 			name = this.parentGUI.getValidRequiredROMName(
-					this.configStringField.getText(), trainerClasses,
-					trainerNames, nicknames);
+					configString.substring(3), trainerClasses, trainerNames,
+					nicknames);
 		} catch (InvalidSupplementFilesException ex) {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
@@ -155,6 +185,11 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 		return true;
 	}
 
+	private void promptForDifferentRandomizerVersion(int presetVN) {
+		// TODO Auto-generated method stub
+
+	}
+
 	private void invalidValues() {
 		this.currentROM = null;
 		this.romFileField.setText("");
@@ -179,7 +214,7 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 	}
 
 	public String getConfigString() {
-		return this.configStringField.getText();
+		return this.configStringField.getText().substring(0, 3);
 	}
 
 	public byte[] getTrainerClasses() {
@@ -189,10 +224,133 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 	public byte[] getTrainerNames() {
 		return trainerNames;
 	}
-	
+
 	public byte[] getNicknames() {
 		return nicknames;
 	}
+
+	private void presetFileButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_presetFileButtonActionPerformed
+		presetFileChooser.setSelectedFile(null);
+		int returnVal = presetFileChooser.showOpenDialog(this);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File fh = presetFileChooser.getSelectedFile();
+			try {
+				DataInputStream dis = new DataInputStream(new FileInputStream(
+						fh));
+				int checkByte = dis.readByte() & 0xFF;
+				if (checkByte != RandomizerGUI.PRESET_FILE_VERSION) {
+					dis.close();
+					promptForDifferentRandomizerVersion(checkByte);
+					return;
+				}
+				long seed = dis.readLong();
+				String preset = dis.readUTF();
+				int tclen = dis.readInt();
+				trainerClasses = new byte[tclen];
+				dis.read(trainerClasses);
+				int tnlen = dis.readInt();
+				trainerNames = new byte[tnlen];
+				dis.read(trainerNames);
+				int nnlen = dis.readInt();
+				nicknames = new byte[nnlen];
+				dis.read(nicknames);
+				changeFieldsWithoutCheck = true;
+				this.randomSeedField.setText(Long.toString(seed));
+				this.configStringField.setText(checkByte + "" + preset);
+				changeFieldsWithoutCheck = false;
+				if (checkValues()) {
+					this.randomSeedField.setEnabled(false);
+					this.configStringField.setEnabled(false);
+					this.presetFileField.setText(fh.getAbsolutePath());
+				} else {
+					this.randomSeedField.setText("");
+					this.configStringField.setText("");
+					this.randomSeedField.setEnabled(true);
+					this.configStringField.setEnabled(true);
+					this.presetFileField.setText("");
+					trainerClasses = null;
+					trainerNames = null;
+					JOptionPane.showMessageDialog(this,
+							"The seed file did not contain valid settings.");
+				}
+				dis.close();
+			} catch (IOException ex) {
+				JOptionPane
+						.showMessageDialog(this, "Could not load seed file.");
+			}
+		}
+	}// GEN-LAST:event_presetFileButtonActionPerformed
+
+	private void romFileButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_romFileButtonActionPerformed
+		romFileChooser.setSelectedFile(null);
+		int returnVal = romFileChooser.showOpenDialog(this);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			final File fh = romFileChooser.getSelectedFile();
+			for (RomHandler rh : parentGUI.checkHandlers) {
+				if (rh.detectRom(fh.getAbsolutePath())) {
+					final RomHandler checkHandler = rh;
+					final JDialog opDialog = new OperationDialog("Loading...",
+							this, true);
+					Thread t = new Thread() {
+						@Override
+						public void run() {
+							SwingUtilities.invokeLater(new Runnable() {
+								@Override
+								public void run() {
+									opDialog.setVisible(true);
+								}
+							});
+							try {
+								checkHandler.loadRom(fh.getAbsolutePath());
+							} catch (Exception ex) {
+								JOptionPane.showMessageDialog(
+										PresetLoadDialog.this,
+										"ROM load failed.");
+							}
+							SwingUtilities.invokeLater(new Runnable() {
+								@Override
+								public void run() {
+									opDialog.setVisible(false);
+									if (checkHandler.getROMName().equals(
+											requiredName)) {
+										// Got it
+										romFileField.setText(fh
+												.getAbsolutePath());
+										currentROM = checkHandler;
+										acceptButton.setEnabled(true);
+										return;
+									} else {
+										JOptionPane.showMessageDialog(
+												PresetLoadDialog.this,
+												"This isn't the required ROM.\nRequired: "
+														+ requiredName
+														+ "\nThis ROM: "
+														+ checkHandler
+																.getROMName());
+										return;
+									}
+								}
+							});
+						}
+					};
+					t.start();
+					return;
+				}
+			}
+			JOptionPane.showMessageDialog(this,
+					"The file you specified isn't a valid Pokemon ROM.");
+		}
+	}// GEN-LAST:event_romFileButtonActionPerformed
+
+	private void acceptButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_acceptButtonActionPerformed
+		completed = true;
+		this.setVisible(false);
+	}// GEN-LAST:event_acceptButtonActionPerformed
+
+	private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cancelButtonActionPerformed
+		completed = false;
+		this.setVisible(false);
+	}// GEN-LAST:event_cancelButtonActionPerformed
 
 	/**
 	 * This method is called from within the constructor to initialize the form.
@@ -417,131 +575,6 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 
 		pack();
 	}// </editor-fold>//GEN-END:initComponents
-
-	private void presetFileButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_presetFileButtonActionPerformed
-		presetFileChooser.setSelectedFile(null);
-		int returnVal = presetFileChooser.showOpenDialog(this);
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			File fh = presetFileChooser.getSelectedFile();
-			try {
-				DataInputStream dis = new DataInputStream(new FileInputStream(
-						fh));
-				int checkByte = dis.readByte() & 0xFF;
-				if (checkByte != RandomizerGUI.PRESET_FILE_VERSION) {
-					dis.close();
-					JOptionPane
-							.showMessageDialog(this,
-									"This seed file is not for this version of the randomizer.");
-					return;
-				}
-				long seed = dis.readLong();
-				String preset = dis.readUTF();
-				int tclen = dis.readInt();
-				trainerClasses = new byte[tclen];
-				dis.read(trainerClasses);
-				int tnlen = dis.readInt();
-				trainerNames = new byte[tnlen];
-				dis.read(trainerNames);
-				int nnlen = dis.readInt();
-				nicknames = new byte[nnlen];
-				dis.read(nicknames);
-				changeFieldsWithoutCheck = true;
-				this.randomSeedField.setText(Long.toString(seed));
-				this.configStringField.setText(preset);
-				changeFieldsWithoutCheck = false;
-				if (checkValues()) {
-					this.randomSeedField.setEnabled(false);
-					this.configStringField.setEnabled(false);
-					this.presetFileField.setText(fh.getAbsolutePath());
-				} else {
-					this.randomSeedField.setText("");
-					this.configStringField.setText("");
-					this.randomSeedField.setEnabled(true);
-					this.configStringField.setEnabled(true);
-					this.presetFileField.setText("");
-					trainerClasses = null;
-					trainerNames = null;
-					JOptionPane.showMessageDialog(this,
-							"The seed file did not contain valid settings.");
-				}
-				dis.close();
-			} catch (IOException ex) {
-				JOptionPane.showMessageDialog(this,
-						"Could not load seed file.");
-			}
-		}
-	}// GEN-LAST:event_presetFileButtonActionPerformed
-
-	private void romFileButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_romFileButtonActionPerformed
-		romFileChooser.setSelectedFile(null);
-		int returnVal = romFileChooser.showOpenDialog(this);
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			final File fh = romFileChooser.getSelectedFile();
-			for (RomHandler rh : parentGUI.checkHandlers) {
-				if (rh.detectRom(fh.getAbsolutePath())) {
-					final RomHandler checkHandler = rh;
-					final JDialog opDialog = new OperationDialog("Loading...",
-							this, true);
-					Thread t = new Thread() {
-						@Override
-						public void run() {
-							SwingUtilities.invokeLater(new Runnable() {
-								@Override
-								public void run() {
-									opDialog.setVisible(true);
-								}
-							});
-							try {
-								checkHandler.loadRom(fh.getAbsolutePath());
-							} catch (Exception ex) {
-								JOptionPane.showMessageDialog(
-										PresetLoadDialog.this,
-										"ROM load failed.");
-							}
-							SwingUtilities.invokeLater(new Runnable() {
-								@Override
-								public void run() {
-									opDialog.setVisible(false);
-									if (checkHandler.getROMName().equals(
-											requiredName)) {
-										// Got it
-										romFileField.setText(fh
-												.getAbsolutePath());
-										currentROM = checkHandler;
-										acceptButton.setEnabled(true);
-										return;
-									} else {
-										JOptionPane.showMessageDialog(
-												PresetLoadDialog.this,
-												"This isn't the required ROM.\nRequired: "
-														+ requiredName
-														+ "\nThis ROM: "
-														+ checkHandler
-																.getROMName());
-										return;
-									}
-								}
-							});
-						}
-					};
-					t.start();
-					return;
-				}
-			}
-			JOptionPane.showMessageDialog(this,
-					"The file you specified isn't a valid Pokemon ROM.");
-		}
-	}// GEN-LAST:event_romFileButtonActionPerformed
-
-	private void acceptButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_acceptButtonActionPerformed
-		completed = true;
-		this.setVisible(false);
-	}// GEN-LAST:event_acceptButtonActionPerformed
-
-	private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cancelButtonActionPerformed
-		completed = false;
-		this.setVisible(false);
-	}// GEN-LAST:event_cancelButtonActionPerformed
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JButton acceptButton;
