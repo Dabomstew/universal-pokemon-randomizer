@@ -61,12 +61,15 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 	private volatile boolean changeFieldsWithoutCheck = false;
 	private byte[] trainerClasses = null, trainerNames = null,
 			nicknames = null;
+	java.util.ResourceBundle bundle;
 
 	/**
 	 * Creates new form PresetLoadDialog
 	 */
 	public PresetLoadDialog(RandomizerGUI parent) {
 		super(parent, true);
+		bundle = java.util.ResourceBundle
+				.getBundle("com/dabomstew/pkrandom/gui/Bundle"); // NOI18N
 		initComponents();
 		this.parentGUI = parent;
 		this.presetFileChooser.setCurrentDirectory(new File("./"));
@@ -130,15 +133,7 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 					0, 3));
 			if (presetVersionNumber != RandomizerGUI.PRESET_FILE_VERSION) {
 				promptForDifferentRandomizerVersion(presetVersionNumber);
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						changeFieldsWithoutCheck = true;
-						configStringField.setText("");
-						randomSeedField.setText("");
-						changeFieldsWithoutCheck = false;
-					}
-				});
+				safelyClearFields();
 				invalidValues();
 				return false;
 			}
@@ -152,20 +147,11 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 					configString.substring(3), trainerClasses, trainerNames,
 					nicknames);
 		} catch (InvalidSupplementFilesException ex) {
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					changeFieldsWithoutCheck = true;
-					configStringField.setText("");
-					randomSeedField.setText("");
-					changeFieldsWithoutCheck = false;
-				}
-			});
+			safelyClearFields();
 			invalidValues();
 			return false;
 		} catch (Exception ex) {
-			// other exception
-			ex.printStackTrace();
+			// other exception, just call it invalid for now
 			invalidValues();
 			return false;
 		}
@@ -174,7 +160,9 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 			return false;
 		}
 		requiredName = name;
-		this.romRequiredLabel.setText("ROM Required: " + name);
+		this.romRequiredLabel.setText(String.format(bundle
+				.getString("PresetLoadDialog.romRequiredLabel.textWithROM"),
+				name));
 		this.romFileButton.setEnabled(true);
 
 		if (currentROM != null && currentROM.getROMName().equals(name) == false) {
@@ -190,11 +178,23 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 
 	}
 
+	private void safelyClearFields() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				changeFieldsWithoutCheck = true;
+				configStringField.setText("");
+				randomSeedField.setText("");
+				changeFieldsWithoutCheck = false;
+			}
+		});
+	}
+
 	private void invalidValues() {
 		this.currentROM = null;
 		this.romFileField.setText("");
-		this.romRequiredLabel
-				.setText("ROM Required: Enter settings above first.");
+		this.romRequiredLabel.setText(bundle
+				.getString("PresetLoadDialog.romRequiredLabel.text"));
 		this.romFileButton.setEnabled(false);
 		this.acceptButton.setEnabled(false);
 		this.requiredName = null;
@@ -270,13 +270,13 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 					this.presetFileField.setText("");
 					trainerClasses = null;
 					trainerNames = null;
-					JOptionPane.showMessageDialog(this,
-							"The seed file did not contain valid settings.");
+					JOptionPane.showMessageDialog(this, bundle
+							.getString("PresetLoadDialog.invalidSeedFile"));
 				}
 				dis.close();
 			} catch (IOException ex) {
-				JOptionPane
-						.showMessageDialog(this, "Could not load seed file.");
+				JOptionPane.showMessageDialog(this, bundle
+						.getString("PresetLoadDialog.loadingSeedFileFailed"));
 			}
 		}
 	}// GEN-LAST:event_presetFileButtonActionPerformed
@@ -289,7 +289,8 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 			for (RomHandler rh : parentGUI.checkHandlers) {
 				if (rh.detectRom(fh.getAbsolutePath())) {
 					final RomHandler checkHandler = rh;
-					final JDialog opDialog = new OperationDialog("Loading...",
+					final JDialog opDialog = new OperationDialog(
+							bundle.getString("RandomizerGUI.loadingText"),
 							this, true);
 					Thread t = new Thread() {
 						@Override
@@ -303,9 +304,10 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 							try {
 								checkHandler.loadRom(fh.getAbsolutePath());
 							} catch (Exception ex) {
-								JOptionPane.showMessageDialog(
-										PresetLoadDialog.this,
-										"ROM load failed.");
+								JOptionPane
+										.showMessageDialog(
+												PresetLoadDialog.this,
+												bundle.getString("RandomizerGUI.loadFailedNoLog"));
 							}
 							SwingUtilities.invokeLater(new Runnable() {
 								@Override
@@ -322,11 +324,11 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 									} else {
 										JOptionPane.showMessageDialog(
 												PresetLoadDialog.this,
-												"This isn't the required ROM.\nRequired: "
-														+ requiredName
-														+ "\nThis ROM: "
-														+ checkHandler
-																.getROMName());
+												String.format(
+														bundle.getString("PresetLoadDialog.notRequiredROM"),
+														requiredName,
+														checkHandler
+																.getROMName()));
 										return;
 									}
 								}
@@ -337,8 +339,9 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 					return;
 				}
 			}
-			JOptionPane.showMessageDialog(this,
-					"The file you specified isn't a valid Pokemon ROM.");
+			JOptionPane.showMessageDialog(this, String.format(
+					bundle.getString("RandomizerGUI.unsupportedRom"),
+					fh.getName()));
 		}
 	}// GEN-LAST:event_romFileButtonActionPerformed
 
@@ -357,6 +360,8 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 	 * WARNING: Do NOT modify this code. The content of this method is always
 	 * regenerated by the Form Editor.
 	 */
+	// <editor-fold defaultstate="collapsed"
+	// desc="Generated Code">//GEN-BEGIN:initComponents
 	private void initComponents() {
 
 		presetFileChooser = new javax.swing.JFileChooser();
@@ -364,13 +369,13 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 		presetFileLabel = new javax.swing.JLabel();
 		presetFileField = new javax.swing.JTextField();
 		presetFileButton = new javax.swing.JButton();
-		jLabel1 = new javax.swing.JLabel();
-		jLabel2 = new javax.swing.JLabel();
+		orLabel = new javax.swing.JLabel();
+		seedBoxLabel = new javax.swing.JLabel();
 		randomSeedField = new javax.swing.JTextField();
-		jLabel3 = new javax.swing.JLabel();
+		configStringBoxLabel = new javax.swing.JLabel();
 		configStringField = new javax.swing.JTextField();
 		romRequiredLabel = new javax.swing.JLabel();
-		jLabel5 = new javax.swing.JLabel();
+		romFileBoxLabel = new javax.swing.JLabel();
 		romFileField = new javax.swing.JTextField();
 		romFileButton = new javax.swing.JButton();
 		acceptButton = new javax.swing.JButton();
@@ -381,52 +386,63 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 		romFileChooser.setFileFilter(new ROMFilter());
 
 		setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-		setTitle("Use Premade Seed");
+		java.util.ResourceBundle bundle = java.util.ResourceBundle
+				.getBundle("com/dabomstew/pkrandom/gui/Bundle"); // NOI18N
+		setTitle(bundle.getString("PresetLoadDialog.title")); // NOI18N
 		setModal(true);
 		setResizable(false);
 
-		presetFileLabel.setText("Seed File:");
+		presetFileLabel.setText(bundle
+				.getString("PresetLoadDialog.presetFileLabel.text")); // NOI18N
 
 		presetFileField.setEditable(false);
 
-		presetFileButton.setText("...");
+		presetFileButton.setText(bundle
+				.getString("PresetLoadDialog.presetFileButton.text")); // NOI18N
 		presetFileButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				presetFileButtonActionPerformed(evt);
 			}
 		});
 
-		jLabel1.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-		jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-		jLabel1.setText("-OR-");
+		orLabel.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+		orLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+		orLabel.setText(bundle.getString("PresetLoadDialog.orLabel.text")); // NOI18N
 
-		jLabel2.setText("Random Seed:");
+		seedBoxLabel.setText(bundle
+				.getString("PresetLoadDialog.seedBoxLabel.text")); // NOI18N
 
-		jLabel3.setText("Config String:");
+		configStringBoxLabel.setText(bundle
+				.getString("PresetLoadDialog.configStringBoxLabel.text")); // NOI18N
 
 		romRequiredLabel
 				.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-		romRequiredLabel.setText("ROM Required: Enter settings above first.");
+		romRequiredLabel.setText(bundle
+				.getString("PresetLoadDialog.romRequiredLabel.text")); // NOI18N
 
-		jLabel5.setText("Rom File:");
+		romFileBoxLabel.setText(bundle
+				.getString("PresetLoadDialog.romFileBoxLabel.text")); // NOI18N
 
 		romFileField.setEditable(false);
 
-		romFileButton.setText("...");
+		romFileButton.setText(bundle
+				.getString("PresetLoadDialog.romFileButton.text")); // NOI18N
 		romFileButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				romFileButtonActionPerformed(evt);
 			}
 		});
 
-		acceptButton.setText("Apply Randomization Settings");
+		acceptButton.setText(bundle
+				.getString("PresetLoadDialog.acceptButton.text")); // NOI18N
 		acceptButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				acceptButtonActionPerformed(evt);
 			}
 		});
 
-		cancelButton.setText("Cancel");
+		cancelButton.setText(bundle
+				.getString("PresetLoadDialog.cancelButton.text")); // NOI18N
 		cancelButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				cancelButtonActionPerformed(evt);
@@ -446,7 +462,7 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 												javax.swing.GroupLayout.Alignment.TRAILING,
 												false)
 												.addComponent(
-														jLabel5,
+														romFileBoxLabel,
 														javax.swing.GroupLayout.Alignment.LEADING,
 														javax.swing.GroupLayout.DEFAULT_SIZE,
 														javax.swing.GroupLayout.DEFAULT_SIZE,
@@ -458,13 +474,13 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 														javax.swing.GroupLayout.DEFAULT_SIZE,
 														Short.MAX_VALUE)
 												.addComponent(
-														jLabel2,
+														seedBoxLabel,
 														javax.swing.GroupLayout.Alignment.LEADING,
 														javax.swing.GroupLayout.DEFAULT_SIZE,
 														javax.swing.GroupLayout.DEFAULT_SIZE,
 														Short.MAX_VALUE)
 												.addComponent(
-														jLabel3,
+														configStringBoxLabel,
 														javax.swing.GroupLayout.Alignment.LEADING,
 														javax.swing.GroupLayout.DEFAULT_SIZE,
 														javax.swing.GroupLayout.DEFAULT_SIZE,
@@ -503,7 +519,7 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 														javax.swing.GroupLayout.PREFERRED_SIZE,
 														1, Short.MAX_VALUE))
 								.addGap(12, 12, 12))
-				.addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE,
+				.addComponent(orLabel, javax.swing.GroupLayout.DEFAULT_SIZE,
 						javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 				.addComponent(romRequiredLabel,
 						javax.swing.GroupLayout.DEFAULT_SIZE,
@@ -525,13 +541,13 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 												.addComponent(presetFileButton))
 								.addPreferredGap(
 										javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addComponent(jLabel1)
+								.addComponent(orLabel)
 								.addPreferredGap(
 										javax.swing.LayoutStyle.ComponentPlacement.RELATED)
 								.addGroup(
 										layout.createParallelGroup(
 												javax.swing.GroupLayout.Alignment.BASELINE)
-												.addComponent(jLabel2)
+												.addComponent(seedBoxLabel)
 												.addComponent(
 														randomSeedField,
 														javax.swing.GroupLayout.PREFERRED_SIZE,
@@ -542,7 +558,8 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 								.addGroup(
 										layout.createParallelGroup(
 												javax.swing.GroupLayout.Alignment.BASELINE)
-												.addComponent(jLabel3)
+												.addComponent(
+														configStringBoxLabel)
 												.addComponent(
 														configStringField,
 														javax.swing.GroupLayout.PREFERRED_SIZE,
@@ -556,7 +573,7 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 								.addGroup(
 										layout.createParallelGroup(
 												javax.swing.GroupLayout.Alignment.BASELINE)
-												.addComponent(jLabel5)
+												.addComponent(romFileBoxLabel)
 												.addComponent(
 														romFileField,
 														javax.swing.GroupLayout.PREFERRED_SIZE,
@@ -579,19 +596,19 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JButton acceptButton;
 	private javax.swing.JButton cancelButton;
+	private javax.swing.JLabel configStringBoxLabel;
 	private javax.swing.JTextField configStringField;
-	private javax.swing.JLabel jLabel1;
-	private javax.swing.JLabel jLabel2;
-	private javax.swing.JLabel jLabel3;
-	private javax.swing.JLabel jLabel5;
+	private javax.swing.JLabel orLabel;
 	private javax.swing.JButton presetFileButton;
 	private javax.swing.JFileChooser presetFileChooser;
 	private javax.swing.JTextField presetFileField;
 	private javax.swing.JLabel presetFileLabel;
 	private javax.swing.JTextField randomSeedField;
+	private javax.swing.JLabel romFileBoxLabel;
 	private javax.swing.JButton romFileButton;
 	private javax.swing.JFileChooser romFileChooser;
 	private javax.swing.JTextField romFileField;
 	private javax.swing.JLabel romRequiredLabel;
+	private javax.swing.JLabel seedBoxLabel;
 	// End of variables declaration//GEN-END:variables
 }
