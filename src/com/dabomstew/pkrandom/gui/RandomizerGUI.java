@@ -2340,14 +2340,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 			try {
 				FileInputStream fis = new FileInputStream(fh);
 				int version = fis.read();
-				if (version < PRESET_FILE_VERSION) {
-					JOptionPane
-							.showMessageDialog(
-									this,
-									bundle.getString("RandomizerGUI.settingsFileOlder"));
-					fis.close();
-					return;
-				} else if (version > PRESET_FILE_VERSION) {
+				if (version > PRESET_FILE_VERSION) {
 					JOptionPane
 							.showMessageDialog(
 									this,
@@ -2360,6 +2353,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
 				fis.read(csBuf);
 				fis.close();
 				String configString = new String(csBuf, "UTF-8");
+				if (version < PRESET_FILE_VERSION) {
+					configString = new QuickSettingsUpdater().update(version,
+							configString);
+				}
 				String romName = getValidRequiredROMName(configString,
 						new byte[] {}, new byte[] {}, new byte[] {});
 				if (romName == null) {
