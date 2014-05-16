@@ -91,9 +91,9 @@ public class RandomSource {
 
 	public static long pickSeed() {
 		long value = 0;
-		byte[] by = SecureRandom.getSeed(8);
+		byte[] by = SecureRandom.getSeed(6);
 		for (int i = 0; i < by.length; i++) {
-			value += ((long) by[i] & 0xffL) << (8 * i);
+			value |= ((long) by[i] & 0xffL) << (8 * i);
 		}
 		return value;
 	}
