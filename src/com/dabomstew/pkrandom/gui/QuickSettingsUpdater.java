@@ -160,7 +160,7 @@ public class QuickSettingsUpdater {
 			// can't do
 			return;
 		}
-		for (int j = actualDataLength; j > position + 3; j++) {
+		for (int j = actualDataLength; j > position + 3; j--) {
 			dataBlock[j] = dataBlock[j - 4];
 		}
 		byte[] valueBuf = ByteBuffer.allocate(4).putInt(value).array();
@@ -173,7 +173,7 @@ public class QuickSettingsUpdater {
 			// can't do
 			return;
 		}
-		for (int j = actualDataLength; j > position; j++) {
+		for (int j = actualDataLength; j > position; j--) {
 			dataBlock[j] = dataBlock[j - 1];
 		}
 		dataBlock[position] = value;
