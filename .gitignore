@@ -21,3 +21,4 @@ config.ini
 error_*.txt
 src/com/dabomstew/pkrandom/localtests
 bin
+*.log
