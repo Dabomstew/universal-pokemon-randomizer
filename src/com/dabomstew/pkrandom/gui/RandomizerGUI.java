@@ -2354,6 +2354,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
 				fis.close();
 				String configString = new String(csBuf, "UTF-8");
 				if (version < PRESET_FILE_VERSION) {
+					// show a warning dialog, but load it
+					JOptionPane
+							.showMessageDialog(
+									this,
+									bundle.getString("RandomizerGUI.settingsFileOlder"));
 					configString = new QuickSettingsUpdater().update(version,
 							configString);
 				}
