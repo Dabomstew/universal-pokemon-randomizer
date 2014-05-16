@@ -243,7 +243,7 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 	}
 
 	public String getConfigString() {
-		return this.configStringField.getText().substring(0, 3);
+		return this.configStringField.getText().substring(3);
 	}
 
 	public byte[] getTrainerClasses() {
