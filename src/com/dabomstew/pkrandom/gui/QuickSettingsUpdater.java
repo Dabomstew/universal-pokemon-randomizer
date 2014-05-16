@@ -29,6 +29,8 @@ public class QuickSettingsUpdater {
 		// new field values here are written as bitwise ORs
 		// this is slightly slower in execution, but it makes it clearer
 		// just what values we actually want to set
+		// bit fields 1 2 3 4 5 6 7 8
+		// are values 0x01 0x02 0x04 0x08 0x10 0x20 0x40 0x80
 
 		// versions prior to 120 didn't have quick settings file,
 		// they're just included here for completeness' sake
@@ -63,7 +65,7 @@ public class QuickSettingsUpdater {
 		// 150-160 lots of re-org etc
 		if (oldVersion < 160) {
 			// byte 0:
-			// move "update moves" to "update legacy moves"
+			// copy "update moves" to "update legacy moves"
 			// move the other 3 fields after it up one
 			int firstByte = dataBlock[0] & 0xFF;
 			int updateMoves = firstByte & 0x08;
@@ -111,7 +113,7 @@ public class QuickSettingsUpdater {
 					13,
 					(byte) ((wpCatchRate) | (wpNoLegendaries << 1) | (hasHeldItems << 3)));
 
-			// new byte 14 (was 13):
+			// new byte 14 (was 13 in 150):
 			// switch off bits 4 and 5 (were for catch rate & no early shedinja)
 			dataBlock[14] &= 0x07;
 

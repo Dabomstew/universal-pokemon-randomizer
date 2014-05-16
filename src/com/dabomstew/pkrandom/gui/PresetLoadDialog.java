@@ -174,8 +174,37 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 	}
 
 	private void promptForDifferentRandomizerVersion(int presetVN) {
-		// TODO Auto-generated method stub
-
+		// so what version number was it?
+		if (presetVN > RandomizerGUI.PRESET_FILE_VERSION) {
+			// it's for a newer version
+			JOptionPane.showMessageDialog(this,
+					bundle.getString("PresetLoadDialog.newerVersionRequired"));
+		} else {
+			// tell them which older version to use to load this preset
+			// this should be the newest version that used that value
+			// for the constant PRESET_FILE_VERSION
+			String versionWanted = "";
+			if (presetVN == 100) {
+				versionWanted = "v1.0.1a";
+			} else if (presetVN == 102) {
+				versionWanted = "v1.0.2a";
+			} else if (presetVN == 110) {
+				versionWanted = "v1.1.0";
+			} else if (presetVN == 111) {
+				versionWanted = "v1.1.1";
+			} else if (presetVN == 112) {
+				versionWanted = "v1.1.2";
+			} else if (presetVN == 120) {
+				versionWanted = "v1.2.0a";
+			} else if (presetVN == 150) {
+				versionWanted = "v1.5.0";
+			} else if (presetVN == 160) {
+				versionWanted = "v1.6.0a";
+			}
+			JOptionPane.showMessageDialog(this, String.format(
+					bundle.getString("PresetLoadDialog.olderVersionRequired"),
+					versionWanted));
+		}
 	}
 
 	private void safelyClearFields() {
