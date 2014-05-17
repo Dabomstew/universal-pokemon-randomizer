@@ -1146,7 +1146,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 					newPK = nonlegsLeft.remove(RandomSource.nextInt(nonlegsLeft
 							.size()));
 					if (nonlegsLeft.size() == 0) {
-						nonlegsLeft.addAll(onlyLegendaryList);
+						nonlegsLeft.addAll(noLegendaryList);
 						nonlegsLeft.removeAll(banned);
 					}
 				}
