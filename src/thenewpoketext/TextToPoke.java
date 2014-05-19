@@ -59,10 +59,10 @@ public class TextToPoke {
 				} else if (text.charAt(1) == 'n') {
 					data.add(0xE000);
 					text = text.substring(2);
-				} else if (text.charAt(1) == 'r') {
+				} else if (text.charAt(1) == 'p') {
 					data.add(0x25BC);
 					text = text.substring(2);
-				} else if (text.charAt(1) == 'f') {
+				} else if (text.charAt(1) == 'l') {
 					data.add(0x25BD);
 					text = text.substring(2);
 				} else if (text.substring(1, 4).equals("and")) {

@@ -25,6 +25,7 @@ package com.dabomstew.pkrandom;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -58,7 +59,7 @@ public class RomFunctions {
 		bannedForDamagingMove[99] = true; // Rage, lock-in in gen1
 		bannedForDamagingMove[205] = true; // Rollout, lock-in
 		bannedForDamagingMove[301] = true; // Ice Ball, Rollout clone
-		
+
 		// make sure these cant roll
 		bannedForDamagingMove[39] = true; // Sonicboom
 		bannedForDamagingMove[82] = true; // Dragon Rage
@@ -166,7 +167,7 @@ public class RomFunctions {
 		if (!longAligned) {
 			// Find 2 more than necessary and return 2 into it,
 			// to preserve stuff like FF terminators for strings
-			// 161: and FFFF terminators for movesets 
+			// 161: and FFFF terminators for movesets
 			byte[] searchNeedle = new byte[amount + 2];
 			for (int i = 0; i < amount + 2; i++) {
 				searchNeedle[i] = freeSpace;
@@ -176,7 +177,7 @@ public class RomFunctions {
 			// Find 5 more than necessary and return into it as necessary for
 			// 4-alignment,
 			// to preserve stuff like FF terminators for strings
-			// 161: and FFFF terminators for movesets 
+			// 161: and FFFF terminators for movesets
 			byte[] searchNeedle = new byte[amount + 5];
 			for (int i = 0; i < amount + 5; i++) {
 				searchNeedle[i] = freeSpace;
@@ -351,6 +352,94 @@ public class RomFunctions {
 		}
 
 		return fullDesc.toString();
+	}
+
+	public static String replaceKeywordsInText(String text,
+			Map<String, String> replacements, String newline, String extraline,
+			String newpara, int maxLineLength, StringSizeDeterminer ssd) {
+		// Ends with a paragraph indicator?
+		boolean endsWithPara = false;
+		if (text.endsWith(newpara)) {
+			endsWithPara = true;
+			text = text.substring(0, text.length() - newpara.length());
+		}
+		// Replace current line endings with spaces
+		text = text.replace(newline, " ").replace(extraline, " ");
+		// Replace words
+		// do it in two stages so the rules don't conflict
+		int index = 0;
+		for (Map.Entry<String, String> toReplace : replacements.entrySet()) {
+			index++;
+			text = text
+					.replace(toReplace.getKey(), "<tmpreplace" + index + ">");
+		}
+		index = 0;
+		for (Map.Entry<String, String> toReplace : replacements.entrySet()) {
+			index++;
+			text = text.replace("<tmpreplace" + index + ">",
+					toReplace.getValue());
+		}
+		// Split on paragraphs and deal with each one individually
+		String[] oldParagraphs = text.split(newpara.replace("\\", "\\\\"));
+		StringBuilder finalResult = new StringBuilder();
+		for (int para = 0; para < oldParagraphs.length; para++) {
+			String[] words = oldParagraphs[para].split(" ");
+			StringBuilder fullPara = new StringBuilder();
+			StringBuilder thisLine = new StringBuilder();
+			int currLineWC = 0;
+			int currLineCC = 0;
+			int linesWritten = 0;
+			for (int i = 0; i < words.length; i++) {
+				int reqLength = ssd.lengthFor(words[i]);
+				if (currLineWC > 0) {
+					reqLength++;
+				}
+				if (currLineCC + reqLength <= maxLineLength) {
+					// add to current line
+					if (currLineWC > 0) {
+						thisLine.append(' ');
+					}
+					thisLine.append(words[i]);
+					currLineWC++;
+					currLineCC += reqLength;
+				} else {
+					// Save current line, if applicable
+					if (currLineWC > 0) {
+						if (linesWritten > 1) {
+							fullPara.append(extraline);
+						} else if (linesWritten == 1) {
+							fullPara.append(newline);
+						}
+						fullPara.append(thisLine.toString());
+						linesWritten++;
+						thisLine = new StringBuilder();
+					}
+					// Start the new line
+					thisLine.append(words[i]);
+					currLineWC = 1;
+					currLineCC = ssd.lengthFor(words[i]);
+				}
+			}
+
+			// If the last line has anything add it
+			if (currLineWC > 0) {
+				if (linesWritten > 1) {
+					fullPara.append(extraline);
+				} else if (linesWritten == 1) {
+					fullPara.append(newline);
+				}
+				fullPara.append(thisLine.toString());
+				linesWritten++;
+			}
+			if (para > 0) {
+				finalResult.append(newpara);
+			}
+			finalResult.append(fullPara.toString());
+		}
+		if (endsWithPara) {
+			finalResult.append(newpara);
+		}
+		return finalResult.toString();
 	}
 
 	public interface StringSizeDeterminer {

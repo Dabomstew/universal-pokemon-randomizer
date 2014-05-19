@@ -834,7 +834,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 							.getInt("StarterLocationTextOffset"));
 					lakeStrings
 							.set(19,
-									"\\v0103\\z0000: Fwaaah!\\nYour Pokémon totally rocked!\\rBut mine was way tougher\\nthan yours!\\r...They were other people’s\\nPokémon, though...\\rBut we had to use them...\\nThey won’t mind, will they?\\r");
+									"\\v0103\\z0000: Fwaaah!\\nYour Pokémon totally rocked!\\pBut mine was way tougher\\nthan yours!\\p...They were other people’s\\nPokémon, though...\\pBut we had to use them...\\nThey won’t mind, will they?\\p");
 					setStrings(romEntry.getInt("StarterLocationTextOffset"),
 							lakeStrings);
 				} else {
@@ -843,7 +843,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 							.getInt("StarterLocationTextOffset"));
 					r201Strings
 							.set(36,
-									"\\v0103\\z0000\\z0000: Then, I choose you!\\nI’m picking this one!\\r");
+									"\\v0103\\z0000\\z0000: Then, I choose you!\\nI’m picking this one!\\p");
 					setStrings(romEntry.getInt("StarterLocationTextOffset"),
 							r201Strings);
 				}
@@ -1896,7 +1896,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 		int offset = find(arm9, tmDataPrefix);
 		if (offset > 0) {
-			offset += tmDataPrefix.length()/2; // because it was a prefix
+			offset += tmDataPrefix.length() / 2; // because it was a prefix
 			List<Integer> tms = new ArrayList<Integer>();
 			for (int i = 0; i < 92; i++) {
 				tms.add(readWord(arm9, offset + i * 2));
@@ -1917,7 +1917,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 		int offset = find(arm9, tmDataPrefix);
 		if (offset > 0) {
-			offset += tmDataPrefix.length()/2; // because it was a prefix
+			offset += tmDataPrefix.length() / 2; // because it was a prefix
 			offset += 184; // TM data
 			List<Integer> hms = new ArrayList<Integer>();
 			for (int i = 0; i < 8; i++) {
@@ -1939,7 +1939,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 		int offset = find(arm9, tmDataPrefix);
 		if (offset > 0) {
-			offset += tmDataPrefix.length()/2; // because it was a prefix
+			offset += tmDataPrefix.length() / 2; // because it was a prefix
 			for (int i = 0; i < 92; i++) {
 				writeWord(arm9, offset + i * 2, moveIndexes.get(i));
 			}
@@ -2688,6 +2688,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	@Override
 	public void setIngameTrades(List<IngameTrade> trades) {
 		int tradeOffset = 0;
+		List<IngameTrade> oldTrades = this.getIngameTrades();
 		try {
 			NARCContents tradeNARC = this.readNARC(romEntry
 					.getString("InGameTrades"));
@@ -2727,6 +2728,39 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			this.writeNARC(romEntry.getString("InGameTrades"), tradeNARC);
 			this.setStrings(romEntry.getInt("IngameTradesTextOffset"),
 					tradeStrings);
+			// update what the people say when they talk to you
+			if (romEntry.arrayEntries
+					.containsKey("IngameTradePersonTextOffsets")) {
+				int[] textOffsets = romEntry.arrayEntries
+						.get("IngameTradePersonTextOffsets");
+				for (int trade = 0; trade < textOffsets.length; trade++) {
+					if (trade >= oldTrades.size() || trade >= trades.size()) {
+						break;
+					}
+					IngameTrade oldTrade = oldTrades.get(trade);
+					IngameTrade newTrade = trades.get(trade);
+					List<String> thisTradeStrings = this
+							.getStrings(textOffsets[trade]);
+					int ttsCount = thisTradeStrings.size();
+					Map<String, String> replacements = new TreeMap<String, String>();
+					replacements.put(oldTrade.givenPokemon.name,
+							newTrade.givenPokemon.name);
+					if (oldTrade.requestedPokemon != newTrade.requestedPokemon) {
+						replacements.put(oldTrade.requestedPokemon.name,
+								newTrade.requestedPokemon.name);
+					}
+					for (int strNum = 0; strNum < ttsCount; strNum++) {
+						String oldString = thisTradeStrings.get(strNum);
+						String newString = RomFunctions.replaceKeywordsInText(
+								oldString, replacements, "\\n", "\\l", "\\p",
+								40, ssd);
+						System.out.println("Original: " + oldString);
+						System.out.println("New: " + newString);
+						thisTradeStrings.set(strNum, newString);
+					}
+					this.setStrings(textOffsets[trade], thisTradeStrings);
+				}
+			}
 		} catch (IOException ex) {
 		}
 	}
@@ -2766,10 +2800,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 							writeWord(evoEntry, evo * 6 + 2, 0);
 							writeWord(evoEntry, evo * 6 + 4, 0);
 						} else {
-							EvolutionType et = EvolutionType.fromIndex(4, method);
+							EvolutionType et = EvolutionType.fromIndex(4,
+									method);
 							int extraInfo = readWord(evoEntry, evo * 6 + 2);
-							Evolution evol = new Evolution(i, species, true, et,
-									extraInfo);
+							Evolution evol = new Evolution(i, species, true,
+									et, extraInfo);
 							evolsIncluded.add(evol);
 						}
 					}
@@ -2800,7 +2835,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			// can't do anything
 		}
 	}
-	
+
 	@Override
 	public boolean supportsFourStartingMoves() {
 		return true;
