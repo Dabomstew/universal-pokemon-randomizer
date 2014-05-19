@@ -2734,35 +2734,46 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				int[] textOffsets = romEntry.arrayEntries
 						.get("IngameTradePersonTextOffsets");
 				for (int trade = 0; trade < textOffsets.length; trade++) {
-					if (trade >= oldTrades.size() || trade >= trades.size()) {
-						break;
+					if (textOffsets[trade] > 0) {
+						if (trade >= oldTrades.size() || trade >= trades.size()) {
+							break;
+						}
+						IngameTrade oldTrade = oldTrades.get(trade);
+						IngameTrade newTrade = trades.get(trade);
+						Map<String, String> replacements = new TreeMap<String, String>();
+						replacements.put(oldTrade.givenPokemon.name,
+								newTrade.givenPokemon.name);
+						if (oldTrade.requestedPokemon != newTrade.requestedPokemon) {
+							replacements.put(oldTrade.requestedPokemon.name,
+									newTrade.requestedPokemon.name);
+						}
+						replaceAllStringsInEntry(textOffsets[trade],
+								replacements, 40);
+						// hgss override for one set of strings that appears 2x
+						if (romEntry.romType == Type_HGSS && trade == 6) {
+							replaceAllStringsInEntry(textOffsets[trade] + 1,
+									replacements, 40);
+						}
 					}
-					IngameTrade oldTrade = oldTrades.get(trade);
-					IngameTrade newTrade = trades.get(trade);
-					List<String> thisTradeStrings = this
-							.getStrings(textOffsets[trade]);
-					int ttsCount = thisTradeStrings.size();
-					Map<String, String> replacements = new TreeMap<String, String>();
-					replacements.put(oldTrade.givenPokemon.name,
-							newTrade.givenPokemon.name);
-					if (oldTrade.requestedPokemon != newTrade.requestedPokemon) {
-						replacements.put(oldTrade.requestedPokemon.name,
-								newTrade.requestedPokemon.name);
-					}
-					for (int strNum = 0; strNum < ttsCount; strNum++) {
-						String oldString = thisTradeStrings.get(strNum);
-						String newString = RomFunctions.replaceKeywordsInText(
-								oldString, replacements, "\\n", "\\l", "\\p",
-								40, ssd);
-						System.out.println("Original: " + oldString);
-						System.out.println("New: " + newString);
-						thisTradeStrings.set(strNum, newString);
-					}
-					this.setStrings(textOffsets[trade], thisTradeStrings);
 				}
 			}
 		} catch (IOException ex) {
 		}
+	}
+
+	private void replaceAllStringsInEntry(int entry,
+			Map<String, String> replacements, int lineLength) {
+		List<String> thisTradeStrings = this.getStrings(entry);
+		int ttsCount = thisTradeStrings.size();
+		for (int strNum = 0; strNum < ttsCount; strNum++) {
+			String oldString = thisTradeStrings.get(strNum);
+			String newString = RomFunctions.replaceKeywordsInText(oldString,
+					replacements, "\\n", "\\l", "\\p", lineLength, ssd);
+			System.out.println("Original: " + oldString);
+			System.out.println("New: " + newString);
+			thisTradeStrings.set(strNum, newString);
+		}
+		this.setStrings(entry, thisTradeStrings);
 	}
 
 	@Override
