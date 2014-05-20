@@ -441,7 +441,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	private boolean mapLoadingDone;
 	private List<Integer> itemOffs;
 	private String[][] mapNames;
-	private List<Integer> tmTextOffsets;
 
 	private static final int RomType_Ruby = 0;
 	private static final int RomType_Sapp = 1;
@@ -1759,10 +1758,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				} else {
 					System.out.println("couldnt read old text");
 				}
-				String unformatted = tte.template.replace("[move]",
-						moves[moveIndexes.get(tte.number - 1)].name);
+				String moveName = this.moves[moveIndexes.get(tte.number - 1)].name;
+				// temporarily use underscores to stop the move name being split
+				String tmpMoveName = moveName.replace(' ', '_');
+				String unformatted = tte.template
+						.replace("[move]", tmpMoveName);
 				String newText = RomFunctions.formatTextWithReplacements(
 						unformatted, null, "\\n", "\\l", "\\p", 40, ssd);
+				// get rid of the underscores
+				newText = newText.replace(tmpMoveName, moveName);
 				System.out.println("inserting " + newText);
 				// insert the new text into free space
 				int fsBytesNeeded = translateString(newText).length + 1;
@@ -1887,10 +1891,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				} else {
 					System.out.println("couldnt read old text");
 				}
-				String unformatted = tte.template.replace("[move]",
-						this.moves[moves.get(tte.number)].name);
+				String moveName = this.moves[moves.get(tte.number)].name;
+				// temporarily use underscores to stop the move name being split
+				String tmpMoveName = moveName.replace(' ', '_');
+				String unformatted = tte.template
+						.replace("[move]", tmpMoveName);
 				String newText = RomFunctions.formatTextWithReplacements(
 						unformatted, null, "\\n", "\\l", "\\p", 40, ssd);
+				// get rid of the underscores
+				newText = newText.replace(tmpMoveName, moveName);
 				System.out.println("inserting " + newText);
 				// insert the new text into free space
 				int fsBytesNeeded = translateString(newText).length + 1;
@@ -2515,7 +2524,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		int mbpsOffset = romEntry.getValue("MapHeaders");
 		int mapLabels = romEntry.getValue("MapLabels");
 		Map<Integer, String> mapLabelsM = new HashMap<Integer, String>();
-		tmTextOffsets = new ArrayList<Integer>();
 		for (int bank = 0; bank < bankCount; bank++) {
 			int bankOffset = readPointer(mbpsOffset + bank * 4);
 			mapNames[bank] = new String[bankMapCounts[bank]];
