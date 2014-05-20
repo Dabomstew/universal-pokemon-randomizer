@@ -187,15 +187,19 @@ public class RomFunctions {
 	}
 
 	public static List<Integer> search(byte[] haystack, byte[] needle) {
-		return search(haystack, 0, needle);
+		return search(haystack, 0, haystack.length, needle);
+	}
+	
+	public static List<Integer> search(byte[] haystack, int beginOffset, byte[] needle) {
+		return search(haystack, beginOffset, haystack.length, needle);
 	}
 
-	public static List<Integer> search(byte[] haystack, int beginOffset,
+	public static List<Integer> search(byte[] haystack, int beginOffset, int endOffset,
 			byte[] needle) {
 		int currentMatchStart = beginOffset;
 		int currentCharacterPosition = 0;
 
-		int docSize = haystack.length;
+		int docSize = endOffset;
 		int needleSize = needle.length;
 
 		int[] toFillTable = buildKMPSearchTable(needle);
@@ -354,7 +358,7 @@ public class RomFunctions {
 		return fullDesc.toString();
 	}
 
-	public static String replaceKeywordsInText(String text,
+	public static String formatTextWithReplacements(String text,
 			Map<String, String> replacements, String newline, String extraline,
 			String newpara, int maxLineLength, StringSizeDeterminer ssd) {
 		// Ends with a paragraph indicator?
@@ -365,23 +369,26 @@ public class RomFunctions {
 		}
 		// Replace current line endings with spaces
 		text = text.replace(newline, " ").replace(extraline, " ");
-		// Replace words
+		// Replace words if replacements are set
 		// do it in two stages so the rules don't conflict
-		int index = 0;
-		for (Map.Entry<String, String> toReplace : replacements.entrySet()) {
-			index++;
-			text = text
-					.replace(toReplace.getKey(), "<tmpreplace" + index + ">");
-		}
-		index = 0;
-		for (Map.Entry<String, String> toReplace : replacements.entrySet()) {
-			index++;
-			text = text.replace("<tmpreplace" + index + ">",
-					toReplace.getValue());
+		if (replacements != null) {
+			int index = 0;
+			for (Map.Entry<String, String> toReplace : replacements.entrySet()) {
+				index++;
+				text = text.replace(toReplace.getKey(), "<tmpreplace" + index
+						+ ">");
+			}
+			index = 0;
+			for (Map.Entry<String, String> toReplace : replacements.entrySet()) {
+				index++;
+				text = text.replace("<tmpreplace" + index + ">",
+						toReplace.getValue());
+			}
 		}
 		// Split on paragraphs and deal with each one individually
 		String[] oldParagraphs = text.split(newpara.replace("\\", "\\\\"));
 		StringBuilder finalResult = new StringBuilder();
+		int sentenceNewLineSize = Math.max(10, maxLineLength / 2);
 		for (int para = 0; para < oldParagraphs.length; para++) {
 			String[] words = oldParagraphs[para].split(" ");
 			StringBuilder fullPara = new StringBuilder();
@@ -389,20 +396,16 @@ public class RomFunctions {
 			int currLineWC = 0;
 			int currLineCC = 0;
 			int linesWritten = 0;
+			char currLineLastChar = 0;
 			for (int i = 0; i < words.length; i++) {
 				int reqLength = ssd.lengthFor(words[i]);
 				if (currLineWC > 0) {
 					reqLength++;
 				}
-				if (currLineCC + reqLength <= maxLineLength) {
-					// add to current line
-					if (currLineWC > 0) {
-						thisLine.append(' ');
-					}
-					thisLine.append(words[i]);
-					currLineWC++;
-					currLineCC += reqLength;
-				} else {
+				if ((currLineCC + reqLength > maxLineLength)
+						|| (currLineCC >= sentenceNewLineSize && (currLineLastChar == '.'
+								|| currLineLastChar == '?' || currLineLastChar == '!'))) {
+					// new line
 					// Save current line, if applicable
 					if (currLineWC > 0) {
 						if (linesWritten > 1) {
@@ -418,6 +421,16 @@ public class RomFunctions {
 					thisLine.append(words[i]);
 					currLineWC = 1;
 					currLineCC = ssd.lengthFor(words[i]);
+					currLineLastChar = words[i].charAt(words[i].length() - 1);
+				} else {
+					// add to current line
+					if (currLineWC > 0) {
+						thisLine.append(' ');
+					}
+					thisLine.append(words[i]);
+					currLineWC++;
+					currLineCC += reqLength;
+					currLineLastChar = words[i].charAt(words[i].length() - 1);
 				}
 			}
 
