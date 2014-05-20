@@ -189,13 +189,14 @@ public class RomFunctions {
 	public static List<Integer> search(byte[] haystack, byte[] needle) {
 		return search(haystack, 0, haystack.length, needle);
 	}
-	
-	public static List<Integer> search(byte[] haystack, int beginOffset, byte[] needle) {
+
+	public static List<Integer> search(byte[] haystack, int beginOffset,
+			byte[] needle) {
 		return search(haystack, beginOffset, haystack.length, needle);
 	}
 
-	public static List<Integer> search(byte[] haystack, int beginOffset, int endOffset,
-			byte[] needle) {
+	public static List<Integer> search(byte[] haystack, int beginOffset,
+			int endOffset, byte[] needle) {
 		int currentMatchStart = beginOffset;
 		int currentCharacterPosition = 0;
 
@@ -404,7 +405,8 @@ public class RomFunctions {
 				}
 				if ((currLineCC + reqLength > maxLineLength)
 						|| (currLineCC >= sentenceNewLineSize && (currLineLastChar == '.'
-								|| currLineLastChar == '?' || currLineLastChar == '!'))) {
+								|| currLineLastChar == '?'
+								|| currLineLastChar == '!' || currLineLastChar == '…'))) {
 					// new line
 					// Save current line, if applicable
 					if (currLineWC > 0) {
