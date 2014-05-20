@@ -2575,6 +2575,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 							int scriptOffset = readPointer(peopleOffset
 									+ (tte.personNum - 1) * 24 + 16);
 							if (scriptOffset >= 0) {
+								if (romEntry.romType == RomType_FRLG
+										&& tte.isMoveTutor
+										&& (tte.number == 5 || (tte.number >= 8 && tte.number <= 11))) {
+									scriptOffset = readPointer(scriptOffset + 1);
+								} else if (romEntry.romType == RomType_FRLG
+										&& tte.isMoveTutor && tte.number == 7) {
+									scriptOffset = readPointer(scriptOffset + 0x1F);
+								}
 								int lookAt = scriptOffset + tte.offsetInScript;
 								// make sure this actually looks like a text
 								// pointer
