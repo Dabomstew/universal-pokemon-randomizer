@@ -128,7 +128,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		private Map<String, Integer> entries = new HashMap<String, Integer>();
 		private Map<String, int[]> arrayEntries = new HashMap<String, int[]>();
 		private List<StaticPokemon> staticPokemon = new ArrayList<StaticPokemon>();
-		private List<TMTextEntry> tmTexts = new ArrayList<TMTextEntry>();
+		private List<TMOrMTTextEntry> tmmtTexts = new ArrayList<TMOrMTTextEntry>();
 
 		private int getValue(String key) {
 			if (!entries.containsKey(key)) {
@@ -138,13 +138,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		}
 	}
 
-	private static class TMTextEntry {
+	private static class TMOrMTTextEntry {
 		private int number;
 		private int mapBank, mapNumber;
 		private int personNum;
 		private int offsetInScript;
 		private int actualOffset;
 		private String template;
+		private boolean isMoveTutor;
 	}
 
 	private static List<RomEntry> roms;
@@ -227,14 +228,29 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 							if (r[1].startsWith("[") && r[1].endsWith("]")) {
 								String[] parts = r[1].substring(1,
 										r[1].length() - 1).split(",", 6);
-								TMTextEntry tte = new TMTextEntry();
+								TMOrMTTextEntry tte = new TMOrMTTextEntry();
 								tte.number = parseRIInt(parts[0]);
 								tte.mapBank = parseRIInt(parts[1]);
 								tte.mapNumber = parseRIInt(parts[2]);
 								tte.personNum = parseRIInt(parts[3]);
 								tte.offsetInScript = parseRIInt(parts[4]);
 								tte.template = parts[5];
-								current.tmTexts.add(tte);
+								tte.isMoveTutor = false;
+								current.tmmtTexts.add(tte);
+							}
+						} else if (r[0].equals("MoveTutorText[]")) {
+							if (r[1].startsWith("[") && r[1].endsWith("]")) {
+								String[] parts = r[1].substring(1,
+										r[1].length() - 1).split(",", 6);
+								TMOrMTTextEntry tte = new TMOrMTTextEntry();
+								tte.number = parseRIInt(parts[0]);
+								tte.mapBank = parseRIInt(parts[1]);
+								tte.mapNumber = parseRIInt(parts[2]);
+								tte.personNum = parseRIInt(parts[3]);
+								tte.offsetInScript = parseRIInt(parts[4]);
+								tte.template = parts[5];
+								tte.isMoveTutor = true;
+								current.tmmtTexts.add(tte);
 							}
 						} else if (r[0].equals("Game")) {
 							current.romCode = r[1];
@@ -277,8 +293,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 												"StaticPokemonSupport", 0);
 									}
 									if (cTT) {
-										current.tmTexts
-												.addAll(otherEntry.tmTexts);
+										current.tmmtTexts
+												.addAll(otherEntry.tmmtTexts);
 									}
 									current.tableFile = otherEntry.tableFile;
 								}
@@ -1733,15 +1749,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		}
 
 		// TM Text?
-		for (TMTextEntry tte : romEntry.tmTexts) {
-			if (tte.actualOffset > 0) {
+		for (TMOrMTTextEntry tte : romEntry.tmmtTexts) {
+			if (tte.actualOffset > 0 && !tte.isMoveTutor) {
 				// create the new TM text
 				int oldPointer = readPointer(tte.actualOffset);
 				if (oldPointer >= 0 && oldPointer < rom.length) {
 					System.out.println("old text: "
 							+ readVariableLengthString(oldPointer));
-				}
-				else {
+				} else {
 					System.out.println("couldnt read old text");
 				}
 				String unformatted = tte.template.replace("[move]",
@@ -1858,6 +1873,53 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		}
 		for (int i = 0; i < moveCount; i++) {
 			writeWord(offset + i * 2, moves.get(i));
+		}
+		int fsOffset = romEntry.getValue("FreeSpace");
+
+		// Move Tutor Text?
+		for (TMOrMTTextEntry tte : romEntry.tmmtTexts) {
+			if (tte.actualOffset > 0 && tte.isMoveTutor) {
+				// create the new MT text
+				int oldPointer = readPointer(tte.actualOffset);
+				if (oldPointer >= 0 && oldPointer < rom.length) {
+					System.out.println("old text: "
+							+ readVariableLengthString(oldPointer));
+				} else {
+					System.out.println("couldnt read old text");
+				}
+				String unformatted = tte.template.replace("[move]",
+						this.moves[moves.get(tte.number)].name);
+				String newText = RomFunctions.formatTextWithReplacements(
+						unformatted, null, "\\n", "\\l", "\\p", 40, ssd);
+				System.out.println("inserting " + newText);
+				// insert the new text into free space
+				int fsBytesNeeded = translateString(newText).length + 1;
+				int newOffset = RomFunctions.freeSpaceFinder(rom, (byte) 0xFF,
+						fsBytesNeeded, fsOffset);
+				if (newOffset < fsOffset) {
+					String nl = System.getProperty("line.separator");
+					log("Couldn't insert new Move Tutor text." + nl);
+					return;
+				}
+				System.out.println("inserting to "
+						+ String.format("%X", newOffset));
+				writeVariableLengthString(newText, newOffset);
+				// search for copies of the pointer:
+				// make a needle of the pointer
+				byte[] searchNeedle = new byte[4];
+				System.arraycopy(rom, tte.actualOffset, searchNeedle, 0, 4);
+				// find copies within 500 bytes either way of actualOffset
+				int minOffset = Math.max(0, tte.actualOffset - 500);
+				int maxOffset = Math.min(rom.length, tte.actualOffset + 500);
+				List<Integer> pointerLocs = RomFunctions.search(rom, minOffset,
+						maxOffset, searchNeedle);
+				for (int pointerLoc : pointerLocs) {
+					// write the new pointer
+					// System.out.println("overwriting pointer at "+String.format("%X",
+					// pointerLoc));
+					writePointer(pointerLoc, newOffset);
+				}
+			}
 		}
 	}
 
@@ -2507,7 +2569,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 						}
 					}
 					// TM Text?
-					for (TMTextEntry tte : romEntry.tmTexts) {
+					for (TMOrMTTextEntry tte : romEntry.tmmtTexts) {
 						if (tte.mapBank == bank && tte.mapNumber == map) {
 							// process this one
 							int scriptOffset = readPointer(peopleOffset
