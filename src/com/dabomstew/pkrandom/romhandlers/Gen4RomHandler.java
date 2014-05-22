@@ -1821,15 +1821,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 						.getInt("MoveTutorMovesOvlNumber"));
 				sp.add(pokes[ovOverlay[romEntry.getInt("MysteryEggOffset")] & 0xFF]);
 			}
-			if(romEntry.getInt("FossilTableOffset") > 0) {
+			if (romEntry.getInt("FossilTableOffset") > 0) {
 				byte[] ftData = arm9;
 				int baseOffset = romEntry.getInt("FossilTableOffset");
-				if(romEntry.romType == Type_HGSS) {
-					ftData = readOverlay(romEntry.getInt("FossilTableOvlNumber"));
+				if (romEntry.romType == Type_HGSS) {
+					ftData = readOverlay(romEntry
+							.getInt("FossilTableOvlNumber"));
 				}
 				// read the 7 Fossil Pokemon
-				for(int f=0; f<7; f++) {
-					sp.add(pokes[readWord(ftData, baseOffset + 2 + f*4)]);
+				for (int f = 0; f < 7; f++) {
+					sp.add(pokes[readWord(ftData, baseOffset + 2 + f * 4)]);
 				}
 			}
 		} catch (IOException e) {
@@ -1845,8 +1846,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		int sptsize = romEntry.arrayEntries.containsKey("StaticPokemonTrades") ? romEntry.arrayEntries
 				.get("StaticPokemonTrades").length : 0;
 		int meggsize = romEntry.getInt("MysteryEggOffset") > 0 ? 1 : 0;
+		int fossilsize = romEntry.getInt("FossilTableOffset") > 0 ? 7 : 0;
 		if (staticPokemon.size() != romEntry.staticPokemon.size() + sptsize
-				+ meggsize) {
+				+ meggsize + fossilsize) {
 			return false;
 		}
 		try {
@@ -1891,21 +1893,22 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				writeOverlay(romEntry.getInt("MoveTutorMovesOvlNumber"),
 						ovOverlay);
 			}
-			if(romEntry.getInt("FossilTableOffset") > 0) {
+			if (romEntry.getInt("FossilTableOffset") > 0) {
 				int baseOffset = romEntry.getInt("FossilTableOffset");
-				if(romEntry.romType == Type_HGSS) {
-					byte[] ftData = readOverlay(romEntry.getInt("FossilTableOvlNumber"));
-					for(int f=0; f<7; f++) {
+				if (romEntry.romType == Type_HGSS) {
+					byte[] ftData = readOverlay(romEntry
+							.getInt("FossilTableOvlNumber"));
+					for (int f = 0; f < 7; f++) {
 						int pokenum = statics.next().number;
-						writeWord(ftData, baseOffset + 2 + f*4, pokenum);
+						writeWord(ftData, baseOffset + 2 + f * 4, pokenum);
 					}
-					writeOverlay(romEntry.getInt("FossilTableOvlNumber"), ftData);
-				}
-				else {
+					writeOverlay(romEntry.getInt("FossilTableOvlNumber"),
+							ftData);
+				} else {
 					// write to arm9
-					for(int f=0; f<7; f++) {
+					for (int f = 0; f < 7; f++) {
 						int pokenum = statics.next().number;
-						writeWord(arm9, baseOffset + 2 + f*4, pokenum);
+						writeWord(arm9, baseOffset + 2 + f * 4, pokenum);
 					}
 				}
 			}
@@ -2796,8 +2799,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		int ttsCount = thisTradeStrings.size();
 		for (int strNum = 0; strNum < ttsCount; strNum++) {
 			String oldString = thisTradeStrings.get(strNum);
-			String newString = RomFunctions.formatTextWithReplacements(oldString,
-					replacements, "\\n", "\\l", "\\p", lineLength, ssd);
+			String newString = RomFunctions.formatTextWithReplacements(
+					oldString, replacements, "\\n", "\\l", "\\p", lineLength,
+					ssd);
 			System.out.println("Original: " + oldString);
 			System.out.println("New: " + newString);
 			thisTradeStrings.set(strNum, newString);

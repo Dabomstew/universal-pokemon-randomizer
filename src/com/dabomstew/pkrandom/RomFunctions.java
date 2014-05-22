@@ -424,7 +424,12 @@ public class RomFunctions {
 					thisLine.append(words[i]);
 					currLineWC = 1;
 					currLineCC = ssd.lengthFor(words[i]);
-					currLineLastChar = words[i].charAt(words[i].length() - 1);
+					if (words[i].length() == 0) {
+						currLineLastChar = 0;
+					} else {
+						currLineLastChar = words[i]
+								.charAt(words[i].length() - 1);
+					}
 				} else {
 					// add to current line
 					if (currLineWC > 0) {
@@ -433,7 +438,12 @@ public class RomFunctions {
 					thisLine.append(words[i]);
 					currLineWC++;
 					currLineCC += reqLength;
-					currLineLastChar = words[i].charAt(words[i].length() - 1);
+					if (words[i].length() == 0) {
+						currLineLastChar = 0;
+					} else {
+						currLineLastChar = words[i]
+								.charAt(words[i].length() - 1);
+					}
 				}
 			}
 
