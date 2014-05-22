@@ -1821,6 +1821,17 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 						.getInt("MoveTutorMovesOvlNumber"));
 				sp.add(pokes[ovOverlay[romEntry.getInt("MysteryEggOffset")] & 0xFF]);
 			}
+			if(romEntry.getInt("FossilTableOffset") > 0) {
+				byte[] ftData = arm9;
+				int baseOffset = romEntry.getInt("FossilTableOffset");
+				if(romEntry.romType == Type_HGSS) {
+					ftData = readOverlay(romEntry.getInt("FossilTableOvlNumber"));
+				}
+				// read the 7 Fossil Pokemon
+				for(int f=0; f<7; f++) {
+					sp.add(pokes[readWord(ftData, baseOffset + 2 + f*4)]);
+				}
+			}
 		} catch (IOException e) {
 		}
 		return sp;
@@ -1879,6 +1890,24 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				ovOverlay[romEntry.getInt("MysteryEggOffset")] = (byte) pokenum;
 				writeOverlay(romEntry.getInt("MoveTutorMovesOvlNumber"),
 						ovOverlay);
+			}
+			if(romEntry.getInt("FossilTableOffset") > 0) {
+				int baseOffset = romEntry.getInt("FossilTableOffset");
+				if(romEntry.romType == Type_HGSS) {
+					byte[] ftData = readOverlay(romEntry.getInt("FossilTableOvlNumber"));
+					for(int f=0; f<7; f++) {
+						int pokenum = statics.next().number;
+						writeWord(ftData, baseOffset + 2 + f*4, pokenum);
+					}
+					writeOverlay(romEntry.getInt("FossilTableOvlNumber"), ftData);
+				}
+				else {
+					// write to arm9
+					for(int f=0; f<7; f++) {
+						int pokenum = statics.next().number;
+						writeWord(arm9, baseOffset + 2 + f*4, pokenum);
+					}
+				}
 			}
 		} catch (IOException e) {
 			return false;
