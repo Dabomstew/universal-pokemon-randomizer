@@ -166,9 +166,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 		bundle = java.util.ResourceBundle
 				.getBundle("com/dabomstew/pkrandom/gui/Bundle"); // NOI18N
 		testForRequiredConfigs();
-		checkHandlers = new RomHandler[] { new Gen1RomHandler(),
-				new Gen2RomHandler(), new Gen3RomHandler(),
-				new Gen4RomHandler(), new Gen5RomHandler() };
+		reinitHandlers();
 		initComponents();
 		initialiseState();
 		autoUpdateEnabled = true;
@@ -590,6 +588,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 						fh.getName()));
 				return;
 			}
+			reinitHandlers();
 			for (RomHandler rh : checkHandlers) {
 				if (rh.detectRom(fh.getAbsolutePath())) {
 					this.romHandler = rh;
@@ -2294,6 +2293,12 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
 	public static String getRootPath() {
 		return rootPath;
+	}
+
+	public void reinitHandlers() {
+		checkHandlers = new RomHandler[] { new Gen1RomHandler(),
+				new Gen2RomHandler(), new Gen3RomHandler(),
+				new Gen4RomHandler(), new Gen5RomHandler() };
 	}
 
 	// actions

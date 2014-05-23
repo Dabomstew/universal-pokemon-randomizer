@@ -315,6 +315,7 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 		int returnVal = romFileChooser.showOpenDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			final File fh = romFileChooser.getSelectedFile();
+			parentGUI.reinitHandlers();
 			for (RomHandler rh : parentGUI.checkHandlers) {
 				if (rh.detectRom(fh.getAbsolutePath())) {
 					final RomHandler checkHandler = rh;
