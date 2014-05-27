@@ -6,7 +6,6 @@ package thenewpoketext;
 /*--  Ported to Java and customized by Dabomstew							--*/
 /*----------------------------------------------------------------------------*/
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;

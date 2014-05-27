@@ -46,10 +46,8 @@ public class BLZCoder {
 	private static final int BLZ_N = 0x1002;
 	private static final int BLZ_F = 0x12;
 
-	private static final int RAW_MINIM = 0;
 	private static final int RAW_MAXIM = 0x00FFFFFF;
 
-	private static final int BLZ_MINIM = 4;
 	private static final int BLZ_MAXIM = 0x01400000;
 
 	private boolean arm9;

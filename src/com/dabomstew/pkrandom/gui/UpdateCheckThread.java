@@ -56,6 +56,7 @@ public class UpdateCheckThread extends Thread {
 						}
 					});
 				}
+				sc.close();
 			}
 		} catch (IOException ex) {
 			ex.printStackTrace();
