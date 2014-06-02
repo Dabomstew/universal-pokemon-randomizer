@@ -1170,23 +1170,36 @@ public abstract class AbstractRomHandler implements RomHandler {
 	}
 
 	@Override
-	public void randomizeTMMoves(boolean noBroken) {
+	public void randomizeTMMoves(boolean noBroken, boolean preserveField) {
 		// Pick some random TM moves.
 		int tmCount = this.getTMCount();
 		List<Move> allMoves = this.getMoves();
 		List<Integer> newTMs = new ArrayList<Integer>();
 		List<Integer> hms = this.getHMMoves();
+		List<Integer> oldTMs = this.getTMMoves();
 		@SuppressWarnings("unchecked")
-		List<Integer> banned = noBroken ? this.getGameBreakingMoves()
-				: Collections.EMPTY_LIST;
+		List<Integer> banned = new ArrayList<Integer>(
+				noBroken ? this.getGameBreakingMoves() : Collections.EMPTY_LIST);
+		// field moves?
+		List<Integer> fieldMoves = this.getFieldMoves();
+		if (preserveField) {
+			List<Integer> banExistingField = new ArrayList<Integer>(oldTMs);
+			banExistingField.retainAll(fieldMoves);
+			banned.addAll(banExistingField);
+		}
 		for (int i = 0; i < tmCount; i++) {
-			int chosenMove = RandomSource.nextInt(allMoves.size() - 1) + 1;
-			while (newTMs.contains(chosenMove)
-					|| RomFunctions.bannedRandomMoves[chosenMove]
-					|| hms.contains(chosenMove) || banned.contains(chosenMove)) {
-				chosenMove = RandomSource.nextInt(allMoves.size() - 1) + 1;
+			if (preserveField && fieldMoves.contains(oldTMs.get(i))) {
+				newTMs.add(oldTMs.get(i));
+			} else {
+				int chosenMove = RandomSource.nextInt(allMoves.size() - 1) + 1;
+				while (newTMs.contains(chosenMove)
+						|| RomFunctions.bannedRandomMoves[chosenMove]
+						|| hms.contains(chosenMove)
+						|| banned.contains(chosenMove)) {
+					chosenMove = RandomSource.nextInt(allMoves.size() - 1) + 1;
+				}
+				newTMs.add(chosenMove);
 			}
-			newTMs.add(chosenMove);
 		}
 		this.setTMMoves(newTMs);
 	}
@@ -1246,27 +1259,40 @@ public abstract class AbstractRomHandler implements RomHandler {
 	}
 
 	@Override
-	public void randomizeMoveTutorMoves(boolean noBroken) {
+	public void randomizeMoveTutorMoves(boolean noBroken, boolean preserveField) {
 		if (!this.hasMoveTutors()) {
 			return;
 		}
 		// Pick some random Move Tutor moves, excluding TMs.
-		int mtCount = this.getMoveTutorMoves().size();
 		List<Move> allMoves = this.getMoves();
 		List<Integer> tms = this.getTMMoves();
 		List<Integer> newMTs = new ArrayList<Integer>();
+		List<Integer> oldMTs = this.getMoveTutorMoves();
+		int mtCount = oldMTs.size();
 		List<Integer> hms = this.getHMMoves();
 		@SuppressWarnings("unchecked")
-		List<Integer> banned = noBroken ? this.getGameBreakingMoves()
-				: Collections.EMPTY_LIST;
+		List<Integer> banned = new ArrayList<Integer>(
+				noBroken ? this.getGameBreakingMoves() : Collections.EMPTY_LIST);
+		// field moves?
+		List<Integer> fieldMoves = this.getFieldMoves();
+		if (preserveField) {
+			List<Integer> banExistingField = new ArrayList<Integer>(oldMTs);
+			banExistingField.retainAll(fieldMoves);
+			banned.addAll(banExistingField);
+		}
 		for (int i = 0; i < mtCount; i++) {
-			int chosenMove = RandomSource.nextInt(allMoves.size() - 1) + 1;
-			while (newMTs.contains(chosenMove) || tms.contains(chosenMove)
-					|| RomFunctions.bannedRandomMoves[chosenMove]
-					|| hms.contains(chosenMove) || banned.contains(chosenMove)) {
-				chosenMove = RandomSource.nextInt(allMoves.size() - 1) + 1;
+			if (preserveField && fieldMoves.contains(oldMTs.get(i))) {
+				newMTs.add(oldMTs.get(i));
+			} else {
+				int chosenMove = RandomSource.nextInt(allMoves.size() - 1) + 1;
+				while (newMTs.contains(chosenMove) || tms.contains(chosenMove)
+						|| RomFunctions.bannedRandomMoves[chosenMove]
+						|| hms.contains(chosenMove)
+						|| banned.contains(chosenMove)) {
+					chosenMove = RandomSource.nextInt(allMoves.size() - 1) + 1;
+				}
+				newMTs.add(chosenMove);
 			}
-			newMTs.add(chosenMove);
 		}
 		this.setMoveTutorMoves(newMTs);
 	}

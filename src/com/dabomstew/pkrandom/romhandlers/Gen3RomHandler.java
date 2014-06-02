@@ -2850,4 +2850,30 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	public boolean supportsFourStartingMoves() {
 		return true;
 	}
+
+	@Override
+	public List<Integer> getFieldMoves() {
+		// cut, fly, surf, strength, flash,
+		// dig, teleport, waterfall,
+		// rock smash, sweet scent
+		// not softboiled or milk drink
+		// dive and secret power in RSE only
+		if (romEntry.romType == RomType_FRLG) {
+			return Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 249, 230);
+		} else {
+			return Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 249, 230,
+					291, 290);
+		}
+	}
+
+	@Override
+	public List<Integer> getEarlyRequiredHMMoves() {
+		// RSE: rock smash
+		// FRLG: cut
+		if (romEntry.romType == RomType_FRLG) {
+			return Arrays.asList(15);
+		} else {
+			return Arrays.asList(249);
+		}
+	}
 }

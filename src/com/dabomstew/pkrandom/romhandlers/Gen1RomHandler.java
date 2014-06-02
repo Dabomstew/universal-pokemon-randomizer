@@ -2121,6 +2121,19 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 			return Arrays.asList(49, 82, 32, 90, 12, 147);
 		}
 	}
+	
+	@Override
+	public List<Integer> getFieldMoves() {
+		// cut, fly, surf, strength, flash,
+		// dig, teleport (NOT softboiled)
+		return Arrays.asList(15, 19, 57, 70, 148, 91, 100);
+	}
+	
+	@Override
+	public List<Integer> getEarlyRequiredHMMoves() {
+		// just cut
+		return Arrays.asList(15);
+	}
 
 	@Override
 	public void applySignature() {

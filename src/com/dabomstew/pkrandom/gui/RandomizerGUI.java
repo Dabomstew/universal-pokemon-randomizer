@@ -90,7 +90,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 	private RomHandler romHandler;
 	protected RomHandler[] checkHandlers;
 	public static final int PRESET_FILE_VERSION = 161;
-	
+
 	public static final int UPDATE_VERSION = 1620;
 
 	public static PrintStream verboseLog = System.out;
@@ -1875,7 +1875,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 			// TMs
 			if (!pmsMetronomeOnlyRB.isSelected()
 					&& this.tmmRandomRB.isSelected()) {
-				romHandler.randomizeTMMoves(noBrokenMoves);
+				romHandler.randomizeTMMoves(noBrokenMoves, false);
 				verboseLog.println("--TM Moves--");
 				List<Integer> tmMoves = romHandler.getTMMoves();
 				for (int i = 0; i < tmMoves.size(); i++) {
@@ -1904,7 +1904,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 				if (!pmsMetronomeOnlyRB.isSelected()
 						&& this.mtmRandomRB.isSelected()) {
 					List<Integer> oldMtMoves = romHandler.getMoveTutorMoves();
-					romHandler.randomizeMoveTutorMoves(noBrokenMoves);
+					romHandler.randomizeMoveTutorMoves(noBrokenMoves, false);
 					verboseLog.println("--Move Tutor Moves--");
 					List<Integer> newMtMoves = romHandler.getMoveTutorMoves();
 					for (int i = 0; i < newMtMoves.size(); i++) {

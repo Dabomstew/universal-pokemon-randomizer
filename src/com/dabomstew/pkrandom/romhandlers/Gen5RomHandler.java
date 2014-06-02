@@ -28,6 +28,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -2701,5 +2702,23 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 	@Override
 	public boolean supportsFourStartingMoves() {
 		return true;
+	}
+
+	@Override
+	public List<Integer> getFieldMoves() {
+		// cut, fly, surf, strength, flash, dig, teleport, waterfall,
+		// sweet scent, dive
+		return Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 230, 291);
+	}
+
+	@Override
+	public List<Integer> getEarlyRequiredHMMoves() {
+		// BW1: cut
+		// BW2: none
+		if (romEntry.romType == Type_BW2) {
+			return Collections.EMPTY_LIST;
+		} else {
+			return Arrays.asList(15);
+		}
 	}
 }

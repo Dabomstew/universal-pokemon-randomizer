@@ -2514,4 +2514,20 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 	public boolean supportsFourStartingMoves() {
 		return (romEntry.getValue("SupportsFourStartingMoves") > 0);
 	}
+
+	@Override
+	public List<Integer> getFieldMoves() {
+		// cut, fly, surf, strength, flash,
+		// dig, teleport, whirlpool, waterfall,
+		// rock smash, headbutt, sweet scent
+		// not softboiled or milk drink
+		return Arrays.asList(15, 19, 57, 70, 148, 91, 100, 250, 127, 249, 29,
+				230);
+	}
+
+	@Override
+	public List<Integer> getEarlyRequiredHMMoves() {
+		// just cut
+		return Arrays.asList(15);
+	}
 }

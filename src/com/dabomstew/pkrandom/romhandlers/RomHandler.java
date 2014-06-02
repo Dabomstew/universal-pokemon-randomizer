@@ -204,7 +204,7 @@ public interface RomHandler {
 
 	public void setTMMoves(List<Integer> moveIndexes);
 
-	public void randomizeTMMoves(boolean noBroken);
+	public void randomizeTMMoves(boolean noBroken, boolean preserveField);
 
 	public int getTMCount();
 
@@ -238,7 +238,7 @@ public interface RomHandler {
 
 	public void setMoveTutorMoves(List<Integer> moves);
 
-	public void randomizeMoveTutorMoves(boolean noBroken);
+	public void randomizeMoveTutorMoves(boolean noBroken, boolean preserveField);
 
 	public Map<Pokemon, boolean[]> getMoveTutorCompatibility();
 
@@ -358,6 +358,18 @@ public interface RomHandler {
 	public void minimumCatchRate(int rateNonLegendary, int rateLegendary);
 
 	public void standardizeEXPCurves();
+	
+	// (Mostly) unchanging lists of moves
+	
+	public List<Integer> getGameBreakingMoves();
+	
+	// includes game or gen-specific moves like Secret Power
+	// but NOT healing moves (Softboiled, Milk Drink)
+	public List<Integer> getFieldMoves();
+	
+	// any HMs required to obtain 4 badges
+	// (excluding Gameshark codes or early drink in RBY)
+	public List<Integer> getEarlyRequiredHMMoves();
 
 	// Misc
 
@@ -381,7 +393,7 @@ public interface RomHandler {
 
 	public int codeTweaksAvailable();
 
-	public List<Integer> getGameBreakingMoves();
+	
 
 	public void applySignature();
 

@@ -2884,4 +2884,32 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	public boolean supportsFourStartingMoves() {
 		return true;
 	}
+
+	@Override
+	public List<Integer> getFieldMoves() {
+		if (romEntry.romType == Type_HGSS) {
+			// HGSS:
+			// cut, fly, surf, strength, flash, dig, teleport, whirlpool,
+			// waterfall, rock smash, headbutt, sweet scent, rock climb
+			return Arrays.asList(15, 19, 57, 70, 148, 91, 100, 250, 127, 249,
+					29, 230, 431);
+		} else {
+			// DPPt:
+			// cut, fly, surf, strength, flash, dig, teleport, waterfall,
+			// rock smash, sweet scent, defog, rock climb
+			return Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 249, 230,
+					432, 431);
+		}
+	}
+
+	@Override
+	public List<Integer> getEarlyRequiredHMMoves() {
+		// DPPt: rock smash, cut
+		// HGSS: just cut
+		if (romEntry.romType == Type_HGSS) {
+			return Arrays.asList(15);
+		} else {
+			return Arrays.asList(249, 15);
+		}
+	}
 }
