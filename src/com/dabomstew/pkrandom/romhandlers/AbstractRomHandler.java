@@ -1061,7 +1061,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
 	@Override
 	public void metronomeOnlyMode() {
-		// TODO fix static pokemon with set movesets
 
 		// movesets
 		Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
@@ -1226,6 +1225,27 @@ public abstract class AbstractRomHandler implements RomHandler {
 	}
 
 	@Override
+	public void ensureTMCompatSanity() {
+		// if a pokemon learns a move in its moveset
+		// and there is a TM of that move, make sure
+		// that TM can be learned.
+		Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
+		Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+		List<Integer> tmMoves = this.getTMMoves();
+		for (Pokemon pkmn : compat.keySet()) {
+			List<MoveLearnt> moveset = movesets.get(pkmn);
+			boolean[] pkmnCompat = compat.get(pkmn);
+			for (MoveLearnt ml : moveset) {
+				if (tmMoves.contains(ml.move)) {
+					int tmIndex = tmMoves.indexOf(ml.move);
+					pkmnCompat[tmIndex + 1] = true;
+				}
+			}
+		}
+		this.setTMHMCompatibility(compat);
+	}
+
+	@Override
 	public void randomizeMoveTutorMoves(boolean noBroken) {
 		if (!this.hasMoveTutors()) {
 			return;
@@ -1284,6 +1304,31 @@ public abstract class AbstractRomHandler implements RomHandler {
 
 		// Set the new compatibility
 		this.setMoveTutorCompatibility(compat);
+
+	}
+
+	@Override
+	public void ensureMoveTutorCompatSanity() {
+		if (!this.hasMoveTutors()) {
+			return;
+		}
+		// if a pokemon learns a move in its moveset
+		// and there is a tutor of that move, make sure
+		// that tutor can be learned.
+		Map<Pokemon, boolean[]> compat = this.getMoveTutorCompatibility();
+		Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+		List<Integer> mtMoves = this.getMoveTutorMoves();
+		for (Pokemon pkmn : compat.keySet()) {
+			List<MoveLearnt> moveset = movesets.get(pkmn);
+			boolean[] pkmnCompat = compat.get(pkmn);
+			for (MoveLearnt ml : moveset) {
+				if (mtMoves.contains(ml.move)) {
+					int mtIndex = mtMoves.indexOf(ml.move);
+					pkmnCompat[mtIndex + 1] = true;
+				}
+			}
+		}
+		this.setTMHMCompatibility(compat);
 
 	}
 
@@ -1757,11 +1802,10 @@ public abstract class AbstractRomHandler implements RomHandler {
 			trade.givenPokemon = given;
 
 			// requested pokemon?
-			if(oldgiven == trade.requestedPokemon) {
+			if (oldgiven == trade.requestedPokemon) {
 				// preserve trades for the same pokemon
 				trade.requestedPokemon = given;
-			}
-			else if (randomizeRequest) {
+			} else if (randomizeRequest) {
 				Pokemon request = this.randomPokemon();
 				while (usedRequests.contains(request) || request == given) {
 					request = this.randomPokemon();

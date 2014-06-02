@@ -49,7 +49,7 @@ public interface RomHandler {
 	public boolean loadRom(String filename);
 
 	public boolean saveRom(String filename);
-	
+
 	public String loadedFilename();
 
 	// Functionality
@@ -181,7 +181,7 @@ public interface RomHandler {
 			boolean forceFourStartingMoves);
 
 	public void metronomeOnlyMode();
-	
+
 	public boolean supportsFourStartingMoves();
 
 	// Randomizer: static pokemon (except starters)
@@ -226,6 +226,10 @@ public interface RomHandler {
 
 	public void randomizeTMHMCompatibility(boolean preferSameType);
 
+	// tm/moveset sanity
+
+	public void ensureTMCompatSanity();
+
 	// Randomizer: move tutors
 
 	public boolean hasMoveTutors();
@@ -241,6 +245,10 @@ public interface RomHandler {
 	public void setMoveTutorCompatibility(Map<Pokemon, boolean[]> compatData);
 
 	public void randomizeMoveTutorCompatibility(boolean preferSameType);
+
+	// mt/moveset sanity
+
+	public void ensureMoveTutorCompatSanity();
 
 	// Randomizer: trainer names
 
