@@ -1328,7 +1328,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 				}
 			}
 		}
-		this.setTMHMCompatibility(compat);
+		this.setMoveTutorCompatibility(compat);
 
 	}
 
