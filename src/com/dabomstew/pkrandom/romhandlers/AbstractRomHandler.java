@@ -1207,6 +1207,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 	@Override
 	public void randomizeTMHMCompatibility(boolean preferSameType) {
 		// Get current compatibility
+		// new: increase HM chances if required early on
+		List<Integer> requiredEarlyOn = this.getEarlyRequiredHMMoves();
 		Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
 		List<Integer> tmHMs = new ArrayList<Integer>(this.getTMMoves());
 		tmHMs.addAll(this.getHMMoves());
@@ -1228,6 +1230,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 					} else {
 						probability = 0.25;
 					}
+				}
+				if (requiredEarlyOn.contains(move)) {
+					probability = Math.min(1.0, probability * 1.5);
 				}
 				flags[i] = (RandomSource.random() < probability);
 			}
