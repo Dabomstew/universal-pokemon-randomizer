@@ -2706,7 +2706,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 			int minTarget = currentBST - currentBST / 10;
 			int maxTarget = currentBST + currentBST / 10;
 			List<Pokemon> canPick = new ArrayList<Pokemon>();
-			while (canPick.isEmpty()) {
+			int expandRounds = 0;
+			while (canPick.isEmpty()
+					|| (canPick.size() < 3 && expandRounds < 2)) {
 				for (Pokemon pk : pickFrom) {
 					if (pk.bstForPowerLevels() >= minTarget
 							&& pk.bstForPowerLevels() <= maxTarget
@@ -2717,6 +2719,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 				}
 				minTarget -= currentBST / 20;
 				maxTarget += currentBST / 20;
+				expandRounds++;
 			}
 			return canPick.get(RandomSource.nextInt(canPick.size()));
 		} else {
@@ -2744,7 +2747,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 		int minTarget = currentBST - currentBST / 10;
 		int maxTarget = currentBST + currentBST / 10;
 		List<Pokemon> canPick = new ArrayList<Pokemon>();
-		while (canPick.isEmpty()) {
+		int expandRounds = 0;
+		while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 2)) {
 			for (Pokemon pk : pokemonPool) {
 				if (pk.bstForPowerLevels() >= minTarget
 						&& pk.bstForPowerLevels() <= maxTarget
@@ -2756,6 +2760,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 			}
 			minTarget -= currentBST / 20;
 			maxTarget += currentBST / 20;
+			expandRounds++;
 		}
 		return canPick.get(RandomSource.nextInt(canPick.size()));
 	}
