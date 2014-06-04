@@ -89,7 +89,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 	private static final long serialVersionUID = 637989089525556154L;
 	private RomHandler romHandler;
 	protected RomHandler[] checkHandlers;
-	public static final int PRESET_FILE_VERSION = 161;
+	public static final int PRESET_FILE_VERSION = 162;
 
 	public static final int UPDATE_VERSION = 1620;
 
@@ -501,6 +501,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
 		this.thcUnchangedRB.setEnabled(false);
 		this.thcUnchangedRB.setSelected(true);
 
+		this.tmLearningSanityCB.setEnabled(false);
+		this.tmLearningSanityCB.setSelected(false);
+		this.tmKeepFieldMovesCB.setEnabled(false);
+		this.tmKeepFieldMovesCB.setSelected(false);
+
 		this.mtmRandomRB.setEnabled(false);
 		this.mtmUnchangedRB.setEnabled(false);
 		this.mtmUnchangedRB.setSelected(true);
@@ -509,6 +514,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
 		this.mtcRandomTypeRB.setEnabled(false);
 		this.mtcUnchangedRB.setEnabled(false);
 		this.mtcUnchangedRB.setSelected(true);
+
+		this.mtLearningSanityCB.setEnabled(false);
+		this.mtLearningSanityCB.setSelected(false);
+		this.mtKeepFieldMovesCB.setEnabled(false);
+		this.mtKeepFieldMovesCB.setSelected(false);
 
 		this.mtMovesPanel.setVisible(true);
 		this.mtCompatPanel.setVisible(true);
@@ -994,12 +1004,56 @@ public class RandomizerGUI extends javax.swing.JFrame {
 			this.mtmUnchangedRB.setEnabled(false);
 			this.mtmRandomRB.setEnabled(false);
 			this.mtmUnchangedRB.setSelected(true);
+
+			this.tmLearningSanityCB.setEnabled(false);
+			this.tmLearningSanityCB.setSelected(false);
+			this.tmKeepFieldMovesCB.setEnabled(false);
+			this.tmKeepFieldMovesCB.setSelected(false);
+
+			this.mtLearningSanityCB.setEnabled(false);
+			this.mtLearningSanityCB.setSelected(false);
+			this.mtKeepFieldMovesCB.setEnabled(false);
+			this.mtKeepFieldMovesCB.setSelected(false);
 		} else {
 			this.tmmUnchangedRB.setEnabled(true);
 			this.tmmRandomRB.setEnabled(true);
 
 			this.mtmUnchangedRB.setEnabled(true);
 			this.mtmRandomRB.setEnabled(true);
+
+			if (!(this.pmsUnchangedRB.isSelected())
+					|| !(this.tmmUnchangedRB.isSelected())
+					|| !(this.thcUnchangedRB.isSelected())) {
+				this.tmLearningSanityCB.setEnabled(true);
+			} else {
+				this.tmLearningSanityCB.setEnabled(false);
+				this.tmLearningSanityCB.setSelected(false);
+			}
+
+			if (!(this.tmmUnchangedRB.isSelected())) {
+				this.tmKeepFieldMovesCB.setEnabled(true);
+			} else {
+				this.tmKeepFieldMovesCB.setEnabled(false);
+				this.tmKeepFieldMovesCB.setSelected(false);
+			}
+
+			if (this.romHandler.hasMoveTutors()
+					&& (!(this.pmsUnchangedRB.isSelected())
+							|| !(this.mtmUnchangedRB.isSelected()) || !(this.mtcUnchangedRB
+								.isSelected()))) {
+				this.mtLearningSanityCB.setEnabled(true);
+			} else {
+				this.mtLearningSanityCB.setEnabled(false);
+				this.mtLearningSanityCB.setSelected(false);
+			}
+
+			if (this.romHandler.hasMoveTutors()
+					&& !(this.mtmUnchangedRB.isSelected())) {
+				this.mtKeepFieldMovesCB.setEnabled(true);
+			} else {
+				this.mtKeepFieldMovesCB.setEnabled(false);
+				this.mtKeepFieldMovesCB.setSelected(false);
+			}
 		}
 
 		if (this.pmsMetronomeOnlyRB.isSelected()
@@ -1109,13 +1163,16 @@ public class RandomizerGUI extends javax.swing.JFrame {
 		baos.write(makeByteSelected(this.stpUnchangedRB, this.stpRandomL4LRB,
 				this.stpRandomTotalRB));
 
+		// new stuff 162
 		baos.write(makeByteSelected(this.thcRandomTotalRB,
 				this.thcRandomTypeRB, this.thcUnchangedRB, this.tmmRandomRB,
-				this.tmmUnchangedRB));
+				this.tmmUnchangedRB, this.tmLearningSanityCB,
+				this.tmKeepFieldMovesCB));
 
 		baos.write(makeByteSelected(this.mtcRandomTotalRB,
 				this.mtcRandomTypeRB, this.mtcUnchangedRB, this.mtmRandomRB,
-				this.mtmUnchangedRB));
+				this.mtmUnchangedRB, this.mtLearningSanityCB,
+				this.mtKeepFieldMovesCB));
 
 		// new 150
 		baos.write(makeByteSelected(this.igtBothRB, this.igtGivenOnlyRB,
@@ -1314,9 +1371,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
 				this.stpRandomTotalRB);
 
 		restoreStates(data[15], this.thcRandomTotalRB, this.thcRandomTypeRB,
-				this.thcUnchangedRB, this.tmmRandomRB, this.tmmUnchangedRB);
+				this.thcUnchangedRB, this.tmmRandomRB, this.tmmUnchangedRB,
+				this.tmLearningSanityCB, this.tmKeepFieldMovesCB);
 		restoreStates(data[16], this.mtcRandomTotalRB, this.mtcRandomTypeRB,
-				this.mtcUnchangedRB, this.mtmRandomRB, this.mtmUnchangedRB);
+				this.mtcUnchangedRB, this.mtmRandomRB, this.mtmUnchangedRB,
+				this.mtLearningSanityCB, this.mtKeepFieldMovesCB);
 
 		// new 150
 		restoreStates(data[17], this.igtBothRB, this.igtGivenOnlyRB,
@@ -1875,7 +1934,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 			// TMs
 			if (!pmsMetronomeOnlyRB.isSelected()
 					&& this.tmmRandomRB.isSelected()) {
-				romHandler.randomizeTMMoves(noBrokenMoves, false);
+				romHandler.randomizeTMMoves(noBrokenMoves,
+						this.tmKeepFieldMovesCB.isSelected());
 				verboseLog.println("--TM Moves--");
 				List<Integer> tmMoves = romHandler.getTMMoves();
 				for (int i = 0; i < tmMoves.size(); i++) {
@@ -1899,12 +1959,17 @@ public class RandomizerGUI extends javax.swing.JFrame {
 				romHandler.randomizeTMHMCompatibility(false);
 			}
 
+			if (this.tmLearningSanityCB.isSelected()) {
+				romHandler.ensureTMCompatSanity();
+			}
+
 			// Move Tutors (new 1.0.3)
 			if (this.romHandler.hasMoveTutors()) {
 				if (!pmsMetronomeOnlyRB.isSelected()
 						&& this.mtmRandomRB.isSelected()) {
 					List<Integer> oldMtMoves = romHandler.getMoveTutorMoves();
-					romHandler.randomizeMoveTutorMoves(noBrokenMoves, false);
+					romHandler.randomizeMoveTutorMoves(noBrokenMoves,
+							this.mtKeepFieldMovesCB.isSelected());
 					verboseLog.println("--Move Tutor Moves--");
 					List<Integer> newMtMoves = romHandler.getMoveTutorMoves();
 					for (int i = 0; i < newMtMoves.size(); i++) {
@@ -1928,6 +1993,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
 					romHandler.randomizeMoveTutorCompatibility(true);
 				} else if (this.mtcRandomTotalRB.isSelected()) {
 					romHandler.randomizeMoveTutorCompatibility(false);
+				}
+
+				if (this.mtLearningSanityCB.isSelected()) {
+					romHandler.ensureMoveTutorCompatSanity();
 				}
 			}
 
@@ -2583,11 +2652,48 @@ public class RandomizerGUI extends javax.swing.JFrame {
 		this.enableOrDisableSubControls();
 	}// GEN-LAST:event_wpGlobalRBActionPerformed
 
+	private void tmmUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tmmUnchangedRBActionPerformed
+		this.enableOrDisableSubControls();
+	}// GEN-LAST:event_tmmUnchangedRBActionPerformed
+
+	private void tmmRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tmmRandomRBActionPerformed
+		this.enableOrDisableSubControls();
+	}// GEN-LAST:event_tmmRandomRBActionPerformed
+
+	private void mtmRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_mtmRandomRBActionPerformed
+		this.enableOrDisableSubControls();
+	}// GEN-LAST:event_mtmRandomRBActionPerformed
+
+	private void thcUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_thcUnchangedRBActionPerformed
+		this.enableOrDisableSubControls();
+	}// GEN-LAST:event_thcUnchangedRBActionPerformed
+
+	private void thcRandomTypeRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_thcRandomTypeRBActionPerformed
+		this.enableOrDisableSubControls();
+	}// GEN-LAST:event_thcRandomTypeRBActionPerformed
+
+	private void thcRandomTotalRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_thcRandomTotalRBActionPerformed
+		this.enableOrDisableSubControls();
+	}// GEN-LAST:event_thcRandomTotalRBActionPerformed
+
+	private void mtcUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_mtcUnchangedRBActionPerformed
+		this.enableOrDisableSubControls();
+	}// GEN-LAST:event_mtcUnchangedRBActionPerformed
+
+	private void mtcRandomTypeRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_mtcRandomTypeRBActionPerformed
+		this.enableOrDisableSubControls();
+	}// GEN-LAST:event_mtcRandomTypeRBActionPerformed
+
+	private void mtcRandomTotalRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_mtcRandomTotalRBActionPerformed
+		this.enableOrDisableSubControls();
+	}// GEN-LAST:event_mtcRandomTotalRBActionPerformed
+
 	/**
 	 * This method is called from within the constructor to initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is always
 	 * regenerated by the Form Editor.
 	 */
+	// <editor-fold defaultstate="collapsed"
 	// <editor-fold defaultstate="collapsed"
 	// <editor-fold defaultstate="collapsed"
 	// <editor-fold defaultstate="collapsed"
@@ -2729,6 +2835,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 		tmMovesPanel = new javax.swing.JPanel();
 		tmmUnchangedRB = new javax.swing.JRadioButton();
 		tmmRandomRB = new javax.swing.JRadioButton();
+		tmLearningSanityCB = new javax.swing.JCheckBox();
+		tmKeepFieldMovesCB = new javax.swing.JCheckBox();
 		tmHmCompatPanel = new javax.swing.JPanel();
 		thcUnchangedRB = new javax.swing.JRadioButton();
 		thcRandomTypeRB = new javax.swing.JRadioButton();
@@ -2741,6 +2849,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 		mtMovesPanel = new javax.swing.JPanel();
 		mtmUnchangedRB = new javax.swing.JRadioButton();
 		mtmRandomRB = new javax.swing.JRadioButton();
+		mtLearningSanityCB = new javax.swing.JCheckBox();
+		mtKeepFieldMovesCB = new javax.swing.JCheckBox();
 		mtCompatPanel = new javax.swing.JPanel();
 		mtcUnchangedRB = new javax.swing.JRadioButton();
 		mtcRandomTypeRB = new javax.swing.JRadioButton();
@@ -4014,11 +4124,31 @@ public class RandomizerGUI extends javax.swing.JFrame {
 				.getString("RandomizerGUI.tmmUnchangedRB.text")); // NOI18N
 		tmmUnchangedRB.setToolTipText(bundle
 				.getString("RandomizerGUI.tmmUnchangedRB.toolTipText")); // NOI18N
+		tmmUnchangedRB.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				tmmUnchangedRBActionPerformed(evt);
+			}
+		});
 
 		tmMovesButtonGroup.add(tmmRandomRB);
 		tmmRandomRB.setText(bundle.getString("RandomizerGUI.tmmRandomRB.text")); // NOI18N
 		tmmRandomRB.setToolTipText(bundle
 				.getString("RandomizerGUI.tmmRandomRB.toolTipText")); // NOI18N
+		tmmRandomRB.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				tmmRandomRBActionPerformed(evt);
+			}
+		});
+
+		tmLearningSanityCB.setText(bundle
+				.getString("RandomizerGUI.tmLearningSanityCB.text")); // NOI18N
+		tmLearningSanityCB.setToolTipText(bundle
+				.getString("RandomizerGUI.tmLearningSanityCB.toolTipText")); // NOI18N
+
+		tmKeepFieldMovesCB.setText(bundle
+				.getString("RandomizerGUI.tmKeepFieldMovesCB.text")); // NOI18N
+		tmKeepFieldMovesCB.setToolTipText(bundle
+				.getString("RandomizerGUI.tmKeepFieldMovesCB.toolTipText")); // NOI18N
 
 		javax.swing.GroupLayout tmMovesPanelLayout = new javax.swing.GroupLayout(
 				tmMovesPanel);
@@ -4039,7 +4169,16 @@ public class RandomizerGUI extends javax.swing.JFrame {
 																tmmUnchangedRB)
 														.addComponent(
 																tmmRandomRB))
-										.addContainerGap(118, Short.MAX_VALUE)));
+										.addGap(67, 67, 67)
+										.addGroup(
+												tmMovesPanelLayout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.LEADING)
+														.addComponent(
+																tmKeepFieldMovesCB)
+														.addComponent(
+																tmLearningSanityCB))
+										.addContainerGap(105, Short.MAX_VALUE)));
 		tmMovesPanelLayout
 				.setVerticalGroup(tmMovesPanelLayout
 						.createParallelGroup(
@@ -4048,10 +4187,24 @@ public class RandomizerGUI extends javax.swing.JFrame {
 								tmMovesPanelLayout
 										.createSequentialGroup()
 										.addContainerGap()
-										.addComponent(tmmUnchangedRB)
+										.addGroup(
+												tmMovesPanelLayout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.BASELINE)
+														.addComponent(
+																tmmUnchangedRB)
+														.addComponent(
+																tmLearningSanityCB))
 										.addPreferredGap(
 												javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-										.addComponent(tmmRandomRB)
+										.addGroup(
+												tmMovesPanelLayout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.BASELINE)
+														.addComponent(
+																tmmRandomRB)
+														.addComponent(
+																tmKeepFieldMovesCB))
 										.addContainerGap(
 												javax.swing.GroupLayout.DEFAULT_SIZE,
 												Short.MAX_VALUE)));
@@ -4066,18 +4219,33 @@ public class RandomizerGUI extends javax.swing.JFrame {
 				.getString("RandomizerGUI.thcUnchangedRB.text")); // NOI18N
 		thcUnchangedRB.setToolTipText(bundle
 				.getString("RandomizerGUI.thcUnchangedRB.toolTipText")); // NOI18N
+		thcUnchangedRB.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				thcUnchangedRBActionPerformed(evt);
+			}
+		});
 
 		tmHmCompatibilityButtonGroup.add(thcRandomTypeRB);
 		thcRandomTypeRB.setText(bundle
 				.getString("RandomizerGUI.thcRandomTypeRB.text")); // NOI18N
 		thcRandomTypeRB.setToolTipText(bundle
 				.getString("RandomizerGUI.thcRandomTypeRB.toolTipText")); // NOI18N
+		thcRandomTypeRB.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				thcRandomTypeRBActionPerformed(evt);
+			}
+		});
 
 		tmHmCompatibilityButtonGroup.add(thcRandomTotalRB);
 		thcRandomTotalRB.setText(bundle
 				.getString("RandomizerGUI.thcRandomTotalRB.text")); // NOI18N
 		thcRandomTotalRB.setToolTipText(bundle
 				.getString("RandomizerGUI.thcRandomTotalRB.toolTipText")); // NOI18N
+		thcRandomTotalRB.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				thcRandomTotalRBActionPerformed(evt);
+			}
+		});
 
 		javax.swing.GroupLayout tmHmCompatPanelLayout = new javax.swing.GroupLayout(
 				tmHmCompatPanel);
@@ -4274,6 +4442,21 @@ public class RandomizerGUI extends javax.swing.JFrame {
 		mtmRandomRB.setText(bundle.getString("RandomizerGUI.mtmRandomRB.text")); // NOI18N
 		mtmRandomRB.setToolTipText(bundle
 				.getString("RandomizerGUI.mtmRandomRB.toolTipText")); // NOI18N
+		mtmRandomRB.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				mtmRandomRBActionPerformed(evt);
+			}
+		});
+
+		mtLearningSanityCB.setText(bundle
+				.getString("RandomizerGUI.mtLearningSanityCB.text")); // NOI18N
+		mtLearningSanityCB.setToolTipText(bundle
+				.getString("RandomizerGUI.mtLearningSanityCB.toolTipText")); // NOI18N
+
+		mtKeepFieldMovesCB.setText(bundle
+				.getString("RandomizerGUI.mtKeepFieldMovesCB.text")); // NOI18N
+		mtKeepFieldMovesCB.setToolTipText(bundle
+				.getString("RandomizerGUI.mtKeepFieldMovesCB.toolTipText")); // NOI18N
 
 		javax.swing.GroupLayout mtMovesPanelLayout = new javax.swing.GroupLayout(
 				mtMovesPanel);
@@ -4294,7 +4477,16 @@ public class RandomizerGUI extends javax.swing.JFrame {
 																mtmUnchangedRB)
 														.addComponent(
 																mtmRandomRB))
-										.addContainerGap(118, Short.MAX_VALUE)));
+										.addGap(64, 64, 64)
+										.addGroup(
+												mtMovesPanelLayout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.LEADING)
+														.addComponent(
+																mtKeepFieldMovesCB)
+														.addComponent(
+																mtLearningSanityCB))
+										.addContainerGap(94, Short.MAX_VALUE)));
 		mtMovesPanelLayout
 				.setVerticalGroup(mtMovesPanelLayout
 						.createParallelGroup(
@@ -4303,10 +4495,24 @@ public class RandomizerGUI extends javax.swing.JFrame {
 								mtMovesPanelLayout
 										.createSequentialGroup()
 										.addContainerGap()
-										.addComponent(mtmUnchangedRB)
+										.addGroup(
+												mtMovesPanelLayout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.BASELINE)
+														.addComponent(
+																mtmUnchangedRB)
+														.addComponent(
+																mtLearningSanityCB))
 										.addPreferredGap(
 												javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-										.addComponent(mtmRandomRB)
+										.addGroup(
+												mtMovesPanelLayout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.BASELINE)
+														.addComponent(
+																mtmRandomRB)
+														.addComponent(
+																mtKeepFieldMovesCB))
 										.addContainerGap(
 												javax.swing.GroupLayout.DEFAULT_SIZE,
 												Short.MAX_VALUE)));
@@ -4321,18 +4527,33 @@ public class RandomizerGUI extends javax.swing.JFrame {
 				.getString("RandomizerGUI.mtcUnchangedRB.text")); // NOI18N
 		mtcUnchangedRB.setToolTipText(bundle
 				.getString("RandomizerGUI.mtcUnchangedRB.toolTipText")); // NOI18N
+		mtcUnchangedRB.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				mtcUnchangedRBActionPerformed(evt);
+			}
+		});
 
 		mtCompatibilityButtonGroup.add(mtcRandomTypeRB);
 		mtcRandomTypeRB.setText(bundle
 				.getString("RandomizerGUI.mtcRandomTypeRB.text")); // NOI18N
 		mtcRandomTypeRB.setToolTipText(bundle
 				.getString("RandomizerGUI.mtcRandomTypeRB.toolTipText")); // NOI18N
+		mtcRandomTypeRB.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				mtcRandomTypeRBActionPerformed(evt);
+			}
+		});
 
 		mtCompatibilityButtonGroup.add(mtcRandomTotalRB);
 		mtcRandomTotalRB.setText(bundle
 				.getString("RandomizerGUI.mtcRandomTotalRB.text")); // NOI18N
 		mtcRandomTotalRB.setToolTipText(bundle
 				.getString("RandomizerGUI.mtcRandomTotalRB.toolTipText")); // NOI18N
+		mtcRandomTotalRB.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				mtcRandomTotalRBActionPerformed(evt);
+			}
+		});
 
 		javax.swing.GroupLayout mtCompatPanelLayout = new javax.swing.GroupLayout(
 				mtCompatPanel);
@@ -4416,7 +4637,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 																		.addComponent(
 																				mtNoExistLabel)
 																		.addGap(0,
-																				0,
+																				323,
 																				Short.MAX_VALUE)))
 										.addContainerGap()));
 		moveTutorsPanelLayout
@@ -5206,6 +5427,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 	private javax.swing.JPanel moveTutorsPanel;
 	private javax.swing.JPanel mtCompatPanel;
 	private javax.swing.ButtonGroup mtCompatibilityButtonGroup;
+	private javax.swing.JCheckBox mtKeepFieldMovesCB;
+	private javax.swing.JCheckBox mtLearningSanityCB;
 	private javax.swing.ButtonGroup mtMovesButtonGroup;
 	private javax.swing.JPanel mtMovesPanel;
 	private javax.swing.JLabel mtNoExistLabel;
@@ -5275,6 +5498,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 	private javax.swing.JRadioButton thcUnchangedRB;
 	private javax.swing.JPanel tmHmCompatPanel;
 	private javax.swing.ButtonGroup tmHmCompatibilityButtonGroup;
+	private javax.swing.JCheckBox tmKeepFieldMovesCB;
+	private javax.swing.JCheckBox tmLearningSanityCB;
 	private javax.swing.ButtonGroup tmMovesButtonGroup;
 	private javax.swing.JPanel tmMovesPanel;
 	private javax.swing.JPanel tmhmsPanel;
