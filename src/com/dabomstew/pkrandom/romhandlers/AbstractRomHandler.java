@@ -1243,6 +1243,18 @@ public abstract class AbstractRomHandler implements RomHandler {
 	}
 
 	@Override
+	public void fullTMHMCompatibility() {
+		Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
+		for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
+			boolean[] flags = compatEntry.getValue();
+			for (int i = 1; i < flags.length; i++) {
+				flags[i] = true;
+			}
+		}
+		this.setTMHMCompatibility(compat);
+	}
+
+	@Override
 	public void ensureTMCompatSanity() {
 		// if a pokemon learns a move in its moveset
 		// and there is a TM of that move, make sure
@@ -1336,6 +1348,21 @@ public abstract class AbstractRomHandler implements RomHandler {
 		// Set the new compatibility
 		this.setMoveTutorCompatibility(compat);
 
+	}
+
+	@Override
+	public void fullMoveTutorCompatibility() {
+		if (!this.hasMoveTutors()) {
+			return;
+		}
+		Map<Pokemon, boolean[]> compat = this.getMoveTutorCompatibility();
+		for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
+			boolean[] flags = compatEntry.getValue();
+			for (int i = 1; i < flags.length; i++) {
+				flags[i] = true;
+			}
+		}
+		this.setMoveTutorCompatibility(compat);
 	}
 
 	@Override
