@@ -26,3 +26,6 @@ bin
 nbproject
 build.xml
 manifest.mf
+nicknames.txt
+trainerclasses.txt
+trainernames.txt
