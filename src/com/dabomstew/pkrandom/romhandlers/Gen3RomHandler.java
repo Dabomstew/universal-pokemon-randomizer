@@ -1764,7 +1764,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				String unformatted = tte.template
 						.replace("[move]", tmpMoveName);
 				String newText = RomFunctions.formatTextWithReplacements(
-						unformatted, null, "\\n", "\\l", "\\p", 40, ssd);
+						unformatted, null, "\\n", "\\l", "\\p", 36, ssd);
 				// get rid of the underscores
 				newText = newText.replace(tmpMoveName, moveName);
 				System.out.println("inserting " + newText);
@@ -1897,7 +1897,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				String unformatted = tte.template
 						.replace("[move]", tmpMoveName);
 				String newText = RomFunctions.formatTextWithReplacements(
-						unformatted, null, "\\n", "\\l", "\\p", 40, ssd);
+						unformatted, null, "\\n", "\\l", "\\p", 36, ssd);
 				// get rid of the underscores
 				newText = newText.replace(tmpMoveName, moveName);
 				System.out.println("inserting " + newText);
