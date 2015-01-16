@@ -2286,10 +2286,38 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 		return evos;
 	}
-	
+
 	@Override
 	public void setEvolutions(List<Evolution> evos) {
-		// TODO implement
+		try {
+			NARCContents evoNARC = readNARC(romEntry
+					.getString("PokemonEvolutions"));
+			for (int i = 1; i <= 493; i++) {
+				byte[] evoEntry = evoNARC.files.get(i);
+				int evosWritten = 0;
+				for (Evolution evo : evos) {
+					if (evo.from == i) {
+						writeWord(evoEntry, evosWritten * 6,
+								evo.type.toIndex(4));
+						writeWord(evoEntry, evosWritten * 6 + 2, evo.extraInfo);
+						writeWord(evoEntry, evosWritten * 6 + 4, evo.to);
+						evosWritten++;
+					}
+					if (evosWritten == 7) {
+						break;
+					}
+				}
+				while (evosWritten < 7) {
+					writeWord(evoEntry, evosWritten * 6, 0);
+					writeWord(evoEntry, evosWritten * 6 + 2, 0);
+					writeWord(evoEntry, evosWritten * 6 + 4, 0);
+					evosWritten++;
+				}
+			}
+			writeNARC(romEntry.getString("PokemonEvolutions"), evoNARC);
+		} catch (IOException e) {
+			// can't do anything
+		}
 	}
 
 	@Override

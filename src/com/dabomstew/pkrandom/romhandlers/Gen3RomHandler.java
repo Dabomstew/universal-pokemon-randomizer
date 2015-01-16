@@ -2229,10 +2229,36 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		}
 		return evos;
 	}
-	
+
 	@Override
 	public void setEvolutions(List<Evolution> evos) {
-		// TODO implement
+		int baseOffset = romEntry.getValue("PokemonEvolutions");
+		for (int i = 1; i <= 386; i++) {
+			int idx = pokeNumTo3GIndex(i);
+			int evoOffset = baseOffset + (idx - 1) * 0x28;
+			int evosWritten = 0;
+			for (Evolution evo : evos) {
+				if (evo.from == i) {
+					writeWord(evoOffset, evo.type.toIndex(3));
+					writeWord(evoOffset + 2, evo.extraInfo);
+					writeWord(evoOffset + 4, pokeNumTo3GIndex(evo.to));
+					writeWord(evoOffset + 6, 0);
+					evoOffset += 8;
+					evosWritten++;
+				}
+				if (evosWritten == 5) {
+					break;
+				}
+			}
+			while (evosWritten < 5) {
+				writeWord(evoOffset, 0);
+				writeWord(evoOffset + 2, 0);
+				writeWord(evoOffset + 4, 0);
+				writeWord(evoOffset + 6, 0);
+				evoOffset += 8;
+				evosWritten++;
+			}
+		}
 	}
 
 	@Override
