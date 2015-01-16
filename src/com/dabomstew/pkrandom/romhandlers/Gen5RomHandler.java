@@ -2115,7 +2115,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 				for (Evolution evo : evos) {
 					if (evo.from == i) {
 						writeWord(evoEntry, evosWritten * 6,
-								evo.type.toIndex(4));
+								evo.type.toIndex(5));
 						writeWord(evoEntry, evosWritten * 6 + 2, evo.extraInfo);
 						writeWord(evoEntry, evosWritten * 6 + 4, evo.to);
 						evosWritten++;
