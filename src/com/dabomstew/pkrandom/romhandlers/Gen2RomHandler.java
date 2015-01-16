@@ -2027,6 +2027,9 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 		if (romEntry.codeTweaks.get("BWXPTweak") != null) {
 			available |= CodeTweaks.BW_EXP_PATCH;
 		}
+		if (romEntry.getValue("TextDelayFunctionOffset") != 0) {
+			available |= CodeTweaks.FASTEST_TEXT;
+		}
 		return available;
 	}
 
@@ -2046,7 +2049,9 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 	
 	@Override
 	public void applyFastestTextPatch() {
-		// TODO implement
+		if (romEntry.getValue("TextDelayFunctionOffset") != 0) {
+			rom[romEntry.getValue("TextDelayFunctionOffset")] = (byte) 0xC9;
+		}
 	}
 
 	@Override
