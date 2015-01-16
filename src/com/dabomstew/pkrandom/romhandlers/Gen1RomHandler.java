@@ -1842,8 +1842,8 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		// change them all to evolve at level 37
 		List<Evolution> evos = this.getEvolutions();
 		log("--Removing Trade Evolutions--");
-		for(Evolution evo : evos) {
-			if(evo.type == EvolutionType.TRADE) {
+		for (Evolution evo : evos) {
+			if (evo.type == EvolutionType.TRADE) {
 				// change
 				evo.type = EvolutionType.LEVEL;
 				evo.extraInfo = 37;
@@ -2641,23 +2641,51 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 			if (writeData != null) {
 				int lengthToFit = writeData.length;
 				int pointerToWrite = -1;
-				if (offsetInMainData + lengthToFit <= mainDataBlockSize) {
+				// compression of leading & trailing 0s:
+				// every entry ends in a 0 (end of move list).
+				// if a block already has data in it, and the data
+				// we want to write starts with a 0 (no evolutions)
+				// we can compress it into the end of the last entry
+				// this saves a decent amount of space overall.
+				if ((offsetInMainData + lengthToFit <= mainDataBlockSize)
+						|| (writeData[0] == 0 && offsetInMainData > 0 && offsetInMainData
+								+ lengthToFit == mainDataBlockSize + 1)) {
 					// place in main storage
-					int writtenDataOffset = mainDataBlockOffset
-							+ offsetInMainData;
-					pointerToWrite = makeGBPointer(writtenDataOffset);
-					System.arraycopy(writeData, 0, mainDataBlock,
-							offsetInMainData, lengthToFit);
-					offsetInMainData += lengthToFit;
+					if (writeData[0] == 0 && offsetInMainData > 0) {
+						int writtenDataOffset = mainDataBlockOffset
+								+ offsetInMainData - 1;
+						pointerToWrite = makeGBPointer(writtenDataOffset);
+						System.arraycopy(writeData, 1, mainDataBlock,
+								offsetInMainData, lengthToFit - 1);
+						offsetInMainData += lengthToFit - 1;
+					} else {
+						int writtenDataOffset = mainDataBlockOffset
+								+ offsetInMainData;
+						pointerToWrite = makeGBPointer(writtenDataOffset);
+						System.arraycopy(writeData, 0, mainDataBlock,
+								offsetInMainData, lengthToFit);
+						offsetInMainData += lengthToFit;
+					}
 				} else if (extraSpaceEnabled
-						&& offsetInExtraData + lengthToFit <= extraSpaceSize) {
+						&& ((offsetInExtraData + lengthToFit <= extraSpaceSize) || (writeData[0] == 0
+								&& offsetInExtraData > 0 && offsetInExtraData
+								+ lengthToFit == extraSpaceSize + 1))) {
 					// place in extra space
-					int writtenDataOffset = extraSpaceOffset
-							+ offsetInExtraData;
-					pointerToWrite = makeGBPointer(writtenDataOffset);
-					System.arraycopy(writeData, 0, extraDataBlock,
-							offsetInExtraData, lengthToFit);
-					offsetInExtraData += lengthToFit;
+					if (writeData[0] == 0 && offsetInExtraData > 0) {
+						int writtenDataOffset = extraSpaceOffset
+								+ offsetInExtraData - 1;
+						pointerToWrite = makeGBPointer(writtenDataOffset);
+						System.arraycopy(writeData, 1, extraDataBlock,
+								offsetInExtraData, lengthToFit - 1);
+						offsetInExtraData += lengthToFit - 1;
+					} else {
+						int writtenDataOffset = extraSpaceOffset
+								+ offsetInExtraData;
+						pointerToWrite = makeGBPointer(writtenDataOffset);
+						System.arraycopy(writeData, 0, extraDataBlock,
+								offsetInExtraData, lengthToFit);
+						offsetInExtraData += lengthToFit;
+					}
 				} else {
 					// this should never happen, but if not, uh oh
 					System.out
