@@ -42,12 +42,14 @@ public class CodeTweaksDialog extends javax.swing.JDialog {
 		bwPatchCB.setVisible((available & CodeTweaks.BW_EXP_PATCH) > 0);
 		nerfXAccCB.setVisible((available & CodeTweaks.NERF_X_ACCURACY) > 0);
 		critRateFixCB.setVisible((available & CodeTweaks.FIX_CRIT_RATE) > 0);
+		fastestTextCB.setVisible((available & CodeTweaks.FASTEST_TEXT) > 0);
 	}
 
 	private void restoreFrom(int current) {
 		bwPatchCB.setSelected((current & CodeTweaks.BW_EXP_PATCH) > 0);
 		nerfXAccCB.setSelected((current & CodeTweaks.NERF_X_ACCURACY) > 0);
 		critRateFixCB.setSelected((current & CodeTweaks.FIX_CRIT_RATE) > 0);
+		fastestTextCB.setSelected((current & CodeTweaks.FASTEST_TEXT) > 0);
 	}
 
 	public boolean pressedOK() {
@@ -65,6 +67,9 @@ public class CodeTweaksDialog extends javax.swing.JDialog {
 		if (critRateFixCB.isSelected()) {
 			choice |= CodeTweaks.FIX_CRIT_RATE;
 		}
+		if (fastestTextCB.isSelected()) {
+			choice |= CodeTweaks.FASTEST_TEXT;
+		}
 		return choice;
 	}
 
@@ -75,89 +80,140 @@ public class CodeTweaksDialog extends javax.swing.JDialog {
 	 */
 	@SuppressWarnings("unchecked")
 	// <editor-fold defaultstate="collapsed"
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+	// desc="Generated Code">//GEN-BEGIN:initComponents
+	private void initComponents() {
 
-        headerLabel = new javax.swing.JLabel();
-        bwPatchCB = new javax.swing.JCheckBox();
-        nerfXAccCB = new javax.swing.JCheckBox();
-        critRateFixCB = new javax.swing.JCheckBox();
-        okButton = new javax.swing.JButton();
-        cancelButton = new javax.swing.JButton();
+		headerLabel = new javax.swing.JLabel();
+		bwPatchCB = new javax.swing.JCheckBox();
+		nerfXAccCB = new javax.swing.JCheckBox();
+		critRateFixCB = new javax.swing.JCheckBox();
+		okButton = new javax.swing.JButton();
+		cancelButton = new javax.swing.JButton();
+		fastestTextCB = new javax.swing.JCheckBox();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle"); // NOI18N
-        setTitle(bundle.getString("CodeTweaksDialog.title")); // NOI18N
+		setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+		java.util.ResourceBundle bundle = java.util.ResourceBundle
+				.getBundle("com/dabomstew/pkrandom/gui/Bundle"); // NOI18N
+		setTitle(bundle.getString("CodeTweaksDialog.title")); // NOI18N
 
-        headerLabel.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        headerLabel.setText(bundle.getString("CodeTweaksDialog.headerLabel.text")); // NOI18N
+		headerLabel.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+		headerLabel.setText(bundle
+				.getString("CodeTweaksDialog.headerLabel.text")); // NOI18N
 
-        bwPatchCB.setText(bundle.getString("CodeTweaksDialog.bwPatchCB.text")); // NOI18N
-        bwPatchCB.setToolTipText(bundle.getString("CodeTweaksDialog.bwPatchCB.toolTipText")); // NOI18N
+		bwPatchCB.setText(bundle.getString("CodeTweaksDialog.bwPatchCB.text")); // NOI18N
+		bwPatchCB.setToolTipText(bundle
+				.getString("CodeTweaksDialog.bwPatchCB.toolTipText")); // NOI18N
 
-        nerfXAccCB.setText(bundle.getString("CodeTweaksDialog.nerfXAccCB.text")); // NOI18N
-        nerfXAccCB.setToolTipText(bundle.getString("CodeTweaksDialog.nerfXAccCB.toolTipText")); // NOI18N
+		nerfXAccCB
+				.setText(bundle.getString("CodeTweaksDialog.nerfXAccCB.text")); // NOI18N
+		nerfXAccCB.setToolTipText(bundle
+				.getString("CodeTweaksDialog.nerfXAccCB.toolTipText")); // NOI18N
 
-        critRateFixCB.setText(bundle.getString("CodeTweaksDialog.critRateFixCB.text")); // NOI18N
-        critRateFixCB.setToolTipText(bundle.getString("CodeTweaksDialog.critRateFixCB.toolTipText")); // NOI18N
+		critRateFixCB.setText(bundle
+				.getString("CodeTweaksDialog.critRateFixCB.text")); // NOI18N
+		critRateFixCB.setToolTipText(bundle
+				.getString("CodeTweaksDialog.critRateFixCB.toolTipText")); // NOI18N
 
-        okButton.setText(bundle.getString("CodeTweaksDialog.okButton.text")); // NOI18N
-        okButton.setMaximumSize(new java.awt.Dimension(65, 23));
-        okButton.setMinimumSize(new java.awt.Dimension(65, 23));
-        okButton.setPreferredSize(new java.awt.Dimension(65, 23));
-        okButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                okButtonActionPerformed(evt);
-            }
-        });
+		okButton.setText(bundle.getString("CodeTweaksDialog.okButton.text")); // NOI18N
+		okButton.setMaximumSize(new java.awt.Dimension(65, 23));
+		okButton.setMinimumSize(new java.awt.Dimension(65, 23));
+		okButton.setPreferredSize(new java.awt.Dimension(65, 23));
+		okButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				okButtonActionPerformed(evt);
+			}
+		});
 
-        cancelButton.setText(bundle.getString("CodeTweaksDialog.cancelButton.text")); // NOI18N
-        cancelButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cancelButtonActionPerformed(evt);
-            }
-        });
+		cancelButton.setText(bundle
+				.getString("CodeTweaksDialog.cancelButton.text")); // NOI18N
+		cancelButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				cancelButtonActionPerformed(evt);
+			}
+		});
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(okButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cancelButton))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(critRateFixCB)
-                            .addComponent(nerfXAccCB)
-                            .addComponent(bwPatchCB)
-                            .addComponent(headerLabel))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(headerLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(bwPatchCB)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(nerfXAccCB)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(critRateFixCB)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(okButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cancelButton))
-                .addContainerGap())
-        );
+		fastestTextCB.setText(bundle
+				.getString("CodeTweaksDialog.fastestTextCB.text")); // NOI18N
+		fastestTextCB.setToolTipText(bundle
+				.getString("CodeTweaksDialog.fastestTextCB.toolTipText")); // NOI18N
 
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
+		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(
+				getContentPane());
+		getContentPane().setLayout(layout);
+		layout.setHorizontalGroup(layout
+				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+				.addGroup(
+						layout.createSequentialGroup()
+								.addContainerGap()
+								.addGroup(
+										layout.createParallelGroup(
+												javax.swing.GroupLayout.Alignment.LEADING)
+												.addGroup(
+														layout.createSequentialGroup()
+																.addComponent(
+																		okButton,
+																		javax.swing.GroupLayout.PREFERRED_SIZE,
+																		javax.swing.GroupLayout.DEFAULT_SIZE,
+																		javax.swing.GroupLayout.PREFERRED_SIZE)
+																.addPreferredGap(
+																		javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+																		javax.swing.GroupLayout.DEFAULT_SIZE,
+																		Short.MAX_VALUE)
+																.addComponent(
+																		cancelButton))
+												.addGroup(
+														layout.createSequentialGroup()
+																.addGroup(
+																		layout.createParallelGroup(
+																				javax.swing.GroupLayout.Alignment.LEADING)
+																				.addComponent(
+																						fastestTextCB)
+																				.addComponent(
+																						critRateFixCB)
+																				.addComponent(
+																						nerfXAccCB)
+																				.addComponent(
+																						bwPatchCB)
+																				.addComponent(
+																						headerLabel))
+																.addGap(0,
+																		0,
+																		Short.MAX_VALUE)))
+								.addContainerGap()));
+		layout.setVerticalGroup(layout
+				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+				.addGroup(
+						layout.createSequentialGroup()
+								.addContainerGap()
+								.addComponent(headerLabel)
+								.addPreferredGap(
+										javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+								.addComponent(bwPatchCB)
+								.addPreferredGap(
+										javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+								.addComponent(nerfXAccCB)
+								.addPreferredGap(
+										javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+								.addComponent(critRateFixCB)
+								.addPreferredGap(
+										javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+								.addComponent(fastestTextCB)
+								.addPreferredGap(
+										javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+										16, Short.MAX_VALUE)
+								.addGroup(
+										layout.createParallelGroup(
+												javax.swing.GroupLayout.Alignment.BASELINE)
+												.addComponent(
+														okButton,
+														javax.swing.GroupLayout.PREFERRED_SIZE,
+														javax.swing.GroupLayout.DEFAULT_SIZE,
+														javax.swing.GroupLayout.PREFERRED_SIZE)
+												.addComponent(cancelButton))
+								.addContainerGap()));
+
+		pack();
+	}// </editor-fold>//GEN-END:initComponents
 
 	private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_okButtonActionPerformed
 		pressedOk = true;
@@ -169,12 +225,13 @@ public class CodeTweaksDialog extends javax.swing.JDialog {
 		setVisible(false);
 	}// GEN-LAST:event_cancelButtonActionPerformed
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JCheckBox bwPatchCB;
-    private javax.swing.JButton cancelButton;
-    private javax.swing.JCheckBox critRateFixCB;
-    private javax.swing.JLabel headerLabel;
-    private javax.swing.JCheckBox nerfXAccCB;
-    private javax.swing.JButton okButton;
-    // End of variables declaration//GEN-END:variables
+	// Variables declaration - do not modify//GEN-BEGIN:variables
+	private javax.swing.JCheckBox bwPatchCB;
+	private javax.swing.JButton cancelButton;
+	private javax.swing.JCheckBox critRateFixCB;
+	private javax.swing.JCheckBox fastestTextCB;
+	private javax.swing.JLabel headerLabel;
+	private javax.swing.JCheckBox nerfXAccCB;
+	private javax.swing.JButton okButton;
+	// End of variables declaration//GEN-END:variables
 }
