@@ -2018,6 +2018,9 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		if (romEntry.codeTweaks.get("CritRateTweak") != null) {
 			available |= CodeTweaks.FIX_CRIT_RATE;
 		}
+		if (romEntry.getValue("TextDelayFunctionOffset") != 0) {
+			available |= CodeTweaks.FASTEST_TEXT;
+		}
 		return available;
 	}
 
@@ -2034,6 +2037,13 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 	@Override
 	public void applyCritRatePatch() {
 		genericIPSPatch("CritRateTweak");
+	}
+
+	@Override
+	public void applyFastestTextPatch() {
+		if (romEntry.getValue("TextDelayFunctionOffset") != 0) {
+			rom[romEntry.getValue("TextDelayFunctionOffset")] = (byte) 0xC9;
+		}
 	}
 
 	private boolean genericIPSPatch(String ctName) {

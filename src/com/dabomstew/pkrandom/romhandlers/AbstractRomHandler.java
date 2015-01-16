@@ -2962,6 +2962,12 @@ public abstract class AbstractRomHandler implements RomHandler {
 		// default: do nothing
 
 	}
+	
+	@Override
+	public void applyFastestTextPatch() {
+		// default: do nothing
+
+	}
 
 	@Override
 	public boolean hasHiddenHollowPokemon() {

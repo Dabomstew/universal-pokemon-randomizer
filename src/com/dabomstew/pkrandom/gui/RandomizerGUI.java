@@ -1494,6 +1494,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
 						&& (currentCodeTweaks & CodeTweaks.NERF_X_ACCURACY) > 0) {
 					romHandler.applyXAccNerfPatch();
 				}
+
+				if ((ctavailable & CodeTweaks.FASTEST_TEXT) > 0
+						&& (currentCodeTweaks & CodeTweaks.FASTEST_TEXT) > 0) {
+					romHandler.applyFastestTextPatch();
+				}
 			}
 
 			// Hollows?

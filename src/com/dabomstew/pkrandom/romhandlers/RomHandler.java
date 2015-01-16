@@ -413,5 +413,7 @@ public interface RomHandler {
 	public void applyXAccNerfPatch();
 
 	public void applyCritRatePatch();
+	
+	public void applyFastestTextPatch();
 
 }

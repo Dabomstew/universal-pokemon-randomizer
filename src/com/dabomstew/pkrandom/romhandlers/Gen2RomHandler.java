@@ -2043,6 +2043,11 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 
 		}
 	}
+	
+	@Override
+	public void applyFastestTextPatch() {
+		// TODO implement
+	}
 
 	@Override
 	public void applySignature() {
