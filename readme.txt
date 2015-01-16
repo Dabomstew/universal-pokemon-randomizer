@@ -2,7 +2,7 @@ Universal Pokemon Randomizer 1.6.2
 by Dabomstew, 2012-15
 
 Homepage: http://pokehacks.dabomstew.com/randomizer/index.php
-Source: https://code.google.com/p/universal-pokemon-randomizer/
+Source: https://github.com/Dabomstew/universal-pokemon-randomizer
 
 Contents
 --------
