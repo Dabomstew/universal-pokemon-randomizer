@@ -139,6 +139,14 @@ public class QuickSettingsUpdater {
 		// the only changes were in implementation, which broke presets, but
 		// leaves settings files the same
 
+		// 161 to 162:
+		// some added fields to tm/move tutors that we can leave blank
+		// more crucially: a new general options byte @ offset 3
+		// set it to all off by default
+		if (oldVersion < 162) {
+			insertExtraByte(3, (byte) 0);
+		}
+
 		// fix checksum
 		CRC32 checksum = new CRC32();
 		checksum.update(dataBlock, 0, actualDataLength - 16);
