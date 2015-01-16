@@ -89,9 +89,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
 	private static final long serialVersionUID = 637989089525556154L;
 	private RomHandler romHandler;
 	protected RomHandler[] checkHandlers;
-	public static final int PRESET_FILE_VERSION = 162;
+	public static final int PRESET_FILE_VERSION = 163;
 
-	public static final int UPDATE_VERSION = 1620;
+	public static final int UPDATE_VERSION = 1630;
 
 	public static PrintStream verboseLog = System.out;
 
