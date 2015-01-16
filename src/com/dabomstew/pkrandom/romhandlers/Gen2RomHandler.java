@@ -1777,6 +1777,11 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 		}
 		return evos;
 	}
+	
+	@Override
+	public void setEvolutions(List<Evolution> evos) {
+		this.writeEvosAndMovesLearnt(evos, null);
+	}
 
 	@Override
 	public void removeTradeEvolutions(boolean changeMoveEvos) {

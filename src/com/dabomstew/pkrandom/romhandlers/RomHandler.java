@@ -57,9 +57,6 @@ public interface RomHandler {
 
 	public boolean isInGame(int pokemonNumber);
 
-	// Get the evolution pairs that apply in this game
-	public List<Evolution> getEvolutions();
-
 	// Get a List of Pokemon objects in this game.
 	// 0 = null 1-whatever = the Pokemon.
 	public List<Pokemon> getPokemon();
@@ -225,7 +222,7 @@ public interface RomHandler {
 	public void setTMHMCompatibility(Map<Pokemon, boolean[]> compatData);
 
 	public void randomizeTMHMCompatibility(boolean preferSameType);
-	
+
 	public void fullTMHMCompatibility();
 
 	// tm/moveset sanity
@@ -247,7 +244,7 @@ public interface RomHandler {
 	public void setMoveTutorCompatibility(Map<Pokemon, boolean[]> compatData);
 
 	public void randomizeMoveTutorCompatibility(boolean preferSameType);
-	
+
 	public void fullMoveTutorCompatibility();
 
 	// mt/moveset sanity
@@ -356,21 +353,27 @@ public interface RomHandler {
 
 	// Evos
 
+	public List<Evolution> getEvolutions();
+	
+	public void setEvolutions(List<Evolution> evos);
+
 	public void removeTradeEvolutions(boolean changeMoveEvos);
+
+	public void condenseLevelEvolutions(int maxLevel, int maxIntermediateLevel);
 
 	// stats stuff
 	public void minimumCatchRate(int rateNonLegendary, int rateLegendary);
 
 	public void standardizeEXPCurves();
-	
+
 	// (Mostly) unchanging lists of moves
-	
+
 	public List<Integer> getGameBreakingMoves();
-	
+
 	// includes game or gen-specific moves like Secret Power
 	// but NOT healing moves (Softboiled, Milk Drink)
 	public List<Integer> getFieldMoves();
-	
+
 	// any HMs required to obtain 4 badges
 	// (excluding Gameshark codes or early drink in RBY)
 	public List<Integer> getEarlyRequiredHMMoves();
@@ -396,8 +399,6 @@ public interface RomHandler {
 	public int internalStringLength(String string);
 
 	public int codeTweaksAvailable();
-
-	
 
 	public void applySignature();
 

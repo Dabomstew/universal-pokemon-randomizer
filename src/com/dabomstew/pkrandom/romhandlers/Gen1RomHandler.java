@@ -23,6 +23,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -1600,56 +1601,8 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 
 	@Override
 	public void setMovesLearnt(Map<Pokemon, List<MoveLearnt>> movesets) {
-		int pointersOffset = romEntry.getValue("PokemonMovesetsTableOffset");
-		int pokeStatsOffset = romEntry.getValue("PokemonStatsOffset");
-		int pkmnCount = romEntry.getValue("InternalPokemonCount");
-		for (int i = 1; i <= pkmnCount; i++) {
-			int pointer = readWord(pointersOffset + (i - 1) * 2);
-			int realPointer = calculateOffset(bankOf(pointersOffset), pointer);
-			if (pokeRBYToNumTable[i] != 0) {
-				Pokemon pkmn = pokes[pokeRBYToNumTable[i]];
-				List<MoveLearnt> ourMoves = movesets.get(pkmn);
-				int statsOffset = 0;
-				if (pokeRBYToNumTable[i] == 151 && !romEntry.isYellow) {
-					// Mewww
-					statsOffset = romEntry.getValue("MewStatsOffset");
-				} else {
-					statsOffset = (pokeRBYToNumTable[i] - 1) * 0x1C
-							+ pokeStatsOffset;
-				}
-				int movenum = 0;
-				while (movenum < 4 && ourMoves.size() > movenum
-						&& ourMoves.get(movenum).level == 1) {
-					rom[statsOffset + 0x0F + movenum] = (byte) moveNumToRomTable[ourMoves
-							.get(movenum).move];
-					movenum++;
-				}
-				// Write out the rest of zeroes
-				for (int mn = movenum; mn < 4; mn++) {
-					rom[statsOffset + 0x0F + mn] = 0;
-				}
-				// Skip over evolution data
-				while (rom[realPointer] != 0) {
-					if (rom[realPointer] == 1) {
-						realPointer += 3;
-					} else if (rom[realPointer] == 2) {
-						realPointer += 4;
-					} else if (rom[realPointer] == 3) {
-						realPointer += 3;
-					}
-				}
-				realPointer++;
-				while (rom[realPointer] != 0 && movenum < ourMoves.size()) {
-					rom[realPointer] = (byte) ourMoves.get(movenum).level;
-					rom[realPointer + 1] = (byte) moveNumToRomTable[ourMoves
-							.get(movenum).move];
-					realPointer += 2;
-					movenum++;
-				}
-				// Make sure we finish off the moveset
-				rom[realPointer] = 0;
-			}
-		}
+		// new method for moves learnt
+		writeEvosAndMovesLearnt(null, movesets);
 	}
 
 	@Override
@@ -1876,6 +1829,11 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 			}
 		}
 		return evos;
+	}
+
+	@Override
+	public void setEvolutions(List<Evolution> evos) {
+		this.writeEvosAndMovesLearnt(evos, null);
 	}
 
 	@Override
@@ -2121,14 +2079,14 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 			return Arrays.asList(49, 82, 32, 90, 12, 147);
 		}
 	}
-	
+
 	@Override
 	public List<Integer> getFieldMoves() {
 		// cut, fly, surf, strength, flash,
 		// dig, teleport (NOT softboiled)
 		return Arrays.asList(15, 19, 57, 70, 148, 91, 100);
 	}
-	
+
 	@Override
 	public List<Integer> getEarlyRequiredHMMoves() {
 		// just cut
@@ -2552,5 +2510,190 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 	@Override
 	public boolean supportsFourStartingMoves() {
 		return true;
+	}
+
+	private void writeEvosAndMovesLearnt(List<Evolution> evos,
+			Map<Pokemon, List<MoveLearnt>> movesets) {
+		// we assume a few things here:
+		// 1) evos & moves learnt are stored directly after their pointer table
+		// 2) PokemonMovesetsExtraSpaceOffset is in the same bank, and
+		// points to the start of the free space at the end of the bank
+		// (if set to 0, disabled from being used)
+		// 3) PokemonMovesetsDataSize is from the start of actual data to
+		// the start of engine/battle/e_2.asm in pokered (aka code we can't
+		// overwrite)
+		// specify null to either argument to copy old values
+		int pokeStatsOffset = romEntry.getValue("PokemonStatsOffset");
+		int movesEvosStart = romEntry.getValue("PokemonMovesetsTableOffset");
+		int movesEvosBank = bankOf(movesEvosStart);
+		int pkmnCount = romEntry.getValue("InternalPokemonCount");
+		byte[] pointerTable = new byte[pkmnCount * 2];
+		int mainDataBlockSize = romEntry.getValue("PokemonMovesetsDataSize");
+		int mainDataBlockOffset = movesEvosStart + pointerTable.length;
+		byte[] mainDataBlock = new byte[mainDataBlockSize];
+		int offsetInMainData = 0;
+		int extraSpaceOffset = romEntry
+				.getValue("PokemonMovesetsExtraSpaceOffset");
+		int extraSpaceBank = bankOf(extraSpaceOffset);
+		boolean extraSpaceEnabled = false;
+		byte[] extraDataBlock = null;
+		int offsetInExtraData = 0;
+		int extraSpaceSize = 0;
+		if (movesEvosBank == extraSpaceBank && extraSpaceOffset != 0) {
+			extraSpaceEnabled = true;
+			int startOfNextBank = ((extraSpaceOffset / 0x4000) + 1) * 0x4000;
+			extraSpaceSize = startOfNextBank - extraSpaceOffset;
+			extraDataBlock = new byte[extraSpaceSize];
+		}
+		int nullEntryPointer = -1;
+
+		for (int i = 1; i <= pkmnCount; i++) {
+			byte[] writeData = null;
+			int oldDataOffset = calculateOffset(movesEvosBank,
+					readWord(movesEvosStart + (i - 1) * 2));
+			boolean setNullEntryPointerHere = false;
+			if (pokeRBYToNumTable[i] == 0) {
+				// null entry
+				if (nullEntryPointer == -1) {
+					// make the null entry
+					writeData = new byte[] { 0, 0 };
+					setNullEntryPointerHere = true;
+				} else {
+					writeWord(pointerTable, (i - 1) * 2, nullEntryPointer);
+				}
+			} else {
+				int pokeNum = pokeRBYToNumTable[i];
+				Pokemon pkmn = pokes[pokeNum];
+				ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
+				// Evolutions
+				if (evos == null) {
+					// copy old
+					int evoOffset = oldDataOffset;
+					while (rom[evoOffset] != 0x00) {
+						int method = rom[evoOffset] & 0xFF;
+						int limiter = (method == 2) ? 4 : 3;
+						for (int b = 0; b < limiter; b++) {
+							dataStream.write(rom[evoOffset++] & 0xFF);
+						}
+					}
+				} else {
+					for (Evolution evo : evos) {
+						// write evos for this poke
+						if (evo.from == pokeNum) {
+							dataStream.write(evo.type.toIndex(1));
+							if (evo.type == EvolutionType.LEVEL) {
+								dataStream.write(evo.extraInfo); // min lvl
+							} else if (evo.type == EvolutionType.STONE) {
+								dataStream.write(evo.extraInfo); // stone item
+								dataStream.write(1); // minimum level
+							} else if (evo.type == EvolutionType.TRADE) {
+								dataStream.write(1); // minimum level
+							}
+							int pokeIndexTo = pokeNumToRBYTable[evo.to];
+							dataStream.write(pokeIndexTo); // species
+						}
+					}
+				}
+				// write terminator for evos
+				dataStream.write(0);
+
+				// Movesets
+				if (movesets == null) {
+					// copy old
+					int movesOffset = oldDataOffset;
+					// move past evos
+					while (rom[movesOffset] != 0x00) {
+						int method = rom[movesOffset] & 0xFF;
+						movesOffset += (method == 2) ? 4 : 3;
+					}
+					movesOffset++;
+					// copy moves
+					while (rom[movesOffset] != 0x00) {
+						dataStream.write(rom[movesOffset++] & 0xFF);
+						dataStream.write(rom[movesOffset++] & 0xFF);
+					}
+				} else {
+					List<MoveLearnt> ourMoves = movesets.get(pkmn);
+					int statsOffset = 0;
+					if (pokeNum == 151 && !romEntry.isYellow) {
+						// Mewww
+						statsOffset = romEntry.getValue("MewStatsOffset");
+					} else {
+						statsOffset = (pokeNum - 1) * 0x1C + pokeStatsOffset;
+					}
+					int movenum = 0;
+					while (movenum < 4 && ourMoves.size() > movenum
+							&& ourMoves.get(movenum).level == 1) {
+						rom[statsOffset + 0x0F + movenum] = (byte) moveNumToRomTable[ourMoves
+								.get(movenum).move];
+						movenum++;
+					}
+					// Write out the rest of zeroes
+					for (int mn = movenum; mn < 4; mn++) {
+						rom[statsOffset + 0x0F + mn] = 0;
+					}
+					// Add the non level 1 moves to the data stream
+					while (movenum < ourMoves.size()) {
+						dataStream.write(ourMoves.get(movenum).level);
+						dataStream.write(moveNumToRomTable[ourMoves
+								.get(movenum).move]);
+						movenum++;
+					}
+				}
+				// terminator
+				dataStream.write(0);
+
+				// done, set writeData
+				writeData = dataStream.toByteArray();
+				try {
+					dataStream.close();
+				} catch (IOException e) {
+				}
+			}
+
+			// write data and set pointer?
+			if (writeData != null) {
+				int lengthToFit = writeData.length;
+				int pointerToWrite = -1;
+				if (offsetInMainData + lengthToFit <= mainDataBlockSize) {
+					// place in main storage
+					int writtenDataOffset = mainDataBlockOffset
+							+ offsetInMainData;
+					pointerToWrite = makeGBPointer(writtenDataOffset);
+					System.arraycopy(writeData, 0, mainDataBlock,
+							offsetInMainData, lengthToFit);
+					offsetInMainData += lengthToFit;
+				} else if (extraSpaceEnabled
+						&& offsetInExtraData + lengthToFit <= extraSpaceSize) {
+					// place in extra space
+					int writtenDataOffset = extraSpaceOffset
+							+ offsetInExtraData;
+					pointerToWrite = makeGBPointer(writtenDataOffset);
+					System.arraycopy(writeData, 0, extraDataBlock,
+							offsetInExtraData, lengthToFit);
+					offsetInExtraData += lengthToFit;
+				} else {
+					// this should never happen, but if not, uh oh
+					System.out
+							.println("we somehow ran out of room for moves/evolutions");
+				}
+				if (pointerToWrite >= 0) {
+					writeWord(pointerTable, (i - 1) * 2, pointerToWrite);
+					if (setNullEntryPointerHere) {
+						nullEntryPointer = pointerToWrite;
+					}
+				}
+			}
+		}
+
+		// Done, write final results to ROM
+		System.arraycopy(pointerTable, 0, rom, movesEvosStart,
+				pointerTable.length);
+		System.arraycopy(mainDataBlock, 0, rom, mainDataBlockOffset,
+				mainDataBlock.length);
+		if (extraSpaceEnabled) {
+			System.arraycopy(extraDataBlock, 0, rom, extraSpaceOffset,
+					extraDataBlock.length);
+		}
 	}
 }

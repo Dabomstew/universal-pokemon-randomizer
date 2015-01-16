@@ -2103,6 +2103,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 		}
 		return evos;
 	}
+	
+	@Override
+	public void setEvolutions(List<Evolution> evos) {
+		// TODO implement
+	}
 
 	@Override
 	public void removeTradeEvolutions(boolean changeMoveEvos) {

@@ -39,4 +39,13 @@ public enum EvolutionType {
 	public static EvolutionType fromIndex(int generation, int index) {
 		return reverseIndexes[generation - 1][index];
 	}
+
+	public boolean usesLevel() {
+		return (this == LEVEL) || (this == LEVEL_ATTACK_HIGHER)
+				|| (this == LEVEL_DEFENSE_HIGHER)
+				|| (this == LEVEL_ATK_DEF_SAME) || (this == LEVEL_LOW_PV)
+				|| (this == LEVEL_HIGH_PV) || (this == LEVEL_CREATE_EXTRA)
+				|| (this == LEVEL_IS_EXTRA) || (this == LEVEL_MALE_ONLY)
+				|| (this == LEVEL_FEMALE_ONLY);
+	}
 }

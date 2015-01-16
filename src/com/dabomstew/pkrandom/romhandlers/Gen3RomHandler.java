@@ -2229,6 +2229,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		}
 		return evos;
 	}
+	
+	@Override
+	public void setEvolutions(List<Evolution> evos) {
+		// TODO implement
+	}
 
 	@Override
 	public void removeTradeEvolutions(boolean changeMoveEvos) {

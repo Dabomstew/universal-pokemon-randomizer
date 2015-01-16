@@ -1924,6 +1924,44 @@ public abstract class AbstractRomHandler implements RomHandler {
 		return 7;
 	}
 
+	@Override
+	public void condenseLevelEvolutions(int maxLevel, int maxIntermediateLevel) {
+		List<Evolution> allEvos = this.getEvolutions();
+		Set<Evolution> changedEvos = new TreeSet<Evolution>();
+		// search for level evolutions
+		for (Evolution checkEvo : allEvos) {
+			if (checkEvo.type.usesLevel()) {
+				// bring down the level of this evo if it exceeds max level
+				if (checkEvo.extraInfo > maxLevel) {
+					checkEvo.extraInfo = maxLevel;
+					changedEvos.add(checkEvo);
+				}
+				// Now, seperately, if an intermediate level evo is too high,
+				// bring it down
+				for (Evolution otherEvo : allEvos) {
+					if (otherEvo.to == checkEvo.from
+							&& otherEvo.type.usesLevel()
+							&& otherEvo.extraInfo > maxIntermediateLevel) {
+						otherEvo.extraInfo = maxIntermediateLevel;
+						changedEvos.add(otherEvo);
+					}
+				}
+			}
+		}
+		// Log changes now that we're done (to avoid repeats)
+		log("--Condensed Level Evolutions--");
+		List<Pokemon> allPokes = this.getPokemon();
+		for (Evolution evol : changedEvos) {
+			log(String.format("%s now evolves into %s at minimum level %d",
+					allPokes.get(evol.from).name, allPokes.get(evol.to).name,
+					evol.extraInfo));
+		}
+		logBlankLine();
+
+		// write new evo list
+		this.setEvolutions(allEvos);
+	}
+
 	private Map<Integer, boolean[]> moveUpdates;
 
 	@Override
