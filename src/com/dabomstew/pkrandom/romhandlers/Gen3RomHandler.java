@@ -2264,106 +2264,84 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	@Override
 	public void removeTradeEvolutions(boolean changeMoveEvos) {
 		// no move evos, so no need to check for those
-		int baseOffset = romEntry.getValue("PokemonEvolutions");
 		log("--Removing Trade Evolutions--");
-		for (int i = 1; i <= 386; i++) {
-			int idx = pokeNumTo3GIndex(i);
-			int evoOffset = baseOffset + (idx - 1) * 0x28;
-			// Types:
-			// 1 0 Pokemon 0 (happiness any time)
-			// 2 0 Pokemon 0 (happiness day)
-			// 3 0 Pokemon 0 (happiness night)
-			// 4 LV Pokemon 0
-			// 5 0 Pokemon 0 (trade w/o item)
-			// 6 Item Pokemon 0 (trade w/ item)
-			// 7 Stone Pokemon 0
-			// 8 Level Pokemon 0 (Attack>Defense)
-			// 9 Level Pokemon 0 (Attack=Defense)
-			// 10 Level Pokemon 0 (Attack<Defense)
-			// 11 Level Pokemon 0 ((PV & 0xFFFF) % 10 < 5)
-			// 12 Level Pokemon 0 ((PV & 0xFFFF) % 10 >= 5)
-			// 13 Level Pokemon 0
-			// (split evolution level up, pokemon becomes this)
-			// 14 Level Pokemon 0
-			// (split evolution level up, pokemon splits to this)
-			// 15 Value Pokemon 0 (Level up w/ Beauty >= Value)
-			for (int j = 0; j < 5; j++) {
-				int method = readWord(evoOffset + j * 8);
-				int evolvingTo = poke3GIndexToNum(readWord(evoOffset + j * 8
-						+ 4));
-				// Not trades, but impossible without trading
-				if (method == 2 && romEntry.romType == RomType_FRLG) {
-					// happiness day change to Sun Stone
-					writeWord(evoOffset + j * 8, 7);
-					writeWord(evoOffset + j * 8 + 2, 93);
-					logEvoChangeStone(pokes[i].name, pokes[evolvingTo].name,
-							itemNames[93]);
-				}
-				if (method == 3 && romEntry.romType == RomType_FRLG) {
-					// happiness night change to Moon Stone
-					writeWord(evoOffset + j * 8, 7);
-					writeWord(evoOffset + j * 8 + 2, 94);
-					logEvoChangeStone(pokes[i].name, pokes[evolvingTo].name,
-							itemNames[94]);
-				}
-				if (method == 15 && romEntry.romType == RomType_FRLG) {
-					// beauty change to level 35
-					writeWord(evoOffset + j * 8, 4);
-					writeWord(evoOffset + j * 8 + 2, 35);
-					logEvoChangeLevel(pokes[i].name, pokes[evolvingTo].name, 35);
-				}
-				// Pure Trade
-				if (method == 5) {
-					// Haunter, Machoke, Kadabra, Graveler
-					// Make it into level 37, we're done.
-					writeWord(evoOffset + j * 8, 4);
-					writeWord(evoOffset + j * 8 + 2, 37);
-					logEvoChangeLevel(pokes[i].name, pokes[evolvingTo].name, 37);
-				}
-				// Trade w/ Held Item
-				if (method == 6) {
-					if (i == 61) {
-						// Poliwhirl: Lv 37
-						writeWord(evoOffset + j * 8, 4);
-						writeWord(evoOffset + j * 8 + 2, 37);
-						logEvoChangeLevel(pokes[i].name,
-								pokes[evolvingTo].name, 37);
-					} else if (i == 79) {
-						// Slowpoke: Water Stone
-						writeWord(evoOffset + j * 8, 7);
-						writeWord(evoOffset + j * 8 + 2, 97);
-						logEvoChangeStone(pokes[i].name,
-								pokes[evolvingTo].name, itemNames[97]);
-					} else if (i == 117) {
-						// Seadra: Lv 40
-						writeWord(evoOffset + j * 8, 4);
-						writeWord(evoOffset + j * 8 + 2, 40);
-						logEvoChangeLevel(pokes[i].name,
-								pokes[evolvingTo].name, 40);
-					} else if (i == 366 && evolvingTo == 367) {
-						// Clamperl -> Huntail: Lv30
-						writeWord(evoOffset + j * 8, 4);
-						writeWord(evoOffset + j * 8 + 2, 30);
-						logEvoChangeLevel(pokes[i].name,
-								pokes[evolvingTo].name, 30);
-					} else if (i == 366 && evolvingTo == 368) {
-						// Clamperl -> Gorebyss: Water Stone
-						writeWord(evoOffset + j * 8, 7);
-						writeWord(evoOffset + j * 8 + 2, 97);
-						logEvoChangeStone(pokes[i].name,
-								pokes[evolvingTo].name, itemNames[97]);
-					} else {
-						// Onix, Scyther or Porygon: Lv30
-						writeWord(evoOffset + j * 8, 4);
-						writeWord(evoOffset + j * 8 + 2, 30);
-						logEvoChangeLevel(pokes[i].name,
-								pokes[evolvingTo].name, 30);
-					}
+		List<Evolution> evos = this.getEvolutions();
+		for (Evolution evo : evos) {
+			// Not trades, but impossible without trading
+			if (evo.type == EvolutionType.HAPPINESS_DAY
+					&& romEntry.romType == RomType_FRLG) {
+				// happiness day change to Sun Stone
+				evo.type = EvolutionType.STONE;
+				evo.extraInfo = 93; // sun stone
+				logEvoChangeStone(pokes[evo.from].name, pokes[evo.to].name,
+						itemNames[93]);
+			}
+			if (evo.type == EvolutionType.HAPPINESS_NIGHT
+					&& romEntry.romType == RomType_FRLG) {
+				// happiness night change to Moon Stone
+				evo.type = EvolutionType.STONE;
+				evo.extraInfo = 94; // moon stone
+				logEvoChangeStone(pokes[evo.from].name, pokes[evo.to].name,
+						itemNames[94]);
+			}
+			if (evo.type == EvolutionType.LEVEL_HIGH_BEAUTY
+					&& romEntry.romType == RomType_FRLG) {
+				// beauty change to level 35
+				evo.type = EvolutionType.LEVEL;
+				evo.extraInfo = 35;
+				logEvoChangeLevel(pokes[evo.from].name, pokes[evo.to].name, 35);
+			}
+			// Pure Trade
+			if (evo.type == EvolutionType.TRADE) {
+				// Haunter, Machoke, Kadabra, Graveler
+				// Make it into level 37, we're done.
+				evo.type = EvolutionType.LEVEL;
+				evo.extraInfo = 37;
+				logEvoChangeLevel(pokes[evo.from].name, pokes[evo.to].name, 37);
+			}
+			// Trade w/ Held Item
+			if (evo.type == EvolutionType.TRADE_ITEM) {
+				if (evo.from == 61) {
+					// Poliwhirl: Lv 37
+					evo.type = EvolutionType.LEVEL;
+					evo.extraInfo = 37;
+					logEvoChangeLevel(pokes[evo.from].name, pokes[evo.to].name,
+							37);
+				} else if (evo.from == 79) {
+					// Slowpoke: Water Stone
+					evo.type = EvolutionType.STONE;
+					evo.extraInfo = 97; // water stone
+					logEvoChangeStone(pokes[evo.from].name, pokes[evo.to].name,
+							itemNames[97]);
+				} else if (evo.from == 117) {
+					// Seadra: Lv 40
+					evo.type = EvolutionType.LEVEL;
+					evo.extraInfo = 40;
+					logEvoChangeLevel(pokes[evo.from].name, pokes[evo.to].name,
+							40);
+				} else if (evo.from == 366 && evo.to == 367) {
+					// Clamperl -> Huntail: Lv30
+					evo.type = EvolutionType.LEVEL;
+					evo.extraInfo = 30;
+					logEvoChangeLevel(pokes[evo.from].name, pokes[evo.to].name,
+							30);
+				} else if (evo.from == 366 && evo.to == 368) {
+					// Clamperl -> Gorebyss: Water Stone
+					evo.type = EvolutionType.STONE;
+					evo.extraInfo = 97; // water stone
+					logEvoChangeStone(pokes[evo.from].name, pokes[evo.to].name,
+							itemNames[97]);
+				} else {
+					// Onix, Scyther or Porygon: Lv30
+					evo.type = EvolutionType.LEVEL;
+					evo.extraInfo = 30;
+					logEvoChangeLevel(pokes[evo.from].name, pokes[evo.to].name,
+							30);
 				}
 			}
 		}
 		logBlankLine();
-
+		this.setEvolutions(evos);
 	}
 
 	@Override
@@ -2855,26 +2833,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	@Override
 	public void removeEvosForPokemonPool() {
 		List<Pokemon> pokemonIncluded = this.mainPokemonList;
-		int baseOffset = romEntry.getValue("PokemonEvolutions");
-		for (int i = 1; i <= 386; i++) {
-			boolean included = pokemonIncluded.contains(pokes[i]);
-			int idx = pokeNumTo3GIndex(i);
-			int evoOffset = baseOffset + (idx - 1) * 0x28;
-			for (int j = 0; j < 5; j++) {
-				int method = readWord(evoOffset + j * 8);
-				int evolvingTo = readWord(evoOffset + j * 8 + 4);
-				if (method >= 1 && method <= 15 && evolvingTo >= 1
-						&& evolvingTo <= 411) {
-					Pokemon evolvingInto = pokes[poke3GIndexToNum(evolvingTo)];
-					if (!included || !pokemonIncluded.contains(evolvingInto)) {
-						// remove this evolution
-						writeWord(evoOffset + j * 8, 0);
-						writeWord(evoOffset + j * 8 + 2, 0);
-						writeWord(evoOffset + j * 8 + 4, 0);
-					}
-				}
+		List<Evolution> currentEvos = this.getEvolutions();
+		List<Evolution> keepEvos = new ArrayList<Evolution>();
+		for (Evolution evol : currentEvos) {
+			if (pokemonIncluded.contains(pokes[evol.from])
+					&& pokemonIncluded.contains(pokes[evol.to])) {
+				keepEvos.add(evol);
 			}
 		}
+		this.setEvolutions(keepEvos);
 	}
 
 	@Override

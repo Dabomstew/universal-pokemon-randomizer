@@ -2103,7 +2103,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 		}
 		return evos;
 	}
-	
+
 	@Override
 	public void setEvolutions(List<Evolution> evos) {
 		try {
@@ -2139,92 +2139,78 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
 	@Override
 	public void removeTradeEvolutions(boolean changeMoveEvos) {
-		// Read NARC
-		try {
-			NARCContents evoNARC = readNARC(romEntry
-					.getString("PokemonEvolutions"));
-			Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
-			log("--Removing Trade Evolutions--");
-			for (int i = 1; i <= 649; i++) {
-				byte[] evoEntry = evoNARC.files.get(i);
-				for (int evo = 0; evo < 7; evo++) {
-					int evoType = readWord(evoEntry, evo * 6);
-					int evolvingTo = readWord(evoEntry, evo * 6 + 4);
-					if (changeMoveEvos && evoType == 21) {
-						// read move
-						int move = readWord(evoEntry, evo * 6 + 2);
-						int levelLearntAt = 1;
-						for (MoveLearnt ml : movesets.get(pokes[i])) {
-							if (ml.move == move) {
-								levelLearntAt = ml.level;
-								break;
-							}
-						}
-						if (levelLearntAt == 1) {
-							// override for piloswine
-							levelLearntAt = 45;
-						}
-						// change to pure level evo
-						writeWord(evoEntry, evo * 6, 4);
-						writeWord(evoEntry, evo * 6 + 2, levelLearntAt);
-						logEvoChangeLevel(pokes[i].name,
-								pokes[evolvingTo].name, levelLearntAt);
-					}
-					if (evoType == 5) {
-						// Replace w/ level 37
-						writeWord(evoEntry, evo * 6, 4);
-						writeWord(evoEntry, evo * 6 + 2, 37);
-						logEvoChangeLevel(pokes[i].name,
-								pokes[evolvingTo].name, 37);
-					} else if (evoType == 6) {
-						// Get the current item & evolution
-						int item = readWord(evoEntry, evo * 6 + 2);
-
-						if (i == 79) {
-							// Slowpoke is awkward - he already has a level evo
-							// So we can't do Level up w/ Held Item for him
-							// Put Water Stone instead
-							writeWord(evoEntry, evo * 6, 8);
-							writeWord(evoEntry, evo * 6 + 2, 84);
-							logEvoChangeStone(pokes[i].name,
-									pokes[evolvingTo].name, itemNames.get(84));
-						} else {
-							logEvoChangeLevelWithItem(pokes[i].name,
-									pokes[evolvingTo].name, itemNames.get(item));
-							// Replace, for this entry, w/
-							// Level up w/ Held Item at Day
-							writeWord(evoEntry, evo * 6, 19);
-							// Now look for a free slot to put
-							// Level up w/ Held Item at Night
-							for (int evo2 = evo + 1; evo2 < 7; evo2++) {
-								if (readWord(evoEntry, evo2 * 6) == 0) {
-									// Bingo, blank entry
-									writeWord(evoEntry, evo2 * 6, 20);
-									writeWord(evoEntry, evo2 * 6 + 2, item);
-									writeWord(evoEntry, evo2 * 6 + 4,
-											evolvingTo);
-									break;
-								}
-							}
-						}
-					} else if (evoType == 7) {
-						// This is the karrablast <-> shelmet trade
-						// Replace it with Level up w/ Other Species in Party
-						// (22)
-						// Based on what species we're currently dealing with
-						writeWord(evoEntry, evo * 6, 22);
-						writeWord(evoEntry, evo * 6 + 2, (i == 588 ? 616 : 588));
-						logEvoChangeLevelWithPkmn(pokes[i].name,
-								pokes[evolvingTo].name, pokes[(i == 588 ? 616
-										: 588)].name);
+		Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+		log("--Removing Trade Evolutions--");
+		List<Evolution> evos = this.getEvolutions();
+		List<Evolution> extraEvolutions = new ArrayList<Evolution>();
+		for (Evolution evo : evos) {
+			if (changeMoveEvos && evo.type == EvolutionType.LEVEL_WITH_MOVE) {
+				// read move
+				int move = evo.extraInfo;
+				int levelLearntAt = 1;
+				for (MoveLearnt ml : movesets.get(pokes[evo.from])) {
+					if (ml.move == move) {
+						levelLearntAt = ml.level;
+						break;
 					}
 				}
+				if (levelLearntAt == 1) {
+					// override for piloswine
+					levelLearntAt = 45;
+				}
+				// change to pure level evo
+				evo.type = EvolutionType.LEVEL;
+				evo.extraInfo = levelLearntAt;
+				logEvoChangeLevel(pokes[evo.from].name, pokes[evo.to].name,
+						levelLearntAt);
 			}
-			writeNARC(romEntry.getString("PokemonEvolutions"), evoNARC);
-			logBlankLine();
-		} catch (IOException e) {
-			// can't do anything
+			// Pure Trade
+			if (evo.type == EvolutionType.TRADE) {
+				// Replace w/ level 37
+				evo.type = EvolutionType.LEVEL;
+				evo.extraInfo = 37;
+				logEvoChangeLevel(pokes[evo.from].name, pokes[evo.to].name, 37);
+			}
+			// Trade w/ Item
+			if (evo.type == EvolutionType.TRADE_ITEM) {
+				// Get the current item & evolution
+				int item = evo.extraInfo;
+				if (evo.from == 79) {
+					// Slowpoke is awkward - he already has a level evo
+					// So we can't do Level up w/ Held Item for him
+					// Put Water Stone instead
+					evo.type = EvolutionType.STONE;
+					evo.extraInfo = 84; // water stone
+					logEvoChangeStone(pokes[evo.from].name, pokes[evo.to].name,
+							itemNames.get(84));
+				} else {
+					logEvoChangeLevelWithItem(pokes[evo.from].name,
+							pokes[evo.to].name, itemNames.get(item));
+					// Replace, for this entry, w/
+					// Level up w/ Held Item at Day
+					evo.type = EvolutionType.LEVEL_ITEM_DAY;
+					// now add an extra evo for
+					// Level up w/ Held Item at Night
+					Evolution extraEntry = new Evolution(evo.from, evo.to,
+							true, EvolutionType.LEVEL_ITEM_NIGHT, item);
+					extraEvolutions.add(extraEntry);
+				}
+			}
+			if (evo.type == EvolutionType.TRADE_SPECIAL) {
+				// This is the karrablast <-> shelmet trade
+				// Replace it with Level up w/ Other Species in Party
+				// (22)
+				// Based on what species we're currently dealing with
+				evo.type = EvolutionType.LEVEL_WITH_OTHER;
+				evo.extraInfo = (evo.from == 588 ? 616 : 588);
+				logEvoChangeLevelWithPkmn(pokes[evo.from].name,
+						pokes[evo.to].name,
+						pokes[(evo.from == 588 ? 616 : 588)].name);
+			}
 		}
+		evos.addAll(extraEvolutions);
+		this.setEvolutions(evos);
+		logBlankLine();
 
 	}
 
@@ -2676,42 +2662,23 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 		// slightly more complicated than gen2/3
 		// we have to update a "baby table" too
 		List<Pokemon> pokemonIncluded = this.mainPokemonList;
-		List<Evolution> evolsIncluded = new ArrayList<Evolution>();
-		try {
-			NARCContents evoNARC = readNARC(romEntry
-					.getString("PokemonEvolutions"));
-			NARCContents babyNARC = readNARC(romEntry.getString("BabyPokemon"));
-			for (int i = 1; i <= 649; i++) {
-				boolean included = pokemonIncluded.contains(pokes[i]);
-				byte[] evoEntry = evoNARC.files.get(i);
-				for (int evo = 0; evo < 7; evo++) {
-					int method = readWord(evoEntry, evo * 6);
-					int species = readWord(evoEntry, evo * 6 + 4);
-					if (method >= 1 && method <= 27 && species >= 1) {
-						Pokemon evolvingInto = pokes[species];
-						if (!included
-								|| !pokemonIncluded.contains(evolvingInto)) {
-							// remove this evolution
-							writeWord(evoEntry, evo * 6, 0);
-							writeWord(evoEntry, evo * 6 + 2, 0);
-							writeWord(evoEntry, evo * 6 + 4, 0);
-						} else {
-							EvolutionType et = EvolutionType.fromIndex(5,
-									method);
-							int extraInfo = readWord(evoEntry, evo * 6 + 2);
-							Evolution evol = new Evolution(i, species, true,
-									et, extraInfo);
-							evolsIncluded.add(evol);
-						}
-					}
-				}
+		List<Evolution> currentEvos = this.getEvolutions();
+		List<Evolution> keepEvos = new ArrayList<Evolution>();
+		for (Evolution evol : currentEvos) {
+			if (pokemonIncluded.contains(pokes[evol.from])
+					&& pokemonIncluded.contains(pokes[evol.to])) {
+				keepEvos.add(evol);
 			}
+		}
+		this.setEvolutions(keepEvos);
+		try {
+			byte[] babyPokes = readFile(romEntry.getString("BabyPokemon"));
 			// baby pokemon
-			for (int i = 1; i <= 493; i++) {
+			for (int i = 1; i <= 649; i++) {
 				int oldBaby = i;
 				while (true) {
 					int currentBaby = oldBaby;
-					for (Evolution evol : evolsIncluded) {
+					for (Evolution evol : keepEvos) {
 						if (evol.to == oldBaby) {
 							currentBaby = evol.from;
 							break;
@@ -2722,11 +2689,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 					}
 					oldBaby = currentBaby;
 				}
-				writeWord(babyNARC.files.get(i), 0, oldBaby);
+				writeWord(babyPokes, i * 2, oldBaby);
 			}
 			// finish up
-			writeNARC(romEntry.getString("PokemonEvolutions"), evoNARC);
-			writeNARC(romEntry.getString("BabyPokemon"), babyNARC);
+			writeFile(romEntry.getString("BabyPokemon"), babyPokes);
 		} catch (IOException e) {
 			// can't do anything
 		}

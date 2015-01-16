@@ -1821,7 +1821,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 				}
 			}
 		}
-		writeEvosAndMovesLearnt(evos, null);
+		this.setEvolutions(evos);
 		logBlankLine();
 
 	}
@@ -2400,7 +2400,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 				keepEvos.add(evol);
 			}
 		}
-		writeEvosAndMovesLearnt(keepEvos, null);
+		this.setEvolutions(keepEvos);
 	}
 
 	private void writeEvosAndMovesLearnt(List<Evolution> evos,

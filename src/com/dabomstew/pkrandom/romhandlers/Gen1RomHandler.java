@@ -1838,37 +1838,19 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 
 	@Override
 	public void removeTradeEvolutions(boolean changeMoveEvos) {
-		// Gen 1: evolution data is right before moveset data
-		// So use those pointers
-		// no move evos, so no need to check for those
-		int pointersOffset = romEntry.getValue("PokemonMovesetsTableOffset");
-		int pkmnCount = romEntry.getValue("InternalPokemonCount");
+		// Gen 1: only regular trade evos
+		// change them all to evolve at level 37
+		List<Evolution> evos = this.getEvolutions();
 		log("--Removing Trade Evolutions--");
-		for (int i = 1; i <= pkmnCount; i++) {
-			int pointer = readWord(pointersOffset + (i - 1) * 2);
-			int realPointer = calculateOffset(bankOf(pointersOffset), pointer);
-			if (pokeRBYToNumTable[i] != 0) {
-				// Evolution data
-				// All the 4 trade evos (Abra, Geodude, Gastly, Machop)
-				// evolve at around 25
-				// So make this "3rd stage" to 37
-				while (rom[realPointer] != 0) {
-					if (rom[realPointer] == 1) {
-						realPointer += 3;
-					} else if (rom[realPointer] == 2) {
-						realPointer += 4;
-					} else if (rom[realPointer] == 3) {
-						int otherPoke = pokeRBYToNumTable[rom[realPointer + 2] & 0xFF];
-						// Trade evo
-						rom[realPointer] = 1;
-						rom[realPointer + 1] = 37;
-						logEvoChangeLevel(pokes[pokeRBYToNumTable[i]].name,
-								pokes[otherPoke].name, 37);
-						realPointer += 3;
-					}
-				}
+		for(Evolution evo : evos) {
+			if(evo.type == EvolutionType.TRADE) {
+				// change
+				evo.type = EvolutionType.LEVEL;
+				evo.extraInfo = 37;
+				logEvoChangeLevel(pokes[evo.from].name, pokes[evo.to].name, 37);
 			}
 		}
+		this.setEvolutions(evos);
 		logBlankLine();
 	}
 
