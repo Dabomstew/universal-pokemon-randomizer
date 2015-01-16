@@ -2522,6 +2522,10 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		// 3) PokemonMovesetsDataSize is from the start of actual data to
 		// the start of engine/battle/e_2.asm in pokered (aka code we can't
 		// overwrite)
+		// it appears that in yellow, this code is moved
+		// so we can write the evos/movesets in one continuous block
+		// until the end of the bank.
+		// so for yellow, extraspace is disabled.
 		// specify null to either argument to copy old values
 		int pokeStatsOffset = romEntry.getValue("PokemonStatsOffset");
 		int movesEvosStart = romEntry.getValue("PokemonMovesetsTableOffset");
