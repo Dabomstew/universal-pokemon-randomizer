@@ -2672,7 +2672,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 		}
 		this.setEvolutions(keepEvos);
 		try {
-			byte[] babyPokes = readFile(romEntry.getString("BabyPokemon"));
+			NARCContents babyNARC = readNARC(romEntry.getString("BabyPokemon"));
 			// baby pokemon
 			for (int i = 1; i <= 649; i++) {
 				int oldBaby = i;
@@ -2689,10 +2689,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 					}
 					oldBaby = currentBaby;
 				}
-				writeWord(babyPokes, i * 2, oldBaby);
+				writeWord(babyNARC.files.get(i), 0, oldBaby);
 			}
 			// finish up
-			writeFile(romEntry.getString("BabyPokemon"), babyPokes);
+			writeNARC(romEntry.getString("BabyPokemon"), babyNARC);
 		} catch (IOException e) {
 			// can't do anything
 		}
