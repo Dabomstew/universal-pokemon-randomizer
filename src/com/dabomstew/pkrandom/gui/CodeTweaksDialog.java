@@ -43,6 +43,8 @@ public class CodeTweaksDialog extends javax.swing.JDialog {
 		nerfXAccCB.setVisible((available & CodeTweaks.NERF_X_ACCURACY) > 0);
 		critRateFixCB.setVisible((available & CodeTweaks.FIX_CRIT_RATE) > 0);
 		fastestTextCB.setVisible((available & CodeTweaks.FASTEST_TEXT) > 0);
+		runningShoesCB
+				.setVisible((available & CodeTweaks.RUNNING_SHOES_INDOORS) > 0);
 	}
 
 	private void restoreFrom(int current) {
@@ -50,6 +52,8 @@ public class CodeTweaksDialog extends javax.swing.JDialog {
 		nerfXAccCB.setSelected((current & CodeTweaks.NERF_X_ACCURACY) > 0);
 		critRateFixCB.setSelected((current & CodeTweaks.FIX_CRIT_RATE) > 0);
 		fastestTextCB.setSelected((current & CodeTweaks.FASTEST_TEXT) > 0);
+		runningShoesCB
+				.setSelected((current & CodeTweaks.RUNNING_SHOES_INDOORS) > 0);
 	}
 
 	public boolean pressedOK() {
@@ -69,6 +73,9 @@ public class CodeTweaksDialog extends javax.swing.JDialog {
 		}
 		if (fastestTextCB.isSelected()) {
 			choice |= CodeTweaks.FASTEST_TEXT;
+		}
+		if (runningShoesCB.isSelected()) {
+			choice |= CodeTweaks.RUNNING_SHOES_INDOORS;
 		}
 		return choice;
 	}
@@ -90,6 +97,7 @@ public class CodeTweaksDialog extends javax.swing.JDialog {
 		okButton = new javax.swing.JButton();
 		cancelButton = new javax.swing.JButton();
 		fastestTextCB = new javax.swing.JCheckBox();
+		runningShoesCB = new javax.swing.JCheckBox();
 
 		setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 		java.util.ResourceBundle bundle = java.util.ResourceBundle
@@ -137,6 +145,11 @@ public class CodeTweaksDialog extends javax.swing.JDialog {
 		fastestTextCB.setToolTipText(bundle
 				.getString("CodeTweaksDialog.fastestTextCB.toolTipText")); // NOI18N
 
+		runningShoesCB.setText(bundle
+				.getString("CodeTweaksDialog.runningShoesCB.text")); // NOI18N
+		runningShoesCB.setToolTipText(bundle
+				.getString("CodeTweaksDialog.runningShoesCB.toolTipText")); // NOI18N
+
 		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(
 				getContentPane());
 		getContentPane().setLayout(layout);
@@ -166,6 +179,8 @@ public class CodeTweaksDialog extends javax.swing.JDialog {
 																.addGroup(
 																		layout.createParallelGroup(
 																				javax.swing.GroupLayout.Alignment.LEADING)
+																				.addComponent(
+																						runningShoesCB)
 																				.addComponent(
 																						fastestTextCB)
 																				.addComponent(
@@ -198,6 +213,9 @@ public class CodeTweaksDialog extends javax.swing.JDialog {
 								.addPreferredGap(
 										javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
 								.addComponent(fastestTextCB)
+								.addPreferredGap(
+										javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+								.addComponent(runningShoesCB)
 								.addPreferredGap(
 										javax.swing.LayoutStyle.ComponentPlacement.RELATED,
 										16, Short.MAX_VALUE)
@@ -233,5 +251,6 @@ public class CodeTweaksDialog extends javax.swing.JDialog {
 	private javax.swing.JLabel headerLabel;
 	private javax.swing.JCheckBox nerfXAccCB;
 	private javax.swing.JButton okButton;
+	private javax.swing.JCheckBox runningShoesCB;
 	// End of variables declaration//GEN-END:variables
 }
