@@ -1527,6 +1527,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
 						&& (currentCodeTweaks & CodeTweaks.FASTEST_TEXT) > 0) {
 					romHandler.applyFastestTextPatch();
 				}
+
+				if ((ctavailable & CodeTweaks.RUNNING_SHOES_INDOORS) > 0
+						&& (currentCodeTweaks & CodeTweaks.RUNNING_SHOES_INDOORS) > 0) {
+					romHandler.applyRunningShoesIndoorsPatch();
+				}
 			}
 
 			// Hollows?
