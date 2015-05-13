@@ -415,5 +415,7 @@ public interface RomHandler {
 	public void applyCritRatePatch();
 	
 	public void applyFastestTextPatch();
+	
+	public void applyRunningShoesIndoorsPatch();
 
 }

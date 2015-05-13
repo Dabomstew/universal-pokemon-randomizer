@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import com.dabomstew.pkrandom.CodeTweaks;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.RomFunctions;
@@ -2872,6 +2873,19 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			return Arrays.asList(15);
 		} else {
 			return Arrays.asList(249);
+		}
+	}
+
+	@Override
+	public int codeTweaksAvailable() {
+		return (romEntry.getValue("RunIndoorsTweakOffset") > 0) ? CodeTweaks.RUNNING_SHOES_INDOORS
+				: 0;
+	}
+
+	@Override
+	public void applyRunningShoesIndoorsPatch() {
+		if (romEntry.getValue("RunIndoorsTweakOffset") != 0) {
+			rom[romEntry.getValue("RunIndoorsTweakOffset")] = 0x00;
 		}
 	}
 }

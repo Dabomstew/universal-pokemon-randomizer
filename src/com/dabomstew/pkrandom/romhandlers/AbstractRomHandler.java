@@ -2968,6 +2968,12 @@ public abstract class AbstractRomHandler implements RomHandler {
 		// default: do nothing
 
 	}
+	
+	@Override
+	public void applyRunningShoesIndoorsPatch() {
+		// default: do nothing
+
+	}
 
 	@Override
 	public boolean hasHiddenHollowPokemon() {
