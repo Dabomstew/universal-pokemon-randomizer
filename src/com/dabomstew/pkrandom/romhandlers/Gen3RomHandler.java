@@ -150,7 +150,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	}
 
 	private static List<RomEntry> roms;
-	private static ItemList allowedItems;
+	private static ItemList allowedItems, nonBadItems;
 
 	private static final Type[] typeTable = constructTypeTable();
 
@@ -383,6 +383,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		allowedItems.banRange(339, 8);
 		// TMs
 		allowedItems.tmRange(289, 50);
+
+		// non-bad items
+		// ban specific pokemon hold items, berries, apricorns, mail
+		nonBadItems = allowedItems.copy();
+		nonBadItems.banSingles(0xCA); // light ball
+		nonBadItems.banRange(0x79, 12); // mail
+		nonBadItems.banRange(0x85, 43); // berries
+		nonBadItems.banRange(0xDE, 4); // pokemon specific
+
 	}
 
 	private static byte typeToByte(Type type) {
@@ -2636,6 +2645,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	@Override
 	public ItemList getAllowedItems() {
 		return allowedItems;
+	}
+	
+	@Override
+	public ItemList getNonBadItems() {
+		return nonBadItems;
 	}
 
 	private void loadItemNames() {

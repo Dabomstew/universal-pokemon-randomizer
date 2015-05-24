@@ -162,7 +162,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 	}
 
 	private static List<RomEntry> roms;
-	private static ItemList allowedItems;
+	private static ItemList allowedItems, nonBadItems;
 
 	static {
 		loadROMInfo();
@@ -331,6 +331,17 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 		allowedItems.banRange(618, 3);
 		// Battle Launcher exclusives
 		allowedItems.banRange(592, 24);
+
+		// non-bad items
+		// ban specific pokemon hold items, berries, apricorns, mail
+		nonBadItems = allowedItems.copy();
+
+		nonBadItems.banSingles(0x6F, 0x70, 0xEC);
+		nonBadItems.banRange(0x5F, 4); // mulch
+		nonBadItems.banRange(0x87, 2); // orbs
+		nonBadItems.banRange(0x89, 12); // mails
+		nonBadItems.banRange(0x95, 64); // berries DansGame
+		nonBadItems.banRange(0x100, 4); // pokemon specific
 	}
 
 	// This ROM
@@ -2325,6 +2336,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 	@Override
 	public ItemList getAllowedItems() {
 		return allowedItems;
+	}
+	
+	@Override
+	public ItemList getNonBadItems() {
+		return nonBadItems;
 	}
 
 	@Override

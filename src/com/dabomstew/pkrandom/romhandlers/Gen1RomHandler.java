@@ -2099,6 +2099,12 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 	public ItemList getAllowedItems() {
 		return allowedItems;
 	}
+	
+	@Override
+	public ItemList getNonBadItems() {
+		// Gen 1 has no bad items Kappa
+		return allowedItems;
+	}
 
 	private void loadItemNames() {
 		itemNames = new String[256];

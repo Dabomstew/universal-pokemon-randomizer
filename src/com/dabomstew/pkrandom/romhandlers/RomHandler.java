@@ -301,8 +301,10 @@ public interface RomHandler {
 	// Items
 
 	public ItemList getAllowedItems();
+	
+	public ItemList getNonBadItems();
 
-	public void randomizeWildHeldItems();
+	public void randomizeWildHeldItems(boolean banBadItems);
 
 	public String[] getItemNames();
 
@@ -310,7 +312,7 @@ public interface RomHandler {
 
 	public void setStarterHeldItems(List<Integer> items);
 
-	public void randomizeStarterHeldItems();
+	public void randomizeStarterHeldItems(boolean banBadItems);
 
 	// Field Items
 
@@ -332,7 +334,7 @@ public interface RomHandler {
 
 	public void shuffleFieldItems();
 
-	public void randomizeFieldItems();
+	public void randomizeFieldItems(boolean banBadItems);
 
 	// Trades
 

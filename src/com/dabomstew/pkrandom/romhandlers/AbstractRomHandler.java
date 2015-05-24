@@ -1605,9 +1605,10 @@ public abstract class AbstractRomHandler implements RomHandler {
 	}
 
 	@Override
-	public void randomizeWildHeldItems() {
+	public void randomizeWildHeldItems(boolean banBadItems) {
 		List<Pokemon> pokemon = allPokemonWithoutNull();
-		ItemList possibleItems = this.getAllowedItems();
+		ItemList possibleItems = banBadItems ? this.getNonBadItems() : this
+				.getAllowedItems();
 		for (Pokemon pk : pokemon) {
 			if (pk.guaranteedHeldItem == -1 && pk.commonHeldItem == -1
 					&& pk.rareHeldItem == -1 && pk.darkGrassHeldItem == -1) {
@@ -1704,10 +1705,11 @@ public abstract class AbstractRomHandler implements RomHandler {
 	}
 
 	@Override
-	public void randomizeStarterHeldItems() {
+	public void randomizeStarterHeldItems(boolean banBadItems) {
 		List<Integer> oldHeldItems = this.getStarterHeldItems();
 		List<Integer> newHeldItems = new ArrayList<Integer>();
-		ItemList possibleItems = this.getAllowedItems();
+		ItemList possibleItems = banBadItems ? this.getNonBadItems() : this
+				.getAllowedItems();
 		for (int i = 0; i < oldHeldItems.size(); i++) {
 			newHeldItems.add(possibleItems.randomItem());
 		}
@@ -1727,8 +1729,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 	}
 
 	@Override
-	public void randomizeFieldItems() {
-		ItemList possibleItems = this.getAllowedItems();
+	public void randomizeFieldItems(boolean banBadItems) {
+		ItemList possibleItems = banBadItems ? this.getNonBadItems() : this
+				.getAllowedItems();
 		List<Integer> currentItems = this.getRegularFieldItems();
 		List<Integer> currentTMs = this.getCurrentFieldTMs();
 		List<Integer> requiredTMs = this.getRequiredFieldTMs();
@@ -2962,13 +2965,13 @@ public abstract class AbstractRomHandler implements RomHandler {
 		// default: do nothing
 
 	}
-	
+
 	@Override
 	public void applyFastestTextPatch() {
 		// default: do nothing
 
 	}
-	
+
 	@Override
 	public void applyRunningShoesIndoorsPatch() {
 		// default: do nothing

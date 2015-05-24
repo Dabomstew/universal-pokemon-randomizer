@@ -70,5 +70,12 @@ public class ItemList {
 		}
 		return chosen;
 	}
+	
+	public ItemList copy() {
+		ItemList other = new ItemList(items.length - 1);
+		System.arraycopy(items, 0, other.items, 0, items.length);
+		System.arraycopy(tms, 0, other.tms, 0, tms.length);
+		return other;
+	}
 
 }
