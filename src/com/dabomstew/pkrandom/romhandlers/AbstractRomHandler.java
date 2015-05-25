@@ -182,8 +182,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 			if ((e.from.number >= first_min && e.from.number <= first_max
 					&& e.to.number >= second_min && e.to.number <= second_max)) {
 				potential = e.to;
-			} else if ((e.from.number >= second_min && e.from.number <= second_max
-					&& e.to.number >= first_min && e.to.number <= first_max)) {
+			} else if ((e.from.number >= second_min
+					&& e.from.number <= second_max && e.to.number >= first_min && e.to.number <= first_max)) {
 				potential = e.from;
 			}
 			if (potential != null && !pokemonPool.contains(potential)) {
@@ -479,8 +479,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 			List<Evolution> allEvos = this.getEvolutions();
 			Map<Pokemon, Pokemon> reverseKeepPokemon = new TreeMap<Pokemon, Pokemon>();
 			for (Evolution e : allEvos) {
-				reverseKeepPokemon
-						.put(e.to, e.from);
+				reverseKeepPokemon.put(e.to, e.from);
 			}
 			remainingPokes.retainAll(reverseKeepPokemon.values());
 			// All pokemon with evolutions are left
@@ -1954,8 +1953,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 		log("--Condensed Level Evolutions--");
 		for (Evolution evol : changedEvos) {
 			log(String.format("%s now evolves into %s at minimum level %d",
-					evol.from.name, evol.to.name,
-					evol.extraInfo));
+					evol.from.name, evol.to.name, evol.extraInfo));
 		}
 		logBlankLine();
 
@@ -2730,13 +2728,31 @@ public abstract class AbstractRomHandler implements RomHandler {
 		// This method works ASSUMING a pokemon has no weird split evolutions
 		// with different levels on each side
 		// Which is true for every pokemon so far.
+		Pokemon[] pokeBuffer = new Pokemon[20];
 		List<Evolution> evos = this.getEvolutions();
+		return innerTimesEvolves(evos, pk, pokeBuffer, 0);
+	}
+
+	private int innerTimesEvolves(List<Evolution> evos, Pokemon currPoke,
+			Pokemon[] seenPokes, int seenPokesIndex) {
+		seenPokes[seenPokesIndex++] = currPoke;
+		int currEvos = 0;
 		for (Evolution e : evos) {
-			if (e.from == pk) {
-				return timesEvolves(e.to) + 1;
+			if (e.from == currPoke) {
+				boolean valid = true;
+				for (int i = 0; i < seenPokesIndex; i++) {
+					if (seenPokes[i] == e.to) {
+						valid = false;
+						break;
+					}
+				}
+				if (valid) {
+					currEvos = Math.max(currEvos, this.innerTimesEvolves(evos,
+							e.to, seenPokes, seenPokesIndex));
+				}
 			}
 		}
-		return 0;
+		return currEvos;
 	}
 
 	private Pokemon firstEvolution(Pokemon pk) {
