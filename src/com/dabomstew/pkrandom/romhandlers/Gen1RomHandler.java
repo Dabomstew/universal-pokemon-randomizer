@@ -1812,8 +1812,8 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 					int otherPoke = pokeRBYToNumTable[rom[realPointer + 2
 							+ (type == EvolutionType.STONE ? 1 : 0)] & 0xFF];
 					int extraInfo = rom[realPointer + 1] & 0xFF;
-					Evolution evo = new Evolution(thisPoke, otherPoke, true,
-							type, extraInfo);
+					Evolution evo = new Evolution(pokes[thisPoke],
+							pokes[otherPoke], true, type, extraInfo);
 					if (!evos.contains(evo)) {
 						evos.add(evo);
 						evosForThisPoke.add(evo);
@@ -1847,7 +1847,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 				// change
 				evo.type = EvolutionType.LEVEL;
 				evo.extraInfo = 37;
-				logEvoChangeLevel(pokes[evo.from].name, pokes[evo.to].name, 37);
+				logEvoChangeLevel(evo.from.name, evo.to.name, 37);
 			}
 		}
 		this.setEvolutions(evos);
@@ -2099,7 +2099,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 	public ItemList getAllowedItems() {
 		return allowedItems;
 	}
-	
+
 	@Override
 	public ItemList getNonBadItems() {
 		// Gen 1 has no bad items Kappa
@@ -2581,7 +2581,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 				} else {
 					for (Evolution evo : evos) {
 						// write evos for this poke
-						if (evo.from == pokeNum) {
+						if (evo.from == pkmn) {
 							dataStream.write(evo.type.toIndex(1));
 							if (evo.type == EvolutionType.LEVEL) {
 								dataStream.write(evo.extraInfo); // min lvl
@@ -2591,7 +2591,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 							} else if (evo.type == EvolutionType.TRADE) {
 								dataStream.write(1); // minimum level
 							}
-							int pokeIndexTo = pokeNumToRBYTable[evo.to];
+							int pokeIndexTo = pokeNumToRBYTable[evo.to.number];
 							dataStream.write(pokeIndexTo); // species
 						}
 					}

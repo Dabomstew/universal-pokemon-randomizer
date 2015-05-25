@@ -1772,8 +1772,8 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 				} else {
 					extraInfo = rom[realPointer + 1] & 0xFF;
 				}
-				Evolution evo = new Evolution(thisPoke, otherPoke, true, type,
-						extraInfo);
+				Evolution evo = new Evolution(pokes[thisPoke],
+						pokes[otherPoke], true, type, extraInfo);
 				if (!evos.contains(evo)) {
 					evos.add(evo);
 					evosForThisPoke.add(evo);
@@ -1804,32 +1804,30 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 			if (evol.type == EvolutionType.TRADE
 					|| evol.type == EvolutionType.TRADE_ITEM) {
 				// change
-				if (evol.from == 79) {
+				if (evol.from.number == 79) {
 					// Slowpoke: Make water stone => Slowking
 					evol.type = EvolutionType.STONE;
 					evol.extraInfo = 24; // water stone
-					logEvoChangeStone(pokes[evol.from].name,
-							pokes[evol.to].name, itemNames[24]);
-				} else if (evol.from == 117) {
+					logEvoChangeStone(evol.from.name, evol.to.name,
+							itemNames[24]);
+				} else if (evol.from.number == 117) {
 					// Seadra: level 40
 					evol.type = EvolutionType.LEVEL;
 					evol.extraInfo = 40; // level
-					logEvoChangeLevel(pokes[evol.from].name,
-							pokes[evol.to].name, 40);
-				} else if (evol.from == 61 || evol.type == EvolutionType.TRADE) {
+					logEvoChangeLevel(evol.from.name, evol.to.name, 40);
+				} else if (evol.from.number == 61
+						|| evol.type == EvolutionType.TRADE) {
 					// Poliwhirl or any of the original 4 trade evos
 					// Level 37
 					evol.type = EvolutionType.LEVEL;
 					evol.extraInfo = 37; // level
-					logEvoChangeLevel(pokes[evol.from].name,
-							pokes[evol.to].name, 37);
+					logEvoChangeLevel(evol.from.name, evol.to.name, 37);
 				} else {
 					// A new trade evo of a single stage Pokemon
 					// level 30
 					evol.type = EvolutionType.LEVEL;
 					evol.extraInfo = 30; // level
-					logEvoChangeLevel(pokes[evol.from].name,
-							pokes[evol.to].name, 30);
+					logEvoChangeLevel(evol.from.name, evol.to.name, 30);
 				}
 			}
 		}
@@ -2422,8 +2420,8 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 		List<Evolution> currentEvos = this.getEvolutions();
 		List<Evolution> keepEvos = new ArrayList<Evolution>();
 		for (Evolution evol : currentEvos) {
-			if (pokemonIncluded.contains(pokes[evol.from])
-					&& pokemonIncluded.contains(pokes[evol.to])) {
+			if (pokemonIncluded.contains(evol.from)
+					&& pokemonIncluded.contains(evol.to)) {
 				keepEvos.add(evol);
 			}
 		}
@@ -2465,7 +2463,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 			} else {
 				for (Evolution evo : evos) {
 					// write evos
-					if (evo.from == i) {
+					if (evo.from.number == i) {
 						// write this one
 						dataBlock[offsetInData++] = (byte) evo.type.toIndex(2);
 						if (evo.type == EvolutionType.LEVEL
@@ -2495,7 +2493,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 							dataBlock[offsetInData++] = (byte) evo.extraInfo;
 							dataBlock[offsetInData++] = 0x03;
 						}
-						dataBlock[offsetInData++] = (byte) evo.to;
+						dataBlock[offsetInData++] = (byte) evo.to.number;
 						evoWritten = true;
 					}
 				}

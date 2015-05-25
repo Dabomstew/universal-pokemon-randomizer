@@ -179,12 +179,12 @@ public abstract class AbstractRomHandler implements RomHandler {
 			int first_max, int second_min, int second_max) {
 		for (Evolution e : evos) {
 			Pokemon potential = null;
-			if ((e.from >= first_min && e.from <= first_max
-					&& e.to >= second_min && e.to <= second_max)) {
-				potential = allPokemon.get(e.to);
-			} else if ((e.from >= second_min && e.from <= second_max
-					&& e.to >= first_min && e.to <= first_max)) {
-				potential = allPokemon.get(e.from);
+			if ((e.from.number >= first_min && e.from.number <= first_max
+					&& e.to.number >= second_min && e.to.number <= second_max)) {
+				potential = e.to;
+			} else if ((e.from.number >= second_min && e.from.number <= second_max
+					&& e.to.number >= first_min && e.to.number <= first_max)) {
+				potential = e.from;
 			}
 			if (potential != null && !pokemonPool.contains(potential)) {
 				pokemonPool.add(potential);
@@ -225,8 +225,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 						Evolution useEvo = currentStack.pop();
 						useEvo.carryStats = false; // so we don't waste time
 													// later
-						Pokemon to = allPokes.get(useEvo.to);
-						Pokemon from = allPokes.get(useEvo.from);
+						Pokemon to = useEvo.to;
+						Pokemon from = useEvo.from;
 						to.copyRandomizedStatsUpEvolution(from);
 					}
 				}
@@ -475,20 +475,19 @@ public abstract class AbstractRomHandler implements RomHandler {
 	public Pokemon random2EvosPokemon() {
 		if (twoEvoPokes == null) {
 			// Prepare the list
-			List<Pokemon> allPokes = this.getPokemon();
 			List<Pokemon> remainingPokes = allPokemonWithoutNull();
 			List<Evolution> allEvos = this.getEvolutions();
 			Map<Pokemon, Pokemon> reverseKeepPokemon = new TreeMap<Pokemon, Pokemon>();
 			for (Evolution e : allEvos) {
 				reverseKeepPokemon
-						.put(allPokes.get(e.to), allPokes.get(e.from));
+						.put(e.to, e.from);
 			}
 			remainingPokes.retainAll(reverseKeepPokemon.values());
 			// All pokemon with evolutions are left
 			// Look for the evolutions themselves again in the evo-list
 			Set<Pokemon> keepFor2Evos = new TreeSet<Pokemon>();
 			for (Evolution e : allEvos) {
-				Pokemon from = allPokes.get(e.from);
+				Pokemon from = e.from;
 				if (reverseKeepPokemon.containsKey(from)) {
 					keepFor2Evos.add(reverseKeepPokemon.get(from));
 				}
@@ -1953,10 +1952,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 		}
 		// Log changes now that we're done (to avoid repeats)
 		log("--Condensed Level Evolutions--");
-		List<Pokemon> allPokes = this.getPokemon();
 		for (Evolution evol : changedEvos) {
 			log(String.format("%s now evolves into %s at minimum level %d",
-					allPokes.get(evol.from).name, allPokes.get(evol.to).name,
+					evol.from.name, evol.to.name,
 					evol.extraInfo));
 		}
 		logBlankLine();
@@ -2733,10 +2731,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 		// with different levels on each side
 		// Which is true for every pokemon so far.
 		List<Evolution> evos = this.getEvolutions();
-		List<Pokemon> pokes = this.getPokemon();
 		for (Evolution e : evos) {
-			if (e.from == pk.number) {
-				return timesEvolves(pokes.get(e.to)) + 1;
+			if (e.from == pk) {
+				return timesEvolves(e.to) + 1;
 			}
 		}
 		return 0;
@@ -2744,10 +2741,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 
 	private Pokemon firstEvolution(Pokemon pk) {
 		List<Evolution> evos = this.getEvolutions();
-		List<Pokemon> pokes = this.getPokemon();
 		for (Evolution e : evos) {
-			if (e.from == pk.number) {
-				return pokes.get(e.to);
+			if (e.from == pk) {
+				return e.to;
 			}
 		}
 		return null;

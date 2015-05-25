@@ -2277,8 +2277,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					if (method >= 1 && method <= 26 && species >= 1) {
 						EvolutionType et = EvolutionType.fromIndex(4, method);
 						int extraInfo = readWord(evoEntry, evo * 6 + 2);
-						Evolution evol = new Evolution(i, species, true, et,
-								extraInfo);
+						Evolution evol = new Evolution(pokes[i],
+								pokes[species], true, et, extraInfo);
 						if (!evos.contains(evol)) {
 							evos.add(evol);
 							evosForThisPoke.add(evol);
@@ -2307,11 +2307,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				byte[] evoEntry = evoNARC.files.get(i);
 				int evosWritten = 0;
 				for (Evolution evo : evos) {
-					if (evo.from == i) {
+					if (evo.from.number == i) {
 						writeWord(evoEntry, evosWritten * 6,
 								evo.type.toIndex(4));
 						writeWord(evoEntry, evosWritten * 6 + 2, evo.extraInfo);
-						writeWord(evoEntry, evosWritten * 6 + 4, evo.to);
+						writeWord(evoEntry, evosWritten * 6 + 4, evo.to.number);
 						evosWritten++;
 					}
 					if (evosWritten == 7) {
@@ -2345,23 +2345,21 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					// Replace w/ level 35
 					evo.type = EvolutionType.LEVEL;
 					evo.extraInfo = 35;
-					logEvoChangeLevel(pokes[evo.from].name, pokes[evo.to].name,
-							35);
+					logEvoChangeLevel(evo.from.name, evo.to.name, 35);
 				}
 				// mt.coronet (magnezone/probopass)
 				if (evo.type == EvolutionType.LEVEL_ELECTRIFIED_AREA) {
 					// Replace w/ level 40
 					evo.type = EvolutionType.LEVEL;
 					evo.extraInfo = 40;
-					logEvoChangeLevel(pokes[evo.from].name, pokes[evo.to].name,
-							40);
+					logEvoChangeLevel(evo.from.name, evo.to.name, 40);
 				}
 				// moss rock (leafeon)
 				if (evo.type == EvolutionType.LEVEL_MOSS_ROCK) {
 					// Replace w/ leaf stone
 					evo.type = EvolutionType.STONE;
 					evo.extraInfo = 85; // leaf stone
-					logEvoChangeStone(pokes[evo.from].name, pokes[evo.to].name,
+					logEvoChangeStone(evo.from.name, evo.to.name,
 							itemNames.get(85));
 				}
 				// icy rock (glaceon)
@@ -2369,7 +2367,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					// Replace w/ dawn stone
 					evo.type = EvolutionType.STONE;
 					evo.extraInfo = 109; // dawn stone
-					logEvoChangeStone(pokes[evo.from].name, pokes[evo.to].name,
+					logEvoChangeStone(evo.from.name, evo.to.name,
 							itemNames.get(109));
 				}
 			}
@@ -2377,7 +2375,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				// read move
 				int move = evo.extraInfo;
 				int levelLearntAt = 1;
-				for (MoveLearnt ml : movesets.get(pokes[evo.from])) {
+				for (MoveLearnt ml : movesets.get(evo.from)) {
 					if (ml.move == move) {
 						levelLearntAt = ml.level;
 						break;
@@ -2390,31 +2388,30 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				// change to pure level evo
 				evo.type = EvolutionType.LEVEL;
 				evo.extraInfo = levelLearntAt;
-				logEvoChangeLevel(pokes[evo.from].name, pokes[evo.to].name,
-						levelLearntAt);
+				logEvoChangeLevel(evo.from.name, evo.to.name, levelLearntAt);
 			}
 			// Pure Trade
 			if (evo.type == EvolutionType.TRADE) {
 				// Replace w/ level 37
 				evo.type = EvolutionType.LEVEL;
 				evo.extraInfo = 37;
-				logEvoChangeLevel(pokes[evo.from].name, pokes[evo.to].name, 37);
+				logEvoChangeLevel(evo.from.name, evo.to.name, 37);
 			}
 			// Trade w/ Item
 			if (evo.type == EvolutionType.TRADE_ITEM) {
 				// Get the current item & evolution
 				int item = evo.extraInfo;
-				if (evo.from == 79) {
+				if (evo.from.number == 79) {
 					// Slowpoke is awkward - he already has a level evo
 					// So we can't do Level up w/ Held Item for him
 					// Put Water Stone instead
 					evo.type = EvolutionType.STONE;
 					evo.extraInfo = 84; // water stone
-					logEvoChangeStone(pokes[evo.from].name, pokes[evo.to].name,
+					logEvoChangeStone(evo.from.name, evo.to.name,
 							itemNames.get(84));
 				} else {
-					logEvoChangeLevelWithItem(pokes[evo.from].name,
-							pokes[evo.to].name, itemNames.get(item));
+					logEvoChangeLevelWithItem(evo.from.name, evo.to.name,
+							itemNames.get(item));
 					// Replace, for this entry, w/
 					// Level up w/ Held Item at Day
 					evo.type = EvolutionType.LEVEL_ITEM_DAY;
@@ -2530,7 +2527,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	public ItemList getAllowedItems() {
 		return allowedItems;
 	}
-	
+
 	@Override
 	public ItemList getNonBadItems() {
 		return nonBadItems;
@@ -2859,8 +2856,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		List<Evolution> currentEvos = this.getEvolutions();
 		List<Evolution> keepEvos = new ArrayList<Evolution>();
 		for (Evolution evol : currentEvos) {
-			if (pokemonIncluded.contains(pokes[evol.from])
-					&& pokemonIncluded.contains(pokes[evol.to])) {
+			if (pokemonIncluded.contains(evol.from)
+					&& pokemonIncluded.contains(evol.to)) {
 				keepEvos.add(evol);
 			}
 		}
@@ -2873,8 +2870,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				while (true) {
 					int currentBaby = oldBaby;
 					for (Evolution evol : keepEvos) {
-						if (evol.to == oldBaby) {
-							currentBaby = evol.from;
+						if (evol.to.number == oldBaby) {
+							currentBaby = evol.from.number;
 							break;
 						}
 					}

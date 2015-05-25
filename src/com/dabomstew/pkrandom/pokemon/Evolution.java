@@ -25,13 +25,13 @@ package com.dabomstew.pkrandom.pokemon;
 
 public class Evolution implements Comparable<Evolution> {
 
-	public int from;
-	public int to;
+	public Pokemon from;
+	public Pokemon to;
 	public boolean carryStats;
 	public EvolutionType type;
 	public int extraInfo;
 
-	public Evolution(int from, int to, boolean carryStats, EvolutionType type, int extra) {
+	public Evolution(Pokemon from, Pokemon to, boolean carryStats, EvolutionType type, int extra) {
 		this.from = from;
 		this.to = to;
 		this.carryStats = carryStats;
@@ -43,8 +43,8 @@ public class Evolution implements Comparable<Evolution> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + from;
-		result = prime * result + to;
+		result = prime * result + from.number;
+		result = prime * result + to.number;
 		return result;
 	}
 
@@ -66,13 +66,13 @@ public class Evolution implements Comparable<Evolution> {
 
 	@Override
 	public int compareTo(Evolution o) {
-		if (this.from < o.from) {
+		if (this.from.number < o.from.number) {
 			return -1;
-		} else if (this.from > o.from) {
+		} else if (this.from.number > o.from.number) {
 			return 1;
-		} else if (this.to < o.to) {
+		} else if (this.to.number < o.to.number) {
 			return -1;
-		} else if (this.to > o.to) {
+		} else if (this.to.number > o.to.number) {
 			return 1;
 		} else {
 			return 0;

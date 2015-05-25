@@ -2093,8 +2093,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 					if (method >= 1 && method <= 27 && species >= 1) {
 						EvolutionType et = EvolutionType.fromIndex(5, method);
 						int extraInfo = readWord(evoEntry, evo * 6 + 2);
-						Evolution evol = new Evolution(i, species, true, et,
-								extraInfo);
+						Evolution evol = new Evolution(pokes[i],
+								pokes[species], true, et, extraInfo);
 						if (!evos.contains(evol)) {
 							evos.add(evol);
 							evosForThisPoke.add(evol);
@@ -2124,11 +2124,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 				byte[] evoEntry = evoNARC.files.get(i);
 				int evosWritten = 0;
 				for (Evolution evo : evos) {
-					if (evo.from == i) {
+					if (evo.from.number == i) {
 						writeWord(evoEntry, evosWritten * 6,
 								evo.type.toIndex(5));
 						writeWord(evoEntry, evosWritten * 6 + 2, evo.extraInfo);
-						writeWord(evoEntry, evosWritten * 6 + 4, evo.to);
+						writeWord(evoEntry, evosWritten * 6 + 4, evo.to.number);
 						evosWritten++;
 					}
 					if (evosWritten == 7) {
@@ -2159,7 +2159,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 				// read move
 				int move = evo.extraInfo;
 				int levelLearntAt = 1;
-				for (MoveLearnt ml : movesets.get(pokes[evo.from])) {
+				for (MoveLearnt ml : movesets.get(evo.from)) {
 					if (ml.move == move) {
 						levelLearntAt = ml.level;
 						break;
@@ -2172,31 +2172,30 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 				// change to pure level evo
 				evo.type = EvolutionType.LEVEL;
 				evo.extraInfo = levelLearntAt;
-				logEvoChangeLevel(pokes[evo.from].name, pokes[evo.to].name,
-						levelLearntAt);
+				logEvoChangeLevel(evo.from.name, evo.to.name, levelLearntAt);
 			}
 			// Pure Trade
 			if (evo.type == EvolutionType.TRADE) {
 				// Replace w/ level 37
 				evo.type = EvolutionType.LEVEL;
 				evo.extraInfo = 37;
-				logEvoChangeLevel(pokes[evo.from].name, pokes[evo.to].name, 37);
+				logEvoChangeLevel(evo.from.name, evo.to.name, 37);
 			}
 			// Trade w/ Item
 			if (evo.type == EvolutionType.TRADE_ITEM) {
 				// Get the current item & evolution
 				int item = evo.extraInfo;
-				if (evo.from == 79) {
+				if (evo.from.number == 79) {
 					// Slowpoke is awkward - he already has a level evo
 					// So we can't do Level up w/ Held Item for him
 					// Put Water Stone instead
 					evo.type = EvolutionType.STONE;
 					evo.extraInfo = 84; // water stone
-					logEvoChangeStone(pokes[evo.from].name, pokes[evo.to].name,
+					logEvoChangeStone(evo.from.name, evo.to.name,
 							itemNames.get(84));
 				} else {
-					logEvoChangeLevelWithItem(pokes[evo.from].name,
-							pokes[evo.to].name, itemNames.get(item));
+					logEvoChangeLevelWithItem(evo.from.name, evo.to.name,
+							itemNames.get(item));
 					// Replace, for this entry, w/
 					// Level up w/ Held Item at Day
 					evo.type = EvolutionType.LEVEL_ITEM_DAY;
@@ -2213,10 +2212,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 				// (22)
 				// Based on what species we're currently dealing with
 				evo.type = EvolutionType.LEVEL_WITH_OTHER;
-				evo.extraInfo = (evo.from == 588 ? 616 : 588);
-				logEvoChangeLevelWithPkmn(pokes[evo.from].name,
-						pokes[evo.to].name,
-						pokes[(evo.from == 588 ? 616 : 588)].name);
+				evo.extraInfo = (evo.from.number == 588 ? 616 : 588);
+				logEvoChangeLevelWithPkmn(evo.from.name, evo.to.name,
+						pokes[(evo.from.number == 588 ? 616 : 588)].name);
 			}
 		}
 		evos.addAll(extraEvolutions);
@@ -2337,7 +2335,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 	public ItemList getAllowedItems() {
 		return allowedItems;
 	}
-	
+
 	@Override
 	public ItemList getNonBadItems() {
 		return nonBadItems;
@@ -2681,8 +2679,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 		List<Evolution> currentEvos = this.getEvolutions();
 		List<Evolution> keepEvos = new ArrayList<Evolution>();
 		for (Evolution evol : currentEvos) {
-			if (pokemonIncluded.contains(pokes[evol.from])
-					&& pokemonIncluded.contains(pokes[evol.to])) {
+			if (pokemonIncluded.contains(evol.from)
+					&& pokemonIncluded.contains(evol.to)) {
 				keepEvos.add(evol);
 			}
 		}
@@ -2695,8 +2693,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 				while (true) {
 					int currentBaby = oldBaby;
 					for (Evolution evol : keepEvos) {
-						if (evol.to == oldBaby) {
-							currentBaby = evol.from;
+						if (evol.to.number == oldBaby) {
+							currentBaby = evol.from.number;
 							break;
 						}
 					}

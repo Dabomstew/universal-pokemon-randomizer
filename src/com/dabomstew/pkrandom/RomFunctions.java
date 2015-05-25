@@ -77,7 +77,7 @@ public class RomFunctions {
 		Set<Pokemon> doCopyPokes = new TreeSet<Pokemon>();
 		for (Evolution e : evos) {
 			if (e.carryStats) {
-				doCopyPokes.add(allPokes.get(e.to));
+				doCopyPokes.add(e.to);
 			}
 		}
 		Set<Pokemon> dontCopyPokes = new TreeSet<Pokemon>();
@@ -92,28 +92,26 @@ public class RomFunctions {
 	}
 
 	public static Set<Pokemon> getFirstEvolutions(RomHandler baseRom) {
-		List<Pokemon> allPokes = baseRom.getPokemon();
 		List<Evolution> evos = baseRom.getEvolutions();
 		Set<Pokemon> basicPokemon = getBasicOrNoCopyPokemon(baseRom);
 
 		Set<Pokemon> firstEvos = new TreeSet<Pokemon>();
 		for (Evolution e : evos) {
-			if (basicPokemon.contains(allPokes.get(e.from))) {
-				firstEvos.add(allPokes.get(e.to));
+			if (basicPokemon.contains(e.from)) {
+				firstEvos.add(e.to);
 			}
 		}
 		return firstEvos;
 	}
 
 	public static Set<Pokemon> getSecondEvolutions(RomHandler baseRom) {
-		List<Pokemon> allPokes = baseRom.getPokemon();
 		List<Evolution> evos = baseRom.getEvolutions();
 		Set<Pokemon> firstEvos = getFirstEvolutions(baseRom);
 
 		Set<Pokemon> secondEvos = new TreeSet<Pokemon>();
 		for (Evolution e : evos) {
-			if (firstEvos.contains(allPokes.get(e.from))) {
-				secondEvos.add(allPokes.get(e.to));
+			if (firstEvos.contains(e.from)) {
+				secondEvos.add(e.to);
 			}
 		}
 		return secondEvos;
@@ -122,7 +120,7 @@ public class RomFunctions {
 	public static boolean pokemonHasEvo(RomHandler baseRom, Pokemon pkmn) {
 		List<Evolution> evos = baseRom.getEvolutions();
 		for (Evolution evo : evos) {
-			if (evo.from == pkmn.number) {
+			if (evo.from == pkmn) {
 				return true;
 			}
 		}
@@ -132,8 +130,8 @@ public class RomFunctions {
 	public static Pokemon evolvesFrom(RomHandler baseRom, Pokemon pkmn) {
 		List<Evolution> evos = baseRom.getEvolutions();
 		for (Evolution evo : evos) {
-			if (evo.to == pkmn.number) {
-				return baseRom.getPokemon().get(evo.from);
+			if (evo.to == pkmn) {
+				return evo.from;
 			}
 		}
 		return null;
