@@ -527,6 +527,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		int baseMapsOffset = findMultiple(rom, "80180068890B091808687047").get(
 				0);
 		romEntry.entries.put("MapHeaders", readPointer(baseMapsOffset + 12));
+		this.determineMapBankSizes();
 
 		// map labels
 		if (romEntry.romType == RomType_FRLG) {
@@ -2526,6 +2527,65 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
 	}
 
+	private void determineMapBankSizes() {
+		int mbpsOffset = romEntry.getValue("MapHeaders");
+		List<Integer> mapBankOffsets = new ArrayList<Integer>();
+
+		int offset = mbpsOffset;
+
+		// find map banks
+		while (true) {
+			boolean valid = true;
+			for (int mbOffset : mapBankOffsets) {
+				if (mbpsOffset < mbOffset && offset >= mbOffset) {
+					valid = false;
+					break;
+				}
+			}
+			if (!valid) {
+				break;
+			}
+			int newMBOffset = readPointer(offset);
+			if (newMBOffset < 0 || newMBOffset >= rom.length) {
+				break;
+			}
+			mapBankOffsets.add(newMBOffset);
+			offset += 4;
+		}
+		int bankCount = mapBankOffsets.size();
+		int[] bankMapCounts = new int[bankCount];
+		for (int bank = 0; bank < bankCount; bank++) {
+			int baseBankOffset = mapBankOffsets.get(bank);
+			int count = 0;
+			offset = baseBankOffset;
+			while (true) {
+				boolean valid = true;
+				for (int mbOffset : mapBankOffsets) {
+					if (baseBankOffset < mbOffset && offset >= mbOffset) {
+						valid = false;
+						break;
+					}
+				}
+				if (!valid) {
+					break;
+				}
+				if (baseBankOffset < mbpsOffset && offset >= mbpsOffset) {
+					break;
+				}
+				int newMapOffset = readPointer(offset);
+				if (newMapOffset < 0 || newMapOffset >= rom.length) {
+					break;
+				}
+				count++;
+				offset += 4;
+			}
+			bankMapCounts[bank] = count;
+		}
+
+		romEntry.entries.put("MapBankCount", bankCount);
+		romEntry.arrayEntries.put("MapBankSizes", bankMapCounts);
+	}
+
 	private void preprocessMaps() {
 		itemOffs = new ArrayList<Integer>();
 		int bankCount = romEntry.getValue("MapBankCount");
@@ -2539,6 +2599,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			int bankOffset = readPointer(mbpsOffset + bank * 4);
 			mapNames[bank] = new String[bankMapCounts[bank]];
 			for (int map = 0; map < bankMapCounts[bank]; map++) {
+				System.out.println("loading map " + bank + "." + map);
 				int mhOffset = readPointer(bankOffset + map * 4);
 
 				// map name
@@ -2558,74 +2619,79 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
 				// events
 				int eventOffset = readPointer(mhOffset + 4);
+				if (eventOffset >= 0 && eventOffset < rom.length) {
 
-				int pCount = rom[eventOffset] & 0xFF;
-				// int wCount = rom[eventOffset + 1] & 0xFF;
-				// int scCount = rom[eventOffset + 2] & 0xFF;
-				int spCount = rom[eventOffset + 3] & 0xFF;
+					int pCount = rom[eventOffset] & 0xFF;
+					// int wCount = rom[eventOffset + 1] & 0xFF;
+					// int scCount = rom[eventOffset + 2] & 0xFF;
+					int spCount = rom[eventOffset + 3] & 0xFF;
 
-				if (pCount > 0) {
-					int peopleOffset = readPointer(eventOffset + 4);
-					for (int p = 0; p < pCount; p++) {
-						int pSprite = rom[peopleOffset + p * 24 + 1];
-						if (pSprite == itemBall
-								&& readPointer(peopleOffset + p * 24 + 16) >= 0) {
-							// Get script and look inside
-							int scriptOffset = readPointer(peopleOffset + p
-									* 24 + 16);
-							if (rom[scriptOffset] == 0x1A
-									&& rom[scriptOffset + 1] == 0x00
-									&& (rom[scriptOffset + 2] & 0xFF) == 0x80
-									&& rom[scriptOffset + 5] == 0x1A
-									&& rom[scriptOffset + 6] == 0x01
-									&& (rom[scriptOffset + 7] & 0xFF) == 0x80
-									&& rom[scriptOffset + 10] == 0x09
-									&& (rom[scriptOffset + 11] == 0x00 || rom[scriptOffset + 11] == 0x01)) {
-								// item ball script
-								// int itemHere = readWord(scriptOffset + 3);
-								itemOffs.add(scriptOffset + 3);
-							}
-						}
-					}
-					// TM Text?
-					for (TMOrMTTextEntry tte : romEntry.tmmtTexts) {
-						if (tte.mapBank == bank && tte.mapNumber == map) {
-							// process this one
-							int scriptOffset = readPointer(peopleOffset
-									+ (tte.personNum - 1) * 24 + 16);
-							if (scriptOffset >= 0) {
-								if (romEntry.romType == RomType_FRLG
-										&& tte.isMoveTutor
-										&& (tte.number == 5 || (tte.number >= 8 && tte.number <= 11))) {
-									scriptOffset = readPointer(scriptOffset + 1);
-								} else if (romEntry.romType == RomType_FRLG
-										&& tte.isMoveTutor && tte.number == 7) {
-									scriptOffset = readPointer(scriptOffset + 0x1F);
-								}
-								int lookAt = scriptOffset + tte.offsetInScript;
-								// make sure this actually looks like a text
-								// pointer
-								if (rom[lookAt + 3] == 0x08
-										|| rom[lookAt + 3] == 0x09) {
-									// okay, it passes the basic test
-									tte.actualOffset = lookAt;
+					if (pCount > 0) {
+						int peopleOffset = readPointer(eventOffset + 4);
+						for (int p = 0; p < pCount; p++) {
+							int pSprite = rom[peopleOffset + p * 24 + 1];
+							if (pSprite == itemBall
+									&& readPointer(peopleOffset + p * 24 + 16) >= 0) {
+								// Get script and look inside
+								int scriptOffset = readPointer(peopleOffset + p
+										* 24 + 16);
+								if (rom[scriptOffset] == 0x1A
+										&& rom[scriptOffset + 1] == 0x00
+										&& (rom[scriptOffset + 2] & 0xFF) == 0x80
+										&& rom[scriptOffset + 5] == 0x1A
+										&& rom[scriptOffset + 6] == 0x01
+										&& (rom[scriptOffset + 7] & 0xFF) == 0x80
+										&& rom[scriptOffset + 10] == 0x09
+										&& (rom[scriptOffset + 11] == 0x00 || rom[scriptOffset + 11] == 0x01)) {
+									// item ball script
+									// int itemHere = readWord(scriptOffset +
+									// 3);
+									itemOffs.add(scriptOffset + 3);
 								}
 							}
 						}
+						// TM Text?
+						for (TMOrMTTextEntry tte : romEntry.tmmtTexts) {
+							if (tte.mapBank == bank && tte.mapNumber == map) {
+								// process this one
+								int scriptOffset = readPointer(peopleOffset
+										+ (tte.personNum - 1) * 24 + 16);
+								if (scriptOffset >= 0) {
+									if (romEntry.romType == RomType_FRLG
+											&& tte.isMoveTutor
+											&& (tte.number == 5 || (tte.number >= 8 && tte.number <= 11))) {
+										scriptOffset = readPointer(scriptOffset + 1);
+									} else if (romEntry.romType == RomType_FRLG
+											&& tte.isMoveTutor
+											&& tte.number == 7) {
+										scriptOffset = readPointer(scriptOffset + 0x1F);
+									}
+									int lookAt = scriptOffset
+											+ tte.offsetInScript;
+									// make sure this actually looks like a text
+									// pointer
+									if (rom[lookAt + 3] == 0x08
+											|| rom[lookAt + 3] == 0x09) {
+										// okay, it passes the basic test
+										tte.actualOffset = lookAt;
+									}
+								}
+							}
+						}
 					}
-				}
 
-				if (spCount > 0) {
-					int signpostsOffset = readPointer(eventOffset + 16);
-					for (int sp = 0; sp < spCount; sp++) {
-						int spType = rom[signpostsOffset + sp * 12 + 5];
-						if (spType >= 5 && spType <= 7) {
-							// hidden item
-							int itemHere = readWord(signpostsOffset + sp * 12
-									+ 8);
-							if (itemHere != 0) {
-								// itemid 0 is coins
-								itemOffs.add(signpostsOffset + sp * 12 + 8);
+					if (spCount > 0) {
+						int signpostsOffset = readPointer(eventOffset + 16);
+						for (int sp = 0; sp < spCount; sp++) {
+							int spType = rom[signpostsOffset + sp * 12 + 5];
+							if (spType >= 5 && spType <= 7) {
+								// hidden item
+								int itemHere = readWord(signpostsOffset + sp
+										* 12 + 8);
+								if (itemHere != 0) {
+									// itemid 0 is coins
+									itemOffs.add(signpostsOffset + sp * 12 + 8);
+								}
 							}
 						}
 					}
