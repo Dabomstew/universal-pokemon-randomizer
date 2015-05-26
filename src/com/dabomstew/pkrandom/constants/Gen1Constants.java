@@ -32,15 +32,19 @@ public class Gen1Constants {
 			38, 27 };
 
 	public static final int[] tclassesCounts = new int[] { 21, 47 };
+	
 	public static final List<Integer> singularTrainers = Arrays.asList(28, 32,
 			33, 34, 35, 36, 37, 38, 39, 43, 45, 46);
 
 	public static final List<Integer> bannedMovesWithXAccBanned = Arrays
-			.asList(49, 82, 147), bannedMovesWithoutXAccBanned = Arrays.asList(
-			49, 82, 32, 90, 12, 147);
+			.asList(49, 82, 147);
+	
+	public static final List<Integer> bannedMovesWithoutXAccBanned = Arrays
+			.asList(49, 82, 32, 90, 12, 147);
 
 	public static final List<Integer> fieldMoves = Arrays.asList(15, 19, 57,
 			70, 148, 91, 100);
+	
 	public static final List<Integer> earlyRequiredHMs = Arrays.asList(15);
 
 	public static final int hmsStartIndex = 0xC4, tmsStartIndex = 0xC9;

@@ -60,8 +60,10 @@ public class Gen2Constants {
 	public static final List<Integer> requiredFieldTMs = Arrays
 			.asList(new Integer[] { 4, 20, 22, 26, 28, 34, 35, 39, 40, 43, 44,
 					46 });
+	
 	public static final List<Integer> fieldMoves = Arrays.asList(15, 19, 57,
 			70, 148, 91, 100, 250, 127, 249, 29, 230);
+	
 	public static final List<Integer> earlyRequiredHMMoves = Arrays.asList(15);
 
 	public static final int tmBlockOneIndex = 191, tmBlockOneSize = 4,
