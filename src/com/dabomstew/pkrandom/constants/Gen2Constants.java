@@ -9,16 +9,11 @@ import com.dabomstew.pkrandom.pokemon.Type;
 
 public class Gen2Constants {
 
-	public static final int minRomSize = 0x80000, maxRomSize = 0x200000;
-
 	public static final int vietCrystalCheckOffset = 0x63;
 
 	public static final byte vietCrystalCheckValue = (byte) 0xF5;
 
 	public static final String vietCrystalROMName = "Pokemon VietCrystal";
-
-	public static final int jpFlagOffset = 0x14A, versionOffset = 0x14C,
-			crcOffset = 0x14E, romCodeOffset = 0x13F;
 
 	public static final int pokemonCount = 251, moveCount = 251;
 
@@ -33,10 +28,6 @@ public class Gen2Constants {
 			bsCommonHeldItemOffset = 11, bsRareHeldItemOffset = 12,
 			bsGrowthCurveOffset = 22, bsTMHMCompatOffset = 24,
 			bsMTCompatOffset = 31;
-
-	public static final int stringTerminator = 0x50, stringNull = 0x00;
-
-	public static final int bankSize = 0x4000;
 
 	public static final String[] starterNames = new String[] { "CYNDAQUIL",
 			"TOTODILE", "CHIKORITA" };
@@ -60,8 +51,6 @@ public class Gen2Constants {
 	public static final byte mtMenuInitByte = (byte) 0x80;
 
 	public static final int maxTrainerNameLength = 17;
-
-	public static final byte gbZ80Ret = (byte) 0xC9;
 
 	public static final int fleeingSetTwoOffset = 0xE,
 			fleeingSetThreeOffset = 0x17;

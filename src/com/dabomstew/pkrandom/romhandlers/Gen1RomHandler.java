@@ -39,6 +39,7 @@ import java.util.TreeMap;
 import com.dabomstew.pkrandom.CodeTweaks;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.constants.Gen1Constants;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
@@ -311,8 +312,8 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 
 	@Override
 	public boolean detectRom(byte[] rom) {
-		if (rom.length < Gen1Constants.minRomSize
-				|| rom.length > Gen1Constants.maxRomSize) {
+		if (rom.length < GBConstants.minRomSize
+				|| rom.length > GBConstants.maxRomSize) {
 			return false; // size check
 		}
 		return checkRomEntry(rom) != null; // so it's OK if it's a valid ROM
@@ -359,11 +360,11 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 	}
 
 	private RomEntry checkRomEntry(byte[] rom) {
-		int version = rom[Gen1Constants.versionOffset] & 0xFF;
-		int nonjap = rom[Gen1Constants.jpFlagOffset] & 0xFF;
+		int version = rom[GBConstants.versionOffset] & 0xFF;
+		int nonjap = rom[GBConstants.jpFlagOffset] & 0xFF;
 		// Check for specific CRC first
-		int crcInHeader = ((rom[Gen1Constants.crcOffset] & 0xFF) << 8)
-				| (rom[Gen1Constants.crcOffset + 1] & 0xFF);
+		int crcInHeader = ((rom[GBConstants.crcOffset] & 0xFF) << 8)
+				| (rom[GBConstants.crcOffset + 1] & 0xFF);
 		for (RomEntry re : roms) {
 			if (romSig(rom, re.romName) && re.version == version
 					&& re.nonJapanese == nonjap
@@ -615,8 +616,8 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 			if (tb[currChar] != null) {
 				string.append(tb[currChar]);
 			} else {
-				if (currChar == Gen1Constants.stringTerminator
-						|| currChar == Gen1Constants.stringNull) {
+				if (currChar == GBConstants.stringTerminator
+						|| currChar == GBConstants.stringNull) {
 					break;
 				} else {
 					string.append("\\x" + String.format("%02X", currChar));
@@ -662,29 +663,29 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		int len = Math.min(translated.length, length);
 		System.arraycopy(translated, 0, rom, offset, len);
 		while (len < length) {
-			rom[offset + len] = Gen1Constants.stringTerminator;
+			rom[offset + len] = GBConstants.stringTerminator;
 			len++;
 		}
 	}
 
 	private int makeGBPointer(int offset) {
-		if (offset < Gen1Constants.bankSize) {
+		if (offset < GBConstants.bankSize) {
 			return offset;
 		} else {
-			return (offset % Gen1Constants.bankSize) + Gen1Constants.bankSize;
+			return (offset % GBConstants.bankSize) + GBConstants.bankSize;
 		}
 	}
 
 	private int bankOf(int offset) {
-		return (offset / Gen1Constants.bankSize);
+		return (offset / GBConstants.bankSize);
 	}
 
 	private int calculateOffset(int bank, int pointer) {
-		if (pointer < Gen1Constants.bankSize) {
+		if (pointer < GBConstants.bankSize) {
 			return pointer;
 		} else {
-			return (pointer % Gen1Constants.bankSize) + bank
-					* Gen1Constants.bankSize;
+			return (pointer % GBConstants.bankSize) + bank
+					* GBConstants.bankSize;
 		}
 	}
 
@@ -705,15 +706,15 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		int len = Math.min(translated.length, length);
 		System.arraycopy(translated, 0, rom, offset, len);
 		while (len < length) {
-			rom[offset + len] = Gen1Constants.stringNull;
+			rom[offset + len] = GBConstants.stringNull;
 			len++;
 		}
 	}
 
 	private int lengthOfStringAt(int offset) {
 		int len = 0;
-		while (rom[offset + len] != Gen1Constants.stringTerminator
-				&& rom[offset + len] != Gen1Constants.stringNull) {
+		while (rom[offset + len] != GBConstants.stringTerminator
+				&& rom[offset + len] != GBConstants.stringNull) {
 			len++;
 		}
 		return len;
@@ -721,7 +722,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 
 	private boolean romSig(byte[] rom, String sig) {
 		try {
-			int sigOffset = Gen1Constants.romSigOffset;
+			int sigOffset = GBConstants.romSigOffset;
 			byte[] sigBytes = sig.getBytes("US-ASCII");
 			for (int i = 0; i < sigBytes.length; i++) {
 				if (rom[sigOffset + i] != sigBytes[i]) {
@@ -830,39 +831,39 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 				// Branch to our new routine(s)
 
 				// Turn bytes on
-				rom[pkDexOnOffset] = Gen1Constants.gbZ80Jump;
+				rom[pkDexOnOffset] = GBConstants.gbZ80Jump;
 				writeWord(pkDexOnOffset + 1, offsetForOnRoutine);
-				rom[pkDexOnOffset + 3] = Gen1Constants.gbZ80Nop;
-				rom[pkDexOnOffset + 4] = Gen1Constants.gbZ80Nop;
+				rom[pkDexOnOffset + 3] = GBConstants.gbZ80Nop;
+				rom[pkDexOnOffset + 4] = GBConstants.gbZ80Nop;
 
 				// Turn bytes off
-				rom[pkDexOffOffset] = Gen1Constants.gbZ80Jump;
+				rom[pkDexOffOffset] = GBConstants.gbZ80Jump;
 				writeWord(pkDexOffOffset + 1, offsetForOffRoutine);
-				rom[pkDexOffOffset + 3] = Gen1Constants.gbZ80Nop;
+				rom[pkDexOffOffset + 3] = GBConstants.gbZ80Nop;
 
 				// Put together the two scripts
-				rom[writeOffRoutineTo] = Gen1Constants.gbZ80XorA;
+				rom[writeOffRoutineTo] = GBConstants.gbZ80XorA;
 				int turnOnOffset = writeOnRoutineTo;
 				int turnOffOffset = writeOffRoutineTo + 1;
 				for (int ramOffset : onValues.keySet()) {
 					int onValue = onValues.get(ramOffset);
 					// Turn on code
-					rom[turnOnOffset++] = Gen1Constants.gbZ80LdA;
+					rom[turnOnOffset++] = GBConstants.gbZ80LdA;
 					rom[turnOnOffset++] = (byte) onValue;
 					// Turn on code for ram writing
-					rom[turnOnOffset++] = Gen1Constants.gbZ80LdAToFar;
+					rom[turnOnOffset++] = GBConstants.gbZ80LdAToFar;
 					rom[turnOnOffset++] = (byte) (ramOffset % 0x100);
 					rom[turnOnOffset++] = (byte) (ramOffset / 0x100);
 					// Turn off code for ram writing
-					rom[turnOffOffset++] = Gen1Constants.gbZ80LdAToFar;
+					rom[turnOffOffset++] = GBConstants.gbZ80LdAToFar;
 					rom[turnOffOffset++] = (byte) (ramOffset % 0x100);
 					rom[turnOffOffset++] = (byte) (ramOffset / 0x100);
 				}
 				// Jump back
-				rom[turnOnOffset++] = Gen1Constants.gbZ80Jump;
+				rom[turnOnOffset++] = GBConstants.gbZ80Jump;
 				writeWord(turnOnOffset, retOnOffset);
 
-				rom[turnOffOffset++] = Gen1Constants.gbZ80Jump;
+				rom[turnOffOffset++] = GBConstants.gbZ80Jump;
 				writeWord(turnOffOffset, retOffOffset);
 			}
 
@@ -1224,8 +1225,8 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 			int champRivalJump = romEntry.getValue("GymLeaderMovesTableOffset")
 					- Gen1Constants.champRivalOffsetFromGymLeaderMoves;
 			// nop out this jump
-			rom[champRivalJump] = Gen1Constants.gbZ80Nop;
-			rom[champRivalJump + 1] = Gen1Constants.gbZ80Nop;
+			rom[champRivalJump] = GBConstants.gbZ80Nop;
+			rom[champRivalJump + 1] = GBConstants.gbZ80Nop;
 		}
 
 	}
@@ -1446,7 +1447,8 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 					* Gen1Constants.baseStatsEntrySize)
 					: romEntry.getValue("MewStatsOffset");
 			Pokemon pkmn = pokes[i];
-			boolean[] flags = new boolean[Gen1Constants.tmCount+Gen1Constants.hmCount+1];
+			boolean[] flags = new boolean[Gen1Constants.tmCount
+					+ Gen1Constants.hmCount + 1];
 			for (int j = 0; j < 7; j++) {
 				readByteIntoFlags(flags, j * 8 + 1, baseStatsOffset
 						+ Gen1Constants.bsTMHMCompatOffset + j);
@@ -1702,7 +1704,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 
 	@Override
 	public String getDefaultExtension() {
-		if (((rom[Gen1Constants.isGBCOffset] & 0xFF) & 0x80) > 0) {
+		if (((rom[GBConstants.isGBCOffset] & 0xFF) & 0x80) > 0) {
 			return "gbc";
 		}
 		return "sgb";
@@ -1759,7 +1761,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 	@Override
 	public void applyFastestTextPatch() {
 		if (romEntry.getValue("TextDelayFunctionOffset") != 0) {
-			rom[romEntry.getValue("TextDelayFunctionOffset")] = Gen1Constants.gbZ80Ret;
+			rom[romEntry.getValue("TextDelayFunctionOffset")] = GBConstants.gbZ80Ret;
 		}
 	}
 
@@ -1831,15 +1833,15 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		int origOffset = romEntry.getValue("ItemNamesOffset");
 		int itemNameOffset = origOffset;
 		for (int index = 1; index <= 0x100; index++) {
-			if (itemNameOffset / Gen1Constants.bankSize > origOffset
-					/ Gen1Constants.bankSize) {
+			if (itemNameOffset / GBConstants.bankSize > origOffset
+					/ GBConstants.bankSize) {
 				// the game would continue making its merry way into VRAM here,
 				// but we don't have VRAM to simulate.
 				// just give up.
 				break;
 			}
 			int startOfText = itemNameOffset;
-			while ((rom[itemNameOffset] & 0xFF) != Gen1Constants.stringTerminator) {
+			while ((rom[itemNameOffset] & 0xFF) != GBConstants.stringTerminator) {
 				itemNameOffset++;
 			}
 			itemNameOffset++;
@@ -2264,8 +2266,8 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		int extraSpaceSize = 0;
 		if (movesEvosBank == extraSpaceBank && extraSpaceOffset != 0) {
 			extraSpaceEnabled = true;
-			int startOfNextBank = ((extraSpaceOffset / Gen1Constants.bankSize) + 1)
-					* Gen1Constants.bankSize;
+			int startOfNextBank = ((extraSpaceOffset / GBConstants.bankSize) + 1)
+					* GBConstants.bankSize;
 			extraSpaceSize = startOfNextBank - extraSpaceOffset;
 			extraDataBlock = new byte[extraSpaceSize];
 		}

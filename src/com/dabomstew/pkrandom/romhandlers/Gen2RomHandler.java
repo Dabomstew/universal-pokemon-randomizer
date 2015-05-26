@@ -40,6 +40,7 @@ import com.dabomstew.pkrandom.CodeTweaks;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.constants.Gen2Constants;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
@@ -272,8 +273,8 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 
 	@Override
 	public boolean detectRom(byte[] rom) {
-		if (rom.length < Gen2Constants.minRomSize
-				|| rom.length > Gen2Constants.maxRomSize) {
+		if (rom.length < GBConstants.minRomSize
+				|| rom.length > GBConstants.maxRomSize) {
 			return false; // size check
 		}
 		return checkRomEntry(rom) != null; // so it's OK if it's a valid ROM
@@ -308,11 +309,11 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 	}
 
 	private RomEntry checkRomEntry(byte[] rom) {
-		int version = rom[Gen2Constants.versionOffset] & 0xFF;
-		int nonjap = rom[Gen2Constants.jpFlagOffset] & 0xFF;
+		int version = rom[GBConstants.versionOffset] & 0xFF;
+		int nonjap = rom[GBConstants.jpFlagOffset] & 0xFF;
 		// Check for specific CRC first
-		int crcInHeader = ((rom[Gen2Constants.crcOffset] & 0xFF) << 8)
-				| (rom[Gen2Constants.crcOffset + 1] & 0xFF);
+		int crcInHeader = ((rom[GBConstants.crcOffset] & 0xFF) << 8)
+				| (rom[GBConstants.crcOffset + 1] & 0xFF);
 		for (RomEntry re : roms) {
 			if (romSig(rom, re.romCode) && re.version == version
 					&& re.nonJapanese == nonjap
@@ -522,8 +523,8 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 			if (tb[currChar] != null) {
 				string.append(tb[currChar]);
 			} else {
-				if (currChar == Gen2Constants.stringTerminator
-						|| currChar == Gen2Constants.stringNull) {
+				if (currChar == GBConstants.stringTerminator
+						|| currChar == GBConstants.stringNull) {
 					break;
 				} else {
 					string.append("\\x" + String.format("%02X", currChar));
@@ -581,7 +582,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 		int len = Math.min(translated.length, length);
 		System.arraycopy(translated, 0, rom, offset, len);
 		while (len < length) {
-			rom[offset + len] = Gen2Constants.stringTerminator;
+			rom[offset + len] = GBConstants.stringTerminator;
 			len++;
 		}
 	}
@@ -591,44 +592,44 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 		int len = Math.min(translated.length, length);
 		System.arraycopy(translated, 0, rom, offset, len);
 		while (len < length) {
-			rom[offset + len] = Gen2Constants.stringNull;
+			rom[offset + len] = GBConstants.stringNull;
 			len++;
 		}
 	}
 
 	private int lengthOfStringAt(int offset) {
 		int len = 0;
-		while (rom[offset + len] != Gen2Constants.stringTerminator
-				&& rom[offset + len] != Gen2Constants.stringNull) {
+		while (rom[offset + len] != GBConstants.stringTerminator
+				&& rom[offset + len] != GBConstants.stringNull) {
 			len++;
 		}
 		return len;
 	}
 
 	private int makeGBPointer(int offset) {
-		if (offset < Gen2Constants.bankSize) {
+		if (offset < GBConstants.bankSize) {
 			return offset;
 		} else {
-			return (offset % Gen2Constants.bankSize) + Gen2Constants.bankSize;
+			return (offset % GBConstants.bankSize) + GBConstants.bankSize;
 		}
 	}
 
 	private int bankOf(int offset) {
-		return (offset / Gen2Constants.bankSize);
+		return (offset / GBConstants.bankSize);
 	}
 
 	private int calculateOffset(int bank, int pointer) {
-		if (pointer < Gen2Constants.bankSize) {
+		if (pointer < GBConstants.bankSize) {
 			return pointer;
 		} else {
-			return (pointer % Gen2Constants.bankSize) + bank
-					* Gen2Constants.bankSize;
+			return (pointer % GBConstants.bankSize) + bank
+					* GBConstants.bankSize;
 		}
 	}
 
 	private boolean romSig(byte[] rom, String sig) {
 		try {
-			int sigOffset = Gen2Constants.romCodeOffset;
+			int sigOffset = GBConstants.romCodeOffset;
 			byte[] sigBytes = sig.getBytes("US-ASCII");
 			for (int i = 0; i < sigBytes.length; i++) {
 				if (rom[sigOffset + i] != sigBytes[i]) {
@@ -1374,7 +1375,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 				byte[] trans = traduire(names[i]);
 				System.arraycopy(trans, 0, rom, menuOffset, trans.length);
 				menuOffset += trans.length;
-				rom[menuOffset++] = Gen2Constants.stringTerminator;
+				rom[menuOffset++] = GBConstants.stringTerminator;
 			}
 			int pointerOffset = romEntry.getValue("MoveTutorMenuOffset");
 			writeWord(pointerOffset,
@@ -1614,7 +1615,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 						String newName = allTrainers.next();
 						byte[] newNameStr = translateString(newName);
 						newData.write(newNameStr);
-						newData.write(Gen2Constants.stringTerminator);
+						newData.write(GBConstants.stringTerminator);
 						oInNewCurrent += newNameStr.length + 1;
 						offs += internalStringLength(name) + 1;
 						int dataType = rom[offs] & 0xFF;
@@ -1772,7 +1773,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 	@Override
 	public void applyFastestTextPatch() {
 		if (romEntry.getValue("TextDelayFunctionOffset") != 0) {
-			rom[romEntry.getValue("TextDelayFunctionOffset")] = (byte) Gen2Constants.gbZ80Ret;
+			rom[romEntry.getValue("TextDelayFunctionOffset")] = (byte) GBConstants.gbZ80Ret;
 		}
 	}
 
@@ -1810,15 +1811,15 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 		int origOffset = romEntry.getValue("ItemNamesOffset");
 		int itemNameOffset = origOffset;
 		for (int index = 1; index <= 0x100; index++) {
-			if (itemNameOffset / Gen2Constants.bankSize > origOffset
-					/ Gen2Constants.bankSize) {
+			if (itemNameOffset / GBConstants.bankSize > origOffset
+					/ GBConstants.bankSize) {
 				// the game would continue making its merry way into VRAM here,
 				// but we don't have VRAM to simulate.
 				// just give up.
 				break;
 			}
 			int startOfText = itemNameOffset;
-			while ((rom[itemNameOffset] & 0xFF) != Gen2Constants.stringTerminator) {
+			while ((rom[itemNameOffset] & 0xFF) != GBConstants.stringTerminator) {
 				itemNameOffset++;
 			}
 			itemNameOffset++;
@@ -1875,7 +1876,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 		for (int mg = 0; mg < mapGroupCount; mg++) {
 			int offset = groupOffsets[mg];
 			int maxOffset = (mg == mapGroupCount - 1) ? (mhBank + 1)
-					* Gen2Constants.bankSize : groupOffsets[mg + 1];
+					* GBConstants.bankSize : groupOffsets[mg + 1];
 			int map = 0;
 			int maxMap = (mg == mapGroupCount - 1) ? mapsInLastGroup
 					: Integer.MAX_VALUE;
@@ -2162,8 +2163,8 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 		int movesEvosStart = romEntry.getValue("PokemonMovesetsTableOffset");
 		int movesEvosBank = bankOf(movesEvosStart);
 		byte[] pointerTable = new byte[Gen2Constants.pokemonCount * 2];
-		int startOfNextBank = ((movesEvosStart / Gen2Constants.bankSize) + 1)
-				* Gen2Constants.bankSize;
+		int startOfNextBank = ((movesEvosStart / GBConstants.bankSize) + 1)
+				* GBConstants.bankSize;
 		int dataBlockSize = startOfNextBank
 				- (movesEvosStart + pointerTable.length);
 		int dataBlockOffset = movesEvosStart + pointerTable.length;
