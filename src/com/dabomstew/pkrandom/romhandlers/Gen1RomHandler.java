@@ -1446,7 +1446,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 					* Gen1Constants.baseStatsEntrySize)
 					: romEntry.getValue("MewStatsOffset");
 			Pokemon pkmn = pokes[i];
-			boolean[] flags = new boolean[56];
+			boolean[] flags = new boolean[Gen1Constants.tmCount+Gen1Constants.hmCount+1];
 			for (int j = 0; j < 7; j++) {
 				readByteIntoFlags(flags, j * 8 + 1, baseStatsOffset
 						+ Gen1Constants.bsTMHMCompatOffset + j);
