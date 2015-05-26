@@ -2088,6 +2088,13 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				writeWord(evoJumpOffset, 0x0000);
 				writeWord(evoJumpOffset + 2, 0xE014);
 			}
+
+			int stoneJumpOffset = find("972808D9");
+			if (stoneJumpOffset > 0) {
+				// same as the above, but for stone evos
+				writeWord(evoJumpOffset, 0x0000);
+				writeWord(evoJumpOffset + 2, 0xE008);
+			}
 		}
 	}
 
