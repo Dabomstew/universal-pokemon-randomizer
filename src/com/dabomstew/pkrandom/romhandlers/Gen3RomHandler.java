@@ -387,11 +387,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		// non-bad items
 		// ban specific pokemon hold items, berries, apricorns, mail
 		nonBadItems = allowedItems.copy();
-		nonBadItems.banSingles(0xCA); // light ball
+		nonBadItems.banSingles(0xCA, 0x8B); // light ball, oran berry
 		nonBadItems.banRange(0x79, 12); // mail
-		nonBadItems.banRange(0x85, 43); // berries
+		nonBadItems.banRange(0x8F, 33); // berries
 		nonBadItems.banRange(0xDE, 4); // pokemon specific
-
+		nonBadItems.banRange(0xFE, 5); // contest scarves
 	}
 
 	private static byte typeToByte(Type type) {

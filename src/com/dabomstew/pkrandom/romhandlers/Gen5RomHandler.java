@@ -336,12 +336,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 		// ban specific pokemon hold items, berries, apricorns, mail
 		nonBadItems = allowedItems.copy();
 
-		nonBadItems.banSingles(0x6F, 0x70, 0xEC);
+		nonBadItems.banSingles(0x6F, 0x70, 0xEC, 0x9B);
 		nonBadItems.banRange(0x5F, 4); // mulch
 		nonBadItems.banRange(0x87, 2); // orbs
 		nonBadItems.banRange(0x89, 12); // mails
-		nonBadItems.banRange(0x95, 64); // berries DansGame
+		nonBadItems.banRange(0x9F, 54); // berries DansGame
 		nonBadItems.banRange(0x100, 4); // pokemon specific
+		nonBadItems.banRange(0x104, 5); // contest scarves
 	}
 
 	// This ROM
