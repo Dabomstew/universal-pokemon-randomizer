@@ -556,16 +556,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		saveMoves();
 	}
 
-	private static final byte[] emptyPokemonSig = new byte[] { 0x32, (byte) 0x96,
-			0x32, (byte) 0x96, (byte) 0x96, 0x32, 0x00, 0x00, 0x03, 0x01, (byte) 0xAA, 0x0A, 0x00,
-			0x00, 0x00, 0x00, (byte) 0xFF, 0x78, 0x00, 0x00, 0x0F, 0x0F, 0x00, 0x00,
-			0x00, 0x04, 0x00, 0x00 };
+	private static final byte[] emptyPokemonSig = new byte[] { 0x32,
+			(byte) 0x96, 0x32, (byte) 0x96, (byte) 0x96, 0x32, 0x00, 0x00,
+			0x03, 0x01, (byte) 0xAA, 0x0A, 0x00, 0x00, 0x00, 0x00, (byte) 0xFF,
+			0x78, 0x00, 0x00, 0x0F, 0x0F, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00 };
 
 	private void loadPokemonStats() {
 		List<Pokemon> pokeList = new ArrayList<Pokemon>();
 		pokeList.add(null);
 		// Fetch our names
-				String[] pokeNames = readPokemonNames();
+		String[] pokeNames = readPokemonNames();
 		int offs = romEntry.getValue("PokemonStats");
 		for (int i = 1; i <= 411; i++) {
 			Pokemon pk = new Pokemon();
@@ -577,7 +577,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				pokeList.add(pk);
 			} else {
 				String lowerName = pk.name.toLowerCase();
-				if(!this.matches(rom, pkoffs, emptyPokemonSig) && !lowerName.contains("unused")) {
+				if (!this.matches(rom, pkoffs, emptyPokemonSig)
+						&& !lowerName.contains("unused")) {
 					this.isRomHack = true;
 					loadBasicPokeStats(pk, pkoffs);
 					pokeList.add(pk);
@@ -592,12 +593,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		int offs = romEntry.getValue("PokemonNames");
 		int nameLen = romEntry.getValue("PokemonNameLength");
 		int offs2 = romEntry.getValue("PokemonStats");
-		for(Pokemon pk : pokes) {
-			if(pk != null) {
+		for (Pokemon pk : pokes) {
+			if (pk != null) {
 				int tgindex = pokeNumTo3GIndex(pk.number);
-				int stringOffset = offs + tgindex*nameLen;
+				int stringOffset = offs + tgindex * nameLen;
 				writeFixedLengthString(pk.name, stringOffset, nameLen);
-				saveBasicPokeStats(pk, offs2 + (tgindex-1)*0x1C);
+				saveBasicPokeStats(pk, offs2 + (tgindex - 1) * 0x1C);
 			}
 		}
 	}
@@ -620,13 +621,13 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		}
 
 	}
-	
+
 	private Pokemon pokemonFromNumber(int number) {
-		if(number < 387) {
+		if (number < 387) {
 			return pokes[number];
 		}
-		for(Pokemon pk : pokes) {
-			if(pk != null && pk.number == number) {
+		for (Pokemon pk : pokes) {
+			if (pk != null && pk.number == number) {
 				return pk;
 			}
 		}
@@ -902,7 +903,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		if (newStarters.size() != 3) {
 			return false;
 		}
-		
+
 		// Support Deoxys/Mew starters in E/FR/LG
 		if (!havePatchedObedience) {
 			attemptObedienceEvolutionPatches();
@@ -1100,8 +1101,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			enc.level = rom[dataOffset + i * 4];
 			enc.maxLevel = rom[dataOffset + i * 4 + 1];
 			try {
-				enc.pokemon = pokemonFromNumber(poke3GIndexToNum(readWord(dataOffset + i
-						* 4 + 2)));
+				enc.pokemon = pokemonFromNumber(poke3GIndexToNum(readWord(dataOffset
+						+ i * 4 + 2)));
 			} catch (ArrayIndexOutOfBoundsException ex) {
 				throw ex;
 			}
@@ -1559,7 +1560,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		int baseOffset = romEntry.getValue("PokemonMovesets");
 		for (int i = 1; i < pokes.length; i++) {
 			Pokemon pkmn = pokes[i];
-			int offsToPtr = baseOffset + (pokeNumTo3GIndex(pkmn.number) - 1) * 4;
+			int offsToPtr = baseOffset + (pokeNumTo3GIndex(pkmn.number) - 1)
+					* 4;
 			int moveDataLoc = readPointer(offsToPtr);
 			List<MoveLearnt> moves = new ArrayList<MoveLearnt>();
 			while ((rom[moveDataLoc] & 0xFF) != 0xFF
@@ -1586,7 +1588,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		int fso = romEntry.getValue("FreeSpace");
 		for (int i = 1; i < pokes.length; i++) {
 			Pokemon pkmn = pokes[i];
-			int offsToPtr = baseOffset + (pokeNumTo3GIndex(pkmn.number) - 1) * 4;
+			int offsToPtr = baseOffset + (pokeNumTo3GIndex(pkmn.number) - 1)
+					* 4;
 			int moveDataLoc = readPointer(offsToPtr);
 			List<MoveLearnt> moves = movesets.get(pkmn);
 			int mloc = moveDataLoc;
@@ -1652,7 +1655,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		}
 
 		public Pokemon getPokemon(Gen3RomHandler parent) {
-			return parent.pokemonFromNumber(poke3GIndexToNum(parent.readWord(offsets[0])));
+			return parent.pokemonFromNumber(poke3GIndexToNum(parent
+					.readWord(offsets[0])));
 		}
 
 		public void setPokemon(Gen3RomHandler parent, Pokemon pkmn) {
@@ -1684,7 +1688,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		if (staticPokemon.size() != staticsHere.size()) {
 			return false;
 		}
-		
+
 		for (int i = 0; i < staticsHere.size(); i++) {
 			staticsHere.get(i).setPokemon(this, staticPokemon.get(i));
 		}
@@ -1961,7 +1965,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		int bytesRequired = ((moveCount + 7) & ~7) / 8;
 		for (int i = 1; i < pokes.length; i++) {
 			Pokemon pkmn = pokes[i];
-			int compatOffset = offset + pokeNumTo3GIndex(pkmn.number) * moveCount;
+			int compatOffset = offset + pokeNumTo3GIndex(pkmn.number)
+					* moveCount;
 			boolean[] flags = new boolean[moveCount + 1];
 			for (int j = 0; j < bytesRequired; j++) {
 				readByteIntoFlags(flags, j * 8 + 1, compatOffset + j);
@@ -2237,8 +2242,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 					evolvingTo = poke3GIndexToNum(evolvingTo);
 					int extraInfo = readWord(evoOffset + j * 8 + 2);
 					EvolutionType et = EvolutionType.fromIndex(3, method);
-					Evolution evo = new Evolution(pokes[i], pokemonFromNumber(evolvingTo),
-							true, et, extraInfo);
+					Evolution evo = new Evolution(pokes[i],
+							pokemonFromNumber(evolvingTo), true, et, extraInfo);
 					if (!evos.contains(evo)) {
 						evos.add(evo);
 						evosForThisPoke.add(evo);
@@ -2974,7 +2979,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			rom[romEntry.getValue("RunIndoorsTweakOffset")] = 0x00;
 		}
 	}
-	
+
 	@Override
 	public boolean isROMHack() {
 		return this.isRomHack;
