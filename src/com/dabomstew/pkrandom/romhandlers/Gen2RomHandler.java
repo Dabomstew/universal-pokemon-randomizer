@@ -726,16 +726,6 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 	}
 
 	@Override
-	public boolean isInGame(Pokemon pkmn) {
-		return (pkmn.number >= 1 && pkmn.number <= 251);
-	}
-
-	@Override
-	public boolean isInGame(int pokemonNumber) {
-		return (pokemonNumber >= 1 && pokemonNumber <= 251);
-	}
-
-	@Override
 	public List<Pokemon> getStarters() {
 		// Get the starters
 		List<Pokemon> starters = new ArrayList<Pokemon>();
@@ -749,11 +739,6 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 	public boolean setStarters(List<Pokemon> newStarters) {
 		if (newStarters.size() != 3) {
 			return false;
-		}
-		for (Pokemon pkmn : newStarters) {
-			if (!isInGame(pkmn)) {
-				return false;
-			}
 		}
 
 		// Actually write
@@ -1480,11 +1465,6 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 		if (staticPokemon.size() != romEntry.staticPokemonSingle.size()
 				+ romEntry.staticPokemonGameCorner.size()) {
 			return false;
-		}
-		for (Pokemon pkmn : staticPokemon) {
-			if (!isInGame(pkmn)) {
-				return false;
-			}
 		}
 
 		Iterator<Pokemon> statics = staticPokemon.iterator();

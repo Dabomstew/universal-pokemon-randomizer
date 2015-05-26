@@ -587,16 +587,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 	}
 
 	@Override
-	public boolean isInGame(Pokemon pkmn) {
-		return isInGame(pkmn.number);
-	}
-
-	@Override
-	public boolean isInGame(int pokemonNumber) {
-		return pokemonNumber >= 1 && pokemonNumber <= 649;
-	}
-
-	@Override
 	public List<Pokemon> getPokemon() {
 		return pokemonList;
 	}
@@ -619,11 +609,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 	public boolean setStarters(List<Pokemon> newStarters) {
 		if (newStarters.size() != 3) {
 			return false;
-		}
-		for (Pokemon pkmn : newStarters) {
-			if (!isInGame(pkmn)) {
-				return false;
-			}
 		}
 
 		// Fix up starter offsets

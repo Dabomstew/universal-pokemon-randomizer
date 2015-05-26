@@ -798,16 +798,6 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 	}
 
 	@Override
-	public boolean isInGame(Pokemon pkmn) {
-		return (pkmn.number >= 1 && pkmn.number <= pokedexCount);
-	}
-
-	@Override
-	public boolean isInGame(int pokemonNumber) {
-		return (pokemonNumber >= 1 && pokemonNumber <= pokedexCount);
-	}
-
-	@Override
 	public List<Pokemon> getStarters() {
 		// Get the starters
 		List<Pokemon> starters = new ArrayList<Pokemon>();
@@ -833,12 +823,6 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		// Basic checks
 		if (newStarters.size() != starterAmount) {
 			return false;
-		}
-
-		for (Pokemon pkmn : newStarters) {
-			if (!isInGame(pkmn)) {
-				return false;
-			}
 		}
 
 		// Patch starter bytes
@@ -1629,11 +1613,6 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		int gcSize = romEntry.staticPokemonGameCorner.size();
 		if (staticPokemon.size() != singleSize + gcSize) {
 			return false;
-		}
-		for (Pokemon pkmn : staticPokemon) {
-			if (!isInGame(pkmn)) {
-				return false;
-			}
 		}
 
 		// Singular entries

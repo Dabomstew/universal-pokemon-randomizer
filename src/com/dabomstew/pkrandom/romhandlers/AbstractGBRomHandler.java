@@ -131,5 +131,17 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 		data[offset] = (byte) (value % 0x100);
 		data[offset + 1] = (byte) ((value / 0x100) % 0x100);
 	}
+	
+	protected boolean matches(byte[] data, int offset, byte[] needle) {
+		for(int i=0;i<needle.length;i++) {
+			if(offset+i >= data.length) {
+				return false;
+			}
+			if(data[offset+i] != needle[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
 
 }

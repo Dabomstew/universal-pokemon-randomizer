@@ -581,16 +581,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	@Override
-	public boolean isInGame(Pokemon pkmn) {
-		return isInGame(pkmn.number);
-	}
-
-	@Override
-	public boolean isInGame(int pokemonNumber) {
-		return pokemonNumber >= 1 && pokemonNumber <= 493;
-	}
-
-	@Override
 	public List<Pokemon> getPokemon() {
 		return pokemonList;
 	}
@@ -632,11 +622,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		if (newStarters.size() != 3) {
 			return false;
 		}
-		for (Pokemon pkmn : newStarters) {
-			if (!isInGame(pkmn)) {
-				return false;
-			}
-		}
+		
 		if (romEntry.romType == Type_HGSS) {
 			List<Integer> tailOffsets = RomFunctions.search(arm9, new byte[] {
 					0x03, 0x03, 0x1A, 0x12, 0x1, 0x23, 0x0, 0x0 });

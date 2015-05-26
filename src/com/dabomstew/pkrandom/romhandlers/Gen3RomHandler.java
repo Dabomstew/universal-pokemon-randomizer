@@ -106,6 +106,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	private static int pokeNumTo3GIndex(int pokenum) {
 		if (pokenum < 252) {
 			return pokenum;
+		} else if (pokenum >= 387) {
+			return pokenum - 135;
 		} else {
 			return numToHoenn[pokenum] + 25;
 		}
@@ -114,6 +116,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	private static int poke3GIndexToNum(int thirdgindex) {
 		if (thirdgindex < 252) {
 			return thirdgindex;
+		} else if (thirdgindex < 277) {
+			return thirdgindex + 135;
 		} else {
 			return hoennToNum[thirdgindex - 25];
 		}
@@ -451,6 +455,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	private boolean mapLoadingDone;
 	private List<Integer> itemOffs;
 	private String[][] mapNames;
+	private boolean isRomHack;
 
 	private static final int RomType_Ruby = 0;
 	private static final int RomType_Sapp = 1;
@@ -499,6 +504,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
 		tb = new String[256];
 		d = new HashMap<String, Byte>();
+		isRomHack = false;
 
 		// Pokemon names offset
 		if (romEntry.romType == RomType_Ruby
@@ -550,36 +556,49 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		saveMoves();
 	}
 
-	private void loadPokemonStats() {
-		pokes = new Pokemon[387];
-		// Fetch our names
-		String[] pokeNames = readPokemonNames();
-		int offs = romEntry.getValue("PokemonStats");
-		// Get base stats
-		for (int i = 1; i <= 386; i++) {
-			pokes[i] = new Pokemon();
-			pokes[i].number = i;
-			loadBasicPokeStats(pokes[i], offs + (pokeNumTo3GIndex(i) - 1)
-					* 0x1C);
-			// Name?
-			pokes[i].name = pokeNames[pokeNumTo3GIndex(i)];
-		}
+	private static final byte[] emptyPokemonSig = new byte[] { 0x32, (byte) 0x96,
+			0x32, (byte) 0x96, (byte) 0x96, 0x32, 0x00, 0x00, 0x03, 0x01, (byte) 0xAA, 0x0A, 0x00,
+			0x00, 0x00, 0x00, (byte) 0xFF, 0x78, 0x00, 0x00, 0x0F, 0x0F, 0x00, 0x00,
+			0x00, 0x04, 0x00, 0x00 };
 
+	private void loadPokemonStats() {
+		List<Pokemon> pokeList = new ArrayList<Pokemon>();
+		pokeList.add(null);
+		// Fetch our names
+				String[] pokeNames = readPokemonNames();
+		int offs = romEntry.getValue("PokemonStats");
+		for (int i = 1; i <= 411; i++) {
+			Pokemon pk = new Pokemon();
+			pk.number = i;
+			pk.name = pokeNames[pokeNumTo3GIndex(i)];
+			int pkoffs = offs + (pokeNumTo3GIndex(i) - 1) * 0x1C;
+			if (i <= 386) {
+				loadBasicPokeStats(pk, pkoffs);
+				pokeList.add(pk);
+			} else {
+				String lowerName = pk.name.toLowerCase();
+				if(!this.matches(rom, pkoffs, emptyPokemonSig) && !lowerName.contains("unused")) {
+					this.isRomHack = true;
+					loadBasicPokeStats(pk, pkoffs);
+					pokeList.add(pk);
+				}
+			}
+		}
+		pokes = pokeList.toArray(new Pokemon[0]);
 	}
 
 	private void savePokemonStats() {
-		// Write pokemon names
+		// Write pokemon names & stats
 		int offs = romEntry.getValue("PokemonNames");
 		int nameLen = romEntry.getValue("PokemonNameLength");
-		for (int i = 1; i <= 386; i++) {
-			int stringOffset = offs + pokeNumTo3GIndex(i) * nameLen;
-			writeFixedLengthString(pokes[i].name, stringOffset, nameLen);
-		}
-		// Write pokemon stats
 		int offs2 = romEntry.getValue("PokemonStats");
-		for (int i = 1; i <= 386; i++) {
-			saveBasicPokeStats(pokes[i], offs2 + (pokeNumTo3GIndex(i) - 1)
-					* 0x1C);
+		for(Pokemon pk : pokes) {
+			if(pk != null) {
+				int tgindex = pokeNumTo3GIndex(pk.number);
+				int stringOffset = offs + tgindex*nameLen;
+				writeFixedLengthString(pk.name, stringOffset, nameLen);
+				saveBasicPokeStats(pk, offs2 + (tgindex-1)*0x1C);
+			}
 		}
 	}
 
@@ -600,6 +619,18 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			moves[i].type = typeTable[rom[offs + (i - 1) * 0xC + 2]];
 		}
 
+	}
+	
+	private Pokemon pokemonFromNumber(int number) {
+		if(number < 387) {
+			return pokes[number];
+		}
+		for(Pokemon pk : pokes) {
+			if(pk != null && pk.number == number) {
+				return pk;
+			}
+		}
+		return null;
 	}
 
 	private void saveMoves() {
@@ -841,16 +872,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	}
 
 	@Override
-	public boolean isInGame(Pokemon pkmn) {
-		return (pkmn.number >= 1 && pkmn.number <= 386);
-	}
-
-	@Override
-	public boolean isInGame(int pokemonNumber) {
-		return (pokemonNumber >= 1 && pokemonNumber <= 386);
-	}
-
-	@Override
 	public List<Pokemon> getStarters() {
 		List<Pokemon> starters = new ArrayList<Pokemon>();
 		int baseOffset = romEntry.getValue("StarterPokemon");
@@ -858,17 +879,17 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				|| romEntry.romType == RomType_Sapp
 				|| romEntry.romType == RomType_Em) {
 			// do something
-			Pokemon starter1 = pokes[poke3GIndexToNum(readWord(baseOffset))];
-			Pokemon starter2 = pokes[poke3GIndexToNum(readWord(baseOffset + 2))];
-			Pokemon starter3 = pokes[poke3GIndexToNum(readWord(baseOffset + 4))];
+			Pokemon starter1 = pokemonFromNumber(poke3GIndexToNum(readWord(baseOffset)));
+			Pokemon starter2 = pokemonFromNumber(poke3GIndexToNum(readWord(baseOffset + 2)));
+			Pokemon starter3 = pokemonFromNumber(poke3GIndexToNum(readWord(baseOffset + 4)));
 			starters.add(starter1);
 			starters.add(starter2);
 			starters.add(starter3);
 		} else {
 			// do something else
-			Pokemon starter1 = pokes[poke3GIndexToNum(readWord(baseOffset))];
-			Pokemon starter2 = pokes[poke3GIndexToNum(readWord(baseOffset + 515))];
-			Pokemon starter3 = pokes[poke3GIndexToNum(readWord(baseOffset + 461))];
+			Pokemon starter1 = pokemonFromNumber(poke3GIndexToNum(readWord(baseOffset)));
+			Pokemon starter2 = pokemonFromNumber(poke3GIndexToNum(readWord(baseOffset + 515)));
+			Pokemon starter3 = pokemonFromNumber(poke3GIndexToNum(readWord(baseOffset + 461)));
 			starters.add(starter1);
 			starters.add(starter2);
 			starters.add(starter3);
@@ -881,11 +902,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		if (newStarters.size() != 3) {
 			return false;
 		}
-		for (Pokemon pkmn : newStarters) {
-			if (!isInGame(pkmn)) {
-				return false;
-			}
-		}
+		
 		// Support Deoxys/Mew starters in E/FR/LG
 		if (!havePatchedObedience) {
 			attemptObedienceEvolutionPatches();
@@ -998,7 +1015,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
 	@Override
 	public void shufflePokemonStats() {
-		for (int i = 1; i <= 386; i++) {
+		for (int i = 1; i < pokes.length; i++) {
 			pokes[i].shuffleStats();
 		}
 	}
@@ -1083,8 +1100,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			enc.level = rom[dataOffset + i * 4];
 			enc.maxLevel = rom[dataOffset + i * 4 + 1];
 			try {
-				enc.pokemon = pokes[poke3GIndexToNum(readWord(dataOffset + i
-						* 4 + 2))];
+				enc.pokemon = pokemonFromNumber(poke3GIndexToNum(readWord(dataOffset + i
+						* 4 + 2)));
 			} catch (ArrayIndexOutOfBoundsException ex) {
 				throw ex;
 			}
@@ -1176,8 +1193,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 					TrainerPokemon thisPoke = new TrainerPokemon();
 					thisPoke.AILevel = readWord(pointerToPokes + poke * 8);
 					thisPoke.level = readWord(pointerToPokes + poke * 8 + 2);
-					thisPoke.pokemon = pokes[poke3GIndexToNum(readWord(pointerToPokes
-							+ poke * 8 + 4))];
+					thisPoke.pokemon = pokemonFromNumber(poke3GIndexToNum(readWord(pointerToPokes
+							+ poke * 8 + 4)));
 					tr.pokemon.add(thisPoke);
 				}
 			} else if (pokeDataType == 2) {
@@ -1186,8 +1203,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 					TrainerPokemon thisPoke = new TrainerPokemon();
 					thisPoke.AILevel = readWord(pointerToPokes + poke * 8);
 					thisPoke.level = readWord(pointerToPokes + poke * 8 + 2);
-					thisPoke.pokemon = pokes[poke3GIndexToNum(readWord(pointerToPokes
-							+ poke * 8 + 4))];
+					thisPoke.pokemon = pokemonFromNumber(poke3GIndexToNum(readWord(pointerToPokes
+							+ poke * 8 + 4)));
 					thisPoke.heldItem = readWord(pointerToPokes + poke * 8 + 6);
 					tr.pokemon.add(thisPoke);
 				}
@@ -1197,8 +1214,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 					TrainerPokemon thisPoke = new TrainerPokemon();
 					thisPoke.AILevel = readWord(pointerToPokes + poke * 16);
 					thisPoke.level = readWord(pointerToPokes + poke * 16 + 2);
-					thisPoke.pokemon = pokes[poke3GIndexToNum(readWord(pointerToPokes
-							+ poke * 16 + 4))];
+					thisPoke.pokemon = pokemonFromNumber(poke3GIndexToNum(readWord(pointerToPokes
+							+ poke * 16 + 4)));
 					thisPoke.move1 = readWord(pointerToPokes + poke * 16 + 6);
 					thisPoke.move2 = readWord(pointerToPokes + poke * 16 + 8);
 					thisPoke.move3 = readWord(pointerToPokes + poke * 16 + 10);
@@ -1211,8 +1228,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 					TrainerPokemon thisPoke = new TrainerPokemon();
 					thisPoke.AILevel = readWord(pointerToPokes + poke * 16);
 					thisPoke.level = readWord(pointerToPokes + poke * 16 + 2);
-					thisPoke.pokemon = pokes[poke3GIndexToNum(readWord(pointerToPokes
-							+ poke * 16 + 4))];
+					thisPoke.pokemon = pokemonFromNumber(poke3GIndexToNum(readWord(pointerToPokes
+							+ poke * 16 + 4)));
 					thisPoke.heldItem = readWord(pointerToPokes + poke * 16 + 6);
 					thisPoke.move1 = readWord(pointerToPokes + poke * 16 + 8);
 					thisPoke.move2 = readWord(pointerToPokes + poke * 16 + 10);
@@ -1540,13 +1557,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	public Map<Pokemon, List<MoveLearnt>> getMovesLearnt() {
 		Map<Pokemon, List<MoveLearnt>> movesets = new TreeMap<Pokemon, List<MoveLearnt>>();
 		int baseOffset = romEntry.getValue("PokemonMovesets");
-		for (int i = 1; i <= 411; i++) {
-			int offsToPtr = baseOffset + (i - 1) * 4;
+		for (int i = 1; i < pokes.length; i++) {
+			Pokemon pkmn = pokes[i];
+			int offsToPtr = baseOffset + (pokeNumTo3GIndex(pkmn.number) - 1) * 4;
 			int moveDataLoc = readPointer(offsToPtr);
-			if (i >= 252 && i <= 276) {
-				continue;
-			}
-			Pokemon pkmn = pokes[poke3GIndexToNum(i)];
 			List<MoveLearnt> moves = new ArrayList<MoveLearnt>();
 			while ((rom[moveDataLoc] & 0xFF) != 0xFF
 					|| (rom[moveDataLoc + 1] & 0xFF) != 0xFF) {
@@ -1570,13 +1584,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	public void setMovesLearnt(Map<Pokemon, List<MoveLearnt>> movesets) {
 		int baseOffset = romEntry.getValue("PokemonMovesets");
 		int fso = romEntry.getValue("FreeSpace");
-		for (int i = 1; i <= 411; i++) {
-			int offsToPtr = baseOffset + (i - 1) * 4;
+		for (int i = 1; i < pokes.length; i++) {
+			Pokemon pkmn = pokes[i];
+			int offsToPtr = baseOffset + (pokeNumTo3GIndex(pkmn.number) - 1) * 4;
 			int moveDataLoc = readPointer(offsToPtr);
-			if (i >= 252 && i <= 276) {
-				continue;
-			}
-			Pokemon pkmn = pokes[poke3GIndexToNum(i)];
 			List<MoveLearnt> moves = movesets.get(pkmn);
 			int mloc = moveDataLoc;
 			while ((rom[mloc] & 0xFF) != 0xFF || (rom[mloc + 1] & 0xFF) != 0xFF) {
@@ -1641,7 +1652,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		}
 
 		public Pokemon getPokemon(Gen3RomHandler parent) {
-			return parent.pokes[poke3GIndexToNum(parent.readWord(offsets[0]))];
+			return parent.pokemonFromNumber(poke3GIndexToNum(parent.readWord(offsets[0])));
 		}
 
 		public void setPokemon(Gen3RomHandler parent, Pokemon pkmn) {
@@ -1673,11 +1684,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		if (staticPokemon.size() != staticsHere.size()) {
 			return false;
 		}
-		for (Pokemon pkmn : staticPokemon) {
-			if (!isInGame(pkmn)) {
-				return false;
-			}
-		}
+		
 		for (int i = 0; i < staticsHere.size(); i++) {
 			staticsHere.get(i).setPokemon(this, staticPokemon.get(i));
 		}
@@ -1832,9 +1839,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	public Map<Pokemon, boolean[]> getTMHMCompatibility() {
 		Map<Pokemon, boolean[]> compat = new TreeMap<Pokemon, boolean[]>();
 		int offset = romEntry.getValue("PokemonTMHMCompat");
-		for (int i = 1; i <= 386; i++) {
-			int compatOffset = offset + (pokeNumTo3GIndex(i) - 1) * 8;
+		for (int i = 1; i < pokes.length; i++) {
 			Pokemon pkmn = pokes[i];
+			int compatOffset = offset + (pokeNumTo3GIndex(pkmn.number) - 1) * 8;
 			boolean[] flags = new boolean[59];
 			for (int j = 0; j < 8; j++) {
 				readByteIntoFlags(flags, j * 8 + 1, compatOffset + j);
@@ -1952,9 +1959,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		int moveCount = romEntry.getValue("MoveTutorMoves");
 		int offset = romEntry.getValue("MoveTutorData") + moveCount * 2;
 		int bytesRequired = ((moveCount + 7) & ~7) / 8;
-		for (int i = 1; i <= 386; i++) {
-			int compatOffset = offset + pokeNumTo3GIndex(i) * moveCount;
+		for (int i = 1; i < pokes.length; i++) {
 			Pokemon pkmn = pokes[i];
+			int compatOffset = offset + pokeNumTo3GIndex(pkmn.number) * moveCount;
 			boolean[] flags = new boolean[moveCount + 1];
 			for (int j = 0; j < bytesRequired; j++) {
 				readByteIntoFlags(flags, j * 8 + 1, compatOffset + j);
@@ -2092,8 +2099,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			int stoneJumpOffset = find("972808D9");
 			if (stoneJumpOffset > 0) {
 				// same as the above, but for stone evos
-				writeWord(evoJumpOffset, 0x0000);
-				writeWord(evoJumpOffset + 2, 0xE008);
+				writeWord(stoneJumpOffset, 0x0000);
+				writeWord(stoneJumpOffset + 2, 0xE008);
 			}
 		}
 	}
@@ -2218,9 +2225,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		int baseOffset = romEntry.getValue("PokemonEvolutions");
 		List<Evolution> evos = new ArrayList<Evolution>();
 		List<Evolution> evosForThisPoke = new ArrayList<Evolution>();
-		for (int i = 1; i <= 386; i++) {
+		for (int i = 1; i < pokes.length; i++) {
 			evosForThisPoke.clear();
-			int idx = pokeNumTo3GIndex(i);
+			int idx = pokeNumTo3GIndex(pokes[i].number);
 			int evoOffset = baseOffset + (idx - 1) * 0x28;
 			for (int j = 0; j < 5; j++) {
 				int method = readWord(evoOffset + j * 8);
@@ -2230,7 +2237,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 					evolvingTo = poke3GIndexToNum(evolvingTo);
 					int extraInfo = readWord(evoOffset + j * 8 + 2);
 					EvolutionType et = EvolutionType.fromIndex(3, method);
-					Evolution evo = new Evolution(pokes[i], pokes[evolvingTo],
+					Evolution evo = new Evolution(pokes[i], pokemonFromNumber(evolvingTo),
 							true, et, extraInfo);
 					if (!evos.contains(evo)) {
 						evos.add(evo);
@@ -2251,12 +2258,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	@Override
 	public void setEvolutions(List<Evolution> evos) {
 		int baseOffset = romEntry.getValue("PokemonEvolutions");
-		for (int i = 1; i <= 386; i++) {
-			int idx = pokeNumTo3GIndex(i);
+		for (int i = 1; i < pokes.length; i++) {
+			int idx = pokeNumTo3GIndex(pokes[i].number);
 			int evoOffset = baseOffset + (idx - 1) * 0x28;
 			int evosWritten = 0;
 			for (Evolution evo : evos) {
-				if (evo.from.number == i) {
+				if (evo.from == pokes[i]) {
 					writeWord(evoOffset, evo.type.toIndex(3));
 					writeWord(evoOffset + 2, evo.extraInfo);
 					writeWord(evoOffset + 4, pokeNumTo3GIndex(evo.to.number));
@@ -2853,7 +2860,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			IngameTrade trade = new IngameTrade();
 			int entryOffset = tableOffset + entry * entryLength;
 			trade.nickname = readVariableLengthString(entryOffset);
-			trade.givenPokemon = pokes[poke3GIndexToNum(readWord(entryOffset + 12))];
+			trade.givenPokemon = pokemonFromNumber(poke3GIndexToNum(readWord(entryOffset + 12)));
 			trade.ivs = new int[6];
 			for (int i = 0; i < 6; i++) {
 				trade.ivs[i] = rom[entryOffset + 14 + i] & 0xFF;
@@ -2861,7 +2868,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			trade.otId = readWord(entryOffset + 24);
 			trade.item = readWord(entryOffset + 40);
 			trade.otName = readVariableLengthString(entryOffset + 43);
-			trade.requestedPokemon = pokes[poke3GIndexToNum(readWord(entryOffset + 56))];
+			trade.requestedPokemon = pokemonFromNumber(poke3GIndexToNum(readWord(entryOffset + 56)));
 			trades.add(trade);
 		}
 
@@ -2966,5 +2973,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		if (romEntry.getValue("RunIndoorsTweakOffset") != 0) {
 			rom[romEntry.getValue("RunIndoorsTweakOffset")] = 0x00;
 		}
+	}
+	
+	@Override
+	public boolean isROMHack() {
+		return this.isRomHack;
 	}
 }

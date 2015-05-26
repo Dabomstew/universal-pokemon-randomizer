@@ -52,11 +52,6 @@ public interface RomHandler {
 
 	public String loadedFilename();
 
-	// Functionality
-	public boolean isInGame(Pokemon pkmn);
-
-	public boolean isInGame(int pokemonNumber);
-
 	// Get a List of Pokemon objects in this game.
 	// 0 = null 1-whatever = the Pokemon.
 	public List<Pokemon> getPokemon();
