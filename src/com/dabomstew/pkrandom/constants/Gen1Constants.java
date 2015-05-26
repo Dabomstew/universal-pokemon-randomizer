@@ -53,7 +53,8 @@ public class Gen1Constants {
 			49, 82, 32, 90, 12, 147);
 
 	public static final List<Integer> fieldMoves = Arrays.asList(15, 19, 57,
-			70, 148, 91, 100), earlyRequiredHMs = Arrays.asList(15);
+			70, 148, 91, 100);
+	public static final List<Integer> earlyRequiredHMs = Arrays.asList(15);
 
 	public static final int hmsStartIndex = 0xC4, tmsStartIndex = 0xC9;
 
