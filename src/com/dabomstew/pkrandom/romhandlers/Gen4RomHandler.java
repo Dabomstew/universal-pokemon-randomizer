@@ -40,6 +40,7 @@ import thenewpoketext.TextToPoke;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.constants.Gen4Constants;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
@@ -52,78 +53,8 @@ import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
-import com.dabomstew.pkrandom.pokemon.Type;
 
 public class Gen4RomHandler extends AbstractDSRomHandler {
-
-	// Statics
-	private static final Type[] typeTable = constructTypeTable();
-
-	private static Type[] constructTypeTable() {
-		Type[] table = new Type[256];
-		table[0x00] = Type.NORMAL;
-		table[0x01] = Type.FIGHTING;
-		table[0x02] = Type.FLYING;
-		table[0x03] = Type.POISON;
-		table[0x04] = Type.GROUND;
-		table[0x05] = Type.ROCK;
-		table[0x06] = Type.BUG;
-		table[0x07] = Type.GHOST;
-		table[0x08] = Type.STEEL;
-		table[0x0A] = Type.FIRE;
-		table[0x0B] = Type.WATER;
-		table[0x0C] = Type.GRASS;
-		table[0x0D] = Type.ELECTRIC;
-		table[0x0E] = Type.PSYCHIC;
-		table[0x0F] = Type.ICE;
-		table[0x10] = Type.DRAGON;
-		table[0x11] = Type.DARK;
-		return table;
-	}
-
-	private static byte typeToByte(Type type) {
-		if (type == null) {
-			return 0x09; // ???-type
-		}
-		switch (type) {
-		case NORMAL:
-			return 0x00;
-		case FIGHTING:
-			return 0x01;
-		case FLYING:
-			return 0x02;
-		case POISON:
-			return 0x03;
-		case GROUND:
-			return 0x04;
-		case ROCK:
-			return 0x05;
-		case BUG:
-			return 0x06;
-		case GHOST:
-			return 0x07;
-		case FIRE:
-			return 0x0A;
-		case WATER:
-			return 0x0B;
-		case GRASS:
-			return 0x0C;
-		case ELECTRIC:
-			return 0x0D;
-		case PSYCHIC:
-			return 0x0E;
-		case ICE:
-			return 0x0F;
-		case DRAGON:
-			return 0x10;
-		case STEEL:
-			return 0x08;
-		case DARK:
-			return 0x11;
-		default:
-			return 0; // normal by default
-		}
-	}
 
 	private static class RomEntry {
 		private String name;
@@ -152,11 +83,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	private static List<RomEntry> roms;
-	private static ItemList allowedItems, nonBadItems;
 
 	static {
 		loadROMInfo();
-		setupAllowedItems();
+
 	}
 
 	private static void loadROMInfo() {
@@ -190,11 +120,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 							current.romCode = r[1];
 						} else if (r[0].equals("Type")) {
 							if (r[1].equalsIgnoreCase("DP")) {
-								current.romType = Type_DP;
+								current.romType = Gen4Constants.Type_DP;
 							} else if (r[1].equalsIgnoreCase("Plat")) {
-								current.romType = Type_Plat;
+								current.romType = Gen4Constants.Type_Plat;
 							} else if (r[1].equalsIgnoreCase("HGSS")) {
-								current.romType = Type_HGSS;
+								current.romType = Gen4Constants.Type_HGSS;
 							} else {
 								System.err.println("unrecognised rom type: "
 										+ r[1]);
@@ -294,30 +224,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 	}
 
-	private static void setupAllowedItems() {
-		allowedItems = new ItemList(536);
-		// Key items + version exclusives
-		allowedItems.banRange(428, 109);
-		// Unknown blank items or version exclusives
-		allowedItems.banRange(112, 23);
-		// HMs
-		allowedItems.banRange(420, 8);
-		// TMs
-		allowedItems.tmRange(328, 92);
-
-		// non-bad items
-		// ban specific pokemon hold items, berries, apricorns, mail
-		nonBadItems = allowedItems.copy();
-
-		nonBadItems.banSingles(0x6F, 0x70, 0xEC, 0x9B);
-		nonBadItems.banRange(0x5F, 4); // mulch
-		nonBadItems.banRange(0x87, 2); // orbs
-		nonBadItems.banRange(0x89, 12); // mails
-		nonBadItems.banRange(0x9F, 54); // berries DansGame
-		nonBadItems.banRange(0x100, 4); // pokemon specific
-		nonBadItems.banRange(0x104, 5); // contest scarves
-	}
-
 	// This rom
 	private Pokemon[] pokes;
 	private List<Pokemon> pokemonList;
@@ -331,10 +237,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	private List<String> itemNames;
 
 	private RomEntry romEntry;
-
-	private static final int Type_DP = 0;
-	private static final int Type_Plat = 1;
-	private static final int Type_HGSS = 2;
 
 	@Override
 	protected boolean detectNDSRom(String ndsCode) {
@@ -380,10 +282,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	private void loadMoves() {
 		try {
 			moveNarc = this.readNARC(romEntry.getString("MoveData"));
-			moves = new Move[468];
+			moves = new Move[Gen4Constants.moveCount + 1];
 			List<String> moveNames = getStrings(romEntry
 					.getInt("MoveNamesTextOffset"));
-			for (int i = 1; i <= 467; i++) {
+			for (int i = 1; i <= Gen4Constants.moveCount; i++) {
 				byte[] moveData = moveNarc.files.get(i);
 				moves[i] = new Move();
 				moves[i].name = moveNames.get(i);
@@ -392,7 +294,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				moves[i].hitratio = (moveData[5] & 0xFF);
 				moves[i].power = moveData[3] & 0xFF;
 				moves[i].pp = moveData[6] & 0xFF;
-				moves[i].type = typeTable[moveData[4] & 0xFF];
+				moves[i].type = Gen4Constants.typeTable[moveData[4] & 0xFF];
 			}
 		} catch (IOException e) {
 			// change this later
@@ -406,8 +308,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			String pstatsnarc = romEntry.getString("PokemonStats");
 			pokeNarc = this.readNARC(pstatsnarc);
 			String[] pokeNames = readPokemonNames();
-			pokes = new Pokemon[494];
-			for (int i = 1; i <= 493; i++) {
+			pokes = new Pokemon[Gen4Constants.pokemonCount + 1];
+			for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
 				pokes[i] = new Pokemon();
 				pokes[i].number = i;
 				loadBasicPokeStats(pokes[i], pokeNarc.files.get(i));
@@ -422,29 +324,30 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	private void loadBasicPokeStats(Pokemon pkmn, byte[] stats) {
-		pkmn.hp = stats[0] & 0xFF;
-		pkmn.attack = stats[1] & 0xFF;
-		pkmn.defense = stats[2] & 0xFF;
-		pkmn.speed = stats[3] & 0xFF;
-		pkmn.spatk = stats[4] & 0xFF;
-		pkmn.spdef = stats[5] & 0xFF;
+		pkmn.hp = stats[Gen4Constants.bsHPOffset] & 0xFF;
+		pkmn.attack = stats[Gen4Constants.bsAttackOffset] & 0xFF;
+		pkmn.defense = stats[Gen4Constants.bsDefenseOffset] & 0xFF;
+		pkmn.speed = stats[Gen4Constants.bsSpeedOffset] & 0xFF;
+		pkmn.spatk = stats[Gen4Constants.bsSpAtkOffset] & 0xFF;
+		pkmn.spdef = stats[Gen4Constants.bsSpDefOffset] & 0xFF;
 		// Type
-		pkmn.primaryType = typeTable[stats[6] & 0xFF];
-		pkmn.secondaryType = typeTable[stats[7] & 0xFF];
+		pkmn.primaryType = Gen4Constants.typeTable[stats[Gen4Constants.bsPrimaryTypeOffset] & 0xFF];
+		pkmn.secondaryType = Gen4Constants.typeTable[stats[Gen4Constants.bsSecondaryTypeOffset] & 0xFF];
 		// Only one type?
 		if (pkmn.secondaryType == pkmn.primaryType) {
 			pkmn.secondaryType = null;
 		}
-		pkmn.catchRate = stats[8] & 0xFF;
-		pkmn.growthCurve = ExpCurve.fromByte(stats[19]);
+		pkmn.catchRate = stats[Gen4Constants.bsCatchRateOffset] & 0xFF;
+		pkmn.growthCurve = ExpCurve
+				.fromByte(stats[Gen4Constants.bsGrowthCurveOffset]);
 
 		// Abilities
-		pkmn.ability1 = stats[22] & 0xFF;
-		pkmn.ability2 = stats[23] & 0xFF;
+		pkmn.ability1 = stats[Gen4Constants.bsAbility1Offset] & 0xFF;
+		pkmn.ability2 = stats[Gen4Constants.bsAbility2Offset] & 0xFF;
 
 		// Held Items?
-		int item1 = readWord(stats, 12);
-		int item2 = readWord(stats, 14);
+		int item1 = readWord(stats, Gen4Constants.bsCommonHeldItemOffset);
+		int item2 = readWord(stats, Gen4Constants.bsRareHeldItemOffset);
 
 		if (item1 == item2) {
 			// guaranteed
@@ -460,10 +363,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	private String[] readPokemonNames() {
-		String[] pokeNames = new String[494];
+		String[] pokeNames = new String[Gen4Constants.pokemonCount + 1];
 		List<String> nameList = getStrings(romEntry
 				.getInt("PokemonNamesTextOffset"));
-		for (int i = 1; i <= 493; i++) {
+		for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
 			pokeNames[i] = nameList.get(i);
 		}
 		return pokeNames;
@@ -492,11 +395,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	private void saveMoves() {
-		for (int i = 1; i <= 467; i++) {
+		for (int i = 1; i <= Gen4Constants.moveCount; i++) {
 			byte[] data = moveNarc.files.get(i);
 			writeWord(data, 0, moves[i].effectIndex);
 			data[3] = (byte) moves[i].power;
-			data[4] = typeToByte(moves[i].type);
+			data[4] = Gen4Constants.typeToByte(moves[i].type);
 			int hitratio = (int) Math.round(moves[i].hitratio);
 			if (hitratio < 0) {
 				hitratio = 0;
@@ -524,7 +427,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		if (romEntry.getString("HasExtraPokemonNames").equalsIgnoreCase("Yes")) {
 			List<String> namesList2 = getStrings(romEntry
 					.getInt("PokemonNamesTextOffset") + 1);
-			for (int i = 1; i <= 493; i++) {
+			for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
 				saveBasicPokeStats(pokes[i], pokeNarc.files.get(i));
 				String oldName = namesList.get(i);
 				namesList.set(i, pokes[i].name);
@@ -534,7 +437,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			setStrings(romEntry.getInt("PokemonNamesTextOffset") + 1,
 					namesList2, false);
 		} else {
-			for (int i = 1; i <= 493; i++) {
+			for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
 				saveBasicPokeStats(pokes[i], pokeNarc.files.get(i));
 				namesList.set(i, pokes[i].name);
 			}
@@ -552,31 +455,37 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	private void saveBasicPokeStats(Pokemon pkmn, byte[] stats) {
-		stats[0] = (byte) pkmn.hp;
-		stats[1] = (byte) pkmn.attack;
-		stats[2] = (byte) pkmn.defense;
-		stats[3] = (byte) pkmn.speed;
-		stats[4] = (byte) pkmn.spatk;
-		stats[5] = (byte) pkmn.spdef;
-		stats[6] = typeToByte(pkmn.primaryType);
+		stats[Gen4Constants.bsHPOffset] = (byte) pkmn.hp;
+		stats[Gen4Constants.bsAttackOffset] = (byte) pkmn.attack;
+		stats[Gen4Constants.bsDefenseOffset] = (byte) pkmn.defense;
+		stats[Gen4Constants.bsSpeedOffset] = (byte) pkmn.speed;
+		stats[Gen4Constants.bsSpAtkOffset] = (byte) pkmn.spatk;
+		stats[Gen4Constants.bsSpDefOffset] = (byte) pkmn.spdef;
+		stats[Gen4Constants.bsPrimaryTypeOffset] = Gen4Constants
+				.typeToByte(pkmn.primaryType);
 		if (pkmn.secondaryType == null) {
-			stats[7] = stats[6];
+			stats[Gen4Constants.bsSecondaryTypeOffset] = stats[Gen4Constants.bsPrimaryTypeOffset];
 		} else {
-			stats[7] = typeToByte(pkmn.secondaryType);
+			stats[Gen4Constants.bsSecondaryTypeOffset] = Gen4Constants
+					.typeToByte(pkmn.secondaryType);
 		}
-		stats[8] = (byte) pkmn.catchRate;
-		stats[19] = pkmn.growthCurve.toByte();
+		stats[Gen4Constants.bsCatchRateOffset] = (byte) pkmn.catchRate;
+		stats[Gen4Constants.bsGrowthCurveOffset] = pkmn.growthCurve.toByte();
 
-		stats[22] = (byte) pkmn.ability1;
-		stats[23] = (byte) pkmn.ability2;
+		stats[Gen4Constants.bsAbility1Offset] = (byte) pkmn.ability1;
+		stats[Gen4Constants.bsAbility2Offset] = (byte) pkmn.ability2;
 
 		// Held items
 		if (pkmn.guaranteedHeldItem > 0) {
-			writeWord(stats, 12, pkmn.guaranteedHeldItem);
-			writeWord(stats, 14, pkmn.guaranteedHeldItem);
+			writeWord(stats, Gen4Constants.bsCommonHeldItemOffset,
+					pkmn.guaranteedHeldItem);
+			writeWord(stats, Gen4Constants.bsRareHeldItemOffset,
+					pkmn.guaranteedHeldItem);
 		} else {
-			writeWord(stats, 12, pkmn.commonHeldItem);
-			writeWord(stats, 14, pkmn.rareHeldItem);
+			writeWord(stats, Gen4Constants.bsCommonHeldItemOffset,
+					pkmn.commonHeldItem);
+			writeWord(stats, Gen4Constants.bsRareHeldItemOffset,
+					pkmn.rareHeldItem);
 		}
 	}
 
@@ -587,9 +496,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 	@Override
 	public List<Pokemon> getStarters() {
-		if (romEntry.romType == Type_HGSS) {
-			List<Integer> tailOffsets = RomFunctions.search(arm9, new byte[] {
-					0x03, 0x03, 0x1A, 0x12, 0x1, 0x23, 0x0, 0x0 });
+		if (romEntry.romType == Gen4Constants.Type_HGSS) {
+			List<Integer> tailOffsets = RomFunctions.search(arm9,
+					Gen4Constants.hgssStarterCodeSuffix);
 			if (tailOffsets.size() == 1) {
 				// Found starters
 				int starterOffset = tailOffsets.get(0) - 13;
@@ -598,7 +507,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				int poke3 = readWord(arm9, starterOffset + 8);
 				return Arrays.asList(pokes[poke1], pokes[poke2], pokes[poke3]);
 			} else {
-				return Arrays.asList(pokes[152], pokes[155], pokes[158]);
+				return Arrays.asList(pokes[Gen4Constants.chikoritaIndex],
+						pokes[Gen4Constants.cyndaquilIndex],
+						pokes[Gen4Constants.totodileIndex]);
 			}
 		} else {
 			try {
@@ -612,7 +523,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 						romEntry.getInt("StarterPokemonOffset") + 8);
 				return Arrays.asList(pokes[poke1], pokes[poke2], pokes[poke3]);
 			} catch (IOException e) {
-				return Arrays.asList(pokes[387], pokes[390], pokes[393]);
+				return Arrays.asList(pokes[Gen4Constants.turtwigIndex],
+						pokes[Gen4Constants.chimcharIndex],
+						pokes[Gen4Constants.piplupIndex]);
 			}
 		}
 	}
@@ -622,10 +535,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		if (newStarters.size() != 3) {
 			return false;
 		}
-		
-		if (romEntry.romType == Type_HGSS) {
-			List<Integer> tailOffsets = RomFunctions.search(arm9, new byte[] {
-					0x03, 0x03, 0x1A, 0x12, 0x1, 0x23, 0x0, 0x0 });
+
+		if (romEntry.romType == Gen4Constants.Type_HGSS) {
+			List<Integer> tailOffsets = RomFunctions.search(arm9,
+					Gen4Constants.hgssStarterCodeSuffix);
 			if (tailOffsets.size() == 1) {
 				// Found starters
 				int starterOffset = tailOffsets.get(0) - 13;
@@ -639,14 +552,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				// ElseIf(0x800C==155) { trainerbattle rival w/ totodile }
 				// Else { trainerbattle rival w/ chiko }
 				// So we basically have to adjust the 152 and the 155.
-				int[] filesWithRivalScript = new int[] { 7, 23, 96, 110, 819,
-						850, 866 };
+				int[] filesWithRivalScript = Gen4Constants.hgssFilesWithRivalScript;
 				// below code represents a rival script for sure
 				// it means: StoreStarter2 0x800C; If 0x800C 152; CheckLR B_!=
 				// <offset to follow>
-				byte[] magic = new byte[] { (byte) 0xCE, 0x00, 0x0C,
-						(byte) 0x80, 0x11, 0x00, 0x0C, (byte) 0x80, (byte) 152,
-						0, 0x1C, 0x00, 0x05 };
+				byte[] magic = Gen4Constants.hgssRivalScriptMagic;
 				NARCContents scriptNARC = scriptNarc;
 				for (int i = 0; i < filesWithRivalScript.length; i++) {
 					int fileCheck = filesWithRivalScript[i];
@@ -661,8 +571,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 								newStarters.get(0).number);
 						int jumpAmount = readLong(file, baseOffset + 13);
 						int secondBase = jumpAmount + baseOffset + 17;
+						// TODO find out what this constant 0x11 is and remove
+						// it
 						if (file[secondBase] != 0x11
-								|| (file[secondBase + 4] & 0xFF) != 155) {
+								|| (file[secondBase + 4] & 0xFF) != Gen4Constants.cyndaquilIndex) {
 							// This isn't what we were expecting...
 						} else {
 							// Replace 155 (cynda) with 2nd starter
@@ -719,12 +631,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				// the HoF times checker case is for the Fight Area or Survival
 				// Area (depending on version).
 				// the StarterBattle case is for Route 201 in Pt.
-				int[] filesWithRivalScript = (romEntry.romType == Type_Plat) ? new int[] {
-						31, 36, 112, 123, 186, 427, 429, 1096 }
-						: new int[] { 34, 90, 118, 180, 195, 394 };
-				byte[] magic = new byte[] { (byte) 0xDE, 0x00, 0x0C,
-						(byte) 0x80, 0x11, 0x00, 0x0C, (byte) 0x80,
-						(byte) 0x83, 0x01, 0x1C, 0x00, 0x01 };
+				int[] filesWithRivalScript = (romEntry.romType == Gen4Constants.Type_Plat) ? Gen4Constants.ptFilesWithRivalScript
+						: Gen4Constants.dpFilesWithRivalScript;
+				byte[] magic = Gen4Constants.dpptRivalScriptMagic;
 				NARCContents scriptNARC = scriptNarc;
 				for (int i = 0; i < filesWithRivalScript.length; i++) {
 					int fileCheck = filesWithRivalScript[i];
@@ -737,9 +646,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 							// check at jump
 							int jumpLoc = baseOffset + magic.length;
 							int jumpTo = readLong(file, jumpLoc) + jumpLoc + 4;
+							// TODO find out what these constants are and remove
+							// them
 							if (readWord(file, jumpTo) != 0xE5
 									&& readWord(file, jumpTo) != 0x28F
-									&& (readWord(file, jumpTo) != 0x125 || romEntry.romType != Type_Plat)) {
+									&& (readWord(file, jumpTo) != 0x125 || romEntry.romType != Gen4Constants.Type_Plat)) {
 								continue; // not a rival script
 							}
 							// Replace the two starter-words 387 and 390
@@ -753,13 +664,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				// Tag battles with rival or friend
 				// Have their own script magic
 				// 2 for Lucas/Dawn (=4 occurrences), 1 or 2 for Barry
-				byte[] tagBattleMagic = new byte[] { (byte) 0xDE, 0x00, 0x0C,
-						(byte) 0x80, 0x28, 0x00, 0x04, (byte) 0x80 };
-				byte[] tagBattleMagic2 = new byte[] { 0x11, 0x00, 0x0C,
-						(byte) 0x80, (byte) 0x86, 0x01, 0x1C, 0x00, 0x01 };
-				int[] filesWithTagBattleScript = (romEntry.romType == Type_Plat) ? new int[] {
-						2, 136, 201, 236 }
-						: new int[] { 2, 131, 230 };
+				byte[] tagBattleMagic = Gen4Constants.dpptTagBattleScriptMagic1;
+				byte[] tagBattleMagic2 = Gen4Constants.dpptTagBattleScriptMagic2;
+				int[] filesWithTagBattleScript = (romEntry.romType == Gen4Constants.Type_Plat) ? Gen4Constants.ptFilesWithTagScript
+						: Gen4Constants.dpFilesWithTagScript;
 				for (int i = 0; i < filesWithTagBattleScript.length; i++) {
 					int fileCheck = filesWithTagBattleScript[i];
 					byte[] file = scriptNARC.files.get(fileCheck);
@@ -788,11 +696,12 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 							int jumpLoc = secondPartStart
 									+ tagBattleMagic2.length;
 							int jumpTo = readLong(file, jumpLoc) + jumpLoc + 4;
+							// TODO find out what this constant is and remove it
 							if (readWord(file, jumpTo) != 0x1B) {
 								continue; // not a tag battle script
 							}
 							// Replace the two starter-words
-							if (readWord(file, baseOffset + 0x21) == 387) {
+							if (readWord(file, baseOffset + 0x21) == Gen4Constants.turtwigIndex) {
 								// first starter
 								writeWord(file, baseOffset + 0x21,
 										newStarters.get(0).number);
@@ -826,12 +735,12 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				// rewrite starter picking screen
 				setStrings(romEntry.getInt("StarterScreenTextOffset"),
 						spStrings);
-				if (romEntry.romType == Type_DP) {
+				if (romEntry.romType == Gen4Constants.Type_DP) {
 					// what rival says after we get the Pokemon
 					List<String> lakeStrings = getStrings(romEntry
 							.getInt("StarterLocationTextOffset"));
 					lakeStrings
-							.set(19,
+							.set(Gen4Constants.dpStarterStringIndex,
 									"\\v0103\\z0000: Fwaaah!\\nYour Pokémon totally rocked!\\pBut mine was way tougher\\nthan yours!\\p...They were other people’s\\nPokémon, though...\\pBut we had to use them...\\nThey won’t mind, will they?\\p");
 					setStrings(romEntry.getInt("StarterLocationTextOffset"),
 							lakeStrings);
@@ -840,7 +749,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					List<String> r201Strings = getStrings(romEntry
 							.getInt("StarterLocationTextOffset"));
 					r201Strings
-							.set(36,
+							.set(Gen4Constants.ptStarterStringIndex,
 									"\\v0103\\z0000\\z0000: Then, I choose you!\\nI’m picking this one!\\p");
 					setStrings(romEntry.getInt("StarterLocationTextOffset"),
 							r201Strings);
@@ -865,7 +774,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 	@Override
 	public void shufflePokemonStats() {
-		for (int i = 1; i <= 493; i++) {
+		for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
 			pokes[i].shuffleStats();
 		}
 	}
@@ -878,7 +787,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	@Override
 	public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
 		try {
-			if (romEntry.romType == Type_HGSS) {
+			if (romEntry.romType == Gen4Constants.Type_HGSS) {
 				return getEncountersHGSS(useTimeOfDay);
 			} else {
 				return getEncountersDPPt();
@@ -1105,7 +1014,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	public void setEncounters(boolean useTimeOfDay,
 			List<EncounterSet> encounters) {
 		try {
-			if (romEntry.romType == Type_HGSS) {
+			if (romEntry.romType == Gen4Constants.Type_HGSS) {
 				setEncountersHGSS(useTimeOfDay, encounters);
 			} else {
 				setEncountersDPPt(encounters);
@@ -1336,304 +1245,25 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 						pokeOffs += 8;
 					}
 					// Plat/HGSS have another random pokeOffs +=2 here.
-					if (romEntry.romType != Type_DP) {
+					if (romEntry.romType != Gen4Constants.Type_DP) {
 						pokeOffs += 2;
 					}
 					tr.pokemon.add(tpk);
 				}
 				allTrainers.add(tr);
 			}
-			if (romEntry.romType == Type_DP) {
-				tagTrainersDP(allTrainers);
-			} else if (romEntry.romType == Type_Plat) {
-				tagTrainersPt(allTrainers);
+			if (romEntry.romType == Gen4Constants.Type_DP) {
+				Gen4Constants.tagTrainersDP(allTrainers);
+			} else if (romEntry.romType == Gen4Constants.Type_Plat) {
+				Gen4Constants.tagTrainersPt(allTrainers);
 			} else {
-				tagTrainersHGSS(allTrainers);
+				Gen4Constants.tagTrainersHGSS(allTrainers);
 			}
 		} catch (IOException ex) {
 			// change this later
 			ex.printStackTrace();
 		}
 		return allTrainers;
-	}
-
-	private void tagTrainersDP(List<Trainer> trs) {
-		// Gym Trainers
-		tag(trs, "GYM1", 0xf4, 0xf5);
-		tag(trs, "GYM2", 0x144, 0x103, 0x104, 0x15C);
-		tag(trs, "GYM3", 0x135, 0x136, 0x137, 0x138);
-		tag(trs, "GYM4", 0x1f1, 0x1f2, 0x191, 0x153, 0x125, 0x1E3);
-		tag(trs, "GYM5", 0x165, 0x145, 0x10a, 0x14a, 0x154, 0x157, 0x118, 0x11c);
-		tag(trs, "GYM6", 0x13a, 0x100, 0x101, 0x117, 0x16f, 0xe8, 0x11b);
-		tag(trs, "GYM7", 0x10c, 0x10d, 0x10e, 0x10f, 0x33b, 0x33c);
-		tag(trs, "GYM8", 0x158, 0x155, 0x12d, 0x12e, 0x12f, 0x11d, 0x119);
-
-		// Gym Leaders
-		tag(trs, 0xf6, "GYM1");
-		tag(trs, 0x13b, "GYM2");
-		tag(trs, 0x13d, "GYM3"); // Maylene
-		tag(trs, 0x13c, "GYM4"); // Wake
-		tag(trs, 0x13e, "GYM5"); // Fantina
-		tag(trs, 0xfa, "GYM6"); // Byron
-		tag(trs, 0x13f, "GYM7"); // Candice
-		tag(trs, 0x140, "GYM8"); // Volkner
-
-		// Elite 4
-		tag(trs, 0x105, "ELITE1");
-		tag(trs, 0x106, "ELITE2");
-		tag(trs, 0x107, "ELITE3");
-		tag(trs, 0x108, "ELITE4");
-		tag(trs, 0x10b, "CHAMPION");
-
-		// Rival battles (8)
-		tagRivalConsecutive(trs, "RIVAL1", 0xf8);
-		tagRivalConsecutive(trs, "RIVAL2", 0x1d7);
-		tagRivalConsecutive(trs, "RIVAL3", 0x1da);
-		tagRivalConsecutive(trs, "RIVAL4", 0x1dd);
-		// Tag battle is not following ze usual format
-		tag(trs, 0x26b, "RIVAL5-0");
-		tag(trs, 0x26c, "RIVAL5-1");
-		tag(trs, 0x25f, "RIVAL5-2");
-		// Back to normal
-		tagRivalConsecutive(trs, "RIVAL6", 0x1e0);
-		tagRivalConsecutive(trs, "RIVAL7", 0x346);
-		tagRivalConsecutive(trs, "RIVAL8", 0x349);
-
-		// Themed
-		tag(trs, "THEMED:CYRUS", 0x193, 0x194);
-		tag(trs, "THEMED:MARS", 0x127, 0x195, 0x210);
-		tag(trs, "THEMED:JUPITER", 0x196, 0x197);
-		tag(trs, "THEMED:SATURN", 0x198, 0x199);
-
-		// Lucas & Dawn tag battles
-		tagFriendConsecutive(trs, "FRIEND1", 0x265);
-		tagFriendConsecutive(trs, "FRIEND1", 0x268);
-		tagFriendConsecutive2(trs, "FRIEND2", 0x26D);
-		tagFriendConsecutive2(trs, "FRIEND2", 0x270);
-
-	}
-
-	private void tagTrainersPt(List<Trainer> trs) {
-		// Gym Trainers
-		tag(trs, "GYM1", 0xf4, 0xf5);
-		tag(trs, "GYM2", 0x144, 0x103, 0x104, 0x15C);
-		tag(trs, "GYM3", 0x165, 0x145, 0x154, 0x157, 0x118, 0x11c);
-		tag(trs, "GYM4", 0x135, 0x136, 0x137, 0x138);
-		tag(trs, "GYM5", 0x1f1, 0x1f2, 0x191, 0x153, 0x125, 0x1E3);
-		tag(trs, "GYM6", 0x13a, 0x100, 0x101, 0x117, 0x16f, 0xe8, 0x11b);
-		tag(trs, "GYM7", 0x10c, 0x10d, 0x10e, 0x10f, 0x33b, 0x33c);
-		tag(trs, "GYM8", 0x158, 0x155, 0x12d, 0x12e, 0x12f, 0x11d, 0x119, 0x14b);
-
-		// Gym Leaders
-		tag(trs, 0xf6, "GYM1");
-		tag(trs, 0x13b, "GYM2");
-		tag(trs, 0x13e, "GYM3"); // Fantina
-		tag(trs, 0x13d, "GYM4"); // Maylene
-		tag(trs, 0x13c, "GYM5"); // Wake
-		tag(trs, 0xfa, "GYM6"); // Byron
-		tag(trs, 0x13f, "GYM7"); // Candice
-		tag(trs, 0x140, "GYM8"); // Volkner
-
-		// Elite 4
-		tag(trs, 0x105, "ELITE1");
-		tag(trs, 0x106, "ELITE2");
-		tag(trs, 0x107, "ELITE3");
-		tag(trs, 0x108, "ELITE4");
-		tag(trs, 0x10b, "CHAMPION");
-
-		// Rival battles (10)
-		tagRivalConsecutive(trs, "RIVAL1", 0x353);
-		tagRivalConsecutive(trs, "RIVAL2", 0xf8);
-		tagRivalConsecutive(trs, "RIVAL3", 0x1d7);
-		tagRivalConsecutive(trs, "RIVAL4", 0x1da);
-		tagRivalConsecutive(trs, "RIVAL5", 0x1dd);
-		// Tag battle is not following ze usual format
-		tag(trs, 0x26b, "RIVAL6-0");
-		tag(trs, 0x26c, "RIVAL6-1");
-		tag(trs, 0x25f, "RIVAL6-2");
-		// Back to normal
-		tagRivalConsecutive(trs, "RIVAL7", 0x1e0);
-		tagRivalConsecutive(trs, "RIVAL8", 0x346);
-		tagRivalConsecutive(trs, "RIVAL9", 0x349);
-		tagRivalConsecutive(trs, "RIVAL10", 0x368);
-
-		// Battleground Gym Leaders
-		tag(trs, 0x35A, "GYM1");
-		tag(trs, 0x359, "GYM2");
-		tag(trs, 0x35C, "GYM3");
-		tag(trs, 0x356, "GYM4");
-		tag(trs, 0x35B, "GYM5");
-		tag(trs, 0x358, "GYM6");
-		tag(trs, 0x355, "GYM7");
-		tag(trs, 0x357, "GYM8");
-
-		// Match vs Volkner and Flint in Battle Frontier
-		tag(trs, 0x399, "GYM8");
-		tag(trs, 0x39A, "ELITE3");
-
-		// E4 rematch
-		tag(trs, 0x362, "ELITE1");
-		tag(trs, 0x363, "ELITE2");
-		tag(trs, 0x364, "ELITE3");
-		tag(trs, 0x365, "ELITE4");
-		tag(trs, 0x366, "CHAMPION");
-
-		// Themed
-		tag(trs, "THEMED:CYRUS", 0x391, 0x193, 0x194);
-		tag(trs, "THEMED:MARS", 0x127, 0x195, 0x210, 0x39e);
-		tag(trs, "THEMED:JUPITER", 0x196, 0x197, 0x39f);
-		tag(trs, "THEMED:SATURN", 0x198, 0x199);
-
-		// Lucas & Dawn tag battles
-		tagFriendConsecutive(trs, "FRIEND1", 0x265);
-		tagFriendConsecutive(trs, "FRIEND1", 0x268);
-		tagFriendConsecutive2(trs, "FRIEND2", 0x26D);
-		tagFriendConsecutive2(trs, "FRIEND2", 0x270);
-
-	}
-
-	private void tagTrainersHGSS(List<Trainer> trs) {
-		// Gym Trainers
-		tag(trs, "GYM1", 0x32, 0x1D);
-		tag(trs, "GYM2", 0x43, 0x44, 0x45, 0x0a);
-		tag(trs, "GYM3", 0x05, 0x46, 0x47, 0x16);
-		tag(trs, "GYM4", 0x57, 0x58, 0x59, 0x2e);
-		tag(trs, "GYM5", 0x9c, 0x9d, 0x9f, 0xfb);
-		tag(trs, "GYM7", 0x1e0, 0x1e1, 0x1e2, 0x1e3, 0x1e4);
-		tag(trs, "GYM8", 0x6e, 0x6f, 0x70, 0x75, 0x77);
-
-		tag(trs, "GYM9", 0x134, 0x2ad);
-		tag(trs, "GYM10", 0x2a4, 0x2a5, 0x2a6, 0x129, 0x12a);
-		tag(trs, "GYM11", 0x18c, 0xe8, 0x151);
-		tag(trs, "GYM12", 0x150, 0x146, 0x164, 0x15a);
-		tag(trs, "GYM13", 0x53, 0x54, 0xb7, 0x88);
-		tag(trs, "GYM14", 0x170, 0x171, 0xe6, 0x19f);
-		tag(trs, "GYM15", 0x2b1, 0x2b2, 0x2b3, 0x2b4, 0x2b5, 0x2b6);
-		tag(trs, "GYM16", 0x2a9, 0x2aa, 0x2ab, 0x2ac);
-
-		// Gym Leaders
-		tag(trs, 0x14, "GYM1");
-		tag(trs, 0x15, "GYM2");
-		tag(trs, 0x1e, "GYM3");
-		tag(trs, 0x1f, "GYM4");
-		tag(trs, 0x22, "GYM5");
-		tag(trs, 0x21, "GYM6");
-		tag(trs, 0x20, "GYM7");
-		tag(trs, 0x23, "GYM8");
-
-		tag(trs, 0xFD, "GYM9");
-		tag(trs, 0xFE, "GYM10");
-		tag(trs, 0xFF, "GYM11");
-		tag(trs, 0x100, "GYM12");
-		tag(trs, 0x101, "GYM13");
-		tag(trs, 0x102, "GYM14");
-		tag(trs, 0x103, "GYM15");
-		tag(trs, 0x105, "GYM16");
-
-		// Elite 4
-		tag(trs, 0xf5, "ELITE1");
-		tag(trs, 0xf7, "ELITE2");
-		tag(trs, 0x1a2, "ELITE3");
-		tag(trs, 0xf6, "ELITE4");
-		tag(trs, 0xf4, "CHAMPION");
-
-		// Red
-		tag(trs, 0x104, "UBER");
-
-		// Gym Rematches
-		tag(trs, 0x2c8, "GYM1");
-		tag(trs, 0x2c9, "GYM2");
-		tag(trs, 0x2ca, "GYM3");
-		tag(trs, 0x2cb, "GYM4");
-		tag(trs, 0x2ce, "GYM5");
-		tag(trs, 0x2cd, "GYM6");
-		tag(trs, 0x2cc, "GYM7");
-		tag(trs, 0x2cf, "GYM8");
-
-		tag(trs, 0x2d0, "GYM9");
-		tag(trs, 0x2d1, "GYM10");
-		tag(trs, 0x2d2, "GYM11");
-		tag(trs, 0x2d3, "GYM12");
-		tag(trs, 0x2d4, "GYM13");
-		tag(trs, 0x2d5, "GYM14");
-		tag(trs, 0x2d6, "GYM15");
-		tag(trs, 0x2d7, "GYM16");
-
-		// Elite 4 Rematch
-		tag(trs, 0x2be, "ELITE1");
-		tag(trs, 0x2bf, "ELITE2");
-		tag(trs, 0x2c0, "ELITE3");
-		tag(trs, 0x2c1, "ELITE4");
-		tag(trs, 0x2bd, "CHAMPION");
-
-		// Rival Battles
-		tagRivalConsecutive(trs, "RIVAL1", 0x1F0);
-
-		tag(trs, 0x10a, "RIVAL2-0");
-		tag(trs, 0x10d, "RIVAL2-1");
-		tag(trs, 0x1, "RIVAL2-2");
-
-		tag(trs, 0x10B, "RIVAL3-0");
-		tag(trs, 0x10E, "RIVAL3-1");
-		tag(trs, 0x107, "RIVAL3-2");
-
-		tag(trs, 0x121, "RIVAL4-0");
-		tag(trs, 0x10f, "RIVAL4-1");
-		tag(trs, 0x120, "RIVAL4-2");
-
-		tag(trs, 0x10C, "RIVAL5-0");
-		tag(trs, 0x110, "RIVAL5-1");
-		tag(trs, 0x108, "RIVAL5-2");
-
-		tagRivalConsecutive(trs, "RIVAL6", 0x11e);
-		tagRivalConsecutive(trs, "RIVAL7", 0x2e0); // dragons den tag battle
-		tagRivalConsecutive(trs, "RIVAL8", 0x1EA);
-
-		// Clair & Lance match in Dragons Den
-		tag(trs, 0x2DE, "GYM8");
-		tag(trs, 0x2DD, "CHAMPION");
-
-		// Themed
-		tag(trs, "THEMED:ARIANA", 0x1df, 0x1de);
-		tag(trs, "THEMED:PETREL", 0x1e8, 0x1e7);
-		tag(trs, "THEMED:PROTON", 0x1e6, 0x2c2);
-		tag(trs, "THEMED:SPROUTTOWER", 0x2b, 0x33, 0x34, 0x35, 0x36, 0x37,
-				0x122);
-
-	}
-
-	private void tag(List<Trainer> allTrainers, int number, String tag) {
-		allTrainers.get(number - 1).tag = tag;
-	}
-
-	private void tag(List<Trainer> allTrainers, String tag, int... numbers) {
-		for (int num : numbers) {
-			allTrainers.get(num - 1).tag = tag;
-		}
-	}
-
-	private void tagRivalConsecutive(List<Trainer> allTrainers, String tag,
-			int offsetFire) {
-		allTrainers.get(offsetFire - 1).tag = tag + "-0";
-		allTrainers.get(offsetFire).tag = tag + "-1";
-		allTrainers.get(offsetFire - 2).tag = tag + "-2";
-
-	}
-
-	private void tagFriendConsecutive(List<Trainer> allTrainers, String tag,
-			int offsetGrass) {
-		allTrainers.get(offsetGrass - 1).tag = tag + "-1";
-		allTrainers.get(offsetGrass).tag = tag + "-2";
-		allTrainers.get(offsetGrass + 1).tag = tag + "-0";
-
-	}
-
-	private void tagFriendConsecutive2(List<Trainer> allTrainers, String tag,
-			int offsetWater) {
-		allTrainers.get(offsetWater - 1).tag = tag + "-0";
-		allTrainers.get(offsetWater).tag = tag + "-1";
-		allTrainers.get(offsetWater + 1).tag = tag + "-2";
-
 	}
 
 	@Override
@@ -1655,7 +1285,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				trainer[3] = (byte) numPokes;
 
 				int bytesNeeded = 6 * numPokes;
-				if (romEntry.romType != Type_DP) {
+				if (romEntry.romType != Gen4Constants.Type_DP) {
 					bytesNeeded += 2 * numPokes;
 				}
 				if (tr.poketype % 2 == 1) {
@@ -1685,7 +1315,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 						pokeOffs += 8;
 					}
 					// Plat/HGSS have another random pokeOffs +=2 here.
-					if (romEntry.romType != Type_DP) {
+					if (romEntry.romType != Gen4Constants.Type_DP) {
 						pokeOffs += 2;
 					}
 				}
@@ -1706,7 +1336,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		try {
 			NARCContents movesLearnt = this.readNARC(romEntry
 					.getString("PokemonMovesets"));
-			for (int i = 1; i <= 493; i++) {
+			for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
 				Pokemon pkmn = pokes[i];
 				byte[] rom = movesLearnt.files.get(i);
 				int moveDataLoc = 0;
@@ -1743,7 +1373,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		// The blank moveset
 		byte[] blankSet = new byte[] { (byte) 0xFF, (byte) 0xFF, 0, 0 };
 		movesLearnt.files.add(blankSet);
-		for (int i = 1; i <= 493; i++) {
+		for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
 			Pokemon pkmn = pokes[i];
 			List<MoveLearnt> learnt = movesets.get(pkmn);
 			int sizeNeeded = learnt.size() * 2 + 2;
@@ -1822,12 +1452,12 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			if (romEntry.getInt("FossilTableOffset") > 0) {
 				byte[] ftData = arm9;
 				int baseOffset = romEntry.getInt("FossilTableOffset");
-				if (romEntry.romType == Type_HGSS) {
+				if (romEntry.romType == Gen4Constants.Type_HGSS) {
 					ftData = readOverlay(romEntry
 							.getInt("FossilTableOvlNumber"));
 				}
 				// read the 7 Fossil Pokemon
-				for (int f = 0; f < 7; f++) {
+				for (int f = 0; f < Gen4Constants.fossilCount; f++) {
 					sp.add(pokes[readWord(ftData, baseOffset + 2 + f * 4)]);
 				}
 			}
@@ -1893,10 +1523,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 			if (romEntry.getInt("FossilTableOffset") > 0) {
 				int baseOffset = romEntry.getInt("FossilTableOffset");
-				if (romEntry.romType == Type_HGSS) {
+				if (romEntry.romType == Gen4Constants.Type_HGSS) {
 					byte[] ftData = readOverlay(romEntry
 							.getInt("FossilTableOvlNumber"));
-					for (int f = 0; f < 7; f++) {
+					for (int f = 0; f < Gen4Constants.fossilCount; f++) {
 						int pokenum = statics.next().number;
 						writeWord(ftData, baseOffset + 2 + f * 4, pokenum);
 					}
@@ -1904,7 +1534,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 							ftData);
 				} else {
 					// write to arm9
-					for (int f = 0; f < 7; f++) {
+					for (int f = 0; f < Gen4Constants.fossilCount; f++) {
 						int pokenum = statics.next().number;
 						writeWord(arm9, baseOffset + 2 + f * 4, pokenum);
 					}
@@ -1919,16 +1549,17 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	@Override
 	public List<Integer> getTMMoves() {
 		String tmDataPrefix;
-		if (romEntry.romType == Type_DP || romEntry.romType == Type_Plat) {
-			tmDataPrefix = "D100D200D300D400";
+		if (romEntry.romType == Gen4Constants.Type_DP
+				|| romEntry.romType == Gen4Constants.Type_Plat) {
+			tmDataPrefix = Gen4Constants.dpptTMDataPrefix;
 		} else {
-			tmDataPrefix = "1E003200";
+			tmDataPrefix = Gen4Constants.hgssTMDataPrefix;
 		}
 		int offset = find(arm9, tmDataPrefix);
 		if (offset > 0) {
 			offset += tmDataPrefix.length() / 2; // because it was a prefix
 			List<Integer> tms = new ArrayList<Integer>();
-			for (int i = 0; i < 92; i++) {
+			for (int i = 0; i < Gen4Constants.tmCount; i++) {
 				tms.add(readWord(arm9, offset + i * 2));
 			}
 			return tms;
@@ -1940,17 +1571,18 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	@Override
 	public List<Integer> getHMMoves() {
 		String tmDataPrefix;
-		if (romEntry.romType == Type_DP || romEntry.romType == Type_Plat) {
-			tmDataPrefix = "D100D200D300D400";
+		if (romEntry.romType == Gen4Constants.Type_DP
+				|| romEntry.romType == Gen4Constants.Type_Plat) {
+			tmDataPrefix = Gen4Constants.dpptTMDataPrefix;
 		} else {
-			tmDataPrefix = "1E003200";
+			tmDataPrefix = Gen4Constants.hgssTMDataPrefix;
 		}
 		int offset = find(arm9, tmDataPrefix);
 		if (offset > 0) {
 			offset += tmDataPrefix.length() / 2; // because it was a prefix
-			offset += 184; // TM data
+			offset += Gen4Constants.tmCount * 2; // TM data
 			List<Integer> hms = new ArrayList<Integer>();
-			for (int i = 0; i < 8; i++) {
+			for (int i = 0; i < Gen4Constants.hmCount; i++) {
 				hms.add(readWord(arm9, offset + i * 2));
 			}
 			return hms;
@@ -1962,15 +1594,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	@Override
 	public void setTMMoves(List<Integer> moveIndexes) {
 		String tmDataPrefix;
-		if (romEntry.romType == Type_DP || romEntry.romType == Type_Plat) {
-			tmDataPrefix = "D100D200D300D400";
+		if (romEntry.romType == Gen4Constants.Type_DP
+				|| romEntry.romType == Gen4Constants.Type_Plat) {
+			tmDataPrefix = Gen4Constants.dpptTMDataPrefix;
 		} else {
-			tmDataPrefix = "1E003200";
+			tmDataPrefix = Gen4Constants.hgssTMDataPrefix;
 		}
 		int offset = find(arm9, tmDataPrefix);
 		if (offset > 0) {
 			offset += tmDataPrefix.length() / 2; // because it was a prefix
-			for (int i = 0; i < 92; i++) {
+			for (int i = 0; i < Gen4Constants.tmCount; i++) {
 				writeWord(arm9, offset + i * 2, moveIndexes.get(i));
 			}
 
@@ -1980,25 +1613,25 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			List<String> moveDescriptions = getStrings(romEntry
 					.getInt("MoveDescriptionsTextOffset"));
 			// TM01 is item 328 and so on
-			for (int i = 0; i < 92; i++) {
+			for (int i = 0; i < Gen4Constants.tmCount; i++) {
 				// Rewrite 5-line move descs into 3-line item descs
-				itemDescriptions.set(i + 328, RomFunctions
-						.rewriteDescriptionForNewLineSize(
+				itemDescriptions.set(i + Gen4Constants.tmItemOffset,
+						RomFunctions.rewriteDescriptionForNewLineSize(
 								moveDescriptions.get(moveIndexes.get(i)),
-								"\\n", 40, ssd));
+								"\\n", Gen4Constants.textCharsPerLine, ssd));
 			}
 			// Save the new item descriptions
 			setStrings(romEntry.getInt("ItemDescriptionsTextOffset"),
 					itemDescriptions);
 			// Palettes update
-			String baseOfPalettes = "8D018E01210133018D018F0122013401";
-			if (romEntry.romType == Type_DP) {
-				baseOfPalettes = "8D018E01210132018D018F0122013301";
+			String baseOfPalettes = Gen4Constants.pthgssPalettesPrefix;
+			if (romEntry.romType == Gen4Constants.Type_DP) {
+				baseOfPalettes = Gen4Constants.dpPalettesPrefix;
 			}
 			int offsPals = find(arm9, baseOfPalettes);
 			if (offsPals > 0) {
 				// Write pals
-				for (int i = 0; i < 92; i++) {
+				for (int i = 0; i < Gen4Constants.tmCount; i++) {
 					Move m = this.moves[moveIndexes.get(i)];
 					int pal = this.typeTMPaletteNumber(m.type);
 					writeWord(arm9, offsPals + i * 8 + 2, pal);
@@ -2013,23 +1646,25 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 	@Override
 	public int getTMCount() {
-		return 92;
+		return Gen4Constants.tmCount;
 	}
 
 	@Override
 	public int getHMCount() {
-		return 8;
+		return Gen4Constants.hmCount;
 	}
 
 	@Override
 	public Map<Pokemon, boolean[]> getTMHMCompatibility() {
 		Map<Pokemon, boolean[]> compat = new TreeMap<Pokemon, boolean[]>();
-		for (int i = 1; i <= 493; i++) {
+		for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
 			byte[] data = pokeNarc.files.get(i);
 			Pokemon pkmn = pokes[i];
-			boolean[] flags = new boolean[101];
+			boolean[] flags = new boolean[Gen4Constants.tmCount
+					+ Gen4Constants.hmCount + 1];
 			for (int j = 0; j < 13; j++) {
-				readByteIntoFlags(data, flags, j * 8 + 1, 0x1C + j);
+				readByteIntoFlags(data, flags, j * 8 + 1,
+						Gen4Constants.bsTMHMCompatOffset + j);
 			}
 			compat.put(pkmn, flags);
 		}
@@ -2043,14 +1678,15 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			boolean[] flags = compatEntry.getValue();
 			byte[] data = pokeNarc.files.get(pkmn.number);
 			for (int j = 0; j < 13; j++) {
-				data[0x1C + j] = getByteFromFlags(flags, j * 8 + 1);
+				data[Gen4Constants.bsTMHMCompatOffset + j] = getByteFromFlags(
+						flags, j * 8 + 1);
 			}
 		}
 	}
 
 	@Override
 	public boolean hasMoveTutors() {
-		return romEntry.romType != Type_DP;
+		return romEntry.romType != Gen4Constants.Type_DP;
 	}
 
 	@Override
@@ -2106,13 +1742,13 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		int bytesPer = romEntry.getInt("MoveTutorCompatBytesCount");
 		try {
 			byte[] mtcFile;
-			if (romEntry.romType == Type_HGSS) {
+			if (romEntry.romType == Gen4Constants.Type_HGSS) {
 				mtcFile = readFile(romEntry.getString("MoveTutorCompat"));
 			} else {
 				mtcFile = readOverlay(romEntry
 						.getInt("MoveTutorCompatOvlNumber"));
 			}
-			for (int i = 1; i <= 493; i++) {
+			for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
 				Pokemon pkmn = pokes[i];
 				boolean[] flags = new boolean[amount + 1];
 				for (int j = 0; j < bytesPer; j++) {
@@ -2136,7 +1772,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		int bytesPer = romEntry.getInt("MoveTutorCompatBytesCount");
 		try {
 			byte[] mtcFile;
-			if (romEntry.romType == Type_HGSS) {
+			if (romEntry.romType == Gen4Constants.Type_HGSS) {
 				mtcFile = readFile(romEntry.getString("MoveTutorCompat"));
 			} else {
 				mtcFile = readOverlay(romEntry
@@ -2161,7 +1797,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					// else do nothing to the byte
 				}
 			}
-			if (romEntry.romType == Type_HGSS) {
+			if (romEntry.romType == Gen4Constants.Type_HGSS) {
 				writeFile(romEntry.getString("MoveTutorCompat"), mtcFile);
 			} else {
 				writeOverlay(romEntry.getInt("MoveTutorCompatOvlNumber"),
@@ -2234,7 +1870,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	@Override
 	public boolean hasTimeBasedEncounters() {
 		// dppt technically do but we ignore them completely
-		return romEntry.romType == Type_HGSS;
+		return romEntry.romType == Gen4Constants.Type_HGSS;
 	}
 
 	@Override
@@ -2255,13 +1891,15 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		try {
 			NARCContents evoNARC = readNARC(romEntry
 					.getString("PokemonEvolutions"));
-			for (int i = 1; i <= 493; i++) {
+			for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
 				evosForThisPoke.clear();
 				byte[] evoEntry = evoNARC.files.get(i);
 				for (int evo = 0; evo < 7; evo++) {
 					int method = readWord(evoEntry, evo * 6);
 					int species = readWord(evoEntry, evo * 6 + 4);
-					if (method >= 1 && method <= 26 && species >= 1) {
+					if (method >= 1
+							&& method <= Gen4Constants.evolutionMethodCount
+							&& species >= 1) {
 						EvolutionType et = EvolutionType.fromIndex(4, method);
 						int extraInfo = readWord(evoEntry, evo * 6 + 2);
 						Evolution evol = new Evolution(pokes[i],
@@ -2290,7 +1928,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		try {
 			NARCContents evoNARC = readNARC(romEntry
 					.getString("PokemonEvolutions"));
-			for (int i = 1; i <= 493; i++) {
+			for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
 				byte[] evoEntry = evoNARC.files.get(i);
 				int evosWritten = 0;
 				for (Evolution evo : evos) {
@@ -2326,7 +1964,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		List<Evolution> extraEvolutions = new ArrayList<Evolution>();
 		for (Evolution evo : evos) {
 			// new 160 other impossible evolutions:
-			if (romEntry.romType == Type_HGSS) {
+			if (romEntry.romType == Gen4Constants.Type_HGSS) {
 				// beauty milotic
 				if (evo.type == EvolutionType.LEVEL_HIGH_BEAUTY) {
 					// Replace w/ level 35
@@ -2345,17 +1983,17 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				if (evo.type == EvolutionType.LEVEL_MOSS_ROCK) {
 					// Replace w/ leaf stone
 					evo.type = EvolutionType.STONE;
-					evo.extraInfo = 85; // leaf stone
+					evo.extraInfo = Gen4Constants.leafStoneIndex; // leaf stone
 					logEvoChangeStone(evo.from.name, evo.to.name,
-							itemNames.get(85));
+							itemNames.get(Gen4Constants.leafStoneIndex));
 				}
 				// icy rock (glaceon)
 				if (evo.type == EvolutionType.LEVEL_ICY_ROCK) {
 					// Replace w/ dawn stone
 					evo.type = EvolutionType.STONE;
-					evo.extraInfo = 109; // dawn stone
+					evo.extraInfo = Gen4Constants.dawnStoneIndex; // dawn stone
 					logEvoChangeStone(evo.from.name, evo.to.name,
-							itemNames.get(109));
+							itemNames.get(Gen4Constants.dawnStoneIndex));
 				}
 			}
 			if (changeMoveEvos && evo.type == EvolutionType.LEVEL_WITH_MOVE) {
@@ -2388,14 +2026,15 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			if (evo.type == EvolutionType.TRADE_ITEM) {
 				// Get the current item & evolution
 				int item = evo.extraInfo;
-				if (evo.from.number == 79) {
+				if (evo.from.number == Gen4Constants.slowpokeIndex) {
 					// Slowpoke is awkward - he already has a level evo
 					// So we can't do Level up w/ Held Item for him
 					// Put Water Stone instead
 					evo.type = EvolutionType.STONE;
-					evo.extraInfo = 84; // water stone
+					evo.extraInfo = Gen4Constants.waterStoneIndex; // water
+																	// stone
 					logEvoChangeStone(evo.from.name, evo.to.name,
-							itemNames.get(84));
+							itemNames.get(Gen4Constants.waterStoneIndex));
 				} else {
 					logEvoChangeLevelWithItem(evo.from.name, evo.to.name,
 							itemNames.get(item));
@@ -2496,7 +2135,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 	@Override
 	public int highestAbilityIndex() {
-		return 123;
+		return Gen4Constants.highestAbilityIndex;
 	}
 
 	@Override
@@ -2512,12 +2151,12 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 	@Override
 	public ItemList getAllowedItems() {
-		return allowedItems;
+		return Gen4Constants.allowedItems;
 	}
 
 	@Override
 	public ItemList getNonBadItems() {
-		return nonBadItems;
+		return Gen4Constants.nonBadItems;
 	}
 
 	@Override
@@ -2538,10 +2177,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		int offset = 0;
 		int skipTableOffset = 0;
 		int[] skipTable = romEntry.arrayEntries.get("ItemBallsSkip");
-		int setVar = romEntry.romType == Type_HGSS ? 0x29 : 0x28;
+		int setVar = romEntry.romType == Gen4Constants.Type_HGSS ? Gen4Constants.hgssSetVarScript
+				: Gen4Constants.dpptSetVarScript;
 		while (true) {
 			int part1 = readWord(itemScripts, offset);
-			if (part1 == 0xFD13) {
+			if (part1 == Gen4Constants.scriptListTerminator) {
 				// done
 				break;
 			}
@@ -2554,7 +2194,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 			int command = readWord(itemScripts, offsetInFile);
 			int variable = readWord(itemScripts, offsetInFile + 2);
-			if (command == setVar && variable == 0x8008) {
+			if (command == setVar
+					&& variable == Gen4Constants.itemScriptVariable) {
 				int item = readWord(itemScripts, offsetInFile + 4);
 				fieldItems.add(item);
 			}
@@ -2581,10 +2222,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		int offset = 0;
 		int skipTableOffset = 0;
 		int[] skipTable = romEntry.arrayEntries.get("ItemBallsSkip");
-		int setVar = romEntry.romType == Type_HGSS ? 0x29 : 0x28;
+		int setVar = romEntry.romType == Gen4Constants.Type_HGSS ? Gen4Constants.hgssSetVarScript
+				: Gen4Constants.dpptSetVarScript;
 		while (true) {
 			int part1 = readWord(itemScripts, offset);
-			if (part1 == 0xFD13) {
+			if (part1 == Gen4Constants.scriptListTerminator) {
 				// done
 				break;
 			}
@@ -2597,7 +2239,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 			int command = readWord(itemScripts, offsetInFile);
 			int variable = readWord(itemScripts, offsetInFile + 2);
-			if (command == setVar && variable == 0x8008) {
+			if (command == setVar
+					&& variable == Gen4Constants.itemScriptVariable) {
 				int item = iterItems.next();
 				writeWord(itemScripts, offsetInFile + 4, item);
 			}
@@ -2614,15 +2257,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 	@Override
 	public List<Integer> getRequiredFieldTMs() {
-		if (romEntry.romType == Type_DP) {
-			return Arrays.asList(new Integer[] { 2, 3, 5, 9, 12, 19, 23, 28,
-					34, 39, 41, 43, 46, 47, 49, 50, 62, 69, 79, 80, 82, 84, 85,
-					87 });
-		} else if (romEntry.romType == Type_Plat) {
+		if (romEntry.romType == Gen4Constants.Type_DP) {
+			return Gen4Constants.dpRequiredFieldTMs;
+		} else if (romEntry.romType == Gen4Constants.Type_Plat) {
 			// same as DP just we have to keep the weather TMs
-			return Arrays.asList(new Integer[] { 2, 3, 5, 7, 9, 11, 12, 18, 19,
-					23, 28, 34, 37, 39, 41, 43, 46, 47, 49, 50, 62, 69, 79, 80,
-					82, 84, 85, 87 });
+			return Gen4Constants.ptRequiredFieldTMs;
 		}
 		return new ArrayList<Integer>();
 	}
@@ -2633,8 +2272,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		List<Integer> fieldTMs = new ArrayList<Integer>();
 
 		for (int item : fieldItems) {
-			if (allowedItems.isTM(item)) {
-				fieldTMs.add(item - 327);
+			if (Gen4Constants.allowedItems.isTM(item)) {
+				fieldTMs.add(item - Gen4Constants.tmItemOffset + 1);
 			}
 		}
 
@@ -2649,8 +2288,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 		for (int i = 0; i < fiLength; i++) {
 			int oldItem = fieldItems.get(i);
-			if (allowedItems.isTM(oldItem)) {
-				int newItem = iterTMs.next() + 327;
+			if (Gen4Constants.allowedItems.isTM(oldItem)) {
+				int newItem = iterTMs.next() + Gen4Constants.tmItemOffset - 1;
 				fieldItems.set(i, newItem);
 			}
 		}
@@ -2664,7 +2303,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		List<Integer> fieldRegItems = new ArrayList<Integer>();
 
 		for (int item : fieldItems) {
-			if (allowedItems.isAllowed(item) && !(allowedItems.isTM(item))) {
+			if (Gen4Constants.allowedItems.isAllowed(item)
+					&& !(Gen4Constants.allowedItems.isTM(item))) {
 				fieldRegItems.add(item);
 			}
 		}
@@ -2680,8 +2320,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 		for (int i = 0; i < fiLength; i++) {
 			int oldItem = fieldItems.get(i);
-			if (!(allowedItems.isTM(oldItem))
-					&& allowedItems.isAllowed(oldItem)) {
+			if (!(Gen4Constants.allowedItems.isTM(oldItem))
+					&& Gen4Constants.allowedItems.isAllowed(oldItem)) {
 				int newItem = iterNewItems.next();
 				fieldItems.set(i, newItem);
 			}
@@ -2796,11 +2436,13 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 									newTrade.requestedPokemon.name);
 						}
 						replaceAllStringsInEntry(textOffsets[trade],
-								replacements, 40);
+								replacements, Gen4Constants.textCharsPerLine);
 						// hgss override for one set of strings that appears 2x
-						if (romEntry.romType == Type_HGSS && trade == 6) {
+						if (romEntry.romType == Gen4Constants.Type_HGSS
+								&& trade == 6) {
 							replaceAllStringsInEntry(textOffsets[trade] + 1,
-									replacements, 40);
+									replacements,
+									Gen4Constants.textCharsPerLine);
 						}
 					}
 				}
@@ -2852,7 +2494,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		try {
 			byte[] babyPokes = readFile(romEntry.getString("BabyPokemon"));
 			// baby pokemon
-			for (int i = 1; i <= 493; i++) {
+			for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
 				int oldBaby = i;
 				while (true) {
 					int currentBaby = oldBaby;
@@ -2883,29 +2525,19 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 	@Override
 	public List<Integer> getFieldMoves() {
-		if (romEntry.romType == Type_HGSS) {
-			// HGSS:
-			// cut, fly, surf, strength, flash, dig, teleport, whirlpool,
-			// waterfall, rock smash, headbutt, sweet scent, rock climb
-			return Arrays.asList(15, 19, 57, 70, 148, 91, 100, 250, 127, 249,
-					29, 230, 431);
+		if (romEntry.romType == Gen4Constants.Type_HGSS) {
+			return Gen4Constants.hgssFieldMoves;
 		} else {
-			// DPPt:
-			// cut, fly, surf, strength, flash, dig, teleport, waterfall,
-			// rock smash, sweet scent, defog, rock climb
-			return Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 249, 230,
-					432, 431);
+			return Gen4Constants.dpptFieldMoves;
 		}
 	}
 
 	@Override
 	public List<Integer> getEarlyRequiredHMMoves() {
-		// DPPt: rock smash, cut
-		// HGSS: just cut
-		if (romEntry.romType == Type_HGSS) {
-			return Arrays.asList(15);
+		if (romEntry.romType == Gen4Constants.Type_HGSS) {
+			return Gen4Constants.hgssEarlyRequiredHMMoves;
 		} else {
-			return Arrays.asList(249, 15);
+			return Gen4Constants.dpptEarlyRequiredHMMoves;
 		}
 	}
 }
