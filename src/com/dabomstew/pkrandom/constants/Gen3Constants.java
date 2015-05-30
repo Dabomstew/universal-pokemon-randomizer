@@ -20,7 +20,7 @@ public class Gen3Constants {
 	public static final String unofficialEmeraldROMName = "YJencrypted";
 
 	public static final int romNameOffset = 0xA0, romCodeOffset = 0xAC,
-			romVersionOffset = 0xBC, unknownHeaderOffset = 0xBD;
+			romVersionOffset = 0xBC, headerChecksumOffset = 0xBD;
 
 	public static final String wildPokemonPointerPrefix = "0348048009E00000FFFF0000";
 

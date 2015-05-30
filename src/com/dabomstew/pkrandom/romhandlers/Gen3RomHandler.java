@@ -305,7 +305,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			rom[Gen3Constants.romCodeOffset + 1] = 'P';
 			rom[Gen3Constants.romCodeOffset + 2] = 'E';
 			rom[Gen3Constants.romCodeOffset + 3] = 'T';
-			rom[Gen3Constants.unknownHeaderOffset] = 0x66;
+			rom[Gen3Constants.headerChecksumOffset] = 0x66;
 		}
 		// Wild Pokemon header
 		if (find(rom, Gen3Constants.wildPokemonPointerPrefix) == -1) {
@@ -859,11 +859,13 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			if (item <= 0xFF) {
 				rom[baseOffset] = (byte) item;
 				rom[baseOffset + 2] = 0;
-				rom[baseOffset + 3] = Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR2;
+				rom[baseOffset + 3] = Gen3Constants.gbaAddRxOpcode
+						| Gen3Constants.gbaR2;
 			} else {
 				rom[baseOffset] = (byte) 0xFF;
 				rom[baseOffset + 2] = (byte) (item - 0xFF);
-				rom[baseOffset + 3] = Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR2;
+				rom[baseOffset + 3] = Gen3Constants.gbaAddRxOpcode
+						| Gen3Constants.gbaR2;
 			}
 		}
 	}
@@ -1724,16 +1726,19 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			// So we just use it twice...
 			// the equivalent of nop'ing the second time.
 			rom[deoxysObOffset] = 0x00;
-			rom[deoxysObOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1;
+			rom[deoxysObOffset + 1] = Gen3Constants.gbaSetRxOpcode
+					| Gen3Constants.gbaR1;
 			rom[deoxysObOffset + 2] = 0x00;
-			rom[deoxysObOffset + 3] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1;
+			rom[deoxysObOffset + 3] = Gen3Constants.gbaSetRxOpcode
+					| Gen3Constants.gbaR1;
 			// Look for the mew check too... it's 0x16 ahead
 			if (readWord(deoxysObOffset
 					+ Gen3Constants.mewObeyOffsetFromDeoxysObey) == (((Gen3Constants.gbaCmpRxOpcode | Gen3Constants.gbaR0) << 8) | (Gen3Constants.mewIndex))) {
 				// Bingo, thats CMP R0, 0x97
 				// change to CMP R0, 0x0
-				writeWord(deoxysObOffset
-						+ Gen3Constants.mewObeyOffsetFromDeoxysObey,
+				writeWord(
+						deoxysObOffset
+								+ Gen3Constants.mewObeyOffsetFromDeoxysObey,
 						(((Gen3Constants.gbaCmpRxOpcode | Gen3Constants.gbaR0) << 8) | (0)));
 			}
 		}
@@ -1887,7 +1892,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			for (int j = 0; j < 5; j++) {
 				int method = readWord(evoOffset + j * 8);
 				int evolvingTo = readWord(evoOffset + j * 8 + 4);
-				if (method >= 1 && method <= Gen3Constants.evolutionMethodCount && evolvingTo >= 1
+				if (method >= 1 && method <= Gen3Constants.evolutionMethodCount
+						&& evolvingTo >= 1
 						&& evolvingTo <= Gen3Constants.internalPokemonCount) {
 					evolvingTo = Gen3Constants.poke3GIndexToNum(evolvingTo);
 					int extraInfo = readWord(evoOffset + j * 8 + 2);
@@ -1921,7 +1927,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				if (evo.from == pokes[i]) {
 					writeWord(evoOffset, evo.type.toIndex(3));
 					writeWord(evoOffset + 2, evo.extraInfo);
-					writeWord(evoOffset + 4, Gen3Constants.pokeNumTo3GIndex(evo.to.number));
+					writeWord(evoOffset + 4,
+							Gen3Constants.pokeNumTo3GIndex(evo.to.number));
 					writeWord(evoOffset + 6, 0);
 					evoOffset += 8;
 					evosWritten++;
@@ -1953,14 +1960,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				// happiness day change to Sun Stone
 				evo.type = EvolutionType.STONE;
 				evo.extraInfo = Gen3Constants.sunStoneIndex; // sun stone
-				logEvoChangeStone(evo.from.name, evo.to.name, itemNames[Gen3Constants.sunStoneIndex]);
+				logEvoChangeStone(evo.from.name, evo.to.name,
+						itemNames[Gen3Constants.sunStoneIndex]);
 			}
 			if (evo.type == EvolutionType.HAPPINESS_NIGHT
 					&& romEntry.romType == Gen3Constants.RomType_FRLG) {
 				// happiness night change to Moon Stone
 				evo.type = EvolutionType.STONE;
 				evo.extraInfo = Gen3Constants.moonStoneIndex; // moon stone
-				logEvoChangeStone(evo.from.name, evo.to.name, itemNames[Gen3Constants.moonStoneIndex]);
+				logEvoChangeStone(evo.from.name, evo.to.name,
+						itemNames[Gen3Constants.moonStoneIndex]);
 			}
 			if (evo.type == EvolutionType.LEVEL_HIGH_BEAUTY
 					&& romEntry.romType == Gen3Constants.RomType_FRLG) {
@@ -1987,23 +1996,29 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				} else if (evo.from.number == Gen3Constants.slowpokeIndex) {
 					// Slowpoke: Water Stone
 					evo.type = EvolutionType.STONE;
-					evo.extraInfo = Gen3Constants.waterStoneIndex; // water stone
-					logEvoChangeStone(evo.from.name, evo.to.name, itemNames[Gen3Constants.waterStoneIndex]);
+					evo.extraInfo = Gen3Constants.waterStoneIndex; // water
+																	// stone
+					logEvoChangeStone(evo.from.name, evo.to.name,
+							itemNames[Gen3Constants.waterStoneIndex]);
 				} else if (evo.from.number == Gen3Constants.seadraIndex) {
 					// Seadra: Lv 40
 					evo.type = EvolutionType.LEVEL;
 					evo.extraInfo = 40;
 					logEvoChangeLevel(evo.from.name, evo.to.name, 40);
-				} else if (evo.from.number == Gen3Constants.clamperlIndex && evo.to.number == Gen3Constants.huntailIndex) {
+				} else if (evo.from.number == Gen3Constants.clamperlIndex
+						&& evo.to.number == Gen3Constants.huntailIndex) {
 					// Clamperl -> Huntail: Lv30
 					evo.type = EvolutionType.LEVEL;
 					evo.extraInfo = 30;
 					logEvoChangeLevel(evo.from.name, evo.to.name, 30);
-				} else if (evo.from.number == Gen3Constants.clamperlIndex && evo.to.number == Gen3Constants.gorebyssIndex) {
+				} else if (evo.from.number == Gen3Constants.clamperlIndex
+						&& evo.to.number == Gen3Constants.gorebyssIndex) {
 					// Clamperl -> Gorebyss: Water Stone
 					evo.type = EvolutionType.STONE;
-					evo.extraInfo = Gen3Constants.waterStoneIndex; // water stone
-					logEvoChangeStone(evo.from.name, evo.to.name, itemNames[Gen3Constants.waterStoneIndex]);
+					evo.extraInfo = Gen3Constants.waterStoneIndex; // water
+																	// stone
+					logEvoChangeStone(evo.from.name, evo.to.name,
+							itemNames[Gen3Constants.waterStoneIndex]);
 				} else {
 					// Onix, Scyther or Porygon: Lv30
 					evo.type = EvolutionType.LEVEL;
@@ -2118,7 +2133,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	private void loadAbilityNames() {
 		int nameoffs = romEntry.getValue("AbilityNames");
 		int namelen = romEntry.getValue("AbilityNameLength");
-		abilityNames = new String[Gen3Constants.highestAbilityIndex+1];
+		abilityNames = new String[Gen3Constants.highestAbilityIndex + 1];
 		for (int i = 0; i <= Gen3Constants.highestAbilityIndex; i++) {
 			abilityNames[i] = readFixedLengthString(nameoffs + namelen * i,
 					namelen);
@@ -2140,7 +2155,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		// FRLG
 		if (romEntry.romType == Gen3Constants.RomType_FRLG) {
 			// intro sprites : first 251 only due to size
-			int introPokemon = RandomSource.nextInt(Gen3Constants.hoennPokesStart-1) + 1;
+			int introPokemon = RandomSource
+					.nextInt(Gen3Constants.hoennPokesStart - 1) + 1;
 			int frontSprites = readPointer(Gen3Constants.frlgFrontSpritesPointer);
 			int palettes = readPointer(Gen3Constants.frlgPokemonPalettesPointer);
 
@@ -2153,7 +2169,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		} else if (romEntry.romType == Gen3Constants.RomType_Ruby
 				|| romEntry.romType == Gen3Constants.RomType_Sapp) {
 			// intro sprites : hoenn pokes only
-			int introPokemon = Gen3Constants.pokeNumTo3GIndex(RandomSource.nextInt(Gen3Constants.hoennPokesCount) + Gen3Constants.hoennPokesStart);
+			int introPokemon = Gen3Constants.pokeNumTo3GIndex(RandomSource
+					.nextInt(Gen3Constants.hoennPokesCount)
+					+ Gen3Constants.hoennPokesStart);
 			int frontSprites = romEntry.getValue("PokemonFrontSprites");
 			int palettes = romEntry.getValue("PokemonNormalPalettes");
 			int cryCommand = romEntry.getValue("IntroCryOffset");
@@ -2161,26 +2179,33 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
 			if (introPokemon > 255) {
 				rom[cryCommand] = (byte) 0xFF;
-				rom[cryCommand + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR0;
+				rom[cryCommand + 1] = Gen3Constants.gbaSetRxOpcode
+						| Gen3Constants.gbaR0;
 
 				rom[cryCommand + 2] = (byte) (introPokemon - 0xFF);
-				rom[cryCommand + 3] = Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR0;
+				rom[cryCommand + 3] = Gen3Constants.gbaAddRxOpcode
+						| Gen3Constants.gbaR0;
 
 				rom[otherCommand] = (byte) 0xFF;
-				rom[otherCommand + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR4;
+				rom[otherCommand + 1] = Gen3Constants.gbaSetRxOpcode
+						| Gen3Constants.gbaR4;
 
 				rom[otherCommand + 2] = (byte) (introPokemon - 0xFF);
-				rom[otherCommand + 3] = Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR4;
+				rom[otherCommand + 3] = Gen3Constants.gbaAddRxOpcode
+						| Gen3Constants.gbaR4;
 			} else {
 				rom[cryCommand] = (byte) introPokemon;
-				rom[cryCommand + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR0;
+				rom[cryCommand + 1] = Gen3Constants.gbaSetRxOpcode
+						| Gen3Constants.gbaR0;
 
 				writeWord(cryCommand + 2, Gen3Constants.gbaAlternativeNopOpcode);
 
 				rom[otherCommand] = (byte) introPokemon;
-				rom[otherCommand + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR4;
+				rom[otherCommand + 1] = Gen3Constants.gbaSetRxOpcode
+						| Gen3Constants.gbaR4;
 
-				writeWord(otherCommand + 2, Gen3Constants.gbaAlternativeNopOpcode);
+				writeWord(otherCommand + 2,
+						Gen3Constants.gbaAlternativeNopOpcode);
 			}
 
 			writePointer(romEntry.getValue("IntroSpriteOffset"), frontSprites
@@ -2189,7 +2214,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 					+ introPokemon * 8);
 		} else {
 			// Emerald, intro sprite: any Pokemon.
-			int introPokemon = Gen3Constants.pokeNumTo3GIndex(randomPokemon().number);
+			int introPokemon = Gen3Constants
+					.pokeNumTo3GIndex(randomPokemon().number);
 			writeWord(romEntry.getValue("IntroSpriteOffset"), introPokemon);
 			writeWord(romEntry.getValue("IntroCryOffset"), introPokemon);
 		}
@@ -2278,7 +2304,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				} else {
 					if (romEntry.romType == Gen3Constants.RomType_FRLG) {
 						mapNames[bank][map] = readVariableLengthString(readPointer(mapLabels
-								+ (mapLabel - Gen3Constants.frlgMapLabelsStart) * 4));
+								+ (mapLabel - Gen3Constants.frlgMapLabelsStart)
+								* 4));
 					} else {
 						mapNames[bank][map] = readVariableLengthString(readPointer(mapLabels
 								+ mapLabel * 8 + 4));
@@ -2510,7 +2537,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			IngameTrade trade = new IngameTrade();
 			int entryOffset = tableOffset + entry * entryLength;
 			trade.nickname = readVariableLengthString(entryOffset);
-			trade.givenPokemon = pokemonFromNumber(Gen3Constants.poke3GIndexToNum(readWord(entryOffset + 12)));
+			trade.givenPokemon = pokemonFromNumber(Gen3Constants
+					.poke3GIndexToNum(readWord(entryOffset + 12)));
 			trade.ivs = new int[6];
 			for (int i = 0; i < 6; i++) {
 				trade.ivs[i] = rom[entryOffset + 14 + i] & 0xFF;
@@ -2518,7 +2546,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			trade.otId = readWord(entryOffset + 24);
 			trade.item = readWord(entryOffset + 40);
 			trade.otName = readVariableLengthString(entryOffset + 43);
-			trade.requestedPokemon = pokemonFromNumber(Gen3Constants.poke3GIndexToNum(readWord(entryOffset + 56)));
+			trade.requestedPokemon = pokemonFromNumber(Gen3Constants
+					.poke3GIndexToNum(readWord(entryOffset + 56)));
 			trades.add(trade);
 		}
 
@@ -2553,7 +2582,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			writeWord(entryOffset + 40, trade.item);
 			writeFixedLengthString(trade.otName, entryOffset + 43, 11);
 			writeWord(entryOffset + 56,
-					Gen3Constants.pokeNumTo3GIndex(trade.requestedPokemon.number));
+					Gen3Constants
+							.pokeNumTo3GIndex(trade.requestedPokemon.number));
 		}
 	}
 
