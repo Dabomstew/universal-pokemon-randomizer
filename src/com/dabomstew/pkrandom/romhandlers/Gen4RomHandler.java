@@ -1624,9 +1624,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			setStrings(romEntry.getInt("ItemDescriptionsTextOffset"),
 					itemDescriptions);
 			// Palettes update
-			String baseOfPalettes = Gen4Constants.pthgssPalettesPrefix;
+			String baseOfPalettes = Gen4Constants.pthgssItemPalettesPrefix;
 			if (romEntry.romType == Gen4Constants.Type_DP) {
-				baseOfPalettes = Gen4Constants.dpPalettesPrefix;
+				baseOfPalettes = Gen4Constants.dpItemPalettesPrefix;
 			}
 			int offsPals = find(arm9, baseOfPalettes);
 			if (offsPals > 0) {

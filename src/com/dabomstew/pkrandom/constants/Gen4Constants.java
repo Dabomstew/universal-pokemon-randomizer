@@ -72,8 +72,8 @@ public class Gen4Constants {
 
 	public static final int textCharsPerLine = 40;
 
-	public static final String dpPalettesPrefix = "8D018E01210132018D018F0122013301",
-			pthgssPalettesPrefix = "8D018E01210133018D018F0122013401";
+	public static final String dpItemPalettesPrefix = "8D018E01210132018D018F0122013301",
+			pthgssItemPalettesPrefix = "8D018E01210133018D018F0122013401";
 
 	public static final int evolutionMethodCount = 26;
 
