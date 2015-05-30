@@ -80,8 +80,6 @@ public class Gen3Constants {
 
 	public static final Type[] typeTable = constructTypeTable();
 
-	public static final int nulledPointer = -134217728;
-
 	public static final int grassSlots = 12, surfingSlots = 5,
 			rockSmashSlots = 5, fishingSlots = 10;
 

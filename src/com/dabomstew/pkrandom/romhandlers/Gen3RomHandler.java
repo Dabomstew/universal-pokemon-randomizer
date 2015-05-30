@@ -920,27 +920,27 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			int fishPokes = readPointer(offs + 16);
 
 			// Add pokemanz
-			if (grassPokes != Gen3Constants.nulledPointer
+			if (grassPokes >= 0 && grassPokes < rom.length
 					&& rom[grassPokes] != 0
 					&& !seenOffsets.contains(readPointer(grassPokes + 4))) {
 				encounterAreas.add(readWildArea(grassPokes,
 						Gen3Constants.grassSlots, mapName + " Grass/Cave"));
 				seenOffsets.add(readPointer(grassPokes + 4));
 			}
-			if (waterPokes != Gen3Constants.nulledPointer
+			if (waterPokes >= 0 && waterPokes < rom.length
 					&& rom[waterPokes] != 0
 					&& !seenOffsets.contains(readPointer(waterPokes + 4))) {
 				encounterAreas.add(readWildArea(waterPokes,
 						Gen3Constants.surfingSlots, mapName + " Surfing"));
 				seenOffsets.add(readPointer(waterPokes + 4));
 			}
-			if (treePokes != Gen3Constants.nulledPointer && rom[treePokes] != 0
+			if (treePokes >= 0 && treePokes < rom.length && rom[treePokes] != 0
 					&& !seenOffsets.contains(readPointer(treePokes + 4))) {
 				encounterAreas.add(readWildArea(treePokes,
 						Gen3Constants.rockSmashSlots, mapName + " Rock Smash"));
 				seenOffsets.add(readPointer(treePokes + 4));
 			}
-			if (fishPokes != Gen3Constants.nulledPointer && rom[fishPokes] != 0
+			if (fishPokes >= 0 && fishPokes < rom.length && rom[fishPokes] != 0
 					&& !seenOffsets.contains(readPointer(fishPokes + 4))) {
 				encounterAreas.add(readWildArea(fishPokes,
 						Gen3Constants.fishingSlots, mapName + " Fishing"));
@@ -1011,27 +1011,27 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			int fishPokes = readPointer(offs + 16);
 
 			// Add pokemanz
-			if (grassPokes != Gen3Constants.nulledPointer
+			if (grassPokes >= 0 && grassPokes < rom.length
 					&& rom[grassPokes] != 0
 					&& !seenOffsets.contains(readPointer(grassPokes + 4))) {
 				writeWildArea(grassPokes, Gen3Constants.grassSlots,
 						encounterAreas.next());
 				seenOffsets.add(readPointer(grassPokes + 4));
 			}
-			if (waterPokes != Gen3Constants.nulledPointer
+			if (waterPokes >= 0 && waterPokes < rom.length
 					&& rom[waterPokes] != 0
 					&& !seenOffsets.contains(readPointer(waterPokes + 4))) {
 				writeWildArea(waterPokes, Gen3Constants.surfingSlots,
 						encounterAreas.next());
 				seenOffsets.add(readPointer(waterPokes + 4));
 			}
-			if (treePokes != Gen3Constants.nulledPointer && rom[treePokes] != 0
+			if (treePokes >= 0 && treePokes < rom.length && rom[treePokes] != 0
 					&& !seenOffsets.contains(readPointer(treePokes + 4))) {
 				writeWildArea(treePokes, Gen3Constants.rockSmashSlots,
 						encounterAreas.next());
 				seenOffsets.add(readPointer(treePokes + 4));
 			}
-			if (fishPokes != Gen3Constants.nulledPointer && rom[fishPokes] != 0
+			if (fishPokes >= 0 && fishPokes < rom.length && rom[fishPokes] != 0
 					&& !seenOffsets.contains(readPointer(fishPokes + 4))) {
 				writeWildArea(fishPokes, Gen3Constants.fishingSlots,
 						encounterAreas.next());
