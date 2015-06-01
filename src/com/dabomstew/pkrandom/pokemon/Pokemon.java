@@ -27,8 +27,7 @@ package com.dabomstew.pkrandom.pokemon;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import com.dabomstew.pkrandom.RandomSource;
+import java.util.Random;
 
 public class Pokemon implements Comparable<Pokemon> {
 
@@ -45,16 +44,16 @@ public class Pokemon implements Comparable<Pokemon> {
 
 	public int guaranteedHeldItem, commonHeldItem, rareHeldItem,
 			darkGrassHeldItem;
-	
+
 	public ExpCurve growthCurve;
 
 	public Pokemon() {
 	}
 
-	public void shuffleStats() {
+	public void shuffleStats(Random random) {
 		List<Integer> stats = Arrays.asList(hp, attack, defense, spatk, spdef,
 				speed);
-		Collections.shuffle(stats, RandomSource.instance());
+		Collections.shuffle(stats, random);
 
 		// Copy in new stats
 		hp = stats.get(0);
@@ -63,27 +62,20 @@ public class Pokemon implements Comparable<Pokemon> {
 		spatk = stats.get(3);
 		spdef = stats.get(4);
 		speed = stats.get(5);
-		
+
 		// make special the average of spatk and spdef
 		special = (int) Math.ceil((spatk + spdef) / 2.0f);
-
-		// Copy special from a random one of spatk or spdef
-//		if (RandomSource.random() < 0.5) {
-//			special = spatk;
-//		} else {
-//			special = spdef;
-//		}
 	}
 
-	public void randomizeStatsWithinBST() {
+	public void randomizeStatsWithinBST(Random random) {
 		if (number == 292) {
 			// Shedinja is horribly broken unless we restrict him to 1HP.
 			int bst = bst() - 51;
 
 			// Make weightings
-			double atkW = RandomSource.random(), defW = RandomSource.random();
-			double spaW = RandomSource.random(), spdW = RandomSource.random(), speW = RandomSource
-					.random();
+			double atkW = random.nextDouble(), defW = random.nextDouble();
+			double spaW = random.nextDouble(), spdW = random.nextDouble(), speW = random
+					.nextDouble();
 
 			double totW = atkW + defW + spaW + spdW + speW;
 
@@ -102,10 +94,10 @@ public class Pokemon implements Comparable<Pokemon> {
 			int bst = bst() - 70;
 
 			// Make weightings
-			double hpW = RandomSource.random(), atkW = RandomSource.random(), defW = RandomSource
-					.random();
-			double spaW = RandomSource.random(), spdW = RandomSource.random(), speW = RandomSource
-					.random();
+			double hpW = random.nextDouble(), atkW = random.nextDouble(), defW = random
+					.nextDouble();
+			double spaW = random.nextDouble(), spdW = random.nextDouble(), speW = random
+					.nextDouble();
 
 			double totW = hpW + atkW + defW + spaW + spdW + speW;
 
@@ -124,7 +116,7 @@ public class Pokemon implements Comparable<Pokemon> {
 		if (hp > 255 || attack > 255 || defense > 255 || spatk > 255
 				|| spdef > 255 || speed > 255) {
 			// re roll
-			randomizeStatsWithinBST();
+			randomizeStatsWithinBST(random);
 		}
 
 	}

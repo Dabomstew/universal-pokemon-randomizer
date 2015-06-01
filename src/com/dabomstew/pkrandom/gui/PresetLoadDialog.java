@@ -42,6 +42,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import com.dabomstew.pkrandom.InvalidSupplementFilesException;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 /**

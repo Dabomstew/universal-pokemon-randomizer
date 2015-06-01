@@ -28,11 +28,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Random;
 
 public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
 	protected byte[] rom;
 	private String loadedFN;
+
+	public AbstractGBRomHandler(Random random) {
+		super(random);
+	}
 
 	public boolean detectRom(String filename) {
 		if (new File(filename).length() > 32 * 1024 * 1024) {
@@ -114,7 +119,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 		}
 		return (byte) thisByte;
 	}
-	
+
 	protected int readWord(int offset) {
 		return readWord(rom, offset);
 	}
@@ -122,7 +127,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 	protected int readWord(byte[] data, int offset) {
 		return (data[offset] & 0xFF) + ((data[offset + 1] & 0xFF) << 8);
 	}
-	
+
 	protected void writeWord(int offset, int value) {
 		writeWord(rom, offset, value);
 	}
@@ -131,13 +136,13 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 		data[offset] = (byte) (value % 0x100);
 		data[offset + 1] = (byte) ((value / 0x100) % 0x100);
 	}
-	
+
 	protected boolean matches(byte[] data, int offset, byte[] needle) {
-		for(int i=0;i<needle.length;i++) {
-			if(offset+i >= data.length) {
+		for (int i = 0; i < needle.length; i++) {
+			if (offset + i >= data.length) {
 				return false;
 			}
-			if(data[offset+i] != needle[i]) {
+			if (data[offset + i] != needle[i]) {
 				return false;
 			}
 		}

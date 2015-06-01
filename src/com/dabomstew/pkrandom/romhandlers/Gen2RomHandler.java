@@ -33,12 +33,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.TreeMap;
 
 import com.dabomstew.pkrandom.CodeTweaks;
 import com.dabomstew.pkrandom.FileFunctions;
-import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.constants.Gen2Constants;
@@ -56,6 +56,18 @@ import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 
 public class Gen2RomHandler extends AbstractGBRomHandler {
+
+	public static class Factory implements RomHandler.Factory {
+
+		@Override
+		public Gen2RomHandler create(Random random) {
+			return new Gen2RomHandler(random);
+		}
+	}
+
+	public Gen2RomHandler(Random random) {
+		super(random);
+	}
 
 	private static class RomEntry {
 		private String name;
@@ -721,7 +733,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 	@Override
 	public void shufflePokemonStats() {
 		for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
-			pokes[i].shuffleStats();
+			pokes[i].shuffleStats(this.random);
 		}
 	}
 
@@ -1782,10 +1794,10 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 		// Intro sprite
 
 		// Pick a pokemon
-		int pokemon = RandomSource.nextInt(Gen2Constants.pokemonCount) + 1;
+		int pokemon = this.random.nextInt(Gen2Constants.pokemonCount) + 1;
 		while (pokemon == Gen2Constants.unownIndex) {
 			// Unown is banned
-			pokemon = RandomSource.nextInt(Gen2Constants.pokemonCount) + 1;
+			pokemon = this.random.nextInt(Gen2Constants.pokemonCount) + 1;
 		}
 
 		rom[romEntry.getValue("IntroSpriteOffset")] = (byte) pokemon;

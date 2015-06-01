@@ -26,6 +26,7 @@ package com.dabomstew.pkrandom.romhandlers;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Random;
 import java.util.TreeMap;
 
 import com.dabomstew.pkrandom.newnds.NDSRom;
@@ -36,6 +37,10 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 	protected String dataFolder;
 	private NDSRom baseRom;
 	private String loadedFN;
+
+	public AbstractDSRomHandler(Random random) {
+		super(random);
+	}
 
 	@Override
 	public boolean detectRom(String filename) {

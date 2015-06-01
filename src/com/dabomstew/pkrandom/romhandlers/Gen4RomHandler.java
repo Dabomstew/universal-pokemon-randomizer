@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.TreeMap;
 
@@ -38,7 +39,6 @@ import thenewpoketext.PokeTextData;
 import thenewpoketext.TextToPoke;
 
 import com.dabomstew.pkrandom.FileFunctions;
-import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen4Constants;
 import com.dabomstew.pkrandom.pokemon.Encounter;
@@ -55,6 +55,18 @@ import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 
 public class Gen4RomHandler extends AbstractDSRomHandler {
+
+	public static class Factory implements RomHandler.Factory {
+
+		@Override
+		public Gen4RomHandler create(Random random) {
+			return new Gen4RomHandler(random);
+		}
+	}
+
+	public Gen4RomHandler(Random random) {
+		super(random);
+	}
 
 	private static class RomEntry {
 		private String name;
@@ -775,7 +787,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	@Override
 	public void shufflePokemonStats() {
 		for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
-			pokes[i].shuffleStats();
+			pokes[i].shuffleStats(this.random);
 		}
 	}
 
@@ -1503,7 +1515,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					writeLong(tradeNARC.files.get(tradeNum), 0,
 							thisTrade.number);
 					writeLong(tradeNARC.files.get(tradeNum), 0x1C,
-							possibleAbilities.get(RandomSource
+							possibleAbilities.get(this.random
 									.nextInt(possibleAbilities.size())));
 				}
 				writeNARC(romEntry.getString("InGameTrades"), tradeNARC);
@@ -1513,7 +1525,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				// Truncate the pokemon# to 1byte, unless it's 0
 				int pokenum = statics.next().number;
 				if (pokenum > 255) {
-					pokenum = RandomSource.nextInt(255) + 1;
+					pokenum = this.random.nextInt(255) + 1;
 				}
 				byte[] ovOverlay = readOverlay(romEntry
 						.getInt("MoveTutorMovesOvlNumber"));

@@ -26,6 +26,7 @@ package com.dabomstew.pkrandom.romhandlers;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
@@ -39,6 +40,10 @@ import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
 
 public interface RomHandler {
+
+	public interface Factory {
+		public RomHandler create(Random random);
+	}
 
 	// Check whether this ROM is for this handler or not
 
@@ -296,7 +301,7 @@ public interface RomHandler {
 	// Items
 
 	public ItemList getAllowedItems();
-	
+
 	public ItemList getNonBadItems();
 
 	public void randomizeWildHeldItems(boolean banBadItems);
@@ -351,7 +356,7 @@ public interface RomHandler {
 	// Evos
 
 	public List<Evolution> getEvolutions();
-	
+
 	public void setEvolutions(List<Evolution> evos);
 
 	public void removeTradeEvolutions(boolean changeMoveEvos);
@@ -410,9 +415,9 @@ public interface RomHandler {
 	public void applyXAccNerfPatch();
 
 	public void applyCritRatePatch();
-	
+
 	public void applyFastestTextPatch();
-	
+
 	public void applyRunningShoesIndoorsPatch();
 
 }

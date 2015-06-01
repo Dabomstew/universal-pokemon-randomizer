@@ -32,13 +32,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.TreeMap;
 
 import pptxt.PPTxtHandler;
 
 import com.dabomstew.pkrandom.FileFunctions;
-import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.pokemon.Encounter;
@@ -58,6 +58,18 @@ import dsdecmp.HexInputStream;
 import dsdecmp.JavaDSDecmp;
 
 public class Gen5RomHandler extends AbstractDSRomHandler {
+
+	public static class Factory implements RomHandler.Factory {
+
+		@Override
+		public Gen5RomHandler create(Random random) {
+			return new Gen5RomHandler(random);
+		}
+	}
+
+	public Gen5RomHandler(Random random) {
+		super(random);
+	}
 
 	private static class OffsetWithinEntry {
 		private int entry;
@@ -676,7 +688,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 	@Override
 	public void shufflePokemonStats() {
 		for (int i = 1; i <= Gen5Constants.pokemonCount; i++) {
-			pokes[i].shuffleStats();
+			pokes[i].shuffleStats(this.random);
 		}
 
 	}
@@ -1347,14 +1359,14 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 				for (int version = 0; version < 2; version++) {
 					for (int rarityslot = 0; rarityslot < 3; rarityslot++) {
 						for (int group = 0; group < 4; group++) {
-							int pokeChoice = RandomSource.nextInt(randomSize) + 1;
+							int pokeChoice = this.random.nextInt(randomSize) + 1;
 							if (pokeChoice > Gen5Constants.nonUnovaPokemonCount) {
 								pokeChoice = allowedUnovaPokemon[pokeChoice
 										- (Gen5Constants.nonUnovaPokemonCount + 1)];
 							}
 							writeWord(hhEntry, version * 78 + rarityslot * 26
 									+ group * 2, pokeChoice);
-							int genderRatio = RandomSource.nextInt(101);
+							int genderRatio = this.random.nextInt(101);
 							hhEntry[version * 78 + rarityslot * 26 + 16 + group] = (byte) genderRatio;
 							hhEntry[version * 78 + rarityslot * 26 + 20 + group] = 0; // forme
 						}

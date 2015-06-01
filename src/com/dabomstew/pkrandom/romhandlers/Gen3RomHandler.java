@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
@@ -38,7 +39,6 @@ import java.util.TreeSet;
 
 import com.dabomstew.pkrandom.CodeTweaks;
 import com.dabomstew.pkrandom.FileFunctions;
-import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen3Constants;
 import com.dabomstew.pkrandom.pokemon.Encounter;
@@ -55,6 +55,18 @@ import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 
 public class Gen3RomHandler extends AbstractGBRomHandler {
+
+	public static class Factory implements RomHandler.Factory {
+
+		@Override
+		public Gen3RomHandler create(Random random) {
+			return new Gen3RomHandler(random);
+		}
+	}
+
+	public Gen3RomHandler(Random random) {
+		super(random);
+	}
 
 	private static class RomEntry {
 		private String name;
@@ -889,7 +901,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	@Override
 	public void shufflePokemonStats() {
 		for (int i = 1; i < pokes.length; i++) {
-			pokes[i].shuffleStats();
+			pokes[i].shuffleStats(this.random);
 		}
 	}
 
@@ -2155,7 +2167,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		// FRLG
 		if (romEntry.romType == Gen3Constants.RomType_FRLG) {
 			// intro sprites : first 251 only due to size
-			int introPokemon = RandomSource
+			int introPokemon = this.random
 					.nextInt(Gen3Constants.hoennPokesStart - 1) + 1;
 			int frontSprites = readPointer(Gen3Constants.frlgFrontSpritesPointer);
 			int palettes = readPointer(Gen3Constants.frlgPokemonPalettesPointer);
@@ -2169,7 +2181,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		} else if (romEntry.romType == Gen3Constants.RomType_Ruby
 				|| romEntry.romType == Gen3Constants.RomType_Sapp) {
 			// intro sprites : hoenn pokes only
-			int introPokemon = Gen3Constants.pokeNumTo3GIndex(RandomSource
+			int introPokemon = Gen3Constants.pokeNumTo3GIndex(this.random
 					.nextInt(Gen3Constants.hoennPokesCount)
 					+ Gen3Constants.hoennPokesStart);
 			int frontSprites = romEntry.getValue("PokemonFrontSprites");

@@ -26,8 +26,8 @@ package com.dabomstew.pkrandom.pokemon;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
-import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.RomFunctions;
 
 public enum Type {
@@ -49,8 +49,8 @@ public enum Type {
 			.unmodifiableList(Arrays.asList(values()));
 	private static final int SIZE = VALUES.size();
 
-	public static Type randomType() {
-		return VALUES.get(RandomSource.nextInt(SIZE));
+	public static Type randomType(Random random) {
+		return VALUES.get(random.nextInt(SIZE));
 	}
 
 	public String camelCase() {

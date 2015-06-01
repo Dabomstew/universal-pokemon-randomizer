@@ -8,8 +8,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
+import java.util.zip.CRC32;
 
 public class FileFunctions {
 
@@ -73,6 +76,64 @@ public class FileFunctions {
 						+ filename);
 	}
 
+	public static int readFullInt(byte[] data, int offset) {
+		ByteBuffer buf = ByteBuffer.allocate(4).put(data, offset, 4);
+		buf.rewind();
+		return buf.getInt();
+	}
+
+	public static byte[] getConfigAsBytes(String filename) throws IOException {
+		InputStream in = openConfig(filename);
+		byte[] bytes = new byte[in.available()];
+		in.read(bytes);
+		return bytes;
+	}
+
+	public static int getFileChecksum(String filename) {
+		try {
+			return getFileChecksum(openConfig(filename));
+		} catch (IOException e) {
+			return 0;
+		}
+	}
+
+	public static int getFileChecksum(InputStream stream) {
+		try {
+			Scanner sc = new Scanner(stream, "UTF-8");
+			CRC32 checksum = new CRC32();
+			while (sc.hasNextLine()) {
+				String line = sc.nextLine().trim();
+				if (!line.isEmpty()) {
+					checksum.update(line.getBytes("UTF-8"));
+				}
+			}
+			sc.close();
+			return (int) checksum.getValue();
+		} catch (IOException e) {
+			return 0;
+		}
+	}
+
+	public static boolean checkOtherCRC(byte[] data, int byteIndex,
+			int switchIndex, String filename, int offsetInData) {
+		// If the switch at data[byteIndex].switchIndex is on,
+		// then check that the CRC at
+		// data[offsetInData] ... data[offsetInData+3]
+		// matches the CRC of filename.
+		// If not, return false.
+		// If any other case, return true.
+		int switches = data[byteIndex] & 0xFF;
+		if (((switches >> switchIndex) & 0x01) == 0x01) {
+			// have to check the CRC
+			int crc = readFullInt(data, offsetInData);
+
+			if (getFileChecksum(filename) != crc) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public static byte[] getCodeTweakFile(String filename) throws IOException {
 		InputStream is = FileFunctions.class
 				.getResourceAsStream("/com/dabomstew/pkrandom/patches/"
@@ -120,7 +181,8 @@ public class FileFunctions {
 			offset += 3;
 			if (offset + 1 >= patchlen) {
 				// error
-				System.out.println("abrupt ending to IPS file, entry cut off before size");
+				System.out
+						.println("abrupt ending to IPS file, entry cut off before size");
 				return;
 			}
 			int size = readIPSSize(patch, offset);
@@ -129,19 +191,22 @@ public class FileFunctions {
 				// RLE
 				if (offset + 1 >= patchlen) {
 					// error
-					System.out.println("abrupt ending to IPS file, entry cut off before RLE size");
+					System.out
+							.println("abrupt ending to IPS file, entry cut off before RLE size");
 					return;
 				}
 				int rleSize = readIPSSize(patch, offset);
-				if(writeOffset + rleSize > rom.length) {
+				if (writeOffset + rleSize > rom.length) {
 					// error
-					System.out.println("trying to patch data past the end of the ROM file");
+					System.out
+							.println("trying to patch data past the end of the ROM file");
 					return;
 				}
 				offset += 2;
 				if (offset >= patchlen) {
 					// error
-					System.out.println("abrupt ending to IPS file, entry cut off before RLE byte");
+					System.out
+							.println("abrupt ending to IPS file, entry cut off before RLE byte");
 					return;
 				}
 				byte rleByte = patch[offset++];
@@ -151,12 +216,14 @@ public class FileFunctions {
 			} else {
 				if (offset + size > patchlen) {
 					// error
-					System.out.println("abrupt ending to IPS file, entry cut off before end of data block");
+					System.out
+							.println("abrupt ending to IPS file, entry cut off before end of data block");
 					return;
 				}
-				if(writeOffset + size > rom.length) {
+				if (writeOffset + size > rom.length) {
 					// error
-					System.out.println("trying to patch data past the end of the ROM file");
+					System.out
+							.println("trying to patch data past the end of the ROM file");
 					return;
 				}
 				System.arraycopy(patch, offset, rom, writeOffset, size);

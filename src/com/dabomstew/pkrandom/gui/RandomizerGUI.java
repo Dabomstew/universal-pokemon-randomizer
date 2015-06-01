@@ -44,6 +44,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.zip.CRC32;
@@ -59,6 +60,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import com.dabomstew.pkrandom.CodeTweaks;
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.InvalidSupplementFilesException;
 import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
@@ -2466,9 +2468,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
 	}
 
 	public void reinitHandlers() {
-		checkHandlers = new RomHandler[] { new Gen1RomHandler(),
-				new Gen2RomHandler(), new Gen3RomHandler(),
-				new Gen4RomHandler(), new Gen5RomHandler() };
+		Random r = RandomSource.instance();
+		checkHandlers = new RomHandler[] { new Gen1RomHandler(r),
+				new Gen2RomHandler(r), new Gen3RomHandler(r),
+				new Gen4RomHandler(r), new Gen5RomHandler(r) };
 	}
 
 	// actions

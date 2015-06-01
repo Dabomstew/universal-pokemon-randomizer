@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.TreeMap;
 
@@ -56,6 +57,18 @@ import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 
 public class Gen1RomHandler extends AbstractGBRomHandler {
+
+	public static class Factory implements RomHandler.Factory {
+
+		@Override
+		public Gen1RomHandler create(Random random) {
+			return new Gen1RomHandler(random);
+		}
+	}
+
+	public Gen1RomHandler(Random random) {
+		super(random);
+	}
 
 	// Important RBY Data Structures
 
@@ -887,7 +900,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 	@Override
 	public void shufflePokemonStats() {
 		for (int i = 1; i <= pokedexCount; i++) {
-			pokes[i].shuffleStats();
+			pokes[i].shuffleStats(this.random);
 		}
 	}
 

@@ -1,6 +1,6 @@
 package com.dabomstew.pkrandom.pokemon;
 
-import com.dabomstew.pkrandom.RandomSource;
+import java.util.Random;
 
 public class ItemList {
 
@@ -47,30 +47,30 @@ public class ItemList {
 		}
 	}
 
-	public int randomItem() {
+	public int randomItem(Random random) {
 		int chosen = 0;
 		while (!items[chosen]) {
-			chosen = RandomSource.nextInt(items.length);
+			chosen = random.nextInt(items.length);
 		}
 		return chosen;
 	}
 
-	public int randomNonTM() {
+	public int randomNonTM(Random random) {
 		int chosen = 0;
 		while (!items[chosen] || tms[chosen]) {
-			chosen = RandomSource.nextInt(items.length);
+			chosen = random.nextInt(items.length);
 		}
 		return chosen;
 	}
-	
-	public int randomTM() {
+
+	public int randomTM(Random random) {
 		int chosen = 0;
 		while (!tms[chosen]) {
-			chosen = RandomSource.nextInt(items.length);
+			chosen = random.nextInt(items.length);
 		}
 		return chosen;
 	}
-	
+
 	public ItemList copy() {
 		ItemList other = new ItemList(items.length - 1);
 		System.arraycopy(items, 0, other.items, 0, items.length);
