@@ -44,6 +44,7 @@ import javax.swing.event.DocumentListener;
 
 import com.dabomstew.pkrandom.InvalidSupplementFilesException;
 import com.dabomstew.pkrandom.RandomSource;
+import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 /**
@@ -133,7 +134,7 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 		try {
 			int presetVersionNumber = Integer.parseInt(configString.substring(
 					0, 3));
-			if (presetVersionNumber != RandomizerGUI.PRESET_FILE_VERSION) {
+			if (presetVersionNumber != Settings.VERSION) {
 				promptForDifferentRandomizerVersion(presetVersionNumber);
 				safelyClearFields();
 				invalidValues();
@@ -177,7 +178,7 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 
 	private void promptForDifferentRandomizerVersion(int presetVN) {
 		// so what version number was it?
-		if (presetVN > RandomizerGUI.PRESET_FILE_VERSION) {
+		if (presetVN > Settings.VERSION) {
 			// it's for a newer version
 			JOptionPane.showMessageDialog(this,
 					bundle.getString("PresetLoadDialog.newerVersionRequired"));
@@ -202,6 +203,8 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 				versionWanted = "1.5.0";
 			} else if (presetVN == 160) {
 				versionWanted = "1.6.0a";
+			} else if (presetVN == 161) {
+				versionWanted = "1.6.1";
 			}
 			JOptionPane.showMessageDialog(this, String.format(
 					bundle.getString("PresetLoadDialog.olderVersionRequired"),
@@ -269,7 +272,7 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 				DataInputStream dis = new DataInputStream(new FileInputStream(
 						fh));
 				int checkByte = dis.readByte() & 0xFF;
-				if (checkByte != RandomizerGUI.PRESET_FILE_VERSION) {
+				if (checkByte != Settings.VERSION) {
 					dis.close();
 					promptForDifferentRandomizerVersion(checkByte);
 					return;

@@ -1,11 +1,11 @@
-package com.dabomstew.pkrandom.gui;
+package com.dabomstew.pkrandom;
 
 import java.nio.ByteBuffer;
 import java.util.zip.CRC32;
 
 import javax.xml.bind.DatatypeConverter;
 
-public class QuickSettingsUpdater {
+public class SettingsUpdater {
 
 	private byte[] dataBlock;
 	private int actualDataLength;

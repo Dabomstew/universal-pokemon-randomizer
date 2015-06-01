@@ -81,6 +81,10 @@ public class FileFunctions {
 		buf.rewind();
 		return buf.getInt();
 	}
+	
+	public static int read2ByteInt(byte[] data, int index) {
+		return (data[index] & 0xFF) | ((data[index+1]&0xFF) << 8);
+	}
 
 	public static byte[] getConfigAsBytes(String filename) throws IOException {
 		InputStream in = openConfig(filename);

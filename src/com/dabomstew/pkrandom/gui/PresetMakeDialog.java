@@ -43,6 +43,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.Settings;
 
 /**
  * 
@@ -64,7 +65,7 @@ public class PresetMakeDialog extends javax.swing.JDialog {
 		super(parent, true);
 		initComponents();
 		randomSeedField.setText(Long.toString(seed));
-		configStringField.setText(RandomizerGUI.PRESET_FILE_VERSION + ""
+		configStringField.setText(Settings.VERSION + ""
 				+ configString);
 		this.seed = seed;
 		this.configString = configString;
@@ -196,7 +197,7 @@ public class PresetMakeDialog extends javax.swing.JDialog {
 			try {
 				DataOutputStream dos = new DataOutputStream(
 						new FileOutputStream(fh));
-				dos.writeByte((byte) RandomizerGUI.PRESET_FILE_VERSION);
+				dos.writeByte((byte) Settings.VERSION);
 				dos.writeLong(seed);
 				dos.writeUTF(configString);
 				byte[] trainerclasses = readFile(FileFunctions
