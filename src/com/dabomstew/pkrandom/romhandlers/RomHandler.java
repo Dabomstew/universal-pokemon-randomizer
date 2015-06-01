@@ -170,6 +170,8 @@ public interface RomHandler {
 	public Map<Pokemon, List<MoveLearnt>> getMovesLearnt();
 
 	public void setMovesLearnt(Map<Pokemon, List<MoveLearnt>> movesets);
+	
+	public List<Integer> getMovesBannedFromLevelup();
 
 	public void randomizeMovesLearnt(boolean typeThemed, boolean noBroken,
 			boolean forceFourStartingMoves);

@@ -998,10 +998,14 @@ public abstract class AbstractRomHandler implements RomHandler {
 			boolean forceFourStartingMoves) {
 		// Get current sets
 		Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+		List<Integer> allBanned = new ArrayList<Integer>();
 		List<Integer> hms = this.getHMMoves();
+		allBanned.addAll(hms);
 		@SuppressWarnings("unchecked")
 		List<Integer> banned = noBroken ? this.getGameBreakingMoves()
 				: Collections.EMPTY_LIST;
+		allBanned.addAll(banned);
+		allBanned.addAll(this.getMovesBannedFromLevelup());
 		for (Pokemon pkmn : movesets.keySet()) {
 			Set<Integer> learnt = new TreeSet<Integer>();
 			List<MoveLearnt> moves = movesets.get(pkmn);
@@ -1023,7 +1027,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 				}
 			}
 			// Last level 1 move should be replaced with a damaging one
-			int damagingMove = pickMove(pkmn, typeThemed, true, hms);
+			int damagingMove = pickMove(pkmn, typeThemed, true, allBanned);
 			// Find last lv1 move
 			// lv1index ends up as the index of the first non-lv1 move
 			int lv1index = 0;
@@ -1042,9 +1046,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 				if (i == (lv1index - 1)) {
 					continue;
 				}
-				int picked = pickMove(pkmn, typeThemed, false, hms);
-				while (learnt.contains(picked) || banned.contains(picked)) {
-					picked = pickMove(pkmn, typeThemed, false, hms);
+				int picked = pickMove(pkmn, typeThemed, false, allBanned);
+				while (learnt.contains(picked)) {
+					picked = pickMove(pkmn, typeThemed, false, allBanned);
 				}
 				moves.get(i).move = picked;
 				learnt.add(picked);
@@ -2427,7 +2431,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 	}
 
 	private int pickMove(Pokemon pkmn, boolean typeThemed, boolean damaging,
-			List<Integer> hms) {
+			List<Integer> bannedForThisGame) {
+
 		// If damaging, we want a move with at least 80% accuracy and 2 power
 		List<Move> allMoves = this.getMoves();
 		Type typeOfMove = null;
@@ -2481,7 +2486,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 		List<Move> canPick = new ArrayList<Move>();
 		for (Move mv : allMoves) {
 			if (mv != null && !RomFunctions.bannedRandomMoves[mv.number]
-					&& !hms.contains(mv.number)
+					&& !bannedForThisGame.contains(mv.number)
 					&& (mv.type == typeOfMove || typeOfMove == null)) {
 				if (!damaging
 						|| (mv.power > 1 && mv.hitratio > 79 && !RomFunctions.bannedForDamagingMove[mv.number])) {
@@ -2491,7 +2496,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 		}
 		// If we ended up with no results, reroll
 		if (canPick.size() == 0) {
-			return pickMove(pkmn, typeThemed, damaging, hms);
+			return pickMove(pkmn, typeThemed, damaging, bannedForThisGame);
 		} else {
 			// pick a random one
 			return canPick.get(this.random.nextInt(canPick.size())).number;
@@ -3012,6 +3017,12 @@ public abstract class AbstractRomHandler implements RomHandler {
 	public List<Integer> getGameBreakingMoves() {
 		// Sonicboom & drage
 		return Arrays.asList(49, 82);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Integer> getMovesBannedFromLevelup() {
+		return (List<Integer>) Collections.EMPTY_LIST;
 	}
 
 	@Override

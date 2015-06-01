@@ -64,7 +64,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 		public Gen2RomHandler create(Random random) {
 			return new Gen2RomHandler(random);
 		}
-		
+
 		public boolean isLoadable(String filename) {
 			long fileLength = new File(filename).length();
 			if (fileLength > 8 * 1024 * 1024) {
@@ -301,7 +301,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 	public boolean detectRom(byte[] rom) {
 		return detectRomInner(rom, rom.length);
 	}
-	
+
 	private static boolean detectRomInner(byte[] rom, int romSize) {
 		if (romSize < GBConstants.minRomSize
 				|| romSize > GBConstants.maxRomSize) {
@@ -1198,6 +1198,12 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 	@Override
 	public void setMovesLearnt(Map<Pokemon, List<MoveLearnt>> movesets) {
 		writeEvosAndMovesLearnt(null, movesets);
+	}
+
+	@Override
+	public List<Integer> getMovesBannedFromLevelup() {
+		// ban thief because trainers are broken with it
+		return Gen2Constants.bannedLevelupMoves;
 	}
 
 	@Override
@@ -2300,6 +2306,12 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 	@Override
 	public boolean supportsFourStartingMoves() {
 		return (romEntry.getValue("SupportsFourStartingMoves") > 0);
+	}
+
+	@Override
+	public List<Integer> getGameBreakingMoves() {
+		// add OHKO moves for gen2 because x acc is still broken
+		return Gen2Constants.brokenMoves;
 	}
 
 	@Override
