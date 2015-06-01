@@ -24,6 +24,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -63,6 +64,19 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		@Override
 		public Gen1RomHandler create(Random random) {
 			return new Gen1RomHandler(random);
+		}
+		
+		public boolean isLoadable(String filename) {
+			long fileLength = new File(filename).length();
+			if (fileLength > 8 * 1024 * 1024) {
+				return false;
+			}
+			byte[] loaded = loadFilePartial(filename, 0x1000);
+			if (loaded.length == 0) {
+				// nope
+				return false;
+			}
+			return detectRomInner(loaded, (int) fileLength);
 		}
 	}
 
@@ -322,11 +336,15 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 	private String[] mapNames;
 	private SubMap[] maps;
 	private boolean xAccNerfed;
-
+	
 	@Override
 	public boolean detectRom(byte[] rom) {
-		if (rom.length < GBConstants.minRomSize
-				|| rom.length > GBConstants.maxRomSize) {
+		return detectRomInner(rom, rom.length);
+	}
+	
+	public static boolean detectRomInner(byte[] rom, int romSize) {
+		if (romSize < GBConstants.minRomSize
+				|| romSize > GBConstants.maxRomSize) {
 			return false; // size check
 		}
 		return checkRomEntry(rom) != null; // so it's OK if it's a valid ROM
@@ -372,7 +390,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		}
 	}
 
-	private RomEntry checkRomEntry(byte[] rom) {
+	private static RomEntry checkRomEntry(byte[] rom) {
 		int version = rom[GBConstants.versionOffset] & 0xFF;
 		int nonjap = rom[GBConstants.jpFlagOffset] & 0xFF;
 		// Check for specific CRC first
@@ -733,7 +751,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		return len;
 	}
 
-	private boolean romSig(byte[] rom, String sig) {
+	private static boolean romSig(byte[] rom, String sig) {
 		try {
 			int sigOffset = GBConstants.romSigOffset;
 			byte[] sigBytes = sig.getBytes("US-ASCII");

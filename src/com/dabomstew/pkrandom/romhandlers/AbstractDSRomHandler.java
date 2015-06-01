@@ -42,26 +42,11 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 		super(random);
 	}
 
-	@Override
-	public boolean detectRom(String filename) {
-		try {
-			FileInputStream fis = new FileInputStream(filename);
-			fis.skip(0x0C);
-			byte[] sig = new byte[4];
-			fis.read(sig);
-			fis.close();
-			String ndsCode = new String(sig, "US-ASCII");
-			return detectNDSRom(ndsCode);
-		} catch (Exception e) {
-			return false;
-		}
-	}
-
 	protected abstract boolean detectNDSRom(String ndsCode);
 
 	@Override
 	public boolean loadRom(String filename) {
-		if (!detectRom(filename)) {
+		if (!this.detectNDSRom(getROMCodeFromFile(filename))) {
 			return false;
 		}
 		// Load inner rom
@@ -71,7 +56,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 			throw new RuntimeException(e);
 		}
 		loadedFN = filename;
-		loadedROM();
+		loadedROM(baseRom.getCode());
 		return true;
 	}
 
@@ -88,7 +73,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 		return ret;
 	}
 
-	protected abstract void loadedROM();
+	protected abstract void loadedROM(String romCode);
 
 	protected abstract void savingROM();
 
@@ -282,6 +267,20 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 			offset += frame_size;
 		}
 		return frames;
+	}
+	
+	protected static String getROMCodeFromFile(String filename) {
+		try {
+			FileInputStream fis = new FileInputStream(filename);
+			fis.skip(0x0C);
+			byte[] sig = new byte[4];
+			fis.read(sig);
+			fis.close();
+			String ndsCode = new String(sig, "US-ASCII");
+			return ndsCode;
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 	protected int readWord(byte[] data, int offset) {

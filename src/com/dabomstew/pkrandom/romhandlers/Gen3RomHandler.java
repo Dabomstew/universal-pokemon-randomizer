@@ -23,6 +23,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -61,6 +62,19 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		@Override
 		public Gen3RomHandler create(Random random) {
 			return new Gen3RomHandler(random);
+		}
+		
+		public boolean isLoadable(String filename) {
+			long fileLength = new File(filename).length();
+			if (fileLength > 32 * 1024 * 1024) {
+				return false;
+			}
+			byte[] loaded = loadFilePartial(filename, 0x1000);
+			if (loaded.length == 0) {
+				// nope
+				return false;
+			}
+			return detectRomInner(loaded, (int) fileLength);
 		}
 	}
 
@@ -305,9 +319,13 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
 	@Override
 	public boolean detectRom(byte[] rom) {
-		if (rom.length != Gen3Constants.size8M
-				&& rom.length != Gen3Constants.size16M
-				&& rom.length != Gen3Constants.size32M) {
+		return detectRomInner(rom, rom.length);
+	}
+	
+	private static boolean detectRomInner(byte[] rom, int romSize) {
+		if (romSize != Gen3Constants.size8M
+				&& romSize != Gen3Constants.size16M
+				&& romSize != Gen3Constants.size32M) {
 			return false; // size check
 		}
 		// Special case for Emerald unofficial translation
@@ -689,7 +707,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		return translateString(str);
 	}
 
-	private boolean romName(byte[] rom, String name) {
+	private static boolean romName(byte[] rom, String name) {
 		try {
 			int sigOffset = Gen3Constants.romNameOffset;
 			byte[] sigBytes = name.getBytes("US-ASCII");
@@ -705,7 +723,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
 	}
 
-	private boolean romCode(byte[] rom, String codeToCheck) {
+	private static boolean romCode(byte[] rom, String codeToCheck) {
 		try {
 			int sigOffset = Gen3Constants.romCodeOffset;
 			byte[] sigBytes = codeToCheck.getBytes("US-ASCII");
@@ -1675,7 +1693,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		return find(rom, hexString);
 	}
 
-	private int find(byte[] haystack, String hexString) {
+	private static int find(byte[] haystack, String hexString) {
 		if (hexString.length() % 2 != 0) {
 			return -3; // error
 		}

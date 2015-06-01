@@ -44,7 +44,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.zip.CRC32;
@@ -90,7 +89,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 	 */
 	private static final long serialVersionUID = 637989089525556154L;
 	private RomHandler romHandler;
-	protected RomHandler[] checkHandlers;
+	protected RomHandler.Factory[] checkHandlers;
 	public static final int PRESET_FILE_VERSION = 163;
 
 	public static final int UPDATE_VERSION = 1630;
@@ -169,7 +168,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
 		bundle = java.util.ResourceBundle
 				.getBundle("com/dabomstew/pkrandom/gui/Bundle"); // NOI18N
 		testForRequiredConfigs();
-		reinitHandlers();
+		checkHandlers = new RomHandler.Factory[] {
+				new Gen1RomHandler.Factory(), new Gen2RomHandler.Factory(),
+				new Gen3RomHandler.Factory(), new Gen4RomHandler.Factory(),
+				new Gen5RomHandler.Factory() };
 		initComponents();
 		initialiseState();
 		autoUpdateEnabled = true;
@@ -615,10 +617,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
 						fh.getName()));
 				return;
 			}
-			reinitHandlers();
-			for (RomHandler rh : checkHandlers) {
-				if (rh.detectRom(fh.getAbsolutePath())) {
-					this.romHandler = rh;
+
+			for (RomHandler.Factory rhf : checkHandlers) {
+				if (rhf.isLoadable(fh.getAbsolutePath())) {
+					this.romHandler = rhf.create(RandomSource.instance());
 					opDialog = new OperationDialog(
 							bundle.getString("RandomizerGUI.loadingText"),
 							this, true);
@@ -2465,13 +2467,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
 	public static String getRootPath() {
 		return rootPath;
-	}
-
-	public void reinitHandlers() {
-		Random r = RandomSource.instance();
-		checkHandlers = new RomHandler[] { new Gen1RomHandler(r),
-				new Gen2RomHandler(r), new Gen3RomHandler(r),
-				new Gen4RomHandler(r), new Gen5RomHandler(r) };
 	}
 
 	// actions

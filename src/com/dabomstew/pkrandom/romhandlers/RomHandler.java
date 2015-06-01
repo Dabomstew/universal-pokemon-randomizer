@@ -43,11 +43,8 @@ public interface RomHandler {
 
 	public interface Factory {
 		public RomHandler create(Random random);
+		public boolean isLoadable(String filename);
 	}
-
-	// Check whether this ROM is for this handler or not
-
-	public boolean detectRom(String filename);
 
 	// Basic load/save to filenames
 

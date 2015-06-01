@@ -24,7 +24,6 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -37,18 +36,6 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
 	public AbstractGBRomHandler(Random random) {
 		super(random);
-	}
-
-	public boolean detectRom(String filename) {
-		if (new File(filename).length() > 32 * 1024 * 1024) {
-			return false;
-		}
-		byte[] loaded = loadFile(filename);
-		if (loaded.length == 0) {
-			// nope
-			return false;
-		}
-		return detectRom(loaded);
 	}
 
 	@Override
@@ -92,10 +79,22 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
 	public abstract void savingRom();
 
-	private byte[] loadFile(String filename) {
+	protected static byte[] loadFile(String filename) {
 		try {
 			FileInputStream fis = new FileInputStream(filename);
 			byte[] file = new byte[fis.available()];
+			fis.read(file);
+			fis.close();
+			return file;
+		} catch (IOException ex) {
+			return new byte[0];
+		}
+	}
+	
+	protected static byte[] loadFilePartial(String filename, int maxBytes) {
+		try {
+			FileInputStream fis = new FileInputStream(filename);
+			byte[] file = new byte[Math.min(maxBytes, fis.available())];
 			fis.read(file);
 			fis.close();
 			return file;

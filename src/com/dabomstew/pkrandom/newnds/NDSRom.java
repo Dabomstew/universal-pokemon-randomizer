@@ -38,6 +38,7 @@ import cuecompressors.BLZCoder;
 
 public class NDSRom {
 
+	private String romCode;
 	private String romFilename;
 	private RandomAccessFile baseRom;
 	private boolean romOpen;
@@ -100,6 +101,12 @@ public class NDSRom {
 	}
 
 	private void readFileSystem() throws IOException {
+		// read rom code
+		baseRom.seek(0x0C);
+		byte[] sig = new byte[4];
+		baseRom.read(sig);
+		this.romCode = new String(sig, "US-ASCII");
+		
 		baseRom.seek(0x40);
 		int fntOffset = readFromFile(baseRom, 4);
 		readFromFile(baseRom, 4); // fntSize not needed
@@ -446,6 +453,11 @@ public class NDSRom {
 			bytes -= read;
 		}
 		copybuf = null;
+	}
+	
+	// get rom code for opened rom
+	public String getCode() {
+		return this.romCode;
 	}
 
 	// returns null if file doesn't exist

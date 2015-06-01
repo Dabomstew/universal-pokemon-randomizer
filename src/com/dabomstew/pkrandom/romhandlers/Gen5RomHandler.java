@@ -65,6 +65,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 		public Gen5RomHandler create(Random random) {
 			return new Gen5RomHandler(random);
 		}
+		
+		public boolean isLoadable(String filename) {
+			return detectNDSRomInner(getROMCodeFromFile(filename));
+		}
 	}
 
 	public Gen5RomHandler(Random random) {
@@ -268,17 +272,29 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
 	@Override
 	protected boolean detectNDSRom(String ndsCode) {
+		return detectNDSRomInner(ndsCode);
+	}
+
+	private static boolean detectNDSRomInner(String ndsCode) {
+		return entryFor(ndsCode) != null;
+	}
+
+	private static RomEntry entryFor(String ndsCode) {
+		if (ndsCode == null) {
+			return null;
+		}
+
 		for (RomEntry re : roms) {
 			if (ndsCode.equals(re.romCode)) {
-				this.romEntry = re;
-				return true; // match
+				return re;
 			}
 		}
-		return false;
+		return null;
 	}
 
 	@Override
-	protected void loadedROM() {
+	protected void loadedROM(String romCode) {
+		this.romEntry = entryFor(romCode);
 		try {
 			arm9 = readARM9();
 		} catch (IOException e) {
