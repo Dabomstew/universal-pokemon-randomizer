@@ -1248,6 +1248,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 		this.spRandom2EvosRB
 				.setSelected(settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_TWO_EVOLUTIONS);
 		this.spHeldItemsCB.setSelected(settings.isRandomizeStartersHeldItems());
+		this.spHeldItemsBanBadCB.setSelected(settings
+				.isBanBadRandomStarterHeldItems());
 
 		int[] customStarters = settings.getCustomStarters();
 		this.spCustomPoke1Chooser.setSelectedIndex(customStarters[0] - 1);
@@ -1303,6 +1305,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 				.setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH);
 		this.wpHeldItemsCB.setSelected(settings
 				.isRandomizeWildPokemonHeldItems());
+		this.wpHeldItemsBanBadCB.setSelected(settings
+				.isBanBadRandomWildPokemonHeldItems());
 
 		this.stpUnchangedRB
 				.setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED);
@@ -1361,6 +1365,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 				.setSelected(settings.getFieldItemsMod() == Settings.FieldItemsMod.SHUFFLE);
 		this.fiUnchangedRB
 				.setSelected(settings.getFieldItemsMod() == Settings.FieldItemsMod.UNCHANGED);
+		this.fiBanBadCB.setSelected(settings.isBanBadRandomFieldItems());
 
 		this.currentRestrictions = settings.getCurrentRestrictions();
 		if (this.currentRestrictions != null) {
@@ -1410,6 +1415,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 				spCustomRB.isSelected(), spRandomRB.isSelected(),
 				spRandom2EvosRB.isSelected());
 		settings.setRandomizeStartersHeldItems(spHeldItemsCB.isSelected());
+		settings.setBanBadRandomStarterHeldItems(spHeldItemsBanBadCB
+				.isSelected());
 
 		int[] customStarters = new int[] {
 				spCustomPoke1Chooser.getSelectedIndex() + 1,
@@ -1444,6 +1451,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 		settings.setUseMinimumCatchRate(wpCatchRateCB.isSelected());
 		settings.setBlockWildLegendaries(wpNoLegendariesCB.isSelected());
 		settings.setRandomizeWildPokemonHeldItems(wpHeldItemsCB.isSelected());
+		settings.setBanBadRandomWildPokemonHeldItems(wpHeldItemsBanBadCB
+				.isSelected());
 
 		settings.setStaticPokemonMod(stpUnchangedRB.isSelected(),
 				stpRandomL4LRB.isSelected(), stpRandomTotalRB.isSelected());
@@ -1475,6 +1484,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
 		settings.setFieldItemsMod(fiUnchangedRB.isSelected(),
 				fiShuffleRB.isSelected(), fiRandomRB.isSelected());
+		settings.setBanBadRandomFieldItems(fiBanBadCB.isSelected());
 
 		settings.setCurrentRestrictions(currentRestrictions);
 		settings.setCurrentCodeTweaks(currentCodeTweaks);
@@ -1500,7 +1510,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 		}
 
 		try {
-			final AtomicInteger finishedCV = new AtomicInteger(0); // TODO(kjs):
+			final AtomicInteger finishedCV = new AtomicInteger(0);
 			opDialog = new OperationDialog(
 					bundle.getString("RandomizerGUI.savingText"), this, true);
 			Thread t = new Thread() {
