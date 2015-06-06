@@ -37,7 +37,7 @@ http://pokehacks.dabomstew.com/randomizer/acks.php
 Also thanks to scheibo for forking the randomizer and refactoring some of the 
 structures relating to randomization of games, the majority of which were
 eventually merged in 1.6.3.
-(The fork is at https://github.com/scheibo/universal-pokemon-randomizer)
+(The fork is at https://github.com/scheibo/universal-pokemon-randomizer/tree/gui)
 
 Libraries Used
 --------------
