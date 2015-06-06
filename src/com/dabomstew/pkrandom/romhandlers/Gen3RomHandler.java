@@ -69,7 +69,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			if (fileLength > 32 * 1024 * 1024) {
 				return false;
 			}
-			byte[] loaded = loadFilePartial(filename, 0x1000);
+			byte[] loaded = loadFilePartial(filename, 0x100000);
 			if (loaded.length == 0) {
 				// nope
 				return false;
