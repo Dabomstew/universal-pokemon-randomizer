@@ -1389,8 +1389,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 	@Override
 	public void setMovesLearnt(Map<Pokemon, List<MoveLearnt>> movesets) {
-		// Get backup of movesets
-		Map<Pokemon, List<MoveLearnt>> oldSets = this.getMovesLearnt();
 		int[] extraLearnSets = new int[] { 7, 13, 13 };
 		// Build up a new NARC
 		NARCContents movesLearnt = new NARCContents();

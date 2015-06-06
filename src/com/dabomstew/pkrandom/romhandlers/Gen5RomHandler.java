@@ -1265,8 +1265,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
 	@Override
 	public void setMovesLearnt(Map<Pokemon, List<MoveLearnt>> movesets) {
-		// Backup of movesets for later
-		Map<Pokemon, List<MoveLearnt>> oldSets = this.getMovesLearnt();
 		try {
 			NARCContents movesLearnt = readNARC(romEntry
 					.getString("PokemonMovesets"));

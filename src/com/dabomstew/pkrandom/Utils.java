@@ -77,7 +77,7 @@ public class Utils {
 			InvalidSupplementFilesException {
 		byte[] data = DatatypeConverter.parseBase64Binary(config);
 
-		if (data.length < Settings.LENGTH_OF_SETTINGS_DATA+17) {
+		if (data.length < Settings.LENGTH_OF_SETTINGS_DATA + 17) {
 			throw new InvalidSupplementFilesException(
 					InvalidSupplementFilesException.Type.TOO_SHORT,
 					"The preset config is too short to be valid");
@@ -124,6 +124,11 @@ public class Utils {
 	}
 
 	public static class InvalidROMException extends Exception {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 6568398515886021477L;
+
 		public enum Type {
 			LENGTH, ZIP_FILE, RAR_FILE, IPS_FILE, UNREADABLE
 		}
