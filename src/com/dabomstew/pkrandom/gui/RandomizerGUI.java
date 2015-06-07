@@ -78,7 +78,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 	private RomHandler romHandler;
 	protected RomHandler.Factory[] checkHandlers;
 
-	public static final int UPDATE_VERSION = 1640;
+	public static final int UPDATE_VERSION = 1631;
 
 	public static PrintStream verboseLog = System.out;
 
