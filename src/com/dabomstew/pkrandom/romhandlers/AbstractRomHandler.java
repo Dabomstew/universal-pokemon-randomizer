@@ -2759,8 +2759,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 					}
 				}
 				if (valid) {
-					currEvos = Math.max(currEvos, this.innerTimesEvolves(evos,
-							e.to, seenPokes, seenPokesIndex));
+					currEvos = Math.max(currEvos, 1 + this.innerTimesEvolves(
+							evos, e.to, seenPokes, seenPokesIndex));
 				}
 			}
 		}
