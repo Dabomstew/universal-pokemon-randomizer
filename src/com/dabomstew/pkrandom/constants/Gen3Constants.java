@@ -31,13 +31,13 @@ public class Gen3Constants {
 	public static final String frlgMapLabelsPointerPrefix = "AC470000AE470000B0470000";
 
 	public static final String rseMapLabelsPointerPrefix = "C078288030BC01BC00470000";
-	
+
 	public static final String pokedexOrderPointerPrefix = "0448814208D0481C0004000C05E00000";
 
 	public static final int efrlgPokemonNamesPointer = 0x144,
 			efrlgMoveNamesPointer = 0x148, efrlgAbilityNamesPointer = 0x1C0,
 			efrlgItemDataPointer = 0x1C8, efrlgMoveDataPointer = 0x1CC,
-			frlgFrontSpritesPointer = 0x128,
+			efrlgPokemonStatsPointer = 0x1BC, frlgFrontSpritesPointer = 0x128,
 			frlgPokemonPalettesPointer = 0x130;
 
 	public static final byte[] emptyPokemonSig = new byte[] { 0x32,
@@ -139,8 +139,9 @@ public class Gen3Constants {
 	public static final String eNatDexScriptPart1 = "31720167";
 
 	public static final String eNatDexScriptPart2 = "3229610825F00129E40825F30116CD40010003";
-	
-	public static final int unhackedMaxPokedex = 411, unhackedRealPokedex = 386, hoennPokesStart = 252;
+
+	public static final int unhackedMaxPokedex = 411,
+			unhackedRealPokedex = 386, hoennPokesStart = 252;
 
 	public static final int evolutionMethodCount = 15;
 

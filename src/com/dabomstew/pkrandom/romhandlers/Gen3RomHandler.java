@@ -397,6 +397,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 					readPointer(Gen3Constants.efrlgItemDataPointer));
 			romEntry.entries.put("MoveData",
 					readPointer(Gen3Constants.efrlgMoveDataPointer));
+			romEntry.entries.put("PokemonStats",
+					readPointer(Gen3Constants.efrlgPokemonStatsPointer));
 		}
 
 		loadTextTable(romEntry.tableFile);
