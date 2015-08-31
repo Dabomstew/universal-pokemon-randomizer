@@ -577,8 +577,9 @@ public class Settings {
 		}
 
 		// gen restrictions
-		if (rh instanceof Gen1RomHandler) {
+		if (rh instanceof Gen1RomHandler || rh.isROMHack()) {
 			this.currentRestrictions = null;
+			this.setLimitPokemon(false);
 		} else if (this.currentRestrictions != null) {
 			this.currentRestrictions.limitToGen(rh.generationOfPokemon());
 		}

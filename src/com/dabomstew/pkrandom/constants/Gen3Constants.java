@@ -31,6 +31,8 @@ public class Gen3Constants {
 	public static final String frlgMapLabelsPointerPrefix = "AC470000AE470000B0470000";
 
 	public static final String rseMapLabelsPointerPrefix = "C078288030BC01BC00470000";
+	
+	public static final String pokedexOrderPointerPrefix = "0448814208D0481C0004000C05E00000";
 
 	public static final int efrlgPokemonNamesPointer = 0x144,
 			efrlgMoveNamesPointer = 0x148, efrlgAbilityNamesPointer = 0x1C0,
@@ -42,10 +44,6 @@ public class Gen3Constants {
 			(byte) 0x96, 0x32, (byte) 0x96, (byte) 0x96, 0x32, 0x00, 0x00,
 			0x03, 0x01, (byte) 0xAA, 0x0A, 0x00, 0x00, 0x00, 0x00, (byte) 0xFF,
 			0x78, 0x00, 0x00, 0x0F, 0x0F, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00 };
-
-	public static final int internalPokemonCount = 411,
-			pokedexPokemonCount = 386, moveCount = 354, hoennPokesStart = 252,
-			hoennPokesCount = 135;
 
 	public static final int baseStatsEntrySize = 0x1C;
 
@@ -141,6 +139,8 @@ public class Gen3Constants {
 	public static final String eNatDexScriptPart1 = "31720167";
 
 	public static final String eNatDexScriptPart2 = "3229610825F00129E40825F30116CD40010003";
+	
+	public static final int unhackedMaxPokedex = 411, unhackedRealPokedex = 386, hoennPokesStart = 252;
 
 	public static final int evolutionMethodCount = 15;
 
@@ -272,73 +272,6 @@ public class Gen3Constants {
 		nonBadItems.banRange(0x8F, 33); // berries
 		nonBadItems.banRange(0xDE, 4); // pokemon specific
 		nonBadItems.banRange(0xFE, 5); // contest scarves
-	}
-
-	private static final int[] hoennToNum = new int[] { 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263,
-			264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 290,
-			291, 292, 276, 277, 285, 286, 327, 278, 279, 283, 284, 320, 321,
-			300, 301, 352, 343, 344, 299, 324, 302, 339, 340, 370, 341, 342,
-			349, 350, 318, 319, 328, 329, 330, 296, 297, 309, 310, 322, 323,
-			363, 364, 365, 331, 332, 361, 362, 337, 338, 298, 325, 326, 311,
-			312, 303, 307, 308, 333, 334, 360, 355, 356, 315, 287, 288, 289,
-			316, 317, 357, 293, 294, 295, 366, 367, 368, 359, 353, 354, 336,
-			335, 369, 304, 305, 306, 351, 313, 314, 345, 346, 347, 348, 280,
-			281, 282, 371, 372, 373, 374, 375, 376, 377, 378, 379, 382, 383,
-			384, 380, 381, 385, 386, 358 };
-	private static final int[] numToHoenn = new int[] { 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263,
-			264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 279,
-			280, 284, 285, 367, 368, 369, 286, 287, 281, 282, 339, 340, 341,
-			276, 277, 278, 345, 346, 347, 310, 311, 325, 295, 290, 291, 297,
-			330, 357, 358, 359, 331, 332, 312, 313, 328, 329, 361, 362, 338,
-			342, 343, 305, 306, 288, 289, 314, 315, 296, 326, 327, 283, 307,
-			308, 309, 319, 320, 333, 334, 355, 354, 323, 324, 298, 299, 301,
-			302, 293, 294, 363, 364, 365, 366, 303, 304, 360, 292, 352, 353,
-			336, 337, 344, 386, 351, 335, 321, 322, 316, 317, 318, 348, 349,
-			350, 356, 300, 370, 371, 372, 373, 374, 375, 376, 377, 378, 382,
-			383, 379, 380, 381, 384, 385 };
-
-	public static int pokeNumTo3GIndex(int pokenum) {
-		if (pokenum < 252) {
-			return pokenum;
-		} else if (pokenum >= 387) {
-			return pokenum - 135;
-		} else {
-			return numToHoenn[pokenum] + 25;
-		}
-	}
-
-	public static int poke3GIndexToNum(int thirdgindex) {
-		if (thirdgindex < 252) {
-			return thirdgindex;
-		} else if (thirdgindex < 277) {
-			return thirdgindex + 135;
-		} else {
-			return hoennToNum[thirdgindex - 25];
-		}
 	}
 
 	public static void trainerTagsRS(List<Trainer> trs, int romType) {

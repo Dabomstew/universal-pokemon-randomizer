@@ -700,11 +700,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
 			this.pokeLimitCB.setSelected(false);
 			this.pokeLimitBtn.setEnabled(false);
 			this.pokeLimitCB
-					.setEnabled(!(romHandler instanceof Gen1RomHandler));
+					.setEnabled(!(romHandler instanceof Gen1RomHandler || romHandler.isROMHack()));
 			this.pokeLimitCB
-					.setVisible(!(romHandler instanceof Gen1RomHandler));
+					.setVisible(!(romHandler instanceof Gen1RomHandler || romHandler.isROMHack()));
 			this.pokeLimitBtn
-					.setVisible(!(romHandler instanceof Gen1RomHandler));
+					.setVisible(!(romHandler instanceof Gen1RomHandler || romHandler.isROMHack()));
 
 			this.randomizeHollowsCB.setSelected(false);
 			this.randomizeHollowsCB.setEnabled(romHandler
