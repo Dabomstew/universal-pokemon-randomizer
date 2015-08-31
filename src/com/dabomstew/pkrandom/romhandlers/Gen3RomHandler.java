@@ -398,7 +398,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			romEntry.entries.put("MoveData",
 					readPointer(Gen3Constants.efrlgMoveDataPointer) + 0xC);
 		}
-		
+
 		loadTextTable(romEntry.tableFile);
 		loadPokemonNames();
 		loadPokedex();
@@ -1709,7 +1709,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
 	@Override
 	public String getROMName() {
-		return romEntry.name;
+		return romEntry.name + (this.isRomHack ? " (ROM Hack)" : "");
 	}
 
 	@Override
