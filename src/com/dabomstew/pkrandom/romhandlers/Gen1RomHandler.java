@@ -65,7 +65,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		public Gen1RomHandler create(Random random) {
 			return new Gen1RomHandler(random);
 		}
-		
+
 		public boolean isLoadable(String filename) {
 			long fileLength = new File(filename).length();
 			if (fileLength > 8 * 1024 * 1024) {
@@ -336,12 +336,12 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 	private String[] mapNames;
 	private SubMap[] maps;
 	private boolean xAccNerfed;
-	
+
 	@Override
 	public boolean detectRom(byte[] rom) {
 		return detectRomInner(rom, rom.length);
 	}
-	
+
 	public static boolean detectRomInner(byte[] rom, int romSize) {
 		if (romSize < GBConstants.minRomSize
 				|| romSize > GBConstants.maxRomSize) {
@@ -542,8 +542,10 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		for (int i = 1; i <= pokedexCount; i++) {
 			pokes[i] = new Pokemon();
 			pokes[i].number = i;
-			loadBasicPokeStats(pokes[i], pokeStatsOffset + (i - 1)
-					* Gen1Constants.baseStatsEntrySize);
+			if (i != Gen1Constants.mewIndex || romEntry.isYellow) {
+				loadBasicPokeStats(pokes[i], pokeStatsOffset + (i - 1)
+						* Gen1Constants.baseStatsEntrySize);
+			}
 			// Name?
 			pokes[i].name = pokeNames[pokeNumToRBYTable[i]];
 		}

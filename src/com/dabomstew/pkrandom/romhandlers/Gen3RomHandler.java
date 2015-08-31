@@ -63,7 +63,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		public Gen3RomHandler create(Random random) {
 			return new Gen3RomHandler(random);
 		}
-		
+
 		public boolean isLoadable(String filename) {
 			long fileLength = new File(filename).length();
 			if (fileLength > 32 * 1024 * 1024) {
@@ -321,10 +321,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	public boolean detectRom(byte[] rom) {
 		return detectRomInner(rom, rom.length);
 	}
-	
+
 	private static boolean detectRomInner(byte[] rom, int romSize) {
-		if (romSize != Gen3Constants.size8M
-				&& romSize != Gen3Constants.size16M
+		if (romSize != Gen3Constants.size8M && romSize != Gen3Constants.size16M
 				&& romSize != Gen3Constants.size32M) {
 			return false; // size check
 		}
@@ -2396,10 +2395,13 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 											+ tte.offsetInScript;
 									// make sure this actually looks like a text
 									// pointer
-									if (rom[lookAt + 3] == 0x08
-											|| rom[lookAt + 3] == 0x09) {
-										// okay, it passes the basic test
-										tte.actualOffset = lookAt;
+									System.out.println(lookAt);
+									if (lookAt >= 0 && lookAt < rom.length - 2) {
+										if (rom[lookAt + 3] == 0x08
+												|| rom[lookAt + 3] == 0x09) {
+											// okay, it passes the basic test
+											tte.actualOffset = lookAt;
+										}
 									}
 								}
 							}
