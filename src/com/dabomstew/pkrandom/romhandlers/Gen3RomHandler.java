@@ -37,6 +37,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.zip.CRC32;
 
 import com.dabomstew.pkrandom.CodeTweaks;
 import com.dabomstew.pkrandom.FileFunctions;
@@ -93,6 +94,23 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		private Map<String, int[]> arrayEntries = new HashMap<String, int[]>();
 		private List<StaticPokemon> staticPokemon = new ArrayList<StaticPokemon>();
 		private List<TMOrMTTextEntry> tmmtTexts = new ArrayList<TMOrMTTextEntry>();
+
+		public RomEntry() {
+
+		}
+
+		public RomEntry(RomEntry toCopy) {
+			this.name = toCopy.name;
+			this.romCode = toCopy.romCode;
+			this.tableFile = toCopy.tableFile;
+			this.version = toCopy.version;
+			this.romType = toCopy.romType;
+			this.copyStaticPokemon = toCopy.copyStaticPokemon;
+			this.entries.putAll(toCopy.entries);
+			this.arrayEntries.putAll(toCopy.arrayEntries);
+			this.staticPokemon.addAll(toCopy.staticPokemon);
+			this.tmmtTexts.addAll(toCopy.tmmtTexts);
+		}
 
 		private int getValue(String key) {
 			if (!entries.containsKey(key)) {
@@ -364,7 +382,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	public void loadedRom() {
 		for (RomEntry re : roms) {
 			if (romCode(rom, re.romCode) && (rom[0xBC] & 0xFF) == re.version) {
-				romEntry = re;
+				romEntry = new RomEntry(re); // clone so we can modify
 				break;
 			}
 		}
@@ -399,6 +417,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 					readPointer(Gen3Constants.efrlgMoveDataPointer));
 			romEntry.entries.put("PokemonStats",
 					readPointer(Gen3Constants.efrlgPokemonStatsPointer));
+			romEntry.entries.put(
+					"MoveTutorCompatibility",
+					romEntry.getValue("MoveTutorData")
+							+ romEntry.getValue("MoveTutorMoves") * 2);
+		}
+
+		if (romEntry.romCode.equals("BPRE") && romEntry.version == 0) {
+			basicBPRE10HackSupport();
 		}
 
 		loadTextTable(romEntry.tableFile);
@@ -434,6 +460,92 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		loadAbilityNames();
 		loadItemNames();
 
+	}
+
+	private void basicBPRE10HackSupport() {
+		if (basicBPRE10HackDetection()) {
+			this.isRomHack = true;
+			// NUMBER OF POKEMON DETECTION
+
+			// this is the most annoying bit
+			// we'll try to get it from the pokemon names,
+			// and sanity check it using the pokedex order
+			// this of course means we can't support
+			// any hack with extended length names
+
+			int iPokemonCount = 0;
+			int namesOffset = romEntry.getValue("PokemonNames");
+			int nameLen = romEntry.getValue("PokemonNameLength");
+			while (true) {
+				int nameStrLen = lengthOfStringAt(namesOffset
+						+ (iPokemonCount + 1) * nameLen);
+				if (nameStrLen > 0 && nameStrLen < nameLen) {
+					iPokemonCount++;
+				} else {
+					break;
+				}
+			}
+			System.out.println("pokemon count after pass 1 = " + iPokemonCount);
+
+			// sanity check: pokedex order
+			// pokedex entries have to be within 0-1023
+			// even after extending the dex
+			// (at least with conventional methods)
+			// so if we run into an invalid one
+			// then we can cut off the count
+			int pdOffset = romEntry.getValue("PokedexOrder");
+			for (int i = 1; i <= iPokemonCount; i++) {
+				int pdEntry = readWord(pdOffset + (i - 1) * 2);
+				if (pdEntry > 1023) {
+					iPokemonCount = i - 1;
+					break;
+				}
+			}
+			System.out.println("pokemon count after pass 2 = " + iPokemonCount);
+
+			// write new pokemon count
+			romEntry.entries.put("PokemonCount", iPokemonCount);
+			// update some key offsets from known pointers
+			romEntry.entries.put("PokemonMovesets", readPointer(0x3EA7C));
+			romEntry.entries.put("PokemonTMHMCompat", readPointer(0x43C68));
+			romEntry.entries.put("PokemonEvolutions", readPointer(0x42F6C));
+			romEntry.entries.put("MoveTutorCompatibility", readPointer(0x120C30));
+			int descsTable = readPointer(0xE5440);
+			romEntry.entries.put("MoveDescriptions", descsTable);
+			// try to detect number of moves using the descriptions
+			int moveCount = 0;
+			while(true) {
+				int descPointer = readPointer(descsTable + (moveCount)*4);
+				if(descPointer >= 0 && descPointer < rom.length) {
+					int descStrLen = lengthOfStringAt(descPointer);
+					if(descStrLen > 0 && descStrLen < 100) {
+						// okay, this does seem fine
+						moveCount++;
+						continue;
+					}
+				}
+				break;
+			}
+			System.out.println("detected number of moves = "+moveCount);
+			romEntry.entries.put("MoveCount", moveCount);
+			// TODO proper trainer support & detect num of trainers
+			// disable static pokemon & move tutor/tm text
+			romEntry.entries.put("StaticPokemonSupport", 0);
+			romEntry.staticPokemon.clear();
+			romEntry.tmmtTexts.clear();
+		}
+
+	}
+
+	private boolean basicBPRE10HackDetection() {
+		if (rom.length != Gen3Constants.size16M) {
+			return true;
+		}
+		CRC32 checksum = new CRC32();
+		checksum.update(rom);
+		long csum = checksum.getValue();
+		// TODO: there might be more valid BPRE 1.0 checksums?
+		return csum != 3716707868L;
 	}
 
 	@Override
@@ -1668,12 +1780,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		}
 		Map<Pokemon, boolean[]> compat = new TreeMap<Pokemon, boolean[]>();
 		int moveCount = romEntry.getValue("MoveTutorMoves");
-		int offset = romEntry.getValue("MoveTutorData") + moveCount * 2;
+		int offset = romEntry.getValue("MoveTutorCompatibility");
 		int bytesRequired = ((moveCount + 7) & ~7) / 8;
 		for (int i = 1; i < pokes.length; i++) {
 			Pokemon pkmn = pokes[i];
 			int compatOffset = offset + pokedexToInternal[pkmn.number]
-					* moveCount;
+					* bytesRequired;
 			boolean[] flags = new boolean[moveCount + 1];
 			for (int j = 0; j < bytesRequired; j++) {
 				readByteIntoFlags(flags, j * 8 + 1, compatOffset + j);
@@ -1689,7 +1801,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			return;
 		}
 		int moveCount = romEntry.getValue("MoveTutorMoves");
-		int offset = romEntry.getValue("MoveTutorData") + moveCount * 2;
+		int offset = romEntry.getValue("MoveTutorCompatibility");
 		int bytesRequired = ((moveCount + 7) & ~7) / 8;
 		for (Map.Entry<Pokemon, boolean[]> compatEntry : compatData.entrySet()) {
 			Pokemon pkmn = compatEntry.getKey();
