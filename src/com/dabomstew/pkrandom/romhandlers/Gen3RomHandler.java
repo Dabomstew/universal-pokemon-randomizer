@@ -512,6 +512,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			romEntry.entries.put("MoveTutorCompatibility", readPointer(0x120C30));
 			int descsTable = readPointer(0xE5440);
 			romEntry.entries.put("MoveDescriptions", descsTable);
+			int trainersTable = readPointer(0xFC00);
+			romEntry.entries.put("TrainerData", trainersTable);
 			// try to detect number of moves using the descriptions
 			int moveCount = 0;
 			while(true) {
@@ -528,7 +530,34 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			}
 			System.out.println("detected number of moves = "+moveCount);
 			romEntry.entries.put("MoveCount", moveCount);
-			// TODO proper trainer support & detect num of trainers
+			// attempt to detect number of trainers using various tells
+			int trainerCount = 1;
+			int tEntryLen = romEntry.getValue("TrainerEntrySize");
+			int tNameLen = romEntry.getValue("TrainerNameLength");
+			while(true) {
+				int trOffset = trainersTable + tEntryLen*trainerCount;
+				int pokeDataType = rom[trOffset] & 0xFF;
+				if(pokeDataType >= 4) {
+					// only allowed 0-3
+					break;
+				}
+				int numPokes = rom[trOffset + (tEntryLen - 8)] & 0xFF;
+				if(numPokes == 0 || numPokes > 6) {
+					break;
+				}
+				int pointerToPokes = readPointer(trOffset + (tEntryLen - 4));
+				if(pointerToPokes < 0 || pointerToPokes >= rom.length) {
+					break;
+				}
+				int nameLength = lengthOfStringAt(trOffset+4);
+				if(nameLength >= tNameLen) {
+					break;
+				}
+				// found a valid trainer entry, recognize it
+				trainerCount++;
+			}
+			System.out.println("detected number of trainers = "+trainerCount);
+			romEntry.entries.put("TrainerCount", trainerCount);
 			// disable static pokemon & move tutor/tm text
 			romEntry.entries.put("StaticPokemonSupport", 0);
 			romEntry.staticPokemon.clear();
