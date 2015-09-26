@@ -431,7 +431,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		loadPokemonNames();
 		loadPokedex();
 		loadPokemonStats();
-		pokemonList = Arrays.asList(pokes);
+		constructPokemonList();
 		loadMoves();
 
 		// Get wild Pokemon offset
@@ -639,6 +639,29 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			this.pokedexCount = maxPokedex;
 		}
 
+	}
+	
+	private void constructPokemonList() {
+		if(!this.isRomHack) {
+			// simple behavior: all pokes in the dex are valid
+			pokemonList = Arrays.asList(pokes);
+		}
+		else {
+			// only include "valid" pokes
+			pokemonList = new ArrayList<Pokemon>();
+			pokemonList.add(null);
+			for(int i=1;i<pokes.length;i++) {
+				Pokemon pk = pokes[i];
+				if(pk != null) {
+					String lowerName = pk.name.toLowerCase();
+					if(!lowerName.contains("unused")
+							&& !lowerName.equals("?")) {
+						pokemonList.add(pk);
+					}
+				}
+			}
+		}
+		
 	}
 
 	private void loadPokemonStats() {
