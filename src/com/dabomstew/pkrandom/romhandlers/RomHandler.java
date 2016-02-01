@@ -418,5 +418,7 @@ public interface RomHandler {
 	public void applyFastestTextPatch();
 
 	public void applyRunningShoesIndoorsPatch();
+	
+	public void randomizePCPotion();
 
 }

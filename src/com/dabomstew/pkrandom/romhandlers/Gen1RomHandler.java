@@ -1773,6 +1773,9 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		if (romEntry.getValue("TextDelayFunctionOffset") != 0) {
 			available |= CodeTweaks.FASTEST_TEXT;
 		}
+		if (romEntry.getValue("PCPotionOffset") != 0) {
+			available |= CodeTweaks.RANDOMIZE_PC_POTION;
+		}
 		return available;
 	}
 
@@ -1795,6 +1798,13 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 	public void applyFastestTextPatch() {
 		if (romEntry.getValue("TextDelayFunctionOffset") != 0) {
 			rom[romEntry.getValue("TextDelayFunctionOffset")] = GBConstants.gbZ80Ret;
+		}
+	}
+	
+	@Override
+	public void randomizePCPotion() {
+		if (romEntry.getValue("PCPotionOffset") != 0) {
+			rom[romEntry.getValue("PCPotionOffset")] = (byte) this.getNonBadItems().randomNonTM(this.random);
 		}
 	}
 
