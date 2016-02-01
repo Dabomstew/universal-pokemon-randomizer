@@ -13,6 +13,6 @@ public class GBConstants {
 
 	public static final byte gbZ80Jump = (byte) 0xC3, gbZ80Nop = 0x00,
 			gbZ80XorA = (byte) 0xAF, gbZ80LdA = 0x3E,
-			gbZ80LdAToFar = (byte) 0xEA, gbZ80Ret = (byte) 0xC9;
+			gbZ80LdAToFar = (byte) 0xEA, gbZ80Ret = (byte) 0xC9, gbZ80JumpRelative = (byte) 0x18;
 
 }

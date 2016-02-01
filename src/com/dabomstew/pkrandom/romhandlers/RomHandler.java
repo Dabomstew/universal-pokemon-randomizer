@@ -420,5 +420,7 @@ public interface RomHandler {
 	public void applyRunningShoesIndoorsPatch();
 	
 	public void randomizePCPotion();
+	
+	public void applyPikachuEvoPatch();
 
 }

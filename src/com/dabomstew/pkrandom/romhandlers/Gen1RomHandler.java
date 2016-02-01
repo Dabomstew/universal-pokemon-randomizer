@@ -1776,6 +1776,9 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		if (romEntry.getValue("PCPotionOffset") != 0) {
 			available |= CodeTweaks.RANDOMIZE_PC_POTION;
 		}
+		if (romEntry.getValue("PikachuEvoJumpOffset") != 0) {
+			available |= CodeTweaks.ALLOW_PIKACHU_EVOLUTION;
+		}
 		return available;
 	}
 
@@ -1805,6 +1808,13 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 	public void randomizePCPotion() {
 		if (romEntry.getValue("PCPotionOffset") != 0) {
 			rom[romEntry.getValue("PCPotionOffset")] = (byte) this.getNonBadItems().randomNonTM(this.random);
+		}
+	}
+	
+	@Override
+	public void applyPikachuEvoPatch() {
+		if (romEntry.getValue("PikachuEvoJumpOffset") != 0) {
+			rom[romEntry.getValue("PikachuEvoJumpOffset")] = GBConstants.gbZ80JumpRelative;
 		}
 	}
 

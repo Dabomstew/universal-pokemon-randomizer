@@ -3006,6 +3006,12 @@ public abstract class AbstractRomHandler implements RomHandler {
 		// default: do nothing
 
 	}
+	
+	@Override
+	public void applyPikachuEvoPatch() {
+		// default: do nothing
+
+	}
 
 	@Override
 	public boolean hasHiddenHollowPokemon() {

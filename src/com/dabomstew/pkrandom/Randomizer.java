@@ -110,34 +110,11 @@ public class Randomizer {
 		int currentCodeTweaks = settings.getCurrentCodeTweaks();
 		if (romHandler.codeTweaksAvailable() != 0) {
 			int codeTweaksAvailable = romHandler.codeTweaksAvailable();
-			if ((codeTweaksAvailable & CodeTweaks.BW_EXP_PATCH) > 0
-					&& (currentCodeTweaks & CodeTweaks.BW_EXP_PATCH) > 0) {
-				romHandler.applyBWEXPPatch();
-			}
-
-			if ((codeTweaksAvailable & CodeTweaks.FIX_CRIT_RATE) > 0
-					&& (currentCodeTweaks & CodeTweaks.FIX_CRIT_RATE) > 0) {
-				romHandler.applyCritRatePatch();
-			}
-
-			if ((codeTweaksAvailable & CodeTweaks.NERF_X_ACCURACY) > 0
-					&& (currentCodeTweaks & CodeTweaks.NERF_X_ACCURACY) > 0) {
-				romHandler.applyXAccNerfPatch();
-			}
-
-			if ((codeTweaksAvailable & CodeTweaks.FASTEST_TEXT) > 0
-					&& (currentCodeTweaks & CodeTweaks.FASTEST_TEXT) > 0) {
-				romHandler.applyFastestTextPatch();
-			}
 			
-			if ((codeTweaksAvailable & CodeTweaks.RUNNING_SHOES_INDOORS) > 0
-					&& (currentCodeTweaks & CodeTweaks.RUNNING_SHOES_INDOORS) > 0) {
-				romHandler.applyRunningShoesIndoorsPatch();
-			}
-			
-			if ((codeTweaksAvailable & CodeTweaks.RANDOMIZE_PC_POTION) > 0
-					&& (currentCodeTweaks & CodeTweaks.RANDOMIZE_PC_POTION) > 0) {
-				romHandler.randomizePCPotion();
+			for(CodeTweaks ct : CodeTweaks.allTweaks) {
+				if((codeTweaksAvailable & ct.getValue()) > 0 && (currentCodeTweaks & ct.getValue()) > 0) {
+					ct.applyTo(romHandler);
+				}
 			}
 		}
 
