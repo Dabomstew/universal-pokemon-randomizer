@@ -2871,14 +2871,30 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
 	@Override
 	public int codeTweaksAvailable() {
-		return (romEntry.getValue("RunIndoorsTweakOffset") > 0) ? CodeTweaks.RUNNING_SHOES_INDOORS
-				: 0;
+		int available = 0;
+		if (romEntry.getValue("RunIndoorsTweakOffset") > 0) {
+			available |= CodeTweaks.RUNNING_SHOES_INDOORS;
+		}
+		if (romEntry.getValue("TextSpeedValuesOffset") > 0) {
+			available |= CodeTweaks.FASTEST_TEXT;
+		}
+		return available;
 	}
 
 	@Override
 	public void applyRunningShoesIndoorsPatch() {
 		if (romEntry.getValue("RunIndoorsTweakOffset") != 0) {
 			rom[romEntry.getValue("RunIndoorsTweakOffset")] = 0x00;
+		}
+	}
+	
+	@Override
+	public void applyFastestTextPatch() {
+		if (romEntry.getValue("TextSpeedValuesOffset") > 0) {
+			int tsvOffset = romEntry.getValue("TextSpeedValuesOffset");
+			rom[tsvOffset] = 4; // slow = medium
+			rom[tsvOffset+1] = 1; // medium = fast
+			rom[tsvOffset+2] = 0; // fast = instant
 		}
 	}
 
