@@ -47,7 +47,7 @@ import javax.swing.JOptionPane;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.gui.RandomizerGUI;
-import com.dabomstew.pkrandom.pokemon.DamageType;
+import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
@@ -2060,17 +2060,17 @@ public abstract class AbstractRomHandler implements RomHandler {
 	}
 
 	@Override
-	public void randomizeMovePSS() {
+	public void randomizeMoveCategory() {
 		if (!this.hasPhysicalSpecialSplit()) {
 			return;
 		}
 		List<Move> moves = this.getMoves();
 		for (Move mv : moves) {
 			if (mv != null && mv.internalId != 165
-					&& mv.damageType != DamageType.STATUS) {
+					&& mv.category != MoveCategory.STATUS) {
 				if (random.nextInt(2) == 0) {
-					mv.damageType = (mv.damageType == DamageType.PHYSICAL) ? DamageType.SPECIAL
-							: DamageType.PHYSICAL;
+					mv.category = (mv.category == MoveCategory.PHYSICAL) ? MoveCategory.SPECIAL
+							: MoveCategory.PHYSICAL;
 				}
 			}
 		}

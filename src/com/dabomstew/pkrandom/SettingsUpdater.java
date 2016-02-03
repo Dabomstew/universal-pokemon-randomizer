@@ -146,6 +146,12 @@ public class SettingsUpdater {
 		if (oldVersion < 162) {
 			insertExtraByte(3, (byte) 0);
 		}
+		
+		// no significant changes from 162 to 163
+		// 163 to 170: add move data randomizations
+		if (oldVersion < 170) {
+			insertExtraByte(20, (byte) 0);
+		}
 
 		// fix checksum
 		CRC32 checksum = new CRC32();

@@ -68,7 +68,7 @@ public class Randomizer {
 			romHandler.fixTypeEffectiveness();
 		}
 
-		// Move updates
+		// Move updates & data changes
 		if (settings.isUpdateMoves()) {
 			romHandler.initMoveUpdates();
 			if (!(romHandler instanceof Gen5RomHandler)) {
@@ -79,6 +79,29 @@ public class Randomizer {
 			}
 			romHandler.printMoveUpdates();
 		}
+
+		if (settings.isRandomizeMovePowers()) {
+			romHandler.randomizeMovePowers();
+		}
+
+		if (settings.isRandomizeMoveAccuracies()) {
+			romHandler.randomizeMoveAccuracies();
+		}
+
+		if (settings.isRandomizeMovePPs()) {
+			romHandler.randomizeMovePPs();
+		}
+
+		if (settings.isRandomizeMoveTypes()) {
+			romHandler.randomizeMoveTypes();
+		}
+
+		if (settings.isRandomizeMoveCategory()
+				&& romHandler.hasPhysicalSpecialSplit()) {
+			romHandler.randomizeMoveCategory();
+		}
+
+		maybeLogMoveChanges(log, romHandler);
 
 		List<Move> moves = romHandler.getMoves();
 
@@ -110,9 +133,10 @@ public class Randomizer {
 		int currentCodeTweaks = settings.getCurrentCodeTweaks();
 		if (romHandler.codeTweaksAvailable() != 0) {
 			int codeTweaksAvailable = romHandler.codeTweaksAvailable();
-			
-			for(CodeTweaks ct : CodeTweaks.allTweaks) {
-				if((codeTweaksAvailable & ct.getValue()) > 0 && (currentCodeTweaks & ct.getValue()) > 0) {
+
+			for (CodeTweaks ct : CodeTweaks.allTweaks) {
+				if ((codeTweaksAvailable & ct.getValue()) > 0
+						&& (currentCodeTweaks & ct.getValue()) > 0) {
 					ct.applyTo(romHandler);
 				}
 			}
@@ -138,7 +162,7 @@ public class Randomizer {
 		default:
 			break;
 		}
-		
+
 		if (settings.isStandardizeEXPCurves()) {
 			romHandler.standardizeEXPCurves();
 		}
@@ -731,6 +755,38 @@ public class Randomizer {
 			}
 		}
 		return checkValue;
+	}
+
+	private void maybeLogMoveChanges(final PrintStream log,
+			final RomHandler romHandler) {
+		if (!settings.isRandomizeMoveAccuracies()
+				&& !settings.isRandomizeMovePowers()
+				&& !settings.isRandomizeMovePPs()
+				&& !settings.isRandomizeMoveCategory()
+				&& !settings.isRandomizeMoveTypes()) {
+			if (!settings.isUpdateMoves()) {
+				log.println("Move Data: Unchanged." + NEWLINE);
+			}
+		}
+		else {
+			log.println("--Move Data--");
+			log.print("NUM|NAME           |TYPE    |POWER|ACC.|PP");
+			if(romHandler.hasPhysicalSpecialSplit()) {
+				log.print(" |CLASS");
+			}
+			log.println();
+			List<Move> allMoves = romHandler.getMoves();
+			for(Move mv : allMoves) {
+				if(mv != null) {
+					log.printf("%3d|%-15s|%-8s|%5d|%4d|%3d", mv.internalId, mv.name, mv.type.toString(), mv.power, mv.hitratio, mv.pp);
+					if(romHandler.hasPhysicalSpecialSplit()) {
+						log.printf("| %s", mv.category.toString());
+					}
+					log.println();
+				}
+			}
+			log.println();
+		}
 	}
 
 	private static int addToCV(int checkValue, int... values) {

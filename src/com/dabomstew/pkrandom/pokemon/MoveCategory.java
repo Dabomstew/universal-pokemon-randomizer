@@ -23,6 +23,6 @@ package com.dabomstew.pkrandom.pokemon;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-public enum DamageType {
+public enum MoveCategory {
 	PHYSICAL, SPECIAL, STATUS;
 }

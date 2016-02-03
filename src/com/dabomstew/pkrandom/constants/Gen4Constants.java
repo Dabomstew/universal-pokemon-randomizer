@@ -3,7 +3,7 @@ package com.dabomstew.pkrandom.constants;
 import java.util.Arrays;
 import java.util.List;
 
-import com.dabomstew.pkrandom.pokemon.DamageType;
+import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
@@ -88,11 +88,11 @@ public class Gen4Constants {
 
 	public static final int itemScriptVariable = 0x8008;
 
-	public static final DamageType[] damageTypeIndexes = { DamageType.PHYSICAL,
-			DamageType.SPECIAL, DamageType.STATUS };
+	public static final MoveCategory[] moveCategoryIndices = { MoveCategory.PHYSICAL,
+			MoveCategory.SPECIAL, MoveCategory.STATUS };
 
-	public static byte damageTypeToByte(DamageType dt) {
-		switch (dt) {
+	public static byte moveCategoryToByte(MoveCategory cat) {
+		switch (cat) {
 		case PHYSICAL:
 			return 0;
 		case SPECIAL:

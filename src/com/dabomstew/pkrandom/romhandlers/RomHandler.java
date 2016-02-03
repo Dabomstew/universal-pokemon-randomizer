@@ -114,7 +114,7 @@ public interface RomHandler {
 	
 	public boolean hasPhysicalSpecialSplit();
 	
-	public void randomizeMovePSS();
+	public void randomizeMoveCategory();
 
 	// Update all moves to gen5 definitions as much as possible
 	// e.g. change typing, power, accuracy, but don't try to

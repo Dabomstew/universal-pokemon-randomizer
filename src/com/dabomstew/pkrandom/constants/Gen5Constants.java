@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.dabomstew.pkrandom.pokemon.DamageType;
+import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
@@ -96,11 +96,11 @@ public class Gen5Constants {
 
 	public static final int scriptListTerminator = 0xFD13;
 
-	public static final DamageType[] damageTypeIndexes = { DamageType.STATUS,
-			DamageType.PHYSICAL, DamageType.SPECIAL };
+	public static final MoveCategory[] moveCategoryIndices = { MoveCategory.STATUS,
+			MoveCategory.PHYSICAL, MoveCategory.SPECIAL };
 
-	public static byte damageTypeToByte(DamageType dt) {
-		switch (dt) {
+	public static byte moveCategoryToByte(MoveCategory cat) {
+		switch (cat) {
 		case PHYSICAL:
 			return 1;
 		case SPECIAL:

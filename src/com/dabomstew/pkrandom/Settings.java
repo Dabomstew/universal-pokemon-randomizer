@@ -21,9 +21,9 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 public class Settings {
 
-	public static final int VERSION = 163;
+	public static final int VERSION = 170;
 
-	public static final int LENGTH_OF_SETTINGS_DATA = 28;
+	public static final int LENGTH_OF_SETTINGS_DATA = 29;
 
 	private byte[] trainerClasses;
 	private byte[] trainerNames;
@@ -35,8 +35,6 @@ public class Settings {
 	private int currentCodeTweaks;
 
 	private boolean updateTypeEffectiveness;
-	private boolean updateMoves;
-	private boolean updateMovesLegacy;
 	private boolean changeImpossibleEvolutions;
 	private boolean makeEvolutionsEasier;
 	private boolean lowerCasePokemonNames;
@@ -78,6 +76,15 @@ public class Settings {
 	}
 
 	private TypesMod typesMod = TypesMod.UNCHANGED;
+
+	// Move data
+	private boolean randomizeMovePowers;
+	private boolean randomizeMoveAccuracies;
+	private boolean randomizeMovePPs;
+	private boolean randomizeMoveTypes;
+	private boolean randomizeMoveCategory;
+	private boolean updateMoves;
+	private boolean updateMovesLegacy;
 
 	public enum MovesetsMod {
 		UNCHANGED, RANDOM_PREFER_SAME_TYPE, COMPLETELY_RANDOM, METRONOME_ONLY
@@ -317,7 +324,13 @@ public class Settings {
 				fieldItemsMod == FieldItemsMod.UNCHANGED,
 				banBadRandomFieldItems));
 
-		// @ 20 pokemon restrictions
+		// new 170
+		// 20 move randomizers
+		out.write(makeByteSelected(randomizeMovePowers,
+				randomizeMoveAccuracies, randomizeMovePPs, randomizeMoveTypes,
+				randomizeMoveCategory));
+
+		// @ 21 pokemon restrictions
 		try {
 			if (currentRestrictions != null) {
 				writeFullInt(out, currentRestrictions.toInt());
@@ -327,7 +340,7 @@ public class Settings {
 		} catch (IOException e) {
 		}
 
-		// @ 24 code tweaks
+		// @ 25 code tweaks
 		try {
 			writeFullInt(out, currentCodeTweaks);
 		} catch (IOException e) {
@@ -499,16 +512,23 @@ public class Settings {
 				0 // RANDOM
 		));
 		settings.setBanBadRandomFieldItems(restoreState(data[19], 3));
+		
+		// new 170
+		settings.setRandomizeMovePowers(restoreState(data[20], 0));
+		settings.setRandomizeMoveAccuracies(restoreState(data[20], 1));
+		settings.setRandomizeMovePPs(restoreState(data[20], 2));
+		settings.setRandomizeMoveTypes(restoreState(data[20], 3));
+		settings.setRandomizeMoveCategory(restoreState(data[20], 4));
 
 		// gen restrictions
-		int genLimit = FileFunctions.readFullInt(data, 20);
+		int genLimit = FileFunctions.readFullInt(data, 21);
 		GenRestrictions restrictions = null;
 		if (genLimit != 0) {
 			restrictions = new GenRestrictions(genLimit);
 		}
 		settings.setCurrentRestrictions(restrictions);
 
-		int codeTweaks = FileFunctions.readFullInt(data, 24);
+		int codeTweaks = FileFunctions.readFullInt(data, 25);
 
 		// Sanity override
 		if (codeTweaks == 0) {
@@ -657,6 +677,10 @@ public class Settings {
 			this.setRandomizeInGameTradesItems(false);
 			this.setRandomizeInGameTradesIVs(false);
 			this.setRandomizeInGameTradesOTs(false);
+		}
+
+		if (!rh.hasPhysicalSpecialSplit()) {
+			this.setRandomizeMoveCategory(false);
 		}
 
 		// done
@@ -934,6 +958,51 @@ public class Settings {
 
 	public Settings setTypesMod(boolean... bools) {
 		return setTypesMod(getEnum(TypesMod.class, bools));
+	}
+
+	public boolean isRandomizeMovePowers() {
+		return randomizeMovePowers;
+	}
+
+	public Settings setRandomizeMovePowers(boolean randomizeMovePowers) {
+		this.randomizeMovePowers = randomizeMovePowers;
+		return this;
+	}
+
+	public boolean isRandomizeMoveAccuracies() {
+		return randomizeMoveAccuracies;
+	}
+
+	public Settings setRandomizeMoveAccuracies(boolean randomizeMoveAccuracies) {
+		this.randomizeMoveAccuracies = randomizeMoveAccuracies;
+		return this;
+	}
+
+	public boolean isRandomizeMovePPs() {
+		return randomizeMovePPs;
+	}
+
+	public Settings setRandomizeMovePPs(boolean randomizeMovePPs) {
+		this.randomizeMovePPs = randomizeMovePPs;
+		return this;
+	}
+
+	public boolean isRandomizeMoveTypes() {
+		return randomizeMoveTypes;
+	}
+
+	public Settings setRandomizeMoveTypes(boolean randomizeMoveTypes) {
+		this.randomizeMoveTypes = randomizeMoveTypes;
+		return this;
+	}
+
+	public boolean isRandomizeMoveCategory() {
+		return randomizeMoveCategory;
+	}
+
+	public Settings setRandomizeMoveCategory(boolean randomizeMoveCategory) {
+		this.randomizeMoveCategory = randomizeMoveCategory;
+		return this;
 	}
 
 	public MovesetsMod getMovesetsMod() {

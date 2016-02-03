@@ -357,7 +357,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 				moves[i].power = moveData[3] & 0xFF;
 				moves[i].pp = moveData[5] & 0xFF;
 				moves[i].type = Gen5Constants.typeTable[moveData[0] & 0xFF];
-				moves[i].damageType = Gen5Constants.damageTypeIndexes[moveData[2] & 0xFF];
+				moves[i].category = Gen5Constants.moveCategoryIndices[moveData[2] & 0xFF];
 			}
 		} catch (IOException e) {
 			// change this later
@@ -440,7 +440,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 	private void saveMoves() {
 		for (int i = 1; i <= Gen5Constants.moveCount; i++) {
 			byte[] data = moveNarc.files.get(i);
-			data[2] = Gen5Constants.damageTypeToByte(moves[i].damageType);
+			data[2] = Gen5Constants.moveCategoryToByte(moves[i].category);
 			data[3] = (byte) moves[i].power;
 			data[0] = Gen5Constants.typeToByte(moves[i].type);
 			int hitratio = (int) Math.round(moves[i].hitratio);
