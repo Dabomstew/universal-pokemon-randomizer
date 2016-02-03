@@ -31,7 +31,8 @@ public class Evolution implements Comparable<Evolution> {
 	public EvolutionType type;
 	public int extraInfo;
 
-	public Evolution(Pokemon from, Pokemon to, boolean carryStats, EvolutionType type, int extra) {
+	public Evolution(Pokemon from, Pokemon to, boolean carryStats,
+			EvolutionType type, int extra) {
 		this.from = from;
 		this.to = to;
 		this.carryStats = carryStats;
@@ -45,6 +46,7 @@ public class Evolution implements Comparable<Evolution> {
 		int result = 1;
 		result = prime * result + from.number;
 		result = prime * result + to.number;
+		result = prime * result + type.ordinal();
 		return result;
 	}
 
@@ -61,6 +63,8 @@ public class Evolution implements Comparable<Evolution> {
 			return false;
 		if (to != other.to)
 			return false;
+		if (type != other.type)
+			return false;
 		return true;
 	}
 
@@ -73,6 +77,10 @@ public class Evolution implements Comparable<Evolution> {
 		} else if (this.to.number < o.to.number) {
 			return -1;
 		} else if (this.to.number > o.to.number) {
+			return 1;
+		} else if (this.type.ordinal() < o.type.ordinal()) {
+			return -1;
+		} else if (this.type.ordinal() > o.type.ordinal()) {
 			return 1;
 		} else {
 			return 0;
