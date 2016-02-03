@@ -772,13 +772,13 @@ public class Randomizer {
 			log.println("--Move Data--");
 			log.print("NUM|NAME           |TYPE    |POWER|ACC.|PP");
 			if(romHandler.hasPhysicalSpecialSplit()) {
-				log.print(" |CLASS");
+				log.print(" |CATEGORY");
 			}
 			log.println();
 			List<Move> allMoves = romHandler.getMoves();
 			for(Move mv : allMoves) {
 				if(mv != null) {
-					log.printf("%3d|%-15s|%-8s|%5d|%4d|%3d", mv.internalId, mv.name, mv.type.toString(), mv.power, mv.hitratio, mv.pp);
+					log.printf("%3d|%-15s|%-8s|%5d|%4d|%3d", mv.internalId, mv.name, mv.type.toString(), mv.power, (int)mv.hitratio, mv.pp);
 					if(romHandler.hasPhysicalSpecialSplit()) {
 						log.printf("| %s", mv.category.toString());
 					}

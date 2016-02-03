@@ -47,7 +47,6 @@ import javax.swing.JOptionPane;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.gui.RandomizerGUI;
-import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
@@ -56,6 +55,7 @@ import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.IngameTrade;
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Move;
+import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
@@ -1983,7 +1983,13 @@ public abstract class AbstractRomHandler implements RomHandler {
 		for (Move mv : moves) {
 			if (mv != null && mv.internalId != 165 && mv.power >= 10) {
 				// "Generic" damaging move to randomize power
-				mv.power = random.nextInt(27) * 5 + 20; // 20 ... 150 inclusive
+				if (random.nextInt(3) != 2) {
+					// "Regular" move
+					mv.power = random.nextInt(11) * 5 + 50; // 50 ... 100
+				} else {
+					// "Extreme" move
+					mv.power = random.nextInt(27) * 5 + 20; // 20 ... 150
+				}
 				// Tiny chance for massive power jumps
 				for (int i = 0; i < 2; i++) {
 					if (random.nextInt(100) == 0) {
