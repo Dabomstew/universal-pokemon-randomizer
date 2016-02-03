@@ -101,8 +101,6 @@ public class Randomizer {
 			romHandler.randomizeMoveCategory();
 		}
 
-		maybeLogMoveChanges(log, romHandler);
-
 		List<Move> moves = romHandler.getMoves();
 
 		// Trade evolutions removal
@@ -205,6 +203,10 @@ public class Randomizer {
 		// Starter Pokemon
 		// Applied after type to update the strings correctly based on new types
 		maybeChangeAndLogStarters(log, romHandler);
+		
+		// Move Data Log
+		// Placed here so it matches its position in the randomizer interface
+		maybeLogMoveChanges(log, romHandler);
 
 		// Movesets
 		boolean noBrokenMoves = settings.doBlockBrokenMoves();
