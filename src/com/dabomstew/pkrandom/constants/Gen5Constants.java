@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.dabomstew.pkrandom.pokemon.DamageType;
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
@@ -94,6 +95,21 @@ public class Gen5Constants {
 			hiddenItemVarSet = 0x8000;
 
 	public static final int scriptListTerminator = 0xFD13;
+
+	public static final DamageType[] damageTypeIndexes = { DamageType.STATUS,
+			DamageType.PHYSICAL, DamageType.SPECIAL };
+
+	public static byte damageTypeToByte(DamageType dt) {
+		switch (dt) {
+		case PHYSICAL:
+			return 1;
+		case SPECIAL:
+			return 2;
+		case STATUS:
+		default:
+			return 0;
+		}
+	}
 
 	public static final Type[] typeTable = constructTypeTable();
 

@@ -103,6 +103,18 @@ public interface RomHandler {
 	public Pokemon random2EvosPokemon();
 
 	// Randomizer: moves
+	
+	public void randomizeMovePowers();
+	
+	public void randomizeMovePPs();
+	
+	public void randomizeMoveAccuracies();
+	
+	public void randomizeMoveTypes();
+	
+	public boolean hasPhysicalSpecialSplit();
+	
+	public void randomizeMovePSS();
 
 	// Update all moves to gen5 definitions as much as possible
 	// e.g. change typing, power, accuracy, but don't try to

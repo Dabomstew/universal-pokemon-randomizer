@@ -47,6 +47,7 @@ import javax.swing.JOptionPane;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.gui.RandomizerGUI;
+import com.dabomstew.pkrandom.pokemon.DamageType;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
@@ -1972,6 +1973,110 @@ public abstract class AbstractRomHandler implements RomHandler {
 		this.setEvolutions(allEvos);
 	}
 
+	// MOVE DATA
+	// All randomizers don't touch move ID 165 (Struggle)
+	// They also have other exclusions where necessary to stop things glitching.
+
+	@Override
+	public void randomizeMovePowers() {
+		List<Move> moves = this.getMoves();
+		for (Move mv : moves) {
+			if (mv != null && mv.internalId != 165 && mv.power >= 10) {
+				// "Generic" damaging move to randomize power
+				mv.power = random.nextInt(27) * 5 + 20; // 20 ... 150 inclusive
+				// Tiny chance for massive power jumps
+				for (int i = 0; i < 2; i++) {
+					if (random.nextInt(100) == 0) {
+						mv.power += 50;
+					}
+				}
+			}
+		}
+	}
+
+	@Override
+	public void randomizeMovePPs() {
+		List<Move> moves = this.getMoves();
+		for (Move mv : moves) {
+			if (mv != null && mv.internalId != 165) {
+				mv.pp = random.nextInt(8) * 5 + 5; // 5 ... 40 inclusive
+			}
+		}
+	}
+
+	@Override
+	public void randomizeMoveAccuracies() {
+		List<Move> moves = this.getMoves();
+		for (Move mv : moves) {
+			if (mv != null && mv.internalId != 165 && mv.hitratio >= 5) {
+				// "Sane" accuracy randomization
+				// Broken into three tiers based on original accuracy
+				// Designed to limit the chances of 100% accurate OHKO moves and
+				// keep a decent base of 100% accurate regular moves.
+
+				if (mv.hitratio <= 50) {
+					// lowest tier (acc <= 50)
+					// new accuracy = rand(20...100) inclusive
+					mv.hitratio = random.nextInt(17) * 5 + 20;
+				} else if (mv.hitratio < 90) {
+					// middle tier (50 < acc < 90)
+					// count down from 100% to 20% in 5% increments with 20%
+					// chance to "stop" and use the current accuracy at each
+					// increment
+					// gives decent-but-not-100% accuracy most of the time
+					mv.hitratio = 100;
+					while (mv.hitratio > 20) {
+						if (random.nextInt(10) < 2) {
+							break;
+						}
+						mv.hitratio -= 5;
+					}
+				} else {
+					// highest tier (90 <= acc <= 100)
+					// count down from 100% to 20% in 5% increments with 40%
+					// chance to "stop" and use the current accuracy at each
+					// increment
+					// gives high accuracy most of the time
+					mv.hitratio = 100;
+					while (mv.hitratio > 20) {
+						if (random.nextInt(10) < 4) {
+							break;
+						}
+						mv.hitratio -= 5;
+					}
+				}
+			}
+		}
+	}
+
+	@Override
+	public void randomizeMoveTypes() {
+		List<Move> moves = this.getMoves();
+		for (Move mv : moves) {
+			if (mv != null && mv.internalId != 165 && mv.type != null) {
+				mv.type = randomType();
+			}
+		}
+	}
+
+	@Override
+	public void randomizeMovePSS() {
+		if (!this.hasPhysicalSpecialSplit()) {
+			return;
+		}
+		List<Move> moves = this.getMoves();
+		for (Move mv : moves) {
+			if (mv != null && mv.internalId != 165
+					&& mv.damageType != DamageType.STATUS) {
+				if (random.nextInt(2) == 0) {
+					mv.damageType = (mv.damageType == DamageType.PHYSICAL) ? DamageType.SPECIAL
+							: DamageType.PHYSICAL;
+				}
+			}
+		}
+
+	}
+
 	private Map<Integer, boolean[]> moveUpdates;
 
 	@Override
@@ -3000,13 +3105,13 @@ public abstract class AbstractRomHandler implements RomHandler {
 		// default: do nothing
 
 	}
-	
+
 	@Override
 	public void randomizePCPotion() {
 		// default: do nothing
 
 	}
-	
+
 	@Override
 	public void applyPikachuEvoPatch() {
 		// default: do nothing

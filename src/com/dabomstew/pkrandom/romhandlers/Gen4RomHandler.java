@@ -314,11 +314,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				moves[i] = new Move();
 				moves[i].name = moveNames.get(i);
 				moves[i].number = i;
+				moves[i].internalId = i;
 				moves[i].effectIndex = readWord(moveData, 0);
 				moves[i].hitratio = (moveData[5] & 0xFF);
 				moves[i].power = moveData[3] & 0xFF;
 				moves[i].pp = moveData[6] & 0xFF;
 				moves[i].type = Gen4Constants.typeTable[moveData[4] & 0xFF];
+				moves[i].damageType = Gen4Constants.damageTypeIndexes[moveData[2] & 0xFF];
+				System.out.printf("%s %d %d\n", moves[i].name, moveData[2]&0xFF, moveData[7]&0xFF);
 			}
 		} catch (IOException e) {
 			// change this later

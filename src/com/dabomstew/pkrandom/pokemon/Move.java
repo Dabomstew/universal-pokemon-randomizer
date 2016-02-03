@@ -33,6 +33,7 @@ public class Move {
 	public double hitratio;
 	public Type type;
 	public int effectIndex;
+	public DamageType damageType;
 
 	public String toString() {
 		return "#" + number + " " + name + " - Power: " + power + ", Base PP: "

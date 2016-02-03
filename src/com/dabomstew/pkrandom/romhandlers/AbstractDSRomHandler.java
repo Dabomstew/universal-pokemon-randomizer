@@ -96,6 +96,13 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 	public boolean canChangeStaticPokemon() {
 		return false;
 	}
+	
+	@Override
+	public boolean hasPhysicalSpecialSplit() {
+		// Default value for Gen4+.
+		// Handlers can override again in case of ROM hacks etc.
+		return true;
+	}
 
 	public NARCContents readNARC(String subpath) throws IOException {
 		Map<String, byte[]> frames = readNitroFrames(subpath);

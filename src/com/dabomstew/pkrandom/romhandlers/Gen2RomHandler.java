@@ -454,6 +454,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 			moves[i] = new Move();
 			moves[i].name = moveNames[i];
 			moves[i].number = i;
+			moves[i].internalId = i;
 			moves[i].effectIndex = rom[offs + (i - 1) * 7] & 0xFF;
 			moves[i].hitratio = ((rom[offs + (i - 1) * 7 + 3] & 0xFF) + 0) / 255.0 * 100;
 			moves[i].power = rom[offs + (i - 1) * 7 + 1] & 0xFF;

@@ -3,6 +3,7 @@ package com.dabomstew.pkrandom.constants;
 import java.util.Arrays;
 import java.util.List;
 
+import com.dabomstew.pkrandom.pokemon.DamageType;
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
@@ -23,36 +24,35 @@ public class Gen4Constants {
 			bsGrowthCurveOffset = 19, bsAbility1Offset = 22,
 			bsAbility2Offset = 23, bsTMHMCompatOffset = 28;
 
-	public static final byte[] hgssStarterCodeSuffix = new byte[] { 0x03, 0x03,
-			0x1A, 0x12, 0x1, 0x23, 0x0, 0x0 };
+	public static final byte[] hgssStarterCodeSuffix = { 0x03, 0x03, 0x1A,
+			0x12, 0x1, 0x23, 0x0, 0x0 };
 
-	public static final int[] hgssFilesWithRivalScript = new int[] { 7, 23, 96,
-			110, 819, 850, 866 };
+	public static final int[] hgssFilesWithRivalScript = { 7, 23, 96, 110, 819,
+			850, 866 };
 
-	public static final byte[] hgssRivalScriptMagic = new byte[] { (byte) 0xCE,
-			0x00, 0x0C, (byte) 0x80, 0x11, 0x00, 0x0C, (byte) 0x80, (byte) 152,
-			0, 0x1C, 0x00, 0x05 };
+	public static final byte[] hgssRivalScriptMagic = { (byte) 0xCE, 0x00,
+			0x0C, (byte) 0x80, 0x11, 0x00, 0x0C, (byte) 0x80, (byte) 152, 0,
+			0x1C, 0x00, 0x05 };
 
-	public static final int[] ptFilesWithRivalScript = new int[] { 31, 36, 112,
-			123, 186, 427, 429, 1096 };
+	public static final int[] ptFilesWithRivalScript = { 31, 36, 112, 123, 186,
+			427, 429, 1096 };
 
-	public static final int[] dpFilesWithRivalScript = new int[] { 34, 90, 118,
-			180, 195, 394 };
+	public static final int[] dpFilesWithRivalScript = { 34, 90, 118, 180, 195,
+			394 };
 
-	public static final byte[] dpptRivalScriptMagic = new byte[] { (byte) 0xDE,
-			0x00, 0x0C, (byte) 0x80, 0x11, 0x00, 0x0C, (byte) 0x80,
-			(byte) 0x83, 0x01, 0x1C, 0x00, 0x01 };
+	public static final byte[] dpptRivalScriptMagic = { (byte) 0xDE, 0x00,
+			0x0C, (byte) 0x80, 0x11, 0x00, 0x0C, (byte) 0x80, (byte) 0x83,
+			0x01, 0x1C, 0x00, 0x01 };
 
 	public static final byte[] dpptTagBattleScriptMagic1 = { (byte) 0xDE, 0x00,
 			0x0C, (byte) 0x80, 0x28, 0x00, 0x04, (byte) 0x80 };
 
-	public static final byte[] dpptTagBattleScriptMagic2 = new byte[] { 0x11,
-			0x00, 0x0C, (byte) 0x80, (byte) 0x86, 0x01, 0x1C, 0x00, 0x01 };
+	public static final byte[] dpptTagBattleScriptMagic2 = { 0x11, 0x00, 0x0C,
+			(byte) 0x80, (byte) 0x86, 0x01, 0x1C, 0x00, 0x01 };
 
-	public static final int[] ptFilesWithTagScript = new int[] { 2, 136, 201,
-			236 };
+	public static final int[] ptFilesWithTagScript = { 2, 136, 201, 236 };
 
-	public static final int[] dpFilesWithTagScript = new int[] { 2, 131, 230 };
+	public static final int[] dpFilesWithTagScript = { 2, 131, 230 };
 
 	public static final int dpStarterStringIndex = 19,
 			ptStarterStringIndex = 36;
@@ -88,6 +88,21 @@ public class Gen4Constants {
 
 	public static final int itemScriptVariable = 0x8008;
 
+	public static final DamageType[] damageTypeIndexes = { DamageType.PHYSICAL,
+			DamageType.SPECIAL, DamageType.STATUS };
+
+	public static byte damageTypeToByte(DamageType dt) {
+		switch (dt) {
+		case PHYSICAL:
+			return 0;
+		case SPECIAL:
+			return 1;
+		case STATUS:
+		default:
+			return 2;
+		}
+	}
+
 	public static final List<Integer> dpRequiredFieldTMs = Arrays
 			.asList(new Integer[] { 2, 3, 5, 9, 12, 19, 23, 28, 34, 39, 41, 43,
 					46, 47, 49, 50, 62, 69, 79, 80, 82, 84, 85, 87 });
@@ -96,6 +111,7 @@ public class Gen4Constants {
 			.asList(new Integer[] { 2, 3, 5, 7, 9, 11, 12, 18, 19, 23, 28, 34,
 					37, 39, 41, 43, 46, 47, 49, 50, 62, 69, 79, 80, 82, 84, 85,
 					87 });
+
 	// DPPt:
 	// cut, fly, surf, strength, flash, dig, teleport, waterfall,
 	// rock smash, sweet scent, defog, rock climb

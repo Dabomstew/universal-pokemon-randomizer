@@ -707,6 +707,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			moves[i].name = readFixedLengthString(nameoffs + i * namelen,
 					namelen);
 			moves[i].number = i;
+			moves[i].internalId = i;
 			moves[i].effectIndex = rom[offs + i * 0xC] & 0xFF;
 			moves[i].hitratio = ((rom[offs + i * 0xC + 3] & 0xFF) + 0);
 			moves[i].power = rom[offs + i * 0xC + 1] & 0xFF;
