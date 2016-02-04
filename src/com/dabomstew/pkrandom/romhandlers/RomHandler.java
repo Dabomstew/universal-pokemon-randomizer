@@ -239,6 +239,10 @@ public interface RomHandler {
 	// tm/moveset sanity
 
 	public void ensureTMCompatSanity();
+	
+	// new 170: full HM (but not TM) compat override
+	
+	public void fullHMCompatibility();
 
 	// Randomizer: move tutors
 

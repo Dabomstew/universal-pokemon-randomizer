@@ -148,9 +148,10 @@ public class SettingsUpdater {
 		}
 		
 		// no significant changes from 162 to 163
-		// 163 to 170: add move data randomizations
+		// 163 to 170: add move data randomizations and 2nd TM byte
 		if (oldVersion < 170) {
-			insertExtraByte(20, (byte) 0);
+			insertExtraByte(17, (byte) 0);
+			insertExtraByte(21, (byte) 0);
 		}
 
 		// fix checksum

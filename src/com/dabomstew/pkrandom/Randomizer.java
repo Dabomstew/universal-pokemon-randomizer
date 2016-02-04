@@ -390,6 +390,10 @@ public class Randomizer {
 		if (settings.isTmLevelUpMoveSanity()) {
 			romHandler.ensureTMCompatSanity();
 		}
+		
+		if (settings.isFullHMCompat()) {
+			romHandler.fullHMCompatibility();
+		}
 
 		// Move Tutors (new 1.0.3)
 		if (romHandler.hasMoveTutors()) {

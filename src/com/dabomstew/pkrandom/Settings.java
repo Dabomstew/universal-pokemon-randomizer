@@ -23,7 +23,7 @@ public class Settings {
 
 	public static final int VERSION = 170;
 
-	public static final int LENGTH_OF_SETTINGS_DATA = 29;
+	public static final int LENGTH_OF_SETTINGS_DATA = 30;
 
 	private byte[] trainerClasses;
 	private byte[] trainerNames;
@@ -135,6 +135,7 @@ public class Settings {
 	private TMsMod tmsMod = TMsMod.UNCHANGED;
 	private boolean tmLevelUpMoveSanity;
 	private boolean keepFieldMoveTMs;
+	private boolean fullHMCompat;
 
 	public enum TMsHMsCompatibilityMod {
 		UNCHANGED, RANDOM_PREFER_TYPE, COMPLETELY_RANDOM, FULL
@@ -298,8 +299,12 @@ public class Settings {
 				tmsMod == TMsMod.RANDOM, tmsMod == TMsMod.UNCHANGED,
 				tmLevelUpMoveSanity, keepFieldMoveTMs,
 				tmsHmsCompatibilityMod == TMsHMsCompatibilityMod.FULL));
+		
+		// 17 tms part 2
+		// new in 170
+		out.write(makeByteSelected(fullHMCompat));
 
-		// 17 move tutor randomization
+		// 18 move tutor randomization
 		out.write(makeByteSelected(
 				moveTutorsCompatibilityMod == MoveTutorsCompatibilityMod.COMPLETELY_RANDOM,
 				moveTutorsCompatibilityMod == MoveTutorsCompatibilityMod.RANDOM_PREFER_TYPE,
@@ -310,7 +315,7 @@ public class Settings {
 				moveTutorsCompatibilityMod == MoveTutorsCompatibilityMod.FULL));
 
 		// new 150
-		// 18 in game trades
+		// 19 in game trades
 		out.write(makeByteSelected(
 				inGameTradesMod == InGameTradesMod.RANDOMIZE_GIVEN_AND_REQUESTED,
 				inGameTradesMod == InGameTradesMod.RANDOMIZE_GIVEN,
@@ -318,19 +323,19 @@ public class Settings {
 				randomizeInGameTradesNicknames, randomizeInGameTradesOTs,
 				inGameTradesMod == InGameTradesMod.UNCHANGED));
 
-		// 19 field items
+		// 20 field items
 		out.write(makeByteSelected(fieldItemsMod == FieldItemsMod.RANDOM,
 				fieldItemsMod == FieldItemsMod.SHUFFLE,
 				fieldItemsMod == FieldItemsMod.UNCHANGED,
 				banBadRandomFieldItems));
 
 		// new 170
-		// 20 move randomizers
+		// 21 move randomizers
 		out.write(makeByteSelected(randomizeMovePowers,
 				randomizeMoveAccuracies, randomizeMovePPs, randomizeMoveTypes,
 				randomizeMoveCategory));
 
-		// @ 21 pokemon restrictions
+		// @ 22 pokemon restrictions
 		try {
 			if (currentRestrictions != null) {
 				writeFullInt(out, currentRestrictions.toInt());
@@ -340,7 +345,7 @@ public class Settings {
 		} catch (IOException e) {
 		}
 
-		// @ 25 code tweaks
+		// @ 26 code tweaks
 		try {
 			writeFullInt(out, currentCodeTweaks);
 		} catch (IOException e) {
@@ -482,53 +487,54 @@ public class Settings {
 		));
 		settings.setTmLevelUpMoveSanity(restoreState(data[16], 5));
 		settings.setKeepFieldMoveTMs(restoreState(data[16], 6));
+		settings.setFullHMCompat(restoreState(data[17], 0));
 
 		settings.setMoveTutorMovesMod(restoreEnum(MoveTutorMovesMod.class,
-				data[17], 4, // UNCHANGED
+				data[18], 4, // UNCHANGED
 				3 // RANDOM
 		));
 		settings.setMoveTutorsCompatibilityMod(restoreEnum(
-				MoveTutorsCompatibilityMod.class, data[17], 2, // UNCHANGED
+				MoveTutorsCompatibilityMod.class, data[18], 2, // UNCHANGED
 				1, // RANDOM_PREFER_TYPE
 				0, // COMPLETELY_RANDOM
 				7 // FULL
 		));
-		settings.setTutorLevelUpMoveSanity(restoreState(data[17], 5));
-		settings.setKeepFieldMoveTutors(restoreState(data[17], 6));
+		settings.setTutorLevelUpMoveSanity(restoreState(data[18], 5));
+		settings.setKeepFieldMoveTutors(restoreState(data[18], 6));
 
 		// new 150
 		settings.setInGameTradesMod(restoreEnum(InGameTradesMod.class,
-				data[18], 6, // UNCHANGED
+				data[19], 6, // UNCHANGED
 				1, // RANDOMIZE_GIVEN
 				0 // RANDOMIZE_GIVEN_AND_REQUESTED
 		));
-		settings.setRandomizeInGameTradesItems(restoreState(data[18], 2));
-		settings.setRandomizeInGameTradesIVs(restoreState(data[18], 3));
-		settings.setRandomizeInGameTradesNicknames(restoreState(data[18], 4));
-		settings.setRandomizeInGameTradesOTs(restoreState(data[18], 5));
+		settings.setRandomizeInGameTradesItems(restoreState(data[19], 2));
+		settings.setRandomizeInGameTradesIVs(restoreState(data[19], 3));
+		settings.setRandomizeInGameTradesNicknames(restoreState(data[19], 4));
+		settings.setRandomizeInGameTradesOTs(restoreState(data[19], 5));
 
-		settings.setFieldItemsMod(restoreEnum(FieldItemsMod.class, data[19], 2, // UNCHANGED
+		settings.setFieldItemsMod(restoreEnum(FieldItemsMod.class, data[20], 2, // UNCHANGED
 				1, // SHUFFLE
 				0 // RANDOM
 		));
-		settings.setBanBadRandomFieldItems(restoreState(data[19], 3));
+		settings.setBanBadRandomFieldItems(restoreState(data[20], 3));
 		
 		// new 170
-		settings.setRandomizeMovePowers(restoreState(data[20], 0));
-		settings.setRandomizeMoveAccuracies(restoreState(data[20], 1));
-		settings.setRandomizeMovePPs(restoreState(data[20], 2));
-		settings.setRandomizeMoveTypes(restoreState(data[20], 3));
-		settings.setRandomizeMoveCategory(restoreState(data[20], 4));
+		settings.setRandomizeMovePowers(restoreState(data[21], 0));
+		settings.setRandomizeMoveAccuracies(restoreState(data[21], 1));
+		settings.setRandomizeMovePPs(restoreState(data[21], 2));
+		settings.setRandomizeMoveTypes(restoreState(data[21], 3));
+		settings.setRandomizeMoveCategory(restoreState(data[21], 4));
 
 		// gen restrictions
-		int genLimit = FileFunctions.readFullInt(data, 21);
+		int genLimit = FileFunctions.readFullInt(data, 22);
 		GenRestrictions restrictions = null;
 		if (genLimit != 0) {
 			restrictions = new GenRestrictions(genLimit);
 		}
 		settings.setCurrentRestrictions(restrictions);
 
-		int codeTweaks = FileFunctions.readFullInt(data, 25);
+		int codeTweaks = FileFunctions.readFullInt(data, 26);
 
 		// Sanity override
 		if (codeTweaks == 0) {
@@ -1224,6 +1230,15 @@ public class Settings {
 
 	public Settings setKeepFieldMoveTMs(boolean keepFieldMoveTMs) {
 		this.keepFieldMoveTMs = keepFieldMoveTMs;
+		return this;
+	}
+
+	public boolean isFullHMCompat() {
+		return fullHMCompat;
+	}
+
+	public Settings setFullHMCompat(boolean fullHMCompat) {
+		this.fullHMCompat = fullHMCompat;
 		return this;
 	}
 
