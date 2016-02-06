@@ -62,7 +62,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		public Gen4RomHandler create(Random random) {
 			return new Gen4RomHandler(random);
 		}
-		
+
 		public boolean isLoadable(String filename) {
 			return detectNDSRomInner(getROMCodeFromFile(filename));
 		}
@@ -258,11 +258,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	protected boolean detectNDSRom(String ndsCode) {
 		return detectNDSRomInner(ndsCode);
 	}
-	
+
 	private static boolean detectNDSRomInner(String ndsCode) {
 		return entryFor(ndsCode) != null;
 	}
-	
+
 	private static RomEntry entryFor(String ndsCode) {
 		for (RomEntry re : roms) {
 			if (ndsCode.equals(re.romCode)) {
@@ -321,7 +321,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				moves[i].pp = moveData[6] & 0xFF;
 				moves[i].type = Gen4Constants.typeTable[moveData[4] & 0xFF];
 				moves[i].category = Gen4Constants.moveCategoryIndices[moveData[2] & 0xFF];
-				System.out.printf("%s %d %d\n", moves[i].name, moveData[2]&0xFF, moveData[7]&0xFF);
 			}
 		} catch (IOException e) {
 			// change this later
@@ -817,7 +816,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			if (romEntry.romType == Gen4Constants.Type_HGSS) {
 				return getEncountersHGSS(useTimeOfDay);
 			} else {
-				return getEncountersDPPt();
+				return getEncountersDPPt(useTimeOfDay);
 			}
 		} catch (IOException ex) {
 			// Uh-oh
@@ -826,7 +825,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 	}
 
-	private List<EncounterSet> getEncountersDPPt() throws IOException {
+	private List<EncounterSet> getEncountersDPPt(boolean useTimeOfDay)
+			throws IOException {
 		// Determine file to use
 		String encountersFile = romEntry.getString("WildPokemon");
 
@@ -843,31 +843,55 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				// up to 4
 				List<Encounter> grassEncounters = readEncountersDPPt(b, 4, 12);
 				EncounterSet grass = new EncounterSet();
-				grass.displayName = "grass";
+				grass.displayName = "Grass Encounters";
 				grass.encounters = grassEncounters;
 				grass.rate = grassRate;
 				grass.offset = c;
 				encounters.add(grass);
+
+				// Time of day replacements?
+				if (useTimeOfDay) {
+					for (int i = 0; i < 4; i++) {
+						int pknum = readLong(b, 108 + 4 * i);
+						if (pknum >= 1 && pknum <= Gen4Constants.pokemonCount) {
+							Pokemon pk = pokes[pknum];
+							Encounter enc = new Encounter();
+							enc.level = grassEncounters
+									.get(Gen4Constants.dpptAlternateSlots[i + 2]).level;
+							enc.pokemon = pk;
+							grassEncounters.add(enc);
+						}
+					}
+				}
+				// (if useTimeOfDay is off, just override them later)
+
+				// Other conditional replacements (swarm, radar, GBA)
+				EncounterSet conds = new EncounterSet();
+				conds.displayName = "Conditional Grass Encounters";
+				conds.rate = grassRate;
+				conds.offset = c;
+				for (int i = 0; i < 20; i++) {
+					if (i >= 2 && i <= 5) {
+						// Time of day slot, handled already
+						continue;
+					}
+					int offs = 100 + i * 4 + (i >= 10 ? 24 : 0);
+					int pknum = readLong(b, offs);
+					if (pknum >= 1 && pknum <= Gen4Constants.pokemonCount) {
+						Pokemon pk = pokes[pknum];
+						Encounter enc = new Encounter();
+						enc.level = grassEncounters
+								.get(Gen4Constants.dpptAlternateSlots[i]).level;
+						enc.pokemon = pk;
+						conds.encounters.add(enc);
+					}
+				}
+				if (conds.encounters.size() > 0) {
+					encounters.add(conds);
+				}
 			}
-			// // tmp: conditional replacements
-			// EncounterSet conds = new EncounterSet();
-			// conds.displayName = "conds";
-			// conds.rate = grassRate;
-			// conds.offset = c;
-			// for (int i = 0; i < 20; i++) {
-			// int offs = 100 + i * 8 + (i >= 10 ? 48 : 0);
-			// int pknum = readLong(b, offs);
-			// if (pknum >= 1 && pknum <= 493) {
-			// Pokemon pk = pokes[pknum];
-			// Encounter enc = new Encounter();
-			// enc.level = 5;
-			// enc.pokemon = pk;
-			// conds.encounters.add(enc);
-			// }
-			// }
-			// if (conds.encounters.size() > 0)
-			// encounters.add(conds);
-			// up to 204, 5 special ones to go
+
+			// up to 204, 5 sets of "sea" encounters to go
 			int offset = 204;
 			for (int i = 0; i < 5; i++) {
 				int rate = readLong(b, offset);
@@ -879,7 +903,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					continue;
 				}
 				EncounterSet other = new EncounterSet();
-				other.displayName = "special" + i;
+				other.displayName = Gen4Constants.dpptWaterSlotSetNames[i];
 				other.offset = c;
 				other.encounters = encountersHere;
 				other.rate = rate;
@@ -956,6 +980,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					EncounterSet grass = new EncounterSet();
 					grass.encounters = grassEncounters;
 					grass.rate = rates[0];
+					grass.displayName = "Grass Encounters";
 					encounters.add(grass);
 				} else {
 					for (int i = 0; i < 3; i++) {
@@ -963,6 +988,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 						grass.encounters = stitchEncsToLevels(grassPokes[i],
 								grassLevels);
 						grass.rate = rates[0];
+						grass.displayName = Gen4Constants.hgssTimeOfDayNames[i]
+								+ " Grass Encounters";
 						encounters.add(grass);
 					}
 				}
@@ -970,6 +997,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 			// Hoenn/Sinnoh Radio
 			EncounterSet radio = readOptionalEncountersHGSS(b, 92, 4);
+			radio.displayName = "Hoenn/Sinnoh Radio Encounters";
 			if (radio.encounters.size() > 0) {
 				encounters.add(radio);
 			}
@@ -984,6 +1012,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					// Valid area.
 					EncounterSet other = new EncounterSet();
 					other.encounters = encountersHere;
+					other.displayName = Gen4Constants.hgssNonGrassSetNames[i];
 					other.rate = rates[i];
 					encounters.add(other);
 				}
@@ -1044,7 +1073,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			if (romEntry.romType == Gen4Constants.Type_HGSS) {
 				setEncountersHGSS(useTimeOfDay, encounters);
 			} else {
-				setEncountersDPPt(encounters);
+				setEncountersDPPt(useTimeOfDay, encounters);
 			}
 		} catch (IOException ex) {
 			// Uh-oh
@@ -1052,8 +1081,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 	}
 
-	private void setEncountersDPPt(List<EncounterSet> encounterList)
-			throws IOException {
+	private void setEncountersDPPt(boolean useTimeOfDay,
+			List<EncounterSet> encounterList) throws IOException {
 		// Determine file to use
 		String encountersFile = romEntry.getString("WildPokemon");
 		NARCContents encounterData = readNARC(encountersFile);
@@ -1066,7 +1095,49 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			if (grassRate != 0) {
 				// grass encounters are a-go
 				EncounterSet grass = encounters.next();
-				writeEncountersDPPt(b, 4, grass.encounters);
+				writeEncountersDPPt(b, 4, grass.encounters, 12);
+
+				// Time of day encounters?
+				int todEncounterSlot = 12;
+				for (int i = 0; i < 4; i++) {
+					int pknum = readLong(b, 108 + 4 * i);
+					if (pknum >= 1 && pknum <= Gen4Constants.pokemonCount) {
+						// Valid time of day slot
+						if (useTimeOfDay) {
+							// Get custom randomized encounter
+							Pokemon pk = grass.encounters
+									.get(todEncounterSlot++).pokemon;
+							writeLong(b, 108 + 4 * i, pk.number);
+						} else {
+							// Copy the original slot's randomized encounter
+							Pokemon pk = grass.encounters
+									.get(Gen4Constants.dpptAlternateSlots[i + 2]).pokemon;
+							writeLong(b, 108 + 4 * i, pk.number);
+						}
+					}
+				}
+
+				// Other conditional encounters?
+				Iterator<Encounter> condEncounters = null;
+				for (int i = 0; i < 20; i++) {
+					if (i >= 2 && i <= 5) {
+						// Time of day slot, handled already
+						continue;
+					}
+					int offs = 100 + i * 4 + (i >= 10 ? 24 : 0);
+					int pknum = readLong(b, offs);
+					if (pknum >= 1 && pknum <= Gen4Constants.pokemonCount) {
+						// This slot is used, grab a replacement.
+						if (condEncounters == null) {
+							// Fetch the set of conditional encounters for this
+							// area now that we know it's necessary and exists.
+							condEncounters = encounters.next().encounters
+									.iterator();
+						}
+						Pokemon pk = condEncounters.next().pokemon;
+						writeLong(b, offs, pk.number);
+					}
+				}
 			}
 			// up to 204, 5 special ones to go
 			// This is for surf, filler, old rod, good rod, super rod
@@ -1093,7 +1164,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 	private void writeEncountersDPPt(byte[] data, int offset,
 			List<Encounter> encounters) {
-		int enclength = encounters.size();
+		writeEncountersDPPt(data, offset, encounters, encounters.size());
+	}
+
+	private void writeEncountersDPPt(byte[] data, int offset,
+			List<Encounter> encounters, int enclength) {
 		for (int i = 0; i < enclength; i++) {
 			Encounter enc = encounters.get(i);
 			writeLong(data, offset + i * 8, enc.level);

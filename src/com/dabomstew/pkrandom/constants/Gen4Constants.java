@@ -3,8 +3,8 @@ package com.dabomstew.pkrandom.constants;
 import java.util.Arrays;
 import java.util.List;
 
-import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.pokemon.ItemList;
+import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
 
@@ -88,8 +88,24 @@ public class Gen4Constants {
 
 	public static final int itemScriptVariable = 0x8008;
 
-	public static final MoveCategory[] moveCategoryIndices = { MoveCategory.PHYSICAL,
-			MoveCategory.SPECIAL, MoveCategory.STATUS };
+	// The original slot each of the 20 "alternate" slots is mapped to
+	// swarmx2, dayx2, nightx2, pokeradarx4, GBAx10
+	// NOTE: in the game data there are 6 fillers between pokeradar and GBA
+
+	public static final int[] dpptAlternateSlots = new int[] { 0, 1, 2, 3, 2,
+			3, 4, 5, 10, 11, 8, 9, 8, 9, 8, 9, 8, 9, 8, 9 };
+
+	public static final String[] dpptWaterSlotSetNames = new String[] {
+			"Surfing", "Filler", "Old Rod", "Good Rod", "Super Rod" };
+
+	public static final String[] hgssTimeOfDayNames = new String[] { "Morning",
+			"Day", "Night" };
+
+	public static final String[] hgssNonGrassSetNames = new String[] { "",
+			"Surfing", "Rock Smash", "Old Rod", "Good Rod", "Super Rod" };
+
+	public static final MoveCategory[] moveCategoryIndices = {
+			MoveCategory.PHYSICAL, MoveCategory.SPECIAL, MoveCategory.STATUS };
 
 	public static byte moveCategoryToByte(MoveCategory cat) {
 		switch (cat) {
