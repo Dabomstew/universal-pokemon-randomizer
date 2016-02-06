@@ -209,7 +209,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 								}
 							} else if (r[0].endsWith("Offset")
 									|| r[0].endsWith("Count")
-									|| r[0].endsWith("Number")) {
+									|| r[0].endsWith("Number")
+									|| r[0].endsWith("Size")) {
 								int offs = parseRIInt(r[1]);
 								current.numbers.put(r[0], offs);
 							} else {
@@ -251,6 +252,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	private byte[] arm9;
 	private List<String> abilityNames;
 	private List<String> itemNames;
+	private boolean loadedWildMapNames;
+	private Map<Integer, String> wildMapNames;
 
 	private RomEntry romEntry;
 
@@ -300,7 +303,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		loadMoves();
 		abilityNames = getStrings(romEntry.getInt("AbilityNamesTextOffset"));
 		itemNames = getStrings(romEntry.getInt("ItemNamesTextOffset"));
-
+		loadedWildMapNames = false;
 	}
 
 	private void loadMoves() {
@@ -812,6 +815,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 	@Override
 	public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
+		if (!loadedWildMapNames) {
+			loadWildMapNames();
+		}
+
 		try {
 			if (romEntry.romType == Gen4Constants.Type_HGSS) {
 				return getEncountersHGSS(useTimeOfDay);
@@ -838,12 +845,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		int c = -1;
 		for (byte[] b : encounterData.files) {
 			c++;
+			if (!wildMapNames.containsKey(c)) {
+				wildMapNames.put(c, "? Unknown ?");
+			}
+			String mapName = wildMapNames.get(c);
 			int grassRate = readLong(b, 0);
 			if (grassRate != 0) {
 				// up to 4
 				List<Encounter> grassEncounters = readEncountersDPPt(b, 4, 12);
 				EncounterSet grass = new EncounterSet();
-				grass.displayName = "Grass Encounters";
+				grass.displayName = mapName + " Grass/Cave";
 				grass.encounters = grassEncounters;
 				grass.rate = grassRate;
 				grass.offset = c;
@@ -867,7 +878,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 				// Other conditional replacements (swarm, radar, GBA)
 				EncounterSet conds = new EncounterSet();
-				conds.displayName = "Conditional Grass Encounters";
+				conds.displayName = mapName + " Swarm/Radar/GBA";
 				conds.rate = grassRate;
 				conds.offset = c;
 				for (int i = 0; i < 20; i++) {
@@ -903,7 +914,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					continue;
 				}
 				EncounterSet other = new EncounterSet();
-				other.displayName = Gen4Constants.dpptWaterSlotSetNames[i];
+				other.displayName = mapName + " "
+						+ Gen4Constants.dpptWaterSlotSetNames[i];
 				other.offset = c;
 				other.encounters = encountersHere;
 				other.rate = rate;
@@ -951,7 +963,13 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		// https://github.com/magical/pokemon-encounters/blob/master/nds/encounters-gen4-johto.py
 		// for the structure for this.
 		int[] amounts = new int[] { 0, 5, 2, 5, 5, 5 };
+		int c = -1;
 		for (byte[] b : encounterData.files) {
+			c++;
+			if (!wildMapNames.containsKey(c)) {
+				wildMapNames.put(c, "? Unknown ?");
+			}
+			String mapName = wildMapNames.get(c);
 			int[] rates = new int[6];
 			rates[0] = b[0] & 0xFF;
 			rates[1] = b[1] & 0xFF;
@@ -980,7 +998,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					EncounterSet grass = new EncounterSet();
 					grass.encounters = grassEncounters;
 					grass.rate = rates[0];
-					grass.displayName = "Grass Encounters";
+					grass.displayName = mapName + " Grass/Cave";
 					encounters.add(grass);
 				} else {
 					for (int i = 0; i < 3; i++) {
@@ -988,8 +1006,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 						grass.encounters = stitchEncsToLevels(grassPokes[i],
 								grassLevels);
 						grass.rate = rates[0];
-						grass.displayName = Gen4Constants.hgssTimeOfDayNames[i]
-								+ " Grass Encounters";
+						grass.displayName = mapName + " "
+								+ Gen4Constants.hgssTimeOfDayNames[i]
+								+ " Grass/Cave";
 						encounters.add(grass);
 					}
 				}
@@ -997,7 +1016,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 			// Hoenn/Sinnoh Radio
 			EncounterSet radio = readOptionalEncountersHGSS(b, 92, 4);
-			radio.displayName = "Hoenn/Sinnoh Radio Encounters";
+			radio.displayName = mapName + " Hoenn/Sinnoh Radio";
 			if (radio.encounters.size() > 0) {
 				encounters.add(radio);
 			}
@@ -1012,7 +1031,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					// Valid area.
 					EncounterSet other = new EncounterSet();
 					other.encounters = encountersHere;
-					other.displayName = Gen4Constants.hgssNonGrassSetNames[i];
+					other.displayName = mapName + " "
+							+ Gen4Constants.hgssNonGrassSetNames[i];
 					other.rate = rates[i];
 					encounters.add(other);
 				}
@@ -1020,6 +1040,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 			// Swarms
 			EncounterSet swarms = readOptionalEncountersHGSS(b, offset, 4);
+			swarms.displayName = mapName + " Swarms";
 			if (swarms.encounters.size() > 0) {
 				encounters.add(swarms);
 			}
@@ -1293,6 +1314,41 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			encounters.add(enc);
 		}
 		return encounters;
+	}
+
+	private void loadWildMapNames() {
+		try {
+			wildMapNames = new HashMap<Integer, String>();
+			byte[] internalNames = this.readFile(romEntry
+					.getString("MapTableFile"));
+			int numMapHeaders = internalNames.length / 16;
+			int baseMHOffset = romEntry.getInt("MapTableARM9Offset");
+			List<String> allMapNames = getStrings(romEntry
+					.getInt("MapNamesTextOffset"));
+			int mapNameIndexSize = romEntry.getInt("MapTableNameIndexSize");
+			for (int map = 0; map < numMapHeaders; map++) {
+				int baseOffset = baseMHOffset + map * 24;
+				int mapNameIndex = (mapNameIndexSize == 2) ? readWord(arm9,
+						baseOffset + 18) : (arm9[baseOffset + 18] & 0xFF);
+				String mapName = allMapNames.get(mapNameIndex);
+				if (romEntry.romType == Gen4Constants.Type_HGSS) {
+					int wildSet = arm9[baseOffset] & 0xFF;
+					if (wildSet != 255) {
+						wildMapNames.put(wildSet, mapName);
+					}
+				} else {
+					int wildSet = readWord(arm9, baseOffset + 14);
+					if (wildSet != 65535) {
+						wildMapNames.put(wildSet, mapName);
+					}
+				}
+			}
+			loadedWildMapNames = true;
+		} catch (IOException e) {
+			// change this later
+			e.printStackTrace();
+		}
+
 	}
 
 	@Override
