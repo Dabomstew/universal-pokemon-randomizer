@@ -65,7 +65,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 		public Gen5RomHandler create(Random random) {
 			return new Gen5RomHandler(random);
 		}
-		
+
 		public boolean isLoadable(String filename) {
 			return detectNDSRomInner(getROMCodeFromFile(filename));
 		}
@@ -266,6 +266,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 	private byte[] arm9;
 	private List<String> abilityNames;
 	private List<String> itemNames;
+	private boolean loadedWildMapNames;
+	private Map<Integer, String> wildMapNames;
 
 	private NARCContents pokeNarc, moveNarc, stringsNarc, storyTextNarc,
 			scriptNarc;
@@ -320,6 +322,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 		abilityNames = getStrings(false,
 				romEntry.getInt("AbilityNamesTextOffset"));
 		itemNames = getStrings(false, romEntry.getInt("ItemNamesTextOffset"));
+		loadedWildMapNames = false;
 	}
 
 	private void loadPokemonStats() {
@@ -718,6 +721,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
 	@Override
 	public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
+		if (!loadedWildMapNames) {
+			loadWildMapNames();
+		}
 		try {
 			NARCContents encounterNARC = readNARC(romEntry
 					.getString("WildPokemon"));
@@ -729,15 +735,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 						&& useTimeOfDay) {
 					for (int i = 0; i < 4; i++) {
 						processEncounterEntry(encounters, entry, i
-								* Gen5Constants.perSeasonEncounterDataLength);
+								* Gen5Constants.perSeasonEncounterDataLength,
+								idx);
 					}
 				} else {
-					processEncounterEntry(encounters, entry, 0);
-				}
-				for (EncounterSet es : encounters) {
-					if (es.rate == -1) {
-						es.rate = idx;
-					}
+					processEncounterEntry(encounters, entry, 0, idx);
 				}
 			}
 			return encounters;
@@ -749,7 +751,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 	}
 
 	private void processEncounterEntry(List<EncounterSet> encounters,
-			byte[] entry, int startOffset) {
+			byte[] entry, int startOffset, int idx) {
+
+		if (!wildMapNames.containsKey(idx)) {
+			wildMapNames.put(idx, "? Unknown ?");
+		}
+		String mapName = wildMapNames.get(idx);
+
 		int[] amounts = Gen5Constants.encountersOfEachType;
 
 		int offset = 8;
@@ -759,8 +767,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 				List<Encounter> encs = readEncounters(entry, startOffset
 						+ offset, amounts[i]);
 				EncounterSet area = new EncounterSet();
-				area.rate = -1;
+				area.rate = rate;
 				area.encounters = encs;
+				area.offset = idx;
+				area.displayName = mapName + " "
+						+ Gen5Constants.encounterTypeNames[i];
 				encounters.add(area);
 			}
 			offset += amounts[i] * 4;
@@ -1018,6 +1029,38 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 			}
 			offset += amounts[i] * 4;
 		}
+	}
+
+	private void loadWildMapNames() {
+		try {
+			wildMapNames = new HashMap<Integer, String>();
+			byte[] mapHeaderData = this.readNARC(romEntry
+					.getString("MapTableFile")).files.get(0);
+			int numMapHeaders = mapHeaderData.length / 48;
+			List<String> allMapNames = getStrings(false,
+					romEntry.getInt("MapNamesTextOffset"));
+			for (int map = 0; map < numMapHeaders; map++) {
+				int baseOffset = map * 48;
+				int mapNameIndex = mapHeaderData[baseOffset + 26] & 0xFF;
+				String mapName = allMapNames.get(mapNameIndex);
+				if (romEntry.romType == Gen5Constants.Type_BW2) {
+					int wildSet = mapHeaderData[baseOffset + 20] & 0xFF;
+					if (wildSet != 255) {
+						wildMapNames.put(wildSet, mapName);
+					}
+				} else {
+					int wildSet = readWord(mapHeaderData, baseOffset + 20);
+					if (wildSet != 65535) {
+						wildMapNames.put(wildSet, mapName);
+					}
+				}
+			}
+			loadedWildMapNames = true;
+		} catch (IOException e) {
+			// change this later
+			e.printStackTrace();
+		}
+
 	}
 
 	@Override

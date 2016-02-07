@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.pokemon.ItemList;
+import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
 
@@ -27,18 +27,18 @@ public class Gen5Constants {
 			bsAbility3Offset = 26, bsTMHMCompatOffset = 40,
 			bsMTCompatOffset = 60;
 
-	public static final byte[] bw1NewStarterScript = new byte[] { 0x24, 0x00,
-			(byte) 0xA7, 0x02, (byte) 0xE7, 0x00, 0x00, 0x00, (byte) 0xDE,
-			0x00, 0x00, 0x00, (byte) 0xF8, 0x01, 0x05, 0x00 };
+	public static final byte[] bw1NewStarterScript = { 0x24, 0x00, (byte) 0xA7,
+			0x02, (byte) 0xE7, 0x00, 0x00, 0x00, (byte) 0xDE, 0x00, 0x00, 0x00,
+			(byte) 0xF8, 0x01, 0x05, 0x00 };
 
 	public static final String bw1StarterScriptMagic = "2400A702";
 
 	public static final int bw1StarterTextOffset = 18,
 			bw1CherenText1Offset = 26, bw1CherenText2Offset = 53;
 
-	public static final byte[] bw2NewStarterScript = new byte[] { 0x28, 0x00,
-			(byte) 0xA1, 0x40, 0x04, 0x00, (byte) 0xDE, 0x00, 0x00, 0x00,
-			(byte) 0xFD, 0x01, 0x05, 0x00 };
+	public static final byte[] bw2NewStarterScript = { 0x28, 0x00, (byte) 0xA1,
+			0x40, 0x04, 0x00, (byte) 0xDE, 0x00, 0x00, 0x00, (byte) 0xFD, 0x01,
+			0x05, 0x00 };
 
 	public static final String bw2StarterScriptMagic = "2800A1400400";
 
@@ -47,11 +47,14 @@ public class Gen5Constants {
 	public static final int perSeasonEncounterDataLength = 232,
 			bw2AreaDataEntryLength = 345, bw2EncounterAreaCount = 85;
 
-	public static final int[] encountersOfEachType = new int[] { 12, 12, 12, 5,
-			5, 5, 5 };
+	public static final int[] encountersOfEachType = { 12, 12, 12, 5, 5, 5, 5 };
 
-	public static final int[] habitatClassificationOfEachType = new int[] { 0,
-			0, 0, 1, 1, 2, 2 };
+	public static final String[] encounterTypeNames = { "Grass/Cave",
+			"Doubles Grass", "Shaking Spots", "Surfing", "Surfing Spots",
+			"Fishing", "Fishing Spots" };
+
+	public static final int[] habitatClassificationOfEachType = { 0, 0, 0, 1,
+			1, 2, 2 };
 
 	public static final int bw2Route4AreaIndex = 40,
 			bw2VictoryRoadAreaIndex = 76, bw2ReversalMountainAreaIndex = 73;
@@ -64,11 +67,11 @@ public class Gen5Constants {
 			w2VRExclusiveRoom1 = 78, w2VRExclusiveRoom2 = 79,
 			w2ReversalMountainStart = 55, w2ReversalMountainEnd = 60;
 
-	public static final int[] bw2HiddenHollowUnovaPokemon = new int[] { 505,
-			507, 510, 511, 513, 515, 519, 523, 525, 527, 529, 531, 533, 535,
-			538, 539, 542, 545, 546, 548, 550, 553, 556, 558, 559, 561, 564,
-			569, 572, 575, 578, 580, 583, 587, 588, 594, 596, 601, 605, 607,
-			610, 613, 616, 618, 619, 621, 622, 624, 626, 628, 630, 631, 632, };
+	public static final int[] bw2HiddenHollowUnovaPokemon = { 505, 507, 510,
+			511, 513, 515, 519, 523, 525, 527, 529, 531, 533, 535, 538, 539,
+			542, 545, 546, 548, 550, 553, 556, 558, 559, 561, 564, 569, 572,
+			575, 578, 580, 583, 587, 588, 594, 596, 601, 605, 607, 610, 613,
+			616, 618, 619, 621, 622, 624, 626, 628, 630, 631, 632, };
 
 	public static final String tmDataPrefix = "87038803";
 
@@ -96,8 +99,8 @@ public class Gen5Constants {
 
 	public static final int scriptListTerminator = 0xFD13;
 
-	public static final MoveCategory[] moveCategoryIndices = { MoveCategory.STATUS,
-			MoveCategory.PHYSICAL, MoveCategory.SPECIAL };
+	public static final MoveCategory[] moveCategoryIndices = {
+			MoveCategory.STATUS, MoveCategory.PHYSICAL, MoveCategory.SPECIAL };
 
 	public static byte moveCategoryToByte(MoveCategory cat) {
 		switch (cat) {
@@ -236,7 +239,7 @@ public class Gen5Constants {
 
 	/* @formatter:off */
 	@SuppressWarnings("unused")
-	private static final int[][] habitatListEntries = new int[][] {
+	private static final int[][] habitatListEntries = {
 		{ 104, 105 }, // Route 4
 		{ 124 }, // Route 15
 		{ 134 }, // Route 21
@@ -297,7 +300,7 @@ public class Gen5Constants {
 		{ 20, 21, 22 }, // Chargestone Cave
 	};
 	
-	public static final int[] wildFileToAreaMap = new int[] {
+	public static final int[] wildFileToAreaMap = {
 		2,
 		4,
 		8,
