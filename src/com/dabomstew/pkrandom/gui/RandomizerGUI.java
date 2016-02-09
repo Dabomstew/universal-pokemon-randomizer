@@ -301,6 +301,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
 		this.romHandler = null;
 		this.currentRestrictions = null;
 		this.currentCodeTweaks = 0;
+		this.websiteLinkLabel.setText("<html><a href=\""
+				+ Constants.WEBSITE_URL + "\">" + Constants.WEBSITE_URL
+				+ "</a>");
 		updateCodeTweaksButtonText();
 		initialFormState();
 		this.romOpenChooser.setCurrentDirectory(new File(Constants.ROOT_PATH));
@@ -2095,7 +2098,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 	private void websiteLinkLabelMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_websiteLinkLabelMouseClicked
 		Desktop desktop = java.awt.Desktop.getDesktop();
 		try {
-			desktop.browse(new URI("http://pokehacks.dabomstew.com/randomizer"));
+			desktop.browse(new URI(Constants.WEBSITE_URL));
 		} catch (IOException e) {
 		} catch (URISyntaxException e) {
 		}
