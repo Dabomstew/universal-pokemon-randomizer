@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.Scanner;
 import java.util.zip.ZipEntry;
@@ -19,6 +20,7 @@ import javax.swing.JOptionPane;
 
 import com.dabomstew.pkrandom.Constants;
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.Utils;
 
 /**
  * 
@@ -167,12 +169,28 @@ public class UpdateFoundDialog extends javax.swing.JDialog {
 
 	private void downloadUpdateBtnActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_downloadUpdateBtnActionPerformed
 		// External: download delta file
-		String deltaFile = "delta_" + Constants.UPDATE_VERSION + "_"
-				+ targetVersion + ".zip";
+		String randomizerBinary;
+		try {
+			randomizerBinary = Utils.getExecutionLocation().getName();
+		} catch (UnsupportedEncodingException e) {
+			JOptionPane
+					.showMessageDialog(
+							this,
+							"Automatic update not available.\n"
+									+ "You will now be taken to the website to download it manually.");
+			attemptOpenBrowser();
+			return;
+		}
+		String deltaFile = "delta_"
+				+ Constants.UPDATE_VERSION
+				+ "_"
+				+ targetVersion
+				+ (randomizerBinary.toLowerCase().endsWith(".exe") ? "_win"
+						: "") + ".zip";
 		try {
 			byte[] zip = FileFunctions.downloadFile(Constants.AUTOUPDATE_URL
 					+ deltaFile);
-			extract(zip, new File("./"));
+			extract(zip, new File(Constants.ROOT_PATH), randomizerBinary);
 			JOptionPane
 					.showMessageDialog(
 							this,
@@ -243,7 +261,8 @@ public class UpdateFoundDialog extends javax.swing.JDialog {
 				.replace(">", "&gt;");
 	}
 
-	public void extract(byte[] zipfile, File outdir) throws IOException {
+	public void extract(byte[] zipfile, File outdir, String randomizerBinary)
+			throws IOException {
 		ZipInputStream zin = new ZipInputStream(new ByteArrayInputStream(
 				zipfile));
 		ZipEntry entry;
@@ -261,6 +280,11 @@ public class UpdateFoundDialog extends javax.swing.JDialog {
 			dir = dirpart(name);
 			if (dir != null)
 				mkdirs(outdir, dir);
+
+			if (name.endsWith("randomizer.jar")
+					|| name.endsWith("randomizer.exe")) {
+				name = name.substring(0, name.length() - 14) + randomizerBinary;
+			}
 
 			extractFile(zin, outdir, name);
 		}
