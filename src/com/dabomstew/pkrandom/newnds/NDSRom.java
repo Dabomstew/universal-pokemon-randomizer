@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.dabomstew.pkrandom.Constants;
 import com.dabomstew.pkrandom.RomFunctions;
-import com.dabomstew.pkrandom.gui.RandomizerGUI;
 
 import cuecompressors.BLZCoder;
 
@@ -69,12 +69,11 @@ public class NDSRom {
 				+ rawFilename.substring(0, rawFilename.lastIndexOf('.'));
 		// remove nonsensical chars
 		dataFolder = dataFolder.replaceAll("[^A-Za-z0-9_]+", "");
-		File tmpFolder = new File(RandomizerGUI.getRootPath() + dataFolder);
+		File tmpFolder = new File(Constants.ROOT_PATH + dataFolder);
 		tmpFolder.mkdir();
 		if (tmpFolder.canWrite()) {
 			writingEnabled = true;
-			this.tmpFolder = RandomizerGUI.getRootPath() + dataFolder
-					+ File.separator;
+			this.tmpFolder = Constants.ROOT_PATH + dataFolder + File.separator;
 			tmpFolder.deleteOnExit();
 		} else {
 			writingEnabled = false;
@@ -106,7 +105,7 @@ public class NDSRom {
 		byte[] sig = new byte[4];
 		baseRom.read(sig);
 		this.romCode = new String(sig, "US-ASCII");
-		
+
 		baseRom.seek(0x40);
 		int fntOffset = readFromFile(baseRom, 4);
 		readFromFile(baseRom, 4); // fntSize not needed
@@ -454,7 +453,7 @@ public class NDSRom {
 		}
 		copybuf = null;
 	}
-	
+
 	// get rom code for opened rom
 	public String getCode() {
 		return this.romCode;

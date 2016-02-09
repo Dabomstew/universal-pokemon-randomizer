@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.zip.CRC32;
 
-import com.dabomstew.pkrandom.gui.RandomizerGUI;
-
 public class FileFunctions {
 
 	public static File fixFilename(File original, String defaultExtension) {
@@ -56,7 +54,7 @@ public class FileFunctions {
 
 	public static boolean configExists(String filename) {
 		if (overrideFiles.contains(filename)) {
-			File fh = new File(RandomizerGUI.getRootPath() + filename);
+			File fh = new File(Constants.ROOT_PATH + filename);
 			if (fh.exists() && fh.canRead()) {
 				return true;
 			}
@@ -72,7 +70,7 @@ public class FileFunctions {
 	public static InputStream openConfig(String filename)
 			throws FileNotFoundException {
 		if (overrideFiles.contains(filename)) {
-			File fh = new File(RandomizerGUI.getRootPath() + filename);
+			File fh = new File(Constants.ROOT_PATH + filename);
 			if (fh.exists() && fh.canRead()) {
 				return new FileInputStream(fh);
 			}

@@ -5,10 +5,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.zip.CRC32;
 
 import javax.xml.bind.DatatypeConverter;
+
+import com.dabomstew.pkrandom.gui.RandomizerGUI;
 
 public class Utils {
 
@@ -121,6 +124,14 @@ public class Utils {
 					"Can't use this preset because you have a different set "
 							+ "of random nicknames to the creator.");
 		}
+	}
+	
+	public static File getExecutionLocation() throws UnsupportedEncodingException {
+		URL location = RandomizerGUI.class.getProtectionDomain()
+				.getCodeSource().getLocation();
+		File fh = new File(java.net.URLDecoder.decode(location.getFile(),
+				"UTF-8"));
+		return fh;
 	}
 
 	public static class InvalidROMException extends Exception {

@@ -17,6 +17,7 @@ import java.util.zip.ZipInputStream;
 
 import javax.swing.JOptionPane;
 
+import com.dabomstew.pkrandom.Constants;
 import com.dabomstew.pkrandom.FileFunctions;
 
 /**
@@ -166,12 +167,11 @@ public class UpdateFoundDialog extends javax.swing.JDialog {
 
 	private void downloadUpdateBtnActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_downloadUpdateBtnActionPerformed
 		// External: download delta file
-		String deltaFile = "delta_" + RandomizerGUI.UPDATE_VERSION + "_"
+		String deltaFile = "delta_" + Constants.UPDATE_VERSION + "_"
 				+ targetVersion + ".zip";
 		try {
-			byte[] zip = FileFunctions
-					.downloadFile("http://pokehacks.dabomstew.com/randomizer/autoupdate/"
-							+ deltaFile);
+			byte[] zip = FileFunctions.downloadFile(Constants.AUTOUPDATE_URL
+					+ deltaFile);
 			extract(zip, new File("./"));
 			JOptionPane
 					.showMessageDialog(
