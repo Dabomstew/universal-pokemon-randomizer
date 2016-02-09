@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.dabomstew.pkrandom.gui;
 
 /*----------------------------------------------------------------------------*/
@@ -179,7 +175,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
 		boolean foundCustom = false;
 		for (int file = 0; file < 3; file++) {
-			File oldFile = new File(Constants.ROOT_PATH + "/config/" + cnamefiles[file]);
+			File oldFile = new File(Constants.ROOT_PATH + "/config/"
+					+ cnamefiles[file]);
 			File currentFile = new File(Constants.ROOT_PATH + cnamefiles[file]);
 			if (oldFile.exists() && oldFile.canRead() && !currentFile.exists()) {
 				try {
@@ -204,7 +201,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 			boolean onefailed = false;
 			if (response == JOptionPane.YES_OPTION) {
 				for (String filename : cnamefiles) {
-					if (new File(Constants.ROOT_PATH + "/config/" + filename).canRead()) {
+					if (new File(Constants.ROOT_PATH + "/config/" + filename)
+							.canRead()) {
 						try {
 							FileInputStream fis = new FileInputStream(new File(
 									Constants.ROOT_PATH + "config/" + filename));
@@ -313,8 +311,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
 			this.qsSaveChooser.setCurrentDirectory(new File(Constants.ROOT_PATH
 					+ "settings/"));
 		} else {
-			this.qsOpenChooser.setCurrentDirectory(new File(Constants.ROOT_PATH));
-			this.qsSaveChooser.setCurrentDirectory(new File(Constants.ROOT_PATH));
+			this.qsOpenChooser
+					.setCurrentDirectory(new File(Constants.ROOT_PATH));
+			this.qsSaveChooser
+					.setCurrentDirectory(new File(Constants.ROOT_PATH));
 		}
 	}
 
@@ -2091,15 +2091,15 @@ public class RandomizerGUI extends javax.swing.JFrame {
 			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_goCondenseEvosCheckBoxActionPerformed
 		this.enableOrDisableSubControls();
 	}// GEN-LAST:event_goCondenseEvosCheckBoxActionPerformed
-	
-	private void websiteLinkLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_websiteLinkLabelMouseClicked
-        Desktop desktop = java.awt.Desktop.getDesktop();
-        try {
+
+	private void websiteLinkLabelMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_websiteLinkLabelMouseClicked
+		Desktop desktop = java.awt.Desktop.getDesktop();
+		try {
 			desktop.browse(new URI("http://pokehacks.dabomstew.com/randomizer"));
 		} catch (IOException e) {
 		} catch (URISyntaxException e) {
 		}
-    }//GEN-LAST:event_websiteLinkLabelMouseClicked
+	}// GEN-LAST:event_websiteLinkLabelMouseClicked
 
 	/* @formatter:off */
 	/**

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.dabomstew.pkrandom.gui;
 
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
@@ -36,7 +32,7 @@ public class GenerationLimitDialog extends javax.swing.JDialog {
 		setVisible(true);
 
 	}
-	
+
 	public boolean pressedOK() {
 		return pressedOk;
 	}
@@ -116,6 +112,7 @@ public class GenerationLimitDialog extends javax.swing.JDialog {
 		g4Rg3CB.setSelected(restrict.assoc_g4_g3);
 	}
 
+	/* @formatter:off */
 	/**
 	 * This method is called from within the constructor to initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is always
@@ -445,4 +442,5 @@ public class GenerationLimitDialog extends javax.swing.JDialog {
     private javax.swing.JLabel relatedPokemonHeader;
     private javax.swing.JLabel warningRomHackLabel;
     // End of variables declaration//GEN-END:variables
+    /* @formatter:on */
 }

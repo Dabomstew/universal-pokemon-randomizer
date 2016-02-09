@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.dabomstew.pkrandom.gui;
 
 import java.awt.Desktop;
@@ -59,6 +55,7 @@ public class UpdateFoundDialog extends javax.swing.JDialog {
 
 	}
 
+	/* @formatter:off */
 	/**
 	 * This method is called from within the constructor to initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is always
@@ -302,4 +299,5 @@ public class UpdateFoundDialog extends javax.swing.JDialog {
 	private javax.swing.JTextArea updateChangelogArea;
 	private javax.swing.JLabel updateFoundLabel;
 	// End of variables declaration//GEN-END:variables
+	/* @formatter:on */
 }
