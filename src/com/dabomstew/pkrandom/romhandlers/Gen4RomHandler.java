@@ -281,22 +281,22 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		try {
 			arm9 = readARM9();
 		} catch (IOException e) {
-			arm9 = new byte[0];
+			throw new RuntimeException(e);
 		}
 		try {
 			msgNarc = readNARC(romEntry.getString("Text"));
 		} catch (IOException e) {
-			msgNarc = null;
+			throw new RuntimeException(e);
 		}
 		try {
 			scriptNarc = readNARC(romEntry.getString("Scripts"));
 		} catch (IOException e) {
-			scriptNarc = null;
+			throw new RuntimeException(e);
 		}
 		try {
 			eventNarc = readNARC(romEntry.getString("Events"));
 		} catch (IOException e) {
-			eventNarc = null;
+			throw new RuntimeException(e);
 		}
 		loadPokemonStats();
 		pokemonList = Arrays.asList(pokes);
@@ -326,8 +326,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				moves[i].category = Gen4Constants.moveCategoryIndices[moveData[2] & 0xFF];
 			}
 		} catch (IOException e) {
-			// change this later
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 
 	}
@@ -346,8 +345,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				pokes[i].name = pokeNames[i];
 			}
 		} catch (IOException e) {
-			// change this later
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 
 	}
@@ -408,18 +406,22 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		try {
 			writeARM9(arm9);
 		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 		try {
 			writeNARC(romEntry.getString("Text"), msgNarc);
 		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 		try {
 			writeNARC(romEntry.getString("Scripts"), scriptNarc);
 		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 		try {
 			writeNARC(romEntry.getString("Events"), eventNarc);
 		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -443,8 +445,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		try {
 			this.writeNARC(romEntry.getString("MoveData"), moveNarc);
 		} catch (IOException e) {
-			// // change this later
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 
 	}
@@ -477,8 +478,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			String pstatsnarc = romEntry.getString("PokemonStats");
 			this.writeNARC(pstatsnarc, pokeNarc);
 		} catch (IOException e) {
-			// change this later
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 
 	}
@@ -552,9 +552,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 						romEntry.getInt("StarterPokemonOffset") + 8);
 				return Arrays.asList(pokes[poke1], pokes[poke2], pokes[poke3]);
 			} catch (IOException e) {
-				return Arrays.asList(pokes[Gen4Constants.turtwigIndex],
-						pokes[Gen4Constants.chimcharIndex],
-						pokes[Gen4Constants.piplupIndex]);
+				throw new RuntimeException(e);
 			}
 		}
 	}
@@ -784,7 +782,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 							r201Strings);
 				}
 			} catch (IOException e) {
-				return false;
+				throw new RuntimeException(e);
 			}
 			return true;
 		}
@@ -826,9 +824,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				return getEncountersDPPt(useTimeOfDay);
 			}
 		} catch (IOException ex) {
-			// Uh-oh
-			ex.printStackTrace();
-			return new ArrayList<EncounterSet>();
+			throw new RuntimeException(ex);
 		}
 	}
 
@@ -1097,8 +1093,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				setEncountersDPPt(useTimeOfDay, encounters);
 			}
 		} catch (IOException ex) {
-			// Uh-oh
-			ex.printStackTrace();
+			throw new RuntimeException(ex);
 		}
 	}
 
@@ -1345,8 +1340,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 			loadedWildMapNames = true;
 		} catch (IOException e) {
-			// change this later
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 
 	}
@@ -1418,8 +1412,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				Gen4Constants.tagTrainersHGSS(allTrainers);
 			}
 		} catch (IOException ex) {
-			// change this later
-			ex.printStackTrace();
+			throw new RuntimeException(ex);
 		}
 		return allTrainers;
 	}
@@ -1482,8 +1475,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			this.writeNARC(romEntry.getString("TrainerData"), trainers);
 			this.writeNARC(romEntry.getString("TrainerPokemon"), trpokes);
 		} catch (IOException ex) {
-			// change this later
-			ex.printStackTrace();
+			throw new RuntimeException(ex);
 		}
 
 	}
@@ -1515,8 +1507,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				movesets.put(pkmn, learnt);
 			}
 		} catch (IOException e) {
-			// change this later
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		return movesets;
 	}
@@ -1558,6 +1549,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		try {
 			this.writeNARC(romEntry.getString("PokemonMovesets"), movesLearnt);
 		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 
 	}
@@ -1618,6 +1610,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 			}
 		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 		return sp;
 	}
@@ -1697,7 +1690,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 			}
 		} catch (IOException e) {
-			return false;
+			throw new RuntimeException(e);
 		}
 		return true;
 	}
@@ -1861,6 +1854,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				mtMoves.add(readWord(mtFile, baseOffset + i * bytesPer));
 			}
 		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 		return mtMoves;
 	}
@@ -1884,6 +1878,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 			writeOverlay(romEntry.getInt("MoveTutorMovesOvlNumber"), mtFile);
 		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -1914,6 +1909,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				compat.put(pkmn, flags);
 			}
 		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 		return compat;
 	}
@@ -1960,6 +1956,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 						mtcFile);
 			}
 		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -2074,7 +2071,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 			}
 		} catch (IOException e) {
-			// can't do anything
+			throw new RuntimeException(e);
 		}
 		return evos;
 	}
@@ -2108,7 +2105,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 			writeNARC(romEntry.getString("PokemonEvolutions"), evoNARC);
 		} catch (IOException e) {
-			// can't do anything
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -2525,6 +2522,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				trades.add(trade);
 			}
 		} catch (IOException ex) {
+			throw new RuntimeException(ex);
 		}
 		return trades;
 	}
@@ -2604,6 +2602,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 			}
 		} catch (IOException ex) {
+			throw new RuntimeException(ex);
 		}
 	}
 
@@ -2670,7 +2669,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			// finish up
 			writeFile(romEntry.getString("BabyPokemon"), babyPokes);
 		} catch (IOException e) {
-			// can't do anything
+			throw new RuntimeException(e);
 		}
 	}
 

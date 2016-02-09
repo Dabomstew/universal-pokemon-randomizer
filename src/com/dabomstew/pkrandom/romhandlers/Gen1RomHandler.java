@@ -1828,7 +1828,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 			FileFunctions.applyPatch(rom, patchName);
 			return true;
 		} catch (IOException e) {
-			return false;
+			throw new RuntimeException(e);
 		}
 	}
 

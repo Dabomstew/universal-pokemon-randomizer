@@ -124,9 +124,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 			try {
 				System.arraycopy(fimgframe, startOffset, thisFile, 0, length);
 			} catch (ArrayIndexOutOfBoundsException ex) {
-				System.out.printf(
-						"AIOBEX: start %d length %d size of frame %d\n",
-						startOffset, length, fimgframe.length);
+				throw new RuntimeException(ex);
 			}
 			narc.files.add(thisFile);
 		}
@@ -286,7 +284,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 			String ndsCode = new String(sig, "US-ASCII");
 			return ndsCode;
 		} catch (Exception e) {
-			return null;
+			throw new RuntimeException(e);
 		}
 	}
 

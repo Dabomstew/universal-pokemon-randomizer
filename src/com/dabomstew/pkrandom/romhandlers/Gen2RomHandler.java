@@ -1803,7 +1803,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 		try {
 			FileFunctions.applyPatch(rom, patchName);
 		} catch (IOException e) {
-
+			throw new RuntimeException(e);
 		}
 	}
 
