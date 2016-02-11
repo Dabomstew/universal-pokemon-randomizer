@@ -429,14 +429,13 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 					romEntry.getValue("MoveTutorData")
 							+ romEntry.getValue("MoveTutorMoves") * 2);
 		}
-		
+
 		loadTextTable(romEntry.tableFile);
 
 		if (romEntry.romCode.equals("BPRE") && romEntry.version == 0) {
 			basicBPRE10HackSupport();
 		}
 
-		
 		loadPokemonNames();
 		loadPokedex();
 		loadPokemonStats();
@@ -475,7 +474,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		if (basicBPRE10HackDetection()) {
 			this.isRomHack = true;
 			// NUMBER OF POKEMON DETECTION
-			
+
 			// this is the most annoying bit
 			// we'll try to get it from the pokemon names,
 			// and sanity check it using other things
@@ -486,33 +485,33 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			int namesOffset = romEntry.getValue("PokemonNames");
 			int nameLen = romEntry.getValue("PokemonNameLength");
 			while (true) {
-				int nameOffset = namesOffset
-						+ (iPokemonCount + 1) * nameLen;
+				int nameOffset = namesOffset + (iPokemonCount + 1) * nameLen;
 				int nameStrLen = lengthOfStringAt(nameOffset);
-				if (nameStrLen > 0 && nameStrLen < nameLen && rom[nameOffset] != 0) {
+				if (nameStrLen > 0 && nameStrLen < nameLen
+						&& rom[nameOffset] != 0) {
 					iPokemonCount++;
 				} else {
 					break;
 				}
 			}
-			
+
 			// Is there an unused egg slot at the end?
-			String lastName = readVariableLengthString(namesOffset + iPokemonCount*nameLen);
-			if(lastName.equals("?") || lastName.equals("-")) {
+			String lastName = readVariableLengthString(namesOffset
+					+ iPokemonCount * nameLen);
+			if (lastName.equals("?") || lastName.equals("-")) {
 				iPokemonCount--;
 			}
-			
+
 			// secondary check: moveset pointers
 			// if a slot has an invalid moveset pointer, it's not a real slot
 			// Before that, grab the moveset table from a known pointer to it.
 			int movesetsTable = readPointer(0x3EA7C);
 			romEntry.entries.put("PokemonMovesets", movesetsTable);
-			while(iPokemonCount >= 0) {
-				int movesetPtr = readPointer(movesetsTable + iPokemonCount*4);
-				if(movesetPtr < 0 || movesetPtr >= rom.length) {
+			while (iPokemonCount >= 0) {
+				int movesetPtr = readPointer(movesetsTable + iPokemonCount * 4);
+				if (movesetPtr < 0 || movesetPtr >= rom.length) {
 					iPokemonCount--;
-				}
-				else {
+				} else {
 					break;
 				}
 			}
@@ -535,7 +534,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			// write new pokemon count
 			romEntry.entries.put("PokemonCount", iPokemonCount);
 			// update some key offsets from known pointers
-			
+
 			romEntry.entries.put("PokemonTMHMCompat", readPointer(0x43C68));
 			romEntry.entries.put("PokemonEvolutions", readPointer(0x42F6C));
 			romEntry.entries.put("MoveTutorCompatibility",
@@ -641,8 +640,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				String lowerName = pokeNames[pokeSlot].toLowerCase();
 				if (!this.matches(rom, pokeOffs, Gen3Constants.emptyPokemonSig)
 						&& !lowerName.contains("unused")
-						&& !lowerName.equals("?")
-						&& !lowerName.equals("-")) {
+						&& !lowerName.equals("?") && !lowerName.equals("-")) {
 					usedSlots++;
 					pokedexToInternal[Gen3Constants.unhackedRealPokedex
 							+ usedSlots] = pokeSlot;
@@ -687,7 +685,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				}
 			}
 		}
-		numRealPokemon = pokemonList.size()-1;
+		numRealPokemon = pokemonList.size() - 1;
 
 	}
 
@@ -1139,7 +1137,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		if (foundTexts.size() > 0) {
 			int offset = foundTexts.get(0);
 			String pokeName = pkmn.name;
-			String pokeType = pkmn.primaryType == null ? "???" : pkmn.primaryType.toString();
+			String pokeType = pkmn.primaryType == null ? "???"
+					: pkmn.primaryType.toString();
 			if (pokeType.equals("NORMAL") && pkmn.secondaryType != null) {
 				pokeType = pkmn.secondaryType.toString();
 			}
@@ -1497,11 +1496,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			while ((rom[mloc] & 0xFF) != 0xFF || (rom[mloc + 1] & 0xFF) != 0xFF) {
 				mloc += 2;
 			}
-			int currentMoveCount = (mloc - moveDataLoc);
+			int currentMoveCount = (mloc - moveDataLoc) / 2;
 			int newMoveCount = moves.size();
-			if (currentMoveCount <= newMoveCount) {
-				int looplimit = Math.min(currentMoveCount, newMoveCount);
-				for (int mv = 0; mv < looplimit; mv++) {
+			if (newMoveCount <= currentMoveCount) {
+				for (int mv = 0; mv < newMoveCount; mv++) {
 					MoveLearnt ml = moves.get(mv);
 					rom[moveDataLoc] = (byte) (ml.move & 0xFF);
 					int levelPart = (ml.level << 1) & 0xFE;
@@ -1511,7 +1509,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 					rom[moveDataLoc + 1] = (byte) levelPart;
 					moveDataLoc += 2;
 				}
-				if (looplimit < currentMoveCount) {
+				if (newMoveCount < currentMoveCount) {
 					// need a new terminator
 					rom[moveDataLoc] = (byte) 0xFF;
 					rom[moveDataLoc + 1] = (byte) 0xFF;
@@ -1681,7 +1679,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				// create the new TM text
 				int oldPointer = readPointer(tte.actualOffset);
 				if (oldPointer < 0 || oldPointer >= rom.length) {
-					throw new RuntimeException("TM Text update failed: couldn't read a TM text pointer.");
+					throw new RuntimeException(
+							"TM Text update failed: couldn't read a TM text pointer.");
 				}
 				String moveName = this.moves[moveIndexes.get(tte.number - 1)].name;
 				// temporarily use underscores to stop the move name being split
@@ -1810,7 +1809,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				// create the new MT text
 				int oldPointer = readPointer(tte.actualOffset);
 				if (oldPointer < 0 || oldPointer >= rom.length) {
-					throw new RuntimeException("Move Tutor Text update failed: couldn't read a move tutor text pointer.");
+					throw new RuntimeException(
+							"Move Tutor Text update failed: couldn't read a move tutor text pointer.");
 				}
 				String moveName = this.moves[moves.get(tte.number)].name;
 				// temporarily use underscores to stop the move name being split

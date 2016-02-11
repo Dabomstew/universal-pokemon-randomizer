@@ -239,9 +239,12 @@ public class Randomizer {
 					if (!first) {
 						sb.append(", ");
 					}
-
-					sb.append(moves.get(ml.move).name).append(" at level ")
-							.append(ml.level);
+					try {
+						sb.append(moves.get(ml.move).name).append(" at level ")
+								.append(ml.level);
+					} catch (NullPointerException ex) {
+						sb.append("invalid move at level" + ml.level);
+					}
 					first = false;
 				}
 				movesets.add(sb.toString());
@@ -783,10 +786,10 @@ public class Randomizer {
 			List<Move> allMoves = romHandler.getMoves();
 			for (Move mv : allMoves) {
 				if (mv != null) {
-					String mvType = (mv.type == null) ? "???" : mv.type.toString();
+					String mvType = (mv.type == null) ? "???" : mv.type
+							.toString();
 					log.printf("%3d|%-15s|%-8s|%5d|%4d|%3d", mv.internalId,
-							mv.name, mvType, mv.power,
-							(int) mv.hitratio, mv.pp);
+							mv.name, mvType, mv.power, (int) mv.hitratio, mv.pp);
 					if (romHandler.hasPhysicalSpecialSplit()) {
 						log.printf("| %s", mv.category.toString());
 					}
