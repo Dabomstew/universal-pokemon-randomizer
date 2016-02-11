@@ -26,6 +26,7 @@ package com.dabomstew.pkrandom.romhandlers;
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -59,11 +60,11 @@ import dsdecmp.JavaDSDecmp;
 
 public class Gen5RomHandler extends AbstractDSRomHandler {
 
-	public static class Factory implements RomHandler.Factory {
+	public static class Factory extends RomHandler.Factory {
 
 		@Override
-		public Gen5RomHandler create(Random random) {
-			return new Gen5RomHandler(random);
+		public Gen5RomHandler create(Random random, PrintStream logStream) {
+			return new Gen5RomHandler(random, logStream);
 		}
 
 		public boolean isLoadable(String filename) {
@@ -72,7 +73,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 	}
 
 	public Gen5RomHandler(Random random) {
-		super(random);
+		super(random, null);
+	}
+
+	public Gen5RomHandler(Random random, PrintStream logStream) {
+		super(random, logStream);
 	}
 
 	private static class OffsetWithinEntry {

@@ -24,6 +24,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -41,9 +42,13 @@ import com.dabomstew.pkrandom.pokemon.Type;
 
 public interface RomHandler {
 
-	public interface Factory {
-		public RomHandler create(Random random);
-		public boolean isLoadable(String filename);
+	public abstract class Factory {
+		public RomHandler create(Random random) {
+			return create(random, null);
+		}
+		
+		public abstract RomHandler create(Random random, PrintStream log);
+		public abstract boolean isLoadable(String filename);
 	}
 
 	// Basic load/save to filenames
@@ -53,6 +58,10 @@ public interface RomHandler {
 	public boolean saveRom(String filename);
 
 	public String loadedFilename();
+	
+	// Log stuff
+	
+	public void setLog(PrintStream logStream);
 
 	// Get a List of Pokemon objects in this game.
 	// 0 = null 1-whatever = the Pokemon.

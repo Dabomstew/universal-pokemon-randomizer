@@ -27,6 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,11 +60,11 @@ import com.dabomstew.pkrandom.pokemon.Type;
 
 public class Gen1RomHandler extends AbstractGBRomHandler {
 
-	public static class Factory implements RomHandler.Factory {
+	public static class Factory extends RomHandler.Factory {
 
 		@Override
-		public Gen1RomHandler create(Random random) {
-			return new Gen1RomHandler(random);
+		public Gen1RomHandler create(Random random, PrintStream logStream) {
+			return new Gen1RomHandler(random, logStream);
 		}
 
 		public boolean isLoadable(String filename) {
@@ -79,9 +80,13 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 			return detectRomInner(loaded, (int) fileLength);
 		}
 	}
-
+	
 	public Gen1RomHandler(Random random) {
-		super(random);
+		super(random, null);
+	}
+
+	public Gen1RomHandler(Random random, PrintStream logStream) {
+		super(random, logStream);
 	}
 
 	// Important RBY Data Structures

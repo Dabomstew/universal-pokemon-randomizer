@@ -27,6 +27,7 @@ package com.dabomstew.pkrandom.romhandlers;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Random;
 
 public abstract class AbstractGBRomHandler extends AbstractRomHandler {
@@ -34,8 +35,8 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 	protected byte[] rom;
 	private String loadedFN;
 
-	public AbstractGBRomHandler(Random random) {
-		super(random);
+	public AbstractGBRomHandler(Random random, PrintStream logStream) {
+		super(random, logStream);
 	}
 
 	@Override

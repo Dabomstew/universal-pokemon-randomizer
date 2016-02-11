@@ -25,6 +25,7 @@ package com.dabomstew.pkrandom.romhandlers;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -56,11 +57,11 @@ import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 
 public class Gen4RomHandler extends AbstractDSRomHandler {
 
-	public static class Factory implements RomHandler.Factory {
+	public static class Factory extends RomHandler.Factory {
 
 		@Override
-		public Gen4RomHandler create(Random random) {
-			return new Gen4RomHandler(random);
+		public Gen4RomHandler create(Random random, PrintStream logStream) {
+			return new Gen4RomHandler(random, logStream);
 		}
 
 		public boolean isLoadable(String filename) {
@@ -69,7 +70,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	public Gen4RomHandler(Random random) {
-		super(random);
+		super(random, null);
+	}
+
+	public Gen4RomHandler(Random random, PrintStream logStream) {
+		super(random, logStream);
 	}
 
 	private static class RomEntry {

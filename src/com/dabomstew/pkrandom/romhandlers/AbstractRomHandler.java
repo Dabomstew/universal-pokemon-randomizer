@@ -29,6 +29,7 @@ package com.dabomstew.pkrandom.romhandlers;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,7 +45,6 @@ import java.util.TreeSet;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
-import com.dabomstew.pkrandom.gui.RandomizerGUI;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
@@ -70,11 +70,13 @@ public abstract class AbstractRomHandler implements RomHandler {
 	protected List<Pokemon> mainPokemonList;
 	protected List<Pokemon> noLegendaryList, onlyLegendaryList;
 	protected final Random random;
+	protected PrintStream logStream;
 
 	/* Constructor */
 
-	public AbstractRomHandler(Random random) {
+	public AbstractRomHandler(Random random, PrintStream logStream) {
 		this.random = random;
+		this.logStream = logStream;
 	}
 
 	/* Public Methods, implemented here for all gens */
@@ -3006,40 +3008,56 @@ public abstract class AbstractRomHandler implements RomHandler {
 
 	/* Helper methods used by subclasses */
 
+	public void setLog(PrintStream logStream) {
+		this.logStream = logStream;
+	}
+
 	protected void log(String log) {
-		RandomizerGUI.verboseLog.println(log);
+		if (logStream != null) {
+			logStream.println(log);
+		}
 	}
 
 	protected void logBlankLine() {
-		RandomizerGUI.verboseLog.println();
+		if (logStream != null) {
+			logStream.println();
+		}
 	}
 
 	protected void logEvoChangeLevel(String pkFrom, String pkTo, int level) {
-		RandomizerGUI.verboseLog.printf("Made %s evolve into %s at level %d",
-				pkFrom, pkTo, level);
-		RandomizerGUI.verboseLog.println();
+		if (logStream != null) {
+			logStream.printf("Made %s evolve into %s at level %d", pkFrom,
+					pkTo, level);
+			logStream.println();
+		}
 	}
 
 	protected void logEvoChangeLevelWithItem(String pkFrom, String pkTo,
 			String itemName) {
-		RandomizerGUI.verboseLog.printf(
-				"Made %s evolve into %s by leveling up holding %s", pkFrom,
-				pkTo, itemName);
-		RandomizerGUI.verboseLog.println();
+		if (logStream != null) {
+			logStream.printf(
+					"Made %s evolve into %s by leveling up holding %s", pkFrom,
+					pkTo, itemName);
+			logStream.println();
+		}
 	}
 
 	protected void logEvoChangeStone(String pkFrom, String pkTo, String itemName) {
-		RandomizerGUI.verboseLog.printf("Made %s evolve into %s using a %s",
-				pkFrom, pkTo, itemName);
-		RandomizerGUI.verboseLog.println();
+		if (logStream != null) {
+			logStream.printf("Made %s evolve into %s using a %s", pkFrom, pkTo,
+					itemName);
+			logStream.println();
+		}
 	}
 
 	protected void logEvoChangeLevelWithPkmn(String pkFrom, String pkTo,
 			String otherRequired) {
-		RandomizerGUI.verboseLog.printf(
-				"Made %s evolve into %s by leveling up with %s in the party",
-				pkFrom, pkTo, otherRequired);
-		RandomizerGUI.verboseLog.println();
+		if (logStream != null) {
+			logStream
+					.printf("Made %s evolve into %s by leveling up with %s in the party",
+							pkFrom, pkTo, otherRequired);
+			logStream.println();
+		}
 	}
 
 	/* Default Implementations */

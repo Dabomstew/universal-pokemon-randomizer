@@ -77,8 +77,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
 	private RomHandler romHandler;
 	protected RomHandler.Factory[] checkHandlers;
 
-	public static PrintStream verboseLog = System.out;
-
 	private OperationDialog opDialog;
 	private boolean presetMode;
 	private GenRestrictions currentRestrictions;
@@ -1522,11 +1520,14 @@ public class RandomizerGUI extends javax.swing.JFrame {
 		final boolean raceMode = settings.isRaceMode();
 		// Setup verbose log
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		PrintStream log;
 		try {
-			verboseLog = new PrintStream(baos, false, "UTF-8");
+			log = new PrintStream(baos, false, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			verboseLog = new PrintStream(baos);
+			log = new PrintStream(baos);
 		}
+		
+		final PrintStream verboseLog = log;
 
 		try {
 			final AtomicInteger finishedCV = new AtomicInteger(0);
@@ -1543,6 +1544,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 					});
 					boolean succeededSave = false;
 					try {
+						RandomizerGUI.this.romHandler.setLog(verboseLog);
 						finishedCV.set(new Randomizer(settings,
 								RandomizerGUI.this.romHandler).randomize(
 								filename, verboseLog, seed));
@@ -1550,7 +1552,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 					} catch (Exception ex) {
 						attemptToLogException(ex, "RandomizerGUI.saveFailedIO",
 								"RandomizerGUI.saveFailedIONoLog");
-						if (verboseLog != null && verboseLog != System.out) {
+						if (verboseLog != null) {
 							verboseLog.close();
 						}
 					}
@@ -1562,7 +1564,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
 								// Log?
 								verboseLog.close();
 								byte[] out = baos.toByteArray();
-								verboseLog = System.out;
 
 								if (raceMode) {
 									JOptionPane.showMessageDialog(
@@ -1623,7 +1624,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
 							@Override
 							public void run() {
 								RandomizerGUI.this.opDialog.setVisible(false);
-								verboseLog = System.out;
 								RandomizerGUI.this.romHandler = null;
 								initialFormState();
 							}
@@ -1635,7 +1635,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 		} catch (Exception ex) {
 			attemptToLogException(ex, "RandomizerGUI.saveFailed",
 					"RandomizerGUI.saveFailedNoLog");
-			if (verboseLog != null && verboseLog != System.out) {
+			if (verboseLog != null) {
 				verboseLog.close();
 			}
 		}

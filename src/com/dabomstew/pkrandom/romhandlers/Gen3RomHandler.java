@@ -25,6 +25,7 @@ package com.dabomstew.pkrandom.romhandlers;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,11 +60,11 @@ import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 
 public class Gen3RomHandler extends AbstractGBRomHandler {
 
-	public static class Factory implements RomHandler.Factory {
+	public static class Factory extends RomHandler.Factory {
 
 		@Override
-		public Gen3RomHandler create(Random random) {
-			return new Gen3RomHandler(random);
+		public Gen3RomHandler create(Random random, PrintStream logStream) {
+			return new Gen3RomHandler(random, logStream);
 		}
 
 		public boolean isLoadable(String filename) {
@@ -81,7 +82,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	}
 
 	public Gen3RomHandler(Random random) {
-		super(random);
+		super(random, null);
+	}
+
+	public Gen3RomHandler(Random random, PrintStream logStream) {
+		super(random, logStream);
 	}
 
 	private static class RomEntry {
