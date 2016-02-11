@@ -203,7 +203,7 @@ public class Randomizer {
 		// Starter Pokemon
 		// Applied after type to update the strings correctly based on new types
 		maybeChangeAndLogStarters(log, romHandler);
-		
+
 		// Move Data Log
 		// Placed here so it matches its position in the randomizer interface
 		maybeLogMoveChanges(log, romHandler);
@@ -297,8 +297,11 @@ public class Randomizer {
 			}
 		}
 
+		// Static Pokemon
+		checkValue = maybeChangeAndLogStaticPokemon(log, romHandler, raceMode,
+				checkValue);
+
 		// Wild Pokemon
-		// actually call this code (Kappa)
 		if (settings.isUseMinimumCatchRate()) {
 			if (romHandler instanceof Gen5RomHandler) {
 				romHandler.minimumCatchRate(50, 25);
@@ -347,10 +350,6 @@ public class Randomizer {
 			}
 		}
 
-		// Static Pokemon
-		checkValue = maybeChangeAndLogStaticPokemon(log, romHandler, raceMode,
-				checkValue);
-
 		// TMs
 		if (!(settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY)
 				&& settings.getTmsMod() == Settings.TMsMod.RANDOM) {
@@ -390,7 +389,7 @@ public class Randomizer {
 		if (settings.isTmLevelUpMoveSanity()) {
 			romHandler.ensureTMCompatSanity();
 		}
-		
+
 		if (settings.isFullHMCompat()) {
 			romHandler.fullHMCompatibility();
 		}
@@ -773,19 +772,20 @@ public class Randomizer {
 			if (!settings.isUpdateMoves()) {
 				log.println("Move Data: Unchanged." + NEWLINE);
 			}
-		}
-		else {
+		} else {
 			log.println("--Move Data--");
 			log.print("NUM|NAME           |TYPE    |POWER|ACC.|PP");
-			if(romHandler.hasPhysicalSpecialSplit()) {
+			if (romHandler.hasPhysicalSpecialSplit()) {
 				log.print(" |CATEGORY");
 			}
 			log.println();
 			List<Move> allMoves = romHandler.getMoves();
-			for(Move mv : allMoves) {
-				if(mv != null) {
-					log.printf("%3d|%-15s|%-8s|%5d|%4d|%3d", mv.internalId, mv.name, mv.type.toString(), mv.power, (int)mv.hitratio, mv.pp);
-					if(romHandler.hasPhysicalSpecialSplit()) {
+			for (Move mv : allMoves) {
+				if (mv != null) {
+					log.printf("%3d|%-15s|%-8s|%5d|%4d|%3d", mv.internalId,
+							mv.name, mv.type.toString(), mv.power,
+							(int) mv.hitratio, mv.pp);
+					if (romHandler.hasPhysicalSpecialSplit()) {
 						log.printf("| %s", mv.category.toString());
 					}
 					log.println();
