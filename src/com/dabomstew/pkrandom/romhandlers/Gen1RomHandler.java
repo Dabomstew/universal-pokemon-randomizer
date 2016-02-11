@@ -2519,8 +2519,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 					}
 				} else {
 					// this should never happen, but if not, uh oh
-					System.out
-							.println("we somehow ran out of room for moves/evolutions");
+					throw new RuntimeException("Unable to save moves/evolutions, out of space");
 				}
 				if (pointerToWrite >= 0) {
 					writeWord(pointerTable, (i - 1) * 2, pointerToWrite);

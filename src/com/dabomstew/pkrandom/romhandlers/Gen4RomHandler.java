@@ -2615,8 +2615,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			String newString = RomFunctions.formatTextWithReplacements(
 					oldString, replacements, "\\n", "\\l", "\\p", lineLength,
 					ssd);
-			System.out.println("Original: " + oldString);
-			System.out.println("New: " + newString);
 			thisTradeStrings.set(strNum, newString);
 		}
 		this.setStrings(entry, thisTradeStrings);
