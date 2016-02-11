@@ -53,15 +53,15 @@ public class BLZCoder {
 	private boolean arm9;
 
 	public BLZCoder(String[] args) {
-		
+
 		int cmd, mode = 0, arg;
 
-		Title();
-		
 		if (args == null) {
 			// going to be used internally
 			return;
 		}
+
+		Title();
 
 		if (args.length < 1) {
 			Usage();
@@ -161,12 +161,7 @@ public class BLZCoder {
 	}
 
 	public byte[] BLZ_DecodePub(byte[] data, String reference) {
-		System.out.printf("- decoding '%s' (memory)", reference);
-		long startTime = System.currentTimeMillis();
 		BLZResult result = BLZ_Decode(data);
-		System.out.print(" - done, time="
-				+ (System.currentTimeMillis() - startTime) + "ms");
-		System.out.print("\n");
 		if (result != null) {
 			byte[] retbuf = new byte[result.length];
 			for (int i = 0; i < result.length; i++) {

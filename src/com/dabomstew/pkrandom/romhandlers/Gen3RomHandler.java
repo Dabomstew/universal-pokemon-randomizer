@@ -1206,10 +1206,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
 	private boolean hasBattleTrappingAbility(Pokemon pokemon) {
 		return pokemon != null
-				&& Gen3Constants.battleTrappingAbilities
-						.contains(pokemon.ability1)
-				|| Gen3Constants.battleTrappingAbilities
-						.contains(pokemon.ability2);
+				&& (Gen3Constants.battleTrappingAbilities
+						.contains(pokemon.ability1) || Gen3Constants.battleTrappingAbilities
+						.contains(pokemon.ability2));
 	}
 
 	private EncounterSet readWildArea(int offset, int numOfEntries,
@@ -2538,7 +2537,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			int bankOffset = readPointer(mbpsOffset + bank * 4);
 			mapNames[bank] = new String[bankMapCounts[bank]];
 			for (int map = 0; map < bankMapCounts[bank]; map++) {
-				System.out.println("loading map " + bank + "." + map);
 				int mhOffset = readPointer(bankOffset + map * 4);
 
 				// map name
@@ -2562,8 +2560,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				if (eventOffset >= 0 && eventOffset < rom.length) {
 
 					int pCount = rom[eventOffset] & 0xFF;
-					// int wCount = rom[eventOffset + 1] & 0xFF;
-					// int scCount = rom[eventOffset + 2] & 0xFF;
 					int spCount = rom[eventOffset + 3] & 0xFF;
 
 					if (pCount > 0) {
@@ -2584,8 +2580,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 										&& rom[scriptOffset + 10] == 0x09
 										&& (rom[scriptOffset + 11] == 0x00 || rom[scriptOffset + 11] == 0x01)) {
 									// item ball script
-									// int itemHere = readWord(scriptOffset +
-									// 3);
 									itemOffs.add(scriptOffset + 3);
 								}
 							}
@@ -2610,7 +2604,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 											+ tte.offsetInScript;
 									// make sure this actually looks like a text
 									// pointer
-									System.out.println(lookAt);
 									if (lookAt >= 0 && lookAt < rom.length - 2) {
 										if (rom[lookAt + 3] == 0x08
 												|| rom[lookAt + 3] == 0x09) {
