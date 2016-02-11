@@ -486,7 +486,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 					break;
 				}
 			}
-			System.out.println("pokemon count after pass 1 = " + iPokemonCount);
 
 			// sanity check: pokedex order
 			// pokedex entries have to be within 0-1023
@@ -502,7 +501,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 					break;
 				}
 			}
-			System.out.println("pokemon count after pass 2 = " + iPokemonCount);
 
 			// write new pokemon count
 			romEntry.entries.put("PokemonCount", iPokemonCount);
@@ -530,7 +528,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				}
 				break;
 			}
-			System.out.println("detected number of moves = " + moveCount);
 			romEntry.entries.put("MoveCount", moveCount);
 			// attempt to detect number of trainers using various tells
 			int trainerCount = 1;
@@ -558,7 +555,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				// found a valid trainer entry, recognize it
 				trainerCount++;
 			}
-			System.out.println("detected number of trainers = " + trainerCount);
 			romEntry.entries.put("TrainerCount", trainerCount);
 			// disable static pokemon & move tutor/tm text
 			romEntry.entries.put("StaticPokemonSupport", 0);
@@ -636,7 +632,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			}
 			this.pokedexCount = Gen3Constants.unhackedRealPokedex + usedSlots;
 		} else {
-			System.out.println("rom hack detected, pokedex size=" + maxPokedex);
 			this.isRomHack = true;
 			this.pokedexCount = maxPokedex;
 		}
@@ -1653,11 +1648,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			if (tte.actualOffset > 0 && !tte.isMoveTutor) {
 				// create the new TM text
 				int oldPointer = readPointer(tte.actualOffset);
-				if (oldPointer >= 0 && oldPointer < rom.length) {
-					System.out.println("old text: "
-							+ readVariableLengthString(oldPointer));
-				} else {
-					System.out.println("couldnt read old text");
+				if (oldPointer < 0 || oldPointer >= rom.length) {
+					throw new RuntimeException("TM Text update failed: couldn't read a TM text pointer.");
 				}
 				String moveName = this.moves[moveIndexes.get(tte.number - 1)].name;
 				// temporarily use underscores to stop the move name being split
@@ -1669,7 +1661,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 						Gen3Constants.regularTextboxCharsPerLine, ssd);
 				// get rid of the underscores
 				newText = newText.replace(tmpMoveName, moveName);
-				System.out.println("inserting " + newText);
 				// insert the new text into free space
 				int fsBytesNeeded = translateString(newText).length + 1;
 				int newOffset = RomFunctions.freeSpaceFinder(rom, (byte) 0xFF,
@@ -1679,8 +1670,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 					log("Couldn't insert new TM text." + nl);
 					return;
 				}
-				System.out.println("inserting to "
-						+ String.format("%X", newOffset));
 				writeVariableLengthString(newText, newOffset);
 				// search for copies of the pointer:
 				// make a needle of the pointer
@@ -1695,8 +1684,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 						maxOffset, searchNeedle);
 				for (int pointerLoc : pointerLocs) {
 					// write the new pointer
-					// System.out.println("overwriting pointer at "+String.format("%X",
-					// pointerLoc));
 					writePointer(pointerLoc, newOffset);
 				}
 			}
@@ -1790,11 +1777,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			if (tte.actualOffset > 0 && tte.isMoveTutor) {
 				// create the new MT text
 				int oldPointer = readPointer(tte.actualOffset);
-				if (oldPointer >= 0 && oldPointer < rom.length) {
-					System.out.println("old text: "
-							+ readVariableLengthString(oldPointer));
-				} else {
-					System.out.println("couldnt read old text");
+				if (oldPointer < 0 || oldPointer >= rom.length) {
+					throw new RuntimeException("Move Tutor Text update failed: couldn't read a move tutor text pointer.");
 				}
 				String moveName = this.moves[moves.get(tte.number)].name;
 				// temporarily use underscores to stop the move name being split
@@ -1806,7 +1790,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 						Gen3Constants.regularTextboxCharsPerLine, ssd);
 				// get rid of the underscores
 				newText = newText.replace(tmpMoveName, moveName);
-				System.out.println("inserting " + newText);
 				// insert the new text into free space
 				int fsBytesNeeded = translateString(newText).length + 1;
 				int newOffset = RomFunctions.freeSpaceFinder(rom,
@@ -1816,8 +1799,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 					log("Couldn't insert new Move Tutor text." + nl);
 					return;
 				}
-				System.out.println("inserting to "
-						+ String.format("%X", newOffset));
 				writeVariableLengthString(newText, newOffset);
 				// search for copies of the pointer:
 				// make a needle of the pointer
@@ -1832,8 +1813,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 						maxOffset, searchNeedle);
 				for (int pointerLoc : pointerLocs) {
 					// write the new pointer
-					// System.out.println("overwriting pointer at "+String.format("%X",
-					// pointerLoc));
 					writePointer(pointerLoc, newOffset);
 				}
 			}
