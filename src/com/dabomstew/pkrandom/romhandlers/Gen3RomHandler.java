@@ -428,12 +428,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 					romEntry.getValue("MoveTutorData")
 							+ romEntry.getValue("MoveTutorMoves") * 2);
 		}
+		
+		loadTextTable(romEntry.tableFile);
 
 		if (romEntry.romCode.equals("BPRE") && romEntry.version == 0) {
 			basicBPRE10HackSupport();
 		}
 
-		loadTextTable(romEntry.tableFile);
+		
 		loadPokemonNames();
 		loadPokedex();
 		loadPokemonStats();
@@ -472,10 +474,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		if (basicBPRE10HackDetection()) {
 			this.isRomHack = true;
 			// NUMBER OF POKEMON DETECTION
-
+			
 			// this is the most annoying bit
 			// we'll try to get it from the pokemon names,
-			// and sanity check it using the pokedex order
+			// and sanity check it using other things
 			// this of course means we can't support
 			// any hack with extended length names
 
@@ -483,11 +485,33 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			int namesOffset = romEntry.getValue("PokemonNames");
 			int nameLen = romEntry.getValue("PokemonNameLength");
 			while (true) {
-				int nameStrLen = lengthOfStringAt(namesOffset
-						+ (iPokemonCount + 1) * nameLen);
-				if (nameStrLen > 0 && nameStrLen < nameLen) {
+				int nameOffset = namesOffset
+						+ (iPokemonCount + 1) * nameLen;
+				int nameStrLen = lengthOfStringAt(nameOffset);
+				if (nameStrLen > 0 && nameStrLen < nameLen && rom[nameOffset] != 0) {
 					iPokemonCount++;
 				} else {
+					break;
+				}
+			}
+			
+			// Is there an unused egg slot at the end?
+			String lastName = readVariableLengthString(namesOffset + iPokemonCount*nameLen);
+			if(lastName.equals("?") || lastName.equals("-")) {
+				iPokemonCount--;
+			}
+			
+			// secondary check: moveset pointers
+			// if a slot has an invalid moveset pointer, it's not a real slot
+			// Before that, grab the moveset table from a known pointer to it.
+			int movesetsTable = readPointer(0x3EA7C);
+			romEntry.entries.put("PokemonMovesets", movesetsTable);
+			while(iPokemonCount >= 0) {
+				int movesetPtr = readPointer(movesetsTable + iPokemonCount*4);
+				if(movesetPtr < 0 || movesetPtr >= rom.length) {
+					iPokemonCount--;
+				}
+				else {
 					break;
 				}
 			}
@@ -510,7 +534,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			// write new pokemon count
 			romEntry.entries.put("PokemonCount", iPokemonCount);
 			// update some key offsets from known pointers
-			romEntry.entries.put("PokemonMovesets", readPointer(0x3EA7C));
+			
 			romEntry.entries.put("PokemonTMHMCompat", readPointer(0x43C68));
 			romEntry.entries.put("PokemonEvolutions", readPointer(0x42F6C));
 			romEntry.entries.put("MoveTutorCompatibility",
@@ -616,7 +640,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				String lowerName = pokeNames[pokeSlot].toLowerCase();
 				if (!this.matches(rom, pokeOffs, Gen3Constants.emptyPokemonSig)
 						&& !lowerName.contains("unused")
-						&& !lowerName.equals("?")) {
+						&& !lowerName.equals("?")
+						&& !lowerName.equals("-")) {
 					usedSlots++;
 					pokedexToInternal[Gen3Constants.unhackedRealPokedex
 							+ usedSlots] = pokeSlot;

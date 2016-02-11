@@ -514,7 +514,7 @@ public class Randomizer {
 				log.println("NUM|NAME      |TYPE             |  HP| ATK| DEF| SPE|SPEC");
 				for (Pokemon pkmn : allPokes) {
 					if (pkmn != null) {
-						String typeString = pkmn.primaryType == null ? "NULL"
+						String typeString = pkmn.primaryType == null ? "???"
 								: pkmn.primaryType.toString();
 						if (pkmn.secondaryType != null) {
 							typeString += "/" + pkmn.secondaryType.toString();
@@ -536,7 +536,8 @@ public class Randomizer {
 				log.println();
 				for (Pokemon pkmn : allPokes) {
 					if (pkmn != null) {
-						String typeString = pkmn.primaryType.toString();
+						String typeString = pkmn.primaryType == null ? "???"
+								: pkmn.primaryType.toString();
 						if (pkmn.secondaryType != null) {
 							typeString += "/" + pkmn.secondaryType.toString();
 						}
@@ -782,8 +783,9 @@ public class Randomizer {
 			List<Move> allMoves = romHandler.getMoves();
 			for (Move mv : allMoves) {
 				if (mv != null) {
+					String mvType = (mv.type == null) ? "???" : mv.type.toString();
 					log.printf("%3d|%-15s|%-8s|%5d|%4d|%3d", mv.internalId,
-							mv.name, mv.type.toString(), mv.power,
+							mv.name, mvType, mv.power,
 							(int) mv.hitratio, mv.pp);
 					if (romHandler.hasPhysicalSpecialSplit()) {
 						log.printf("| %s", mv.category.toString());
