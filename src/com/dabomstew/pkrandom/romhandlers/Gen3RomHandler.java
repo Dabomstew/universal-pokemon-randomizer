@@ -29,6 +29,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -509,18 +510,19 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			romEntry.entries.put("PokemonMovesets", readPointer(0x3EA7C));
 			romEntry.entries.put("PokemonTMHMCompat", readPointer(0x43C68));
 			romEntry.entries.put("PokemonEvolutions", readPointer(0x42F6C));
-			romEntry.entries.put("MoveTutorCompatibility", readPointer(0x120C30));
+			romEntry.entries.put("MoveTutorCompatibility",
+					readPointer(0x120C30));
 			int descsTable = readPointer(0xE5440);
 			romEntry.entries.put("MoveDescriptions", descsTable);
 			int trainersTable = readPointer(0xFC00);
 			romEntry.entries.put("TrainerData", trainersTable);
 			// try to detect number of moves using the descriptions
 			int moveCount = 0;
-			while(true) {
-				int descPointer = readPointer(descsTable + (moveCount)*4);
-				if(descPointer >= 0 && descPointer < rom.length) {
+			while (true) {
+				int descPointer = readPointer(descsTable + (moveCount) * 4);
+				if (descPointer >= 0 && descPointer < rom.length) {
 					int descStrLen = lengthOfStringAt(descPointer);
-					if(descStrLen > 0 && descStrLen < 100) {
+					if (descStrLen > 0 && descStrLen < 100) {
 						// okay, this does seem fine
 						moveCount++;
 						continue;
@@ -528,35 +530,35 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				}
 				break;
 			}
-			System.out.println("detected number of moves = "+moveCount);
+			System.out.println("detected number of moves = " + moveCount);
 			romEntry.entries.put("MoveCount", moveCount);
 			// attempt to detect number of trainers using various tells
 			int trainerCount = 1;
 			int tEntryLen = romEntry.getValue("TrainerEntrySize");
 			int tNameLen = romEntry.getValue("TrainerNameLength");
-			while(true) {
-				int trOffset = trainersTable + tEntryLen*trainerCount;
+			while (true) {
+				int trOffset = trainersTable + tEntryLen * trainerCount;
 				int pokeDataType = rom[trOffset] & 0xFF;
-				if(pokeDataType >= 4) {
+				if (pokeDataType >= 4) {
 					// only allowed 0-3
 					break;
 				}
 				int numPokes = rom[trOffset + (tEntryLen - 8)] & 0xFF;
-				if(numPokes == 0 || numPokes > 6) {
+				if (numPokes == 0 || numPokes > 6) {
 					break;
 				}
 				int pointerToPokes = readPointer(trOffset + (tEntryLen - 4));
-				if(pointerToPokes < 0 || pointerToPokes >= rom.length) {
+				if (pointerToPokes < 0 || pointerToPokes >= rom.length) {
 					break;
 				}
-				int nameLength = lengthOfStringAt(trOffset+4);
-				if(nameLength >= tNameLen) {
+				int nameLength = lengthOfStringAt(trOffset + 4);
+				if (nameLength >= tNameLen) {
 					break;
 				}
 				// found a valid trainer entry, recognize it
 				trainerCount++;
 			}
-			System.out.println("detected number of trainers = "+trainerCount);
+			System.out.println("detected number of trainers = " + trainerCount);
 			romEntry.entries.put("TrainerCount", trainerCount);
 			// disable static pokemon & move tutor/tm text
 			romEntry.entries.put("StaticPokemonSupport", 0);
@@ -640,28 +642,26 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		}
 
 	}
-	
+
 	private void constructPokemonList() {
-		if(!this.isRomHack) {
+		if (!this.isRomHack) {
 			// simple behavior: all pokes in the dex are valid
 			pokemonList = Arrays.asList(pokes);
-		}
-		else {
+		} else {
 			// only include "valid" pokes
 			pokemonList = new ArrayList<Pokemon>();
 			pokemonList.add(null);
-			for(int i=1;i<pokes.length;i++) {
+			for (int i = 1; i < pokes.length; i++) {
 				Pokemon pk = pokes[i];
-				if(pk != null) {
+				if (pk != null) {
 					String lowerName = pk.name.toLowerCase();
-					if(!lowerName.contains("unused")
-							&& !lowerName.equals("?")) {
+					if (!lowerName.contains("unused") && !lowerName.equals("?")) {
 						pokemonList.add(pk);
 					}
 				}
 			}
 		}
-		
+
 	}
 
 	private void loadPokemonStats() {
@@ -1190,11 +1190,26 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			// with Arena Trap, Shadow Tag etc.
 			int[] bannedAreas = romEntry.arrayEntries
 					.get("BattleTrappersBanned");
+			Set<Pokemon> battleTrappers = new HashSet<Pokemon>();
+			for (Pokemon pk : getPokemon()) {
+				if (hasBattleTrappingAbility(pk)) {
+					battleTrappers.add(pk);
+				}
+			}
 			for (int areaIdx : bannedAreas) {
-				encounterAreas.get(areaIdx).battleTrappersBanned = true;
+				encounterAreas.get(areaIdx).bannedPokemon
+						.addAll(battleTrappers);
 			}
 		}
 		return encounterAreas;
+	}
+
+	private boolean hasBattleTrappingAbility(Pokemon pokemon) {
+		return pokemon != null
+				&& Gen3Constants.battleTrappingAbilities
+						.contains(pokemon.ability1)
+				|| Gen3Constants.battleTrappingAbilities
+						.contains(pokemon.ability2);
 	}
 
 	private EncounterSet readWildArea(int offset, int numOfEntries,
@@ -2888,14 +2903,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			rom[romEntry.getValue("RunIndoorsTweakOffset")] = 0x00;
 		}
 	}
-	
+
 	@Override
 	public void applyFastestTextPatch() {
 		if (romEntry.getValue("TextSpeedValuesOffset") > 0) {
 			int tsvOffset = romEntry.getValue("TextSpeedValuesOffset");
 			rom[tsvOffset] = 4; // slow = medium
-			rom[tsvOffset+1] = 1; // medium = fast
-			rom[tsvOffset+2] = 0; // fast = instant
+			rom[tsvOffset + 1] = 1; // medium = fast
+			rom[tsvOffset + 2] = 0; // fast = instant
 		}
 	}
 

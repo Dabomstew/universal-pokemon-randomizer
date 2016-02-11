@@ -17,7 +17,7 @@ public class Gen1Constants {
 			bsCatchRateOffset = 8, bsLevel1MovesOffset = 15,
 			bsGrowthCurveOffset = 19, bsTMHMCompatOffset = 20;
 
-	public static final int mewIndex = 151;
+	public static final int mewIndex = 151, marowakIndex = 105;
 
 	public static final int encounterTableEnd = 0xFFFF,
 			encounterTableSize = 10, yellowSuperRodTableSize = 4;
@@ -52,6 +52,8 @@ public class Gen1Constants {
 	public static final List<Integer> requiredFieldTMs = Arrays
 			.asList(new Integer[] { 3, 4, 8, 10, 12, 14, 16, 19, 20, 22, 25,
 					26, 30, 40, 43, 44, 45, 47 });
+	
+	public static final int towerMapsStartIndex = 0x90, towerMapsEndIndex = 0x94;
 
 	public static final Type[] typeTable = constructTypeTable();
 

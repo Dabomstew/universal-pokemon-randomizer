@@ -602,6 +602,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 					Thread t = new Thread() {
 						@Override
 						public void run() {
+							boolean romLoaded = false;
 							SwingUtilities.invokeLater(new Runnable() {
 								@Override
 								public void run() {
@@ -611,39 +612,22 @@ public class RandomizerGUI extends javax.swing.JFrame {
 							try {
 								RandomizerGUI.this.romHandler.loadRom(fh
 										.getAbsolutePath());
+								romLoaded = true;
 							} catch (Exception ex) {
-								long time = System.currentTimeMillis();
-								try {
-									String errlog = "error_" + time + ".txt";
-									PrintStream ps = new PrintStream(
-											new FileOutputStream(errlog));
-									PrintStream e1 = System.err;
-									System.setErr(ps);
-									ex.printStackTrace();
-									verboseLog.close();
-									System.setErr(e1);
-									ps.close();
-									JOptionPane
-											.showMessageDialog(
-													RandomizerGUI.this,
-													String.format(
-															bundle.getString("RandomizerGUI.loadFailed"),
-															errlog));
-								} catch (Exception logex) {
-									JOptionPane
-											.showMessageDialog(
-													RandomizerGUI.this,
-													bundle.getString("RandomizerGUI.loadFailedNoLog"));
-									verboseLog.close();
-								}
+								attemptToLogException(ex,
+										"RandomizerGUI.loadFailed",
+										"RandomizerGUI.loadFailedNoLog");
 							}
+							final boolean loadSuccess = romLoaded;
 							SwingUtilities.invokeLater(new Runnable() {
 								@Override
 								public void run() {
 									RandomizerGUI.this.opDialog
 											.setVisible(false);
 									RandomizerGUI.this.initialFormState();
-									RandomizerGUI.this.romLoaded();
+									if (loadSuccess) {
+										RandomizerGUI.this.romLoaded();
+									}
 								}
 							});
 						}
@@ -1564,28 +1548,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
 								filename, verboseLog, seed));
 						succeededSave = true;
 					} catch (Exception ex) {
-						long time = System.currentTimeMillis();
-						try {
-							String errlog = "error_" + time + ".txt";
-							PrintStream ps = new PrintStream(
-									new FileOutputStream(errlog));
-							PrintStream e1 = System.err;
-							System.setErr(ps);
-							ex.printStackTrace();
-							verboseLog.close();
-							System.setErr(e1);
-							ps.close();
-							JOptionPane
-									.showMessageDialog(
-											RandomizerGUI.this,
-											String.format(
-													bundle.getString("RandomizerGUI.saveFailedIO"),
-													errlog));
-						} catch (Exception logex) {
-							JOptionPane
-									.showMessageDialog(
-											RandomizerGUI.this,
-											bundle.getString("RandomizerGUI.saveFailedIONoLog"));
+						attemptToLogException(ex, "RandomizerGUI.saveFailedIO",
+								"RandomizerGUI.saveFailedIONoLog");
+						if (verboseLog != null && verboseLog != System.out) {
 							verboseLog.close();
 						}
 					}
@@ -1668,23 +1633,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
 			};
 			t.start();
 		} catch (Exception ex) {
-			long time = System.currentTimeMillis();
-			try {
-				String errlog = "error_" + time + ".txt";
-				PrintStream ps = new PrintStream(new FileOutputStream(errlog));
-				PrintStream e1 = System.err;
-				System.setErr(ps);
-				ex.printStackTrace();
-				verboseLog.close();
-				byte[] out = baos.toByteArray();
-				System.err.print(new String(out, "UTF-8"));
-				System.setErr(e1);
-				ps.close();
-				JOptionPane.showMessageDialog(this, String.format(
-						bundle.getString("RandomizerGUI.saveFailed"), errlog));
-			} catch (Exception logex) {
-				JOptionPane.showMessageDialog(this,
-						bundle.getString("RandomizerGUI.saveFailedNoLog"));
+			attemptToLogException(ex, "RandomizerGUI.saveFailed",
+					"RandomizerGUI.saveFailedNoLog");
+			if (verboseLog != null && verboseLog != System.out) {
 				verboseLog.close();
 			}
 		}
@@ -1745,6 +1696,25 @@ public class RandomizerGUI extends javax.swing.JFrame {
 			}
 		}
 
+	}
+
+	private void attemptToLogException(Exception ex, String baseMessageKey,
+			String noLogMessageKey) {
+		long time = System.currentTimeMillis();
+		try {
+			String errlog = "error_" + time + ".txt";
+			PrintStream ps = new PrintStream(new FileOutputStream(errlog));
+			PrintStream e1 = System.err;
+			System.setErr(ps);
+			ex.printStackTrace();
+			System.setErr(e1);
+			ps.close();
+			JOptionPane.showMessageDialog(this,
+					String.format(bundle.getString(baseMessageKey), errlog));
+		} catch (Exception logex) {
+			JOptionPane.showMessageDialog(this,
+					bundle.getString(noLogMessageKey));
+		}
 	}
 
 	private void updateCodeTweaksButtonText() {

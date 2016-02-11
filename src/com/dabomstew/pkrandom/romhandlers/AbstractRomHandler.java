@@ -42,8 +42,6 @@ import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import javax.swing.JOptionPane;
-
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.gui.RandomizerGUI;
@@ -511,35 +509,45 @@ public abstract class AbstractRomHandler implements RomHandler {
 					noLegendaryList) : new ArrayList<Pokemon>(mainPokemonList);
 			allPokes.removeAll(banned);
 			for (EncounterSet area : currentEncounters) {
+				List<Pokemon> pickablePokemon = allPokes;
+				if (area.bannedPokemon.size() > 0) {
+					pickablePokemon = new ArrayList<Pokemon>(allPokes);
+					pickablePokemon.removeAll(area.bannedPokemon);
+				}
 				for (Encounter enc : area.encounters) {
 					// Pick a random pokemon
-					int picked = this.random.nextInt(allPokes.size());
-					enc.pokemon = allPokes.get(picked);
-					if (area.battleTrappersBanned
-							&& hasBattleTrappingAbility(enc.pokemon)) {
-						// Skip past this Pokemon for now and just pick a random
-						// one
-						List<Pokemon> pickable = noLegendaries ? new ArrayList<Pokemon>(
+					if (pickablePokemon.size() == 0) {
+						// Only banned pokes are left, ignore them and pick
+						// something else for now.
+						List<Pokemon> tempPickable = noLegendaries ? new ArrayList<Pokemon>(
 								noLegendaryList) : new ArrayList<Pokemon>(
 								mainPokemonList);
-						pickable.removeAll(banned);
-						if (pickable.size() == 0) {
-							JOptionPane.showMessageDialog(null,
+						tempPickable.removeAll(banned);
+						tempPickable.removeAll(area.bannedPokemon);
+						if (tempPickable.size() == 0) {
+							throw new RuntimeException(
 									"ERROR: Couldn't replace a Pokemon!");
-							return;
 						}
-						while (hasBattleTrappingAbility(enc.pokemon)) {
-							picked = this.random.nextInt(pickable.size());
-							enc.pokemon = pickable.get(picked);
-						}
+						int picked = this.random.nextInt(tempPickable.size());
+						enc.pokemon = tempPickable.get(picked);
 					} else {
 						// Picked this Pokemon, remove it
-						allPokes.remove(picked);
+						int picked = this.random
+								.nextInt(pickablePokemon.size());
+						enc.pokemon = pickablePokemon.get(picked);
+						pickablePokemon.remove(picked);
+						if (allPokes != pickablePokemon) {
+							allPokes.remove(enc.pokemon);
+						}
 						if (allPokes.size() == 0) {
 							// Start again
 							allPokes.addAll(noLegendaries ? noLegendaryList
 									: mainPokemonList);
 							allPokes.removeAll(banned);
+							if (pickablePokemon != allPokes) {
+								pickablePokemon.addAll(allPokes);
+								pickablePokemon.removeAll(area.bannedPokemon);
+							}
 						}
 					}
 				}
@@ -547,21 +555,36 @@ public abstract class AbstractRomHandler implements RomHandler {
 		} else if (typeThemed) {
 			Map<Type, List<Pokemon>> cachedPokeLists = new TreeMap<Type, List<Pokemon>>();
 			for (EncounterSet area : currentEncounters) {
-				Type areaTheme = randomType();
-				if (!cachedPokeLists.containsKey(areaTheme)) {
-					cachedPokeLists.put(areaTheme,
-							pokemonOfType(areaTheme, noLegendaries));
+				List<Pokemon> possiblePokemon = null;
+				int iterLoops = 0;
+				while (possiblePokemon == null && iterLoops < 10000) {
+					Type areaTheme = randomType();
+					if (!cachedPokeLists.containsKey(areaTheme)) {
+						List<Pokemon> pType = pokemonOfType(areaTheme,
+								noLegendaries);
+						pType.removeAll(banned);
+						cachedPokeLists.put(areaTheme, pType);
+					}
+					possiblePokemon = cachedPokeLists.get(areaTheme);
+					if (area.bannedPokemon.size() > 0) {
+						possiblePokemon = new ArrayList<Pokemon>(
+								possiblePokemon);
+						possiblePokemon.removeAll(area.bannedPokemon);
+					}
+					if (possiblePokemon.size() == 0) {
+						// Can't use this type for this area
+						possiblePokemon = null;
+					}
+					iterLoops++;
 				}
-				List<Pokemon> possiblePokemon = cachedPokeLists.get(areaTheme);
+				if (possiblePokemon == null) {
+					throw new RuntimeException(
+							"Could not randomize an area in a reasonable amount of attempts.");
+				}
 				for (Encounter enc : area.encounters) {
 					// Pick a random themed pokemon
 					enc.pokemon = possiblePokemon.get(this.random
 							.nextInt(possiblePokemon.size()));
-					while (banned.contains(enc.pokemon)
-							|| (area.battleTrappersBanned && hasBattleTrappingAbility(enc.pokemon))) {
-						enc.pokemon = possiblePokemon.get(this.random
-								.nextInt(possiblePokemon.size()));
-					}
 				}
 			}
 		} else if (usePowerLevels) {
@@ -569,9 +592,14 @@ public abstract class AbstractRomHandler implements RomHandler {
 					noLegendaryList) : new ArrayList<Pokemon>(mainPokemonList);
 			allowedPokes.removeAll(banned);
 			for (EncounterSet area : currentEncounters) {
+				List<Pokemon> localAllowed = allowedPokes;
+				if (area.bannedPokemon.size() > 0) {
+					localAllowed = new ArrayList<Pokemon>(allowedPokes);
+					localAllowed.removeAll(area.bannedPokemon);
+				}
 				for (Encounter enc : area.encounters) {
-					enc.pokemon = pickWildPowerLvlReplacement(allowedPokes,
-							enc.pokemon, area.battleTrappersBanned, false, null);
+					enc.pokemon = pickWildPowerLvlReplacement(localAllowed,
+							enc.pokemon, false, null);
 				}
 			}
 		} else {
@@ -581,7 +609,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 					enc.pokemon = noLegendaries ? randomNonLegendaryPokemon()
 							: randomPokemon();
 					while (banned.contains(enc.pokemon)
-							|| (area.battleTrappersBanned && hasBattleTrappingAbility(enc.pokemon))) {
+							|| area.bannedPokemon.contains(enc.pokemon)) {
 						enc.pokemon = noLegendaries ? randomNonLegendaryPokemon()
 								: randomPokemon();
 					}
@@ -608,35 +636,43 @@ public abstract class AbstractRomHandler implements RomHandler {
 				Set<Pokemon> inArea = pokemonInArea(area);
 				// Build area map using catch em all
 				Map<Pokemon, Pokemon> areaMap = new TreeMap<Pokemon, Pokemon>();
+				List<Pokemon> pickablePokemon = allPokes;
+				if (area.bannedPokemon.size() > 0) {
+					pickablePokemon = new ArrayList<Pokemon>(allPokes);
+					pickablePokemon.removeAll(area.bannedPokemon);
+				}
 				for (Pokemon areaPk : inArea) {
-					int picked = this.random.nextInt(allPokes.size());
-					Pokemon pickedMN = allPokes.get(picked);
-					if (area.battleTrappersBanned
-							&& hasBattleTrappingAbility(pickedMN)) {
-						// Skip past this Pokemon for now and just pick a random
-						// one
-						List<Pokemon> pickable = noLegendaries ? new ArrayList<Pokemon>(
+					if (pickablePokemon.size() == 0) {
+						// No more pickable pokes left, take a random one
+						List<Pokemon> tempPickable = noLegendaries ? new ArrayList<Pokemon>(
 								noLegendaryList) : new ArrayList<Pokemon>(
 								mainPokemonList);
-						pickable.removeAll(banned);
-						if (pickable.size() == 0) {
-							JOptionPane.showMessageDialog(null,
+						tempPickable.removeAll(banned);
+						tempPickable.removeAll(area.bannedPokemon);
+						if (tempPickable.size() == 0) {
+							throw new RuntimeException(
 									"ERROR: Couldn't replace a Pokemon!");
-							return;
 						}
-						while (hasBattleTrappingAbility(pickedMN)) {
-							picked = this.random.nextInt(pickable.size());
-							pickedMN = pickable.get(picked);
-						}
+						int picked = this.random.nextInt(tempPickable.size());
+						Pokemon pickedMN = tempPickable.get(picked);
 						areaMap.put(areaPk, pickedMN);
 					} else {
+						int picked = this.random.nextInt(allPokes.size());
+						Pokemon pickedMN = allPokes.get(picked);
 						areaMap.put(areaPk, pickedMN);
-						allPokes.remove(picked);
+						pickablePokemon.remove(picked);
+						if (allPokes != pickablePokemon) {
+							allPokes.remove(pickedMN);
+						}
 						if (allPokes.size() == 0) {
 							// Start again
 							allPokes.addAll(noLegendaries ? noLegendaryList
 									: mainPokemonList);
 							allPokes.removeAll(banned);
+							if (pickablePokemon != allPokes) {
+								pickablePokemon.addAll(allPokes);
+								pickablePokemon.removeAll(area.bannedPokemon);
+							}
 						}
 					}
 				}
@@ -648,55 +684,42 @@ public abstract class AbstractRomHandler implements RomHandler {
 		} else if (typeThemed) {
 			Map<Type, List<Pokemon>> cachedPokeLists = new TreeMap<Type, List<Pokemon>>();
 			for (EncounterSet area : currentEncounters) {
-				Type areaTheme = randomType();
-				if (!cachedPokeLists.containsKey(areaTheme)) {
-					cachedPokeLists.put(areaTheme,
-							pokemonOfType(areaTheme, noLegendaries));
-				}
-				List<Pokemon> possiblePokemon = new ArrayList<Pokemon>(
-						cachedPokeLists.get(areaTheme));
-				possiblePokemon.removeAll(banned);
 				// Poke-set
 				Set<Pokemon> inArea = pokemonInArea(area);
-				// Build area map using type theme, reset the list if needed
+				List<Pokemon> possiblePokemon = null;
+				int iterLoops = 0;
+				while (possiblePokemon == null && iterLoops < 10000) {
+					Type areaTheme = randomType();
+					if (!cachedPokeLists.containsKey(areaTheme)) {
+						List<Pokemon> pType = pokemonOfType(areaTheme,
+								noLegendaries);
+						pType.removeAll(banned);
+						cachedPokeLists.put(areaTheme, pType);
+					}
+					possiblePokemon = cachedPokeLists.get(areaTheme);
+					if (area.bannedPokemon.size() > 0) {
+						possiblePokemon = new ArrayList<Pokemon>(
+								possiblePokemon);
+						possiblePokemon.removeAll(area.bannedPokemon);
+					}
+					if (possiblePokemon.size() < inArea.size()) {
+						// Can't use this type for this area
+						possiblePokemon = null;
+					}
+					iterLoops++;
+				}
+				if (possiblePokemon == null) {
+					throw new RuntimeException(
+							"Could not randomize an area in a reasonable amount of attempts.");
+				}
+
+				// Build area map using type theme.
 				Map<Pokemon, Pokemon> areaMap = new TreeMap<Pokemon, Pokemon>();
 				for (Pokemon areaPk : inArea) {
 					int picked = this.random.nextInt(possiblePokemon.size());
 					Pokemon pickedMN = possiblePokemon.get(picked);
-					if (area.battleTrappersBanned
-							&& hasBattleTrappingAbility(pickedMN)) {
-						// Skip past this Pokemon for now and just pick a random
-						// one
-						List<Pokemon> pickable = new ArrayList<Pokemon>(
-								cachedPokeLists.get(areaTheme));
-						pickable.removeAll(banned);
-						if (pickable.size() == 0) {
-							// Try all Pokemon instead
-							pickable = noLegendaries ? new ArrayList<Pokemon>(
-									noLegendaryList) : new ArrayList<Pokemon>(
-									mainPokemonList);
-							pickable.removeAll(banned);
-						}
-						if (pickable.size() == 0) {
-							JOptionPane.showMessageDialog(null,
-									"ERROR: Couldn't replace a Pokemon!");
-							return;
-						}
-						while (hasBattleTrappingAbility(pickedMN)) {
-							picked = this.random.nextInt(pickable.size());
-							pickedMN = pickable.get(picked);
-						}
-						areaMap.put(areaPk, pickedMN);
-					} else {
-						areaMap.put(areaPk, pickedMN);
-						possiblePokemon.remove(picked);
-						if (possiblePokemon.size() == 0) {
-							// Start again
-							possiblePokemon.addAll(cachedPokeLists
-									.get(areaTheme));
-							possiblePokemon.removeAll(banned);
-						}
-					}
+					areaMap.put(areaPk, pickedMN);
+					possiblePokemon.remove(picked);
 				}
 				for (Encounter enc : area.encounters) {
 					// Apply the map
@@ -713,9 +736,14 @@ public abstract class AbstractRomHandler implements RomHandler {
 				// Build area map using randoms
 				Map<Pokemon, Pokemon> areaMap = new TreeMap<Pokemon, Pokemon>();
 				List<Pokemon> usedPks = new ArrayList<Pokemon>();
+				List<Pokemon> localAllowed = allowedPokes;
+				if (area.bannedPokemon.size() > 0) {
+					localAllowed = new ArrayList<Pokemon>(allowedPokes);
+					localAllowed.removeAll(area.bannedPokemon);
+				}
 				for (Pokemon areaPk : inArea) {
-					Pokemon picked = pickWildPowerLvlReplacement(allowedPokes,
-							areaPk, area.battleTrappersBanned, false, usedPks);
+					Pokemon picked = pickWildPowerLvlReplacement(localAllowed,
+							areaPk, false, usedPks);
 					areaMap.put(areaPk, picked);
 					usedPks.add(picked);
 				}
@@ -736,7 +764,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 							: randomPokemon();
 					while (areaMap.containsValue(picked)
 							|| banned.contains(picked)
-							|| (area.battleTrappersBanned && hasBattleTrappingAbility(picked))) {
+							|| area.bannedPokemon.contains(picked)) {
 						picked = noLegendaries ? randomNonLegendaryPokemon()
 								: randomPokemon();
 					}
@@ -780,7 +808,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 				} else {
 					// pick on power level with the current one blocked
 					pickedRightP = pickWildPowerLvlReplacement(remainingRight,
-							pickedLeftP, false, true, null);
+							pickedLeftP, true, null);
 				}
 				remainingRight.remove(pickedRightP);
 				translateMap.put(pickedLeftP, pickedRightP);
@@ -820,26 +848,23 @@ public abstract class AbstractRomHandler implements RomHandler {
 			for (Encounter enc : area.encounters) {
 				// Apply the map
 				enc.pokemon = translateMap.get(enc.pokemon);
-				if (area.battleTrappersBanned
-						&& hasBattleTrappingAbility(enc.pokemon)) {
-					// Ignore the map and put a random non-trapping Poke
-					List<Pokemon> pickable = noLegendaries ? new ArrayList<Pokemon>(
+				if (area.bannedPokemon.contains(enc.pokemon)) {
+					// Ignore the map and put a random non-banned poke
+					List<Pokemon> tempPickable = noLegendaries ? new ArrayList<Pokemon>(
 							noLegendaryList) : new ArrayList<Pokemon>(
 							mainPokemonList);
-					pickable.removeAll(banned);
-					if (pickable.size() == 0) {
-						JOptionPane.showMessageDialog(null,
+					tempPickable.removeAll(banned);
+					tempPickable.removeAll(area.bannedPokemon);
+					if (tempPickable.size() == 0) {
+						throw new RuntimeException(
 								"ERROR: Couldn't replace a Pokemon!");
-						return;
 					}
 					if (usePowerLevels) {
-						enc.pokemon = pickWildPowerLvlReplacement(pickable,
-								enc.pokemon, true, false, null);
+						enc.pokemon = pickWildPowerLvlReplacement(tempPickable,
+								enc.pokemon, false, null);
 					} else {
-						while (hasBattleTrappingAbility(enc.pokemon)) {
-							int picked = this.random.nextInt(pickable.size());
-							enc.pokemon = pickable.get(picked);
-						}
+						int picked = this.random.nextInt(tempPickable.size());
+						enc.pokemon = tempPickable.get(picked);
 					}
 				}
 			}
@@ -2955,8 +2980,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 	}
 
 	private Pokemon pickWildPowerLvlReplacement(List<Pokemon> pokemonPool,
-			Pokemon current, boolean banBattleTrappers, boolean banSamePokemon,
-			List<Pokemon> usedUp) {
+			Pokemon current, boolean banSamePokemon, List<Pokemon> usedUp) {
 		// start with within 10% and add 5% either direction till we find
 		// something
 		int currentBST = current.bstForPowerLevels();
@@ -2968,7 +2992,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 			for (Pokemon pk : pokemonPool) {
 				if (pk.bstForPowerLevels() >= minTarget
 						&& pk.bstForPowerLevels() <= maxTarget
-						&& (!banBattleTrappers || !hasBattleTrappingAbility(pk))
 						&& (!banSamePokemon || pk != current)
 						&& (usedUp == null || !usedUp.contains(pk))) {
 					canPick.add(pk);
@@ -2979,15 +3002,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 			expandRounds++;
 		}
 		return canPick.get(this.random.nextInt(canPick.size()));
-	}
-
-	private static final List<Integer> battleTrappingAbilities = Arrays.asList(
-			23, 42, 71);
-
-	private boolean hasBattleTrappingAbility(Pokemon pokemon) {
-		return battleTrappingAbilities.contains(pokemon.ability1)
-				|| battleTrappingAbilities.contains(pokemon.ability2)
-				|| battleTrappingAbilities.contains(pokemon.ability3);
 	}
 
 	/* Helper methods used by subclasses */

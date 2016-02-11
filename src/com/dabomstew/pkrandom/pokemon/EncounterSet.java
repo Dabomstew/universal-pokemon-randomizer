@@ -24,13 +24,15 @@ package com.dabomstew.pkrandom.pokemon;
 /*----------------------------------------------------------------------------*/
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class EncounterSet {
 
 	public int rate;
 	public List<Encounter> encounters = new ArrayList<Encounter>();
-	public boolean battleTrappersBanned = false;
+	public Set<Pokemon> bannedPokemon = new HashSet<Pokemon>();
 	public String displayName;
 	public int offset;
 

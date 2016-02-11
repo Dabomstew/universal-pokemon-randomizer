@@ -125,6 +125,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		private Map<String, int[]> arrayEntries = new HashMap<String, int[]>();
 		private List<Integer> staticPokemonSingle = new ArrayList<Integer>();
 		private List<GameCornerPokemon> staticPokemonGameCorner = new ArrayList<GameCornerPokemon>();
+		private int[] ghostMarowakOffsets = new int[0];
 		private Map<Integer, Type> extraTypeLookup = new HashMap<Integer, Type>();
 		private Map<Type, Integer> extraTypeReverse = new HashMap<Type, Integer>();
 
@@ -203,6 +204,18 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 								gc.offsets = new int[] { offs };
 								current.staticPokemonGameCorner.add(gc);
 							}
+						} else if (r[0].equals("StaticPokemonGhostMarowak")) {
+							if (r[1].startsWith("[") && r[1].endsWith("]")) {
+								String[] offsets = r[1].substring(1,
+										r[1].length() - 1).split(",");
+								int[] offs = new int[offsets.length];
+								int c = 0;
+								for (String off : offsets) {
+									offs[c++] = parseRIInt(off);
+								}
+								current.ghostMarowakOffsets = offs;
+							} else {
+							}
 						} else if (r[0].equals("TMText[]")) {
 							if (r[1].startsWith("[") && r[1].endsWith("]")) {
 								String[] parts = r[1].substring(1,
@@ -259,6 +272,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 												.addAll(otherEntry.staticPokemonSingle);
 										current.staticPokemonGameCorner
 												.addAll(otherEntry.staticPokemonGameCorner);
+										current.ghostMarowakOffsets = otherEntry.ghostMarowakOffsets;
 										current.entries.put(
 												"StaticPokemonSupport", 1);
 									} else {
@@ -928,6 +942,11 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 	public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
 		List<EncounterSet> encounters = new ArrayList<EncounterSet>();
 
+		Pokemon ghostMarowak = pokes[Gen1Constants.marowakIndex];
+		if (canChangeStaticPokemon()) {
+			ghostMarowak = pokes[pokeRBYToNumTable[rom[romEntry.ghostMarowakOffsets[0]] & 0xFF]];
+		}
+
 		// grass & water
 		List<Integer> usedOffsets = new ArrayList<Integer>();
 		int tableOffset = romEntry.getValue("WildPokemonTableOffset");
@@ -950,6 +969,10 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 						thisSet.offset = rootOffset;
 						thisSet.displayName = (a == 1 ? "Surfing"
 								: "Grass/Cave") + " on " + mapNames[mapID];
+						if (mapID >= Gen1Constants.towerMapsStartIndex
+								&& mapID <= Gen1Constants.towerMapsEndIndex) {
+							thisSet.bannedPokemon.add(ghostMarowak);
+						}
 						for (int slot = 0; slot < Gen1Constants.encounterTableSize; slot++) {
 							Encounter enc = new Encounter();
 							enc.level = rom[offset] & 0xFF;
@@ -1370,6 +1393,8 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 			for (GameCornerPokemon gcp : romEntry.staticPokemonGameCorner) {
 				statics.add(pokes[pokeRBYToNumTable[rom[gcp.offsets[0]] & 0xFF]]);
 			}
+			// Ghost Marowak
+			statics.add(pokes[pokeRBYToNumTable[rom[romEntry.ghostMarowakOffsets[0]] & 0xFF]]);
 		}
 		return statics;
 	}
@@ -1382,7 +1407,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		// Checks
 		int singleSize = romEntry.staticPokemonSingle.size();
 		int gcSize = romEntry.staticPokemonGameCorner.size();
-		if (staticPokemon.size() != singleSize + gcSize) {
+		if (staticPokemon.size() != singleSize + gcSize + 1) {
 			return false;
 		}
 
@@ -1401,6 +1426,14 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 				rom[offset] = pokeNum;
 			}
 		}
+
+		// Ghost Marowak
+		byte maroNum = (byte) pokeNumToRBYTable[staticPokemon.get(singleSize
+				+ gcSize).number];
+		for (int maroOffset : romEntry.ghostMarowakOffsets) {
+			rom[maroOffset] = maroNum;
+		}
+
 		return true;
 	}
 
@@ -1803,14 +1836,15 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 			rom[romEntry.getValue("TextDelayFunctionOffset")] = GBConstants.gbZ80Ret;
 		}
 	}
-	
+
 	@Override
 	public void randomizePCPotion() {
 		if (romEntry.getValue("PCPotionOffset") != 0) {
-			rom[romEntry.getValue("PCPotionOffset")] = (byte) this.getNonBadItems().randomNonTM(this.random);
+			rom[romEntry.getValue("PCPotionOffset")] = (byte) this
+					.getNonBadItems().randomNonTM(this.random);
 		}
 	}
-	
+
 	@Override
 	public void applyPikachuEvoPatch() {
 		if (romEntry.getValue("PikachuEvoJumpOffset") != 0) {

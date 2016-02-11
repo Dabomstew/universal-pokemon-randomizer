@@ -174,6 +174,9 @@ public class Gen3Constants {
 	public static final List<Integer> frlgEarlyRequiredHMMoves = Arrays
 			.asList(15);
 
+	public static final List<Integer> battleTrappingAbilities = Arrays.asList(
+			23, 42, 71);
+
 	private static Type[] constructTypeTable() {
 		Type[] table = new Type[256];
 		table[0x00] = Type.NORMAL;
