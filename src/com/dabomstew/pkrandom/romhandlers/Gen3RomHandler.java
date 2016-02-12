@@ -1549,24 +1549,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			}
 			int currentMoveCount = (mloc - moveDataLoc) / entrySize;
 
-			if (newMoveCount <= currentMoveCount) {
-				for (int mv = 0; mv < newMoveCount; mv++) {
-					MoveLearnt ml = moves.get(mv);
-					moveDataLoc += writeMLToOffset(moveDataLoc, ml);
-				}
-				if (newMoveCount < currentMoveCount) {
-					// need a new terminator
-					if (jamboMovesetHack) {
-						rom[moveDataLoc] = 0x00;
-						rom[moveDataLoc + 1] = 0x00;
-						rom[moveDataLoc + 2] = (byte) 0xFF;
-					} else {
-						rom[moveDataLoc] = (byte) 0xFF;
-						rom[moveDataLoc + 1] = (byte) 0xFF;
-					}
-				}
-			} else {
-				// repoint!
+			if (newMoveCount > currentMoveCount) {
+				// Repoint for more space
 				int newBytesNeeded = newMoveCount * entrySize + entrySize * 2;
 				int writeSpace = RomFunctions.freeSpaceFinder(rom,
 						Gen3Constants.freeSpaceByte, newBytesNeeded, fso);
@@ -1575,14 +1559,19 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				}
 				writePointer(offsToPtr, writeSpace);
 				moveDataLoc = writeSpace;
-				for (int mv = 0; mv < newMoveCount; mv++) {
-					MoveLearnt ml = moves.get(mv);
-					moveDataLoc += writeMLToOffset(moveDataLoc, ml);
-				}
-				// need a new terminator
-				// also write some 0s for safety
-				// (the freespace finder should prevent the
-				// terminator being overwritten but...)
+			}
+
+			// Write new moveset now that space is ensured.
+			for (int mv = 0; mv < newMoveCount; mv++) {
+				MoveLearnt ml = moves.get(mv);
+				moveDataLoc += writeMLToOffset(moveDataLoc, ml);
+			}
+
+			// If move count changed, new terminator is required
+			// In the repoint enough space was reserved to add some padding to
+			// make sure the terminator isn't detected as free space.
+			// If no repoint, the padding goes over the old moves/terminator.
+			if (newMoveCount != currentMoveCount) {
 				if (jamboMovesetHack) {
 					rom[moveDataLoc] = 0x00;
 					rom[moveDataLoc + 1] = 0x00;
@@ -1597,6 +1586,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 					rom[moveDataLoc + 3] = 0x00;
 				}
 			}
+
 		}
 
 	}
