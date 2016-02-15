@@ -1148,7 +1148,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 		}
 	}
 
-	private String getConfigString() {
+	private Settings getCurrentSettings() {
 		byte[] trainerClasses = null;
 		byte[] trainerNames = null;
 		byte[] nicknames = null;
@@ -1163,7 +1163,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
 		Settings settings = createSettingsFromState(trainerClasses,
 				trainerNames, nicknames);
-		return settings.toString();
+		return settings;
 	}
 
 	public String getValidRequiredROMName(String config, byte[] trainerClasses,
@@ -1632,7 +1632,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 									initialFormState();
 								} else {
 									// Compile a config string
-									String configString = getConfigString();
+									String configString = getCurrentSettings().toString();
 									// Show the preset maker
 									new PresetMakeDialog(RandomizerGUI.this,
 											seed, configString);
@@ -1874,10 +1874,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 			// Save now?
 			try {
 				FileOutputStream fos = new FileOutputStream(fh);
-				fos.write(Settings.VERSION);
-				byte[] configString = getConfigString().getBytes("UTF-8");
-				fos.write(configString.length);
-				fos.write(configString);
+				getCurrentSettings().write(fos);
 				fos.close();
 			} catch (IOException ex) {
 				JOptionPane.showMessageDialog(this,
@@ -2212,7 +2209,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         paUnchangedRB = new javax.swing.JRadioButton();
         paRandomizeRB = new javax.swing.JRadioButton();
         paWonderGuardCB = new javax.swing.JCheckBox();
-        jPanel1 = new javax.swing.JPanel();
+        pokemonEvolutionsPanel = new javax.swing.JPanel();
         peUnchangedRB = new javax.swing.JRadioButton();
         peRandomRB = new javax.swing.JRadioButton();
         peSimilarStrengthCB = new javax.swing.JCheckBox();
@@ -2691,7 +2688,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("RandomizerGUI.jPanel1.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
+        pokemonEvolutionsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("RandomizerGUI.pokemonEvolutionsPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
 
         pokeEvolutionsButtonGroup.add(peUnchangedRB);
         peUnchangedRB.setSelected(true);
@@ -2735,39 +2732,39 @@ public class RandomizerGUI extends javax.swing.JFrame {
             }
         });
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        javax.swing.GroupLayout pokemonEvolutionsPanelLayout = new javax.swing.GroupLayout(pokemonEvolutionsPanel);
+        pokemonEvolutionsPanel.setLayout(pokemonEvolutionsPanelLayout);
+        pokemonEvolutionsPanelLayout.setHorizontalGroup(
+            pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pokemonEvolutionsPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(peUnchangedRB)
                     .addComponent(peRandomRB))
                 .addGap(83, 83, 83)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(peForceChangeCB)
                     .addComponent(pePreventCyclesCB)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pokemonEvolutionsPanelLayout.createSequentialGroup()
+                        .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(peSimilarStrengthCB)
                             .addComponent(peSameTypeCB))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(goCondenseEvosCheckBox)
                             .addComponent(goRemoveTradeEvosCheckBox))))
                 .addContainerGap())
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        pokemonEvolutionsPanelLayout.setVerticalGroup(
+            pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pokemonEvolutionsPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(peUnchangedRB)
                     .addComponent(peSimilarStrengthCB)
                     .addComponent(goRemoveTradeEvosCheckBox))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(peRandomRB)
                     .addComponent(peSameTypeCB)
                     .addComponent(goCondenseEvosCheckBox))
@@ -2790,7 +2787,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(abilitiesPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(pokemonTypesPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(pokemonEvolutionsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         pokeTraitsPanelLayout.setVerticalGroup(
@@ -2803,7 +2800,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(pokemonTypesPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(pokemonEvolutionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -4071,7 +4068,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JRadioButton igtUnchangedRB;
     private javax.swing.JPanel inGameTradesPanel;
     private javax.swing.ButtonGroup ingameTradesButtonGroup;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JButton loadQSButton;
     private javax.swing.JMenuItem manualUpdateMenuItem;
     private javax.swing.JCheckBox mdRandomAccuracyCB;
@@ -4124,6 +4120,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.ButtonGroup pokeStatChangesButtonGroup;
     private javax.swing.JPanel pokeTraitsPanel;
     private javax.swing.ButtonGroup pokeTypesButtonGroup;
+    private javax.swing.JPanel pokemonEvolutionsPanel;
     private javax.swing.JPanel pokemonMovesetsPanel;
     private javax.swing.JPanel pokemonTypesPanel;
     private javax.swing.JRadioButton ptRandomFollowEvosRB;
