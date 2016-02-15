@@ -389,7 +389,7 @@ public interface RomHandler {
 	public void condenseLevelEvolutions(int maxLevel, int maxIntermediateLevel);
 
 	public void randomizeEvolutions(boolean similarStrength, boolean sameType,
-			boolean preventLoops, boolean forceChange);
+			boolean preventCycles, boolean forceChange);
 
 	// stats stuff
 	public void minimumCatchRate(int rateNonLegendary, int rateLegendary);

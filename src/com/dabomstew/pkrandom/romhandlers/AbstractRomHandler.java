@@ -2018,7 +2018,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
 	@Override
 	public void randomizeEvolutions(boolean similarStrength, boolean sameType,
-			boolean preventLoops, boolean forceChange) {
+			boolean preventCycles, boolean forceChange) {
 		List<Evolution> oldEvos = this.getEvolutions();
 		List<Evolution> newEvos = new ArrayList<Evolution>();
 		Set<EvolutionPair> newEvoPairs = new HashSet<EvolutionPair>();
@@ -2052,9 +2052,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 						if (pk == fromPK) {
 							continue;
 						}
-						
+
 						// Force same EXP curve (mandatory)
-						if(pk.growthCurve != fromPK.growthCurve) {
+						if (pk.growthCurve != fromPK.growthCurve) {
 							continue;
 						}
 
@@ -2070,8 +2070,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 							continue;
 						}
 
-						// Prevent evolution that causes loop if flagged
-						if (preventLoops && evoLoopCheck(fromPK, pk, newEvos)) {
+						// Prevent evolution that causes cycle if flagged
+						if (preventCycles && evoCycleCheck(fromPK, pk, newEvos)) {
 							continue;
 						}
 
@@ -2206,14 +2206,14 @@ public abstract class AbstractRomHandler implements RomHandler {
 
 	/**
 	 * Check whether adding an evolution from one Pokemon to another will cause
-	 * an evolution loop.
+	 * an evolution cycle.
 	 * 
 	 * @param from
 	 * @param to
 	 * @param newEvos
 	 * @return
 	 */
-	private boolean evoLoopCheck(Pokemon from, Pokemon to,
+	private boolean evoCycleCheck(Pokemon from, Pokemon to,
 			List<Evolution> newEvos) {
 		Evolution tempEvo = new Evolution(from, to, false, EvolutionType.NONE,
 				0);
