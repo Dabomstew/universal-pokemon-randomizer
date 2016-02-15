@@ -46,8 +46,9 @@ public interface RomHandler {
 		public RomHandler create(Random random) {
 			return create(random, null);
 		}
-		
+
 		public abstract RomHandler create(Random random, PrintStream log);
+
 		public abstract boolean isLoadable(String filename);
 	}
 
@@ -58,9 +59,9 @@ public interface RomHandler {
 	public boolean saveRom(String filename);
 
 	public String loadedFilename();
-	
+
 	// Log stuff
-	
+
 	public void setLog(PrintStream logStream);
 
 	// Get a List of Pokemon objects in this game.
@@ -112,17 +113,17 @@ public interface RomHandler {
 	public Pokemon random2EvosPokemon();
 
 	// Randomizer: moves
-	
+
 	public void randomizeMovePowers();
-	
+
 	public void randomizeMovePPs();
-	
+
 	public void randomizeMoveAccuracies();
-	
+
 	public void randomizeMoveTypes();
-	
+
 	public boolean hasPhysicalSpecialSplit();
-	
+
 	public void randomizeMoveCategory();
 
 	// Update all moves to gen5 definitions as much as possible
@@ -191,7 +192,7 @@ public interface RomHandler {
 	public Map<Pokemon, List<MoveLearnt>> getMovesLearnt();
 
 	public void setMovesLearnt(Map<Pokemon, List<MoveLearnt>> movesets);
-	
+
 	public List<Integer> getMovesBannedFromLevelup();
 
 	public void randomizeMovesLearnt(boolean typeThemed, boolean noBroken,
@@ -248,9 +249,9 @@ public interface RomHandler {
 	// tm/moveset sanity
 
 	public void ensureTMCompatSanity();
-	
+
 	// new 170: full HM (but not TM) compat override
-	
+
 	public void fullHMCompatibility();
 
 	// Randomizer: move tutors
@@ -387,6 +388,9 @@ public interface RomHandler {
 
 	public void condenseLevelEvolutions(int maxLevel, int maxIntermediateLevel);
 
+	public void randomizeEvolutions(boolean similarStrength, boolean sameType,
+			boolean preventLoops, boolean forceChange);
+
 	// stats stuff
 	public void minimumCatchRate(int rateNonLegendary, int rateLegendary);
 
@@ -443,9 +447,9 @@ public interface RomHandler {
 	public void applyFastestTextPatch();
 
 	public void applyRunningShoesIndoorsPatch();
-	
+
 	public void randomizePCPotion();
-	
+
 	public void applyPikachuEvoPatch();
 
 }

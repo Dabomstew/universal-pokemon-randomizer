@@ -11,6 +11,7 @@ import java.util.TreeMap;
 
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
+import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.IngameTrade;
 import com.dabomstew.pkrandom.pokemon.Move;
 import com.dabomstew.pkrandom.pokemon.MoveLearnt;
@@ -19,7 +20,6 @@ import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen3RomHandler;
-import com.dabomstew.pkrandom.romhandlers.Gen4RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen5RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
@@ -103,20 +103,8 @@ public class Randomizer {
 
 		List<Move> moves = romHandler.getMoves();
 
-		// Trade evolutions removal
-		if (settings.isChangeImpossibleEvolutions()) {
-			romHandler
-					.removeTradeEvolutions(!(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED));
-		}
-
-		// Easier evolutions
-		if (settings.isMakeEvolutionsEasier()) {
-			romHandler.condenseLevelEvolutions(40, 30);
-		}
-
 		// Camel case?
 		if (!(romHandler instanceof Gen5RomHandler)
-				&& !(romHandler instanceof Gen4RomHandler)
 				&& settings.isLowerCasePokemonNames()) {
 			romHandler.applyCamelCaseNames();
 		}
@@ -198,6 +186,58 @@ public class Randomizer {
 							pkmn.ability1, pkmn.ability2, pkmn.ability3);
 				}
 			}
+		}
+
+		// Random Evos
+		// Applied after type to pick new evos based on new types.
+		if (settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM) {
+			romHandler.randomizeEvolutions(settings.isEvosSimilarStrength(),
+					settings.isEvosSameTyping(),
+					settings.isEvosPreventCycles(),
+					settings.isEvosForceChange());
+
+			log.println("--Randomized Evolutions--");
+			List<Evolution> evos = romHandler.getEvolutions();
+			List<Pokemon> allPokes = romHandler.getPokemon();
+			for (Pokemon pk : allPokes) {
+				if (pk != null) {
+					List<Pokemon> evosFromCurrent = new ArrayList<Pokemon>();
+					for (Evolution ev : evos) {
+						if (ev.from == pk) {
+							evosFromCurrent.add(ev.to);
+						}
+					}
+					int numEvos = evosFromCurrent.size();
+					if (numEvos > 0) {
+						StringBuilder evoStr = new StringBuilder(
+								evosFromCurrent.get(0).name);
+						for (int i = 1; i < numEvos; i++) {
+							if (i == numEvos - 1) {
+								evoStr.append(" and "
+										+ evosFromCurrent.get(i).name);
+							} else {
+								evoStr.append(", "
+										+ evosFromCurrent.get(i).name);
+							}
+						}
+						log.println(pk.name + " now evolves into "
+								+ evoStr.toString());
+					}
+				}
+			}
+
+			log.println();
+		}
+
+		// Trade evolutions removal
+		if (settings.isChangeImpossibleEvolutions()) {
+			romHandler
+					.removeTradeEvolutions(!(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED));
+		}
+
+		// Easier evolutions
+		if (settings.isMakeEvolutionsEasier()) {
+			romHandler.condenseLevelEvolutions(40, 30);
 		}
 
 		// Starter Pokemon

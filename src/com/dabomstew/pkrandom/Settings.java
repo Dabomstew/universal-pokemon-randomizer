@@ -23,7 +23,7 @@ public class Settings {
 
 	public static final int VERSION = 170;
 
-	public static final int LENGTH_OF_SETTINGS_DATA = 30;
+	public static final int LENGTH_OF_SETTINGS_DATA = 31;
 
 	private byte[] trainerClasses;
 	private byte[] trainerNames;
@@ -76,6 +76,17 @@ public class Settings {
 	}
 
 	private TypesMod typesMod = TypesMod.UNCHANGED;
+
+	// Evolutions
+	public enum EvolutionsMod {
+		UNCHANGED, RANDOM
+	}
+
+	private EvolutionsMod evolutionsMod = EvolutionsMod.UNCHANGED;
+	private boolean evosSimilarStrength;
+	private boolean evosSameTyping;
+	private boolean evosPreventCycles;
+	private boolean evosForceChange;
 
 	// Move data
 	private boolean randomizeMovePowers;
@@ -299,7 +310,7 @@ public class Settings {
 				tmsMod == TMsMod.RANDOM, tmsMod == TMsMod.UNCHANGED,
 				tmLevelUpMoveSanity, keepFieldMoveTMs,
 				tmsHmsCompatibilityMod == TMsHMsCompatibilityMod.FULL));
-		
+
 		// 17 tms part 2
 		// new in 170
 		out.write(makeByteSelected(fullHMCompat));
@@ -335,7 +346,12 @@ public class Settings {
 				randomizeMoveAccuracies, randomizeMovePPs, randomizeMoveTypes,
 				randomizeMoveCategory));
 
-		// @ 22 pokemon restrictions
+		// 22 evolutions
+		out.write(makeByteSelected(evolutionsMod == EvolutionsMod.UNCHANGED,
+				evolutionsMod == EvolutionsMod.RANDOM, evosSimilarStrength,
+				evosSameTyping, evosPreventCycles, evosForceChange));
+
+		// @ 23 pokemon restrictions
 		try {
 			if (currentRestrictions != null) {
 				writeFullInt(out, currentRestrictions.toInt());
@@ -345,7 +361,7 @@ public class Settings {
 		} catch (IOException e) {
 		}
 
-		// @ 26 code tweaks
+		// @ 27 code tweaks
 		try {
 			writeFullInt(out, currentCodeTweaks);
 		} catch (IOException e) {
@@ -518,23 +534,31 @@ public class Settings {
 				0 // RANDOM
 		));
 		settings.setBanBadRandomFieldItems(restoreState(data[20], 3));
-		
+
 		// new 170
 		settings.setRandomizeMovePowers(restoreState(data[21], 0));
 		settings.setRandomizeMoveAccuracies(restoreState(data[21], 1));
 		settings.setRandomizeMovePPs(restoreState(data[21], 2));
 		settings.setRandomizeMoveTypes(restoreState(data[21], 3));
 		settings.setRandomizeMoveCategory(restoreState(data[21], 4));
+		
+		settings.setEvolutionsMod(restoreEnum(EvolutionsMod.class, data[22], 0, // UNCHANGED
+				1 // RANDOM
+		));
+		settings.setEvosSimilarStrength(restoreState(data[22], 2));
+		settings.setEvosSameTyping(restoreState(data[22], 3));
+		settings.setEvosPreventCycles(restoreState(data[22], 4));
+		settings.setEvosForceChange(restoreState(data[22], 5));
 
 		// gen restrictions
-		int genLimit = FileFunctions.readFullInt(data, 22);
+		int genLimit = FileFunctions.readFullInt(data, 23);
 		GenRestrictions restrictions = null;
 		if (genLimit != 0) {
 			restrictions = new GenRestrictions(genLimit);
 		}
 		settings.setCurrentRestrictions(restrictions);
 
-		int codeTweaks = FileFunctions.readFullInt(data, 26);
+		int codeTweaks = FileFunctions.readFullInt(data, 27);
 
 		// Sanity override
 		if (codeTweaks == 0) {
@@ -964,6 +988,55 @@ public class Settings {
 
 	public Settings setTypesMod(boolean... bools) {
 		return setTypesMod(getEnum(TypesMod.class, bools));
+	}
+
+	public EvolutionsMod getEvolutionsMod() {
+		return evolutionsMod;
+	}
+
+	public Settings setEvolutionsMod(EvolutionsMod evolutionsMod) {
+		this.evolutionsMod = evolutionsMod;
+		return this;
+	}
+	
+	public Settings setEvolutionsMod(boolean... bools) {
+		return setEvolutionsMod(getEnum(EvolutionsMod.class, bools));
+	}
+
+	public boolean isEvosSimilarStrength() {
+		return evosSimilarStrength;
+	}
+
+	public Settings setEvosSimilarStrength(boolean evosSimilarStrength) {
+		this.evosSimilarStrength = evosSimilarStrength;
+		return this;
+	}
+
+	public boolean isEvosSameTyping() {
+		return evosSameTyping;
+	}
+
+	public Settings setEvosSameTyping(boolean evosSameTyping) {
+		this.evosSameTyping = evosSameTyping;
+		return this;
+	}
+
+	public boolean isEvosPreventCycles() {
+		return evosPreventCycles;
+	}
+
+	public Settings setEvosPreventCycles(boolean evosPreventCycles) {
+		this.evosPreventCycles = evosPreventCycles;
+		return this;
+	}
+
+	public boolean isEvosForceChange() {
+		return evosForceChange;
+	}
+
+	public Settings setEvosForceChange(boolean evosForceChange) {
+		this.evosForceChange = evosForceChange;
+		return this;
 	}
 
 	public boolean isRandomizeMovePowers() {

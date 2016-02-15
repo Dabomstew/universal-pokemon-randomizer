@@ -13,7 +13,7 @@ public enum EvolutionType {
 			-1, -1, -1, 20, 21), LEVEL_WITH_OTHER(-1, -1, -1, 21, 22), LEVEL_MALE_ONLY(
 			-1, -1, -1, 22, 23), LEVEL_FEMALE_ONLY(-1, -1, -1, 23, 24), LEVEL_ELECTRIFIED_AREA(
 			-1, -1, -1, 24, 25), LEVEL_MOSS_ROCK(-1, -1, -1, 25, 26), LEVEL_ICY_ROCK(
-			-1, -1, -1, 26, 27), TRADE_SPECIAL(-1, -1, -1, -1, 7);
+			-1, -1, -1, 26, 27), TRADE_SPECIAL(-1, -1, -1, -1, 7), NONE(-1,-1,-1,-1,-1);
 	private int[] indexNumbers;
 	private static EvolutionType[][] reverseIndexes = new EvolutionType[5][30];
 

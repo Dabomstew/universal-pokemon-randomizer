@@ -32,3 +32,4 @@ trainernames.txt
 /build/
 *.dsm
 *.dsv
+build_eclipse.xml

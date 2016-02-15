@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -48,6 +49,7 @@ import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
+import com.dabomstew.pkrandom.pokemon.EvolutionType;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.IngameTrade;
@@ -2014,6 +2016,237 @@ public abstract class AbstractRomHandler implements RomHandler {
 		this.setEvolutions(allEvos);
 	}
 
+	@Override
+	public void randomizeEvolutions(boolean similarStrength, boolean sameType,
+			boolean preventLoops, boolean forceChange) {
+		List<Evolution> oldEvos = this.getEvolutions();
+		List<Evolution> newEvos = new ArrayList<Evolution>();
+		Set<EvolutionPair> newEvoPairs = new HashSet<EvolutionPair>();
+		Set<EvolutionPair> oldEvoPairs = new HashSet<EvolutionPair>();
+		if (forceChange) {
+			for (Evolution ev : oldEvos) {
+				oldEvoPairs.add(new EvolutionPair(ev.from, ev.to));
+			}
+		}
+		List<Pokemon> replacements = new ArrayList<Pokemon>();
+		checkPokemonRestrictions();
+		int loops = 0;
+		while (loops < 1000) {
+			// Setup for this loop.
+			System.out.println("--Evos Loop "+(loops+1)+"--");
+			boolean hadError = false;
+			newEvos.clear();
+			newEvoPairs.clear();
+
+			// Shuffle old evolutions so the results aren't overly predictable.
+			Collections.shuffle(oldEvos, this.random);
+
+			for (Evolution ev : oldEvos) {
+				Pokemon fromPK = ev.from;
+				// Pick a Pokemon as replacement
+				replacements.clear();
+
+				// Step 1: base filters
+				for (Pokemon pk : mainPokemonList) {
+					if (pk != null) {
+						// Prevent evolving into oneself (mandatory)
+						if (pk == fromPK) {
+							continue;
+						}
+						
+						// Force same EXP curve (mandatory)
+						if(pk.growthCurve != fromPK.growthCurve) {
+							continue;
+						}
+
+						EvolutionPair ep = new EvolutionPair(fromPK, pk);
+						// Prevent split evos choosing the same Pokemon
+						// (mandatory)
+						if (newEvoPairs.contains(ep)) {
+							continue;
+						}
+
+						// Prevent evolving into old thing if flagged
+						if (forceChange && oldEvoPairs.contains(ep)) {
+							continue;
+						}
+
+						// Prevent evolution that causes loop if flagged
+						if (preventLoops && evoLoopCheck(fromPK, pk, newEvos)) {
+							continue;
+						}
+
+						// Passes everything, add as a candidate.
+						replacements.add(pk);
+					}
+				}
+
+				// If we don't have any candidates after Step 1, severe failure
+				// exit out of this loop and try again from scratch
+				if (replacements.size() == 0) {
+					hadError = true;
+					break;
+				}
+
+				// Step 2: filter by type, if needed
+				if (replacements.size() > 1 && sameType) {
+					Set<Pokemon> includeType = new HashSet<Pokemon>();
+					for (Pokemon pk : replacements) {
+						if (pk.primaryType == fromPK.primaryType
+								|| (fromPK.secondaryType != null && pk.primaryType == fromPK.secondaryType)
+								|| (pk.secondaryType != null && pk.secondaryType == fromPK.primaryType)
+								|| (fromPK.secondaryType != null
+										&& pk.secondaryType != null && pk.secondaryType == fromPK.secondaryType)) {
+							includeType.add(pk);
+						}
+					}
+
+					if (includeType.size() != 0) {
+						replacements.retainAll(includeType);
+					}
+				}
+
+				// Step 3: pick - by similar strength or otherwise
+				Pokemon picked = null;
+
+				if (replacements.size() == 1) {
+					// Foregone conclusion.
+					picked = replacements.get(0);
+				} else if (similarStrength) {
+					picked = pickEvoPowerLvlReplacement(replacements, ev.to);
+				} else {
+					picked = replacements.get(this.random.nextInt(replacements
+							.size()));
+				}
+
+				// Step 4: add it to the new evos pool
+				System.out.println(fromPK.name+" now evolving into "+picked.name);
+				Evolution newEvo = new Evolution(fromPK, picked, ev.carryStats,
+						ev.type, ev.extraInfo);
+				newEvos.add(newEvo);
+				newEvoPairs.add(new EvolutionPair(fromPK, picked));
+			}
+
+			// If no error, done and return
+			if (!hadError) {
+				this.setEvolutions(newEvos);
+				return;
+			} else {
+				loops++;
+			}
+		}
+
+		// If we made it out of the loop, we weren't able to randomize evos.
+		throw new RuntimeException(
+				"Not able to randomize evolutions in a sane amount of retries.");
+	}
+
+	private Pokemon pickEvoPowerLvlReplacement(List<Pokemon> pokemonPool,
+			Pokemon current) {
+		// start with within 10% and add 5% either direction till we find
+		// something
+		int currentBST = current.bstForPowerLevels();
+		int minTarget = currentBST - currentBST / 10;
+		int maxTarget = currentBST + currentBST / 10;
+		List<Pokemon> canPick = new ArrayList<Pokemon>();
+		int expandRounds = 0;
+		while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 3)) {
+			for (Pokemon pk : pokemonPool) {
+				if (pk.bstForPowerLevels() >= minTarget
+						&& pk.bstForPowerLevels() <= maxTarget
+						&& !canPick.contains(pk)) {
+					canPick.add(pk);
+				}
+			}
+			minTarget -= currentBST / 20;
+			maxTarget += currentBST / 20;
+			expandRounds++;
+		}
+		return canPick.get(this.random.nextInt(canPick.size()));
+	}
+
+	private static class EvolutionPair {
+		private Pokemon from;
+		private Pokemon to;
+
+		public EvolutionPair(Pokemon from, Pokemon to) {
+			this.from = from;
+			this.to = to;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((from == null) ? 0 : from.hashCode());
+			result = prime * result + ((to == null) ? 0 : to.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			EvolutionPair other = (EvolutionPair) obj;
+			if (from == null) {
+				if (other.from != null)
+					return false;
+			} else if (!from.equals(other.from))
+				return false;
+			if (to == null) {
+				if (other.to != null)
+					return false;
+			} else if (!to.equals(other.to))
+				return false;
+			return true;
+		}
+	}
+
+	/**
+	 * Check whether adding an evolution from one Pokemon to another will cause
+	 * an evolution loop.
+	 * 
+	 * @param from
+	 * @param to
+	 * @param newEvos
+	 * @return
+	 */
+	private boolean evoLoopCheck(Pokemon from, Pokemon to,
+			List<Evolution> newEvos) {
+		Evolution tempEvo = new Evolution(from, to, false, EvolutionType.NONE,
+				0);
+		newEvos.add(tempEvo);
+		Set<Pokemon> visited = new HashSet<Pokemon>();
+		Set<Pokemon> recStack = new HashSet<Pokemon>();
+		boolean recur = isCyclic(from, newEvos, visited, recStack);
+		newEvos.remove(tempEvo);
+		return recur;
+	}
+
+	private boolean isCyclic(Pokemon pk, List<Evolution> newEvos,
+			Set<Pokemon> visited, Set<Pokemon> recStack) {
+		if (!visited.contains(pk)) {
+			visited.add(pk);
+			recStack.add(pk);
+			for (Evolution ev : newEvos) {
+				if (ev.from == pk) {
+					if (!visited.contains(ev.to)
+							&& isCyclic(ev.to, newEvos, visited, recStack)) {
+						return true;
+					} else if (recStack.contains(ev.to)) {
+						return true;
+					}
+				}
+			}
+		}
+		recStack.remove(pk);
+		return false;
+	}
+
 	// MOVE DATA
 	// All randomizers don't touch move ID 165 (Struggle)
 	// They also have other exclusions where necessary to stop things glitching.
@@ -2990,12 +3223,13 @@ public abstract class AbstractRomHandler implements RomHandler {
 		int maxTarget = currentBST + currentBST / 10;
 		List<Pokemon> canPick = new ArrayList<Pokemon>();
 		int expandRounds = 0;
-		while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 2)) {
+		while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 3)) {
 			for (Pokemon pk : pokemonPool) {
 				if (pk.bstForPowerLevels() >= minTarget
 						&& pk.bstForPowerLevels() <= maxTarget
 						&& (!banSamePokemon || pk != current)
-						&& (usedUp == null || !usedUp.contains(pk))) {
+						&& (usedUp == null || !usedUp.contains(pk))
+						&& !canPick.contains(pk)) {
 					canPick.add(pk);
 				}
 			}
