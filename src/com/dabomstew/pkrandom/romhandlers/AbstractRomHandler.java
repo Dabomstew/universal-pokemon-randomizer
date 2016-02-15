@@ -2033,7 +2033,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 		int loops = 0;
 		while (loops < 1000) {
 			// Setup for this loop.
-			System.out.println("--Evos Loop "+(loops+1)+"--");
 			boolean hadError = false;
 			newEvos.clear();
 			newEvoPairs.clear();
@@ -2120,7 +2119,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 				}
 
 				// Step 4: add it to the new evos pool
-				System.out.println(fromPK.name+" now evolving into "+picked.name);
 				Evolution newEvo = new Evolution(fromPK, picked, ev.carryStats,
 						ev.type, ev.extraInfo);
 				newEvos.add(newEvo);
