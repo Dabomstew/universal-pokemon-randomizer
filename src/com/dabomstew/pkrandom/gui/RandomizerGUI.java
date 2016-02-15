@@ -1632,7 +1632,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 									initialFormState();
 								} else {
 									// Compile a config string
-									String configString = getCurrentSettings().toString();
+									String configString = getCurrentSettings()
+											.toString();
 									// Show the preset maker
 									new PresetMakeDialog(RandomizerGUI.this,
 											seed, configString);
@@ -1738,8 +1739,20 @@ public class RandomizerGUI extends javax.swing.JFrame {
 		try {
 			String errlog = "error_" + time + ".txt";
 			PrintStream ps = new PrintStream(new FileOutputStream(errlog));
+			ps.println("Randomizer Version: "+Constants.UPDATE_VERSION);
 			PrintStream e1 = System.err;
 			System.setErr(ps);
+			if (this.romHandler != null) {
+				try {
+					ps.println("ROM: " + romHandler.getROMName());
+					ps.println("Code: " + romHandler.getROMCode());
+					ps.println("Reported Support Level: "
+							+ romHandler.getSupportLevel());
+					ps.println();
+				} catch (Exception ex2) {
+					// Do nothing, just don't fail
+				}
+			}
 			ex.printStackTrace();
 			System.setErr(e1);
 			ps.close();
