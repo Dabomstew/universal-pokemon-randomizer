@@ -357,7 +357,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 						to.secondaryType = from.secondaryType;
 
 						if (to.secondaryType == null) {
-							double chance = middleEvos.contains(to) ? 0.15 : 0.25;
+							double chance = middleEvos.contains(to) ? 0.15
+									: 0.25;
 							if (this.random.nextDouble() < chance) {
 								to.secondaryType = randomType();
 								while (to.secondaryType == to.primaryType) {
@@ -365,13 +366,12 @@ public abstract class AbstractRomHandler implements RomHandler {
 								}
 							}
 						}
-						
+
 						to.temporaryFlag = true;
-						
-						if(currentStack.isEmpty()) {
+
+						if (currentStack.isEmpty()) {
 							break;
-						}
-						else {
+						} else {
 							ev = currentStack.pop();
 						}
 					}
@@ -2122,9 +2122,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
 						for (Pokemon pk2 : related) {
 							int numPreEvos = numPreEvolutions(pk2, stageLimit);
-							int numEvos = numEvolutions(pk2, stageLimit);
-							if (numPreEvos >= stageLimit
-									|| numEvos >= stageLimit) {
+							if (numPreEvos >= stageLimit) {
 								exceededLimit = true;
 								break;
 							} else if (numPreEvos == stageLimit - 1
