@@ -32,11 +32,13 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.TreeMap;
 
 import com.dabomstew.pkrandom.CodeTweaks;
@@ -422,6 +424,9 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 			// Name?
 			pokes[i].name = pokeNames[i];
 		}
+		
+		// Get evolutions
+		populateEvolutions();
 
 	}
 
@@ -439,6 +444,8 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 			saveBasicPokeStats(pokes[i], offs2 + (i - 1)
 					* Gen2Constants.baseStatsEntrySize);
 		}
+		// Write evolutions
+		writeEvosAndMovesLearnt(true, null);
 	}
 
 	private String[] readMoveNames() {
@@ -1203,7 +1210,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 
 	@Override
 	public void setMovesLearnt(Map<Pokemon, List<MoveLearnt>> movesets) {
-		writeEvosAndMovesLearnt(null, movesets);
+		writeEvosAndMovesLearnt(false, movesets);
 	}
 
 	@Override
@@ -1488,15 +1495,19 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 		return true; // All GSC do
 	}
 
-	@Override
-	public List<Evolution> getEvolutions() {
-		List<Evolution> evos = new ArrayList<Evolution>();
+	private void populateEvolutions() {
+		for (Pokemon pkmn : pokes) {
+			if (pkmn != null) {
+				pkmn.evolutionsFrom.clear();
+				pkmn.evolutionsTo.clear();
+			}
+		}
+
 		int pointersOffset = romEntry.getValue("PokemonMovesetsTableOffset");
-		List<Evolution> evosForThisPoke = new ArrayList<Evolution>();
 		for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
 			int pointer = readWord(pointersOffset + (i - 1) * 2);
 			int realPointer = calculateOffset(bankOf(pointersOffset), pointer);
-			evosForThisPoke.clear();
+			Pokemon pkmn = pokes[i];
 			int thisPoke = i;
 			while (rom[realPointer] != 0) {
 				int method = rom[realPointer] & 0xFF;
@@ -1529,64 +1540,60 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 				}
 				Evolution evo = new Evolution(pokes[thisPoke],
 						pokes[otherPoke], true, type, extraInfo);
-				if (!evos.contains(evo)) {
-					evos.add(evo);
-					evosForThisPoke.add(evo);
+				if (!pkmn.evolutionsFrom.contains(evo)) {
+					pkmn.evolutionsFrom.add(evo);
+					pokes[otherPoke].evolutionsTo.add(evo);
 				}
 				realPointer += (method == 5 ? 4 : 3);
 			}
 			// split evos don't carry stats
-			if (evosForThisPoke.size() > 1) {
-				for (Evolution e : evosForThisPoke) {
+			if (pkmn.evolutionsFrom.size() > 1) {
+				for (Evolution e : pkmn.evolutionsFrom) {
 					e.carryStats = false;
 				}
 			}
 		}
-		return evos;
-	}
-
-	@Override
-	public void setEvolutions(List<Evolution> evos) {
-		this.writeEvosAndMovesLearnt(evos, null);
 	}
 
 	@Override
 	public void removeTradeEvolutions(boolean changeMoveEvos) {
 		// no move evos, so no need to check for those
 		log("--Removing Trade Evolutions--");
-		List<Evolution> evos = this.getEvolutions();
-		for (Evolution evol : evos) {
-			if (evol.type == EvolutionType.TRADE
-					|| evol.type == EvolutionType.TRADE_ITEM) {
-				// change
-				if (evol.from.number == Gen2Constants.slowpokeIndex) {
-					// Slowpoke: Make water stone => Slowking
-					evol.type = EvolutionType.STONE;
-					evol.extraInfo = 24; // water stone
-					logEvoChangeStone(evol.from.name, evol.to.name,
-							itemNames[24]);
-				} else if (evol.from.number == Gen2Constants.seadraIndex) {
-					// Seadra: level 40
-					evol.type = EvolutionType.LEVEL;
-					evol.extraInfo = 40; // level
-					logEvoChangeLevel(evol.from.name, evol.to.name, 40);
-				} else if (evol.from.number == Gen2Constants.poliwhirlIndex
-						|| evol.type == EvolutionType.TRADE) {
-					// Poliwhirl or any of the original 4 trade evos
-					// Level 37
-					evol.type = EvolutionType.LEVEL;
-					evol.extraInfo = 37; // level
-					logEvoChangeLevel(evol.from.name, evol.to.name, 37);
-				} else {
-					// A new trade evo of a single stage Pokemon
-					// level 30
-					evol.type = EvolutionType.LEVEL;
-					evol.extraInfo = 30; // level
-					logEvoChangeLevel(evol.from.name, evol.to.name, 30);
+		for (Pokemon pkmn : pokes) {
+			if (pkmn != null) {
+				for (Evolution evol : pkmn.evolutionsFrom) {
+					if (evol.type == EvolutionType.TRADE
+							|| evol.type == EvolutionType.TRADE_ITEM) {
+						// change
+						if (evol.from.number == Gen2Constants.slowpokeIndex) {
+							// Slowpoke: Make water stone => Slowking
+							evol.type = EvolutionType.STONE;
+							evol.extraInfo = 24; // water stone
+							logEvoChangeStone(evol.from.name, evol.to.name,
+									itemNames[24]);
+						} else if (evol.from.number == Gen2Constants.seadraIndex) {
+							// Seadra: level 40
+							evol.type = EvolutionType.LEVEL;
+							evol.extraInfo = 40; // level
+							logEvoChangeLevel(evol.from.name, evol.to.name, 40);
+						} else if (evol.from.number == Gen2Constants.poliwhirlIndex
+								|| evol.type == EvolutionType.TRADE) {
+							// Poliwhirl or any of the original 4 trade evos
+							// Level 37
+							evol.type = EvolutionType.LEVEL;
+							evol.extraInfo = 37; // level
+							logEvoChangeLevel(evol.from.name, evol.to.name, 37);
+						} else {
+							// A new trade evo of a single stage Pokemon
+							// level 30
+							evol.type = EvolutionType.LEVEL;
+							evol.extraInfo = 30; // level
+							logEvoChangeLevel(evol.from.name, evol.to.name, 30);
+						}
+					}
 				}
 			}
 		}
-		this.setEvolutions(evos);
 		logBlankLine();
 
 	}
@@ -2185,18 +2192,24 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 	@Override
 	public void removeEvosForPokemonPool() {
 		List<Pokemon> pokemonIncluded = this.mainPokemonList;
-		List<Evolution> currentEvos = this.getEvolutions();
-		List<Evolution> keepEvos = new ArrayList<Evolution>();
-		for (Evolution evol : currentEvos) {
-			if (pokemonIncluded.contains(evol.from)
-					&& pokemonIncluded.contains(evol.to)) {
-				keepEvos.add(evol);
+		Set<Evolution> keepEvos = new HashSet<Evolution>();
+		for (Pokemon pk : pokes) {
+			if (pk != null) {
+				keepEvos.clear();
+				for (Evolution evol : pk.evolutionsFrom) {
+					if (pokemonIncluded.contains(evol.from)
+							&& pokemonIncluded.contains(evol.to)) {
+						keepEvos.add(evol);
+					} else {
+						evol.to.evolutionsTo.remove(evol);
+					}
+				}
+				pk.evolutionsFrom.retainAll(keepEvos);
 			}
 		}
-		this.setEvolutions(keepEvos);
 	}
 
-	private void writeEvosAndMovesLearnt(List<Evolution> evos,
+	private void writeEvosAndMovesLearnt(boolean writeEvos,
 			Map<Pokemon, List<MoveLearnt>> movesets) {
 		// this assumes that the evo/attack pointers & data
 		// are at the end of the bank
@@ -2218,7 +2231,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 					readWord(movesEvosStart + (i - 1) * 2));
 			int offsetStart = dataBlockOffset + offsetInData;
 			boolean evoWritten = false;
-			if (evos == null) {
+			if (!writeEvos) {
 				// copy old
 				int evoOffset = oldDataOffset;
 				while (rom[evoOffset] != 0x00) {
@@ -2230,41 +2243,38 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 					evoWritten = true;
 				}
 			} else {
-				for (Evolution evo : evos) {
+				for (Evolution evo : pokes[i].evolutionsFrom) {
 					// write evos
-					if (evo.from.number == i) {
-						// write this one
-						dataBlock[offsetInData++] = (byte) evo.type.toIndex(2);
-						if (evo.type == EvolutionType.LEVEL
-								|| evo.type == EvolutionType.STONE
-								|| evo.type == EvolutionType.TRADE_ITEM) {
-							// simple types
-							dataBlock[offsetInData++] = (byte) evo.extraInfo;
-						} else if (evo.type == EvolutionType.TRADE) {
-							// non-item trade
-							dataBlock[offsetInData++] = (byte) 0xFF;
-						} else if (evo.type == EvolutionType.HAPPINESS) {
-							// cond 01
-							dataBlock[offsetInData++] = 0x01;
-						} else if (evo.type == EvolutionType.HAPPINESS_DAY) {
-							// cond 02
-							dataBlock[offsetInData++] = 0x02;
-						} else if (evo.type == EvolutionType.HAPPINESS_NIGHT) {
-							// cond 03
-							dataBlock[offsetInData++] = 0x03;
-						} else if (evo.type == EvolutionType.LEVEL_ATTACK_HIGHER) {
-							dataBlock[offsetInData++] = (byte) evo.extraInfo;
-							dataBlock[offsetInData++] = 0x01;
-						} else if (evo.type == EvolutionType.LEVEL_DEFENSE_HIGHER) {
-							dataBlock[offsetInData++] = (byte) evo.extraInfo;
-							dataBlock[offsetInData++] = 0x02;
-						} else if (evo.type == EvolutionType.LEVEL_ATK_DEF_SAME) {
-							dataBlock[offsetInData++] = (byte) evo.extraInfo;
-							dataBlock[offsetInData++] = 0x03;
-						}
-						dataBlock[offsetInData++] = (byte) evo.to.number;
-						evoWritten = true;
+					dataBlock[offsetInData++] = (byte) evo.type.toIndex(2);
+					if (evo.type == EvolutionType.LEVEL
+							|| evo.type == EvolutionType.STONE
+							|| evo.type == EvolutionType.TRADE_ITEM) {
+						// simple types
+						dataBlock[offsetInData++] = (byte) evo.extraInfo;
+					} else if (evo.type == EvolutionType.TRADE) {
+						// non-item trade
+						dataBlock[offsetInData++] = (byte) 0xFF;
+					} else if (evo.type == EvolutionType.HAPPINESS) {
+						// cond 01
+						dataBlock[offsetInData++] = 0x01;
+					} else if (evo.type == EvolutionType.HAPPINESS_DAY) {
+						// cond 02
+						dataBlock[offsetInData++] = 0x02;
+					} else if (evo.type == EvolutionType.HAPPINESS_NIGHT) {
+						// cond 03
+						dataBlock[offsetInData++] = 0x03;
+					} else if (evo.type == EvolutionType.LEVEL_ATTACK_HIGHER) {
+						dataBlock[offsetInData++] = (byte) evo.extraInfo;
+						dataBlock[offsetInData++] = 0x01;
+					} else if (evo.type == EvolutionType.LEVEL_DEFENSE_HIGHER) {
+						dataBlock[offsetInData++] = (byte) evo.extraInfo;
+						dataBlock[offsetInData++] = 0x02;
+					} else if (evo.type == EvolutionType.LEVEL_ATK_DEF_SAME) {
+						dataBlock[offsetInData++] = (byte) evo.extraInfo;
+						dataBlock[offsetInData++] = 0x03;
 					}
+					dataBlock[offsetInData++] = (byte) evo.to.number;
+					evoWritten = true;
 				}
 			}
 			// can we reuse a terminator?

@@ -35,8 +35,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
@@ -95,61 +97,50 @@ public abstract class AbstractRomHandler implements RomHandler {
 		if (restrictions != null) {
 			mainPokemonList = new ArrayList<Pokemon>();
 			List<Pokemon> allPokemon = this.getPokemon();
-			List<Evolution> evos = this.getEvolutions();
 
 			if (restrictions.allow_gen1) {
 				addPokesFromRange(mainPokemonList, allPokemon, 1, 151);
 				if (restrictions.assoc_g1_g2 && allPokemon.size() > 251) {
-					addEvosFromRange(mainPokemonList, allPokemon, evos, 1, 151,
-							152, 251);
+					addEvosFromRange(mainPokemonList, 1, 151, 152, 251);
 				}
 				if (restrictions.assoc_g1_g4 && allPokemon.size() > 493) {
-					addEvosFromRange(mainPokemonList, allPokemon, evos, 1, 151,
-							387, 493);
+					addEvosFromRange(mainPokemonList, 1, 151, 387, 493);
 				}
 			}
 
 			if (restrictions.allow_gen2 && allPokemon.size() > 251) {
 				addPokesFromRange(mainPokemonList, allPokemon, 152, 251);
 				if (restrictions.assoc_g2_g1) {
-					addEvosFromRange(mainPokemonList, allPokemon, evos, 152,
-							251, 1, 151);
+					addEvosFromRange(mainPokemonList, 152, 251, 1, 151);
 				}
 				if (restrictions.assoc_g2_g3 && allPokemon.size() > 386) {
-					addEvosFromRange(mainPokemonList, allPokemon, evos, 152,
-							251, 252, 386);
+					addEvosFromRange(mainPokemonList, 152, 251, 252, 386);
 				}
 				if (restrictions.assoc_g2_g4 && allPokemon.size() > 493) {
-					addEvosFromRange(mainPokemonList, allPokemon, evos, 152,
-							251, 387, 493);
+					addEvosFromRange(mainPokemonList, 152, 251, 387, 493);
 				}
 			}
 
 			if (restrictions.allow_gen3 && allPokemon.size() > 386) {
 				addPokesFromRange(mainPokemonList, allPokemon, 252, 386);
 				if (restrictions.assoc_g3_g2) {
-					addEvosFromRange(mainPokemonList, allPokemon, evos, 252,
-							386, 152, 251);
+					addEvosFromRange(mainPokemonList, 252, 386, 152, 251);
 				}
 				if (restrictions.assoc_g3_g4 && allPokemon.size() > 493) {
-					addEvosFromRange(mainPokemonList, allPokemon, evos, 252,
-							386, 387, 493);
+					addEvosFromRange(mainPokemonList, 252, 386, 387, 493);
 				}
 			}
 
 			if (restrictions.allow_gen4 && allPokemon.size() > 493) {
 				addPokesFromRange(mainPokemonList, allPokemon, 387, 493);
 				if (restrictions.assoc_g4_g1) {
-					addEvosFromRange(mainPokemonList, allPokemon, evos, 387,
-							493, 1, 151);
+					addEvosFromRange(mainPokemonList, 387, 493, 1, 151);
 				}
 				if (restrictions.assoc_g4_g2) {
-					addEvosFromRange(mainPokemonList, allPokemon, evos, 387,
-							493, 152, 251);
+					addEvosFromRange(mainPokemonList, 387, 493, 152, 251);
 				}
 				if (restrictions.assoc_g4_g3) {
-					addEvosFromRange(mainPokemonList, allPokemon, evos, 387,
-							493, 252, 386);
+					addEvosFromRange(mainPokemonList, 387, 493, 252, 386);
 				}
 			}
 
@@ -179,60 +170,78 @@ public abstract class AbstractRomHandler implements RomHandler {
 		}
 	}
 
-	private void addEvosFromRange(List<Pokemon> pokemonPool,
-			List<Pokemon> allPokemon, List<Evolution> evos, int first_min,
+	private void addEvosFromRange(List<Pokemon> pokemonPool, int first_min,
 			int first_max, int second_min, int second_max) {
-		for (Evolution e : evos) {
-			Pokemon potential = null;
-			if ((e.from.number >= first_min && e.from.number <= first_max
-					&& e.to.number >= second_min && e.to.number <= second_max)) {
-				potential = e.to;
-			} else if ((e.from.number >= second_min
-					&& e.from.number <= second_max && e.to.number >= first_min && e.to.number <= first_max)) {
-				potential = e.from;
-			}
-			if (potential != null && !pokemonPool.contains(potential)) {
-				pokemonPool.add(potential);
+		Set<Pokemon> newPokemon = new TreeSet<Pokemon>();
+		for (Pokemon pk : pokemonPool) {
+			if (pk.number >= first_min && pk.number <= first_max) {
+				for (Evolution ev : pk.evolutionsFrom) {
+					if (ev.to.number >= second_min
+							&& ev.to.number <= second_max) {
+						if (!pokemonPool.contains(ev.to)
+								&& !newPokemon.contains(ev.to)) {
+							newPokemon.add(ev.to);
+						}
+					}
+				}
+
+				for (Evolution ev : pk.evolutionsTo) {
+					if (ev.from.number >= second_min
+							&& ev.from.number <= second_max) {
+						if (!pokemonPool.contains(ev.from)
+								&& !newPokemon.contains(ev.from)) {
+							newPokemon.add(ev.from);
+						}
+					}
+				}
 			}
 		}
+
+		pokemonPool.addAll(newPokemon);
 	}
 
 	@Override
 	public void randomizePokemonStats(boolean evolutionSanity) {
 		List<Pokemon> allPokes = this.getPokemon();
-		List<Evolution> evolutions = this.getEvolutions();
+
 		if (evolutionSanity) {
+			for (Pokemon pk : allPokes) {
+				if (pk != null) {
+					pk.temporaryFlag = false;
+				}
+			}
 			// Spread stats up MOST evolutions.
 			Set<Pokemon> dontCopyPokes = RomFunctions
 					.getBasicOrNoCopyPokemon(this);
 
 			for (Pokemon pk : dontCopyPokes) {
 				pk.randomizeStatsWithinBST(this.random);
+				pk.temporaryFlag = true;
 			}
+
 			// go "up" evolutions looking for pre-evos to do first
-			for (Evolution evo : evolutions) {
-				if (evo.carryStats) {
+			for (Pokemon pk : allPokes) {
+				if (pk != null && !pk.temporaryFlag) {
+					// Non-randomized pokes at this point must have
+					// a linear chain of single evolutions down to
+					// a randomized poke.
 					Stack<Evolution> currentStack = new Stack<Evolution>();
-					Evolution current = evo;
-					while (current != null) {
-						Evolution last = current;
-						currentStack.push(last);
-						current = null;
-						for (Evolution evo2 : evolutions) {
-							if (last.from == evo2.to && evo2.carryStats) {
-								current = evo2;
-								break;
-							}
-						}
+					Evolution ev = pk.evolutionsTo.get(0);
+					while (!ev.from.temporaryFlag) {
+						currentStack.push(ev);
+						ev = ev.from.evolutionsTo.get(0);
 					}
-					// now we have a stack of evolutions
+
+					// Now "ev" is set to an evolution from a randomized Pokemon
+					// to a non-randomized.
+					// Carry stats up, then do the same for everything left on
+					// the stack.
+					ev.to.copyRandomizedStatsUpEvolution(ev.from);
+					ev.to.temporaryFlag = true;
 					while (!currentStack.isEmpty()) {
-						Evolution useEvo = currentStack.pop();
-						useEvo.carryStats = false; // so we don't waste time
-													// later
-						Pokemon to = useEvo.to;
-						Pokemon from = useEvo.from;
-						to.copyRandomizedStatsUpEvolution(from);
+						ev = currentStack.pop();
+						ev.to.copyRandomizedStatsUpEvolution(ev.from);
+						ev.to.temporaryFlag = true;
 					}
 				}
 			}
@@ -296,7 +305,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 			for (Pokemon pk : dontCopyPokes) {
 				pk.primaryType = randomType();
 				pk.secondaryType = null;
-				if (RomFunctions.pokemonHasEvo(this, pk)) {
+				if (pk.evolutionsFrom.size() > 0) {
 					if (this.random.nextDouble() < 0.35) {
 						pk.secondaryType = randomType();
 						while (pk.secondaryType == pk.primaryType) {
@@ -312,38 +321,28 @@ public abstract class AbstractRomHandler implements RomHandler {
 					}
 				}
 			}
-			// Step 2: First Evolutions
-			// A first evolution has a 15% chance of adding a type if there's a
-			// 3rd stage, Or a 25% chance if there's not
-			Set<Pokemon> firstEvos = RomFunctions.getFirstEvolutions(this);
+			// Step 2: Middle Evolutions
+			// A middle evolution has a 15% chance of adding a type.
+			Set<Pokemon> firstEvos = RomFunctions.getMiddleEvolutions(this);
 			for (Pokemon pk : firstEvos) {
-				Pokemon evolvedFrom = RomFunctions.evolvesFrom(this, pk);
+				Pokemon evolvedFrom = pk.evolutionsTo.get(0).from;
 				pk.primaryType = evolvedFrom.primaryType;
 				pk.secondaryType = evolvedFrom.secondaryType;
 				if (pk.secondaryType == null) {
-					if (RomFunctions.pokemonHasEvo(this, pk)) {
-						if (this.random.nextDouble() < 0.15) {
+					if (this.random.nextDouble() < 0.15) {
+						pk.secondaryType = randomType();
+						while (pk.secondaryType == pk.primaryType) {
 							pk.secondaryType = randomType();
-							while (pk.secondaryType == pk.primaryType) {
-								pk.secondaryType = randomType();
-							}
-						}
-					} else {
-						if (this.random.nextDouble() < 0.25) {
-							pk.secondaryType = randomType();
-							while (pk.secondaryType == pk.primaryType) {
-								pk.secondaryType = randomType();
-							}
 						}
 					}
 				}
 			}
 
-			// Step 3: Second Evolutions
-			// A second evolution has a 25% chance of adding a type
-			Set<Pokemon> secondEvos = RomFunctions.getSecondEvolutions(this);
+			// Step 3: Final Evolutions
+			// A final evolution has a 25% chance of adding a type
+			Set<Pokemon> secondEvos = RomFunctions.getFinalEvolutions(this);
 			for (Pokemon pk : secondEvos) {
-				Pokemon evolvedFrom = RomFunctions.evolvesFrom(this, pk);
+				Pokemon evolvedFrom = pk.evolutionsTo.get(0).from;
 				pk.primaryType = evolvedFrom.primaryType;
 				pk.secondaryType = evolvedFrom.secondaryType;
 				if (pk.secondaryType == null) {
@@ -478,24 +477,22 @@ public abstract class AbstractRomHandler implements RomHandler {
 	public Pokemon random2EvosPokemon() {
 		if (twoEvoPokes == null) {
 			// Prepare the list
-			List<Pokemon> remainingPokes = allPokemonWithoutNull();
-			List<Evolution> allEvos = this.getEvolutions();
-			Map<Pokemon, Pokemon> reverseKeepPokemon = new TreeMap<Pokemon, Pokemon>();
-			for (Evolution e : allEvos) {
-				reverseKeepPokemon.put(e.to, e.from);
-			}
-			remainingPokes.retainAll(reverseKeepPokemon.values());
-			// All pokemon with evolutions are left
-			// Look for the evolutions themselves again in the evo-list
-			Set<Pokemon> keepFor2Evos = new TreeSet<Pokemon>();
-			for (Evolution e : allEvos) {
-				Pokemon from = e.from;
-				if (reverseKeepPokemon.containsKey(from)) {
-					keepFor2Evos.add(reverseKeepPokemon.get(from));
+			twoEvoPokes = new ArrayList<Pokemon>();
+			List<Pokemon> allPokes = this.getPokemon();
+			for (Pokemon pk : allPokes) {
+				if (pk != null && pk.evolutionsTo.size() == 0
+						&& pk.evolutionsFrom.size() > 0) {
+					// Potential candidate
+					for (Evolution ev : pk.evolutionsFrom) {
+						// If any of the targets here evolve, the original
+						// Pokemon has 2+ stages.
+						if (ev.to.evolutionsFrom.size() > 0) {
+							twoEvoPokes.add(pk);
+							break;
+						}
+					}
 				}
 			}
-			remainingPokes.retainAll(keepFor2Evos);
-			twoEvoPokes = remainingPokes;
 		}
 		return twoEvoPokes.get(this.random.nextInt(twoEvoPokes.size()));
 	}
@@ -1982,24 +1979,28 @@ public abstract class AbstractRomHandler implements RomHandler {
 
 	@Override
 	public void condenseLevelEvolutions(int maxLevel, int maxIntermediateLevel) {
-		List<Evolution> allEvos = this.getEvolutions();
+		List<Pokemon> allPokemon = this.getPokemon();
 		Set<Evolution> changedEvos = new TreeSet<Evolution>();
 		// search for level evolutions
-		for (Evolution checkEvo : allEvos) {
-			if (checkEvo.type.usesLevel()) {
-				// bring down the level of this evo if it exceeds max level
-				if (checkEvo.extraInfo > maxLevel) {
-					checkEvo.extraInfo = maxLevel;
-					changedEvos.add(checkEvo);
-				}
-				// Now, seperately, if an intermediate level evo is too high,
-				// bring it down
-				for (Evolution otherEvo : allEvos) {
-					if (otherEvo.to == checkEvo.from
-							&& otherEvo.type.usesLevel()
-							&& otherEvo.extraInfo > maxIntermediateLevel) {
-						otherEvo.extraInfo = maxIntermediateLevel;
-						changedEvos.add(otherEvo);
+		for (Pokemon pk : allPokemon) {
+			if (pk != null) {
+				for (Evolution checkEvo : pk.evolutionsFrom) {
+					if (checkEvo.type.usesLevel()) {
+						// bring down the level of this evo if it exceeds max
+						// level
+						if (checkEvo.extraInfo > maxLevel) {
+							checkEvo.extraInfo = maxLevel;
+							changedEvos.add(checkEvo);
+						}
+						// Now, seperately, if an intermediate level evo is too
+						// high, bring it down
+						for (Evolution otherEvo : pk.evolutionsTo) {
+							if (otherEvo.type.usesLevel()
+									&& otherEvo.extraInfo > maxIntermediateLevel) {
+								otherEvo.extraInfo = maxIntermediateLevel;
+								changedEvos.add(otherEvo);
+							}
+						}
 					}
 				}
 			}
@@ -2012,42 +2013,55 @@ public abstract class AbstractRomHandler implements RomHandler {
 		}
 		logBlankLine();
 
-		// write new evo list
-		this.setEvolutions(allEvos);
 	}
 
 	@Override
 	public void randomizeEvolutions(boolean similarStrength, boolean sameType,
-			boolean preventCycles, boolean forceChange) {
-		List<Evolution> oldEvos = this.getEvolutions();
-		List<Evolution> newEvos = new ArrayList<Evolution>();
+			boolean limitToThreeStages, boolean forceChange) {
+		checkPokemonRestrictions();
+		List<Pokemon> pokemonPool = new ArrayList<Pokemon>(mainPokemonList);
+		int stageLimit = limitToThreeStages ? 3 : 10;
+
+		// Cache old evolutions for data later
+		Map<Pokemon, List<Evolution>> originalEvos = new HashMap<Pokemon, List<Evolution>>();
+		for (Pokemon pk : pokemonPool) {
+			originalEvos.put(pk, new ArrayList<Evolution>(pk.evolutionsFrom));
+		}
+
 		Set<EvolutionPair> newEvoPairs = new HashSet<EvolutionPair>();
 		Set<EvolutionPair> oldEvoPairs = new HashSet<EvolutionPair>();
+
 		if (forceChange) {
-			for (Evolution ev : oldEvos) {
-				oldEvoPairs.add(new EvolutionPair(ev.from, ev.to));
+			for (Pokemon pk : pokemonPool) {
+				for (Evolution ev : pk.evolutionsFrom) {
+					oldEvoPairs.add(new EvolutionPair(ev.from, ev.to));
+				}
 			}
 		}
+
 		List<Pokemon> replacements = new ArrayList<Pokemon>();
-		checkPokemonRestrictions();
+
 		int loops = 0;
-		while (loops < 1000) {
+		while (loops < 1) {
 			// Setup for this loop.
 			boolean hadError = false;
-			newEvos.clear();
+			for (Pokemon pk : pokemonPool) {
+				pk.evolutionsFrom.clear();
+				pk.evolutionsTo.clear();
+			}
 			newEvoPairs.clear();
 
-			// Shuffle old evolutions so the results aren't overly predictable.
-			Collections.shuffle(oldEvos, this.random);
+			// Shuffle pokemon list so the results aren't overly predictable.
+			Collections.shuffle(pokemonPool, this.random);
 
-			for (Evolution ev : oldEvos) {
-				Pokemon fromPK = ev.from;
-				// Pick a Pokemon as replacement
-				replacements.clear();
+			for (Pokemon fromPK : pokemonPool) {
+				List<Evolution> oldEvos = originalEvos.get(fromPK);
+				for (Evolution ev : oldEvos) {
+					// Pick a Pokemon as replacement
+					replacements.clear();
 
-				// Step 1: base filters
-				for (Pokemon pk : mainPokemonList) {
-					if (pk != null) {
+					// Step 1: base filters
+					for (Pokemon pk : mainPokemonList) {
 						// Prevent evolving into oneself (mandatory)
 						if (pk == fromPK) {
 							continue;
@@ -2070,64 +2084,101 @@ public abstract class AbstractRomHandler implements RomHandler {
 							continue;
 						}
 
-						// Prevent evolution that causes cycle if flagged
-						if (preventCycles && evoCycleCheck(fromPK, pk, newEvos)) {
+						// Prevent evolution that causes cycle (mandatory)
+						if (evoCycleCheck(fromPK, pk)) {
+							continue;
+						}
+
+						// Prevent evolution that exceeds stage limit
+						Evolution tempEvo = new Evolution(fromPK, pk, false,
+								EvolutionType.NONE, 0);
+						fromPK.evolutionsFrom.add(tempEvo);
+						pk.evolutionsTo.add(tempEvo);
+						boolean exceededLimit = false;
+
+						Set<Pokemon> related = relatedPokemon(fromPK);
+
+						for (Pokemon pk2 : related) {
+							int numPreEvos = numPreEvolutions(pk2, stageLimit);
+							int numEvos = numEvolutions(pk2, stageLimit);
+							if (numPreEvos >= stageLimit
+									|| numEvos >= stageLimit) {
+								exceededLimit = true;
+								break;
+							} else if (numPreEvos == stageLimit - 1
+									&& pk2.evolutionsFrom.size() == 0
+									&& originalEvos.get(pk2).size() > 0) {
+								exceededLimit = true;
+								break;
+							}
+						}
+
+						fromPK.evolutionsFrom.remove(tempEvo);
+						pk.evolutionsTo.remove(tempEvo);
+
+						if (exceededLimit) {
 							continue;
 						}
 
 						// Passes everything, add as a candidate.
 						replacements.add(pk);
 					}
-				}
 
-				// If we don't have any candidates after Step 1, severe failure
-				// exit out of this loop and try again from scratch
-				if (replacements.size() == 0) {
-					hadError = true;
-					break;
-				}
+					// If we don't have any candidates after Step 1, severe
+					// failure
+					// exit out of this loop and try again from scratch
+					if (replacements.size() == 0) {
+						hadError = true;
+						break;
+					}
 
-				// Step 2: filter by type, if needed
-				if (replacements.size() > 1 && sameType) {
-					Set<Pokemon> includeType = new HashSet<Pokemon>();
-					for (Pokemon pk : replacements) {
-						if (pk.primaryType == fromPK.primaryType
-								|| (fromPK.secondaryType != null && pk.primaryType == fromPK.secondaryType)
-								|| (pk.secondaryType != null && pk.secondaryType == fromPK.primaryType)
-								|| (fromPK.secondaryType != null
-										&& pk.secondaryType != null && pk.secondaryType == fromPK.secondaryType)) {
-							includeType.add(pk);
+					// Step 2: filter by type, if needed
+					if (replacements.size() > 1 && sameType) {
+						Set<Pokemon> includeType = new HashSet<Pokemon>();
+						for (Pokemon pk : replacements) {
+							if (pk.primaryType == fromPK.primaryType
+									|| (fromPK.secondaryType != null && pk.primaryType == fromPK.secondaryType)
+									|| (pk.secondaryType != null && pk.secondaryType == fromPK.primaryType)
+									|| (fromPK.secondaryType != null
+											&& pk.secondaryType != null && pk.secondaryType == fromPK.secondaryType)) {
+								includeType.add(pk);
+							}
+						}
+
+						if (includeType.size() != 0) {
+							replacements.retainAll(includeType);
 						}
 					}
 
-					if (includeType.size() != 0) {
-						replacements.retainAll(includeType);
+					// Step 3: pick - by similar strength or otherwise
+					Pokemon picked = null;
+
+					if (replacements.size() == 1) {
+						// Foregone conclusion.
+						picked = replacements.get(0);
+					} else if (similarStrength) {
+						picked = pickEvoPowerLvlReplacement(replacements, ev.to);
+					} else {
+						picked = replacements.get(this.random
+								.nextInt(replacements.size()));
 					}
+
+					// Step 4: add it to the new evos pool
+					Evolution newEvo = new Evolution(fromPK, picked,
+							ev.carryStats, ev.type, ev.extraInfo);
+					fromPK.evolutionsFrom.add(newEvo);
+					picked.evolutionsTo.add(newEvo);
+					newEvoPairs.add(new EvolutionPair(fromPK, picked));
 				}
 
-				// Step 3: pick - by similar strength or otherwise
-				Pokemon picked = null;
-
-				if (replacements.size() == 1) {
-					// Foregone conclusion.
-					picked = replacements.get(0);
-				} else if (similarStrength) {
-					picked = pickEvoPowerLvlReplacement(replacements, ev.to);
-				} else {
-					picked = replacements.get(this.random.nextInt(replacements
-							.size()));
+				if (hadError) {
+					// No need to check the other Pokemon if we already errored
+					break;
 				}
-
-				// Step 4: add it to the new evos pool
-				Evolution newEvo = new Evolution(fromPK, picked, ev.carryStats,
-						ev.type, ev.extraInfo);
-				newEvos.add(newEvo);
-				newEvoPairs.add(new EvolutionPair(fromPK, picked));
 			}
 
 			// If no error, done and return
 			if (!hadError) {
-				this.setEvolutions(newEvos);
 				return;
 			} else {
 				loops++;
@@ -2213,31 +2264,28 @@ public abstract class AbstractRomHandler implements RomHandler {
 	 * @param newEvos
 	 * @return
 	 */
-	private boolean evoCycleCheck(Pokemon from, Pokemon to,
-			List<Evolution> newEvos) {
+	private boolean evoCycleCheck(Pokemon from, Pokemon to) {
 		Evolution tempEvo = new Evolution(from, to, false, EvolutionType.NONE,
 				0);
-		newEvos.add(tempEvo);
+		from.evolutionsFrom.add(tempEvo);
 		Set<Pokemon> visited = new HashSet<Pokemon>();
 		Set<Pokemon> recStack = new HashSet<Pokemon>();
-		boolean recur = isCyclic(from, newEvos, visited, recStack);
-		newEvos.remove(tempEvo);
+		boolean recur = isCyclic(from, visited, recStack);
+		from.evolutionsFrom.remove(tempEvo);
 		return recur;
 	}
 
-	private boolean isCyclic(Pokemon pk, List<Evolution> newEvos,
-			Set<Pokemon> visited, Set<Pokemon> recStack) {
+	private boolean isCyclic(Pokemon pk, Set<Pokemon> visited,
+			Set<Pokemon> recStack) {
 		if (!visited.contains(pk)) {
 			visited.add(pk);
 			recStack.add(pk);
-			for (Evolution ev : newEvos) {
-				if (ev.from == pk) {
-					if (!visited.contains(ev.to)
-							&& isCyclic(ev.to, newEvos, visited, recStack)) {
-						return true;
-					} else if (recStack.contains(ev.to)) {
-						return true;
-					}
+			for (Evolution ev : pk.evolutionsFrom) {
+				if (!visited.contains(ev.to)
+						&& isCyclic(ev.to, visited, recStack)) {
+					return true;
+				} else if (recStack.contains(ev.to)) {
+					return true;
 				}
 			}
 		}
@@ -2969,7 +3017,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 		if (isYellow()) {
 			// The rival's starter is index 1
 			Pokemon rivalStarter = starters.get(1);
-			int timesEvolves = timesEvolves(rivalStarter);
+			int timesEvolves = numEvolutions(rivalStarter, 2);
 			// Apply evolutions as appropriate
 			if (timesEvolves == 0) {
 				for (int j = 1; j <= 3; j++) {
@@ -2987,7 +3035,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 					changeStarterWithTag(currentTrainers, prefix + j + "-0",
 							rivalStarter);
 				}
-				rivalStarter = firstEvolution(rivalStarter);
+				rivalStarter = pickRandomEvolutionOf(rivalStarter, false);
 				for (int j = 4; j <= 7; j++) {
 					for (int i = 0; i < 3; i++) {
 						changeStarterWithTag(currentTrainers, prefix + j + "-"
@@ -2999,14 +3047,14 @@ public abstract class AbstractRomHandler implements RomHandler {
 					changeStarterWithTag(currentTrainers, prefix + j + "-" + 0,
 							rivalStarter);
 				}
-				rivalStarter = firstEvolution(rivalStarter);
+				rivalStarter = pickRandomEvolutionOf(rivalStarter, true);
 				changeStarterWithTag(currentTrainers, prefix + "3-0",
 						rivalStarter);
 				for (int i = 0; i < 3; i++) {
 					changeStarterWithTag(currentTrainers, prefix + "4-" + i,
 							rivalStarter);
 				}
-				rivalStarter = firstEvolution(rivalStarter);
+				rivalStarter = pickRandomEvolutionOf(rivalStarter, false);
 				for (int j = 5; j <= 7; j++) {
 					for (int i = 0; i < 3; i++) {
 						changeStarterWithTag(currentTrainers, prefix + j + "-"
@@ -3021,7 +3069,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 				// Rival's starters are pokemonOffset over from each of ours
 				int starterToUse = (i + pokemonOffset) % 3;
 				Pokemon thisStarter = starters.get(starterToUse);
-				int timesEvolves = timesEvolves(thisStarter);
+				int timesEvolves = numEvolutions(thisStarter, 2);
 				// If a fully evolved pokemon, use throughout
 				// Otherwise split by evolutions as appropriate
 				if (timesEvolves == 0) {
@@ -3039,7 +3087,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 						changeStarterWithTag(currentTrainers, prefix + j + "-"
 								+ i, thisStarter);
 					}
-					thisStarter = firstEvolution(thisStarter);
+					thisStarter = pickRandomEvolutionOf(thisStarter, false);
 					for (; j <= highestRivalNum; j++) {
 						changeStarterWithTag(currentTrainers, prefix + j + "-"
 								+ i, thisStarter);
@@ -3054,7 +3102,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 						changeStarterWithTag(currentTrainers, prefix + j + "-"
 								+ i, thisStarter);
 					}
-					thisStarter = firstEvolution(thisStarter);
+					thisStarter = pickRandomEvolutionOf(thisStarter, true);
 					for (; j <= highestRivalNum; j++) {
 						if (getLevelOfStarter(currentTrainers, prefix + j + "-"
 								+ i) >= 36) {
@@ -3063,7 +3111,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 						changeStarterWithTag(currentTrainers, prefix + j + "-"
 								+ i, thisStarter);
 					}
-					thisStarter = firstEvolution(thisStarter);
+					thisStarter = pickRandomEvolutionOf(thisStarter, false);
 					for (; j <= highestRivalNum; j++) {
 						changeStarterWithTag(currentTrainers, prefix + j + "-"
 								+ i, thisStarter);
@@ -3072,6 +3120,25 @@ public abstract class AbstractRomHandler implements RomHandler {
 			}
 		}
 
+	}
+
+	private Pokemon pickRandomEvolutionOf(Pokemon base, boolean mustEvolveItself) {
+		// Used for "rival carries starter"
+		// Pick a random evolution of base Pokemon, subject to
+		// "must evolve itself" if appropriate.
+		List<Pokemon> candidates = new ArrayList<Pokemon>();
+		for (Evolution ev : base.evolutionsFrom) {
+			if (!mustEvolveItself || ev.to.evolutionsFrom.size() > 0) {
+				candidates.add(ev.to);
+			}
+		}
+
+		if (candidates.size() == 0) {
+			throw new RuntimeException(
+					"Random evolution called on a Pokemon without any usable evolutions.");
+		}
+
+		return candidates.get(random.nextInt(candidates.size()));
 	}
 
 	private int getLevelOfStarter(List<Trainer> currentTrainers, String tag) {
@@ -3119,45 +3186,72 @@ public abstract class AbstractRomHandler implements RomHandler {
 
 	}
 
-	private int timesEvolves(Pokemon pk) {
-		// This method works ASSUMING a pokemon has no weird split evolutions
-		// with different levels on each side
-		// Which is true for every pokemon so far.
-		Pokemon[] pokeBuffer = new Pokemon[20];
-		List<Evolution> evos = this.getEvolutions();
-		return innerTimesEvolves(evos, pk, pokeBuffer, 0);
+	// Return the max depth of pre-evolutions a Pokemon has
+	private int numPreEvolutions(Pokemon pk, int maxInterested) {
+		return numPreEvolutions(pk, 0, maxInterested);
 	}
 
-	private int innerTimesEvolves(List<Evolution> evos, Pokemon currPoke,
-			Pokemon[] seenPokes, int seenPokesIndex) {
-		seenPokes[seenPokesIndex++] = currPoke;
-		int currEvos = 0;
-		for (Evolution e : evos) {
-			if (e.from == currPoke) {
-				boolean valid = true;
-				for (int i = 0; i < seenPokesIndex; i++) {
-					if (seenPokes[i] == e.to) {
-						valid = false;
-						break;
-					}
+	private int numPreEvolutions(Pokemon pk, int depth, int maxInterested) {
+		if (pk.evolutionsTo.size() == 0) {
+			return 0;
+		} else {
+			if (depth == maxInterested - 1) {
+				return 1;
+			} else {
+				int maxPreEvos = 0;
+				for (Evolution ev : pk.evolutionsTo) {
+					maxPreEvos = Math
+							.max(maxPreEvos,
+									numPreEvolutions(ev.from, depth + 1,
+											maxInterested) + 1);
 				}
-				if (valid) {
-					currEvos = Math.max(currEvos, 1 + this.innerTimesEvolves(
-							evos, e.to, seenPokes, seenPokesIndex));
+				return maxPreEvos;
+			}
+		}
+	}
+
+	private int numEvolutions(Pokemon pk, int maxInterested) {
+		return numEvolutions(pk, 0, maxInterested);
+	}
+
+	private int numEvolutions(Pokemon pk, int depth, int maxInterested) {
+		if (pk.evolutionsFrom.size() == 0) {
+			return 0;
+		} else {
+			if (depth == maxInterested - 1) {
+				return 1;
+			} else {
+				int maxEvos = 0;
+				for (Evolution ev : pk.evolutionsFrom) {
+					maxEvos = Math.max(maxEvos,
+							numEvolutions(ev.to, depth + 1, maxInterested) + 1);
+				}
+				return maxEvos;
+			}
+		}
+	}
+
+	private Set<Pokemon> relatedPokemon(Pokemon original) {
+		Set<Pokemon> results = new HashSet<Pokemon>();
+		results.add(original);
+		Queue<Pokemon> toCheck = new LinkedList<Pokemon>();
+		toCheck.add(original);
+		while (!toCheck.isEmpty()) {
+			Pokemon check = toCheck.poll();
+			for (Evolution ev : check.evolutionsFrom) {
+				if (!results.contains(ev.to)) {
+					results.add(ev.to);
+					toCheck.add(ev.to);
+				}
+			}
+			for (Evolution ev : check.evolutionsTo) {
+				if (!results.contains(ev.from)) {
+					results.add(ev.from);
+					toCheck.add(ev.from);
 				}
 			}
 		}
-		return currEvos;
-	}
-
-	private Pokemon firstEvolution(Pokemon pk) {
-		List<Evolution> evos = this.getEvolutions();
-		for (Evolution e : evos) {
-			if (e.from == pk) {
-				return e.to;
-			}
-		}
-		return null;
+		return results;
 	}
 
 	private Map<Type, List<Pokemon>> cachedReplacementLists;

@@ -24,6 +24,7 @@ package com.dabomstew.pkrandom.pokemon;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -46,6 +47,13 @@ public class Pokemon implements Comparable<Pokemon> {
 			darkGrassHeldItem;
 
 	public ExpCurve growthCurve;
+
+	public List<Evolution> evolutionsFrom = new ArrayList<Evolution>();
+	public List<Evolution> evolutionsTo = new ArrayList<Evolution>();
+	
+	// A flag to use for things like recursive stats copying.
+	// Must not rely on the state of this flag being preserved between calls.
+	public boolean temporaryFlag;
 
 	public Pokemon() {
 	}

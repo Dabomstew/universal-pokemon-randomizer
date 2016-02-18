@@ -11,7 +11,6 @@ import java.util.TreeMap;
 
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
-import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.IngameTrade;
 import com.dabomstew.pkrandom.pokemon.Move;
 import com.dabomstew.pkrandom.pokemon.MoveLearnt;
@@ -193,31 +192,24 @@ public class Randomizer {
 		if (settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM) {
 			romHandler.randomizeEvolutions(settings.isEvosSimilarStrength(),
 					settings.isEvosSameTyping(),
-					settings.isEvosPreventCycles(),
+					settings.isEvosMaxThreeStages(),
 					settings.isEvosForceChange());
 
 			log.println("--Randomized Evolutions--");
-			List<Evolution> evos = romHandler.getEvolutions();
 			List<Pokemon> allPokes = romHandler.getPokemon();
 			for (Pokemon pk : allPokes) {
 				if (pk != null) {
-					List<Pokemon> evosFromCurrent = new ArrayList<Pokemon>();
-					for (Evolution ev : evos) {
-						if (ev.from == pk) {
-							evosFromCurrent.add(ev.to);
-						}
-					}
-					int numEvos = evosFromCurrent.size();
+					int numEvos = pk.evolutionsFrom.size();
 					if (numEvos > 0) {
 						StringBuilder evoStr = new StringBuilder(
-								evosFromCurrent.get(0).name);
+								pk.evolutionsFrom.get(0).to.name);
 						for (int i = 1; i < numEvos; i++) {
 							if (i == numEvos - 1) {
 								evoStr.append(" and "
-										+ evosFromCurrent.get(i).name);
+										+ pk.evolutionsFrom.get(i).to.name);
 							} else {
 								evoStr.append(", "
-										+ evosFromCurrent.get(i).name);
+										+ pk.evolutionsFrom.get(i).to.name);
 							}
 						}
 						log.println(pk.name + " now evolves into "

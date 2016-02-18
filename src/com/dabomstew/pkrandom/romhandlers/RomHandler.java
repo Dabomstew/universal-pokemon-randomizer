@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
-import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.IngameTrade;
 import com.dabomstew.pkrandom.pokemon.ItemList;
@@ -380,16 +379,12 @@ public interface RomHandler {
 
 	// Evos
 
-	public List<Evolution> getEvolutions();
-
-	public void setEvolutions(List<Evolution> evos);
-
 	public void removeTradeEvolutions(boolean changeMoveEvos);
 
 	public void condenseLevelEvolutions(int maxLevel, int maxIntermediateLevel);
 
 	public void randomizeEvolutions(boolean similarStrength, boolean sameType,
-			boolean preventCycles, boolean forceChange);
+			boolean limitToThreeStages, boolean forceChange);
 
 	// stats stuff
 	public void minimumCatchRate(int rateNonLegendary, int rateLegendary);

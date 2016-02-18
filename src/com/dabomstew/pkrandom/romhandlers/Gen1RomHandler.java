@@ -80,7 +80,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 			return detectRomInner(loaded, (int) fileLength);
 		}
 	}
-	
+
 	public Gen1RomHandler(Random random) {
 		super(random, null);
 	}
@@ -575,6 +575,9 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 					romEntry.getValue("MewStatsOffset"));
 		}
 
+		// Evolutions
+		populateEvolutions();
+
 	}
 
 	private void savePokemonStats() {
@@ -601,6 +604,9 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 				* Gen1Constants.baseStatsEntrySize : romEntry
 				.getValue("MewStatsOffset");
 		saveBasicPokeStats(pokes[Gen1Constants.mewIndex], mewOffset);
+
+		// Write evolutions
+		writeEvosAndMovesLearnt(true, null);
 	}
 
 	private void loadBasicPokeStats(Pokemon pkmn, int offset) {
@@ -1385,7 +1391,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 	@Override
 	public void setMovesLearnt(Map<Pokemon, List<MoveLearnt>> movesets) {
 		// new method for moves learnt
-		writeEvosAndMovesLearnt(null, movesets);
+		writeEvosAndMovesLearnt(false, movesets);
 	}
 
 	@Override
@@ -1587,63 +1593,64 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 				: "No Static Pokemon";
 	}
 
-	@Override
-	public List<Evolution> getEvolutions() {
-		List<Evolution> evos = new ArrayList<Evolution>();
+	private void populateEvolutions() {
+		for (Pokemon pkmn : pokes) {
+			if (pkmn != null) {
+				pkmn.evolutionsFrom.clear();
+				pkmn.evolutionsTo.clear();
+			}
+		}
+
 		int pointersOffset = romEntry.getValue("PokemonMovesetsTableOffset");
-		List<Evolution> evosForThisPoke = new ArrayList<Evolution>();
+
 		int pkmnCount = romEntry.getValue("InternalPokemonCount");
 		for (int i = 1; i <= pkmnCount; i++) {
 			int pointer = readWord(pointersOffset + (i - 1) * 2);
 			int realPointer = calculateOffset(bankOf(pointersOffset), pointer);
 			if (pokeRBYToNumTable[i] != 0) {
-				evosForThisPoke.clear();
 				int thisPoke = pokeRBYToNumTable[i];
+				Pokemon pkmn = pokes[thisPoke];
 				while (rom[realPointer] != 0) {
 					int method = rom[realPointer];
 					EvolutionType type = EvolutionType.fromIndex(1, method);
 					int otherPoke = pokeRBYToNumTable[rom[realPointer + 2
 							+ (type == EvolutionType.STONE ? 1 : 0)] & 0xFF];
 					int extraInfo = rom[realPointer + 1] & 0xFF;
-					Evolution evo = new Evolution(pokes[thisPoke],
-							pokes[otherPoke], true, type, extraInfo);
-					if (!evos.contains(evo)) {
-						evos.add(evo);
-						evosForThisPoke.add(evo);
+					Evolution evo = new Evolution(pkmn, pokes[otherPoke], true,
+							type, extraInfo);
+					if (!pkmn.evolutionsFrom.contains(evo)) {
+						pkmn.evolutionsFrom.add(evo);
+						pokes[otherPoke].evolutionsTo.add(evo);
 					}
 					realPointer += (type == EvolutionType.STONE ? 4 : 3);
 				}
 				// split evos don't carry stats
-				if (evosForThisPoke.size() > 1) {
-					for (Evolution e : evosForThisPoke) {
+				if (pkmn.evolutionsFrom.size() > 1) {
+					for (Evolution e : pkmn.evolutionsFrom) {
 						e.carryStats = false;
 					}
 				}
 			}
 		}
-		return evos;
-	}
-
-	@Override
-	public void setEvolutions(List<Evolution> evos) {
-		this.writeEvosAndMovesLearnt(evos, null);
 	}
 
 	@Override
 	public void removeTradeEvolutions(boolean changeMoveEvos) {
 		// Gen 1: only regular trade evos
 		// change them all to evolve at level 37
-		List<Evolution> evos = this.getEvolutions();
 		log("--Removing Trade Evolutions--");
-		for (Evolution evo : evos) {
-			if (evo.type == EvolutionType.TRADE) {
-				// change
-				evo.type = EvolutionType.LEVEL;
-				evo.extraInfo = 37;
-				logEvoChangeLevel(evo.from.name, evo.to.name, 37);
+		for (Pokemon pkmn : pokes) {
+			if (pkmn != null) {
+				for (Evolution evo : pkmn.evolutionsFrom) {
+					if (evo.type == EvolutionType.TRADE) {
+						// change
+						evo.type = EvolutionType.LEVEL;
+						evo.extraInfo = 37;
+						logEvoChangeLevel(evo.from.name, evo.to.name, 37);
+					}
+				}
 			}
 		}
-		this.setEvolutions(evos);
 		logBlankLine();
 	}
 
@@ -2325,7 +2332,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		return true;
 	}
 
-	private void writeEvosAndMovesLearnt(List<Evolution> evos,
+	private void writeEvosAndMovesLearnt(boolean writeEvos,
 			Map<Pokemon, List<MoveLearnt>> movesets) {
 		// we assume a few things here:
 		// 1) evos & moves learnt are stored directly after their pointer table
@@ -2384,7 +2391,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 				Pokemon pkmn = pokes[pokeNum];
 				ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
 				// Evolutions
-				if (evos == null) {
+				if (!writeEvos) {
 					// copy old
 					int evoOffset = oldDataOffset;
 					while (rom[evoOffset] != 0x00) {
@@ -2395,21 +2402,19 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 						}
 					}
 				} else {
-					for (Evolution evo : evos) {
+					for (Evolution evo : pkmn.evolutionsFrom) {
 						// write evos for this poke
-						if (evo.from == pkmn) {
-							dataStream.write(evo.type.toIndex(1));
-							if (evo.type == EvolutionType.LEVEL) {
-								dataStream.write(evo.extraInfo); // min lvl
-							} else if (evo.type == EvolutionType.STONE) {
-								dataStream.write(evo.extraInfo); // stone item
-								dataStream.write(1); // minimum level
-							} else if (evo.type == EvolutionType.TRADE) {
-								dataStream.write(1); // minimum level
-							}
-							int pokeIndexTo = pokeNumToRBYTable[evo.to.number];
-							dataStream.write(pokeIndexTo); // species
+						dataStream.write(evo.type.toIndex(1));
+						if (evo.type == EvolutionType.LEVEL) {
+							dataStream.write(evo.extraInfo); // min lvl
+						} else if (evo.type == EvolutionType.STONE) {
+							dataStream.write(evo.extraInfo); // stone item
+							dataStream.write(1); // minimum level
+						} else if (evo.type == EvolutionType.TRADE) {
+							dataStream.write(1); // minimum level
 						}
+						int pokeIndexTo = pokeNumToRBYTable[evo.to.number];
+						dataStream.write(pokeIndexTo); // species
 					}
 				}
 				// write terminator for evos
@@ -2524,7 +2529,8 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 					}
 				} else {
 					// this should never happen, but if not, uh oh
-					throw new RuntimeException("Unable to save moves/evolutions, out of space");
+					throw new RuntimeException(
+							"Unable to save moves/evolutions, out of space");
 				}
 				if (pointerToWrite >= 0) {
 					writeWord(pointerTable, (i - 1) * 2, pointerToWrite);

@@ -85,7 +85,7 @@ public class Settings {
 	private EvolutionsMod evolutionsMod = EvolutionsMod.UNCHANGED;
 	private boolean evosSimilarStrength;
 	private boolean evosSameTyping;
-	private boolean evosPreventCycles;
+	private boolean evosMaxThreeStages;
 	private boolean evosForceChange;
 
 	// Move data
@@ -349,7 +349,7 @@ public class Settings {
 		// 22 evolutions
 		out.write(makeByteSelected(evolutionsMod == EvolutionsMod.UNCHANGED,
 				evolutionsMod == EvolutionsMod.RANDOM, evosSimilarStrength,
-				evosSameTyping, evosPreventCycles, evosForceChange));
+				evosSameTyping, evosMaxThreeStages, evosForceChange));
 
 		// @ 23 pokemon restrictions
 		try {
@@ -547,7 +547,7 @@ public class Settings {
 		));
 		settings.setEvosSimilarStrength(restoreState(data[22], 2));
 		settings.setEvosSameTyping(restoreState(data[22], 3));
-		settings.setEvosPreventCycles(restoreState(data[22], 4));
+		settings.setEvosMaxThreeStages(restoreState(data[22], 4));
 		settings.setEvosForceChange(restoreState(data[22], 5));
 
 		// gen restrictions
@@ -1021,12 +1021,12 @@ public class Settings {
 		return this;
 	}
 
-	public boolean isEvosPreventCycles() {
-		return evosPreventCycles;
+	public boolean isEvosMaxThreeStages() {
+		return evosMaxThreeStages;
 	}
 
-	public Settings setEvosPreventCycles(boolean evosPreventCycles) {
-		this.evosPreventCycles = evosPreventCycles;
+	public Settings setEvosMaxThreeStages(boolean evosMaxThreeStages) {
+		this.evosMaxThreeStages = evosMaxThreeStages;
 		return this;
 	}
 
