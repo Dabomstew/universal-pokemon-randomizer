@@ -74,12 +74,14 @@ public class RomFunctions {
 		List<Pokemon> allPokes = baseRom.getPokemon();
 		Set<Pokemon> dontCopyPokes = new TreeSet<Pokemon>();
 		for (Pokemon pkmn : allPokes) {
-			if (pkmn.evolutionsTo.size() != 1) {
-				dontCopyPokes.add(pkmn);
-			} else {
-				Evolution onlyEvo = pkmn.evolutionsTo.get(0);
-				if (!onlyEvo.carryStats) {
+			if (pkmn != null) {
+				if (pkmn.evolutionsTo.size() != 1) {
 					dontCopyPokes.add(pkmn);
+				} else {
+					Evolution onlyEvo = pkmn.evolutionsTo.get(0);
+					if (!onlyEvo.carryStats) {
+						dontCopyPokes.add(pkmn);
+					}
 				}
 			}
 		}
@@ -90,11 +92,13 @@ public class RomFunctions {
 		List<Pokemon> allPokes = baseRom.getPokemon();
 		Set<Pokemon> middleEvolutions = new TreeSet<Pokemon>();
 		for (Pokemon pkmn : allPokes) {
-			if (pkmn.evolutionsTo.size() == 1
-					&& pkmn.evolutionsFrom.size() == 0) {
-				Evolution onlyEvo = pkmn.evolutionsTo.get(0);
-				if (onlyEvo.carryStats) {
-					middleEvolutions.add(pkmn);
+			if (pkmn != null) {
+				if (pkmn.evolutionsTo.size() == 1
+						&& pkmn.evolutionsFrom.size() > 0) {
+					Evolution onlyEvo = pkmn.evolutionsTo.get(0);
+					if (onlyEvo.carryStats) {
+						middleEvolutions.add(pkmn);
+					}
 				}
 			}
 		}
@@ -105,10 +109,13 @@ public class RomFunctions {
 		List<Pokemon> allPokes = baseRom.getPokemon();
 		Set<Pokemon> finalEvolutions = new TreeSet<Pokemon>();
 		for (Pokemon pkmn : allPokes) {
-			if (pkmn.evolutionsTo.size() == 1 && pkmn.evolutionsFrom.size() > 0) {
-				Evolution onlyEvo = pkmn.evolutionsTo.get(0);
-				if (onlyEvo.carryStats) {
-					finalEvolutions.add(pkmn);
+			if (pkmn != null) {
+				if (pkmn.evolutionsTo.size() == 1
+						&& pkmn.evolutionsFrom.size() == 0) {
+					Evolution onlyEvo = pkmn.evolutionsTo.get(0);
+					if (onlyEvo.carryStats) {
+						finalEvolutions.add(pkmn);
+					}
 				}
 			}
 		}

@@ -295,17 +295,26 @@ public abstract class AbstractRomHandler implements RomHandler {
 
 	@Override
 	public void randomizePokemonTypes(boolean evolutionSanity) {
+		List<Pokemon> allPokes = this.getPokemon();
 		if (evolutionSanity) {
-			Set<Pokemon> dontCopyPokes = RomFunctions
-					.getBasicOrNoCopyPokemon(this);
-			// Type randomization
+			// Type randomization with evolution sanity
+			for (Pokemon pk : allPokes) {
+				if (pk != null) {
+					pk.temporaryFlag = false;
+				}
+			}
+
 			// Step 1: Basic or Excluded From Copying Pokemon
 			// A Basic/EFC pokemon has a 35% chance of a second type if it has
-			// an evolution, a 50% chance otherwise
+			// an evolution that copies type/stats, a 50% chance otherwise
+			Set<Pokemon> dontCopyPokes = RomFunctions
+					.getBasicOrNoCopyPokemon(this);
+
 			for (Pokemon pk : dontCopyPokes) {
 				pk.primaryType = randomType();
 				pk.secondaryType = null;
-				if (pk.evolutionsFrom.size() > 0) {
+				if (pk.evolutionsFrom.size() == 1
+						&& pk.evolutionsFrom.get(0).carryStats) {
 					if (this.random.nextDouble() < 0.35) {
 						pk.secondaryType = randomType();
 						while (pk.secondaryType == pk.primaryType) {
@@ -320,43 +329,56 @@ public abstract class AbstractRomHandler implements RomHandler {
 						}
 					}
 				}
-			}
-			// Step 2: Middle Evolutions
-			// A middle evolution has a 15% chance of adding a type.
-			Set<Pokemon> firstEvos = RomFunctions.getMiddleEvolutions(this);
-			for (Pokemon pk : firstEvos) {
-				Pokemon evolvedFrom = pk.evolutionsTo.get(0).from;
-				pk.primaryType = evolvedFrom.primaryType;
-				pk.secondaryType = evolvedFrom.secondaryType;
-				if (pk.secondaryType == null) {
-					if (this.random.nextDouble() < 0.15) {
-						pk.secondaryType = randomType();
-						while (pk.secondaryType == pk.primaryType) {
-							pk.secondaryType = randomType();
-						}
-					}
-				}
+				pk.temporaryFlag = true;
 			}
 
-			// Step 3: Final Evolutions
-			// A final evolution has a 25% chance of adding a type
-			Set<Pokemon> secondEvos = RomFunctions.getFinalEvolutions(this);
-			for (Pokemon pk : secondEvos) {
-				Pokemon evolvedFrom = pk.evolutionsTo.get(0).from;
-				pk.primaryType = evolvedFrom.primaryType;
-				pk.secondaryType = evolvedFrom.secondaryType;
-				if (pk.secondaryType == null) {
-					if (this.random.nextDouble() < 0.25) {
-						pk.secondaryType = randomType();
-						while (pk.secondaryType == pk.primaryType) {
-							pk.secondaryType = randomType();
+			// go "up" evolutions looking for pre-evos to do first
+			Set<Pokemon> middleEvos = RomFunctions.getMiddleEvolutions(this);
+			for (Pokemon pk : allPokes) {
+				if (pk != null && !pk.temporaryFlag) {
+					// Non-randomized pokes at this point must have
+					// a linear chain of single evolutions down to
+					// a randomized poke.
+					Stack<Evolution> currentStack = new Stack<Evolution>();
+					Evolution ev = pk.evolutionsTo.get(0);
+					while (!ev.from.temporaryFlag) {
+						currentStack.push(ev);
+						ev = ev.from.evolutionsTo.get(0);
+					}
+
+					// Now "ev" is set to an evolution from a randomized Pokemon
+					// to a non-randomized.
+					// Carry types up, add the chance to add secondary, then
+					// continue up the stack as required.
+					while (true) {
+						Pokemon to = ev.to;
+						Pokemon from = ev.from;
+						to.primaryType = from.primaryType;
+						to.secondaryType = from.secondaryType;
+
+						if (to.secondaryType == null) {
+							double chance = middleEvos.contains(to) ? 0.15 : 0.25;
+							if (this.random.nextDouble() < chance) {
+								to.secondaryType = randomType();
+								while (to.secondaryType == to.primaryType) {
+									to.secondaryType = randomType();
+								}
+							}
+						}
+						
+						to.temporaryFlag = true;
+						
+						if(currentStack.isEmpty()) {
+							break;
+						}
+						else {
+							ev = currentStack.pop();
 						}
 					}
 				}
 			}
 		} else {
 			// Entirely random types
-			List<Pokemon> allPokes = this.getPokemon();
 			for (Pokemon pkmn : allPokes) {
 				if (pkmn != null) {
 					pkmn.primaryType = randomType();
