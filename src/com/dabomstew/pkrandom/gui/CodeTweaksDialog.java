@@ -8,7 +8,7 @@ import javax.swing.GroupLayout.ParallelGroup;
 import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.JCheckBox;
 
-import com.dabomstew.pkrandom.CodeTweaks;
+import com.dabomstew.pkrandom.MiscTweak;
 
 /**
  * 
@@ -23,7 +23,7 @@ public class CodeTweaksDialog extends javax.swing.JDialog {
 			.getBundle("com/dabomstew/pkrandom/gui/Bundle");
 	private boolean pressedOk;
 	private List<JCheckBox> tweakCheckboxes;
-	private List<CodeTweaks> tweaksAvailable;
+	private List<MiscTweak> tweaksAvailable;
 	
 
 	/**
@@ -45,7 +45,7 @@ public class CodeTweaksDialog extends javax.swing.JDialog {
 	private void restoreFrom(int current) {
 		for(int i=0;i<tweakCheckboxes.size();i++) {
 			JCheckBox tweakCB = tweakCheckboxes.get(i);
-			CodeTweaks tweak = tweaksAvailable.get(i);
+			MiscTweak tweak = tweaksAvailable.get(i);
 			tweakCB.setSelected((current & tweak.getValue()) > 0);
 		}
 	}
@@ -58,7 +58,7 @@ public class CodeTweaksDialog extends javax.swing.JDialog {
 		int choice = 0;
 		for(int i=0;i<tweakCheckboxes.size();i++) {
 			JCheckBox tweakCB = tweakCheckboxes.get(i);
-			CodeTweaks tweak = tweaksAvailable.get(i);
+			MiscTweak tweak = tweaksAvailable.get(i);
 			if(tweakCB.isSelected()) {
 				choice |= tweak.getValue();
 			}
@@ -72,13 +72,13 @@ public class CodeTweaksDialog extends javax.swing.JDialog {
         okButton = new javax.swing.JButton();
         cancelButton = new javax.swing.JButton();
         
-        int numTweaks = CodeTweaks.allTweaks.size();
+        int numTweaks = MiscTweak.allTweaks.size();
         
         tweakCheckboxes = new ArrayList<JCheckBox>();
-        tweaksAvailable = new ArrayList<CodeTweaks>();
+        tweaksAvailable = new ArrayList<MiscTweak>();
         
         for(int i=0;i<numTweaks;i++) {
-        	CodeTweaks ct = CodeTweaks.allTweaks.get(i);
+        	MiscTweak ct = MiscTweak.allTweaks.get(i);
         	if((available & ct.getValue()) > 0) {
         		JCheckBox tweakBox = new JCheckBox();
         		tweakBox.setText(ct.getTweakName());

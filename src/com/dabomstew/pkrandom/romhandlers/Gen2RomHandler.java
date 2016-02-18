@@ -41,8 +41,8 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
 
-import com.dabomstew.pkrandom.CodeTweaks;
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.constants.Gen2Constants;
@@ -424,7 +424,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 			// Name?
 			pokes[i].name = pokeNames[i];
 		}
-		
+
 		// Get evolutions
 		populateEvolutions();
 
@@ -1794,19 +1794,29 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 	}
 
 	@Override
-	public int codeTweaksAvailable() {
-		int available = 0;
+	public int miscTweaksAvailable() {
+		int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
 		if (romEntry.codeTweaks.get("BWXPTweak") != null) {
-			available |= CodeTweaks.BW_EXP_PATCH;
+			available |= MiscTweak.BW_EXP_PATCH.getValue();
 		}
 		if (romEntry.getValue("TextDelayFunctionOffset") != 0) {
-			available |= CodeTweaks.FASTEST_TEXT;
+			available |= MiscTweak.FASTEST_TEXT.getValue();
 		}
 		return available;
 	}
 
 	@Override
-	public void applyBWEXPPatch() {
+	public void applyMiscTweak(MiscTweak tweak) {
+		if (tweak == MiscTweak.BW_EXP_PATCH) {
+			applyBWEXPPatch();
+		} else if (tweak == MiscTweak.FASTEST_TEXT) {
+			applyFastestTextPatch();
+		} else if (tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
+			applyCamelCaseNames();
+		}
+	}
+
+	private void applyBWEXPPatch() {
 		String patchName = romEntry.codeTweaks.get("BWXPTweak");
 		if (patchName == null) {
 			return;
@@ -1819,8 +1829,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 		}
 	}
 
-	@Override
-	public void applyFastestTextPatch() {
+	private void applyFastestTextPatch() {
 		if (romEntry.getValue("TextDelayFunctionOffset") != 0) {
 			rom[romEntry.getValue("TextDelayFunctionOffset")] = (byte) GBConstants.gbZ80Ret;
 		}

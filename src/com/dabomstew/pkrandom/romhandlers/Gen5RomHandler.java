@@ -42,6 +42,7 @@ import java.util.TreeMap;
 import pptxt.PPTxtHandler;
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.pokemon.Encounter;
@@ -1401,12 +1402,22 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 	}
 
 	@Override
-	public boolean hasHiddenHollowPokemon() {
-		return romEntry.romType == Gen5Constants.Type_BW2;
+	public int miscTweaksAvailable() {
+		int available = 0;
+		if (romEntry.romType == Gen5Constants.Type_BW2) {
+			available |= MiscTweak.RANDOMIZE_HIDDEN_HOLLOWS.getValue();
+		}
+		return available;
 	}
 
 	@Override
-	public void randomizeHiddenHollowPokemon() {
+	public void applyMiscTweak(MiscTweak tweak) {
+		if (tweak == MiscTweak.RANDOMIZE_HIDDEN_HOLLOWS) {
+			randomizeHiddenHollowPokemon();
+		}
+	}
+
+	private void randomizeHiddenHollowPokemon() {
 		if (romEntry.romType != Gen5Constants.Type_BW2) {
 			return;
 		}

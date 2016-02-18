@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.IngameTrade;
@@ -316,12 +317,6 @@ public interface RomHandler {
 
 	public void randomizeAbilities(boolean allowWonderGuard);
 
-	// Hidden hollows (BW2 only)
-
-	public boolean hasHiddenHollowPokemon();
-
-	public void randomizeHiddenHollowPokemon();
-
 	// Items
 
 	public ItemList getAllowedItems();
@@ -405,8 +400,6 @@ public interface RomHandler {
 
 	// Misc
 
-	public void applyCamelCaseNames();
-
 	public boolean isYellow();
 
 	public String getROMName();
@@ -415,15 +408,9 @@ public interface RomHandler {
 
 	public String getSupportLevel();
 
-	public void fixTypeEffectiveness();
-
-	public void patchForNationalDex();
-
 	public String getDefaultExtension();
 
 	public int internalStringLength(String string);
-
-	public int codeTweaksAvailable();
 
 	public void applySignature();
 
@@ -433,18 +420,8 @@ public interface RomHandler {
 
 	// code tweaks
 
-	public void applyBWEXPPatch();
+	public int miscTweaksAvailable();
 
-	public void applyXAccNerfPatch();
-
-	public void applyCritRatePatch();
-
-	public void applyFastestTextPatch();
-
-	public void applyRunningShoesIndoorsPatch();
-
-	public void randomizePCPotion();
-
-	public void applyPikachuEvoPatch();
+	public void applyMiscTweak(MiscTweak tweak);
 
 }

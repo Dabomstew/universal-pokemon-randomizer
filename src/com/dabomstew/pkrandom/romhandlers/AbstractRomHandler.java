@@ -47,6 +47,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
@@ -254,9 +255,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 		}
 
 	}
-
-	@Override
-	public void applyCamelCaseNames() {
+	
+	protected void applyCamelCaseNames() {
 		List<Pokemon> pokes = getPokemon();
 		for (Pokemon pkmn : pokes) {
 			if (pkmn == null) {
@@ -3410,12 +3410,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 	/* Used when a subclass doesn't override */
 
 	@Override
-	public void fixTypeEffectiveness() {
-		// DEFAULT: do nothing
-
-	}
-
-	@Override
 	public boolean hasTimeBasedEncounters() {
 		// DEFAULT: no
 		return false;
@@ -3446,12 +3440,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 	}
 
 	@Override
-	public void patchForNationalDex() {
-		// Default: Do Nothing.
-
-	}
-
-	@Override
 	public boolean canChangeStarters() {
 		return true;
 	}
@@ -3469,63 +3457,14 @@ public abstract class AbstractRomHandler implements RomHandler {
 	}
 
 	@Override
-	public int codeTweaksAvailable() {
+	public int miscTweaksAvailable() {
 		// default: none
 		return 0;
 	}
-
+	
 	@Override
-	public void applyBWEXPPatch() {
+	public void applyMiscTweak(MiscTweak tweak) {
 		// default: do nothing
-
-	}
-
-	@Override
-	public void applyXAccNerfPatch() {
-		// default: do nothing
-
-	}
-
-	@Override
-	public void applyCritRatePatch() {
-		// default: do nothing
-
-	}
-
-	@Override
-	public void applyFastestTextPatch() {
-		// default: do nothing
-
-	}
-
-	@Override
-	public void applyRunningShoesIndoorsPatch() {
-		// default: do nothing
-
-	}
-
-	@Override
-	public void randomizePCPotion() {
-		// default: do nothing
-
-	}
-
-	@Override
-	public void applyPikachuEvoPatch() {
-		// default: do nothing
-
-	}
-
-	@Override
-	public boolean hasHiddenHollowPokemon() {
-		// default: no
-		return false;
-	}
-
-	@Override
-	public void randomizeHiddenHollowPokemon() {
-		// default: do nothing
-
 	}
 
 	@Override

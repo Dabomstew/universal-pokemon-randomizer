@@ -41,8 +41,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.zip.CRC32;
 
-import com.dabomstew.pkrandom.CodeTweaks;
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen3Constants;
 import com.dabomstew.pkrandom.pokemon.Encounter;
@@ -2080,7 +2080,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		}
 	}
 
-	public void patchForNationalDex() {
+	private void patchForNationalDex() {
 		log("--Patching for National Dex at Start of Game--");
 		String nl = System.getProperty("line.separator");
 		int fso = romEntry.getValue("FreeSpace");
@@ -2964,26 +2964,39 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	}
 
 	@Override
-	public int codeTweaksAvailable() {
-		int available = 0;
+	public int miscTweaksAvailable() {
+		int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
+		available |= MiscTweak.NATIONAL_DEX_AT_START.getValue();
 		if (romEntry.getValue("RunIndoorsTweakOffset") > 0) {
-			available |= CodeTweaks.RUNNING_SHOES_INDOORS;
+			available |= MiscTweak.RUNNING_SHOES_INDOORS.getValue();
 		}
 		if (romEntry.getValue("TextSpeedValuesOffset") > 0) {
-			available |= CodeTweaks.FASTEST_TEXT;
+			available |= MiscTweak.FASTEST_TEXT.getValue();
 		}
+		
 		return available;
 	}
 
 	@Override
-	public void applyRunningShoesIndoorsPatch() {
+	public void applyMiscTweak(MiscTweak tweak) {
+		if (tweak == MiscTweak.RUNNING_SHOES_INDOORS) {
+			applyRunningShoesIndoorsPatch();
+		} else if (tweak == MiscTweak.FASTEST_TEXT) {
+			applyFastestTextPatch();
+		} else if (tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
+			applyCamelCaseNames();
+		} else if (tweak == MiscTweak.NATIONAL_DEX_AT_START) {
+			patchForNationalDex();
+		}
+	}
+
+	private void applyRunningShoesIndoorsPatch() {
 		if (romEntry.getValue("RunIndoorsTweakOffset") != 0) {
 			rom[romEntry.getValue("RunIndoorsTweakOffset")] = 0x00;
 		}
 	}
 
-	@Override
-	public void applyFastestTextPatch() {
+	private void applyFastestTextPatch() {
 		if (romEntry.getValue("TextSpeedValuesOffset") > 0) {
 			int tsvOffset = romEntry.getValue("TextSpeedValuesOffset");
 			rom[tsvOffset] = 4; // slow = medium

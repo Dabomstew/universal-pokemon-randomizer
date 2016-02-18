@@ -148,11 +148,33 @@ public class SettingsUpdater {
 		}
 		
 		// no significant changes from 162 to 163
-		// 163 to 170: add move data/evolution randoms and 2nd TM byte
+		
 		if (oldVersion < 170) {
+			// 163 to 170: add move data/evolution randoms and 2nd TM byte
 			insertExtraByte(17, (byte) 0);
 			insertExtraByte(21, (byte) 0);
 			insertExtraByte(22, (byte) 1);
+			
+			
+			// Move some bits from general options to misc tweaks
+			int oldTweaks = FileFunctions.readFullInt(dataBlock, 27);
+			if((dataBlock[0] & 1) != 0) {
+				oldTweaks |= MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
+			}
+			if((dataBlock[0] & (1 << 1)) != 0) {
+				oldTweaks |= MiscTweak.NATIONAL_DEX_AT_START.getValue();
+			}
+			if((dataBlock[0] & (1 << 5)) != 0) {
+				oldTweaks |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
+			}
+			if((dataBlock[2] & (1 << 5)) != 0) {
+				oldTweaks |= MiscTweak.RANDOMIZE_HIDDEN_HOLLOWS.getValue();
+			}
+			FileFunctions.writeFullInt(dataBlock, 27, oldTweaks);
+			
+			// Now remap the affected bytes
+			dataBlock[0] = getRemappedByte(dataBlock[0], new int[] { 2, 3, 4, 6, 7});
+			dataBlock[2] = getRemappedByte(dataBlock[2], new int[] { 0, 1, 2, 4, 6, 7 });
 		}
 
 		// fix checksum
@@ -168,6 +190,17 @@ public class SettingsUpdater {
 		byte[] finalConfigString = new byte[actualDataLength];
 		System.arraycopy(dataBlock, 0, finalConfigString, 0, actualDataLength);
 		return DatatypeConverter.printBase64Binary(finalConfigString);
+	}
+	
+	private static byte getRemappedByte(byte old, int[] oldIndexes) {
+		int newValue = 0;
+		int oldValue = old & 0xFF;
+		for(int i=0;i<oldIndexes.length;i++) {
+			if((oldValue & (1 << oldIndexes[i])) != 0) {
+				newValue |= (1 << i);
+			}
+		}
+		return (byte) newValue;
 	}
 
 	/**

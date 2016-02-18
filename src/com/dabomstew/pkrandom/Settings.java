@@ -32,16 +32,11 @@ public class Settings {
 	private String romName;
 	private boolean updatedFromOldVersion = false;
 	private GenRestrictions currentRestrictions;
-	private int currentCodeTweaks;
+	private int currentMiscTweaks;
 
-	private boolean updateTypeEffectiveness;
 	private boolean changeImpossibleEvolutions;
 	private boolean makeEvolutionsEasier;
-	private boolean lowerCasePokemonNames;
-	private boolean nationalDexAtStart;
 	private boolean raceMode;
-	private boolean randomizeHiddenHollows;
-	private boolean useCodeTweaks;
 	private boolean blockBrokenMoves;
 	private boolean limitPokemon;
 
@@ -221,9 +216,8 @@ public class Settings {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
 		// 0: general options #1 + trainer/class names
-		out.write(makeByteSelected(lowerCasePokemonNames, nationalDexAtStart,
-				changeImpossibleEvolutions, updateMoves, updateMovesLegacy,
-				updateTypeEffectiveness, randomizeTrainerNames,
+		out.write(makeByteSelected(changeImpossibleEvolutions, updateMoves,
+				updateMovesLegacy, randomizeTrainerNames,
 				randomizeTrainerClassNames));
 
 		// 1: pokemon base stats & abilities
@@ -240,8 +234,8 @@ public class Settings {
 		out.write(makeByteSelected(
 				typesMod == TypesMod.RANDOM_FOLLOW_EVOLUTIONS,
 				typesMod == TypesMod.COMPLETELY_RANDOM,
-				typesMod == TypesMod.UNCHANGED, useCodeTweaks, raceMode,
-				randomizeHiddenHollows, blockBrokenMoves, limitPokemon));
+				typesMod == TypesMod.UNCHANGED, raceMode, blockBrokenMoves,
+				limitPokemon));
 
 		// v162: 3: new general options byte added (the rest were full)
 
@@ -361,9 +355,9 @@ public class Settings {
 		} catch (IOException e) {
 		}
 
-		// @ 27 code tweaks
+		// @ 27 misc tweaks
 		try {
-			writeFullInt(out, currentCodeTweaks);
+			writeFullInt(out, currentMiscTweaks);
 		} catch (IOException e) {
 
 		}
@@ -402,14 +396,11 @@ public class Settings {
 		Settings settings = new Settings();
 
 		// Restore the actual controls
-		settings.setLowerCasePokemonNames(restoreState(data[0], 0));
-		settings.setNationalDexAtStart(restoreState(data[0], 1));
-		settings.setChangeImpossibleEvolutions(restoreState(data[0], 2));
-		settings.setUpdateMoves(restoreState(data[0], 3));
-		settings.setUpdateMovesLegacy(restoreState(data[0], 4));
-		settings.setUpdateTypeEffectiveness(restoreState(data[0], 5));
-		settings.setRandomizeTrainerNames(restoreState(data[0], 6));
-		settings.setRandomizeTrainerClassNames(restoreState(data[0], 7));
+		settings.setChangeImpossibleEvolutions(restoreState(data[0], 0));
+		settings.setUpdateMoves(restoreState(data[0], 1));
+		settings.setUpdateMovesLegacy(restoreState(data[0], 2));
+		settings.setRandomizeTrainerNames(restoreState(data[0], 3));
+		settings.setRandomizeTrainerClassNames(restoreState(data[0], 4));
 
 		settings.setBaseStatisticsMod(restoreEnum(BaseStatisticsMod.class,
 				data[1], 3, // UNCHANGED
@@ -427,11 +418,9 @@ public class Settings {
 				0, // RANDOM_FOLLOW_EVOLUTIONS
 				1 // COMPLETELY_RANDOM
 		));
-		settings.setUseCodeTweaks(restoreState(data[2], 3));
-		settings.setRaceMode(restoreState(data[2], 4));
-		settings.setRandomizeHiddenHollows(restoreState(data[2], 5));
-		settings.setBlockBrokenMoves(restoreState(data[2], 6));
-		settings.setLimitPokemon(restoreState(data[2], 7));
+		settings.setRaceMode(restoreState(data[2], 3));
+		settings.setBlockBrokenMoves(restoreState(data[2], 4));
+		settings.setLimitPokemon(restoreState(data[2], 5));
 
 		settings.setMakeEvolutionsEasier(restoreState(data[3], 0));
 
@@ -541,7 +530,7 @@ public class Settings {
 		settings.setRandomizeMovePPs(restoreState(data[21], 2));
 		settings.setRandomizeMoveTypes(restoreState(data[21], 3));
 		settings.setRandomizeMoveCategory(restoreState(data[21], 4));
-		
+
 		settings.setEvolutionsMod(restoreEnum(EvolutionsMod.class, data[22], 0, // UNCHANGED
 				1 // RANDOM
 		));
@@ -560,11 +549,7 @@ public class Settings {
 
 		int codeTweaks = FileFunctions.readFullInt(data, 27);
 
-		// Sanity override
-		if (codeTweaks == 0) {
-			settings.setUseCodeTweaks(false);
-		}
-		settings.setCurrentCodeTweaks(codeTweaks);
+		settings.setCurrentMiscTweaks(codeTweaks);
 
 		int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
 		String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1,
@@ -634,33 +619,12 @@ public class Settings {
 			this.currentRestrictions.limitToGen(rh.generationOfPokemon());
 		}
 
-		// code tweaks
-		int oldCodeTweaks = this.currentCodeTweaks;
-		this.currentCodeTweaks &= rh.codeTweaksAvailable();
+		// misc tweaks
+		int oldMiscTweaks = this.currentMiscTweaks;
+		this.currentMiscTweaks &= rh.miscTweaksAvailable();
 
-		if (oldCodeTweaks != this.currentCodeTweaks) {
+		if (oldMiscTweaks != this.currentMiscTweaks) {
 			feedback.setRemovedCodeTweaks(true);
-		}
-
-		if (this.currentCodeTweaks == 0) {
-			this.setUseCodeTweaks(false);
-		}
-
-		// checkboxes that are only used for certain gens
-		if (!(rh instanceof Gen1RomHandler)) {
-			this.setUpdateTypeEffectiveness(false);
-		}
-
-		if (rh instanceof Gen5RomHandler) {
-			this.setLowerCasePokemonNames(false);
-		}
-
-		if (!(rh instanceof Gen3RomHandler)) {
-			this.setNationalDexAtStart(false);
-		}
-
-		if (!rh.hasHiddenHollowPokemon()) {
-			this.setRandomizeHiddenHollows(false);
 		}
 
 		if (rh.abilitiesPerPokemon() == 0) {
@@ -773,21 +737,12 @@ public class Settings {
 		return this;
 	}
 
-	public int getCurrentCodeTweaks() {
-		return currentCodeTweaks;
+	public int getCurrentMiscTweaks() {
+		return currentMiscTweaks;
 	}
 
-	public Settings setCurrentCodeTweaks(int currentCodeTweaks) {
-		this.currentCodeTweaks = currentCodeTweaks;
-		return this;
-	}
-
-	public boolean isUpdateTypeEffectiveness() {
-		return updateTypeEffectiveness;
-	}
-
-	public Settings setUpdateTypeEffectiveness(boolean updateTypeEffectiveness) {
-		this.updateTypeEffectiveness = updateTypeEffectiveness;
+	public Settings setCurrentMiscTweaks(int currentMiscTweaks) {
+		this.currentMiscTweaks = currentMiscTweaks;
 		return this;
 	}
 
@@ -828,48 +783,12 @@ public class Settings {
 		return this;
 	}
 
-	public boolean isLowerCasePokemonNames() {
-		return lowerCasePokemonNames;
-	}
-
-	public Settings setLowerCasePokemonNames(boolean lowerCasePokemonNames) {
-		this.lowerCasePokemonNames = lowerCasePokemonNames;
-		return this;
-	}
-
-	public boolean isNationalDexAtStart() {
-		return nationalDexAtStart;
-	}
-
-	public Settings setNationalDexAtStart(boolean nationalDexAtStart) {
-		this.nationalDexAtStart = nationalDexAtStart;
-		return this;
-	}
-
 	public boolean isRaceMode() {
 		return raceMode;
 	}
 
 	public Settings setRaceMode(boolean raceMode) {
 		this.raceMode = raceMode;
-		return this;
-	}
-
-	public boolean isRandomizeHiddenHollows() {
-		return randomizeHiddenHollows;
-	}
-
-	public Settings setRandomizeHiddenHollows(boolean randomizeHiddenHollows) {
-		this.randomizeHiddenHollows = randomizeHiddenHollows;
-		return this;
-	}
-
-	public boolean isUseCodeTweaks() {
-		return useCodeTweaks;
-	}
-
-	public Settings setUseCodeTweaks(boolean useCodeTweaks) {
-		this.useCodeTweaks = useCodeTweaks;
 		return this;
 	}
 
@@ -998,7 +917,7 @@ public class Settings {
 		this.evolutionsMod = evolutionsMod;
 		return this;
 	}
-	
+
 	public Settings setEvolutionsMod(boolean... bools) {
 		return setEvolutionsMod(getEnum(EvolutionsMod.class, bools));
 	}

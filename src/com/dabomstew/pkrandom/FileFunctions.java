@@ -93,6 +93,12 @@ public class FileFunctions {
 	public static int read2ByteInt(byte[] data, int index) {
 		return (data[index] & 0xFF) | ((data[index + 1] & 0xFF) << 8);
 	}
+	
+	public static void writeFullInt(byte[] data, int offset, int value) {
+		byte[] valueBytes = ByteBuffer.allocate(4).putInt(value).array();
+		System.arraycopy(valueBytes, 0, data, offset, 4);
+	}
+	
 
 	public static byte[] getConfigAsBytes(String filename) throws IOException {
 		InputStream in = openConfig(filename);

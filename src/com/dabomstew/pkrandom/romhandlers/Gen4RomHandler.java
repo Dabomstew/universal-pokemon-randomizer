@@ -42,6 +42,7 @@ import thenewpoketext.PokeTextData;
 import thenewpoketext.TextToPoke;
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen4Constants;
 import com.dabomstew.pkrandom.pokemon.Encounter;
@@ -2706,6 +2707,19 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			return Gen4Constants.hgssEarlyRequiredHMMoves;
 		} else {
 			return Gen4Constants.dpptEarlyRequiredHMMoves;
+		}
+	}
+
+	@Override
+	public int miscTweaksAvailable() {
+		int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
+		return available;
+	}
+
+	@Override
+	public void applyMiscTweak(MiscTweak tweak) {
+		if (tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
+			applyCamelCaseNames();
 		}
 	}
 }

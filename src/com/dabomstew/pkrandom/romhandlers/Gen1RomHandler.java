@@ -39,8 +39,8 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.TreeMap;
 
-import com.dabomstew.pkrandom.CodeTweaks;
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.constants.Gen1Constants;
@@ -1315,8 +1315,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		return false;
 	}
 
-	@Override
-	public void fixTypeEffectiveness() {
+	private void fixTypeEffectiveness() {
 		// TODO rewrite to use table properly
 		int base = romEntry.getValue("TypeEffectivenessOffset");
 		log("--Fixing Type Effectiveness--");
@@ -1804,61 +1803,78 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 	}
 
 	@Override
-	public int codeTweaksAvailable() {
-		int available = 0;
+	public int miscTweaksAvailable() {
+		int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
+		available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
+		
 		if (romEntry.codeTweaks.get("BWXPTweak") != null) {
-			available |= CodeTweaks.BW_EXP_PATCH;
+			available |= MiscTweak.BW_EXP_PATCH.getValue();
 		}
 		if (romEntry.codeTweaks.get("XAccNerfTweak") != null) {
-			available |= CodeTweaks.NERF_X_ACCURACY;
+			available |= MiscTweak.NERF_X_ACCURACY.getValue();
 		}
 		if (romEntry.codeTweaks.get("CritRateTweak") != null) {
-			available |= CodeTweaks.FIX_CRIT_RATE;
+			available |= MiscTweak.FIX_CRIT_RATE.getValue();
 		}
 		if (romEntry.getValue("TextDelayFunctionOffset") != 0) {
-			available |= CodeTweaks.FASTEST_TEXT;
+			available |= MiscTweak.FASTEST_TEXT.getValue();
 		}
 		if (romEntry.getValue("PCPotionOffset") != 0) {
-			available |= CodeTweaks.RANDOMIZE_PC_POTION;
+			available |= MiscTweak.RANDOMIZE_PC_POTION.getValue();
 		}
 		if (romEntry.getValue("PikachuEvoJumpOffset") != 0) {
-			available |= CodeTweaks.ALLOW_PIKACHU_EVOLUTION;
+			available |= MiscTweak.ALLOW_PIKACHU_EVOLUTION.getValue();
 		}
 		return available;
 	}
 
 	@Override
-	public void applyBWEXPPatch() {
+	public void applyMiscTweak(MiscTweak tweak) {
+		if (tweak == MiscTweak.BW_EXP_PATCH) {
+			applyBWEXPPatch();
+		} else if (tweak == MiscTweak.NERF_X_ACCURACY) {
+			applyXAccNerfPatch();
+		} else if (tweak == MiscTweak.FIX_CRIT_RATE) {
+			applyCritRatePatch();
+		} else if (tweak == MiscTweak.FASTEST_TEXT) {
+			applyFastestTextPatch();
+		} else if (tweak == MiscTweak.RANDOMIZE_PC_POTION) {
+			randomizePCPotion();
+		} else if (tweak == MiscTweak.ALLOW_PIKACHU_EVOLUTION) {
+			applyPikachuEvoPatch();
+		} else if(tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
+			applyCamelCaseNames();
+		} else if(tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
+			fixTypeEffectiveness();
+		}
+	}
+
+	private void applyBWEXPPatch() {
 		genericIPSPatch("BWXPTweak");
 	}
 
-	@Override
-	public void applyXAccNerfPatch() {
+	private void applyXAccNerfPatch() {
 		xAccNerfed = genericIPSPatch("XAccNerfTweak");
 	}
 
-	@Override
-	public void applyCritRatePatch() {
+	private void applyCritRatePatch() {
 		genericIPSPatch("CritRateTweak");
 	}
 
-	@Override
-	public void applyFastestTextPatch() {
+	private void applyFastestTextPatch() {
 		if (romEntry.getValue("TextDelayFunctionOffset") != 0) {
 			rom[romEntry.getValue("TextDelayFunctionOffset")] = GBConstants.gbZ80Ret;
 		}
 	}
 
-	@Override
-	public void randomizePCPotion() {
+	private void randomizePCPotion() {
 		if (romEntry.getValue("PCPotionOffset") != 0) {
 			rom[romEntry.getValue("PCPotionOffset")] = (byte) this
 					.getNonBadItems().randomNonTM(this.random);
 		}
 	}
 
-	@Override
-	public void applyPikachuEvoPatch() {
+	private void applyPikachuEvoPatch() {
 		if (romEntry.getValue("PikachuEvoJumpOffset") != 0) {
 			rom[romEntry.getValue("PikachuEvoJumpOffset")] = GBConstants.gbZ80JumpRelative;
 		}

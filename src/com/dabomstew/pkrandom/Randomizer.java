@@ -18,7 +18,6 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
-import com.dabomstew.pkrandom.romhandlers.Gen3RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen5RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
@@ -61,12 +60,6 @@ public class Randomizer {
 			romHandler.removeEvosForPokemonPool();
 		}
 
-		// Update type effectiveness in RBY?
-		if (romHandler instanceof Gen1RomHandler
-				&& settings.isUpdateTypeEffectiveness()) {
-			romHandler.fixTypeEffectiveness();
-		}
-
 		// Move updates & data changes
 		if (settings.isUpdateMoves()) {
 			romHandler.initMoveUpdates();
@@ -102,35 +95,17 @@ public class Randomizer {
 
 		List<Move> moves = romHandler.getMoves();
 
-		// Camel case?
-		if (!(romHandler instanceof Gen5RomHandler)
-				&& settings.isLowerCasePokemonNames()) {
-			romHandler.applyCamelCaseNames();
-		}
+		// Misc Tweaks?
+		int currentMiscTweaks = settings.getCurrentMiscTweaks();
+		if (romHandler.miscTweaksAvailable() != 0) {
+			int codeTweaksAvailable = romHandler.miscTweaksAvailable();
 
-		// National dex gen3?
-		if (romHandler instanceof Gen3RomHandler
-				&& settings.isNationalDexAtStart()) {
-			romHandler.patchForNationalDex();
-		}
-
-		// Code Tweaks?
-		int currentCodeTweaks = settings.getCurrentCodeTweaks();
-		if (romHandler.codeTweaksAvailable() != 0) {
-			int codeTweaksAvailable = romHandler.codeTweaksAvailable();
-
-			for (CodeTweaks ct : CodeTweaks.allTweaks) {
-				if ((codeTweaksAvailable & ct.getValue()) > 0
-						&& (currentCodeTweaks & ct.getValue()) > 0) {
-					ct.applyTo(romHandler);
+			for (MiscTweak mt : MiscTweak.allTweaks) {
+				if ((codeTweaksAvailable & mt.getValue()) > 0
+						&& (currentMiscTweaks & mt.getValue()) > 0) {
+					romHandler.applyMiscTweak(mt);
 				}
 			}
-		}
-
-		// Hollows?
-		if (romHandler.hasHiddenHollowPokemon()
-				&& settings.isRandomizeHiddenHollows()) {
-			romHandler.randomizeHiddenHollowPokemon();
 		}
 
 		// Base stats changing
