@@ -868,7 +868,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
 			this.peUnchangedRB.setEnabled(true);
 			this.peUnchangedRB.setSelected(true);
 			this.peRandomRB.setEnabled(true);
-			this.peThreeStagesCB.setSelected(true);
 
 			if (this.romHandler instanceof AbstractDSRomHandler) {
 				((AbstractDSRomHandler) this.romHandler).closeInnerRom();
