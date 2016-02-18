@@ -1960,10 +1960,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
 		this.enableOrDisableSubControls();
 	}// GEN-LAST:event_goUpdateMovesCheckBoxActionPerformed
 
-	private void codeTweaksCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_codeTweaksCBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_codeTweaksCBActionPerformed
-
 	private void pokeLimitCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pokeLimitCBActionPerformed
 		this.enableOrDisableSubControls();
 	}// GEN-LAST:event_pokeLimitCBActionPerformed
