@@ -2475,11 +2475,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		// FRLG
 		if (romEntry.romType == Gen3Constants.RomType_FRLG) {
 			// intro sprites : first 255 only due to size
-			int introPokemon = this.random.nextInt(255) + 1;
-			// no out of dex slots
-			while (internalToPokedex[introPokemon] == 0) {
-				introPokemon = this.random.nextInt(255) + 1;
+			Pokemon introPk = randomPokemonLimited(255, false);
+			if (introPk == null) {
+				return;
 			}
+			int introPokemon = pokedexToInternal[introPk.number];
 			int frontSprites = readPointer(Gen3Constants.frlgFrontSpritesPointer);
 			int palettes = readPointer(Gen3Constants.frlgPokemonPalettesPointer);
 
@@ -2545,6 +2545,21 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			writeWord(romEntry.getValue("IntroCryOffset"), introPokemon);
 		}
 
+	}
+
+	private Pokemon randomPokemonLimited(int maxValue, boolean blockNonMales) {
+		List<Pokemon> validPokemon = new ArrayList<Pokemon>();
+		for (Pokemon pk : this.mainPokemonList) {
+			if (pokedexToInternal[pk.number] <= maxValue
+					&& (!blockNonMales || pk.genderRatio <= 0xFD)) {
+				validPokemon.add(pk);
+			}
+		}
+		if (validPokemon.size() == 0) {
+			return null;
+		} else {
+			return validPokemon.get(random.nextInt(validPokemon.size()));
+		}
 	}
 
 	private void determineMapBankSizes() {
@@ -3003,39 +3018,34 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		if (romEntry.getValue("CatchingTutorialOpponentMonOffset") > 0) {
 			int oppOffset = romEntry
 					.getValue("CatchingTutorialOpponentMonOffset");
-			Pokemon opponent = randomPokemon();
 			if (romEntry.romType == Gen3Constants.RomType_FRLG) {
-				while (opponent.genderRatio >= 0xFE
-						|| pokedexToInternal[opponent.number] > 255) {
-					// Opponent must be able to be male and fit in the space.
-					opponent = randomPokemon();
-				}
-				
-				int oppValue = pokedexToInternal[opponent.number];
-				rom[oppOffset] = (byte) oppValue;
-				rom[oppOffset + 1] = Gen3Constants.gbaSetRxOpcode
-						| Gen3Constants.gbaR1;
-			} else {
-				while (opponent.genderRatio >= 0xFE
-						|| pokedexToInternal[opponent.number] > 510) {
-					// Opponent must be able to be male and fit in the space.
-					opponent = randomPokemon();
-				}
-				int oppValue = pokedexToInternal[opponent.number];
-				if (oppValue > 255) {
-					rom[oppOffset] = (byte) 0xFF;
-					rom[oppOffset + 1] = Gen3Constants.gbaSetRxOpcode
-							| Gen3Constants.gbaR1;
+				Pokemon opponent = randomPokemonLimited(255, true);
+				if (opponent != null) {
 
-					rom[oppOffset + 2] = (byte) (oppValue - 0xFF);
-					rom[oppOffset + 3] = Gen3Constants.gbaAddRxOpcode
-							| Gen3Constants.gbaR1;
-				} else {
+					int oppValue = pokedexToInternal[opponent.number];
 					rom[oppOffset] = (byte) oppValue;
 					rom[oppOffset + 1] = Gen3Constants.gbaSetRxOpcode
 							| Gen3Constants.gbaR1;
+				}
+			} else {
+				Pokemon opponent = randomPokemonLimited(510, true);
+				if (opponent != null) {
+					int oppValue = pokedexToInternal[opponent.number];
+					if (oppValue > 255) {
+						rom[oppOffset] = (byte) 0xFF;
+						rom[oppOffset + 1] = Gen3Constants.gbaSetRxOpcode
+								| Gen3Constants.gbaR1;
 
-					writeWord(oppOffset + 2, Gen3Constants.gbaNopOpcode);
+						rom[oppOffset + 2] = (byte) (oppValue - 0xFF);
+						rom[oppOffset + 3] = Gen3Constants.gbaAddRxOpcode
+								| Gen3Constants.gbaR1;
+					} else {
+						rom[oppOffset] = (byte) oppValue;
+						rom[oppOffset + 1] = Gen3Constants.gbaSetRxOpcode
+								| Gen3Constants.gbaR1;
+
+						writeWord(oppOffset + 2, Gen3Constants.gbaNopOpcode);
+					}
 				}
 			}
 		}
@@ -3043,26 +3053,24 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		if (romEntry.getValue("CatchingTutorialPlayerMonOffset") > 0) {
 			int playerOffset = romEntry
 					.getValue("CatchingTutorialPlayerMonOffset");
-			Pokemon playerMon = randomPokemon();
-			while (pokedexToInternal[playerMon.number] > 510) {
-				// Player mon must be able to fit in the space.
-				playerMon = randomPokemon();
-			}
-			int plyValue = pokedexToInternal[playerMon.number];
-			if (plyValue > 255) {
-				rom[playerOffset] = (byte) 0xFF;
-				rom[playerOffset + 1] = Gen3Constants.gbaSetRxOpcode
-						| Gen3Constants.gbaR1;
+			Pokemon playerMon = randomPokemonLimited(510, false);
+			if (playerMon != null) {
+				int plyValue = pokedexToInternal[playerMon.number];
+				if (plyValue > 255) {
+					rom[playerOffset] = (byte) 0xFF;
+					rom[playerOffset + 1] = Gen3Constants.gbaSetRxOpcode
+							| Gen3Constants.gbaR1;
 
-				rom[playerOffset + 2] = (byte) (plyValue - 0xFF);
-				rom[playerOffset + 3] = Gen3Constants.gbaAddRxOpcode
-						| Gen3Constants.gbaR1;
-			} else {
-				rom[playerOffset] = (byte) plyValue;
-				rom[playerOffset + 1] = Gen3Constants.gbaSetRxOpcode
-						| Gen3Constants.gbaR1;
+					rom[playerOffset + 2] = (byte) (plyValue - 0xFF);
+					rom[playerOffset + 3] = Gen3Constants.gbaAddRxOpcode
+							| Gen3Constants.gbaR1;
+				} else {
+					rom[playerOffset] = (byte) plyValue;
+					rom[playerOffset + 1] = Gen3Constants.gbaSetRxOpcode
+							| Gen3Constants.gbaR1;
 
-				writeWord(playerOffset + 2, Gen3Constants.gbaNopOpcode);
+					writeWord(playerOffset + 2, Gen3Constants.gbaNopOpcode);
+				}
 			}
 		}
 

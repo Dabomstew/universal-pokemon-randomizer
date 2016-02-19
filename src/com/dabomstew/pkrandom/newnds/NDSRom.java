@@ -469,10 +469,18 @@ public class NDSRom {
 	}
 
 	public byte[] getOverlay(int number) throws IOException {
-		if (number >= 0 && number <= arm9overlays.length) {
+		if (number >= 0 && number < arm9overlays.length) {
 			return arm9overlays[number].getContents();
 		} else {
 			return null;
+		}
+	}
+	
+	public int getOverlayAddress(int number) {
+		if (number >= 0 && number < arm9overlays.length) {
+			return arm9overlays[number].ram_address;
+		} else {
+			return -1;
 		}
 	}
 

@@ -2713,6 +2713,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	@Override
 	public int miscTweaksAvailable() {
 		int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
+		available |= MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getValue();
 		return available;
 	}
 
@@ -2720,6 +2721,50 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	public void applyMiscTweak(MiscTweak tweak) {
 		if (tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
 			applyCamelCaseNames();
+		} else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
+			randomizeCatchingTutorial();
+		}
+	}
+
+	private void randomizeCatchingTutorial() {
+		int opponentOffset = romEntry
+				.getInt("CatchingTutorialOpponentMonOffset");
+
+		if (romEntry.romType == Gen4Constants.Type_HGSS) {
+			// Can randomize player mon too, but both limited to 1-255
+			int playerOffset = romEntry
+					.getInt("CatchingTutorialPlayerMonOffset");
+
+			Pokemon opponent = randomPokemonLimited(255, false);
+			Pokemon player = randomPokemonLimited(255, false);
+
+			if (opponent != null && player != null) {
+				arm9[opponentOffset] = (byte) opponent.number;
+				arm9[playerOffset] = (byte) player.number;
+			}
+		} else {
+			// Only opponent, but enough space for any mon
+			Pokemon opponent = randomPokemonLimited(Integer.MAX_VALUE, false);
+
+			if (opponent != null) {
+				writeLong(arm9, opponentOffset, opponent.number);
+			}
+		}
+
+	}
+
+	private Pokemon randomPokemonLimited(int maxValue, boolean blockNonMales) {
+		List<Pokemon> validPokemon = new ArrayList<Pokemon>();
+		for (Pokemon pk : this.mainPokemonList) {
+			if (pk.number <= maxValue
+					&& (!blockNonMales || pk.genderRatio <= 0xFD)) {
+				validPokemon.add(pk);
+			}
+		}
+		if (validPokemon.size() == 0) {
+			return null;
+		} else {
+			return validPokemon.get(random.nextInt(validPokemon.size()));
 		}
 	}
 }
