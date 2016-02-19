@@ -23,6 +23,7 @@ public class MiscTweak {
 	public static final MiscTweak UPDATE_TYPE_EFFECTIVENESS = new MiscTweak(256, "typeEffectiveness");
 	public static final MiscTweak RANDOMIZE_HIDDEN_HOLLOWS = new MiscTweak(512, "hiddenHollows");
 	public static final MiscTweak LOWER_CASE_POKEMON_NAMES = new MiscTweak(1024, "lowerCaseNames");
+	public static final MiscTweak RANDOMIZE_CATCHING_TUTORIAL = new MiscTweak(2048, "catchingTutorial");
 	/* @formatter:on */
 
 	private final int value;

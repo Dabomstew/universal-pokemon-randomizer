@@ -1802,6 +1802,9 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 		if (romEntry.getValue("TextDelayFunctionOffset") != 0) {
 			available |= MiscTweak.FASTEST_TEXT.getValue();
 		}
+		if (romEntry.arrayEntries.containsKey("CatchingTutorialOffsets")) {
+			available |= MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getValue();
+		}
 		return available;
 	}
 
@@ -1813,7 +1816,27 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 			applyFastestTextPatch();
 		} else if (tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
 			applyCamelCaseNames();
+		} else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
+			randomizeCatchingTutorial();
 		}
+	}
+
+	private void randomizeCatchingTutorial() {
+		if (romEntry.arrayEntries.containsKey("CatchingTutorialOffsets")) {
+			// Pick a pokemon
+			int pokemon = this.random.nextInt(Gen2Constants.pokemonCount) + 1;
+			while (pokemon == Gen2Constants.unownIndex) {
+				// Unown is banned
+				pokemon = this.random.nextInt(Gen2Constants.pokemonCount) + 1;
+			}
+
+			int[] offsets = romEntry.arrayEntries
+					.get("CatchingTutorialOffsets");
+			for (int offset : offsets) {
+				rom[offset] = (byte) pokemon;
+			}
+		}
+
 	}
 
 	private void applyBWEXPPatch() {

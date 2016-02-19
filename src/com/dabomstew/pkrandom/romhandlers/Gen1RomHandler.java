@@ -1806,7 +1806,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 	public int miscTweaksAvailable() {
 		int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
 		available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
-		
+
 		if (romEntry.codeTweaks.get("BWXPTweak") != null) {
 			available |= MiscTweak.BW_EXP_PATCH.getValue();
 		}
@@ -1825,6 +1825,9 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		if (romEntry.getValue("PikachuEvoJumpOffset") != 0) {
 			available |= MiscTweak.ALLOW_PIKACHU_EVOLUTION.getValue();
 		}
+		if (romEntry.getValue("CatchingTutorialMonOffset") != 0) {
+			available |= MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getValue();
+		}
 		return available;
 	}
 
@@ -1842,10 +1845,12 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 			randomizePCPotion();
 		} else if (tweak == MiscTweak.ALLOW_PIKACHU_EVOLUTION) {
 			applyPikachuEvoPatch();
-		} else if(tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
+		} else if (tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
 			applyCamelCaseNames();
-		} else if(tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
+		} else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
 			fixTypeEffectiveness();
+		} else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
+			randomizeCatchingTutorial();
 		}
 	}
 
@@ -1877,6 +1882,13 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 	private void applyPikachuEvoPatch() {
 		if (romEntry.getValue("PikachuEvoJumpOffset") != 0) {
 			rom[romEntry.getValue("PikachuEvoJumpOffset")] = GBConstants.gbZ80JumpRelative;
+		}
+	}
+
+	private void randomizeCatchingTutorial() {
+		if (romEntry.getValue("CatchingTutorialMonOffset") != 0) {
+			rom[romEntry.getValue("CatchingTutorialMonOffset")] = (byte) pokeNumToRBYTable[this
+					.randomPokemon().number];
 		}
 	}
 
