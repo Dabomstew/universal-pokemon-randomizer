@@ -52,8 +52,8 @@ public class Gen3Constants {
 			bsSpDefOffset = 5, bsPrimaryTypeOffset = 6,
 			bsSecondaryTypeOffset = 7, bsCatchRateOffset = 8,
 			bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14,
-			bsGrowthCurveOffset = 19, bsAbility1Offset = 22,
-			bsAbility2Offset = 23;
+			bsGenderRatioOffset = 16, bsGrowthCurveOffset = 19,
+			bsAbility1Offset = 22, bsAbility2Offset = 23;
 
 	public static final int textTerminator = 0xFF, textVariable = 0xFD;
 
@@ -70,8 +70,7 @@ public class Gen3Constants {
 
 	public static final int gbaAddRxOpcode = 0x30,
 			gbaUnconditionalJumpOpcode = 0xE0, gbaSetRxOpcode = 0x20,
-			gbaCmpRxOpcode = 0x28, gbaNopOpcode = 0x00,
-			gbaAlternativeNopOpcode = 0x46C0;
+			gbaCmpRxOpcode = 0x28, gbaNopOpcode = 0x46C0;
 
 	public static final int gbaR0 = 0, gbaR1 = 1, gbaR2 = 2, gbaR3 = 3,
 			gbaR4 = 4, gbaR5 = 5, gbaR6 = 6, gbaR7 = 7;

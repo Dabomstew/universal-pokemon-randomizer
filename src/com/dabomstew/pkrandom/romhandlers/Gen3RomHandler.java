@@ -823,6 +823,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			pkmn.rareHeldItem = item2;
 		}
 		pkmn.darkGrassHeldItem = -1;
+
+		pkmn.genderRatio = rom[offset + Gen3Constants.bsGenderRatioOffset] & 0xFF;
 	}
 
 	private void saveBasicPokeStats(Pokemon pkmn, int offset) {
@@ -865,6 +867,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			writeWord(offset + Gen3Constants.bsRareHeldItemOffset,
 					pkmn.rareHeldItem);
 		}
+
+		rom[offset + Gen3Constants.bsGenderRatioOffset] = (byte) pkmn.genderRatio;
 	}
 
 	private void loadPokemonNames() {
@@ -2521,14 +2525,13 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				rom[cryCommand + 1] = Gen3Constants.gbaSetRxOpcode
 						| Gen3Constants.gbaR0;
 
-				writeWord(cryCommand + 2, Gen3Constants.gbaAlternativeNopOpcode);
+				writeWord(cryCommand + 2, Gen3Constants.gbaNopOpcode);
 
 				rom[otherCommand] = (byte) introPokemon;
 				rom[otherCommand + 1] = Gen3Constants.gbaSetRxOpcode
 						| Gen3Constants.gbaR4;
 
-				writeWord(otherCommand + 2,
-						Gen3Constants.gbaAlternativeNopOpcode);
+				writeWord(otherCommand + 2, Gen3Constants.gbaNopOpcode);
 			}
 
 			writePointer(romEntry.getValue("IntroSpriteOffset"), frontSprites
@@ -2973,7 +2976,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		if (romEntry.getValue("TextSpeedValuesOffset") > 0) {
 			available |= MiscTweak.FASTEST_TEXT.getValue();
 		}
-		
+		if (romEntry.getValue("CatchingTutorialOpponentMonOffset") > 0
+				|| romEntry.getValue("CatchingTutorialPlayerMonOffset") > 0) {
+			available |= MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getValue();
+		}
+
 		return available;
 	}
 
@@ -2987,7 +2994,78 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			applyCamelCaseNames();
 		} else if (tweak == MiscTweak.NATIONAL_DEX_AT_START) {
 			patchForNationalDex();
+		} else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
+			randomizeCatchingTutorial();
 		}
+	}
+
+	private void randomizeCatchingTutorial() {
+		if (romEntry.getValue("CatchingTutorialOpponentMonOffset") > 0) {
+			int oppOffset = romEntry
+					.getValue("CatchingTutorialOpponentMonOffset");
+			Pokemon opponent = randomPokemon();
+			if (romEntry.romType == Gen3Constants.RomType_FRLG) {
+				while (opponent.genderRatio >= 0xFE
+						|| pokedexToInternal[opponent.number] > 255) {
+					// Opponent must be able to be male and fit in the space.
+					opponent = randomPokemon();
+				}
+				
+				int oppValue = pokedexToInternal[opponent.number];
+				rom[oppOffset] = (byte) oppValue;
+				rom[oppOffset + 1] = Gen3Constants.gbaSetRxOpcode
+						| Gen3Constants.gbaR1;
+			} else {
+				while (opponent.genderRatio >= 0xFE
+						|| pokedexToInternal[opponent.number] > 510) {
+					// Opponent must be able to be male and fit in the space.
+					opponent = randomPokemon();
+				}
+				int oppValue = pokedexToInternal[opponent.number];
+				if (oppValue > 255) {
+					rom[oppOffset] = (byte) 0xFF;
+					rom[oppOffset + 1] = Gen3Constants.gbaSetRxOpcode
+							| Gen3Constants.gbaR1;
+
+					rom[oppOffset + 2] = (byte) (oppValue - 0xFF);
+					rom[oppOffset + 3] = Gen3Constants.gbaAddRxOpcode
+							| Gen3Constants.gbaR1;
+				} else {
+					rom[oppOffset] = (byte) oppValue;
+					rom[oppOffset + 1] = Gen3Constants.gbaSetRxOpcode
+							| Gen3Constants.gbaR1;
+
+					writeWord(oppOffset + 2, Gen3Constants.gbaNopOpcode);
+				}
+			}
+		}
+
+		if (romEntry.getValue("CatchingTutorialPlayerMonOffset") > 0) {
+			int playerOffset = romEntry
+					.getValue("CatchingTutorialPlayerMonOffset");
+			Pokemon playerMon = randomPokemon();
+			while (pokedexToInternal[playerMon.number] > 510) {
+				// Player mon must be able to fit in the space.
+				playerMon = randomPokemon();
+			}
+			int plyValue = pokedexToInternal[playerMon.number];
+			if (plyValue > 255) {
+				rom[playerOffset] = (byte) 0xFF;
+				rom[playerOffset + 1] = Gen3Constants.gbaSetRxOpcode
+						| Gen3Constants.gbaR1;
+
+				rom[playerOffset + 2] = (byte) (plyValue - 0xFF);
+				rom[playerOffset + 3] = Gen3Constants.gbaAddRxOpcode
+						| Gen3Constants.gbaR1;
+			} else {
+				rom[playerOffset] = (byte) plyValue;
+				rom[playerOffset + 1] = Gen3Constants.gbaSetRxOpcode
+						| Gen3Constants.gbaR1;
+
+				writeWord(playerOffset + 2, Gen3Constants.gbaNopOpcode);
+			}
+		}
+
 	}
 
 	private void applyRunningShoesIndoorsPatch() {
