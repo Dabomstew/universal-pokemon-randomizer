@@ -2734,24 +2734,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 	}
 
-	private void applyFastestText() {
-		genericIPSPatch(arm9, "FastestTextTweak");
-	}
-	
-	private boolean genericIPSPatch(byte[] data, String ctName) {
-		String patchName = romEntry.tweakFiles.get(ctName);
-		if (patchName == null) {
-			return false;
-		}
-
-		try {
-			FileFunctions.applyPatch(data, patchName);
-			return true;
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
 	private void randomizeCatchingTutorial() {
 		int opponentOffset = romEntry
 				.getInt("CatchingTutorialOpponentMonOffset");
@@ -2777,6 +2759,24 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 		}
 
+	}
+
+	private void applyFastestText() {
+		genericIPSPatch(arm9, "FastestTextTweak");
+	}
+
+	private boolean genericIPSPatch(byte[] data, String ctName) {
+		String patchName = romEntry.tweakFiles.get(ctName);
+		if (patchName == null) {
+			return false;
+		}
+
+		try {
+			FileFunctions.applyPatch(data, patchName);
+			return true;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private Pokemon randomPokemonLimited(int maxValue, boolean blockNonMales) {

@@ -96,6 +96,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 				copyStaticPokemon = false;
 		private Map<String, String> strings = new HashMap<String, String>();
 		private Map<String, Integer> numbers = new HashMap<String, Integer>();
+		private Map<String, String> tweakFiles = new HashMap<String, String>();
 		private Map<String, int[]> arrayEntries = new HashMap<String, int[]>();
 		private Map<String, OffsetWithinEntry[]> offsetArrayEntries = new HashMap<String, OffsetWithinEntry[]>();
 		private List<StaticPokemon> staticPokemon = new ArrayList<StaticPokemon>();
@@ -219,6 +220,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 								offs[c++] = owe;
 							}
 							current.offsetArrayEntries.put(r[0], offs);
+						} else if (r[0].endsWith("Tweak")) {
+							current.tweakFiles.put(r[0], r[1]);
 						} else {
 							if (r[1].startsWith("[") && r[1].endsWith("]")) {
 								String[] offsets = r[1].substring(1,
@@ -1407,6 +1410,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 		if (romEntry.romType == Gen5Constants.Type_BW2) {
 			available |= MiscTweak.RANDOMIZE_HIDDEN_HOLLOWS.getValue();
 		}
+		if (romEntry.tweakFiles.get("FastestTextTweak") != null) {
+			available |= MiscTweak.FASTEST_TEXT.getValue();
+		}
 		return available;
 	}
 
@@ -1414,6 +1420,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 	public void applyMiscTweak(MiscTweak tweak) {
 		if (tweak == MiscTweak.RANDOMIZE_HIDDEN_HOLLOWS) {
 			randomizeHiddenHollowPokemon();
+		} else if (tweak == MiscTweak.FASTEST_TEXT) {
+			applyFastestText();
 		}
 	}
 
@@ -1447,6 +1455,24 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 				// the rest of the file is items
 			}
 			this.writeNARC(romEntry.getString("HiddenHollows"), hhNARC);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void applyFastestText() {
+		genericIPSPatch(arm9, "FastestTextTweak");
+	}
+
+	private boolean genericIPSPatch(byte[] data, String ctName) {
+		String patchName = romEntry.tweakFiles.get(ctName);
+		if (patchName == null) {
+			return false;
+		}
+
+		try {
+			FileFunctions.applyPatch(data, patchName);
+			return true;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
