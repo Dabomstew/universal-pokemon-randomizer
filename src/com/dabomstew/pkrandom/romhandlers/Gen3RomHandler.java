@@ -2548,6 +2548,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	}
 
 	private Pokemon randomPokemonLimited(int maxValue, boolean blockNonMales) {
+		checkPokemonRestrictions();
 		List<Pokemon> validPokemon = new ArrayList<Pokemon>();
 		for (Pokemon pk : this.mainPokemonList) {
 			if (pokedexToInternal[pk.number] <= maxValue

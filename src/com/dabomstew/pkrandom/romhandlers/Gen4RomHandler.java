@@ -2754,6 +2754,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	private Pokemon randomPokemonLimited(int maxValue, boolean blockNonMales) {
+		checkPokemonRestrictions();
 		List<Pokemon> validPokemon = new ArrayList<Pokemon>();
 		for (Pokemon pk : this.mainPokemonList) {
 			if (pk.number <= maxValue
