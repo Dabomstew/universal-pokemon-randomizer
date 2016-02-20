@@ -23,7 +23,6 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -58,8 +57,7 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 
-import dsdecmp.HexInputStream;
-import dsdecmp.JavaDSDecmp;
+import dsdecmp.DSDecmp;
 
 public class Gen5RomHandler extends AbstractDSRomHandler {
 
@@ -706,18 +704,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 		// Get the picture...
 		byte[] compressedPic = pokespritesNARC.files.get(pokeNumber * 20);
 		// Decompress it with JavaDSDecmp
-		int[] ucp = JavaDSDecmp.Decompress(new HexInputStream(
-				new ByteArrayInputStream(compressedPic)));
-		byte[] uncompressedPic = convIntArrToByteArr(ucp);
+		byte[] uncompressedPic = DSDecmp.Decompress(compressedPic);
 		starterNARC.files.set(12 + starterIndex, uncompressedPic);
-	}
-
-	private byte[] convIntArrToByteArr(int[] arg) {
-		byte[] out = new byte[arg.length];
-		for (int i = 0; i < arg.length; i++) {
-			out[i] = (byte) arg[i];
-		}
-		return out;
 	}
 
 	@Override

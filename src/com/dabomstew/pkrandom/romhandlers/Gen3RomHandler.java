@@ -23,6 +23,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -57,6 +58,8 @@ import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
+
+import dsdecmp.DSDecmp;
 
 public class Gen3RomHandler extends AbstractGBRomHandler {
 
@@ -3095,5 +3098,54 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	@Override
 	public boolean isROMHack() {
 		return this.isRomHack;
+	}
+
+	public BufferedImage getMascotImage() {
+		Pokemon mascotPk = randomPokemon();
+		int mascotPokemon = pokedexToInternal[mascotPk.number];
+		int frontSprites = readPointer(Gen3Constants.frlgFrontSpritesPointer);
+		int palettes = readPointer(Gen3Constants.frlgPokemonPalettesPointer);
+		int fsOffset = readPointer(frontSprites + mascotPokemon * 8);
+		int palOffset = readPointer(palettes + mascotPokemon * 8);
+
+		byte[] trueFrontSprite = DSDecmp.Decompress(rom, fsOffset);
+		byte[] truePalette = DSDecmp.Decompress(rom, palOffset);
+
+		// Convert palette into RGB
+		int[] convPalette = new int[15];
+		for (int i = 0; i < 15; i++) {
+			int palValue = readWord(truePalette, i * 2 + 2);
+			int red = (palValue & 0x1F) << 3;
+			int green = (palValue & 0x3E0) >> 2;
+			int blue = (palValue & 0x7C00) >> 7;
+			convPalette[i] = 0xFF000000 | (red << 16) | (green << 8) | blue;
+		}
+
+		// Make buffer
+		BufferedImage bim = new BufferedImage(64, 64,
+				BufferedImage.TYPE_INT_ARGB);
+
+		// 8x8 tiles, 32 bytes each
+		// each byte is 2 pixels, too
+		// least significant nibble appears BEFORE most significant
+		for (int i = 0; i < 2048; i++) {
+			int tile = i / 32;
+			int xInTile = (i % 4) * 2;
+			int yInTile = (i / 4) % 8;
+			int xTile = tile % 8;
+			int yTile = tile / 8;
+			int lowerBit = trueFrontSprite[i] & 0x0F;
+			if (lowerBit > 0) {
+				bim.setRGB(xTile * 8 + xInTile, yTile * 8 + yInTile,
+						convPalette[lowerBit - 1]);
+			}
+			int upperBit = (trueFrontSprite[i] & 0xF0) >> 4;
+			if (upperBit > 0) {
+				bim.setRGB(xTile * 8 + xInTile + 1, yTile * 8 + yInTile,
+						convPalette[upperBit - 1]);
+			}
+		}
+
+		return bim;
 	}
 }

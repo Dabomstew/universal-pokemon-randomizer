@@ -245,4 +245,12 @@ public class FileFunctions {
 	private static int readIPSSize(byte[] data, int offset) {
 		return ((data[offset] & 0xFF) << 8) | (data[offset + 1] & 0xFF);
 	}
+	
+	public static byte[] convIntArrToByteArr(int[] arg) {
+		byte[] out = new byte[arg.length];
+		for (int i = 0; i < arg.length; i++) {
+			out[i] = (byte) arg[i];
+		}
+		return out;
+	}
 }
