@@ -124,7 +124,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		private String extraTableFile;
 		private boolean isYellow;
 		private int crcInHeader = -1;
-		private Map<String, String> codeTweaks = new HashMap<String, String>();
+		private Map<String, String> tweakFiles = new HashMap<String, String>();
 		private List<TMTextEntry> tmTexts = new ArrayList<TMTextEntry>();
 		private Map<String, Integer> entries = new HashMap<String, Integer>();
 		private Map<String, int[]> arrayEntries = new HashMap<String, int[]>();
@@ -248,7 +248,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 						} else if (r[0].equals("CRCInHeader")) {
 							current.crcInHeader = parseRIInt(r[1]);
 						} else if (r[0].endsWith("Tweak")) {
-							current.codeTweaks.put(r[0], r[1]);
+							current.tweakFiles.put(r[0], r[1]);
 						} else if (r[0].equals("ExtraTypes")) {
 							// remove the containers
 							r[1] = r[1].substring(1, r[1].length() - 1);
@@ -1807,13 +1807,13 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 		int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
 		available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
 
-		if (romEntry.codeTweaks.get("BWXPTweak") != null) {
+		if (romEntry.tweakFiles.get("BWXPTweak") != null) {
 			available |= MiscTweak.BW_EXP_PATCH.getValue();
 		}
-		if (romEntry.codeTweaks.get("XAccNerfTweak") != null) {
+		if (romEntry.tweakFiles.get("XAccNerfTweak") != null) {
 			available |= MiscTweak.NERF_X_ACCURACY.getValue();
 		}
-		if (romEntry.codeTweaks.get("CritRateTweak") != null) {
+		if (romEntry.tweakFiles.get("CritRateTweak") != null) {
 			available |= MiscTweak.FIX_CRIT_RATE.getValue();
 		}
 		if (romEntry.getValue("TextDelayFunctionOffset") != 0) {
@@ -1893,7 +1893,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 	}
 
 	private boolean genericIPSPatch(String ctName) {
-		String patchName = romEntry.codeTweaks.get(ctName);
+		String patchName = romEntry.tweakFiles.get(ctName);
 		if (patchName == null) {
 			return false;
 		}
