@@ -35,23 +35,22 @@ import javax.swing.filechooser.FileFilter;
 
 public class QSFileFilter extends FileFilter {
 
-	@Override
-	public boolean accept(File arg0) {
-		if (arg0.isDirectory()) {
-			return true; // needed to allow directory navigation
-		}
-		String filename = arg0.getName();
-		if (filename.contains(".") == false) {
-			return false;
-		}
-		String extension = arg0.getName().substring(
-				arg0.getName().lastIndexOf('.') + 1);
-		return extension.toLowerCase().equals("rnqs");
-	}
+    @Override
+    public boolean accept(File arg0) {
+        if (arg0.isDirectory()) {
+            return true; // needed to allow directory navigation
+        }
+        String filename = arg0.getName();
+        if (filename.contains(".") == false) {
+            return false;
+        }
+        String extension = arg0.getName().substring(arg0.getName().lastIndexOf('.') + 1);
+        return extension.toLowerCase().equals("rnqs");
+    }
 
-	@Override
-	public String getDescription() {
-		return "Randomization Quick Settings (*.rnqs)";
-	}
+    @Override
+    public String getDescription() {
+        return "Randomization Quick Settings (*.rnqs)";
+    }
 
 }

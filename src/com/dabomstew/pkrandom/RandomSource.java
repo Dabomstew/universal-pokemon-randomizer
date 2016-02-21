@@ -30,133 +30,133 @@ import java.util.Random;
 
 public class RandomSource {
 
-	private static Random source = new Random();
-	private static int calls = 0;
-	private static Random instance = new RandomSourceInstance();
+    private static Random source = new Random();
+    private static int calls = 0;
+    private static Random instance = new RandomSourceInstance();
 
-	public static void reset() {
-		source = new Random();
-		calls = 0;
-	}
+    public static void reset() {
+        source = new Random();
+        calls = 0;
+    }
 
-	public static void seed(long seed) {
-		source.setSeed(seed);
-		calls = 0;
-	}
+    public static void seed(long seed) {
+        source.setSeed(seed);
+        calls = 0;
+    }
 
-	public static double random() {
-		calls++;
-		return source.nextDouble();
-	}
+    public static double random() {
+        calls++;
+        return source.nextDouble();
+    }
 
-	public static int nextInt(int size) {
-		calls++;
-		return source.nextInt(size);
-	}
+    public static int nextInt(int size) {
+        calls++;
+        return source.nextInt(size);
+    }
 
-	public static void nextBytes(byte[] bytes) {
-		calls++;
-		source.nextBytes(bytes);
-	}
+    public static void nextBytes(byte[] bytes) {
+        calls++;
+        source.nextBytes(bytes);
+    }
 
-	public static int nextInt() {
-		calls++;
-		return source.nextInt();
-	}
+    public static int nextInt() {
+        calls++;
+        return source.nextInt();
+    }
 
-	public static long nextLong() {
-		calls++;
-		return source.nextLong();
-	}
+    public static long nextLong() {
+        calls++;
+        return source.nextLong();
+    }
 
-	public static boolean nextBoolean() {
-		calls++;
-		return source.nextBoolean();
-	}
+    public static boolean nextBoolean() {
+        calls++;
+        return source.nextBoolean();
+    }
 
-	public static float nextFloat() {
-		calls++;
-		return source.nextFloat();
-	}
+    public static float nextFloat() {
+        calls++;
+        return source.nextFloat();
+    }
 
-	public static double nextDouble() {
-		calls++;
-		return source.nextDouble();
-	}
+    public static double nextDouble() {
+        calls++;
+        return source.nextDouble();
+    }
 
-	public static synchronized double nextGaussian() {
-		calls++;
-		return source.nextGaussian();
-	}
+    public static synchronized double nextGaussian() {
+        calls++;
+        return source.nextGaussian();
+    }
 
-	public static long pickSeed() {
-		long value = 0;
-		byte[] by = SecureRandom.getSeed(6);
-		for (int i = 0; i < by.length; i++) {
-			value |= ((long) by[i] & 0xffL) << (8 * i);
-		}
-		return value;
-	}
+    public static long pickSeed() {
+        long value = 0;
+        byte[] by = SecureRandom.getSeed(6);
+        for (int i = 0; i < by.length; i++) {
+            value |= ((long) by[i] & 0xffL) << (8 * i);
+        }
+        return value;
+    }
 
-	public static Random instance() {
-		return instance;
-	}
+    public static Random instance() {
+        return instance;
+    }
 
-	public static int callsSinceSeed() {
-		return calls;
-	}
+    public static int callsSinceSeed() {
+        return calls;
+    }
 
-	private static class RandomSourceInstance extends Random {
+    private static class RandomSourceInstance extends Random {
 
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = -4876737183441746322L;
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -4876737183441746322L;
 
-		@Override
-		public synchronized void setSeed(long seed) {
-			RandomSource.seed(seed);
-		}
+        @Override
+        public synchronized void setSeed(long seed) {
+            RandomSource.seed(seed);
+        }
 
-		@Override
-		public void nextBytes(byte[] bytes) {
-			RandomSource.nextBytes(bytes);
-		}
+        @Override
+        public void nextBytes(byte[] bytes) {
+            RandomSource.nextBytes(bytes);
+        }
 
-		@Override
-		public int nextInt() {
-			return RandomSource.nextInt();
-		}
+        @Override
+        public int nextInt() {
+            return RandomSource.nextInt();
+        }
 
-		@Override
-		public int nextInt(int n) {
-			return RandomSource.nextInt(n);
-		}
+        @Override
+        public int nextInt(int n) {
+            return RandomSource.nextInt(n);
+        }
 
-		@Override
-		public long nextLong() {
-			return RandomSource.nextLong();
-		}
+        @Override
+        public long nextLong() {
+            return RandomSource.nextLong();
+        }
 
-		@Override
-		public boolean nextBoolean() {
-			return RandomSource.nextBoolean();
-		}
+        @Override
+        public boolean nextBoolean() {
+            return RandomSource.nextBoolean();
+        }
 
-		@Override
-		public float nextFloat() {
-			return RandomSource.nextFloat();
-		}
+        @Override
+        public float nextFloat() {
+            return RandomSource.nextFloat();
+        }
 
-		@Override
-		public double nextDouble() {
-			return RandomSource.nextDouble();
-		}
+        @Override
+        public double nextDouble() {
+            return RandomSource.nextDouble();
+        }
 
-		@Override
-		public synchronized double nextGaussian() {
-			return RandomSource.nextGaussian();
-		}
+        @Override
+        public synchronized double nextGaussian() {
+            return RandomSource.nextGaussian();
+        }
 
-	}
+    }
 }

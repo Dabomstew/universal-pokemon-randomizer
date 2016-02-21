@@ -25,66 +25,65 @@ package com.dabomstew.pkrandom.pokemon;
 
 public class Evolution implements Comparable<Evolution> {
 
-	public Pokemon from;
-	public Pokemon to;
-	public boolean carryStats;
-	public EvolutionType type;
-	public int extraInfo;
+    public Pokemon from;
+    public Pokemon to;
+    public boolean carryStats;
+    public EvolutionType type;
+    public int extraInfo;
 
-	public Evolution(Pokemon from, Pokemon to, boolean carryStats,
-			EvolutionType type, int extra) {
-		this.from = from;
-		this.to = to;
-		this.carryStats = carryStats;
-		this.type = type;
-		this.extraInfo = extra;
-	}
+    public Evolution(Pokemon from, Pokemon to, boolean carryStats, EvolutionType type, int extra) {
+        this.from = from;
+        this.to = to;
+        this.carryStats = carryStats;
+        this.type = type;
+        this.extraInfo = extra;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + from.number;
-		result = prime * result + to.number;
-		result = prime * result + type.ordinal();
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + from.number;
+        result = prime * result + to.number;
+        result = prime * result + type.ordinal();
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Evolution other = (Evolution) obj;
-		if (from != other.from)
-			return false;
-		if (to != other.to)
-			return false;
-		if (type != other.type)
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Evolution other = (Evolution) obj;
+        if (from != other.from)
+            return false;
+        if (to != other.to)
+            return false;
+        if (type != other.type)
+            return false;
+        return true;
+    }
 
-	@Override
-	public int compareTo(Evolution o) {
-		if (this.from.number < o.from.number) {
-			return -1;
-		} else if (this.from.number > o.from.number) {
-			return 1;
-		} else if (this.to.number < o.to.number) {
-			return -1;
-		} else if (this.to.number > o.to.number) {
-			return 1;
-		} else if (this.type.ordinal() < o.type.ordinal()) {
-			return -1;
-		} else if (this.type.ordinal() > o.type.ordinal()) {
-			return 1;
-		} else {
-			return 0;
-		}
-	}
+    @Override
+    public int compareTo(Evolution o) {
+        if (this.from.number < o.from.number) {
+            return -1;
+        } else if (this.from.number > o.from.number) {
+            return 1;
+        } else if (this.to.number < o.to.number) {
+            return -1;
+        } else if (this.to.number > o.to.number) {
+            return 1;
+        } else if (this.type.ordinal() < o.type.ordinal()) {
+            return -1;
+        } else if (this.type.ordinal() > o.type.ordinal()) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
 
 }

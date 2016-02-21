@@ -58,12 +58,12 @@ import javax.xml.bind.DatatypeConverter;
 
 import com.dabomstew.pkrandom.Constants;
 import com.dabomstew.pkrandom.FileFunctions;
-import com.dabomstew.pkrandom.InvalidSupplementFilesException;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.Randomizer;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.Utils;
+import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.AbstractDSRomHandler;
@@ -80,2119 +80,1901 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
  */
 public class RandomizerGUI extends javax.swing.JFrame {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 637989089525556154L;
-	private RomHandler romHandler;
-	protected RomHandler.Factory[] checkHandlers;
-
-	private OperationDialog opDialog;
-	private List<JCheckBox> tweakCheckboxes;
-	private boolean presetMode;
-	private GenRestrictions currentRestrictions;
-	private LayoutManager noTweaksLayout;
-
-	// Settings
-	private boolean autoUpdateEnabled;
-	private boolean haveCheckedCustomNames;
-	private ImageIcon emptyIcon = new ImageIcon(getClass().getResource(
-			"/com/dabomstew/pkrandom/gui/emptyIcon.png"));
-
-	java.util.ResourceBundle bundle;
-
-	/**
-	 * @param args
-	 *            the command line arguments
-	 */
-	public static void main(String args[]) {
-		boolean autoupdate = true;
-		for (String arg : args) {
-			if (arg.equalsIgnoreCase("--noupdate")) {
-				autoupdate = false;
-				break;
-			}
-		}
-		final boolean au = autoupdate;
-		try {
-			javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager
-					.getSystemLookAndFeelClassName());
-		} catch (ClassNotFoundException ex) {
-			java.util.logging.Logger.getLogger(RandomizerGUI.class.getName())
-					.log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (InstantiationException ex) {
-			java.util.logging.Logger.getLogger(RandomizerGUI.class.getName())
-					.log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (IllegalAccessException ex) {
-			java.util.logging.Logger.getLogger(RandomizerGUI.class.getName())
-					.log(java.util.logging.Level.SEVERE, null, ex);
-		} catch (javax.swing.UnsupportedLookAndFeelException ex) {
-			java.util.logging.Logger.getLogger(RandomizerGUI.class.getName())
-					.log(java.util.logging.Level.SEVERE, null, ex);
-		}
-
-		/* Create and display the form */
-		java.awt.EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				new RandomizerGUI(au);
-			}
-		});
-	}
-
-	// constructor
-	/**
-	 * Creates new form RandomizerGUI
-	 * 
-	 * @param autoupdate
-	 */
-	public RandomizerGUI(boolean autoupdate) {
-
-		bundle = java.util.ResourceBundle
-				.getBundle("com/dabomstew/pkrandom/gui/Bundle"); // NOI18N
-		testForRequiredConfigs();
-		checkHandlers = new RomHandler.Factory[] {
-				new Gen1RomHandler.Factory(), new Gen2RomHandler.Factory(),
-				new Gen3RomHandler.Factory(), new Gen4RomHandler.Factory(),
-				new Gen5RomHandler.Factory() };
-		initComponents();
-		noTweaksLayout = miscTweaksPanel.getLayout();
-		initTweaksPanel();
-		initialiseState();
-		autoUpdateEnabled = true;
-		haveCheckedCustomNames = false;
-		attemptReadConfig();
-		if (!autoupdate) {
-			// override autoupdate
-			autoUpdateEnabled = false;
-		}
-		boolean canWrite = attemptWriteConfig();
-		if (!canWrite) {
-			JOptionPane.showMessageDialog(null,
-					bundle.getString("RandomizerGUI.cantWriteConfigFile"));
-			autoUpdateEnabled = false;
-		}
-		setLocationRelativeTo(null);
-		setVisible(true);
-		checkCustomNames();
-		if (autoUpdateEnabled) {
-			new UpdateCheckThread(this, false).start();
-		}
-	}
-
-	private void initTweaksPanel() {
-		tweakCheckboxes = new ArrayList<JCheckBox>();
-		int numTweaks = MiscTweak.allTweaks.size();
-		for (int i = 0; i < numTweaks; i++) {
-			MiscTweak ct = MiscTweak.allTweaks.get(i);
-			JCheckBox tweakBox = new JCheckBox();
-			tweakBox.setText(ct.getTweakName());
-			tweakBox.setToolTipText(ct.getTooltipText());
-			tweakCheckboxes.add(tweakBox);
-		}
-	}
-
-	// config-related stuff
-
-	private static final int TWEAK_COLS = 4;
-
-	private GroupLayout makeTweaksLayout(List<JCheckBox> tweaks) {
-		GroupLayout gl = new GroupLayout(miscTweaksPanel);
-		int numTweaks = tweaks.size();
-
-		// Handle columns
-		SequentialGroup columnsGroup = gl.createSequentialGroup()
-				.addContainerGap();
-		int numCols = Math.min(TWEAK_COLS, numTweaks);
-		ParallelGroup[] colGroups = new ParallelGroup[numCols];
-		for (int col = 0; col < numCols; col++) {
-			if (col > 0) {
-				columnsGroup.addGap(18, 18, 18);
-			}
-			colGroups[col] = gl
-					.createParallelGroup(GroupLayout.Alignment.LEADING);
-			columnsGroup.addGroup(colGroups[col]);
-		}
-		for (int tweak = 0; tweak < numTweaks; tweak++) {
-			colGroups[tweak % numCols].addComponent(tweaks.get(tweak));
-		}
-		columnsGroup.addContainerGap();
-		gl.setHorizontalGroup(gl.createParallelGroup(
-				GroupLayout.Alignment.LEADING).addGroup(columnsGroup));
-
-		// And rows
-		SequentialGroup rowsGroup = gl.createSequentialGroup()
-				.addContainerGap();
-		int numRows = (numTweaks - 1) / numCols + 1;
-		ParallelGroup[] rowGroups = new ParallelGroup[numRows];
-		for (int row = 0; row < numRows; row++) {
-			if (row > 0) {
-				rowsGroup.addPreferredGap(ComponentPlacement.UNRELATED);
-			}
-			rowGroups[row] = gl
-					.createParallelGroup(GroupLayout.Alignment.BASELINE);
-			rowsGroup.addGroup(rowGroups[row]);
-		}
-		for (int tweak = 0; tweak < numTweaks; tweak++) {
-			rowGroups[tweak / numCols].addComponent(tweaks.get(tweak));
-		}
-		rowsGroup.addContainerGap();
-		gl.setVerticalGroup(gl.createParallelGroup(
-				GroupLayout.Alignment.LEADING).addGroup(rowsGroup));
-		return gl;
-	}
-
-	private void checkCustomNames() {
-		String[] cnamefiles = new String[] { "trainerclasses.txt",
-				"trainernames.txt", "nicknames.txt" };
-		int[] defaultcsums = new int[] { -1442281799, -1499590809, 1641673648 };
-
-		boolean foundCustom = false;
-		for (int file = 0; file < 3; file++) {
-			File oldFile = new File(Constants.ROOT_PATH + "/config/"
-					+ cnamefiles[file]);
-			File currentFile = new File(Constants.ROOT_PATH + cnamefiles[file]);
-			if (oldFile.exists() && oldFile.canRead() && !currentFile.exists()) {
-				try {
-					int crc = FileFunctions
-							.getFileChecksum(new FileInputStream(oldFile));
-					if (crc != defaultcsums[file]) {
-						foundCustom = true;
-						break;
-					}
-				} catch (FileNotFoundException e) {
-				}
-			}
-		}
-
-		if (foundCustom) {
-			int response = JOptionPane
-					.showConfirmDialog(
-							RandomizerGUI.this,
-							bundle.getString("RandomizerGUI.copyNameFilesDialog.text"),
-							bundle.getString("RandomizerGUI.copyNameFilesDialog.title"),
-							JOptionPane.YES_NO_OPTION);
-			boolean onefailed = false;
-			if (response == JOptionPane.YES_OPTION) {
-				for (String filename : cnamefiles) {
-					if (new File(Constants.ROOT_PATH + "/config/" + filename)
-							.canRead()) {
-						try {
-							FileInputStream fis = new FileInputStream(new File(
-									Constants.ROOT_PATH + "config/" + filename));
-							FileOutputStream fos = new FileOutputStream(
-									new File(Constants.ROOT_PATH + filename));
-							byte[] buf = new byte[1024];
-							int len;
-							while ((len = fis.read(buf)) > 0) {
-								fos.write(buf, 0, len);
-							}
-							fos.close();
-							fis.close();
-						} catch (IOException ex) {
-							onefailed = true;
-						}
-					}
-				}
-				if (onefailed) {
-					JOptionPane.showMessageDialog(this, bundle
-							.getString("RandomizerGUI.copyNameFilesFailed"));
-				}
-			}
-		}
-
-		haveCheckedCustomNames = true;
-		attemptWriteConfig();
-	}
-
-	private void attemptReadConfig() {
-		File fh = new File(Constants.ROOT_PATH + "config.ini");
-		if (!fh.exists() || !fh.canRead()) {
-			return;
-		}
-
-		try {
-			Scanner sc = new Scanner(fh, "UTF-8");
-			while (sc.hasNextLine()) {
-				String q = sc.nextLine().trim();
-				if (q.contains("//")) {
-					q = q.substring(0, q.indexOf("//")).trim();
-				}
-				if (!q.isEmpty()) {
-					String[] tokens = q.split("=", 2);
-					if (tokens.length == 2) {
-						String key = tokens[0].trim();
-						if (key.equalsIgnoreCase("autoupdate")) {
-							autoUpdateEnabled = Boolean.parseBoolean(tokens[1]
-									.trim());
-						} else if (key.equalsIgnoreCase("checkedcustomnames")) {
-							haveCheckedCustomNames = Boolean
-									.parseBoolean(tokens[1].trim());
-						}
-					}
-				}
-			}
-			sc.close();
-		} catch (IOException ex) {
-
-		}
-	}
-
-	private boolean attemptWriteConfig() {
-		File fh = new File(Constants.ROOT_PATH + "config.ini");
-		if (fh.exists() && !fh.canWrite()) {
-			return false;
-		}
-
-		try {
-			PrintStream ps = new PrintStream(new FileOutputStream(fh), true,
-					"UTF-8");
-			ps.println("autoupdate=" + autoUpdateEnabled);
-			ps.println("checkedcustomnames=" + haveCheckedCustomNames);
-			ps.close();
-			return true;
-		} catch (IOException e) {
-			return false;
-		}
-
-	}
-
-	private void testForRequiredConfigs() {
-		try {
-			Utils.testForRequiredConfigs();
-		} catch (FileNotFoundException e) {
-			JOptionPane.showMessageDialog(null, String.format(
-					bundle.getString("RandomizerGUI.configFileMissing"),
-					e.getMessage()));
-			System.exit(1);
-			return;
-		}
-	}
-
-	// form initial state
-
-	private void initialiseState() {
-		this.romHandler = null;
-		this.currentRestrictions = null;
-		this.websiteLinkLabel.setText("<html><a href=\""
-				+ Constants.WEBSITE_URL + "\">" + Constants.WEBSITE_URL
-				+ "</a>");
-		initialFormState();
-		this.romOpenChooser.setCurrentDirectory(new File(Constants.ROOT_PATH));
-		this.romSaveChooser.setCurrentDirectory(new File(Constants.ROOT_PATH));
-		if (new File(Constants.ROOT_PATH + "settings/").exists()) {
-			this.qsOpenChooser.setCurrentDirectory(new File(Constants.ROOT_PATH
-					+ "settings/"));
-			this.qsSaveChooser.setCurrentDirectory(new File(Constants.ROOT_PATH
-					+ "settings/"));
-		} else {
-			this.qsOpenChooser
-					.setCurrentDirectory(new File(Constants.ROOT_PATH));
-			this.qsSaveChooser
-					.setCurrentDirectory(new File(Constants.ROOT_PATH));
-		}
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void initialFormState() {
-		// Disable all rom components
-		this.goRemoveTradeEvosCheckBox.setEnabled(false);
-		this.goUpdateMovesCheckBox.setEnabled(false);
-		this.goUpdateMovesLegacyCheckBox.setEnabled(false);
-		this.goCondenseEvosCheckBox.setEnabled(false);
-
-		this.goRemoveTradeEvosCheckBox.setSelected(false);
-		this.goUpdateMovesCheckBox.setSelected(false);
-		this.goUpdateMovesLegacyCheckBox.setSelected(false);
-		this.goCondenseEvosCheckBox.setSelected(false);
-
-		this.goUpdateMovesLegacyCheckBox.setVisible(true);
-		this.pokeLimitCB.setEnabled(false);
-		this.pokeLimitCB.setSelected(false);
-		this.pokeLimitBtn.setEnabled(false);
-		this.pokeLimitBtn.setVisible(true);
-		this.pokeLimitCB.setVisible(true);
-		this.raceModeCB.setEnabled(false);
-		this.raceModeCB.setSelected(false);
-		this.brokenMovesCB.setEnabled(false);
-		this.brokenMovesCB.setSelected(false);
-
-		this.riRomNameLabel.setText(bundle
-				.getString("RandomizerGUI.noRomLoaded"));
-		this.riRomCodeLabel.setText("");
-		this.riRomSupportLabel.setText("");
-
-		this.loadQSButton.setEnabled(false);
-		this.saveQSButton.setEnabled(false);
-
-		this.pbsChangesUnchangedRB.setEnabled(false);
-		this.pbsChangesRandomEvosRB.setEnabled(false);
-		this.pbsChangesRandomTotalRB.setEnabled(false);
-		this.pbsChangesShuffleRB.setEnabled(false);
-		this.pbsChangesUnchangedRB.setSelected(true);
-		this.pbsStandardEXPCurvesCB.setEnabled(false);
-		this.pbsStandardEXPCurvesCB.setSelected(false);
-
-		this.abilitiesPanel.setVisible(true);
-		this.paUnchangedRB.setEnabled(false);
-		this.paRandomizeRB.setEnabled(false);
-		this.paWonderGuardCB.setEnabled(false);
-		this.paUnchangedRB.setSelected(true);
-		this.paWonderGuardCB.setSelected(false);
-
-		this.spCustomPoke1Chooser.setEnabled(false);
-		this.spCustomPoke2Chooser.setEnabled(false);
-		this.spCustomPoke3Chooser.setEnabled(false);
-		this.spCustomPoke1Chooser.setSelectedIndex(0);
-		this.spCustomPoke1Chooser.setModel(new DefaultComboBoxModel(
-				new String[] { "--" }));
-		this.spCustomPoke2Chooser.setSelectedIndex(0);
-		this.spCustomPoke2Chooser.setModel(new DefaultComboBoxModel(
-				new String[] { "--" }));
-		this.spCustomPoke3Chooser.setSelectedIndex(0);
-		this.spCustomPoke3Chooser.setModel(new DefaultComboBoxModel(
-				new String[] { "--" }));
-		this.spCustomRB.setEnabled(false);
-		this.spRandomRB.setEnabled(false);
-		this.spRandom2EvosRB.setEnabled(false);
-		this.spUnchangedRB.setEnabled(false);
-		this.spUnchangedRB.setSelected(true);
-		this.spHeldItemsCB.setEnabled(false);
-		this.spHeldItemsCB.setSelected(false);
-		this.spHeldItemsCB.setVisible(true);
-		this.spHeldItemsBanBadCB.setEnabled(false);
-		this.spHeldItemsBanBadCB.setSelected(false);
-		this.spHeldItemsBanBadCB.setVisible(true);
-
-		this.mdRandomAccuracyCB.setEnabled(false);
-		this.mdRandomAccuracyCB.setSelected(false);
-		this.mdRandomPowerCB.setEnabled(false);
-		this.mdRandomPowerCB.setSelected(false);
-		this.mdRandomPPCB.setEnabled(false);
-		this.mdRandomPPCB.setSelected(false);
-		this.mdRandomTypeCB.setEnabled(false);
-		this.mdRandomTypeCB.setSelected(false);
-		this.mdRandomCategoryCB.setEnabled(false);
-		this.mdRandomCategoryCB.setSelected(false);
-		this.mdRandomCategoryCB.setVisible(true);
-
-		this.pmsRandomTotalRB.setEnabled(false);
-		this.pmsRandomTypeRB.setEnabled(false);
-		this.pmsUnchangedRB.setEnabled(false);
-		this.pmsUnchangedRB.setSelected(true);
-		this.pmsMetronomeOnlyRB.setEnabled(false);
-		this.pms4MovesCB.setEnabled(false);
-		this.pms4MovesCB.setSelected(false);
-		this.pms4MovesCB.setVisible(true);
-
-		this.ptRandomFollowEvosRB.setEnabled(false);
-		this.ptRandomTotalRB.setEnabled(false);
-		this.ptUnchangedRB.setEnabled(false);
-		this.ptUnchangedRB.setSelected(true);
-
-		this.tpPowerLevelsCB.setEnabled(false);
-		this.tpRandomRB.setEnabled(false);
-		this.tpRivalCarriesStarterCB.setEnabled(false);
-		this.tpTypeThemedRB.setEnabled(false);
-		this.tpTypeWeightingCB.setEnabled(false);
-		this.tpNoLegendariesCB.setEnabled(false);
-		this.tpNoEarlyShedinjaCB.setEnabled(false);
-		this.tpNoEarlyShedinjaCB.setVisible(true);
-		this.tpUnchangedRB.setEnabled(false);
-		this.tpUnchangedRB.setSelected(true);
-		this.tpPowerLevelsCB.setSelected(false);
-		this.tpRivalCarriesStarterCB.setSelected(false);
-		this.tpTypeWeightingCB.setSelected(false);
-		this.tpNoLegendariesCB.setSelected(false);
-		this.tpNoEarlyShedinjaCB.setSelected(false);
-
-		this.tnRandomizeCB.setEnabled(false);
-		this.tcnRandomizeCB.setEnabled(false);
-
-		this.tnRandomizeCB.setSelected(false);
-		this.tcnRandomizeCB.setSelected(false);
-
-		this.wpUnchangedRB.setEnabled(false);
-		this.wpRandomRB.setEnabled(false);
-		this.wpArea11RB.setEnabled(false);
-		this.wpGlobalRB.setEnabled(false);
-		this.wpUnchangedRB.setSelected(true);
-
-		this.wpARNoneRB.setEnabled(false);
-		this.wpARCatchEmAllRB.setEnabled(false);
-		this.wpARTypeThemedRB.setEnabled(false);
-		this.wpARSimilarStrengthRB.setEnabled(false);
-		this.wpARNoneRB.setSelected(true);
-
-		this.wpUseTimeCB.setEnabled(false);
-		this.wpUseTimeCB.setVisible(true);
-		this.wpUseTimeCB.setSelected(false);
-
-		this.wpNoLegendariesCB.setEnabled(false);
-		this.wpNoLegendariesCB.setSelected(false);
-
-		this.wpCatchRateCB.setEnabled(false);
-		this.wpCatchRateCB.setSelected(false);
-
-		this.wpHeldItemsCB.setEnabled(false);
-		this.wpHeldItemsCB.setSelected(false);
-		this.wpHeldItemsCB.setVisible(true);
-		this.wpHeldItemsBanBadCB.setEnabled(false);
-		this.wpHeldItemsBanBadCB.setSelected(false);
-		this.wpHeldItemsBanBadCB.setVisible(true);
-
-		this.stpRandomL4LRB.setEnabled(false);
-		this.stpRandomTotalRB.setEnabled(false);
-		this.stpUnchangedRB.setEnabled(false);
-		this.stpUnchangedRB.setSelected(true);
-
-		this.tmmRandomRB.setEnabled(false);
-		this.tmmUnchangedRB.setEnabled(false);
-		this.tmmUnchangedRB.setSelected(true);
-
-		this.thcRandomTotalRB.setEnabled(false);
-		this.thcRandomTypeRB.setEnabled(false);
-		this.thcUnchangedRB.setEnabled(false);
-		this.thcFullRB.setEnabled(false);
-		this.thcUnchangedRB.setSelected(true);
-
-		this.tmLearningSanityCB.setEnabled(false);
-		this.tmLearningSanityCB.setSelected(false);
-		this.tmKeepFieldMovesCB.setEnabled(false);
-		this.tmKeepFieldMovesCB.setSelected(false);
-		this.tmFullHMCompatCB.setEnabled(false);
-		this.tmFullHMCompatCB.setSelected(false);
-
-		this.mtmRandomRB.setEnabled(false);
-		this.mtmUnchangedRB.setEnabled(false);
-		this.mtmUnchangedRB.setSelected(true);
-
-		this.mtcRandomTotalRB.setEnabled(false);
-		this.mtcRandomTypeRB.setEnabled(false);
-		this.mtcUnchangedRB.setEnabled(false);
-		this.mtcFullRB.setEnabled(false);
-		this.mtcUnchangedRB.setSelected(true);
-
-		this.mtLearningSanityCB.setEnabled(false);
-		this.mtLearningSanityCB.setSelected(false);
-		this.mtKeepFieldMovesCB.setEnabled(false);
-		this.mtKeepFieldMovesCB.setSelected(false);
-
-		this.mtMovesPanel.setVisible(true);
-		this.mtCompatPanel.setVisible(true);
-		this.mtNoExistLabel.setVisible(false);
-
-		this.igtUnchangedRB.setEnabled(false);
-		this.igtGivenOnlyRB.setEnabled(false);
-		this.igtBothRB.setEnabled(false);
-		this.igtUnchangedRB.setSelected(true);
-
-		this.igtRandomItemCB.setEnabled(false);
-		this.igtRandomItemCB.setSelected(false);
-		this.igtRandomItemCB.setVisible(true);
-
-		this.igtRandomIVsCB.setEnabled(false);
-		this.igtRandomIVsCB.setSelected(false);
-		this.igtRandomIVsCB.setVisible(true);
-
-		this.igtRandomOTCB.setEnabled(false);
-		this.igtRandomOTCB.setSelected(false);
-		this.igtRandomOTCB.setVisible(true);
-
-		this.igtRandomNicknameCB.setEnabled(false);
-		this.igtRandomNicknameCB.setSelected(false);
-
-		this.fiUnchangedRB.setEnabled(false);
-		this.fiShuffleRB.setEnabled(false);
-		this.fiRandomRB.setEnabled(false);
-		this.fiUnchangedRB.setSelected(true);
-
-		this.fiBanBadCB.setEnabled(false);
-		this.fiBanBadCB.setSelected(false);
-		this.fiBanBadCB.setVisible(true);
-
-		this.peUnchangedRB.setSelected(true);
-		this.peUnchangedRB.setEnabled(false);
-		this.peRandomRB.setEnabled(false);
-		this.peForceChangeCB.setSelected(false);
-		this.peForceChangeCB.setEnabled(false);
-		this.peThreeStagesCB.setSelected(false);
-		this.peThreeStagesCB.setEnabled(false);
-		this.peSameTypeCB.setSelected(false);
-		this.peSameTypeCB.setEnabled(false);
-		this.peSimilarStrengthCB.setSelected(false);
-		this.peSimilarStrengthCB.setEnabled(false);
-
-		for (JCheckBox cb : tweakCheckboxes) {
-			cb.setVisible(true);
-			cb.setEnabled(false);
-			cb.setSelected(false);
-		}
-
-		this.mtNoneAvailableLabel.setVisible(false);
-		miscTweaksPanel.setLayout(makeTweaksLayout(tweakCheckboxes));
-		
-		this.gameMascotLabel.setIcon(emptyIcon);
-	}
-
-	// rom loading
-
-	private void loadROM() {
-		romOpenChooser.setSelectedFile(null);
-		int returnVal = romOpenChooser.showOpenDialog(this);
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			final File fh = romOpenChooser.getSelectedFile();
-			try {
-				Utils.validateRomFile(fh);
-			} catch (Utils.InvalidROMException e) {
-				switch (e.getType()) {
-				case LENGTH:
-					JOptionPane.showMessageDialog(this, String.format(
-							bundle.getString("RandomizerGUI.tooShortToBeARom"),
-							fh.getName()));
-					return;
-				case ZIP_FILE:
-					JOptionPane.showMessageDialog(this, String.format(
-							bundle.getString("RandomizerGUI.openedZIPfile"),
-							fh.getName()));
-					return;
-				case RAR_FILE:
-					JOptionPane.showMessageDialog(this, String.format(
-							bundle.getString("RandomizerGUI.openedRARfile"),
-							fh.getName()));
-					return;
-				case IPS_FILE:
-					JOptionPane.showMessageDialog(this, String.format(
-							bundle.getString("RandomizerGUI.openedIPSfile"),
-							fh.getName()));
-					return;
-				case UNREADABLE:
-					JOptionPane.showMessageDialog(this, String.format(
-							bundle.getString("RandomizerGUI.unreadableRom"),
-							fh.getName()));
-					return;
-				}
-			}
-
-			for (RomHandler.Factory rhf : checkHandlers) {
-				if (rhf.isLoadable(fh.getAbsolutePath())) {
-					this.romHandler = rhf.create(RandomSource.instance());
-					opDialog = new OperationDialog(
-							bundle.getString("RandomizerGUI.loadingText"),
-							this, true);
-					Thread t = new Thread() {
-						@Override
-						public void run() {
-							boolean romLoaded = false;
-							SwingUtilities.invokeLater(new Runnable() {
-								@Override
-								public void run() {
-									opDialog.setVisible(true);
-								}
-							});
-							try {
-								RandomizerGUI.this.romHandler.loadRom(fh
-										.getAbsolutePath());
-								romLoaded = true;
-							} catch (Exception ex) {
-								attemptToLogException(ex,
-										"RandomizerGUI.loadFailed",
-										"RandomizerGUI.loadFailedNoLog");
-							}
-							final boolean loadSuccess = romLoaded;
-							SwingUtilities.invokeLater(new Runnable() {
-								@Override
-								public void run() {
-									RandomizerGUI.this.opDialog
-											.setVisible(false);
-									RandomizerGUI.this.initialFormState();
-									if (loadSuccess) {
-										RandomizerGUI.this.romLoaded();
-									}
-								}
-							});
-						}
-					};
-					t.start();
-
-					return;
-				}
-			}
-			JOptionPane.showMessageDialog(this, String.format(
-					bundle.getString("RandomizerGUI.unsupportedRom"),
-					fh.getName()));
-		}
-
-	}
-
-	private void romLoaded() {
-		try {
-			this.currentRestrictions = null;
-			this.riRomNameLabel.setText(this.romHandler.getROMName());
-			this.riRomCodeLabel.setText(this.romHandler.getROMCode());
-			this.riRomSupportLabel.setText(bundle
-					.getString("RandomizerGUI.romSupportPrefix")
-					+ " "
-					+ this.romHandler.getSupportLevel());
-			this.goUpdateMovesCheckBox.setSelected(false);
-			this.goUpdateMovesCheckBox.setSelected(false);
-			this.goUpdateMovesCheckBox.setEnabled(true);
-			this.goUpdateMovesLegacyCheckBox.setSelected(false);
-			this.goUpdateMovesLegacyCheckBox.setEnabled(false);
-			this.goUpdateMovesLegacyCheckBox
-					.setVisible(!(romHandler instanceof Gen5RomHandler));
-			this.goRemoveTradeEvosCheckBox.setSelected(false);
-			this.goRemoveTradeEvosCheckBox.setEnabled(true);
-			this.goCondenseEvosCheckBox.setSelected(false);
-			this.goCondenseEvosCheckBox.setEnabled(true);
-			this.raceModeCB.setSelected(false);
-			this.raceModeCB.setEnabled(true);
-
-			this.pokeLimitCB.setSelected(false);
-			this.pokeLimitBtn.setEnabled(false);
-			this.pokeLimitCB
-					.setEnabled(!(romHandler instanceof Gen1RomHandler || romHandler
-							.isROMHack()));
-			this.pokeLimitCB
-					.setVisible(!(romHandler instanceof Gen1RomHandler || romHandler
-							.isROMHack()));
-			this.pokeLimitBtn
-					.setVisible(!(romHandler instanceof Gen1RomHandler || romHandler
-							.isROMHack()));
-
-			this.brokenMovesCB.setSelected(false);
-			this.brokenMovesCB.setEnabled(true);
-
-			this.loadQSButton.setEnabled(true);
-			this.saveQSButton.setEnabled(true);
-
-			this.pbsChangesUnchangedRB.setEnabled(true);
-			this.pbsChangesUnchangedRB.setSelected(true);
-			this.pbsChangesRandomEvosRB.setEnabled(true);
-			this.pbsChangesRandomTotalRB.setEnabled(true);
-			this.pbsChangesShuffleRB.setEnabled(true);
-
-			this.pbsStandardEXPCurvesCB.setEnabled(true);
-			this.pbsStandardEXPCurvesCB.setSelected(false);
-
-			if (romHandler.abilitiesPerPokemon() > 0) {
-				this.paUnchangedRB.setEnabled(true);
-				this.paUnchangedRB.setSelected(true);
-				this.paRandomizeRB.setEnabled(true);
-				this.paWonderGuardCB.setEnabled(false);
-			} else {
-				this.abilitiesPanel.setVisible(false);
-			}
-
-			this.spUnchangedRB.setEnabled(true);
-			this.spUnchangedRB.setSelected(true);
-
-			this.spCustomPoke3Chooser.setVisible(true);
-			if (romHandler.canChangeStarters()) {
-				this.spCustomRB.setEnabled(true);
-				this.spRandomRB.setEnabled(true);
-				this.spRandom2EvosRB.setEnabled(true);
-				if (romHandler.isYellow()) {
-					this.spCustomPoke3Chooser.setVisible(false);
-				}
-				populateDropdowns();
-			}
-
-			this.spHeldItemsCB.setSelected(false);
-			boolean hasStarterHeldItems = (romHandler instanceof Gen2RomHandler || romHandler instanceof Gen3RomHandler);
-			this.spHeldItemsCB.setEnabled(hasStarterHeldItems);
-			this.spHeldItemsCB.setVisible(hasStarterHeldItems);
-			this.spHeldItemsBanBadCB.setEnabled(false);
-			this.spHeldItemsBanBadCB.setVisible(hasStarterHeldItems);
-
-			this.mdRandomAccuracyCB.setEnabled(true);
-			this.mdRandomPowerCB.setEnabled(true);
-			this.mdRandomPPCB.setEnabled(true);
-			this.mdRandomTypeCB.setEnabled(true);
-			this.mdRandomCategoryCB.setEnabled(romHandler
-					.hasPhysicalSpecialSplit());
-			this.mdRandomCategoryCB.setVisible(romHandler
-					.hasPhysicalSpecialSplit());
-
-			this.pmsRandomTotalRB.setEnabled(true);
-			this.pmsRandomTypeRB.setEnabled(true);
-			this.pmsUnchangedRB.setEnabled(true);
-			this.pmsUnchangedRB.setSelected(true);
-			this.pmsMetronomeOnlyRB.setEnabled(true);
-
-			this.pms4MovesCB.setVisible(romHandler.supportsFourStartingMoves());
-
-			this.ptRandomFollowEvosRB.setEnabled(true);
-			this.ptRandomTotalRB.setEnabled(true);
-			this.ptUnchangedRB.setEnabled(true);
-			this.ptUnchangedRB.setSelected(true);
-
-			this.tpRandomRB.setEnabled(true);
-			this.tpTypeThemedRB.setEnabled(true);
-			this.tpUnchangedRB.setEnabled(true);
-			this.tpUnchangedRB.setSelected(true);
-			this.tnRandomizeCB.setEnabled(true);
-			this.tcnRandomizeCB.setEnabled(true);
-
-			if (romHandler instanceof Gen1RomHandler
-					|| romHandler instanceof Gen2RomHandler) {
-				this.tpNoEarlyShedinjaCB.setVisible(false);
-			} else {
-				this.tpNoEarlyShedinjaCB.setVisible(true);
-			}
-			this.tpNoEarlyShedinjaCB.setSelected(false);
-
-			this.wpArea11RB.setEnabled(true);
-			this.wpGlobalRB.setEnabled(true);
-			this.wpRandomRB.setEnabled(true);
-			this.wpUnchangedRB.setEnabled(true);
-			this.wpUnchangedRB.setSelected(true);
-			this.wpUseTimeCB.setEnabled(false);
-			this.wpNoLegendariesCB.setEnabled(false);
-			if (!romHandler.hasTimeBasedEncounters()) {
-				this.wpUseTimeCB.setVisible(false);
-			}
-			this.wpCatchRateCB.setEnabled(true);
-
-			this.wpHeldItemsCB.setSelected(false);
-			this.wpHeldItemsCB.setEnabled(true);
-			this.wpHeldItemsCB.setVisible(true);
-			this.wpHeldItemsBanBadCB.setSelected(false);
-			this.wpHeldItemsBanBadCB.setEnabled(false);
-			this.wpHeldItemsBanBadCB.setVisible(true);
-			if (romHandler instanceof Gen1RomHandler) {
-				this.wpHeldItemsCB.setVisible(false);
-				this.wpHeldItemsBanBadCB.setVisible(false);
-			}
-
-			this.stpUnchangedRB.setEnabled(true);
-			if (this.romHandler.canChangeStaticPokemon()) {
-				this.stpRandomL4LRB.setEnabled(true);
-				this.stpRandomTotalRB.setEnabled(true);
-
-			}
-
-			this.tmmRandomRB.setEnabled(true);
-			this.tmmUnchangedRB.setEnabled(true);
-			this.tmFullHMCompatCB.setEnabled(true);
-
-			this.thcRandomTotalRB.setEnabled(true);
-			this.thcRandomTypeRB.setEnabled(true);
-			this.thcUnchangedRB.setEnabled(true);
-			this.thcFullRB.setEnabled(true);
-
-			if (this.romHandler.hasMoveTutors()) {
-				this.mtmRandomRB.setEnabled(true);
-				this.mtmUnchangedRB.setEnabled(true);
-
-				this.mtcRandomTotalRB.setEnabled(true);
-				this.mtcRandomTypeRB.setEnabled(true);
-				this.mtcUnchangedRB.setEnabled(true);
-				this.mtcFullRB.setEnabled(true);
-			} else {
-				this.mtCompatPanel.setVisible(false);
-				this.mtMovesPanel.setVisible(false);
-				this.mtNoExistLabel.setVisible(true);
-			}
-
-			this.igtUnchangedRB.setEnabled(true);
-			this.igtBothRB.setEnabled(true);
-			this.igtGivenOnlyRB.setEnabled(true);
-
-			if (this.romHandler instanceof Gen1RomHandler) {
-				this.igtRandomItemCB.setVisible(false);
-				this.igtRandomIVsCB.setVisible(false);
-				this.igtRandomOTCB.setVisible(false);
-			}
-
-			this.fiUnchangedRB.setEnabled(true);
-			this.fiRandomRB.setEnabled(true);
-			this.fiShuffleRB.setEnabled(true);
-
-			this.fiBanBadCB.setEnabled(false);
-			this.fiBanBadCB.setSelected(false);
-
-			this.peUnchangedRB.setEnabled(true);
-			this.peUnchangedRB.setSelected(true);
-			this.peRandomRB.setEnabled(true);
-
-			int mtsAvailable = this.romHandler.miscTweaksAvailable();
-			int mtCount = MiscTweak.allTweaks.size();
-			List<JCheckBox> usableCheckboxes = new ArrayList<JCheckBox>();
-
-			for (int mti = 0; mti < mtCount; mti++) {
-				MiscTweak mt = MiscTweak.allTweaks.get(mti);
-				JCheckBox mtCB = tweakCheckboxes.get(mti);
-				mtCB.setSelected(false);
-				if ((mtsAvailable & mt.getValue()) != 0) {
-					mtCB.setVisible(true);
-					mtCB.setEnabled(true);
-					usableCheckboxes.add(mtCB);
-				} else {
-					mtCB.setVisible(false);
-					mtCB.setEnabled(false);
-				}
-			}
-
-			if (tweakCheckboxes.size() > 0) {
-				this.mtNoneAvailableLabel.setVisible(false);
-				miscTweaksPanel.setLayout(makeTweaksLayout(usableCheckboxes));
-			} else {
-				this.mtNoneAvailableLabel.setVisible(true);
-				miscTweaksPanel.setLayout(noTweaksLayout);
-			}
-
-			this.gameMascotLabel.setIcon(makeMascotIcon());
-
-			if (this.romHandler instanceof AbstractDSRomHandler) {
-				((AbstractDSRomHandler) this.romHandler).closeInnerRom();
-			}
-		} catch (Exception ex) {
-			attemptToLogException(ex, "RandomizerGUI.processFailed",
-					"RandomizerGUI.processFailedNoLog");
-			this.romHandler = null;
-			this.initialFormState();
-		}
-	}
-	
-	private ImageIcon makeMascotIcon() {
-		BufferedImage handlerImg = romHandler.getMascotImage();
-		
-		if(handlerImg == null) {
-			return emptyIcon;
-		}
-		
-		BufferedImage nImg = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
-		int hW = handlerImg.getWidth();
-		int hH = handlerImg.getHeight();
-		Graphics g = nImg.getGraphics();
-		nImg.getGraphics().drawImage(handlerImg, 64-hW/2, 64-hH/2, this);
-		return new ImageIcon(nImg);
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void populateDropdowns() {
-		List<Pokemon> currentStarters = romHandler.getStarters();
-		List<Pokemon> allPokes = romHandler.getPokemon();
-		String[] pokeNames = new String[allPokes.size() - 1];
-		for (int i = 1; i < allPokes.size(); i++) {
-			pokeNames[i - 1] = allPokes.get(i).name;
-		}
-		this.spCustomPoke1Chooser.setModel(new DefaultComboBoxModel(pokeNames));
-		this.spCustomPoke1Chooser.setSelectedIndex(allPokes
-				.indexOf(currentStarters.get(0)) - 1);
-		this.spCustomPoke2Chooser.setModel(new DefaultComboBoxModel(pokeNames));
-		this.spCustomPoke2Chooser.setSelectedIndex(allPokes
-				.indexOf(currentStarters.get(1)) - 1);
-		if (!romHandler.isYellow()) {
-			this.spCustomPoke3Chooser.setModel(new DefaultComboBoxModel(
-					pokeNames));
-			this.spCustomPoke3Chooser.setSelectedIndex(allPokes
-					.indexOf(currentStarters.get(2)) - 1);
-		}
-	}
-
-	private void enableOrDisableSubControls() {
-		// This isn't for a new ROM being loaded (that's romLoaded)
-		// This is just for when a radio button gets selected or state is loaded
-		// and we need to enable/disable secondary controls
-		// e.g. wild pokemon / trainer pokemon "modifier"
-		// and the 3 starter pokemon dropdowns
-
-		if (this.goUpdateMovesCheckBox.isSelected()
-				&& !(romHandler instanceof Gen5RomHandler)) {
-			this.goUpdateMovesLegacyCheckBox.setEnabled(true);
-		} else {
-			this.goUpdateMovesLegacyCheckBox.setEnabled(false);
-			this.goUpdateMovesLegacyCheckBox.setSelected(false);
-		}
-
-		this.pokeLimitBtn.setEnabled(this.pokeLimitCB.isSelected());
-
-		if (this.spCustomRB.isSelected()) {
-			this.spCustomPoke1Chooser.setEnabled(true);
-			this.spCustomPoke2Chooser.setEnabled(true);
-			this.spCustomPoke3Chooser.setEnabled(true);
-		} else {
-			this.spCustomPoke1Chooser.setEnabled(false);
-			this.spCustomPoke2Chooser.setEnabled(false);
-			this.spCustomPoke3Chooser.setEnabled(false);
-		}
-
-		if (this.spHeldItemsCB.isSelected() && this.spHeldItemsCB.isVisible()
-				&& this.spHeldItemsCB.isEnabled()) {
-			this.spHeldItemsBanBadCB.setEnabled(true);
-		} else {
-			this.spHeldItemsBanBadCB.setEnabled(false);
-			this.spHeldItemsBanBadCB.setSelected(false);
-		}
-
-		if (this.paRandomizeRB.isSelected()) {
-			this.paWonderGuardCB.setEnabled(true);
-		} else {
-			this.paWonderGuardCB.setEnabled(false);
-			this.paWonderGuardCB.setSelected(false);
-		}
-
-		if (this.tpUnchangedRB.isSelected()) {
-			this.tpPowerLevelsCB.setEnabled(false);
-			this.tpRivalCarriesStarterCB.setEnabled(false);
-			this.tpNoLegendariesCB.setEnabled(false);
-			this.tpNoEarlyShedinjaCB.setEnabled(false);
-			this.tpNoEarlyShedinjaCB.setSelected(false);
-		} else {
-			this.tpPowerLevelsCB.setEnabled(true);
-			this.tpRivalCarriesStarterCB.setEnabled(true);
-			this.tpNoLegendariesCB.setEnabled(true);
-			this.tpNoEarlyShedinjaCB.setEnabled(true);
-		}
-
-		if (this.tpTypeThemedRB.isSelected()) {
-			this.tpTypeWeightingCB.setEnabled(true);
-		} else {
-			this.tpTypeWeightingCB.setEnabled(false);
-		}
-
-		if (this.wpArea11RB.isSelected() || this.wpRandomRB.isSelected()) {
-			this.wpARNoneRB.setEnabled(true);
-			this.wpARSimilarStrengthRB.setEnabled(true);
-			this.wpARCatchEmAllRB.setEnabled(true);
-			this.wpARTypeThemedRB.setEnabled(true);
-		} else if (this.wpGlobalRB.isSelected()) {
-			if (this.wpARCatchEmAllRB.isSelected()
-					|| this.wpARTypeThemedRB.isSelected()) {
-				this.wpARNoneRB.setSelected(true);
-			}
-			this.wpARNoneRB.setEnabled(true);
-			this.wpARSimilarStrengthRB.setEnabled(true);
-			this.wpARCatchEmAllRB.setEnabled(false);
-			this.wpARTypeThemedRB.setEnabled(false);
-		} else {
-			this.wpARNoneRB.setEnabled(false);
-			this.wpARSimilarStrengthRB.setEnabled(false);
-			this.wpARCatchEmAllRB.setEnabled(false);
-			this.wpARTypeThemedRB.setEnabled(false);
-			this.wpARNoneRB.setSelected(true);
-		}
-
-		if (this.wpUnchangedRB.isSelected()) {
-			this.wpUseTimeCB.setEnabled(false);
-			this.wpNoLegendariesCB.setEnabled(false);
-		} else {
-			this.wpUseTimeCB.setEnabled(true);
-			this.wpNoLegendariesCB.setEnabled(true);
-		}
-
-		if (this.wpHeldItemsCB.isSelected() && this.wpHeldItemsCB.isVisible()
-				&& this.wpHeldItemsCB.isEnabled()) {
-			this.wpHeldItemsBanBadCB.setEnabled(true);
-		} else {
-			this.wpHeldItemsBanBadCB.setEnabled(false);
-			this.wpHeldItemsBanBadCB.setSelected(false);
-		}
-
-		if (this.igtUnchangedRB.isSelected()) {
-			this.igtRandomItemCB.setEnabled(false);
-			this.igtRandomIVsCB.setEnabled(false);
-			this.igtRandomNicknameCB.setEnabled(false);
-			this.igtRandomOTCB.setEnabled(false);
-		} else {
-			this.igtRandomItemCB.setEnabled(true);
-			this.igtRandomIVsCB.setEnabled(true);
-			this.igtRandomNicknameCB.setEnabled(true);
-			this.igtRandomOTCB.setEnabled(true);
-		}
-
-		if (this.pmsMetronomeOnlyRB.isSelected()) {
-			this.tmmUnchangedRB.setEnabled(false);
-			this.tmmRandomRB.setEnabled(false);
-			this.tmmUnchangedRB.setSelected(true);
-
-			this.mtmUnchangedRB.setEnabled(false);
-			this.mtmRandomRB.setEnabled(false);
-			this.mtmUnchangedRB.setSelected(true);
-
-			this.tmLearningSanityCB.setEnabled(false);
-			this.tmLearningSanityCB.setSelected(false);
-			this.tmKeepFieldMovesCB.setEnabled(false);
-			this.tmKeepFieldMovesCB.setSelected(false);
-
-			this.mtLearningSanityCB.setEnabled(false);
-			this.mtLearningSanityCB.setSelected(false);
-			this.mtKeepFieldMovesCB.setEnabled(false);
-			this.mtKeepFieldMovesCB.setSelected(false);
-		} else {
-			this.tmmUnchangedRB.setEnabled(true);
-			this.tmmRandomRB.setEnabled(true);
-
-			this.mtmUnchangedRB.setEnabled(true);
-			this.mtmRandomRB.setEnabled(true);
-
-			if (!(this.pmsUnchangedRB.isSelected())
-					|| !(this.tmmUnchangedRB.isSelected())
-					|| !(this.thcUnchangedRB.isSelected())) {
-				this.tmLearningSanityCB.setEnabled(true);
-			} else {
-				this.tmLearningSanityCB.setEnabled(false);
-				this.tmLearningSanityCB.setSelected(false);
-			}
-
-			if (!(this.tmmUnchangedRB.isSelected())) {
-				this.tmKeepFieldMovesCB.setEnabled(true);
-			} else {
-				this.tmKeepFieldMovesCB.setEnabled(false);
-				this.tmKeepFieldMovesCB.setSelected(false);
-			}
-
-			if (this.romHandler.hasMoveTutors()
-					&& (!(this.pmsUnchangedRB.isSelected())
-							|| !(this.mtmUnchangedRB.isSelected()) || !(this.mtcUnchangedRB
-								.isSelected()))) {
-				this.mtLearningSanityCB.setEnabled(true);
-			} else {
-				this.mtLearningSanityCB.setEnabled(false);
-				this.mtLearningSanityCB.setSelected(false);
-			}
-
-			if (this.romHandler.hasMoveTutors()
-					&& !(this.mtmUnchangedRB.isSelected())) {
-				this.mtKeepFieldMovesCB.setEnabled(true);
-			} else {
-				this.mtKeepFieldMovesCB.setEnabled(false);
-				this.mtKeepFieldMovesCB.setSelected(false);
-			}
-		}
-
-		this.tmFullHMCompatCB.setEnabled(!this.thcFullRB.isSelected());
-
-		if (this.pmsMetronomeOnlyRB.isSelected()
-				|| this.pmsUnchangedRB.isSelected()) {
-			this.pms4MovesCB.setEnabled(false);
-			this.pms4MovesCB.setSelected(false);
-		} else {
-			this.pms4MovesCB.setEnabled(true);
-		}
-
-		if (this.fiRandomRB.isSelected() && this.fiRandomRB.isVisible()
-				&& this.fiRandomRB.isEnabled()) {
-			this.fiBanBadCB.setEnabled(true);
-		} else {
-			this.fiBanBadCB.setEnabled(false);
-			this.fiBanBadCB.setSelected(false);
-		}
-
-		this.peForceChangeCB.setEnabled(this.peRandomRB.isSelected());
-		this.peThreeStagesCB.setEnabled(this.peRandomRB.isSelected());
-		this.peSameTypeCB.setEnabled(this.peRandomRB.isSelected());
-		this.peSimilarStrengthCB.setEnabled(this.peRandomRB.isSelected());
-	}
-
-	private void saveROM() {
-		if (romHandler == null) {
-			return; // none loaded
-		}
-		if (raceModeCB.isSelected() && tpUnchangedRB.isSelected()
-				&& wpUnchangedRB.isSelected()) {
-			JOptionPane.showMessageDialog(this,
-					bundle.getString("RandomizerGUI.raceModeRequirements"));
-			return;
-		}
-		if (pokeLimitCB.isSelected()
-				&& (this.currentRestrictions == null || this.currentRestrictions
-						.nothingSelected())) {
-			JOptionPane.showMessageDialog(this,
-					bundle.getString("RandomizerGUI.pokeLimitNotChosen"));
-			return;
-		}
-		romSaveChooser.setSelectedFile(null);
-		int returnVal = romSaveChooser.showSaveDialog(this);
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			File fh = romSaveChooser.getSelectedFile();
-			// Fix or add extension
-			List<String> extensions = new ArrayList<String>(Arrays.asList(
-					"sgb", "gbc", "gba", "nds"));
-			extensions.remove(this.romHandler.getDefaultExtension());
-			fh = FileFunctions.fixFilename(fh,
-					this.romHandler.getDefaultExtension(), extensions);
-			boolean allowed = true;
-			if (this.romHandler instanceof AbstractDSRomHandler) {
-				String currentFN = this.romHandler.loadedFilename();
-				if (currentFN.equals(fh.getAbsolutePath())) {
-					JOptionPane.showMessageDialog(this,
-							bundle.getString("RandomizerGUI.cantOverwriteDS"));
-					allowed = false;
-				}
-			}
-			if (allowed) {
-				// Get a seed
-				long seed = RandomSource.pickSeed();
-				// Apply it
-				RandomSource.seed(seed);
-				presetMode = false;
-				performRandomization(fh.getAbsolutePath(), seed, null, null,
-						null);
-			}
-		}
-	}
-
-	private Settings getCurrentSettings() {
-		byte[] trainerClasses = null;
-		byte[] trainerNames = null;
-		byte[] nicknames = null;
-
-		try {
-			trainerClasses = FileFunctions
-					.getConfigAsBytes("trainerclasses.txt");
-			trainerNames = FileFunctions.getConfigAsBytes("trainernames.txt");
-			nicknames = FileFunctions.getConfigAsBytes("nicknames.txt");
-		} catch (IOException e) {
-		}
-
-		Settings settings = createSettingsFromState(trainerClasses,
-				trainerNames, nicknames);
-		return settings;
-	}
-
-	public String getValidRequiredROMName(String config, byte[] trainerClasses,
-			byte[] trainerNames, byte[] nicknames)
-			throws UnsupportedEncodingException,
-			InvalidSupplementFilesException {
-		try {
-			Utils.validatePresetSupplementFiles(config, trainerClasses,
-					trainerNames, nicknames);
-		} catch (InvalidSupplementFilesException e) {
-			switch (e.getType()) {
-			case TRAINER_CLASSES:
-				JOptionPane.showMessageDialog(null, bundle
-						.getString("RandomizerGUI.presetFailTrainerClasses"));
-				throw e;
-			case TRAINER_NAMES:
-				JOptionPane.showMessageDialog(null, bundle
-						.getString("RandomizerGUI.presetFailTrainerNames"));
-				throw e;
-			case NICKNAMES:
-				JOptionPane.showMessageDialog(null,
-						bundle.getString("RandomizerGUI.presetFailNicknames"));
-				throw e;
-			default:
-				throw e;
-			}
-		}
-		byte[] data = DatatypeConverter.parseBase64Binary(config);
-
-		int nameLength = data[Settings.LENGTH_OF_SETTINGS_DATA] & 0xFF;
-		if (data.length != Settings.LENGTH_OF_SETTINGS_DATA + 17 + nameLength) {
-			return null; // not valid length
-		}
-		String name = new String(data, Settings.LENGTH_OF_SETTINGS_DATA + 1,
-				nameLength, "US-ASCII");
-		return name;
-	}
-
-	private void restoreStateFromSettings(Settings settings) {
-		this.goRemoveTradeEvosCheckBox.setSelected(settings
-				.isChangeImpossibleEvolutions());
-		this.goUpdateMovesCheckBox.setSelected(settings.isUpdateMoves());
-		this.goUpdateMovesLegacyCheckBox.setSelected(settings
-				.isUpdateMovesLegacy());
-		this.tnRandomizeCB.setSelected(settings.isRandomizeTrainerNames());
-		this.tcnRandomizeCB
-				.setSelected(settings.isRandomizeTrainerClassNames());
-
-		this.pbsChangesRandomEvosRB
-				.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.RANDOM_FOLLOW_EVOLUTIONS);
-		this.pbsChangesRandomTotalRB
-				.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.COMPLETELY_RANDOM);
-		this.pbsChangesShuffleRB
-				.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.SHUFFLE);
-		this.pbsChangesUnchangedRB
-				.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.UNCHANGED);
-		this.paUnchangedRB
-				.setSelected(settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED);
-		this.paRandomizeRB
-				.setSelected(settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
-		this.paWonderGuardCB.setSelected(settings.isAllowWonderGuard());
-		this.pbsStandardEXPCurvesCB.setSelected(settings
-				.isStandardizeEXPCurves());
-
-		this.ptRandomFollowEvosRB
-				.setSelected(settings.getTypesMod() == Settings.TypesMod.RANDOM_FOLLOW_EVOLUTIONS);
-		this.ptRandomTotalRB
-				.setSelected(settings.getTypesMod() == Settings.TypesMod.COMPLETELY_RANDOM);
-		this.ptUnchangedRB
-				.setSelected(settings.getTypesMod() == Settings.TypesMod.UNCHANGED);
-		this.raceModeCB.setSelected(settings.isRaceMode());
-		this.brokenMovesCB.setSelected(settings.doBlockBrokenMoves());
-		this.pokeLimitCB.setSelected(settings.isLimitPokemon());
-
-		this.goCondenseEvosCheckBox.setSelected(settings
-				.isMakeEvolutionsEasier());
-
-		this.spCustomRB
-				.setSelected(settings.getStartersMod() == Settings.StartersMod.CUSTOM);
-		this.spRandomRB
-				.setSelected(settings.getStartersMod() == Settings.StartersMod.COMPLETELY_RANDOM);
-		this.spUnchangedRB
-				.setSelected(settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
-		this.spRandom2EvosRB
-				.setSelected(settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_TWO_EVOLUTIONS);
-		this.spHeldItemsCB.setSelected(settings.isRandomizeStartersHeldItems());
-		this.spHeldItemsBanBadCB.setSelected(settings
-				.isBanBadRandomStarterHeldItems());
-
-		int[] customStarters = settings.getCustomStarters();
-		this.spCustomPoke1Chooser.setSelectedIndex(customStarters[0] - 1);
-		this.spCustomPoke2Chooser.setSelectedIndex(customStarters[1] - 1);
-		this.spCustomPoke3Chooser.setSelectedIndex(customStarters[2] - 1);
-
-		this.peUnchangedRB
-				.setSelected(settings.getEvolutionsMod() == Settings.EvolutionsMod.UNCHANGED);
-		this.peRandomRB
-				.setSelected(settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM);
-		this.peSimilarStrengthCB.setSelected(settings.isEvosSimilarStrength());
-		this.peSameTypeCB.setSelected(settings.isEvosSameTyping());
-		this.peThreeStagesCB.setSelected(settings.isEvosMaxThreeStages());
-		this.peForceChangeCB.setSelected(settings.isEvosForceChange());
-
-		this.mdRandomAccuracyCB.setSelected(settings
-				.isRandomizeMoveAccuracies());
-		this.mdRandomCategoryCB.setSelected(settings.isRandomizeMoveCategory());
-		this.mdRandomPowerCB.setSelected(settings.isRandomizeMovePowers());
-		this.mdRandomPPCB.setSelected(settings.isRandomizeMovePPs());
-		this.mdRandomTypeCB.setSelected(settings.isRandomizeMoveTypes());
-
-		this.pmsRandomTotalRB
-				.setSelected(settings.getMovesetsMod() == Settings.MovesetsMod.COMPLETELY_RANDOM);
-		this.pmsRandomTypeRB
-				.setSelected(settings.getMovesetsMod() == Settings.MovesetsMod.RANDOM_PREFER_SAME_TYPE);
-		this.pmsUnchangedRB
-				.setSelected(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED);
-		this.pmsMetronomeOnlyRB
-				.setSelected(settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY);
-		this.pms4MovesCB.setSelected(settings.isStartWithFourMoves());
-
-		this.tpPowerLevelsCB.setSelected(settings
-				.isTrainersUsePokemonOfSimilarStrength());
-		this.tpRandomRB
-				.setSelected(settings.getTrainersMod() == Settings.TrainersMod.RANDOM);
-		this.tpRivalCarriesStarterCB.setSelected(settings
-				.isRivalCarriesStarterThroughout());
-		this.tpTypeThemedRB
-				.setSelected(settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED);
-		this.tpTypeWeightingCB.setSelected(settings
-				.isTrainersMatchTypingDistribution());
-		this.tpUnchangedRB
-				.setSelected(settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED);
-		this.tpNoLegendariesCB.setSelected(settings
-				.isTrainersBlockLegendaries());
-		this.tpNoEarlyShedinjaCB.setSelected(settings
-				.isTrainersBlockEarlyWonderGuard());
-
-		this.wpARCatchEmAllRB
-				.setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL);
-		this.wpArea11RB
-				.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.AREA_MAPPING);
-		this.wpARNoneRB
-				.setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.NONE);
-		this.wpARTypeThemedRB
-				.setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS);
-		this.wpGlobalRB
-				.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.GLOBAL_MAPPING);
-		this.wpRandomRB
-				.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.RANDOM);
-		this.wpUnchangedRB
-				.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
-		this.wpUseTimeCB.setSelected(settings.isUseTimeBasedEncounters());
-
-		this.wpCatchRateCB.setSelected(settings.isUseMinimumCatchRate());
-		this.wpNoLegendariesCB.setSelected(settings.isBlockWildLegendaries());
-		this.wpARSimilarStrengthRB
-				.setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH);
-		this.wpHeldItemsCB.setSelected(settings
-				.isRandomizeWildPokemonHeldItems());
-		this.wpHeldItemsBanBadCB.setSelected(settings
-				.isBanBadRandomWildPokemonHeldItems());
-
-		this.stpUnchangedRB
-				.setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED);
-		this.stpRandomL4LRB
-				.setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING);
-		this.stpRandomTotalRB
-				.setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.COMPLETELY_RANDOM);
-
-		this.thcRandomTotalRB
-				.setSelected(settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.COMPLETELY_RANDOM);
-		this.thcRandomTypeRB
-				.setSelected(settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.RANDOM_PREFER_TYPE);
-		this.thcUnchangedRB
-				.setSelected(settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.UNCHANGED);
-		this.tmmRandomRB
-				.setSelected(settings.getTmsMod() == Settings.TMsMod.RANDOM);
-		this.tmmUnchangedRB
-				.setSelected(settings.getTmsMod() == Settings.TMsMod.UNCHANGED);
-		this.tmLearningSanityCB.setSelected(settings.isTmLevelUpMoveSanity());
-		this.tmKeepFieldMovesCB.setSelected(settings.isKeepFieldMoveTMs());
-		this.thcFullRB
-				.setSelected(settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.FULL);
-
-		this.mtcRandomTotalRB
-				.setSelected(settings.getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.COMPLETELY_RANDOM);
-		this.mtcRandomTypeRB
-				.setSelected(settings.getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.RANDOM_PREFER_TYPE);
-		this.mtcUnchangedRB
-				.setSelected(settings.getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.UNCHANGED);
-		this.mtmRandomRB
-				.setSelected(settings.getMoveTutorMovesMod() == Settings.MoveTutorMovesMod.RANDOM);
-		this.mtmUnchangedRB
-				.setSelected(settings.getMoveTutorMovesMod() == Settings.MoveTutorMovesMod.UNCHANGED);
-		this.mtLearningSanityCB
-				.setSelected(settings.isTutorLevelUpMoveSanity());
-		this.mtKeepFieldMovesCB.setSelected(settings.isKeepFieldMoveTutors());
-		this.mtcFullRB
-				.setSelected(settings.getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.FULL);
-
-		this.igtBothRB
-				.setSelected(settings.getInGameTradesMod() == Settings.InGameTradesMod.RANDOMIZE_GIVEN_AND_REQUESTED);
-		this.igtGivenOnlyRB
-				.setSelected(settings.getInGameTradesMod() == Settings.InGameTradesMod.RANDOMIZE_GIVEN);
-		this.igtRandomItemCB.setSelected(settings
-				.isRandomizeInGameTradesItems());
-		this.igtRandomIVsCB.setSelected(settings.isRandomizeInGameTradesIVs());
-		this.igtRandomNicknameCB.setSelected(settings
-				.isRandomizeInGameTradesNicknames());
-		this.igtRandomOTCB.setSelected(settings.isRandomizeInGameTradesOTs());
-		this.igtUnchangedRB
-				.setSelected(settings.getInGameTradesMod() == Settings.InGameTradesMod.UNCHANGED);
-
-		this.fiRandomRB
-				.setSelected(settings.getFieldItemsMod() == Settings.FieldItemsMod.RANDOM);
-		this.fiShuffleRB
-				.setSelected(settings.getFieldItemsMod() == Settings.FieldItemsMod.SHUFFLE);
-		this.fiUnchangedRB
-				.setSelected(settings.getFieldItemsMod() == Settings.FieldItemsMod.UNCHANGED);
-		this.fiBanBadCB.setSelected(settings.isBanBadRandomFieldItems());
-
-		this.currentRestrictions = settings.getCurrentRestrictions();
-		if (this.currentRestrictions != null) {
-			this.currentRestrictions.limitToGen(this.romHandler
-					.generationOfPokemon());
-		}
-
-		int mtsSelected = settings.getCurrentMiscTweaks();
-		int mtCount = MiscTweak.allTweaks.size();
-
-		for (int mti = 0; mti < mtCount; mti++) {
-			MiscTweak mt = MiscTweak.allTweaks.get(mti);
-			JCheckBox mtCB = tweakCheckboxes.get(mti);
-			mtCB.setSelected((mtsSelected & mt.getValue()) != 0);
-		}
-
-		this.enableOrDisableSubControls();
-	}
-
-	private Settings createSettingsFromState(byte[] trainerClasses,
-			byte[] trainerNames, byte[] nicknames) {
-		Settings settings = new Settings();
-		settings.setRomName(this.romHandler.getROMName());
-		settings.setChangeImpossibleEvolutions(goRemoveTradeEvosCheckBox
-				.isSelected());
-		settings.setUpdateMoves(goUpdateMovesCheckBox.isSelected());
-		settings.setUpdateMovesLegacy(goUpdateMovesLegacyCheckBox.isSelected());
-		settings.setRandomizeTrainerNames(tnRandomizeCB.isSelected());
-		settings.setRandomizeTrainerClassNames(tcnRandomizeCB.isSelected());
-
-		settings.setBaseStatisticsMod(pbsChangesUnchangedRB.isSelected(),
-				pbsChangesShuffleRB.isSelected(),
-				pbsChangesRandomEvosRB.isSelected(),
-				pbsChangesRandomTotalRB.isSelected());
-		settings.setAbilitiesMod(paUnchangedRB.isSelected(),
-				paRandomizeRB.isSelected());
-		settings.setAllowWonderGuard(paWonderGuardCB.isSelected());
-		settings.setStandardizeEXPCurves(pbsStandardEXPCurvesCB.isSelected());
-
-		settings.setTypesMod(ptUnchangedRB.isSelected(),
-				ptRandomFollowEvosRB.isSelected(), ptRandomTotalRB.isSelected());
-		settings.setRaceMode(raceModeCB.isSelected());
-		settings.setBlockBrokenMoves(brokenMovesCB.isSelected());
-		settings.setLimitPokemon(pokeLimitCB.isSelected());
-
-		settings.setMakeEvolutionsEasier(goCondenseEvosCheckBox.isSelected());
-
-		settings.setStartersMod(spUnchangedRB.isSelected(),
-				spCustomRB.isSelected(), spRandomRB.isSelected(),
-				spRandom2EvosRB.isSelected());
-		settings.setRandomizeStartersHeldItems(spHeldItemsCB.isSelected());
-		settings.setBanBadRandomStarterHeldItems(spHeldItemsBanBadCB
-				.isSelected());
-
-		int[] customStarters = new int[] {
-				spCustomPoke1Chooser.getSelectedIndex() + 1,
-				spCustomPoke2Chooser.getSelectedIndex() + 1,
-				spCustomPoke3Chooser.getSelectedIndex() + 1 };
-		settings.setCustomStarters(customStarters);
-
-		settings.setEvolutionsMod(peUnchangedRB.isSelected(),
-				peRandomRB.isSelected());
-		settings.setEvosSimilarStrength(peSimilarStrengthCB.isSelected());
-		settings.setEvosSameTyping(peSameTypeCB.isSelected());
-		settings.setEvosMaxThreeStages(peThreeStagesCB.isSelected());
-		settings.setEvosForceChange(peForceChangeCB.isSelected());
-
-		settings.setRandomizeMoveAccuracies(mdRandomAccuracyCB.isSelected());
-		settings.setRandomizeMoveCategory(mdRandomCategoryCB.isSelected());
-		settings.setRandomizeMovePowers(mdRandomPowerCB.isSelected());
-		settings.setRandomizeMovePPs(mdRandomPPCB.isSelected());
-		settings.setRandomizeMoveTypes(mdRandomTypeCB.isSelected());
-
-		settings.setMovesetsMod(pmsUnchangedRB.isSelected(),
-				pmsRandomTypeRB.isSelected(), pmsRandomTotalRB.isSelected(),
-				pmsMetronomeOnlyRB.isSelected());
-		settings.setStartWithFourMoves(pms4MovesCB.isSelected());
-
-		settings.setTrainersMod(tpUnchangedRB.isSelected(),
-				tpRandomRB.isSelected(), tpTypeThemedRB.isSelected());
-		settings.setTrainersUsePokemonOfSimilarStrength(tpPowerLevelsCB
-				.isSelected());
-		settings.setRivalCarriesStarterThroughout(tpRivalCarriesStarterCB
-				.isSelected());
-		settings.setTrainersMatchTypingDistribution(tpTypeWeightingCB
-				.isSelected());
-		settings.setTrainersBlockLegendaries(tpNoLegendariesCB.isSelected());
-		settings.setTrainersBlockEarlyWonderGuard(tpNoEarlyShedinjaCB
-				.isSelected());
-
-		settings.setWildPokemonMod(wpUnchangedRB.isSelected(),
-				wpRandomRB.isSelected(), wpArea11RB.isSelected(),
-				wpGlobalRB.isSelected());
-		settings.setWildPokemonRestrictionMod(wpARNoneRB.isSelected(),
-				wpARSimilarStrengthRB.isSelected(),
-				wpARCatchEmAllRB.isSelected(), wpARTypeThemedRB.isSelected());
-		settings.setUseTimeBasedEncounters(wpUseTimeCB.isSelected());
-		settings.setUseMinimumCatchRate(wpCatchRateCB.isSelected());
-		settings.setBlockWildLegendaries(wpNoLegendariesCB.isSelected());
-		settings.setRandomizeWildPokemonHeldItems(wpHeldItemsCB.isSelected());
-		settings.setBanBadRandomWildPokemonHeldItems(wpHeldItemsBanBadCB
-				.isSelected());
-
-		settings.setStaticPokemonMod(stpUnchangedRB.isSelected(),
-				stpRandomL4LRB.isSelected(), stpRandomTotalRB.isSelected());
-
-		settings.setTmsMod(tmmUnchangedRB.isSelected(),
-				tmmRandomRB.isSelected());
-
-		settings.setTmsHmsCompatibilityMod(thcUnchangedRB.isSelected(),
-				thcRandomTypeRB.isSelected(), thcRandomTotalRB.isSelected(),
-				thcFullRB.isSelected());
-		settings.setTmLevelUpMoveSanity(tmLearningSanityCB.isSelected());
-		settings.setKeepFieldMoveTMs(tmKeepFieldMovesCB.isSelected());
-		settings.setFullHMCompat(tmFullHMCompatCB.isSelected());
-
-		settings.setMoveTutorMovesMod(mtmUnchangedRB.isSelected(),
-				mtmRandomRB.isSelected());
-		settings.setMoveTutorsCompatibilityMod(mtcUnchangedRB.isSelected(),
-				mtcRandomTypeRB.isSelected(), mtcRandomTotalRB.isSelected(),
-				mtcFullRB.isSelected());
-		settings.setTutorLevelUpMoveSanity(mtLearningSanityCB.isSelected());
-		settings.setKeepFieldMoveTutors(mtKeepFieldMovesCB.isSelected());
-
-		settings.setInGameTradesMod(igtUnchangedRB.isSelected(),
-				igtGivenOnlyRB.isSelected(), igtBothRB.isSelected());
-		settings.setRandomizeInGameTradesItems(igtRandomItemCB.isSelected());
-		settings.setRandomizeInGameTradesIVs(igtRandomIVsCB.isSelected());
-		settings.setRandomizeInGameTradesNicknames(igtRandomNicknameCB
-				.isSelected());
-		settings.setRandomizeInGameTradesOTs(igtRandomOTCB.isSelected());
-
-		settings.setFieldItemsMod(fiUnchangedRB.isSelected(),
-				fiShuffleRB.isSelected(), fiRandomRB.isSelected());
-		settings.setBanBadRandomFieldItems(fiBanBadCB.isSelected());
-
-		settings.setCurrentRestrictions(currentRestrictions);
-
-		int currentMiscTweaks = 0;
-		int mtCount = MiscTweak.allTweaks.size();
-
-		for (int mti = 0; mti < mtCount; mti++) {
-			MiscTweak mt = MiscTweak.allTweaks.get(mti);
-			JCheckBox mtCB = tweakCheckboxes.get(mti);
-			if (mtCB.isSelected()) {
-				currentMiscTweaks |= mt.getValue();
-			}
-		}
-
-		settings.setCurrentMiscTweaks(currentMiscTweaks);
-
-		settings.setTrainerNames(trainerNames);
-		settings.setTrainerClasses(trainerClasses);
-		settings.setNicknames(nicknames);
-
-		return settings;
-	}
-
-	private void performRandomization(final String filename, final long seed,
-			byte[] trainerClasses, byte[] trainerNames, byte[] nicknames) {
-		final Settings settings = createSettingsFromState(trainerClasses,
-				trainerNames, nicknames);
-		final boolean raceMode = settings.isRaceMode();
-		// Setup verbose log
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrintStream log;
-		try {
-			log = new PrintStream(baos, false, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			log = new PrintStream(baos);
-		}
-
-		final PrintStream verboseLog = log;
-
-		try {
-			final AtomicInteger finishedCV = new AtomicInteger(0);
-			opDialog = new OperationDialog(
-					bundle.getString("RandomizerGUI.savingText"), this, true);
-			Thread t = new Thread() {
-				@Override
-				public void run() {
-					SwingUtilities.invokeLater(new Runnable() {
-						@Override
-						public void run() {
-							opDialog.setVisible(true);
-						}
-					});
-					boolean succeededSave = false;
-					try {
-						RandomizerGUI.this.romHandler.setLog(verboseLog);
-						finishedCV.set(new Randomizer(settings,
-								RandomizerGUI.this.romHandler).randomize(
-								filename, verboseLog, seed));
-						succeededSave = true;
-					} catch (Exception ex) {
-						attemptToLogException(ex, "RandomizerGUI.saveFailedIO",
-								"RandomizerGUI.saveFailedIONoLog");
-						if (verboseLog != null) {
-							verboseLog.close();
-						}
-					}
-					if (succeededSave) {
-						SwingUtilities.invokeLater(new Runnable() {
-							@Override
-							public void run() {
-								RandomizerGUI.this.opDialog.setVisible(false);
-								// Log?
-								verboseLog.close();
-								byte[] out = baos.toByteArray();
-
-								if (raceMode) {
-									JOptionPane.showMessageDialog(
-											RandomizerGUI.this,
-											String.format(
-													bundle.getString("RandomizerGUI.raceModeCheckValuePopup"),
-													finishedCV.get()));
-								} else {
-									int response = JOptionPane.showConfirmDialog(
-											RandomizerGUI.this,
-											bundle.getString("RandomizerGUI.saveLogDialog.text"),
-											bundle.getString("RandomizerGUI.saveLogDialog.title"),
-											JOptionPane.YES_NO_OPTION);
-									if (response == JOptionPane.YES_OPTION) {
-										try {
-											FileOutputStream fos = new FileOutputStream(
-													filename + ".log");
-											fos.write(0xEF);
-											fos.write(0xBB);
-											fos.write(0xBF);
-											fos.write(out);
-											fos.close();
-										} catch (IOException e) {
-											JOptionPane.showMessageDialog(
-													RandomizerGUI.this,
-													bundle.getString("RandomizerGUI.logSaveFailed"));
-											return;
-										}
-										JOptionPane.showMessageDialog(
-												RandomizerGUI.this,
-												String.format(
-														bundle.getString("RandomizerGUI.logSaved"),
-														filename));
-									}
-								}
-								if (presetMode) {
-									JOptionPane.showMessageDialog(
-											RandomizerGUI.this,
-											bundle.getString("RandomizerGUI.randomizationDone"));
-									// Done
-									RandomizerGUI.this.romHandler = null;
-									initialFormState();
-								} else {
-									// Compile a config string
-									String configString = getCurrentSettings()
-											.toString();
-									// Show the preset maker
-									new PresetMakeDialog(RandomizerGUI.this,
-											seed, configString);
-
-									// Done
-									RandomizerGUI.this.romHandler = null;
-									initialFormState();
-								}
-							}
-						});
-					} else {
-						SwingUtilities.invokeLater(new Runnable() {
-							@Override
-							public void run() {
-								RandomizerGUI.this.opDialog.setVisible(false);
-								RandomizerGUI.this.romHandler = null;
-								initialFormState();
-							}
-						});
-					}
-				}
-			};
-			t.start();
-		} catch (Exception ex) {
-			attemptToLogException(ex, "RandomizerGUI.saveFailed",
-					"RandomizerGUI.saveFailedNoLog");
-			if (verboseLog != null) {
-				verboseLog.close();
-			}
-		}
-	}
-
-	private void presetLoader() {
-		PresetLoadDialog pld = new PresetLoadDialog(this);
-		if (pld.isCompleted()) {
-			// Apply it
-			long seed = pld.getSeed();
-			String config = pld.getConfigString();
-			this.romHandler = pld.getROM();
-			this.romLoaded();
-			Settings settings;
-			try {
-				settings = Settings.fromString(config);
-				settings.tweakForRom(this.romHandler);
-				this.restoreStateFromSettings(settings);
-			} catch (UnsupportedEncodingException e) {
-				// settings load failed
-				this.romHandler = null;
-				initialFormState();
-			}
-			romSaveChooser.setSelectedFile(null);
-			int returnVal = romSaveChooser.showSaveDialog(this);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				File fh = romSaveChooser.getSelectedFile();
-				// Fix or add extension
-				List<String> extensions = new ArrayList<String>(Arrays.asList(
-						"sgb", "gbc", "gba", "nds"));
-				extensions.remove(this.romHandler.getDefaultExtension());
-				fh = FileFunctions.fixFilename(fh,
-						this.romHandler.getDefaultExtension(), extensions);
-				boolean allowed = true;
-				if (this.romHandler instanceof AbstractDSRomHandler) {
-					String currentFN = this.romHandler.loadedFilename();
-					if (currentFN.equals(fh.getAbsolutePath())) {
-						JOptionPane.showMessageDialog(this, bundle
-								.getString("RandomizerGUI.cantOverwriteDS"));
-						allowed = false;
-					}
-				}
-				if (allowed) {
-					// Apply the seed we were given
-					RandomSource.seed(seed);
-					presetMode = true;
-					performRandomization(fh.getAbsolutePath(), seed,
-							pld.getTrainerClasses(), pld.getTrainerNames(),
-							pld.getNicknames());
-				} else {
-					this.romHandler = null;
-					initialFormState();
-				}
-
-			} else {
-				this.romHandler = null;
-				initialFormState();
-			}
-		}
-
-	}
-
-	private void attemptToLogException(Exception ex, String baseMessageKey,
-			String noLogMessageKey) {
-
-		// Make sure the operation dialog doesn't show up over the error
-		// dialog
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				RandomizerGUI.this.opDialog.setVisible(false);
-			}
-		});
-
-		long time = System.currentTimeMillis();
-		try {
-			String errlog = "error_" + time + ".txt";
-			PrintStream ps = new PrintStream(new FileOutputStream(errlog));
-			ps.println("Randomizer Version: " + Constants.UPDATE_VERSION);
-			PrintStream e1 = System.err;
-			System.setErr(ps);
-			if (this.romHandler != null) {
-				try {
-					ps.println("ROM: " + romHandler.getROMName());
-					ps.println("Code: " + romHandler.getROMCode());
-					ps.println("Reported Support Level: "
-							+ romHandler.getSupportLevel());
-					ps.println();
-				} catch (Exception ex2) {
-					// Do nothing, just don't fail
-				}
-			}
-			ex.printStackTrace();
-			System.setErr(e1);
-			ps.close();
-			JOptionPane.showMessageDialog(this,
-					String.format(bundle.getString(baseMessageKey), errlog));
-		} catch (Exception logex) {
-			JOptionPane.showMessageDialog(this,
-					bundle.getString(noLogMessageKey));
-		}
-	}
-
-	// public response methods
-
-	public void updateFound(int newVersion, String changelog) {
-		new UpdateFoundDialog(this, newVersion, changelog);
-	}
-
-	public void noUpdateFound() {
-		JOptionPane.showMessageDialog(this,
-				bundle.getString("RandomizerGUI.noUpdates"));
-	}
-
-	// actions
-
-	private void updateSettingsButtonActionPerformed(
-			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_updateSettingsButtonActionPerformed
-		if (autoUpdateEnabled) {
-			toggleAutoUpdatesMenuItem.setText(bundle
-					.getString("RandomizerGUI.disableAutoUpdate"));
-		} else {
-			toggleAutoUpdatesMenuItem.setText(bundle
-					.getString("RandomizerGUI.enableAutoUpdate"));
-		}
-		updateSettingsMenu.show(updateSettingsButton, 0,
-				updateSettingsButton.getHeight());
-	}// GEN-LAST:event_updateSettingsButtonActionPerformed
-
-	private void toggleAutoUpdatesMenuItemActionPerformed(
-			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_toggleAutoUpdatesMenuItemActionPerformed
-		autoUpdateEnabled = !autoUpdateEnabled;
-		if (autoUpdateEnabled) {
-			JOptionPane.showMessageDialog(this,
-					bundle.getString("RandomizerGUI.autoUpdateEnabled"));
-		} else {
-			JOptionPane.showMessageDialog(this,
-					bundle.getString("RandomizerGUI.autoUpdateDisabled"));
-		}
-		attemptWriteConfig();
-	}// GEN-LAST:event_toggleAutoUpdatesMenuItemActionPerformed
-
-	private void manualUpdateMenuItemActionPerformed(
-			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_manualUpdateMenuItemActionPerformed
-		new UpdateCheckThread(this, true).start();
-	}// GEN-LAST:event_manualUpdateMenuItemActionPerformed
-
-	private void loadQSButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_loadQSButtonActionPerformed
-		if (this.romHandler == null) {
-			return;
-		}
-		qsOpenChooser.setSelectedFile(null);
-		int returnVal = qsOpenChooser.showOpenDialog(this);
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			File fh = qsOpenChooser.getSelectedFile();
-			try {
-				FileInputStream fis = new FileInputStream(fh);
-				Settings settings = Settings.read(fis);
-				fis.close();
-
-				// load settings
-				initialFormState();
-				romLoaded();
-				Settings.TweakForROMFeedback feedback = settings
-						.tweakForRom(this.romHandler);
-				if (feedback.isChangedStarter()
-						&& settings.getStartersMod() == Settings.StartersMod.CUSTOM) {
-					JOptionPane.showMessageDialog(this, bundle
-							.getString("RandomizerGUI.starterUnavailable"));
-				}
-				this.restoreStateFromSettings(settings);
-
-				if (settings.isUpdatedFromOldVersion()) {
-					// show a warning dialog, but load it
-					JOptionPane
-							.showMessageDialog(
-									this,
-									bundle.getString("RandomizerGUI.settingsFileOlder"));
-				}
-
-				JOptionPane.showMessageDialog(this, String.format(
-						bundle.getString("RandomizerGUI.settingsLoaded"),
-						fh.getName()));
-			} catch (UnsupportedOperationException ex) {
-				JOptionPane.showMessageDialog(this,
-						bundle.getString("RandomizerGUI.settingsFileNewer"));
-			} catch (IllegalArgumentException ex) {
-				JOptionPane.showMessageDialog(this,
-						bundle.getString("RandomizerGUI.invalidSettingsFile"));
-			} catch (IOException ex) {
-				JOptionPane.showMessageDialog(this,
-						bundle.getString("RandomizerGUI.settingsLoadFailed"));
-			}
-		}
-	}// GEN-LAST:event_loadQSButtonActionPerformed
-
-	private void saveQSButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_saveQSButtonActionPerformed
-		if (this.romHandler == null) {
-			return;
-		}
-		qsSaveChooser.setSelectedFile(null);
-		int returnVal = qsSaveChooser.showSaveDialog(this);
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			File fh = qsSaveChooser.getSelectedFile();
-			// Fix or add extension
-			fh = FileFunctions.fixFilename(fh, "rnqs");
-			// Save now?
-			try {
-				FileOutputStream fos = new FileOutputStream(fh);
-				getCurrentSettings().write(fos);
-				fos.close();
-			} catch (IOException ex) {
-				JOptionPane.showMessageDialog(this,
-						bundle.getString("RandomizerGUI.settingsSaveFailed"));
-			}
-		}
-	}// GEN-LAST:event_saveQSButtonActionPerformed
-
-	private void pokeLimitBtnActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pokeLimitBtnActionPerformed
-		GenerationLimitDialog gld = new GenerationLimitDialog(this,
-				this.currentRestrictions, this.romHandler.generationOfPokemon());
-		if (gld.pressedOK()) {
-			this.currentRestrictions = gld.getChoice();
-		}
-	}// GEN-LAST:event_pokeLimitBtnActionPerformed
-
-	private void goUpdateMovesCheckBoxActionPerformed(
-			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_goUpdateMovesCheckBoxActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_goUpdateMovesCheckBoxActionPerformed
-
-	private void pokeLimitCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pokeLimitCBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_pokeLimitCBActionPerformed
-
-	private void pmsMetronomeOnlyRBActionPerformed(
-			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pmsMetronomeOnlyRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_pmsMetronomeOnlyRBActionPerformed
-
-	private void igtUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_igtUnchangedRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_igtUnchangedRBActionPerformed
-
-	private void igtGivenOnlyRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_igtGivenOnlyRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_igtGivenOnlyRBActionPerformed
-
-	private void igtBothRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_igtBothRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_igtBothRBActionPerformed
-
-	private void wpARNoneRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpARNoneRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_wpARNoneRBActionPerformed
-
-	private void wpARSimilarStrengthRBActionPerformed(
-			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpARSimilarStrengthRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_wpARSimilarStrengthRBActionPerformed
-
-	private void wpARCatchEmAllRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpARCatchEmAllRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_wpARCatchEmAllRBActionPerformed
-
-	private void wpARTypeThemedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpARTypeThemedRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_wpARTypeThemedRBActionPerformed
-
-	private void pmsUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pmsUnchangedRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_pmsUnchangedRBActionPerformed
-
-	private void pmsRandomTypeRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pmsRandomTypeRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_pmsRandomTypeRBActionPerformed
-
-	private void pmsRandomTotalRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pmsRandomTotalRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_pmsRandomTotalRBActionPerformed
-
-	private void mtmUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_mtmUnchangedRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_mtmUnchangedRBActionPerformed
-
-	private void paUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_paUnchangedRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_paUnchangedRBActionPerformed
-
-	private void paRandomizeRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_paRandomizeRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_paRandomizeRBActionPerformed
-
-	private void openROMButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_openROMButtonActionPerformed
-		loadROM();
-	}// GEN-LAST:event_openROMButtonActionPerformed
-
-	private void saveROMButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_saveROMButtonActionPerformed
-		saveROM();
-	}// GEN-LAST:event_saveROMButtonActionPerformed
-
-	private void usePresetsButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_usePresetsButtonActionPerformed
-		presetLoader();
-	}// GEN-LAST:event_usePresetsButtonActionPerformed
-
-	private void wpUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpUnchangedRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_wpUnchangedRBActionPerformed
-
-	private void tpUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tpUnchangedRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_tpUnchangedRBActionPerformed
-
-	private void tpRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tpRandomRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_tpRandomRBActionPerformed
-
-	private void tpTypeThemedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tpTypeThemedRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_tpTypeThemedRBActionPerformed
-
-	private void spUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spUnchangedRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_spUnchangedRBActionPerformed
-
-	private void spCustomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spCustomRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_spCustomRBActionPerformed
-
-	private void spRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spRandomRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_spRandomRBActionPerformed
-
-	private void wpRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpRandomRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_wpRandomRBActionPerformed
-
-	private void wpArea11RBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpArea11RBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_wpArea11RBActionPerformed
-
-	private void wpGlobalRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpGlobalRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_wpGlobalRBActionPerformed
-
-	private void tmmUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tmmUnchangedRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_tmmUnchangedRBActionPerformed
-
-	private void tmmRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tmmRandomRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_tmmRandomRBActionPerformed
-
-	private void mtmRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_mtmRandomRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_mtmRandomRBActionPerformed
-
-	private void thcUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_thcUnchangedRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_thcUnchangedRBActionPerformed
-
-	private void thcRandomTypeRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_thcRandomTypeRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_thcRandomTypeRBActionPerformed
-
-	private void thcRandomTotalRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_thcRandomTotalRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_thcRandomTotalRBActionPerformed
-
-	private void mtcUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_mtcUnchangedRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_mtcUnchangedRBActionPerformed
-
-	private void mtcRandomTypeRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_mtcRandomTypeRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_mtcRandomTypeRBActionPerformed
-
-	private void mtcRandomTotalRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_mtcRandomTotalRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_mtcRandomTotalRBActionPerformed
-
-	private void thcFullRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_thcFullRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_thcFullRBActionPerformed
-
-	private void mtcFullRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_mtcFullRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_mtcFullRBActionPerformed
-
-	private void spHeldItemsCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spHeldItemsCBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_spHeldItemsCBActionPerformed
-
-	private void wpHeldItemsCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpHeldItemsCBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_wpHeldItemsCBActionPerformed
-
-	private void fiUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_fiUnchangedRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_fiUnchangedRBActionPerformed
-
-	private void fiShuffleRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_fiShuffleRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_fiShuffleRBActionPerformed
-
-	private void fiRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_fiRandomRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_fiRandomRBActionPerformed
-
-	private void spRandom2EvosRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spRandom2EvosRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_spRandom2EvosRBActionPerformed
-
-	private void goCondenseEvosCheckBoxActionPerformed(
-			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_goCondenseEvosCheckBoxActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_goCondenseEvosCheckBoxActionPerformed
-
-	private void websiteLinkLabelMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_websiteLinkLabelMouseClicked
-		Desktop desktop = java.awt.Desktop.getDesktop();
-		try {
-			desktop.browse(new URI(Constants.WEBSITE_URL));
-		} catch (IOException e) {
-		} catch (URISyntaxException e) {
-		}
-	}// GEN-LAST:event_websiteLinkLabelMouseClicked
-
-	private void peUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_peUnchangedRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_peUnchangedRBActionPerformed
-
-	private void peRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_peRandomRBActionPerformed
-		this.enableOrDisableSubControls();
-	}// GEN-LAST:event_peRandomRBActionPerformed
-
-	/* @formatter:off */
-	/**
-	 * This method is called from within the constructor to initialize the form.
-	 * WARNING: Do NOT modify this code. The content of this method is always
-	 * regenerated by the Form Editor.
-	 */
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 637989089525556154L;
+    private RomHandler romHandler;
+    protected RomHandler.Factory[] checkHandlers;
+
+    private OperationDialog opDialog;
+    private List<JCheckBox> tweakCheckboxes;
+    private boolean presetMode;
+    private GenRestrictions currentRestrictions;
+    private LayoutManager noTweaksLayout;
+
+    // Settings
+    private boolean autoUpdateEnabled;
+    private boolean haveCheckedCustomNames;
+    private ImageIcon emptyIcon = new ImageIcon(getClass().getResource("/com/dabomstew/pkrandom/gui/emptyIcon.png"));
+
+    java.util.ResourceBundle bundle;
+
+    /**
+     * @param args
+     *            the command line arguments
+     */
+    public static void main(String args[]) {
+        boolean autoupdate = true;
+        for (String arg : args) {
+            if (arg.equalsIgnoreCase("--noupdate")) {
+                autoupdate = false;
+                break;
+            }
+        }
+        final boolean au = autoupdate;
+        try {
+            javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(RandomizerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(RandomizerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(RandomizerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(RandomizerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    ex);
+        }
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new RandomizerGUI(au);
+            }
+        });
+    }
+
+    // constructor
+    /**
+     * Creates new form RandomizerGUI
+     * 
+     * @param autoupdate
+     */
+    public RandomizerGUI(boolean autoupdate) {
+
+        bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle"); // NOI18N
+        testForRequiredConfigs();
+        checkHandlers = new RomHandler.Factory[] { new Gen1RomHandler.Factory(), new Gen2RomHandler.Factory(),
+                new Gen3RomHandler.Factory(), new Gen4RomHandler.Factory(), new Gen5RomHandler.Factory() };
+        initComponents();
+        noTweaksLayout = miscTweaksPanel.getLayout();
+        initTweaksPanel();
+        initialiseState();
+        autoUpdateEnabled = true;
+        haveCheckedCustomNames = false;
+        attemptReadConfig();
+        if (!autoupdate) {
+            // override autoupdate
+            autoUpdateEnabled = false;
+        }
+        boolean canWrite = attemptWriteConfig();
+        if (!canWrite) {
+            JOptionPane.showMessageDialog(null, bundle.getString("RandomizerGUI.cantWriteConfigFile"));
+            autoUpdateEnabled = false;
+        }
+        setLocationRelativeTo(null);
+        setVisible(true);
+        checkCustomNames();
+        if (autoUpdateEnabled) {
+            new UpdateCheckThread(this, false).start();
+        }
+    }
+
+    private void initTweaksPanel() {
+        tweakCheckboxes = new ArrayList<JCheckBox>();
+        int numTweaks = MiscTweak.allTweaks.size();
+        for (int i = 0; i < numTweaks; i++) {
+            MiscTweak ct = MiscTweak.allTweaks.get(i);
+            JCheckBox tweakBox = new JCheckBox();
+            tweakBox.setText(ct.getTweakName());
+            tweakBox.setToolTipText(ct.getTooltipText());
+            tweakCheckboxes.add(tweakBox);
+        }
+    }
+
+    // config-related stuff
+
+    private static final int TWEAK_COLS = 4;
+
+    private GroupLayout makeTweaksLayout(List<JCheckBox> tweaks) {
+        GroupLayout gl = new GroupLayout(miscTweaksPanel);
+        int numTweaks = tweaks.size();
+
+        // Handle columns
+        SequentialGroup columnsGroup = gl.createSequentialGroup().addContainerGap();
+        int numCols = Math.min(TWEAK_COLS, numTweaks);
+        ParallelGroup[] colGroups = new ParallelGroup[numCols];
+        for (int col = 0; col < numCols; col++) {
+            if (col > 0) {
+                columnsGroup.addGap(18, 18, 18);
+            }
+            colGroups[col] = gl.createParallelGroup(GroupLayout.Alignment.LEADING);
+            columnsGroup.addGroup(colGroups[col]);
+        }
+        for (int tweak = 0; tweak < numTweaks; tweak++) {
+            colGroups[tweak % numCols].addComponent(tweaks.get(tweak));
+        }
+        columnsGroup.addContainerGap();
+        gl.setHorizontalGroup(gl.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(columnsGroup));
+
+        // And rows
+        SequentialGroup rowsGroup = gl.createSequentialGroup().addContainerGap();
+        int numRows = (numTweaks - 1) / numCols + 1;
+        ParallelGroup[] rowGroups = new ParallelGroup[numRows];
+        for (int row = 0; row < numRows; row++) {
+            if (row > 0) {
+                rowsGroup.addPreferredGap(ComponentPlacement.UNRELATED);
+            }
+            rowGroups[row] = gl.createParallelGroup(GroupLayout.Alignment.BASELINE);
+            rowsGroup.addGroup(rowGroups[row]);
+        }
+        for (int tweak = 0; tweak < numTweaks; tweak++) {
+            rowGroups[tweak / numCols].addComponent(tweaks.get(tweak));
+        }
+        rowsGroup.addContainerGap();
+        gl.setVerticalGroup(gl.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(rowsGroup));
+        return gl;
+    }
+
+    private void checkCustomNames() {
+        String[] cnamefiles = new String[] { "trainerclasses.txt", "trainernames.txt", "nicknames.txt" };
+        int[] defaultcsums = new int[] { -1442281799, -1499590809, 1641673648 };
+
+        boolean foundCustom = false;
+        for (int file = 0; file < 3; file++) {
+            File oldFile = new File(Constants.ROOT_PATH + "/config/" + cnamefiles[file]);
+            File currentFile = new File(Constants.ROOT_PATH + cnamefiles[file]);
+            if (oldFile.exists() && oldFile.canRead() && !currentFile.exists()) {
+                try {
+                    int crc = FileFunctions.getFileChecksum(new FileInputStream(oldFile));
+                    if (crc != defaultcsums[file]) {
+                        foundCustom = true;
+                        break;
+                    }
+                } catch (FileNotFoundException e) {
+                }
+            }
+        }
+
+        if (foundCustom) {
+            int response = JOptionPane.showConfirmDialog(RandomizerGUI.this,
+                    bundle.getString("RandomizerGUI.copyNameFilesDialog.text"),
+                    bundle.getString("RandomizerGUI.copyNameFilesDialog.title"), JOptionPane.YES_NO_OPTION);
+            boolean onefailed = false;
+            if (response == JOptionPane.YES_OPTION) {
+                for (String filename : cnamefiles) {
+                    if (new File(Constants.ROOT_PATH + "/config/" + filename).canRead()) {
+                        try {
+                            FileInputStream fis = new FileInputStream(new File(Constants.ROOT_PATH + "config/"
+                                    + filename));
+                            FileOutputStream fos = new FileOutputStream(new File(Constants.ROOT_PATH + filename));
+                            byte[] buf = new byte[1024];
+                            int len;
+                            while ((len = fis.read(buf)) > 0) {
+                                fos.write(buf, 0, len);
+                            }
+                            fos.close();
+                            fis.close();
+                        } catch (IOException ex) {
+                            onefailed = true;
+                        }
+                    }
+                }
+                if (onefailed) {
+                    JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.copyNameFilesFailed"));
+                }
+            }
+        }
+
+        haveCheckedCustomNames = true;
+        attemptWriteConfig();
+    }
+
+    private void attemptReadConfig() {
+        File fh = new File(Constants.ROOT_PATH + "config.ini");
+        if (!fh.exists() || !fh.canRead()) {
+            return;
+        }
+
+        try {
+            Scanner sc = new Scanner(fh, "UTF-8");
+            while (sc.hasNextLine()) {
+                String q = sc.nextLine().trim();
+                if (q.contains("//")) {
+                    q = q.substring(0, q.indexOf("//")).trim();
+                }
+                if (!q.isEmpty()) {
+                    String[] tokens = q.split("=", 2);
+                    if (tokens.length == 2) {
+                        String key = tokens[0].trim();
+                        if (key.equalsIgnoreCase("autoupdate")) {
+                            autoUpdateEnabled = Boolean.parseBoolean(tokens[1].trim());
+                        } else if (key.equalsIgnoreCase("checkedcustomnames")) {
+                            haveCheckedCustomNames = Boolean.parseBoolean(tokens[1].trim());
+                        }
+                    }
+                }
+            }
+            sc.close();
+        } catch (IOException ex) {
+
+        }
+    }
+
+    private boolean attemptWriteConfig() {
+        File fh = new File(Constants.ROOT_PATH + "config.ini");
+        if (fh.exists() && !fh.canWrite()) {
+            return false;
+        }
+
+        try {
+            PrintStream ps = new PrintStream(new FileOutputStream(fh), true, "UTF-8");
+            ps.println("autoupdate=" + autoUpdateEnabled);
+            ps.println("checkedcustomnames=" + haveCheckedCustomNames);
+            ps.close();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+
+    }
+
+    private void testForRequiredConfigs() {
+        try {
+            Utils.testForRequiredConfigs();
+        } catch (FileNotFoundException e) {
+            JOptionPane.showMessageDialog(null,
+                    String.format(bundle.getString("RandomizerGUI.configFileMissing"), e.getMessage()));
+            System.exit(1);
+            return;
+        }
+    }
+
+    // form initial state
+
+    private void initialiseState() {
+        this.romHandler = null;
+        this.currentRestrictions = null;
+        this.websiteLinkLabel.setText("<html><a href=\"" + Constants.WEBSITE_URL + "\">" + Constants.WEBSITE_URL
+                + "</a>");
+        initialFormState();
+        this.romOpenChooser.setCurrentDirectory(new File(Constants.ROOT_PATH));
+        this.romSaveChooser.setCurrentDirectory(new File(Constants.ROOT_PATH));
+        if (new File(Constants.ROOT_PATH + "settings/").exists()) {
+            this.qsOpenChooser.setCurrentDirectory(new File(Constants.ROOT_PATH + "settings/"));
+            this.qsSaveChooser.setCurrentDirectory(new File(Constants.ROOT_PATH + "settings/"));
+        } else {
+            this.qsOpenChooser.setCurrentDirectory(new File(Constants.ROOT_PATH));
+            this.qsSaveChooser.setCurrentDirectory(new File(Constants.ROOT_PATH));
+        }
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private void initialFormState() {
+        // Disable all rom components
+        this.goRemoveTradeEvosCheckBox.setEnabled(false);
+        this.goUpdateMovesCheckBox.setEnabled(false);
+        this.goUpdateMovesLegacyCheckBox.setEnabled(false);
+        this.goCondenseEvosCheckBox.setEnabled(false);
+
+        this.goRemoveTradeEvosCheckBox.setSelected(false);
+        this.goUpdateMovesCheckBox.setSelected(false);
+        this.goUpdateMovesLegacyCheckBox.setSelected(false);
+        this.goCondenseEvosCheckBox.setSelected(false);
+
+        this.goUpdateMovesLegacyCheckBox.setVisible(true);
+        this.pokeLimitCB.setEnabled(false);
+        this.pokeLimitCB.setSelected(false);
+        this.pokeLimitBtn.setEnabled(false);
+        this.pokeLimitBtn.setVisible(true);
+        this.pokeLimitCB.setVisible(true);
+        this.raceModeCB.setEnabled(false);
+        this.raceModeCB.setSelected(false);
+        this.brokenMovesCB.setEnabled(false);
+        this.brokenMovesCB.setSelected(false);
+
+        this.riRomNameLabel.setText(bundle.getString("RandomizerGUI.noRomLoaded"));
+        this.riRomCodeLabel.setText("");
+        this.riRomSupportLabel.setText("");
+
+        this.loadQSButton.setEnabled(false);
+        this.saveQSButton.setEnabled(false);
+
+        this.pbsChangesUnchangedRB.setEnabled(false);
+        this.pbsChangesRandomEvosRB.setEnabled(false);
+        this.pbsChangesRandomTotalRB.setEnabled(false);
+        this.pbsChangesShuffleRB.setEnabled(false);
+        this.pbsChangesUnchangedRB.setSelected(true);
+        this.pbsStandardEXPCurvesCB.setEnabled(false);
+        this.pbsStandardEXPCurvesCB.setSelected(false);
+
+        this.abilitiesPanel.setVisible(true);
+        this.paUnchangedRB.setEnabled(false);
+        this.paRandomizeRB.setEnabled(false);
+        this.paWonderGuardCB.setEnabled(false);
+        this.paUnchangedRB.setSelected(true);
+        this.paWonderGuardCB.setSelected(false);
+
+        this.spCustomPoke1Chooser.setEnabled(false);
+        this.spCustomPoke2Chooser.setEnabled(false);
+        this.spCustomPoke3Chooser.setEnabled(false);
+        this.spCustomPoke1Chooser.setSelectedIndex(0);
+        this.spCustomPoke1Chooser.setModel(new DefaultComboBoxModel(new String[] { "--" }));
+        this.spCustomPoke2Chooser.setSelectedIndex(0);
+        this.spCustomPoke2Chooser.setModel(new DefaultComboBoxModel(new String[] { "--" }));
+        this.spCustomPoke3Chooser.setSelectedIndex(0);
+        this.spCustomPoke3Chooser.setModel(new DefaultComboBoxModel(new String[] { "--" }));
+        this.spCustomRB.setEnabled(false);
+        this.spRandomRB.setEnabled(false);
+        this.spRandom2EvosRB.setEnabled(false);
+        this.spUnchangedRB.setEnabled(false);
+        this.spUnchangedRB.setSelected(true);
+        this.spHeldItemsCB.setEnabled(false);
+        this.spHeldItemsCB.setSelected(false);
+        this.spHeldItemsCB.setVisible(true);
+        this.spHeldItemsBanBadCB.setEnabled(false);
+        this.spHeldItemsBanBadCB.setSelected(false);
+        this.spHeldItemsBanBadCB.setVisible(true);
+
+        this.mdRandomAccuracyCB.setEnabled(false);
+        this.mdRandomAccuracyCB.setSelected(false);
+        this.mdRandomPowerCB.setEnabled(false);
+        this.mdRandomPowerCB.setSelected(false);
+        this.mdRandomPPCB.setEnabled(false);
+        this.mdRandomPPCB.setSelected(false);
+        this.mdRandomTypeCB.setEnabled(false);
+        this.mdRandomTypeCB.setSelected(false);
+        this.mdRandomCategoryCB.setEnabled(false);
+        this.mdRandomCategoryCB.setSelected(false);
+        this.mdRandomCategoryCB.setVisible(true);
+
+        this.pmsRandomTotalRB.setEnabled(false);
+        this.pmsRandomTypeRB.setEnabled(false);
+        this.pmsUnchangedRB.setEnabled(false);
+        this.pmsUnchangedRB.setSelected(true);
+        this.pmsMetronomeOnlyRB.setEnabled(false);
+        this.pms4MovesCB.setEnabled(false);
+        this.pms4MovesCB.setSelected(false);
+        this.pms4MovesCB.setVisible(true);
+
+        this.ptRandomFollowEvosRB.setEnabled(false);
+        this.ptRandomTotalRB.setEnabled(false);
+        this.ptUnchangedRB.setEnabled(false);
+        this.ptUnchangedRB.setSelected(true);
+
+        this.tpPowerLevelsCB.setEnabled(false);
+        this.tpRandomRB.setEnabled(false);
+        this.tpRivalCarriesStarterCB.setEnabled(false);
+        this.tpTypeThemedRB.setEnabled(false);
+        this.tpTypeWeightingCB.setEnabled(false);
+        this.tpNoLegendariesCB.setEnabled(false);
+        this.tpNoEarlyShedinjaCB.setEnabled(false);
+        this.tpNoEarlyShedinjaCB.setVisible(true);
+        this.tpUnchangedRB.setEnabled(false);
+        this.tpUnchangedRB.setSelected(true);
+        this.tpPowerLevelsCB.setSelected(false);
+        this.tpRivalCarriesStarterCB.setSelected(false);
+        this.tpTypeWeightingCB.setSelected(false);
+        this.tpNoLegendariesCB.setSelected(false);
+        this.tpNoEarlyShedinjaCB.setSelected(false);
+
+        this.tnRandomizeCB.setEnabled(false);
+        this.tcnRandomizeCB.setEnabled(false);
+
+        this.tnRandomizeCB.setSelected(false);
+        this.tcnRandomizeCB.setSelected(false);
+
+        this.wpUnchangedRB.setEnabled(false);
+        this.wpRandomRB.setEnabled(false);
+        this.wpArea11RB.setEnabled(false);
+        this.wpGlobalRB.setEnabled(false);
+        this.wpUnchangedRB.setSelected(true);
+
+        this.wpARNoneRB.setEnabled(false);
+        this.wpARCatchEmAllRB.setEnabled(false);
+        this.wpARTypeThemedRB.setEnabled(false);
+        this.wpARSimilarStrengthRB.setEnabled(false);
+        this.wpARNoneRB.setSelected(true);
+
+        this.wpUseTimeCB.setEnabled(false);
+        this.wpUseTimeCB.setVisible(true);
+        this.wpUseTimeCB.setSelected(false);
+
+        this.wpNoLegendariesCB.setEnabled(false);
+        this.wpNoLegendariesCB.setSelected(false);
+
+        this.wpCatchRateCB.setEnabled(false);
+        this.wpCatchRateCB.setSelected(false);
+
+        this.wpHeldItemsCB.setEnabled(false);
+        this.wpHeldItemsCB.setSelected(false);
+        this.wpHeldItemsCB.setVisible(true);
+        this.wpHeldItemsBanBadCB.setEnabled(false);
+        this.wpHeldItemsBanBadCB.setSelected(false);
+        this.wpHeldItemsBanBadCB.setVisible(true);
+
+        this.stpRandomL4LRB.setEnabled(false);
+        this.stpRandomTotalRB.setEnabled(false);
+        this.stpUnchangedRB.setEnabled(false);
+        this.stpUnchangedRB.setSelected(true);
+
+        this.tmmRandomRB.setEnabled(false);
+        this.tmmUnchangedRB.setEnabled(false);
+        this.tmmUnchangedRB.setSelected(true);
+
+        this.thcRandomTotalRB.setEnabled(false);
+        this.thcRandomTypeRB.setEnabled(false);
+        this.thcUnchangedRB.setEnabled(false);
+        this.thcFullRB.setEnabled(false);
+        this.thcUnchangedRB.setSelected(true);
+
+        this.tmLearningSanityCB.setEnabled(false);
+        this.tmLearningSanityCB.setSelected(false);
+        this.tmKeepFieldMovesCB.setEnabled(false);
+        this.tmKeepFieldMovesCB.setSelected(false);
+        this.tmFullHMCompatCB.setEnabled(false);
+        this.tmFullHMCompatCB.setSelected(false);
+
+        this.mtmRandomRB.setEnabled(false);
+        this.mtmUnchangedRB.setEnabled(false);
+        this.mtmUnchangedRB.setSelected(true);
+
+        this.mtcRandomTotalRB.setEnabled(false);
+        this.mtcRandomTypeRB.setEnabled(false);
+        this.mtcUnchangedRB.setEnabled(false);
+        this.mtcFullRB.setEnabled(false);
+        this.mtcUnchangedRB.setSelected(true);
+
+        this.mtLearningSanityCB.setEnabled(false);
+        this.mtLearningSanityCB.setSelected(false);
+        this.mtKeepFieldMovesCB.setEnabled(false);
+        this.mtKeepFieldMovesCB.setSelected(false);
+
+        this.mtMovesPanel.setVisible(true);
+        this.mtCompatPanel.setVisible(true);
+        this.mtNoExistLabel.setVisible(false);
+
+        this.igtUnchangedRB.setEnabled(false);
+        this.igtGivenOnlyRB.setEnabled(false);
+        this.igtBothRB.setEnabled(false);
+        this.igtUnchangedRB.setSelected(true);
+
+        this.igtRandomItemCB.setEnabled(false);
+        this.igtRandomItemCB.setSelected(false);
+        this.igtRandomItemCB.setVisible(true);
+
+        this.igtRandomIVsCB.setEnabled(false);
+        this.igtRandomIVsCB.setSelected(false);
+        this.igtRandomIVsCB.setVisible(true);
+
+        this.igtRandomOTCB.setEnabled(false);
+        this.igtRandomOTCB.setSelected(false);
+        this.igtRandomOTCB.setVisible(true);
+
+        this.igtRandomNicknameCB.setEnabled(false);
+        this.igtRandomNicknameCB.setSelected(false);
+
+        this.fiUnchangedRB.setEnabled(false);
+        this.fiShuffleRB.setEnabled(false);
+        this.fiRandomRB.setEnabled(false);
+        this.fiUnchangedRB.setSelected(true);
+
+        this.fiBanBadCB.setEnabled(false);
+        this.fiBanBadCB.setSelected(false);
+        this.fiBanBadCB.setVisible(true);
+
+        this.peUnchangedRB.setSelected(true);
+        this.peUnchangedRB.setEnabled(false);
+        this.peRandomRB.setEnabled(false);
+        this.peForceChangeCB.setSelected(false);
+        this.peForceChangeCB.setEnabled(false);
+        this.peThreeStagesCB.setSelected(false);
+        this.peThreeStagesCB.setEnabled(false);
+        this.peSameTypeCB.setSelected(false);
+        this.peSameTypeCB.setEnabled(false);
+        this.peSimilarStrengthCB.setSelected(false);
+        this.peSimilarStrengthCB.setEnabled(false);
+
+        for (JCheckBox cb : tweakCheckboxes) {
+            cb.setVisible(true);
+            cb.setEnabled(false);
+            cb.setSelected(false);
+        }
+
+        this.mtNoneAvailableLabel.setVisible(false);
+        miscTweaksPanel.setLayout(makeTweaksLayout(tweakCheckboxes));
+
+        this.gameMascotLabel.setIcon(emptyIcon);
+    }
+
+    // rom loading
+
+    private void loadROM() {
+        romOpenChooser.setSelectedFile(null);
+        int returnVal = romOpenChooser.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            final File fh = romOpenChooser.getSelectedFile();
+            try {
+                Utils.validateRomFile(fh);
+            } catch (Utils.InvalidROMException e) {
+                switch (e.getType()) {
+                case LENGTH:
+                    JOptionPane.showMessageDialog(this,
+                            String.format(bundle.getString("RandomizerGUI.tooShortToBeARom"), fh.getName()));
+                    return;
+                case ZIP_FILE:
+                    JOptionPane.showMessageDialog(this,
+                            String.format(bundle.getString("RandomizerGUI.openedZIPfile"), fh.getName()));
+                    return;
+                case RAR_FILE:
+                    JOptionPane.showMessageDialog(this,
+                            String.format(bundle.getString("RandomizerGUI.openedRARfile"), fh.getName()));
+                    return;
+                case IPS_FILE:
+                    JOptionPane.showMessageDialog(this,
+                            String.format(bundle.getString("RandomizerGUI.openedIPSfile"), fh.getName()));
+                    return;
+                case UNREADABLE:
+                    JOptionPane.showMessageDialog(this,
+                            String.format(bundle.getString("RandomizerGUI.unreadableRom"), fh.getName()));
+                    return;
+                }
+            }
+
+            for (RomHandler.Factory rhf : checkHandlers) {
+                if (rhf.isLoadable(fh.getAbsolutePath())) {
+                    this.romHandler = rhf.create(RandomSource.instance());
+                    opDialog = new OperationDialog(bundle.getString("RandomizerGUI.loadingText"), this, true);
+                    Thread t = new Thread() {
+                        @Override
+                        public void run() {
+                            boolean romLoaded = false;
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    opDialog.setVisible(true);
+                                }
+                            });
+                            try {
+                                RandomizerGUI.this.romHandler.loadRom(fh.getAbsolutePath());
+                                romLoaded = true;
+                            } catch (Exception ex) {
+                                attemptToLogException(ex, "RandomizerGUI.loadFailed", "RandomizerGUI.loadFailedNoLog");
+                            }
+                            final boolean loadSuccess = romLoaded;
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    RandomizerGUI.this.opDialog.setVisible(false);
+                                    RandomizerGUI.this.initialFormState();
+                                    if (loadSuccess) {
+                                        RandomizerGUI.this.romLoaded();
+                                    }
+                                }
+                            });
+                        }
+                    };
+                    t.start();
+
+                    return;
+                }
+            }
+            JOptionPane.showMessageDialog(this,
+                    String.format(bundle.getString("RandomizerGUI.unsupportedRom"), fh.getName()));
+        }
+
+    }
+
+    private void romLoaded() {
+        try {
+            this.currentRestrictions = null;
+            this.riRomNameLabel.setText(this.romHandler.getROMName());
+            this.riRomCodeLabel.setText(this.romHandler.getROMCode());
+            this.riRomSupportLabel.setText(bundle.getString("RandomizerGUI.romSupportPrefix") + " "
+                    + this.romHandler.getSupportLevel());
+            this.goUpdateMovesCheckBox.setSelected(false);
+            this.goUpdateMovesCheckBox.setSelected(false);
+            this.goUpdateMovesCheckBox.setEnabled(true);
+            this.goUpdateMovesLegacyCheckBox.setSelected(false);
+            this.goUpdateMovesLegacyCheckBox.setEnabled(false);
+            this.goUpdateMovesLegacyCheckBox.setVisible(!(romHandler instanceof Gen5RomHandler));
+            this.goRemoveTradeEvosCheckBox.setSelected(false);
+            this.goRemoveTradeEvosCheckBox.setEnabled(true);
+            this.goCondenseEvosCheckBox.setSelected(false);
+            this.goCondenseEvosCheckBox.setEnabled(true);
+            this.raceModeCB.setSelected(false);
+            this.raceModeCB.setEnabled(true);
+
+            this.pokeLimitCB.setSelected(false);
+            this.pokeLimitBtn.setEnabled(false);
+            this.pokeLimitCB.setEnabled(!(romHandler instanceof Gen1RomHandler || romHandler.isROMHack()));
+            this.pokeLimitCB.setVisible(!(romHandler instanceof Gen1RomHandler || romHandler.isROMHack()));
+            this.pokeLimitBtn.setVisible(!(romHandler instanceof Gen1RomHandler || romHandler.isROMHack()));
+
+            this.brokenMovesCB.setSelected(false);
+            this.brokenMovesCB.setEnabled(true);
+
+            this.loadQSButton.setEnabled(true);
+            this.saveQSButton.setEnabled(true);
+
+            this.pbsChangesUnchangedRB.setEnabled(true);
+            this.pbsChangesUnchangedRB.setSelected(true);
+            this.pbsChangesRandomEvosRB.setEnabled(true);
+            this.pbsChangesRandomTotalRB.setEnabled(true);
+            this.pbsChangesShuffleRB.setEnabled(true);
+
+            this.pbsStandardEXPCurvesCB.setEnabled(true);
+            this.pbsStandardEXPCurvesCB.setSelected(false);
+
+            if (romHandler.abilitiesPerPokemon() > 0) {
+                this.paUnchangedRB.setEnabled(true);
+                this.paUnchangedRB.setSelected(true);
+                this.paRandomizeRB.setEnabled(true);
+                this.paWonderGuardCB.setEnabled(false);
+            } else {
+                this.abilitiesPanel.setVisible(false);
+            }
+
+            this.spUnchangedRB.setEnabled(true);
+            this.spUnchangedRB.setSelected(true);
+
+            this.spCustomPoke3Chooser.setVisible(true);
+            if (romHandler.canChangeStarters()) {
+                this.spCustomRB.setEnabled(true);
+                this.spRandomRB.setEnabled(true);
+                this.spRandom2EvosRB.setEnabled(true);
+                if (romHandler.isYellow()) {
+                    this.spCustomPoke3Chooser.setVisible(false);
+                }
+                populateDropdowns();
+            }
+
+            this.spHeldItemsCB.setSelected(false);
+            boolean hasStarterHeldItems = (romHandler instanceof Gen2RomHandler || romHandler instanceof Gen3RomHandler);
+            this.spHeldItemsCB.setEnabled(hasStarterHeldItems);
+            this.spHeldItemsCB.setVisible(hasStarterHeldItems);
+            this.spHeldItemsBanBadCB.setEnabled(false);
+            this.spHeldItemsBanBadCB.setVisible(hasStarterHeldItems);
+
+            this.mdRandomAccuracyCB.setEnabled(true);
+            this.mdRandomPowerCB.setEnabled(true);
+            this.mdRandomPPCB.setEnabled(true);
+            this.mdRandomTypeCB.setEnabled(true);
+            this.mdRandomCategoryCB.setEnabled(romHandler.hasPhysicalSpecialSplit());
+            this.mdRandomCategoryCB.setVisible(romHandler.hasPhysicalSpecialSplit());
+
+            this.pmsRandomTotalRB.setEnabled(true);
+            this.pmsRandomTypeRB.setEnabled(true);
+            this.pmsUnchangedRB.setEnabled(true);
+            this.pmsUnchangedRB.setSelected(true);
+            this.pmsMetronomeOnlyRB.setEnabled(true);
+
+            this.pms4MovesCB.setVisible(romHandler.supportsFourStartingMoves());
+
+            this.ptRandomFollowEvosRB.setEnabled(true);
+            this.ptRandomTotalRB.setEnabled(true);
+            this.ptUnchangedRB.setEnabled(true);
+            this.ptUnchangedRB.setSelected(true);
+
+            this.tpRandomRB.setEnabled(true);
+            this.tpTypeThemedRB.setEnabled(true);
+            this.tpUnchangedRB.setEnabled(true);
+            this.tpUnchangedRB.setSelected(true);
+            this.tnRandomizeCB.setEnabled(true);
+            this.tcnRandomizeCB.setEnabled(true);
+
+            if (romHandler instanceof Gen1RomHandler || romHandler instanceof Gen2RomHandler) {
+                this.tpNoEarlyShedinjaCB.setVisible(false);
+            } else {
+                this.tpNoEarlyShedinjaCB.setVisible(true);
+            }
+            this.tpNoEarlyShedinjaCB.setSelected(false);
+
+            this.wpArea11RB.setEnabled(true);
+            this.wpGlobalRB.setEnabled(true);
+            this.wpRandomRB.setEnabled(true);
+            this.wpUnchangedRB.setEnabled(true);
+            this.wpUnchangedRB.setSelected(true);
+            this.wpUseTimeCB.setEnabled(false);
+            this.wpNoLegendariesCB.setEnabled(false);
+            if (!romHandler.hasTimeBasedEncounters()) {
+                this.wpUseTimeCB.setVisible(false);
+            }
+            this.wpCatchRateCB.setEnabled(true);
+
+            this.wpHeldItemsCB.setSelected(false);
+            this.wpHeldItemsCB.setEnabled(true);
+            this.wpHeldItemsCB.setVisible(true);
+            this.wpHeldItemsBanBadCB.setSelected(false);
+            this.wpHeldItemsBanBadCB.setEnabled(false);
+            this.wpHeldItemsBanBadCB.setVisible(true);
+            if (romHandler instanceof Gen1RomHandler) {
+                this.wpHeldItemsCB.setVisible(false);
+                this.wpHeldItemsBanBadCB.setVisible(false);
+            }
+
+            this.stpUnchangedRB.setEnabled(true);
+            if (this.romHandler.canChangeStaticPokemon()) {
+                this.stpRandomL4LRB.setEnabled(true);
+                this.stpRandomTotalRB.setEnabled(true);
+
+            }
+
+            this.tmmRandomRB.setEnabled(true);
+            this.tmmUnchangedRB.setEnabled(true);
+            this.tmFullHMCompatCB.setEnabled(true);
+
+            this.thcRandomTotalRB.setEnabled(true);
+            this.thcRandomTypeRB.setEnabled(true);
+            this.thcUnchangedRB.setEnabled(true);
+            this.thcFullRB.setEnabled(true);
+
+            if (this.romHandler.hasMoveTutors()) {
+                this.mtmRandomRB.setEnabled(true);
+                this.mtmUnchangedRB.setEnabled(true);
+
+                this.mtcRandomTotalRB.setEnabled(true);
+                this.mtcRandomTypeRB.setEnabled(true);
+                this.mtcUnchangedRB.setEnabled(true);
+                this.mtcFullRB.setEnabled(true);
+            } else {
+                this.mtCompatPanel.setVisible(false);
+                this.mtMovesPanel.setVisible(false);
+                this.mtNoExistLabel.setVisible(true);
+            }
+
+            this.igtUnchangedRB.setEnabled(true);
+            this.igtBothRB.setEnabled(true);
+            this.igtGivenOnlyRB.setEnabled(true);
+
+            if (this.romHandler instanceof Gen1RomHandler) {
+                this.igtRandomItemCB.setVisible(false);
+                this.igtRandomIVsCB.setVisible(false);
+                this.igtRandomOTCB.setVisible(false);
+            }
+
+            this.fiUnchangedRB.setEnabled(true);
+            this.fiRandomRB.setEnabled(true);
+            this.fiShuffleRB.setEnabled(true);
+
+            this.fiBanBadCB.setEnabled(false);
+            this.fiBanBadCB.setSelected(false);
+
+            this.peUnchangedRB.setEnabled(true);
+            this.peUnchangedRB.setSelected(true);
+            this.peRandomRB.setEnabled(true);
+
+            int mtsAvailable = this.romHandler.miscTweaksAvailable();
+            int mtCount = MiscTweak.allTweaks.size();
+            List<JCheckBox> usableCheckboxes = new ArrayList<JCheckBox>();
+
+            for (int mti = 0; mti < mtCount; mti++) {
+                MiscTweak mt = MiscTweak.allTweaks.get(mti);
+                JCheckBox mtCB = tweakCheckboxes.get(mti);
+                mtCB.setSelected(false);
+                if ((mtsAvailable & mt.getValue()) != 0) {
+                    mtCB.setVisible(true);
+                    mtCB.setEnabled(true);
+                    usableCheckboxes.add(mtCB);
+                } else {
+                    mtCB.setVisible(false);
+                    mtCB.setEnabled(false);
+                }
+            }
+
+            if (tweakCheckboxes.size() > 0) {
+                this.mtNoneAvailableLabel.setVisible(false);
+                miscTweaksPanel.setLayout(makeTweaksLayout(usableCheckboxes));
+            } else {
+                this.mtNoneAvailableLabel.setVisible(true);
+                miscTweaksPanel.setLayout(noTweaksLayout);
+            }
+
+            this.gameMascotLabel.setIcon(makeMascotIcon());
+
+            if (this.romHandler instanceof AbstractDSRomHandler) {
+                ((AbstractDSRomHandler) this.romHandler).closeInnerRom();
+            }
+        } catch (Exception ex) {
+            attemptToLogException(ex, "RandomizerGUI.processFailed", "RandomizerGUI.processFailedNoLog");
+            this.romHandler = null;
+            this.initialFormState();
+        }
+    }
+
+    private ImageIcon makeMascotIcon() {
+        BufferedImage handlerImg = romHandler.getMascotImage();
+
+        if (handlerImg == null) {
+            return emptyIcon;
+        }
+
+        BufferedImage nImg = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
+        int hW = handlerImg.getWidth();
+        int hH = handlerImg.getHeight();
+        Graphics g = nImg.getGraphics();
+        nImg.getGraphics().drawImage(handlerImg, 64 - hW / 2, 64 - hH / 2, this);
+        return new ImageIcon(nImg);
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private void populateDropdowns() {
+        List<Pokemon> currentStarters = romHandler.getStarters();
+        List<Pokemon> allPokes = romHandler.getPokemon();
+        String[] pokeNames = new String[allPokes.size() - 1];
+        for (int i = 1; i < allPokes.size(); i++) {
+            pokeNames[i - 1] = allPokes.get(i).name;
+        }
+        this.spCustomPoke1Chooser.setModel(new DefaultComboBoxModel(pokeNames));
+        this.spCustomPoke1Chooser.setSelectedIndex(allPokes.indexOf(currentStarters.get(0)) - 1);
+        this.spCustomPoke2Chooser.setModel(new DefaultComboBoxModel(pokeNames));
+        this.spCustomPoke2Chooser.setSelectedIndex(allPokes.indexOf(currentStarters.get(1)) - 1);
+        if (!romHandler.isYellow()) {
+            this.spCustomPoke3Chooser.setModel(new DefaultComboBoxModel(pokeNames));
+            this.spCustomPoke3Chooser.setSelectedIndex(allPokes.indexOf(currentStarters.get(2)) - 1);
+        }
+    }
+
+    private void enableOrDisableSubControls() {
+        // This isn't for a new ROM being loaded (that's romLoaded)
+        // This is just for when a radio button gets selected or state is loaded
+        // and we need to enable/disable secondary controls
+        // e.g. wild pokemon / trainer pokemon "modifier"
+        // and the 3 starter pokemon dropdowns
+
+        if (this.goUpdateMovesCheckBox.isSelected() && !(romHandler instanceof Gen5RomHandler)) {
+            this.goUpdateMovesLegacyCheckBox.setEnabled(true);
+        } else {
+            this.goUpdateMovesLegacyCheckBox.setEnabled(false);
+            this.goUpdateMovesLegacyCheckBox.setSelected(false);
+        }
+
+        this.pokeLimitBtn.setEnabled(this.pokeLimitCB.isSelected());
+
+        if (this.spCustomRB.isSelected()) {
+            this.spCustomPoke1Chooser.setEnabled(true);
+            this.spCustomPoke2Chooser.setEnabled(true);
+            this.spCustomPoke3Chooser.setEnabled(true);
+        } else {
+            this.spCustomPoke1Chooser.setEnabled(false);
+            this.spCustomPoke2Chooser.setEnabled(false);
+            this.spCustomPoke3Chooser.setEnabled(false);
+        }
+
+        if (this.spHeldItemsCB.isSelected() && this.spHeldItemsCB.isVisible() && this.spHeldItemsCB.isEnabled()) {
+            this.spHeldItemsBanBadCB.setEnabled(true);
+        } else {
+            this.spHeldItemsBanBadCB.setEnabled(false);
+            this.spHeldItemsBanBadCB.setSelected(false);
+        }
+
+        if (this.paRandomizeRB.isSelected()) {
+            this.paWonderGuardCB.setEnabled(true);
+        } else {
+            this.paWonderGuardCB.setEnabled(false);
+            this.paWonderGuardCB.setSelected(false);
+        }
+
+        if (this.tpUnchangedRB.isSelected()) {
+            this.tpPowerLevelsCB.setEnabled(false);
+            this.tpRivalCarriesStarterCB.setEnabled(false);
+            this.tpNoLegendariesCB.setEnabled(false);
+            this.tpNoEarlyShedinjaCB.setEnabled(false);
+            this.tpNoEarlyShedinjaCB.setSelected(false);
+        } else {
+            this.tpPowerLevelsCB.setEnabled(true);
+            this.tpRivalCarriesStarterCB.setEnabled(true);
+            this.tpNoLegendariesCB.setEnabled(true);
+            this.tpNoEarlyShedinjaCB.setEnabled(true);
+        }
+
+        if (this.tpTypeThemedRB.isSelected()) {
+            this.tpTypeWeightingCB.setEnabled(true);
+        } else {
+            this.tpTypeWeightingCB.setEnabled(false);
+        }
+
+        if (this.wpArea11RB.isSelected() || this.wpRandomRB.isSelected()) {
+            this.wpARNoneRB.setEnabled(true);
+            this.wpARSimilarStrengthRB.setEnabled(true);
+            this.wpARCatchEmAllRB.setEnabled(true);
+            this.wpARTypeThemedRB.setEnabled(true);
+        } else if (this.wpGlobalRB.isSelected()) {
+            if (this.wpARCatchEmAllRB.isSelected() || this.wpARTypeThemedRB.isSelected()) {
+                this.wpARNoneRB.setSelected(true);
+            }
+            this.wpARNoneRB.setEnabled(true);
+            this.wpARSimilarStrengthRB.setEnabled(true);
+            this.wpARCatchEmAllRB.setEnabled(false);
+            this.wpARTypeThemedRB.setEnabled(false);
+        } else {
+            this.wpARNoneRB.setEnabled(false);
+            this.wpARSimilarStrengthRB.setEnabled(false);
+            this.wpARCatchEmAllRB.setEnabled(false);
+            this.wpARTypeThemedRB.setEnabled(false);
+            this.wpARNoneRB.setSelected(true);
+        }
+
+        if (this.wpUnchangedRB.isSelected()) {
+            this.wpUseTimeCB.setEnabled(false);
+            this.wpNoLegendariesCB.setEnabled(false);
+        } else {
+            this.wpUseTimeCB.setEnabled(true);
+            this.wpNoLegendariesCB.setEnabled(true);
+        }
+
+        if (this.wpHeldItemsCB.isSelected() && this.wpHeldItemsCB.isVisible() && this.wpHeldItemsCB.isEnabled()) {
+            this.wpHeldItemsBanBadCB.setEnabled(true);
+        } else {
+            this.wpHeldItemsBanBadCB.setEnabled(false);
+            this.wpHeldItemsBanBadCB.setSelected(false);
+        }
+
+        if (this.igtUnchangedRB.isSelected()) {
+            this.igtRandomItemCB.setEnabled(false);
+            this.igtRandomIVsCB.setEnabled(false);
+            this.igtRandomNicknameCB.setEnabled(false);
+            this.igtRandomOTCB.setEnabled(false);
+        } else {
+            this.igtRandomItemCB.setEnabled(true);
+            this.igtRandomIVsCB.setEnabled(true);
+            this.igtRandomNicknameCB.setEnabled(true);
+            this.igtRandomOTCB.setEnabled(true);
+        }
+
+        if (this.pmsMetronomeOnlyRB.isSelected()) {
+            this.tmmUnchangedRB.setEnabled(false);
+            this.tmmRandomRB.setEnabled(false);
+            this.tmmUnchangedRB.setSelected(true);
+
+            this.mtmUnchangedRB.setEnabled(false);
+            this.mtmRandomRB.setEnabled(false);
+            this.mtmUnchangedRB.setSelected(true);
+
+            this.tmLearningSanityCB.setEnabled(false);
+            this.tmLearningSanityCB.setSelected(false);
+            this.tmKeepFieldMovesCB.setEnabled(false);
+            this.tmKeepFieldMovesCB.setSelected(false);
+
+            this.mtLearningSanityCB.setEnabled(false);
+            this.mtLearningSanityCB.setSelected(false);
+            this.mtKeepFieldMovesCB.setEnabled(false);
+            this.mtKeepFieldMovesCB.setSelected(false);
+        } else {
+            this.tmmUnchangedRB.setEnabled(true);
+            this.tmmRandomRB.setEnabled(true);
+
+            this.mtmUnchangedRB.setEnabled(true);
+            this.mtmRandomRB.setEnabled(true);
+
+            if (!(this.pmsUnchangedRB.isSelected()) || !(this.tmmUnchangedRB.isSelected())
+                    || !(this.thcUnchangedRB.isSelected())) {
+                this.tmLearningSanityCB.setEnabled(true);
+            } else {
+                this.tmLearningSanityCB.setEnabled(false);
+                this.tmLearningSanityCB.setSelected(false);
+            }
+
+            if (!(this.tmmUnchangedRB.isSelected())) {
+                this.tmKeepFieldMovesCB.setEnabled(true);
+            } else {
+                this.tmKeepFieldMovesCB.setEnabled(false);
+                this.tmKeepFieldMovesCB.setSelected(false);
+            }
+
+            if (this.romHandler.hasMoveTutors()
+                    && (!(this.pmsUnchangedRB.isSelected()) || !(this.mtmUnchangedRB.isSelected()) || !(this.mtcUnchangedRB
+                            .isSelected()))) {
+                this.mtLearningSanityCB.setEnabled(true);
+            } else {
+                this.mtLearningSanityCB.setEnabled(false);
+                this.mtLearningSanityCB.setSelected(false);
+            }
+
+            if (this.romHandler.hasMoveTutors() && !(this.mtmUnchangedRB.isSelected())) {
+                this.mtKeepFieldMovesCB.setEnabled(true);
+            } else {
+                this.mtKeepFieldMovesCB.setEnabled(false);
+                this.mtKeepFieldMovesCB.setSelected(false);
+            }
+        }
+
+        this.tmFullHMCompatCB.setEnabled(!this.thcFullRB.isSelected());
+
+        if (this.pmsMetronomeOnlyRB.isSelected() || this.pmsUnchangedRB.isSelected()) {
+            this.pms4MovesCB.setEnabled(false);
+            this.pms4MovesCB.setSelected(false);
+        } else {
+            this.pms4MovesCB.setEnabled(true);
+        }
+
+        if (this.fiRandomRB.isSelected() && this.fiRandomRB.isVisible() && this.fiRandomRB.isEnabled()) {
+            this.fiBanBadCB.setEnabled(true);
+        } else {
+            this.fiBanBadCB.setEnabled(false);
+            this.fiBanBadCB.setSelected(false);
+        }
+
+        this.peForceChangeCB.setEnabled(this.peRandomRB.isSelected());
+        this.peThreeStagesCB.setEnabled(this.peRandomRB.isSelected());
+        this.peSameTypeCB.setEnabled(this.peRandomRB.isSelected());
+        this.peSimilarStrengthCB.setEnabled(this.peRandomRB.isSelected());
+    }
+
+    private void saveROM() {
+        if (romHandler == null) {
+            return; // none loaded
+        }
+        if (raceModeCB.isSelected() && tpUnchangedRB.isSelected() && wpUnchangedRB.isSelected()) {
+            JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.raceModeRequirements"));
+            return;
+        }
+        if (pokeLimitCB.isSelected()
+                && (this.currentRestrictions == null || this.currentRestrictions.nothingSelected())) {
+            JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.pokeLimitNotChosen"));
+            return;
+        }
+        romSaveChooser.setSelectedFile(null);
+        int returnVal = romSaveChooser.showSaveDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File fh = romSaveChooser.getSelectedFile();
+            // Fix or add extension
+            List<String> extensions = new ArrayList<String>(Arrays.asList("sgb", "gbc", "gba", "nds"));
+            extensions.remove(this.romHandler.getDefaultExtension());
+            fh = FileFunctions.fixFilename(fh, this.romHandler.getDefaultExtension(), extensions);
+            boolean allowed = true;
+            if (this.romHandler instanceof AbstractDSRomHandler) {
+                String currentFN = this.romHandler.loadedFilename();
+                if (currentFN.equals(fh.getAbsolutePath())) {
+                    JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.cantOverwriteDS"));
+                    allowed = false;
+                }
+            }
+            if (allowed) {
+                // Get a seed
+                long seed = RandomSource.pickSeed();
+                // Apply it
+                RandomSource.seed(seed);
+                presetMode = false;
+                performRandomization(fh.getAbsolutePath(), seed, null, null, null);
+            }
+        }
+    }
+
+    private Settings getCurrentSettings() {
+        byte[] trainerClasses = null;
+        byte[] trainerNames = null;
+        byte[] nicknames = null;
+
+        try {
+            trainerClasses = FileFunctions.getConfigAsBytes("trainerclasses.txt");
+            trainerNames = FileFunctions.getConfigAsBytes("trainernames.txt");
+            nicknames = FileFunctions.getConfigAsBytes("nicknames.txt");
+        } catch (IOException e) {
+        }
+
+        Settings settings = createSettingsFromState(trainerClasses, trainerNames, nicknames);
+        return settings;
+    }
+
+    public String getValidRequiredROMName(String config, byte[] trainerClasses, byte[] trainerNames, byte[] nicknames)
+            throws UnsupportedEncodingException, InvalidSupplementFilesException {
+        try {
+            Utils.validatePresetSupplementFiles(config, trainerClasses, trainerNames, nicknames);
+        } catch (InvalidSupplementFilesException e) {
+            switch (e.getType()) {
+            case TRAINER_CLASSES:
+                JOptionPane.showMessageDialog(null, bundle.getString("RandomizerGUI.presetFailTrainerClasses"));
+                throw e;
+            case TRAINER_NAMES:
+                JOptionPane.showMessageDialog(null, bundle.getString("RandomizerGUI.presetFailTrainerNames"));
+                throw e;
+            case NICKNAMES:
+                JOptionPane.showMessageDialog(null, bundle.getString("RandomizerGUI.presetFailNicknames"));
+                throw e;
+            default:
+                throw e;
+            }
+        }
+        byte[] data = DatatypeConverter.parseBase64Binary(config);
+
+        int nameLength = data[Settings.LENGTH_OF_SETTINGS_DATA] & 0xFF;
+        if (data.length != Settings.LENGTH_OF_SETTINGS_DATA + 17 + nameLength) {
+            return null; // not valid length
+        }
+        String name = new String(data, Settings.LENGTH_OF_SETTINGS_DATA + 1, nameLength, "US-ASCII");
+        return name;
+    }
+
+    private void restoreStateFromSettings(Settings settings) {
+        this.goRemoveTradeEvosCheckBox.setSelected(settings.isChangeImpossibleEvolutions());
+        this.goUpdateMovesCheckBox.setSelected(settings.isUpdateMoves());
+        this.goUpdateMovesLegacyCheckBox.setSelected(settings.isUpdateMovesLegacy());
+        this.tnRandomizeCB.setSelected(settings.isRandomizeTrainerNames());
+        this.tcnRandomizeCB.setSelected(settings.isRandomizeTrainerClassNames());
+
+        this.pbsChangesRandomEvosRB
+                .setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.RANDOM_FOLLOW_EVOLUTIONS);
+        this.pbsChangesRandomTotalRB
+                .setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.COMPLETELY_RANDOM);
+        this.pbsChangesShuffleRB.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.SHUFFLE);
+        this.pbsChangesUnchangedRB.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.UNCHANGED);
+        this.paUnchangedRB.setSelected(settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED);
+        this.paRandomizeRB.setSelected(settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
+        this.paWonderGuardCB.setSelected(settings.isAllowWonderGuard());
+        this.pbsStandardEXPCurvesCB.setSelected(settings.isStandardizeEXPCurves());
+
+        this.ptRandomFollowEvosRB.setSelected(settings.getTypesMod() == Settings.TypesMod.RANDOM_FOLLOW_EVOLUTIONS);
+        this.ptRandomTotalRB.setSelected(settings.getTypesMod() == Settings.TypesMod.COMPLETELY_RANDOM);
+        this.ptUnchangedRB.setSelected(settings.getTypesMod() == Settings.TypesMod.UNCHANGED);
+        this.raceModeCB.setSelected(settings.isRaceMode());
+        this.brokenMovesCB.setSelected(settings.doBlockBrokenMoves());
+        this.pokeLimitCB.setSelected(settings.isLimitPokemon());
+
+        this.goCondenseEvosCheckBox.setSelected(settings.isMakeEvolutionsEasier());
+
+        this.spCustomRB.setSelected(settings.getStartersMod() == Settings.StartersMod.CUSTOM);
+        this.spRandomRB.setSelected(settings.getStartersMod() == Settings.StartersMod.COMPLETELY_RANDOM);
+        this.spUnchangedRB.setSelected(settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
+        this.spRandom2EvosRB.setSelected(settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_TWO_EVOLUTIONS);
+        this.spHeldItemsCB.setSelected(settings.isRandomizeStartersHeldItems());
+        this.spHeldItemsBanBadCB.setSelected(settings.isBanBadRandomStarterHeldItems());
+
+        int[] customStarters = settings.getCustomStarters();
+        this.spCustomPoke1Chooser.setSelectedIndex(customStarters[0] - 1);
+        this.spCustomPoke2Chooser.setSelectedIndex(customStarters[1] - 1);
+        this.spCustomPoke3Chooser.setSelectedIndex(customStarters[2] - 1);
+
+        this.peUnchangedRB.setSelected(settings.getEvolutionsMod() == Settings.EvolutionsMod.UNCHANGED);
+        this.peRandomRB.setSelected(settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM);
+        this.peSimilarStrengthCB.setSelected(settings.isEvosSimilarStrength());
+        this.peSameTypeCB.setSelected(settings.isEvosSameTyping());
+        this.peThreeStagesCB.setSelected(settings.isEvosMaxThreeStages());
+        this.peForceChangeCB.setSelected(settings.isEvosForceChange());
+
+        this.mdRandomAccuracyCB.setSelected(settings.isRandomizeMoveAccuracies());
+        this.mdRandomCategoryCB.setSelected(settings.isRandomizeMoveCategory());
+        this.mdRandomPowerCB.setSelected(settings.isRandomizeMovePowers());
+        this.mdRandomPPCB.setSelected(settings.isRandomizeMovePPs());
+        this.mdRandomTypeCB.setSelected(settings.isRandomizeMoveTypes());
+
+        this.pmsRandomTotalRB.setSelected(settings.getMovesetsMod() == Settings.MovesetsMod.COMPLETELY_RANDOM);
+        this.pmsRandomTypeRB.setSelected(settings.getMovesetsMod() == Settings.MovesetsMod.RANDOM_PREFER_SAME_TYPE);
+        this.pmsUnchangedRB.setSelected(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED);
+        this.pmsMetronomeOnlyRB.setSelected(settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY);
+        this.pms4MovesCB.setSelected(settings.isStartWithFourMoves());
+
+        this.tpPowerLevelsCB.setSelected(settings.isTrainersUsePokemonOfSimilarStrength());
+        this.tpRandomRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.RANDOM);
+        this.tpRivalCarriesStarterCB.setSelected(settings.isRivalCarriesStarterThroughout());
+        this.tpTypeThemedRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED);
+        this.tpTypeWeightingCB.setSelected(settings.isTrainersMatchTypingDistribution());
+        this.tpUnchangedRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED);
+        this.tpNoLegendariesCB.setSelected(settings.isTrainersBlockLegendaries());
+        this.tpNoEarlyShedinjaCB.setSelected(settings.isTrainersBlockEarlyWonderGuard());
+
+        this.wpARCatchEmAllRB
+                .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL);
+        this.wpArea11RB.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.AREA_MAPPING);
+        this.wpARNoneRB.setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.NONE);
+        this.wpARTypeThemedRB
+                .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS);
+        this.wpGlobalRB.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.GLOBAL_MAPPING);
+        this.wpRandomRB.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.RANDOM);
+        this.wpUnchangedRB.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
+        this.wpUseTimeCB.setSelected(settings.isUseTimeBasedEncounters());
+
+        this.wpCatchRateCB.setSelected(settings.isUseMinimumCatchRate());
+        this.wpNoLegendariesCB.setSelected(settings.isBlockWildLegendaries());
+        this.wpARSimilarStrengthRB
+                .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH);
+        this.wpHeldItemsCB.setSelected(settings.isRandomizeWildPokemonHeldItems());
+        this.wpHeldItemsBanBadCB.setSelected(settings.isBanBadRandomWildPokemonHeldItems());
+
+        this.stpUnchangedRB.setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED);
+        this.stpRandomL4LRB.setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING);
+        this.stpRandomTotalRB
+                .setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.COMPLETELY_RANDOM);
+
+        this.thcRandomTotalRB
+                .setSelected(settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.COMPLETELY_RANDOM);
+        this.thcRandomTypeRB
+                .setSelected(settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.RANDOM_PREFER_TYPE);
+        this.thcUnchangedRB
+                .setSelected(settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.UNCHANGED);
+        this.tmmRandomRB.setSelected(settings.getTmsMod() == Settings.TMsMod.RANDOM);
+        this.tmmUnchangedRB.setSelected(settings.getTmsMod() == Settings.TMsMod.UNCHANGED);
+        this.tmLearningSanityCB.setSelected(settings.isTmLevelUpMoveSanity());
+        this.tmKeepFieldMovesCB.setSelected(settings.isKeepFieldMoveTMs());
+        this.thcFullRB.setSelected(settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.FULL);
+
+        this.mtcRandomTotalRB
+                .setSelected(settings.getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.COMPLETELY_RANDOM);
+        this.mtcRandomTypeRB
+                .setSelected(settings.getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.RANDOM_PREFER_TYPE);
+        this.mtcUnchangedRB
+                .setSelected(settings.getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.UNCHANGED);
+        this.mtmRandomRB.setSelected(settings.getMoveTutorMovesMod() == Settings.MoveTutorMovesMod.RANDOM);
+        this.mtmUnchangedRB.setSelected(settings.getMoveTutorMovesMod() == Settings.MoveTutorMovesMod.UNCHANGED);
+        this.mtLearningSanityCB.setSelected(settings.isTutorLevelUpMoveSanity());
+        this.mtKeepFieldMovesCB.setSelected(settings.isKeepFieldMoveTutors());
+        this.mtcFullRB
+                .setSelected(settings.getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.FULL);
+
+        this.igtBothRB
+                .setSelected(settings.getInGameTradesMod() == Settings.InGameTradesMod.RANDOMIZE_GIVEN_AND_REQUESTED);
+        this.igtGivenOnlyRB.setSelected(settings.getInGameTradesMod() == Settings.InGameTradesMod.RANDOMIZE_GIVEN);
+        this.igtRandomItemCB.setSelected(settings.isRandomizeInGameTradesItems());
+        this.igtRandomIVsCB.setSelected(settings.isRandomizeInGameTradesIVs());
+        this.igtRandomNicknameCB.setSelected(settings.isRandomizeInGameTradesNicknames());
+        this.igtRandomOTCB.setSelected(settings.isRandomizeInGameTradesOTs());
+        this.igtUnchangedRB.setSelected(settings.getInGameTradesMod() == Settings.InGameTradesMod.UNCHANGED);
+
+        this.fiRandomRB.setSelected(settings.getFieldItemsMod() == Settings.FieldItemsMod.RANDOM);
+        this.fiShuffleRB.setSelected(settings.getFieldItemsMod() == Settings.FieldItemsMod.SHUFFLE);
+        this.fiUnchangedRB.setSelected(settings.getFieldItemsMod() == Settings.FieldItemsMod.UNCHANGED);
+        this.fiBanBadCB.setSelected(settings.isBanBadRandomFieldItems());
+
+        this.currentRestrictions = settings.getCurrentRestrictions();
+        if (this.currentRestrictions != null) {
+            this.currentRestrictions.limitToGen(this.romHandler.generationOfPokemon());
+        }
+
+        int mtsSelected = settings.getCurrentMiscTweaks();
+        int mtCount = MiscTweak.allTweaks.size();
+
+        for (int mti = 0; mti < mtCount; mti++) {
+            MiscTweak mt = MiscTweak.allTweaks.get(mti);
+            JCheckBox mtCB = tweakCheckboxes.get(mti);
+            mtCB.setSelected((mtsSelected & mt.getValue()) != 0);
+        }
+
+        this.enableOrDisableSubControls();
+    }
+
+    private Settings createSettingsFromState(byte[] trainerClasses, byte[] trainerNames, byte[] nicknames) {
+        Settings settings = new Settings();
+        settings.setRomName(this.romHandler.getROMName());
+        settings.setChangeImpossibleEvolutions(goRemoveTradeEvosCheckBox.isSelected());
+        settings.setUpdateMoves(goUpdateMovesCheckBox.isSelected());
+        settings.setUpdateMovesLegacy(goUpdateMovesLegacyCheckBox.isSelected());
+        settings.setRandomizeTrainerNames(tnRandomizeCB.isSelected());
+        settings.setRandomizeTrainerClassNames(tcnRandomizeCB.isSelected());
+
+        settings.setBaseStatisticsMod(pbsChangesUnchangedRB.isSelected(), pbsChangesShuffleRB.isSelected(),
+                pbsChangesRandomEvosRB.isSelected(), pbsChangesRandomTotalRB.isSelected());
+        settings.setAbilitiesMod(paUnchangedRB.isSelected(), paRandomizeRB.isSelected());
+        settings.setAllowWonderGuard(paWonderGuardCB.isSelected());
+        settings.setStandardizeEXPCurves(pbsStandardEXPCurvesCB.isSelected());
+
+        settings.setTypesMod(ptUnchangedRB.isSelected(), ptRandomFollowEvosRB.isSelected(),
+                ptRandomTotalRB.isSelected());
+        settings.setRaceMode(raceModeCB.isSelected());
+        settings.setBlockBrokenMoves(brokenMovesCB.isSelected());
+        settings.setLimitPokemon(pokeLimitCB.isSelected());
+
+        settings.setMakeEvolutionsEasier(goCondenseEvosCheckBox.isSelected());
+
+        settings.setStartersMod(spUnchangedRB.isSelected(), spCustomRB.isSelected(), spRandomRB.isSelected(),
+                spRandom2EvosRB.isSelected());
+        settings.setRandomizeStartersHeldItems(spHeldItemsCB.isSelected());
+        settings.setBanBadRandomStarterHeldItems(spHeldItemsBanBadCB.isSelected());
+
+        int[] customStarters = new int[] { spCustomPoke1Chooser.getSelectedIndex() + 1,
+                spCustomPoke2Chooser.getSelectedIndex() + 1, spCustomPoke3Chooser.getSelectedIndex() + 1 };
+        settings.setCustomStarters(customStarters);
+
+        settings.setEvolutionsMod(peUnchangedRB.isSelected(), peRandomRB.isSelected());
+        settings.setEvosSimilarStrength(peSimilarStrengthCB.isSelected());
+        settings.setEvosSameTyping(peSameTypeCB.isSelected());
+        settings.setEvosMaxThreeStages(peThreeStagesCB.isSelected());
+        settings.setEvosForceChange(peForceChangeCB.isSelected());
+
+        settings.setRandomizeMoveAccuracies(mdRandomAccuracyCB.isSelected());
+        settings.setRandomizeMoveCategory(mdRandomCategoryCB.isSelected());
+        settings.setRandomizeMovePowers(mdRandomPowerCB.isSelected());
+        settings.setRandomizeMovePPs(mdRandomPPCB.isSelected());
+        settings.setRandomizeMoveTypes(mdRandomTypeCB.isSelected());
+
+        settings.setMovesetsMod(pmsUnchangedRB.isSelected(), pmsRandomTypeRB.isSelected(),
+                pmsRandomTotalRB.isSelected(), pmsMetronomeOnlyRB.isSelected());
+        settings.setStartWithFourMoves(pms4MovesCB.isSelected());
+
+        settings.setTrainersMod(tpUnchangedRB.isSelected(), tpRandomRB.isSelected(), tpTypeThemedRB.isSelected());
+        settings.setTrainersUsePokemonOfSimilarStrength(tpPowerLevelsCB.isSelected());
+        settings.setRivalCarriesStarterThroughout(tpRivalCarriesStarterCB.isSelected());
+        settings.setTrainersMatchTypingDistribution(tpTypeWeightingCB.isSelected());
+        settings.setTrainersBlockLegendaries(tpNoLegendariesCB.isSelected());
+        settings.setTrainersBlockEarlyWonderGuard(tpNoEarlyShedinjaCB.isSelected());
+
+        settings.setWildPokemonMod(wpUnchangedRB.isSelected(), wpRandomRB.isSelected(), wpArea11RB.isSelected(),
+                wpGlobalRB.isSelected());
+        settings.setWildPokemonRestrictionMod(wpARNoneRB.isSelected(), wpARSimilarStrengthRB.isSelected(),
+                wpARCatchEmAllRB.isSelected(), wpARTypeThemedRB.isSelected());
+        settings.setUseTimeBasedEncounters(wpUseTimeCB.isSelected());
+        settings.setUseMinimumCatchRate(wpCatchRateCB.isSelected());
+        settings.setBlockWildLegendaries(wpNoLegendariesCB.isSelected());
+        settings.setRandomizeWildPokemonHeldItems(wpHeldItemsCB.isSelected());
+        settings.setBanBadRandomWildPokemonHeldItems(wpHeldItemsBanBadCB.isSelected());
+
+        settings.setStaticPokemonMod(stpUnchangedRB.isSelected(), stpRandomL4LRB.isSelected(),
+                stpRandomTotalRB.isSelected());
+
+        settings.setTmsMod(tmmUnchangedRB.isSelected(), tmmRandomRB.isSelected());
+
+        settings.setTmsHmsCompatibilityMod(thcUnchangedRB.isSelected(), thcRandomTypeRB.isSelected(),
+                thcRandomTotalRB.isSelected(), thcFullRB.isSelected());
+        settings.setTmLevelUpMoveSanity(tmLearningSanityCB.isSelected());
+        settings.setKeepFieldMoveTMs(tmKeepFieldMovesCB.isSelected());
+        settings.setFullHMCompat(tmFullHMCompatCB.isSelected());
+
+        settings.setMoveTutorMovesMod(mtmUnchangedRB.isSelected(), mtmRandomRB.isSelected());
+        settings.setMoveTutorsCompatibilityMod(mtcUnchangedRB.isSelected(), mtcRandomTypeRB.isSelected(),
+                mtcRandomTotalRB.isSelected(), mtcFullRB.isSelected());
+        settings.setTutorLevelUpMoveSanity(mtLearningSanityCB.isSelected());
+        settings.setKeepFieldMoveTutors(mtKeepFieldMovesCB.isSelected());
+
+        settings.setInGameTradesMod(igtUnchangedRB.isSelected(), igtGivenOnlyRB.isSelected(), igtBothRB.isSelected());
+        settings.setRandomizeInGameTradesItems(igtRandomItemCB.isSelected());
+        settings.setRandomizeInGameTradesIVs(igtRandomIVsCB.isSelected());
+        settings.setRandomizeInGameTradesNicknames(igtRandomNicknameCB.isSelected());
+        settings.setRandomizeInGameTradesOTs(igtRandomOTCB.isSelected());
+
+        settings.setFieldItemsMod(fiUnchangedRB.isSelected(), fiShuffleRB.isSelected(), fiRandomRB.isSelected());
+        settings.setBanBadRandomFieldItems(fiBanBadCB.isSelected());
+
+        settings.setCurrentRestrictions(currentRestrictions);
+
+        int currentMiscTweaks = 0;
+        int mtCount = MiscTweak.allTweaks.size();
+
+        for (int mti = 0; mti < mtCount; mti++) {
+            MiscTweak mt = MiscTweak.allTweaks.get(mti);
+            JCheckBox mtCB = tweakCheckboxes.get(mti);
+            if (mtCB.isSelected()) {
+                currentMiscTweaks |= mt.getValue();
+            }
+        }
+
+        settings.setCurrentMiscTweaks(currentMiscTweaks);
+
+        settings.setTrainerNames(trainerNames);
+        settings.setTrainerClasses(trainerClasses);
+        settings.setNicknames(nicknames);
+
+        return settings;
+    }
+
+    private void performRandomization(final String filename, final long seed, byte[] trainerClasses,
+            byte[] trainerNames, byte[] nicknames) {
+        final Settings settings = createSettingsFromState(trainerClasses, trainerNames, nicknames);
+        final boolean raceMode = settings.isRaceMode();
+        // Setup verbose log
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream log;
+        try {
+            log = new PrintStream(baos, false, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            log = new PrintStream(baos);
+        }
+
+        final PrintStream verboseLog = log;
+
+        try {
+            final AtomicInteger finishedCV = new AtomicInteger(0);
+            opDialog = new OperationDialog(bundle.getString("RandomizerGUI.savingText"), this, true);
+            Thread t = new Thread() {
+                @Override
+                public void run() {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            opDialog.setVisible(true);
+                        }
+                    });
+                    boolean succeededSave = false;
+                    try {
+                        RandomizerGUI.this.romHandler.setLog(verboseLog);
+                        finishedCV.set(new Randomizer(settings, RandomizerGUI.this.romHandler).randomize(filename,
+                                verboseLog, seed));
+                        succeededSave = true;
+                    } catch (Exception ex) {
+                        attemptToLogException(ex, "RandomizerGUI.saveFailedIO", "RandomizerGUI.saveFailedIONoLog");
+                        if (verboseLog != null) {
+                            verboseLog.close();
+                        }
+                    }
+                    if (succeededSave) {
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                RandomizerGUI.this.opDialog.setVisible(false);
+                                // Log?
+                                verboseLog.close();
+                                byte[] out = baos.toByteArray();
+
+                                if (raceMode) {
+                                    JOptionPane.showMessageDialog(RandomizerGUI.this,
+                                            String.format(bundle.getString("RandomizerGUI.raceModeCheckValuePopup"),
+                                                    finishedCV.get()));
+                                } else {
+                                    int response = JOptionPane.showConfirmDialog(RandomizerGUI.this,
+                                            bundle.getString("RandomizerGUI.saveLogDialog.text"),
+                                            bundle.getString("RandomizerGUI.saveLogDialog.title"),
+                                            JOptionPane.YES_NO_OPTION);
+                                    if (response == JOptionPane.YES_OPTION) {
+                                        try {
+                                            FileOutputStream fos = new FileOutputStream(filename + ".log");
+                                            fos.write(0xEF);
+                                            fos.write(0xBB);
+                                            fos.write(0xBF);
+                                            fos.write(out);
+                                            fos.close();
+                                        } catch (IOException e) {
+                                            JOptionPane.showMessageDialog(RandomizerGUI.this,
+                                                    bundle.getString("RandomizerGUI.logSaveFailed"));
+                                            return;
+                                        }
+                                        JOptionPane.showMessageDialog(RandomizerGUI.this,
+                                                String.format(bundle.getString("RandomizerGUI.logSaved"), filename));
+                                    }
+                                }
+                                if (presetMode) {
+                                    JOptionPane.showMessageDialog(RandomizerGUI.this,
+                                            bundle.getString("RandomizerGUI.randomizationDone"));
+                                    // Done
+                                    RandomizerGUI.this.romHandler = null;
+                                    initialFormState();
+                                } else {
+                                    // Compile a config string
+                                    String configString = getCurrentSettings().toString();
+                                    // Show the preset maker
+                                    new PresetMakeDialog(RandomizerGUI.this, seed, configString);
+
+                                    // Done
+                                    RandomizerGUI.this.romHandler = null;
+                                    initialFormState();
+                                }
+                            }
+                        });
+                    } else {
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                RandomizerGUI.this.opDialog.setVisible(false);
+                                RandomizerGUI.this.romHandler = null;
+                                initialFormState();
+                            }
+                        });
+                    }
+                }
+            };
+            t.start();
+        } catch (Exception ex) {
+            attemptToLogException(ex, "RandomizerGUI.saveFailed", "RandomizerGUI.saveFailedNoLog");
+            if (verboseLog != null) {
+                verboseLog.close();
+            }
+        }
+    }
+
+    private void presetLoader() {
+        PresetLoadDialog pld = new PresetLoadDialog(this);
+        if (pld.isCompleted()) {
+            // Apply it
+            long seed = pld.getSeed();
+            String config = pld.getConfigString();
+            this.romHandler = pld.getROM();
+            this.romLoaded();
+            Settings settings;
+            try {
+                settings = Settings.fromString(config);
+                settings.tweakForRom(this.romHandler);
+                this.restoreStateFromSettings(settings);
+            } catch (UnsupportedEncodingException e) {
+                // settings load failed
+                this.romHandler = null;
+                initialFormState();
+            }
+            romSaveChooser.setSelectedFile(null);
+            int returnVal = romSaveChooser.showSaveDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File fh = romSaveChooser.getSelectedFile();
+                // Fix or add extension
+                List<String> extensions = new ArrayList<String>(Arrays.asList("sgb", "gbc", "gba", "nds"));
+                extensions.remove(this.romHandler.getDefaultExtension());
+                fh = FileFunctions.fixFilename(fh, this.romHandler.getDefaultExtension(), extensions);
+                boolean allowed = true;
+                if (this.romHandler instanceof AbstractDSRomHandler) {
+                    String currentFN = this.romHandler.loadedFilename();
+                    if (currentFN.equals(fh.getAbsolutePath())) {
+                        JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.cantOverwriteDS"));
+                        allowed = false;
+                    }
+                }
+                if (allowed) {
+                    // Apply the seed we were given
+                    RandomSource.seed(seed);
+                    presetMode = true;
+                    performRandomization(fh.getAbsolutePath(), seed, pld.getTrainerClasses(), pld.getTrainerNames(),
+                            pld.getNicknames());
+                } else {
+                    this.romHandler = null;
+                    initialFormState();
+                }
+
+            } else {
+                this.romHandler = null;
+                initialFormState();
+            }
+        }
+
+    }
+
+    private void attemptToLogException(Exception ex, String baseMessageKey, String noLogMessageKey) {
+
+        // Make sure the operation dialog doesn't show up over the error
+        // dialog
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                RandomizerGUI.this.opDialog.setVisible(false);
+            }
+        });
+
+        long time = System.currentTimeMillis();
+        try {
+            String errlog = "error_" + time + ".txt";
+            PrintStream ps = new PrintStream(new FileOutputStream(errlog));
+            ps.println("Randomizer Version: " + Constants.UPDATE_VERSION);
+            PrintStream e1 = System.err;
+            System.setErr(ps);
+            if (this.romHandler != null) {
+                try {
+                    ps.println("ROM: " + romHandler.getROMName());
+                    ps.println("Code: " + romHandler.getROMCode());
+                    ps.println("Reported Support Level: " + romHandler.getSupportLevel());
+                    ps.println();
+                } catch (Exception ex2) {
+                    // Do nothing, just don't fail
+                }
+            }
+            ex.printStackTrace();
+            System.setErr(e1);
+            ps.close();
+            JOptionPane.showMessageDialog(this, String.format(bundle.getString(baseMessageKey), errlog));
+        } catch (Exception logex) {
+            JOptionPane.showMessageDialog(this, bundle.getString(noLogMessageKey));
+        }
+    }
+
+    // public response methods
+
+    public void updateFound(int newVersion, String changelog) {
+        new UpdateFoundDialog(this, newVersion, changelog);
+    }
+
+    public void noUpdateFound() {
+        JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.noUpdates"));
+    }
+
+    // actions
+
+    private void updateSettingsButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_updateSettingsButtonActionPerformed
+        if (autoUpdateEnabled) {
+            toggleAutoUpdatesMenuItem.setText(bundle.getString("RandomizerGUI.disableAutoUpdate"));
+        } else {
+            toggleAutoUpdatesMenuItem.setText(bundle.getString("RandomizerGUI.enableAutoUpdate"));
+        }
+        updateSettingsMenu.show(updateSettingsButton, 0, updateSettingsButton.getHeight());
+    }// GEN-LAST:event_updateSettingsButtonActionPerformed
+
+    private void toggleAutoUpdatesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_toggleAutoUpdatesMenuItemActionPerformed
+        autoUpdateEnabled = !autoUpdateEnabled;
+        if (autoUpdateEnabled) {
+            JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.autoUpdateEnabled"));
+        } else {
+            JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.autoUpdateDisabled"));
+        }
+        attemptWriteConfig();
+    }// GEN-LAST:event_toggleAutoUpdatesMenuItemActionPerformed
+
+    private void manualUpdateMenuItemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_manualUpdateMenuItemActionPerformed
+        new UpdateCheckThread(this, true).start();
+    }// GEN-LAST:event_manualUpdateMenuItemActionPerformed
+
+    private void loadQSButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_loadQSButtonActionPerformed
+        if (this.romHandler == null) {
+            return;
+        }
+        qsOpenChooser.setSelectedFile(null);
+        int returnVal = qsOpenChooser.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File fh = qsOpenChooser.getSelectedFile();
+            try {
+                FileInputStream fis = new FileInputStream(fh);
+                Settings settings = Settings.read(fis);
+                fis.close();
+
+                // load settings
+                initialFormState();
+                romLoaded();
+                Settings.TweakForROMFeedback feedback = settings.tweakForRom(this.romHandler);
+                if (feedback.isChangedStarter() && settings.getStartersMod() == Settings.StartersMod.CUSTOM) {
+                    JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.starterUnavailable"));
+                }
+                this.restoreStateFromSettings(settings);
+
+                if (settings.isUpdatedFromOldVersion()) {
+                    // show a warning dialog, but load it
+                    JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.settingsFileOlder"));
+                }
+
+                JOptionPane.showMessageDialog(this,
+                        String.format(bundle.getString("RandomizerGUI.settingsLoaded"), fh.getName()));
+            } catch (UnsupportedOperationException ex) {
+                JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.settingsFileNewer"));
+            } catch (IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.invalidSettingsFile"));
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.settingsLoadFailed"));
+            }
+        }
+    }// GEN-LAST:event_loadQSButtonActionPerformed
+
+    private void saveQSButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_saveQSButtonActionPerformed
+        if (this.romHandler == null) {
+            return;
+        }
+        qsSaveChooser.setSelectedFile(null);
+        int returnVal = qsSaveChooser.showSaveDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File fh = qsSaveChooser.getSelectedFile();
+            // Fix or add extension
+            fh = FileFunctions.fixFilename(fh, "rnqs");
+            // Save now?
+            try {
+                FileOutputStream fos = new FileOutputStream(fh);
+                getCurrentSettings().write(fos);
+                fos.close();
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.settingsSaveFailed"));
+            }
+        }
+    }// GEN-LAST:event_saveQSButtonActionPerformed
+
+    private void pokeLimitBtnActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pokeLimitBtnActionPerformed
+        GenerationLimitDialog gld = new GenerationLimitDialog(this, this.currentRestrictions,
+                this.romHandler.generationOfPokemon());
+        if (gld.pressedOK()) {
+            this.currentRestrictions = gld.getChoice();
+        }
+    }// GEN-LAST:event_pokeLimitBtnActionPerformed
+
+    private void goUpdateMovesCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_goUpdateMovesCheckBoxActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_goUpdateMovesCheckBoxActionPerformed
+
+    private void pokeLimitCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pokeLimitCBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_pokeLimitCBActionPerformed
+
+    private void pmsMetronomeOnlyRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pmsMetronomeOnlyRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_pmsMetronomeOnlyRBActionPerformed
+
+    private void igtUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_igtUnchangedRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_igtUnchangedRBActionPerformed
+
+    private void igtGivenOnlyRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_igtGivenOnlyRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_igtGivenOnlyRBActionPerformed
+
+    private void igtBothRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_igtBothRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_igtBothRBActionPerformed
+
+    private void wpARNoneRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpARNoneRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_wpARNoneRBActionPerformed
+
+    private void wpARSimilarStrengthRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpARSimilarStrengthRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_wpARSimilarStrengthRBActionPerformed
+
+    private void wpARCatchEmAllRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpARCatchEmAllRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_wpARCatchEmAllRBActionPerformed
+
+    private void wpARTypeThemedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpARTypeThemedRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_wpARTypeThemedRBActionPerformed
+
+    private void pmsUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pmsUnchangedRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_pmsUnchangedRBActionPerformed
+
+    private void pmsRandomTypeRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pmsRandomTypeRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_pmsRandomTypeRBActionPerformed
+
+    private void pmsRandomTotalRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pmsRandomTotalRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_pmsRandomTotalRBActionPerformed
+
+    private void mtmUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_mtmUnchangedRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_mtmUnchangedRBActionPerformed
+
+    private void paUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_paUnchangedRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_paUnchangedRBActionPerformed
+
+    private void paRandomizeRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_paRandomizeRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_paRandomizeRBActionPerformed
+
+    private void openROMButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_openROMButtonActionPerformed
+        loadROM();
+    }// GEN-LAST:event_openROMButtonActionPerformed
+
+    private void saveROMButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_saveROMButtonActionPerformed
+        saveROM();
+    }// GEN-LAST:event_saveROMButtonActionPerformed
+
+    private void usePresetsButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_usePresetsButtonActionPerformed
+        presetLoader();
+    }// GEN-LAST:event_usePresetsButtonActionPerformed
+
+    private void wpUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpUnchangedRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_wpUnchangedRBActionPerformed
+
+    private void tpUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tpUnchangedRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_tpUnchangedRBActionPerformed
+
+    private void tpRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tpRandomRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_tpRandomRBActionPerformed
+
+    private void tpTypeThemedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tpTypeThemedRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_tpTypeThemedRBActionPerformed
+
+    private void spUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spUnchangedRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_spUnchangedRBActionPerformed
+
+    private void spCustomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spCustomRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_spCustomRBActionPerformed
+
+    private void spRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spRandomRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_spRandomRBActionPerformed
+
+    private void wpRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpRandomRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_wpRandomRBActionPerformed
+
+    private void wpArea11RBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpArea11RBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_wpArea11RBActionPerformed
+
+    private void wpGlobalRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpGlobalRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_wpGlobalRBActionPerformed
+
+    private void tmmUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tmmUnchangedRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_tmmUnchangedRBActionPerformed
+
+    private void tmmRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tmmRandomRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_tmmRandomRBActionPerformed
+
+    private void mtmRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_mtmRandomRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_mtmRandomRBActionPerformed
+
+    private void thcUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_thcUnchangedRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_thcUnchangedRBActionPerformed
+
+    private void thcRandomTypeRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_thcRandomTypeRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_thcRandomTypeRBActionPerformed
+
+    private void thcRandomTotalRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_thcRandomTotalRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_thcRandomTotalRBActionPerformed
+
+    private void mtcUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_mtcUnchangedRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_mtcUnchangedRBActionPerformed
+
+    private void mtcRandomTypeRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_mtcRandomTypeRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_mtcRandomTypeRBActionPerformed
+
+    private void mtcRandomTotalRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_mtcRandomTotalRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_mtcRandomTotalRBActionPerformed
+
+    private void thcFullRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_thcFullRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_thcFullRBActionPerformed
+
+    private void mtcFullRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_mtcFullRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_mtcFullRBActionPerformed
+
+    private void spHeldItemsCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spHeldItemsCBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_spHeldItemsCBActionPerformed
+
+    private void wpHeldItemsCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpHeldItemsCBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_wpHeldItemsCBActionPerformed
+
+    private void fiUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_fiUnchangedRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_fiUnchangedRBActionPerformed
+
+    private void fiShuffleRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_fiShuffleRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_fiShuffleRBActionPerformed
+
+    private void fiRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_fiRandomRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_fiRandomRBActionPerformed
+
+    private void spRandom2EvosRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spRandom2EvosRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_spRandom2EvosRBActionPerformed
+
+    private void goCondenseEvosCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_goCondenseEvosCheckBoxActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_goCondenseEvosCheckBoxActionPerformed
+
+    private void websiteLinkLabelMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_websiteLinkLabelMouseClicked
+        Desktop desktop = java.awt.Desktop.getDesktop();
+        try {
+            desktop.browse(new URI(Constants.WEBSITE_URL));
+        } catch (IOException e) {
+        } catch (URISyntaxException e) {
+        }
+    }// GEN-LAST:event_websiteLinkLabelMouseClicked
+
+    private void peUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_peUnchangedRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_peUnchangedRBActionPerformed
+
+    private void peRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_peRandomRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_peRandomRBActionPerformed
+
+    /* @formatter:off */
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 

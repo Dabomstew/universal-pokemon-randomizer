@@ -32,29 +32,28 @@ import com.dabomstew.pkrandom.RomFunctions;
 
 public enum Type {
 
-	NORMAL, FIGHTING, FLYING, GRASS, WATER, FIRE, ROCK, GROUND, PSYCHIC, BUG, DRAGON, ELECTRIC, GHOST, POISON, ICE, STEEL, DARK,
-	GAS(true), FAIRY(true), WOOD(true), ABNORMAL(true), WIND(true), SOUND(true), LIGHT(true);
-	
-	public boolean isHackOnly;
-	
-	private Type() {
-		this.isHackOnly = false;
-	}
-	
-	private Type(boolean isHackOnly) {
-		this.isHackOnly = isHackOnly;
-	}
+    NORMAL, FIGHTING, FLYING, GRASS, WATER, FIRE, ROCK, GROUND, PSYCHIC, BUG, DRAGON, ELECTRIC, GHOST, POISON, ICE, STEEL, DARK, GAS(
+            true), FAIRY(true), WOOD(true), ABNORMAL(true), WIND(true), SOUND(true), LIGHT(true);
 
-	private static final List<Type> VALUES = Collections
-			.unmodifiableList(Arrays.asList(values()));
-	private static final int SIZE = VALUES.size();
+    public boolean isHackOnly;
 
-	public static Type randomType(Random random) {
-		return VALUES.get(random.nextInt(SIZE));
-	}
+    private Type() {
+        this.isHackOnly = false;
+    }
 
-	public String camelCase() {
-		return RomFunctions.camelCase(this.toString());
-	}
+    private Type(boolean isHackOnly) {
+        this.isHackOnly = isHackOnly;
+    }
+
+    private static final List<Type> VALUES = Collections.unmodifiableList(Arrays.asList(values()));
+    private static final int SIZE = VALUES.size();
+
+    public static Type randomType(Random random) {
+        return VALUES.get(random.nextInt(SIZE));
+    }
+
+    public String camelCase() {
+        return RomFunctions.camelCase(this.toString());
+    }
 
 }

@@ -1,7 +1,10 @@
-package com.dabomstew.pkrandom.pokemon;
+package com.dabomstew.pkrandom.exceptions;
 
 /*----------------------------------------------------------------------------*/
-/*--  MoveLearnt.java - represents a move learnt by a Pokemon at a level.   --*/
+/*--  InvalidSupplementFilesException.java - thrown when the trainer class	--*/
+/*--  			     	                     or trainer name files found are--*/
+/*--					                     different from those of the	--*/
+/*--                                         preset creator.           		--*/
 /*--  																		--*/
 /*--  Part of "Universal Pokemon Randomizer" by Dabomstew					--*/
 /*--  Pokemon and any associated names and the like are						--*/
@@ -23,13 +26,30 @@ package com.dabomstew.pkrandom.pokemon;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-public class MoveLearnt {
+public class InvalidSupplementFilesException extends Exception {
 
-    public int move;
-    public int level;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -3778498838677886358L;
 
-    public String toString() {
-        return "move " + move + " at level " + level;
+    public enum Type {
+        UNKNOWN, TOO_SHORT, TRAINER_CLASSES, TRAINER_NAMES, NICKNAMES
     }
 
+    private final Type type;
+
+    public InvalidSupplementFilesException() {
+        // legacy
+        this.type = Type.UNKNOWN;
+    }
+
+    public InvalidSupplementFilesException(Type type, String message) {
+        super(message);
+        this.type = type;
+    }
+
+    public Type getType() {
+        return type;
+    }
 }

@@ -8,117 +8,116 @@ import com.dabomstew.pkrandom.pokemon.GenRestrictions;
  */
 public class GenerationLimitDialog extends javax.swing.JDialog {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 106783506965080925L;
-	private boolean pressedOk;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 106783506965080925L;
+    private boolean pressedOk;
 
-	/**
-	 * Creates new form GenerationLimitDialog
-	 */
-	public GenerationLimitDialog(RandomizerGUI parent, GenRestrictions current,
-			int generation) {
-		super(parent, true);
-		initComponents();
-		initialState(generation);
-		if (current != null) {
-			current.limitToGen(generation);
-			restoreFrom(current);
-		}
-		enableAndDisableBoxes();
-		pressedOk = false;
-		setLocationRelativeTo(parent);
-		setVisible(true);
+    /**
+     * Creates new form GenerationLimitDialog
+     */
+    public GenerationLimitDialog(RandomizerGUI parent, GenRestrictions current, int generation) {
+        super(parent, true);
+        initComponents();
+        initialState(generation);
+        if (current != null) {
+            current.limitToGen(generation);
+            restoreFrom(current);
+        }
+        enableAndDisableBoxes();
+        pressedOk = false;
+        setLocationRelativeTo(parent);
+        setVisible(true);
 
-	}
+    }
 
-	public boolean pressedOK() {
-		return pressedOk;
-	}
+    public boolean pressedOK() {
+        return pressedOk;
+    }
 
-	public GenRestrictions getChoice() {
-		GenRestrictions gr = new GenRestrictions();
-		gr.allow_gen1 = this.gen1CB.isSelected();
-		gr.allow_gen2 = this.gen2CB.isSelected();
-		gr.allow_gen3 = this.gen3CB.isSelected();
-		gr.allow_gen4 = this.gen4CB.isSelected();
-		gr.allow_gen5 = this.gen5CB.isSelected();
+    public GenRestrictions getChoice() {
+        GenRestrictions gr = new GenRestrictions();
+        gr.allow_gen1 = this.gen1CB.isSelected();
+        gr.allow_gen2 = this.gen2CB.isSelected();
+        gr.allow_gen3 = this.gen3CB.isSelected();
+        gr.allow_gen4 = this.gen4CB.isSelected();
+        gr.allow_gen5 = this.gen5CB.isSelected();
 
-		gr.assoc_g1_g2 = this.g1Rg2CB.isSelected();
-		gr.assoc_g1_g4 = this.g1Rg4CB.isSelected();
+        gr.assoc_g1_g2 = this.g1Rg2CB.isSelected();
+        gr.assoc_g1_g4 = this.g1Rg4CB.isSelected();
 
-		gr.assoc_g2_g1 = this.g2Rg1CB.isSelected();
-		gr.assoc_g2_g3 = this.g2Rg3CB.isSelected();
-		gr.assoc_g2_g4 = this.g2Rg4CB.isSelected();
+        gr.assoc_g2_g1 = this.g2Rg1CB.isSelected();
+        gr.assoc_g2_g3 = this.g2Rg3CB.isSelected();
+        gr.assoc_g2_g4 = this.g2Rg4CB.isSelected();
 
-		gr.assoc_g3_g2 = this.g3Rg2CB.isSelected();
-		gr.assoc_g3_g4 = this.g3Rg4CB.isSelected();
+        gr.assoc_g3_g2 = this.g3Rg2CB.isSelected();
+        gr.assoc_g3_g4 = this.g3Rg4CB.isSelected();
 
-		gr.assoc_g4_g1 = this.g4Rg1CB.isSelected();
-		gr.assoc_g4_g2 = this.g4Rg2CB.isSelected();
-		gr.assoc_g4_g3 = this.g4Rg3CB.isSelected();
+        gr.assoc_g4_g1 = this.g4Rg1CB.isSelected();
+        gr.assoc_g4_g2 = this.g4Rg2CB.isSelected();
+        gr.assoc_g4_g3 = this.g4Rg3CB.isSelected();
 
-		return gr;
-	}
+        return gr;
+    }
 
-	private void initialState(int generation) {
-		if (generation < 2) {
-			gen2CB.setVisible(false);
-			g1Rg2CB.setVisible(false);
-			g2Rg1CB.setVisible(false);
-			g2Rg3CB.setVisible(false);
-			g2Rg4CB.setVisible(false);
-		}
-		if (generation < 3) {
-			gen3CB.setVisible(false);
-			g2Rg3CB.setVisible(false);
-			g3Rg2CB.setVisible(false);
-			g3Rg4CB.setVisible(false);
-		}
-		if (generation < 4) {
-			gen4CB.setVisible(false);
-			g1Rg4CB.setVisible(false);
-			g2Rg4CB.setVisible(false);
-			g3Rg4CB.setVisible(false);
-			g4Rg1CB.setVisible(false);
-			g4Rg2CB.setVisible(false);
-			g4Rg3CB.setVisible(false);
-		}
-		if (generation < 5) {
-			gen5CB.setVisible(false);
-		}
-	}
+    private void initialState(int generation) {
+        if (generation < 2) {
+            gen2CB.setVisible(false);
+            g1Rg2CB.setVisible(false);
+            g2Rg1CB.setVisible(false);
+            g2Rg3CB.setVisible(false);
+            g2Rg4CB.setVisible(false);
+        }
+        if (generation < 3) {
+            gen3CB.setVisible(false);
+            g2Rg3CB.setVisible(false);
+            g3Rg2CB.setVisible(false);
+            g3Rg4CB.setVisible(false);
+        }
+        if (generation < 4) {
+            gen4CB.setVisible(false);
+            g1Rg4CB.setVisible(false);
+            g2Rg4CB.setVisible(false);
+            g3Rg4CB.setVisible(false);
+            g4Rg1CB.setVisible(false);
+            g4Rg2CB.setVisible(false);
+            g4Rg3CB.setVisible(false);
+        }
+        if (generation < 5) {
+            gen5CB.setVisible(false);
+        }
+    }
 
-	private void restoreFrom(GenRestrictions restrict) {
-		gen1CB.setSelected(restrict.allow_gen1);
-		gen2CB.setSelected(restrict.allow_gen2);
-		gen3CB.setSelected(restrict.allow_gen3);
-		gen4CB.setSelected(restrict.allow_gen4);
-		gen5CB.setSelected(restrict.allow_gen5);
+    private void restoreFrom(GenRestrictions restrict) {
+        gen1CB.setSelected(restrict.allow_gen1);
+        gen2CB.setSelected(restrict.allow_gen2);
+        gen3CB.setSelected(restrict.allow_gen3);
+        gen4CB.setSelected(restrict.allow_gen4);
+        gen5CB.setSelected(restrict.allow_gen5);
 
-		g1Rg2CB.setSelected(restrict.assoc_g1_g2);
-		g1Rg4CB.setSelected(restrict.assoc_g1_g4);
+        g1Rg2CB.setSelected(restrict.assoc_g1_g2);
+        g1Rg4CB.setSelected(restrict.assoc_g1_g4);
 
-		g2Rg1CB.setSelected(restrict.assoc_g2_g1);
-		g2Rg3CB.setSelected(restrict.assoc_g2_g3);
-		g2Rg4CB.setSelected(restrict.assoc_g2_g4);
+        g2Rg1CB.setSelected(restrict.assoc_g2_g1);
+        g2Rg3CB.setSelected(restrict.assoc_g2_g3);
+        g2Rg4CB.setSelected(restrict.assoc_g2_g4);
 
-		g3Rg2CB.setSelected(restrict.assoc_g3_g2);
-		g3Rg4CB.setSelected(restrict.assoc_g3_g4);
+        g3Rg2CB.setSelected(restrict.assoc_g3_g2);
+        g3Rg4CB.setSelected(restrict.assoc_g3_g4);
 
-		g4Rg1CB.setSelected(restrict.assoc_g4_g1);
-		g4Rg2CB.setSelected(restrict.assoc_g4_g2);
-		g4Rg3CB.setSelected(restrict.assoc_g4_g3);
-	}
+        g4Rg1CB.setSelected(restrict.assoc_g4_g1);
+        g4Rg2CB.setSelected(restrict.assoc_g4_g2);
+        g4Rg3CB.setSelected(restrict.assoc_g4_g3);
+    }
 
-	/* @formatter:off */
-	/**
-	 * This method is called from within the constructor to initialize the form.
-	 * WARNING: Do NOT modify this code. The content of this method is always
-	 * regenerated by the Form Editor.
-	 */
-	@SuppressWarnings("unchecked")
+    /* @formatter:off */
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
@@ -322,103 +321,103 @@ public class GenerationLimitDialog extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-	private void enableAndDisableBoxes() {
+    private void enableAndDisableBoxes() {
 
-		// enable sub-boxes of checked main boxes
-		g1Rg2CB.setEnabled(gen1CB.isSelected());
-		g1Rg4CB.setEnabled(gen1CB.isSelected());
-		g2Rg1CB.setEnabled(gen2CB.isSelected());
-		g2Rg3CB.setEnabled(gen2CB.isSelected());
-		g2Rg4CB.setEnabled(gen2CB.isSelected());
-		g3Rg2CB.setEnabled(gen3CB.isSelected());
-		g3Rg4CB.setEnabled(gen3CB.isSelected());
-		g4Rg1CB.setEnabled(gen4CB.isSelected());
-		g4Rg2CB.setEnabled(gen4CB.isSelected());
-		g4Rg3CB.setEnabled(gen4CB.isSelected());
+        // enable sub-boxes of checked main boxes
+        g1Rg2CB.setEnabled(gen1CB.isSelected());
+        g1Rg4CB.setEnabled(gen1CB.isSelected());
+        g2Rg1CB.setEnabled(gen2CB.isSelected());
+        g2Rg3CB.setEnabled(gen2CB.isSelected());
+        g2Rg4CB.setEnabled(gen2CB.isSelected());
+        g3Rg2CB.setEnabled(gen3CB.isSelected());
+        g3Rg4CB.setEnabled(gen3CB.isSelected());
+        g4Rg1CB.setEnabled(gen4CB.isSelected());
+        g4Rg2CB.setEnabled(gen4CB.isSelected());
+        g4Rg3CB.setEnabled(gen4CB.isSelected());
 
-		// uncheck disabled subboxes
-		if (!gen1CB.isSelected()) {
-			g1Rg2CB.setSelected(false);
-			g1Rg4CB.setSelected(false);
-		}
-		if (!gen2CB.isSelected()) {
-			g2Rg1CB.setSelected(false);
-			g2Rg3CB.setSelected(false);
-			g2Rg4CB.setSelected(false);
-		}
-		if (!gen3CB.isSelected()) {
-			g3Rg2CB.setSelected(false);
-			g3Rg4CB.setSelected(false);
-		}
-		if (!gen4CB.isSelected()) {
-			g4Rg1CB.setSelected(false);
-			g4Rg2CB.setSelected(false);
-			g4Rg3CB.setSelected(false);
-		}
+        // uncheck disabled subboxes
+        if (!gen1CB.isSelected()) {
+            g1Rg2CB.setSelected(false);
+            g1Rg4CB.setSelected(false);
+        }
+        if (!gen2CB.isSelected()) {
+            g2Rg1CB.setSelected(false);
+            g2Rg3CB.setSelected(false);
+            g2Rg4CB.setSelected(false);
+        }
+        if (!gen3CB.isSelected()) {
+            g3Rg2CB.setSelected(false);
+            g3Rg4CB.setSelected(false);
+        }
+        if (!gen4CB.isSelected()) {
+            g4Rg1CB.setSelected(false);
+            g4Rg2CB.setSelected(false);
+            g4Rg3CB.setSelected(false);
+        }
 
-		// check and disable implied boxes
-		if (gen1CB.isSelected()) {
-			g2Rg1CB.setEnabled(false);
-			g2Rg1CB.setSelected(true);
-			g4Rg1CB.setEnabled(false);
-			g4Rg1CB.setSelected(true);
-		}
+        // check and disable implied boxes
+        if (gen1CB.isSelected()) {
+            g2Rg1CB.setEnabled(false);
+            g2Rg1CB.setSelected(true);
+            g4Rg1CB.setEnabled(false);
+            g4Rg1CB.setSelected(true);
+        }
 
-		if (gen2CB.isSelected()) {
-			g1Rg2CB.setEnabled(false);
-			g1Rg2CB.setSelected(true);
-			g3Rg2CB.setEnabled(false);
-			g3Rg2CB.setSelected(true);
-			g4Rg2CB.setEnabled(false);
-			g4Rg2CB.setSelected(true);
-		}
+        if (gen2CB.isSelected()) {
+            g1Rg2CB.setEnabled(false);
+            g1Rg2CB.setSelected(true);
+            g3Rg2CB.setEnabled(false);
+            g3Rg2CB.setSelected(true);
+            g4Rg2CB.setEnabled(false);
+            g4Rg2CB.setSelected(true);
+        }
 
-		if (gen3CB.isSelected()) {
-			g2Rg3CB.setEnabled(false);
-			g2Rg3CB.setSelected(true);
-			g4Rg3CB.setEnabled(false);
-			g4Rg3CB.setSelected(true);
-		}
+        if (gen3CB.isSelected()) {
+            g2Rg3CB.setEnabled(false);
+            g2Rg3CB.setSelected(true);
+            g4Rg3CB.setEnabled(false);
+            g4Rg3CB.setSelected(true);
+        }
 
-		if (gen4CB.isSelected()) {
-			g1Rg4CB.setEnabled(false);
-			g1Rg4CB.setSelected(true);
-			g2Rg4CB.setEnabled(false);
-			g2Rg4CB.setSelected(true);
-			g3Rg4CB.setEnabled(false);
-			g3Rg4CB.setSelected(true);
-		}
-	}
+        if (gen4CB.isSelected()) {
+            g1Rg4CB.setEnabled(false);
+            g1Rg4CB.setSelected(true);
+            g2Rg4CB.setEnabled(false);
+            g2Rg4CB.setSelected(true);
+            g3Rg4CB.setEnabled(false);
+            g3Rg4CB.setSelected(true);
+        }
+    }
 
-	private void gen1CBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_gen1CBActionPerformed
-		enableAndDisableBoxes();
-	}// GEN-LAST:event_gen1CBActionPerformed
+    private void gen1CBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_gen1CBActionPerformed
+        enableAndDisableBoxes();
+    }// GEN-LAST:event_gen1CBActionPerformed
 
-	private void gen2CBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_gen2CBActionPerformed
-		enableAndDisableBoxes();
-	}// GEN-LAST:event_gen2CBActionPerformed
+    private void gen2CBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_gen2CBActionPerformed
+        enableAndDisableBoxes();
+    }// GEN-LAST:event_gen2CBActionPerformed
 
-	private void gen3CBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_gen3CBActionPerformed
-		enableAndDisableBoxes();
-	}// GEN-LAST:event_gen3CBActionPerformed
+    private void gen3CBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_gen3CBActionPerformed
+        enableAndDisableBoxes();
+    }// GEN-LAST:event_gen3CBActionPerformed
 
-	private void gen4CBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_gen4CBActionPerformed
-		enableAndDisableBoxes();
-	}// GEN-LAST:event_gen4CBActionPerformed
+    private void gen4CBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_gen4CBActionPerformed
+        enableAndDisableBoxes();
+    }// GEN-LAST:event_gen4CBActionPerformed
 
-	private void gen5CBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_gen5CBActionPerformed
-		enableAndDisableBoxes();
-	}// GEN-LAST:event_gen5CBActionPerformed
+    private void gen5CBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_gen5CBActionPerformed
+        enableAndDisableBoxes();
+    }// GEN-LAST:event_gen5CBActionPerformed
 
-	private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_okButtonActionPerformed
-		pressedOk=true;
-		setVisible(false);
-	}// GEN-LAST:event_okButtonActionPerformed
+    private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_okButtonActionPerformed
+        pressedOk=true;
+        setVisible(false);
+    }// GEN-LAST:event_okButtonActionPerformed
 
-	private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cancelButtonActionPerformed
-		pressedOk=false;
-		setVisible(false);
-	}// GEN-LAST:event_cancelButtonActionPerformed
+    private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_cancelButtonActionPerformed
+        pressedOk=false;
+        setVisible(false);
+    }// GEN-LAST:event_cancelButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelButton;

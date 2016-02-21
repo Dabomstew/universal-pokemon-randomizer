@@ -32,194 +32,176 @@ import java.util.Random;
 
 public class Pokemon implements Comparable<Pokemon> {
 
-	public String name;
-	public int number;
+    public String name;
+    public int number;
 
-	public Type primaryType, secondaryType;
+    public Type primaryType, secondaryType;
 
-	public int hp, attack, defense, spatk, spdef, speed, special;
+    public int hp, attack, defense, spatk, spdef, speed, special;
 
-	public int ability1, ability2, ability3;
+    public int ability1, ability2, ability3;
 
-	public int catchRate;
+    public int catchRate;
 
-	public int guaranteedHeldItem, commonHeldItem, rareHeldItem,
-			darkGrassHeldItem;
-	
-	public int genderRatio;
-	
-	public int frontSpritePointer, picDimensions;
+    public int guaranteedHeldItem, commonHeldItem, rareHeldItem, darkGrassHeldItem;
 
-	public ExpCurve growthCurve;
+    public int genderRatio;
 
-	public List<Evolution> evolutionsFrom = new ArrayList<Evolution>();
-	public List<Evolution> evolutionsTo = new ArrayList<Evolution>();
-	
-	// A flag to use for things like recursive stats copying.
-	// Must not rely on the state of this flag being preserved between calls.
-	public boolean temporaryFlag;
+    public int frontSpritePointer, picDimensions;
 
-	public Pokemon() {
-	}
+    public ExpCurve growthCurve;
 
-	public void shuffleStats(Random random) {
-		List<Integer> stats = Arrays.asList(hp, attack, defense, spatk, spdef,
-				speed);
-		Collections.shuffle(stats, random);
+    public List<Evolution> evolutionsFrom = new ArrayList<Evolution>();
+    public List<Evolution> evolutionsTo = new ArrayList<Evolution>();
 
-		// Copy in new stats
-		hp = stats.get(0);
-		attack = stats.get(1);
-		defense = stats.get(2);
-		spatk = stats.get(3);
-		spdef = stats.get(4);
-		speed = stats.get(5);
+    // A flag to use for things like recursive stats copying.
+    // Must not rely on the state of this flag being preserved between calls.
+    public boolean temporaryFlag;
 
-		// make special the average of spatk and spdef
-		special = (int) Math.ceil((spatk + spdef) / 2.0f);
-	}
+    public Pokemon() {
+    }
 
-	public void randomizeStatsWithinBST(Random random) {
-		if (number == 292) {
-			// Shedinja is horribly broken unless we restrict him to 1HP.
-			int bst = bst() - 51;
+    public void shuffleStats(Random random) {
+        List<Integer> stats = Arrays.asList(hp, attack, defense, spatk, spdef, speed);
+        Collections.shuffle(stats, random);
 
-			// Make weightings
-			double atkW = random.nextDouble(), defW = random.nextDouble();
-			double spaW = random.nextDouble(), spdW = random.nextDouble(), speW = random
-					.nextDouble();
+        // Copy in new stats
+        hp = stats.get(0);
+        attack = stats.get(1);
+        defense = stats.get(2);
+        spatk = stats.get(3);
+        spdef = stats.get(4);
+        speed = stats.get(5);
 
-			double totW = atkW + defW + spaW + spdW + speW;
+        // make special the average of spatk and spdef
+        special = (int) Math.ceil((spatk + spdef) / 2.0f);
+    }
 
-			hp = 1;
-			attack = (int) Math.max(1, Math.round(atkW / totW * bst)) + 10;
-			defense = (int) Math.max(1, Math.round(defW / totW * bst)) + 10;
-			spatk = (int) Math.max(1, Math.round(spaW / totW * bst)) + 10;
-			spdef = (int) Math.max(1, Math.round(spdW / totW * bst)) + 10;
-			speed = (int) Math.max(1, Math.round(speW / totW * bst)) + 10;
+    public void randomizeStatsWithinBST(Random random) {
+        if (number == 292) {
+            // Shedinja is horribly broken unless we restrict him to 1HP.
+            int bst = bst() - 51;
 
-			// Fix up special too
-			special = (int) Math.ceil((spatk + spdef) / 2.0f);
+            // Make weightings
+            double atkW = random.nextDouble(), defW = random.nextDouble();
+            double spaW = random.nextDouble(), spdW = random.nextDouble(), speW = random.nextDouble();
 
-		} else {
-			// Minimum 20 HP, 10 everything else
-			int bst = bst() - 70;
+            double totW = atkW + defW + spaW + spdW + speW;
 
-			// Make weightings
-			double hpW = random.nextDouble(), atkW = random.nextDouble(), defW = random
-					.nextDouble();
-			double spaW = random.nextDouble(), spdW = random.nextDouble(), speW = random
-					.nextDouble();
+            hp = 1;
+            attack = (int) Math.max(1, Math.round(atkW / totW * bst)) + 10;
+            defense = (int) Math.max(1, Math.round(defW / totW * bst)) + 10;
+            spatk = (int) Math.max(1, Math.round(spaW / totW * bst)) + 10;
+            spdef = (int) Math.max(1, Math.round(spdW / totW * bst)) + 10;
+            speed = (int) Math.max(1, Math.round(speW / totW * bst)) + 10;
 
-			double totW = hpW + atkW + defW + spaW + spdW + speW;
+            // Fix up special too
+            special = (int) Math.ceil((spatk + spdef) / 2.0f);
 
-			hp = (int) Math.max(1, Math.round(hpW / totW * bst)) + 20;
-			attack = (int) Math.max(1, Math.round(atkW / totW * bst)) + 10;
-			defense = (int) Math.max(1, Math.round(defW / totW * bst)) + 10;
-			spatk = (int) Math.max(1, Math.round(spaW / totW * bst)) + 10;
-			spdef = (int) Math.max(1, Math.round(spdW / totW * bst)) + 10;
-			speed = (int) Math.max(1, Math.round(speW / totW * bst)) + 10;
+        } else {
+            // Minimum 20 HP, 10 everything else
+            int bst = bst() - 70;
 
-			// Fix up special too
-			special = (int) Math.ceil((spatk + spdef) / 2.0f);
-		}
+            // Make weightings
+            double hpW = random.nextDouble(), atkW = random.nextDouble(), defW = random.nextDouble();
+            double spaW = random.nextDouble(), spdW = random.nextDouble(), speW = random.nextDouble();
 
-		// Check for something we can't store
-		if (hp > 255 || attack > 255 || defense > 255 || spatk > 255
-				|| spdef > 255 || speed > 255) {
-			// re roll
-			randomizeStatsWithinBST(random);
-		}
+            double totW = hpW + atkW + defW + spaW + spdW + speW;
 
-	}
+            hp = (int) Math.max(1, Math.round(hpW / totW * bst)) + 20;
+            attack = (int) Math.max(1, Math.round(atkW / totW * bst)) + 10;
+            defense = (int) Math.max(1, Math.round(defW / totW * bst)) + 10;
+            spatk = (int) Math.max(1, Math.round(spaW / totW * bst)) + 10;
+            spdef = (int) Math.max(1, Math.round(spdW / totW * bst)) + 10;
+            speed = (int) Math.max(1, Math.round(speW / totW * bst)) + 10;
 
-	public void copyRandomizedStatsUpEvolution(Pokemon evolvesFrom) {
-		double ourBST = bst();
-		double theirBST = evolvesFrom.bst();
+            // Fix up special too
+            special = (int) Math.ceil((spatk + spdef) / 2.0f);
+        }
 
-		double bstRatio = ourBST / theirBST;
+        // Check for something we can't store
+        if (hp > 255 || attack > 255 || defense > 255 || spatk > 255 || spdef > 255 || speed > 255) {
+            // re roll
+            randomizeStatsWithinBST(random);
+        }
 
-		hp = (int) Math.min(255,
-				Math.max(1, Math.round(evolvesFrom.hp * bstRatio)));
-		attack = (int) Math.min(255,
-				Math.max(1, Math.round(evolvesFrom.attack * bstRatio)));
-		defense = (int) Math.min(255,
-				Math.max(1, Math.round(evolvesFrom.defense * bstRatio)));
-		speed = (int) Math.min(255,
-				Math.max(1, Math.round(evolvesFrom.speed * bstRatio)));
-		spatk = (int) Math.min(255,
-				Math.max(1, Math.round(evolvesFrom.spatk * bstRatio)));
-		spdef = (int) Math.min(255,
-				Math.max(1, Math.round(evolvesFrom.spdef * bstRatio)));
+    }
 
-		special = (int) Math.ceil((spatk + spdef) / 2.0f);
-	}
+    public void copyRandomizedStatsUpEvolution(Pokemon evolvesFrom) {
+        double ourBST = bst();
+        double theirBST = evolvesFrom.bst();
 
-	public int bst() {
-		return hp + attack + defense + spatk + spdef + speed;
-	}
+        double bstRatio = ourBST / theirBST;
 
-	public int bstForPowerLevels() {
-		// Take into account Shedinja's purposefully nerfed HP
-		if (number == 292) {
-			return (attack + defense + spatk + spdef + speed) * 6 / 5;
-		} else {
-			return hp + attack + defense + spatk + spdef + speed;
-		}
-	}
+        hp = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.hp * bstRatio)));
+        attack = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.attack * bstRatio)));
+        defense = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.defense * bstRatio)));
+        speed = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.speed * bstRatio)));
+        spatk = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.spatk * bstRatio)));
+        spdef = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.spdef * bstRatio)));
 
-	@Override
-	public String toString() {
-		return "Pokemon [name=" + name + ", number=" + number
-				+ ", primaryType=" + primaryType + ", secondaryType="
-				+ secondaryType + ", hp=" + hp + ", attack=" + attack
-				+ ", defense=" + defense + ", spatk=" + spatk + ", spdef="
-				+ spdef + ", speed=" + speed + "]";
-	}
+        special = (int) Math.ceil((spatk + spdef) / 2.0f);
+    }
 
-	public String toStringRBY() {
-		return "Pokemon [name=" + name + ", number=" + number
-				+ ", primaryType=" + primaryType + ", secondaryType="
-				+ secondaryType + ", hp=" + hp + ", attack=" + attack
-				+ ", defense=" + defense + ", special=" + special + ", speed="
-				+ speed + "]";
-	}
+    public int bst() {
+        return hp + attack + defense + spatk + spdef + speed;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + number;
-		return result;
-	}
+    public int bstForPowerLevels() {
+        // Take into account Shedinja's purposefully nerfed HP
+        if (number == 292) {
+            return (attack + defense + spatk + spdef + speed) * 6 / 5;
+        } else {
+            return hp + attack + defense + spatk + spdef + speed;
+        }
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Pokemon other = (Pokemon) obj;
-		if (number != other.number)
-			return false;
-		return true;
-	}
+    @Override
+    public String toString() {
+        return "Pokemon [name=" + name + ", number=" + number + ", primaryType=" + primaryType + ", secondaryType="
+                + secondaryType + ", hp=" + hp + ", attack=" + attack + ", defense=" + defense + ", spatk=" + spatk
+                + ", spdef=" + spdef + ", speed=" + speed + "]";
+    }
 
-	@Override
-	public int compareTo(Pokemon o) {
-		return number - o.number;
-	}
+    public String toStringRBY() {
+        return "Pokemon [name=" + name + ", number=" + number + ", primaryType=" + primaryType + ", secondaryType="
+                + secondaryType + ", hp=" + hp + ", attack=" + attack + ", defense=" + defense + ", special=" + special
+                + ", speed=" + speed + "]";
+    }
 
-	private static final List<Integer> legendaries = Arrays.asList(144, 145,
-			146, 150, 151, 243, 244, 245, 249, 250, 251, 377, 378, 379, 380,
-			381, 382, 383, 384, 385, 386, 479, 480, 481, 482, 483, 484, 485,
-			486, 487, 488, 489, 490, 491, 492, 493, 494, 638, 639, 640, 641,
-			642, 643, 644, 645, 646, 647, 648, 649);
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + number;
+        return result;
+    }
 
-	public boolean isLegendary() {
-		return legendaries.contains(this.number);
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Pokemon other = (Pokemon) obj;
+        if (number != other.number)
+            return false;
+        return true;
+    }
+
+    @Override
+    public int compareTo(Pokemon o) {
+        return number - o.number;
+    }
+
+    private static final List<Integer> legendaries = Arrays.asList(144, 145, 146, 150, 151, 243, 244, 245, 249, 250,
+            251, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488,
+            489, 490, 491, 492, 493, 494, 638, 639, 640, 641, 642, 643, 644, 645, 646, 647, 648, 649);
+
+    public boolean isLegendary() {
+        return legendaries.contains(this.number);
+    }
 
 }

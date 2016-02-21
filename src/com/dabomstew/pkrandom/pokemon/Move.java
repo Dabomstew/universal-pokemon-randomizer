@@ -25,24 +25,23 @@ package com.dabomstew.pkrandom.pokemon;
 
 public class Move {
 
-	public String name;
-	public int number;
-	public int internalId;
-	public int power;
-	public int pp;
-	public double hitratio;
-	public Type type;
-	public int effectIndex;
-	public MoveCategory category;
+    public String name;
+    public int number;
+    public int internalId;
+    public int power;
+    public int pp;
+    public double hitratio;
+    public Type type;
+    public int effectIndex;
+    public MoveCategory category;
 
-	public String toString() {
-		return "#" + number + " " + name + " - Power: " + power + ", Base PP: "
-				+ pp + ", Type: " + type + ", Hit%: " + (hitratio)
-				+ ", Effect: " + effectIndex;
-	}
+    public String toString() {
+        return "#" + number + " " + name + " - Power: " + power + ", Base PP: " + pp + ", Type: " + type + ", Hit%: "
+                + (hitratio) + ", Effect: " + effectIndex;
+    }
 
-	public void setAccuracy(double percent) {
-		hitratio = percent;
-	}
+    public void setAccuracy(double percent) {
+        hitratio = percent;
+    }
 
 }

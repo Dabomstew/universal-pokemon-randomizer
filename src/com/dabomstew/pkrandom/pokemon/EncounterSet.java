@@ -30,15 +30,14 @@ import java.util.Set;
 
 public class EncounterSet {
 
-	public int rate;
-	public List<Encounter> encounters = new ArrayList<Encounter>();
-	public Set<Pokemon> bannedPokemon = new HashSet<Pokemon>();
-	public String displayName;
-	public int offset;
+    public int rate;
+    public List<Encounter> encounters = new ArrayList<Encounter>();
+    public Set<Pokemon> bannedPokemon = new HashSet<Pokemon>();
+    public String displayName;
+    public int offset;
 
-	public String toString() {
-		return "Encounter [Rate = " + rate + ", Encounters = " + encounters
-				+ "]";
-	}
+    public String toString() {
+        return "Encounter [Rate = " + rate + ", Encounters = " + encounters + "]";
+    }
 
 }

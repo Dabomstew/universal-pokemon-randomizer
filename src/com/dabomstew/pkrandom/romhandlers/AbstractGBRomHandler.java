@@ -32,128 +32,127 @@ import java.util.Random;
 
 public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
-	protected byte[] rom;
-	private String loadedFN;
+    protected byte[] rom;
+    private String loadedFN;
 
-	public AbstractGBRomHandler(Random random, PrintStream logStream) {
-		super(random, logStream);
-	}
+    public AbstractGBRomHandler(Random random, PrintStream logStream) {
+        super(random, logStream);
+    }
 
-	@Override
-	public boolean loadRom(String filename) {
-		byte[] loaded = loadFile(filename);
-		if (!detectRom(loaded)) {
-			return false;
-		}
-		this.rom = loaded;
-		loadedFN = filename;
-		loadedRom();
-		return true;
-	}
+    @Override
+    public boolean loadRom(String filename) {
+        byte[] loaded = loadFile(filename);
+        if (!detectRom(loaded)) {
+            return false;
+        }
+        this.rom = loaded;
+        loadedFN = filename;
+        loadedRom();
+        return true;
+    }
 
-	@Override
-	public String loadedFilename() {
-		return loadedFN;
-	}
+    @Override
+    public String loadedFilename() {
+        return loadedFN;
+    }
 
-	@Override
-	public boolean saveRom(String filename) {
-		savingRom();
-		try {
-			FileOutputStream fos = new FileOutputStream(filename);
-			fos.write(rom);
-			fos.close();
-			return true;
-		} catch (IOException ex) {
-			return false;
-		}
-	}
+    @Override
+    public boolean saveRom(String filename) {
+        savingRom();
+        try {
+            FileOutputStream fos = new FileOutputStream(filename);
+            fos.write(rom);
+            fos.close();
+            return true;
+        } catch (IOException ex) {
+            return false;
+        }
+    }
 
-	@Override
-	public boolean canChangeStaticPokemon() {
-		return true;
-	}
-	
-	@Override
-	public boolean hasPhysicalSpecialSplit() {
-		// Default value for Gen1-Gen3.
-		// Handlers can override again in case of ROM hacks etc.
-		return false;
-	}
+    @Override
+    public boolean canChangeStaticPokemon() {
+        return true;
+    }
 
-	public abstract boolean detectRom(byte[] rom);
+    @Override
+    public boolean hasPhysicalSpecialSplit() {
+        // Default value for Gen1-Gen3.
+        // Handlers can override again in case of ROM hacks etc.
+        return false;
+    }
 
-	public abstract void loadedRom();
+    public abstract boolean detectRom(byte[] rom);
 
-	public abstract void savingRom();
+    public abstract void loadedRom();
 
-	protected static byte[] loadFile(String filename) {
-		try {
-			FileInputStream fis = new FileInputStream(filename);
-			byte[] file = new byte[fis.available()];
-			fis.read(file);
-			fis.close();
-			return file;
-		} catch (IOException ex) {
-			return new byte[0];
-		}
-	}
-	
-	protected static byte[] loadFilePartial(String filename, int maxBytes) {
-		try {
-			FileInputStream fis = new FileInputStream(filename);
-			byte[] file = new byte[Math.min(maxBytes, fis.available())];
-			fis.read(file);
-			fis.close();
-			return file;
-		} catch (IOException ex) {
-			return new byte[0];
-		}
-	}
+    public abstract void savingRom();
 
-	protected void readByteIntoFlags(boolean[] flags, int offsetIntoFlags,
-			int offsetIntoROM) {
-		int thisByte = rom[offsetIntoROM] & 0xFF;
-		for (int i = 0; i < 8 && (i + offsetIntoFlags) < flags.length; i++) {
-			flags[offsetIntoFlags + i] = ((thisByte >> i) & 0x01) == 0x01;
-		}
-	}
+    protected static byte[] loadFile(String filename) {
+        try {
+            FileInputStream fis = new FileInputStream(filename);
+            byte[] file = new byte[fis.available()];
+            fis.read(file);
+            fis.close();
+            return file;
+        } catch (IOException ex) {
+            return new byte[0];
+        }
+    }
 
-	protected byte getByteFromFlags(boolean[] flags, int offsetIntoFlags) {
-		int thisByte = 0;
-		for (int i = 0; i < 8 && (i + offsetIntoFlags) < flags.length; i++) {
-			thisByte |= (flags[offsetIntoFlags + i] ? 1 : 0) << i;
-		}
-		return (byte) thisByte;
-	}
+    protected static byte[] loadFilePartial(String filename, int maxBytes) {
+        try {
+            FileInputStream fis = new FileInputStream(filename);
+            byte[] file = new byte[Math.min(maxBytes, fis.available())];
+            fis.read(file);
+            fis.close();
+            return file;
+        } catch (IOException ex) {
+            return new byte[0];
+        }
+    }
 
-	protected int readWord(int offset) {
-		return readWord(rom, offset);
-	}
+    protected void readByteIntoFlags(boolean[] flags, int offsetIntoFlags, int offsetIntoROM) {
+        int thisByte = rom[offsetIntoROM] & 0xFF;
+        for (int i = 0; i < 8 && (i + offsetIntoFlags) < flags.length; i++) {
+            flags[offsetIntoFlags + i] = ((thisByte >> i) & 0x01) == 0x01;
+        }
+    }
 
-	protected int readWord(byte[] data, int offset) {
-		return (data[offset] & 0xFF) + ((data[offset + 1] & 0xFF) << 8);
-	}
+    protected byte getByteFromFlags(boolean[] flags, int offsetIntoFlags) {
+        int thisByte = 0;
+        for (int i = 0; i < 8 && (i + offsetIntoFlags) < flags.length; i++) {
+            thisByte |= (flags[offsetIntoFlags + i] ? 1 : 0) << i;
+        }
+        return (byte) thisByte;
+    }
 
-	protected void writeWord(int offset, int value) {
-		writeWord(rom, offset, value);
-	}
+    protected int readWord(int offset) {
+        return readWord(rom, offset);
+    }
 
-	protected void writeWord(byte[] data, int offset, int value) {
-		data[offset] = (byte) (value % 0x100);
-		data[offset + 1] = (byte) ((value / 0x100) % 0x100);
-	}
+    protected int readWord(byte[] data, int offset) {
+        return (data[offset] & 0xFF) + ((data[offset + 1] & 0xFF) << 8);
+    }
 
-	protected boolean matches(byte[] data, int offset, byte[] needle) {
-		for (int i = 0; i < needle.length; i++) {
-			if (offset + i >= data.length) {
-				return false;
-			}
-			if (data[offset + i] != needle[i]) {
-				return false;
-			}
-		}
-		return true;
-	}
+    protected void writeWord(int offset, int value) {
+        writeWord(rom, offset, value);
+    }
+
+    protected void writeWord(byte[] data, int offset, int value) {
+        data[offset] = (byte) (value % 0x100);
+        data[offset + 1] = (byte) ((value / 0x100) % 0x100);
+    }
+
+    protected boolean matches(byte[] data, int offset, byte[] needle) {
+        for (int i = 0; i < needle.length; i++) {
+            if (offset + i >= data.length) {
+                return false;
+            }
+            if (data[offset + i] != needle[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
 
 }

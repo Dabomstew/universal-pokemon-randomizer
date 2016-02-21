@@ -28,9 +28,9 @@ import java.util.List;
 
 public class NARCContents {
 
-	public List<String> filenames = new ArrayList<String>();
-	public List<byte[]> files = new ArrayList<byte[]>();
+    public List<String> filenames = new ArrayList<String>();
+    public List<byte[]> files = new ArrayList<byte[]>();
 
-	public boolean hasFilenames = false;
+    public boolean hasFilenames = false;
 
 }

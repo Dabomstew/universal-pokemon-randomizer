@@ -25,20 +25,20 @@ package com.dabomstew.pkrandom.pokemon;
 
 public class TrainerPokemon {
 
-	public Pokemon pokemon;
-	public int level;
+    public Pokemon pokemon;
+    public int level;
 
-	public int move1;
-	public int move2;
-	public int move3;
-	public int move4;
+    public int move1;
+    public int move2;
+    public int move3;
+    public int move4;
 
-	public int AILevel;
-	public int heldItem;
-	public int ability;
+    public int AILevel;
+    public int heldItem;
+    public int ability;
 
-	public String toString() {
-		return pokemon.name + " Lv" + level;
-	}
+    public String toString() {
+        return pokemon.name + " Lv" + level;
+    }
 
 }

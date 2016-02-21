@@ -24,5 +24,5 @@ package com.dabomstew.pkrandom.pokemon;
 /*----------------------------------------------------------------------------*/
 
 public enum MoveCategory {
-	PHYSICAL, SPECIAL, STATUS;
+    PHYSICAL, SPECIAL, STATUS;
 }

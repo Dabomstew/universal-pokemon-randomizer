@@ -29,94 +29,93 @@ import java.io.RandomAccessFile;
 
 public class NDSFile {
 
-	private NDSRom parent;
-	public int offset, size;
-	public int fileID;
-	public String fullPath;
-	public Extracted status = Extracted.NOT;
-	public String extFilename;
-	public byte[] data;
+    private NDSRom parent;
+    public int offset, size;
+    public int fileID;
+    public String fullPath;
+    public Extracted status = Extracted.NOT;
+    public String extFilename;
+    public byte[] data;
 
-	public NDSFile(NDSRom parent) {
-		this.parent = parent;
-	}
+    public NDSFile(NDSRom parent) {
+        this.parent = parent;
+    }
 
-	public byte[] getContents() throws IOException {
-		if (this.status == Extracted.NOT) {
-			// extract file
-			parent.reopenROM();
-			RandomAccessFile rom = parent.getBaseRom();
-			byte[] buf = new byte[this.size];
-			rom.seek(this.offset);
-			rom.readFully(buf);
-			if (parent.isWritingEnabled()) {
-				// make a file
-				String tmpDir = parent.getTmpFolder();
-				String tmpFilename = fullPath.replaceAll("[^A-Za-z0-9_]+", "");
-				this.extFilename = tmpFilename;
-				File tmpFile = new File(tmpDir + extFilename);
-				FileOutputStream fos = new FileOutputStream(tmpFile);
-				fos.write(buf);
-				fos.close();
-				tmpFile.deleteOnExit();
-				this.status = Extracted.TO_FILE;
-				this.data = null;
-				return buf;
-			} else {
-				this.status = Extracted.TO_RAM;
-				this.data = buf;
-				byte[] newcopy = new byte[buf.length];
-				System.arraycopy(buf, 0, newcopy, 0, buf.length);
-				return newcopy;
-			}
-		} else if (this.status == Extracted.TO_RAM) {
-			byte[] newcopy = new byte[this.data.length];
-			System.arraycopy(this.data, 0, newcopy, 0, this.data.length);
-			return newcopy;
-		} else {
-			String tmpDir = parent.getTmpFolder();
-			FileInputStream fis = new FileInputStream(tmpDir + this.extFilename);
-			byte[] file = new byte[fis.available()];
-			fis.read(file);
-			fis.close();
-			return file;
-		}
-	}
+    public byte[] getContents() throws IOException {
+        if (this.status == Extracted.NOT) {
+            // extract file
+            parent.reopenROM();
+            RandomAccessFile rom = parent.getBaseRom();
+            byte[] buf = new byte[this.size];
+            rom.seek(this.offset);
+            rom.readFully(buf);
+            if (parent.isWritingEnabled()) {
+                // make a file
+                String tmpDir = parent.getTmpFolder();
+                String tmpFilename = fullPath.replaceAll("[^A-Za-z0-9_]+", "");
+                this.extFilename = tmpFilename;
+                File tmpFile = new File(tmpDir + extFilename);
+                FileOutputStream fos = new FileOutputStream(tmpFile);
+                fos.write(buf);
+                fos.close();
+                tmpFile.deleteOnExit();
+                this.status = Extracted.TO_FILE;
+                this.data = null;
+                return buf;
+            } else {
+                this.status = Extracted.TO_RAM;
+                this.data = buf;
+                byte[] newcopy = new byte[buf.length];
+                System.arraycopy(buf, 0, newcopy, 0, buf.length);
+                return newcopy;
+            }
+        } else if (this.status == Extracted.TO_RAM) {
+            byte[] newcopy = new byte[this.data.length];
+            System.arraycopy(this.data, 0, newcopy, 0, this.data.length);
+            return newcopy;
+        } else {
+            String tmpDir = parent.getTmpFolder();
+            FileInputStream fis = new FileInputStream(tmpDir + this.extFilename);
+            byte[] file = new byte[fis.available()];
+            fis.read(file);
+            fis.close();
+            return file;
+        }
+    }
 
-	public void writeOverride(byte[] data) throws IOException {
-		if (status == Extracted.NOT) {
-			// temp extract
-			getContents();
-		}
-		if (status == Extracted.TO_FILE) {
-			String tmpDir = parent.getTmpFolder();
-			FileOutputStream fos = new FileOutputStream(new File(tmpDir
-					+ this.extFilename));
-			fos.write(data);
-			fos.close();
-		} else {
-			if (this.data.length == data.length) {
-				// copy new in
-				System.arraycopy(data, 0, this.data, 0, data.length);
-			} else {
-				// make new array
-				this.data = null;
-				this.data = new byte[data.length];
-				System.arraycopy(data, 0, this.data, 0, data.length);
-			}
-		}
-	}
+    public void writeOverride(byte[] data) throws IOException {
+        if (status == Extracted.NOT) {
+            // temp extract
+            getContents();
+        }
+        if (status == Extracted.TO_FILE) {
+            String tmpDir = parent.getTmpFolder();
+            FileOutputStream fos = new FileOutputStream(new File(tmpDir + this.extFilename));
+            fos.write(data);
+            fos.close();
+        } else {
+            if (this.data.length == data.length) {
+                // copy new in
+                System.arraycopy(data, 0, this.data, 0, data.length);
+            } else {
+                // make new array
+                this.data = null;
+                this.data = new byte[data.length];
+                System.arraycopy(data, 0, this.data, 0, data.length);
+            }
+        }
+    }
 
-	// returns null if no override
-	public byte[] getOverrideContents() throws IOException {
-		if (status == Extracted.NOT) {
-			return null;
-		}
-		return getContents();
-	}
+    // returns null if no override
+    public byte[] getOverrideContents() throws IOException {
+        if (status == Extracted.NOT) {
+            return null;
+        }
+        return getContents();
+    }
 
-	private enum Extracted {
-		NOT, TO_FILE, TO_RAM;
-	}
+    private enum Extracted {
+        NOT, TO_FILE, TO_RAM;
+    }
 
 }
