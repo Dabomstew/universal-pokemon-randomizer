@@ -16,12 +16,12 @@ public class GFXFunctions {
 					"Bits per pixel must be a multiple of 2.");
 		}
 		int pixelsPerByte = 8 / bpp;
-		if (width * height / pixelsPerByte != data.length) {
+		if (width * height / pixelsPerByte > data.length) {
 			throw new IllegalArgumentException("Invalid input image.");
 		}
 
 		int bytesPerTile = tileWidth * tileHeight / pixelsPerByte;
-		int numTiles = data.length / bytesPerTile;
+		int numTiles = width * height / (tileWidth * tileHeight);
 		int widthInTiles = width / tileWidth;
 
 		BufferedImage bim = new BufferedImage(width, height,

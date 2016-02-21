@@ -34,11 +34,19 @@ public class Gen3Constants {
 
 	public static final String pokedexOrderPointerPrefix = "0448814208D0481C0004000C05E00000";
 
+	public static final String rsFrontSpritesPointerPrefix = "05E0";
+
+	public static final String rsFrontSpritesPointerSuffix = "1068191C";
+
+	public static final String rsPokemonPalettesPointerPrefix = "04D90148006817E0";
+
+	public static final String rsPokemonPalettesPointerSuffix = "080C064A11404840";
+
 	public static final int efrlgPokemonNamesPointer = 0x144,
 			efrlgMoveNamesPointer = 0x148, efrlgAbilityNamesPointer = 0x1C0,
 			efrlgItemDataPointer = 0x1C8, efrlgMoveDataPointer = 0x1CC,
-			efrlgPokemonStatsPointer = 0x1BC, frlgFrontSpritesPointer = 0x128,
-			frlgPokemonPalettesPointer = 0x130;
+			efrlgPokemonStatsPointer = 0x1BC, efrlgFrontSpritesPointer = 0x128,
+			efrlgPokemonPalettesPointer = 0x130;
 
 	public static final byte[] emptyPokemonSig = new byte[] { 0x32,
 			(byte) 0x96, 0x32, (byte) 0x96, (byte) 0x96, 0x32, 0x00, 0x00,
