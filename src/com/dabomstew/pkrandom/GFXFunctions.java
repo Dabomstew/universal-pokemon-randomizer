@@ -6,17 +6,22 @@ public class GFXFunctions {
 
 	public static BufferedImage drawTiledImage(byte[] data, int[] palette,
 			int width, int height, int bpp) {
-		return drawTiledImage(data, palette, width, height, 8, 8, bpp);
+		return drawTiledImage(data, palette, 0, width, height, 8, 8, bpp);
+	}
+	
+	public static BufferedImage drawTiledImage(byte[] data, int[] palette, int offset,
+			int width, int height, int bpp) {
+		return drawTiledImage(data, palette, offset, width, height, 8, 8, bpp);
 	}
 
-	public static BufferedImage drawTiledImage(byte[] data, int[] palette,
+	public static BufferedImage drawTiledImage(byte[] data, int[] palette, int offset,
 			int width, int height, int tileWidth, int tileHeight, int bpp) {
 		if (bpp != 1 && bpp != 2 && bpp != 4 && bpp != 8) {
 			throw new IllegalArgumentException(
 					"Bits per pixel must be a multiple of 2.");
 		}
 		int pixelsPerByte = 8 / bpp;
-		if (width * height / pixelsPerByte > data.length) {
+		if (width * height / pixelsPerByte + offset > data.length) {
 			throw new IllegalArgumentException("Invalid input image.");
 		}
 
@@ -33,7 +38,7 @@ public class GFXFunctions {
 			for (int yT = 0; yT < tileHeight; yT++) {
 				for (int xT = 0; xT < tileWidth; xT++) {
 					int value = data[tile * bytesPerTile + yT * tileWidth
-							/ pixelsPerByte + xT / pixelsPerByte] & 0xFF;
+							/ pixelsPerByte + xT / pixelsPerByte + offset] & 0xFF;
 					if (pixelsPerByte != 1) {
 						value = (value >>> (xT % pixelsPerByte) * bpp)
 								& ((1 << bpp) - 1);
