@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
@@ -59,6 +60,7 @@ import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
+import compressors.Gen2Decmp;
 
 public class Gen2RomHandler extends AbstractGBRomHandler {
 
@@ -523,6 +525,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 		pkmn.darkGrassHeldItem = -1;
 		pkmn.growthCurve = ExpCurve.fromByte(rom[offset
 				+ Gen2Constants.bsGrowthCurveOffset]);
+		pkmn.picDimensions = rom[offset + Gen2Constants.bsPicDimensionsOffset] & 0xFF;
 
 	}
 
@@ -2377,10 +2380,64 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 		// just cut
 		return Gen2Constants.earlyRequiredHMMoves;
 	}
-	
+
 	@Override
 	public BufferedImage getMascotImage() {
-		// TODO implement
-		return null;
+		Pokemon mascot = randomPokemon();
+		while (mascot.number == Gen2Constants.unownIndex) {
+			// Unown is banned as handling it would add a ton of extra effort.
+			mascot = randomPokemon();
+		}
+
+		// Each Pokemon has a front and back pic with a bank and a pointer (3*2
+		// = 6)
+		// There is no zero-entry.
+		int picPointer = romEntry.getValue("PicPointers") + (mascot.number - 1)
+				* 6;
+		int picWidth = mascot.picDimensions & 0x0F;
+		int picHeight = (mascot.picDimensions >> 4) & 0x0F;
+
+		int picBank = (rom[picPointer] & 0xFF);
+		if (romEntry.isCrystal) {
+			// Crystal pic banks are offset by x36 for whatever reason.
+			picBank += 0x36;
+		} else {
+			// Hey, G/S are dumb too! Arbitrarily redirected bank numbers.
+			if (picBank == 0x13) {
+				picBank = 0x1F;
+			} else if (picBank == 0x14) {
+				picBank = 0x20;
+			} else if (picBank == 0x1F) {
+				picBank = 0x2E;
+			}
+		}
+		int picOffset = calculateOffset(picBank, readWord(picPointer + 1));
+
+		Gen2Decmp mscSprite = new Gen2Decmp(rom, picOffset, picWidth, picHeight);
+		int w = picWidth * 8;
+		int h = picHeight * 8;
+
+		// Palette?
+		// Two colors per Pokemon + two more for shiny, unlike pics there is a
+		// zero-entry.
+		// Black and white are left alone at the start and end of the palette.
+		int[] palette = new int[] { 0xFFFFFFFF, 0xFFAAAAAA, 0xFF666666,
+				0xFF000000 };
+		int paletteOffset = romEntry.getValue("PokemonPalettes")
+				+ mascot.number * 8;
+		if (random.nextInt(10) == 0) {
+			// Use shiny instead
+			paletteOffset += 4;
+		}
+		for (int i = 0; i < 2; i++) {
+			palette[i + 1] = GFXFunctions
+					.conv16BitColorToARGB(readWord(paletteOffset + i * 2));
+		}
+
+		byte[] data = mscSprite.getFlattenedData();
+
+		BufferedImage bim = GFXFunctions.drawTiledImage(data, palette, w, h, 8);
+
+		return bim;
 	}
 }
