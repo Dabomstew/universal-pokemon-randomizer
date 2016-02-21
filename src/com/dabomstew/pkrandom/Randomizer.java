@@ -59,6 +59,9 @@ public class Randomizer {
 			romHandler.setPokemonPool(settings.getCurrentRestrictions());
 			romHandler.removeEvosForPokemonPool();
 		}
+		else {
+			romHandler.setPokemonPool(null);
+		}
 
 		// Move updates & data changes
 		if (settings.isUpdateMoves()) {
