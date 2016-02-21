@@ -46,6 +46,8 @@ import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.constants.Gen1Constants;
+import com.dabomstew.pkrandom.exceptions.RandomizationException;
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
@@ -1818,7 +1820,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
             FileFunctions.applyPatch(rom, patchName);
             return true;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
     }
 
@@ -2437,7 +2439,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
                     }
                 } else {
                     // this should never happen, but if not, uh oh
-                    throw new RuntimeException("Unable to save moves/evolutions, out of space");
+                    throw new RandomizationException("Unable to save moves/evolutions, out of space");
                 }
                 if (pointerToWrite >= 0) {
                     writeWord(pointerTable, (i - 1) * 2, pointerToWrite);

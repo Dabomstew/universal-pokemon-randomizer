@@ -47,6 +47,7 @@ import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen5Constants;
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
@@ -298,19 +299,19 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         try {
             arm9 = readARM9();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
         try {
             stringsNarc = readNARC(romEntry.getString("TextStrings"));
             storyTextNarc = readNARC(romEntry.getString("TextStory"));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
 
         try {
             scriptNarc = readNARC(romEntry.getString("Scripts"));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
         loadPokemonStats();
         pokemonList = Arrays.asList(pokes);
@@ -335,7 +336,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
             populateEvolutions();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
 
     }
@@ -358,7 +359,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 moves[i].category = Gen5Constants.moveCategoryIndices[moveData[2] & 0xFF];
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
 
     }
@@ -418,19 +419,19 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         try {
             writeARM9(arm9);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
         try {
             writeNARC(romEntry.getString("TextStrings"), stringsNarc);
             writeNARC(romEntry.getString("TextStory"), storyTextNarc);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
 
         try {
             writeNARC(romEntry.getString("Scripts"), scriptNarc);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
     }
 
@@ -454,7 +455,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         try {
             this.writeNARC(romEntry.getString("MoveData"), moveNarc);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
 
     }
@@ -472,7 +473,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         try {
             this.writeNARC(romEntry.getString("PokemonStats"), pokeNarc);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
 
         writeEvolutions();
@@ -587,9 +588,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             replaceStarterFiles(starterNARC, pokespritesNARC, 2, newStarters.get(2).number);
             writeNARC(romEntry.getString("StarterGraphics"), starterNARC);
         } catch (IOException ex) {
-            throw new RuntimeException(ex);
+            throw new RandomizerIOException(ex);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
         // Fix text depending on version
         if (romEntry.romType == Gen5Constants.Type_BW) {
@@ -686,7 +687,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
             return encounters;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
     }
 
@@ -838,7 +839,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 this.writeNARC(romEntry.getString("PokemonAreaData"), areaNARC);
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
 
     }
@@ -972,7 +973,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
             loadedWildMapNames = true;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
 
     }
@@ -1068,7 +1069,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 Gen5Constants.tagTrainersBW2(allTrainers);
             }
         } catch (IOException ex) {
-            throw new RuntimeException(ex);
+            throw new RandomizerIOException(ex);
         }
         return allTrainers;
     }
@@ -1176,7 +1177,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 this.writeNARC(romEntry.getString("DriftveilPokemon"), driftveil);
             }
         } catch (IOException ex) {
-            throw new RuntimeException(ex);
+            throw new RandomizerIOException(ex);
         }
     }
 
@@ -1202,7 +1203,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 movesets.put(pkmn, learnt);
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
         return movesets;
     }
@@ -1229,7 +1230,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             // Save
             this.writeNARC(romEntry.getString("PokemonMovesets"), movesLearnt);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
 
     }
@@ -1340,7 +1341,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
             this.writeNARC(romEntry.getString("HiddenHollows"), hhNARC);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
     }
 
@@ -1358,7 +1359,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             FileFunctions.applyPatch(data, patchName);
             return true;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
     }
 
@@ -1530,7 +1531,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 mtMoves.add(readWord(mtFile, baseOffset + i * bytesPer));
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
         return mtMoves;
     }
@@ -1553,7 +1554,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
             writeOverlay(romEntry.getInt("MoveTutorOvlNumber"), mtFile);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
     }
 
@@ -1701,7 +1702,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
     }
 
@@ -1730,7 +1731,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
             writeNARC(romEntry.getString("PokemonEvolutions"), evoNARC);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
     }
 
@@ -2190,7 +2191,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 trades.add(trade);
             }
         } catch (Exception ex) {
-            throw new RuntimeException(ex);
+            throw new RandomizerIOException(ex);
         }
 
         return trades;
@@ -2229,7 +2230,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             this.writeNARC(romEntry.getString("InGameTrades"), tradeNARC);
             this.setStrings(false, romEntry.getInt("IngameTradesTextOffset"), tradeStrings);
         } catch (IOException ex) {
-            throw new RuntimeException(ex);
+            throw new RandomizerIOException(ex);
         }
     }
 
@@ -2277,7 +2278,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             // finish up
             writeNARC(romEntry.getString("BabyPokemon"), babyNARC);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
     }
 
@@ -2345,7 +2346,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             // Phew, all done.
             return finalImage;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
     }
 }

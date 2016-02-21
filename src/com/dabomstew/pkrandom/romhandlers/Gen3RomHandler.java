@@ -47,6 +47,8 @@ import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen3Constants;
+import com.dabomstew.pkrandom.exceptions.RandomizationException;
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
@@ -1539,7 +1541,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 int newBytesNeeded = newMoveCount * entrySize + entrySize * 2;
                 int writeSpace = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, newBytesNeeded, fso);
                 if (writeSpace < fso) {
-                    throw new RuntimeException("ROM is full");
+                    throw new RandomizerIOException("ROM is full");
                 }
                 writePointer(offsToPtr, writeSpace);
                 moveDataLoc = writeSpace;
@@ -1717,7 +1719,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 // create the new TM text
                 int oldPointer = readPointer(tte.actualOffset);
                 if (oldPointer < 0 || oldPointer >= rom.length) {
-                    throw new RuntimeException("TM Text update failed: couldn't read a TM text pointer.");
+                    throw new RandomizationException("TM Text update failed: couldn't read a TM text pointer.");
                 }
                 String moveName = this.moves[moveIndexes.get(tte.number - 1)].name;
                 // temporarily use underscores to stop the move name being split

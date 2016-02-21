@@ -49,6 +49,7 @@ import java.util.TreeSet;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
@@ -529,7 +530,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         tempPickable.removeAll(banned);
                         tempPickable.removeAll(area.bannedPokemon);
                         if (tempPickable.size() == 0) {
-                            throw new RuntimeException("ERROR: Couldn't replace a Pokemon!");
+                            throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon!");
                         }
                         int picked = this.random.nextInt(tempPickable.size());
                         enc.pokemon = tempPickable.get(picked);
@@ -577,7 +578,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     iterLoops++;
                 }
                 if (possiblePokemon == null) {
-                    throw new RuntimeException("Could not randomize an area in a reasonable amount of attempts.");
+                    throw new RandomizationException("Could not randomize an area in a reasonable amount of attempts.");
                 }
                 for (Encounter enc : area.encounters) {
                     // Pick a random themed pokemon
@@ -642,7 +643,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         tempPickable.removeAll(banned);
                         tempPickable.removeAll(area.bannedPokemon);
                         if (tempPickable.size() == 0) {
-                            throw new RuntimeException("ERROR: Couldn't replace a Pokemon!");
+                            throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon!");
                         }
                         int picked = this.random.nextInt(tempPickable.size());
                         Pokemon pickedMN = tempPickable.get(picked);
@@ -697,7 +698,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     iterLoops++;
                 }
                 if (possiblePokemon == null) {
-                    throw new RuntimeException("Could not randomize an area in a reasonable amount of attempts.");
+                    throw new RandomizationException("Could not randomize an area in a reasonable amount of attempts.");
                 }
 
                 // Build area map using type theme.
@@ -834,7 +835,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     tempPickable.removeAll(banned);
                     tempPickable.removeAll(area.bannedPokemon);
                     if (tempPickable.size() == 0) {
-                        throw new RuntimeException("ERROR: Couldn't replace a Pokemon!");
+                        throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon!");
                     }
                     if (usePowerLevels) {
                         enc.pokemon = pickWildPowerLvlReplacement(tempPickable, enc.pokemon, false, null);
@@ -2089,7 +2090,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // If we made it out of the loop, we weren't able to randomize evos.
-        throw new RuntimeException("Not able to randomize evolutions in a sane amount of retries.");
+        throw new RandomizationException("Not able to randomize evolutions in a sane amount of retries.");
     }
 
     private Pokemon pickEvoPowerLvlReplacement(List<Pokemon> pokemonPool, Pokemon current) {
@@ -3000,7 +3001,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         if (candidates.size() == 0) {
-            throw new RuntimeException("Random evolution called on a Pokemon without any usable evolutions.");
+            throw new RandomizationException("Random evolution called on a Pokemon without any usable evolutions.");
         }
 
         return candidates.get(random.nextInt(candidates.size()));

@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.newnds.NDSRom;
 import com.dabomstew.pkrandom.pokemon.Type;
 
@@ -54,7 +55,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         try {
             baseRom = new NDSRom(filename);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RandomizerIOException(e);
         }
         loadedFN = filename;
         loadedROM(baseRom.getCode());
@@ -83,8 +84,8 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         savingROM();
         try {
             baseRom.saveTo(filename);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
         }
         return true;
     }
@@ -121,11 +122,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             int endOffset = readLong(fatbframe, 8 + i * 8);
             int length = (endOffset - startOffset);
             byte[] thisFile = new byte[length];
-            try {
-                System.arraycopy(fimgframe, startOffset, thisFile, 0, length);
-            } catch (ArrayIndexOutOfBoundsException ex) {
-                throw new RuntimeException(ex);
-            }
+            System.arraycopy(fimgframe, startOffset, thisFile, 0, length);
             narc.files.add(thisFile);
         }
         // Filenames?
@@ -277,8 +274,8 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             fis.close();
             String ndsCode = new String(sig, "US-ASCII");
             return ndsCode;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
         }
     }
 

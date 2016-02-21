@@ -64,6 +64,7 @@ import com.dabomstew.pkrandom.Randomizer;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.Utils;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
+import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.AbstractDSRomHandler;
@@ -1491,6 +1492,12 @@ public class RandomizerGUI extends javax.swing.JFrame {
                         finishedCV.set(new Randomizer(settings, RandomizerGUI.this.romHandler).randomize(filename,
                                 verboseLog, seed));
                         succeededSave = true;
+                    } catch (RandomizationException ex) {
+                        attemptToLogException(ex, "RandomizerGUI.saveFailedMessage",
+                                "RandomizerGUI.saveFailedMessageNoLog", true);
+                        if (verboseLog != null) {
+                            verboseLog.close();
+                        }
                     } catch (Exception ex) {
                         attemptToLogException(ex, "RandomizerGUI.saveFailedIO", "RandomizerGUI.saveFailedIONoLog");
                         if (verboseLog != null) {
@@ -1625,6 +1632,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
     }
 
     private void attemptToLogException(Exception ex, String baseMessageKey, String noLogMessageKey) {
+        attemptToLogException(ex, baseMessageKey, noLogMessageKey, false);
+    }
+
+    private void attemptToLogException(Exception ex, String baseMessageKey, String noLogMessageKey, boolean showMessage) {
 
         // Make sure the operation dialog doesn't show up over the error
         // dialog
@@ -1655,9 +1666,18 @@ public class RandomizerGUI extends javax.swing.JFrame {
             ex.printStackTrace();
             System.setErr(e1);
             ps.close();
-            JOptionPane.showMessageDialog(this, String.format(bundle.getString(baseMessageKey), errlog));
+            if (showMessage) {
+                JOptionPane.showMessageDialog(this,
+                        String.format(bundle.getString(baseMessageKey), ex.getMessage(), errlog));
+            } else {
+                JOptionPane.showMessageDialog(this, String.format(bundle.getString(baseMessageKey), errlog));
+            }
         } catch (Exception logex) {
-            JOptionPane.showMessageDialog(this, bundle.getString(noLogMessageKey));
+            if (showMessage) {
+                JOptionPane.showMessageDialog(this, String.format(bundle.getString(noLogMessageKey), ex.getMessage()));
+            } else {
+                JOptionPane.showMessageDialog(this, bundle.getString(noLogMessageKey));
+            }
         }
     }
 
