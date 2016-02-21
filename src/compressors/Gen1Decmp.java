@@ -126,7 +126,6 @@ public class Gen1Decmp {
 			int oldTileX = tile % width;
 			int oldTileY = tile / width;
 			int newTileNum = oldTileX * height + oldTileY;
-			System.out.printf("tile %d => %d\n", tile, newTileNum);
 			System.arraycopy(data, tile * 16, newData, newTileNum * 16, 16);
 		}
 		data = newData;

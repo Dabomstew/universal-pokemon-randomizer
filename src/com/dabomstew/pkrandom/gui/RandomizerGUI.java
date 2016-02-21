@@ -25,7 +25,9 @@ package com.dabomstew.pkrandom.gui;
 /*----------------------------------------------------------------------------*/
 
 import java.awt.Desktop;
+import java.awt.Graphics;
 import java.awt.LayoutManager;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,6 +48,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.ParallelGroup;
 import javax.swing.GroupLayout.SequentialGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -93,6 +96,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 	// Settings
 	private boolean autoUpdateEnabled;
 	private boolean haveCheckedCustomNames;
+	private ImageIcon emptyIcon = new ImageIcon(getClass().getResource(
+			"/com/dabomstew/pkrandom/gui/emptyIcon.png"));
 
 	java.util.ResourceBundle bundle;
 
@@ -625,6 +630,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
 		this.mtNoneAvailableLabel.setVisible(false);
 		miscTweaksPanel.setLayout(makeTweaksLayout(tweakCheckboxes));
+		
+		this.gameMascotLabel.setIcon(emptyIcon);
 	}
 
 	// rom loading
@@ -751,7 +758,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
 			this.pokeLimitBtn
 					.setVisible(!(romHandler instanceof Gen1RomHandler || romHandler
 							.isROMHack()));
-
 
 			this.brokenMovesCB.setSelected(false);
 			this.brokenMovesCB.setEnabled(true);
@@ -935,6 +941,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 				miscTweaksPanel.setLayout(noTweaksLayout);
 			}
 
+			this.gameMascotLabel.setIcon(makeMascotIcon());
+
 			if (this.romHandler instanceof AbstractDSRomHandler) {
 				((AbstractDSRomHandler) this.romHandler).closeInnerRom();
 			}
@@ -944,6 +952,21 @@ public class RandomizerGUI extends javax.swing.JFrame {
 			this.romHandler = null;
 			this.initialFormState();
 		}
+	}
+	
+	private ImageIcon makeMascotIcon() {
+		BufferedImage handlerImg = romHandler.getMascotImage();
+		
+		if(handlerImg == null) {
+			return emptyIcon;
+		}
+		
+		BufferedImage nImg = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
+		int hW = handlerImg.getWidth();
+		int hH = handlerImg.getHeight();
+		Graphics g = nImg.getGraphics();
+		nImg.getGraphics().drawImage(handlerImg, 64-hW/2, 64-hH/2, this);
+		return new ImageIcon(nImg);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -2364,6 +2387,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         mtNoneAvailableLabel = new javax.swing.JLabel();
         versionLabel = new javax.swing.JLabel();
         websiteLinkLabel = new javax.swing.JLabel();
+        gameMascotLabel = new javax.swing.JLabel();
 
         romOpenChooser.setFileFilter(new ROMFilter());
 
@@ -2445,7 +2469,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addComponent(raceModeCB)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(brokenMovesCB)
-                .addContainerGap(32, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         romInfoPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("RandomizerGUI.romInfoPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
@@ -2463,10 +2487,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
             .addGroup(romInfoPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(romInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(riRomNameLabel)
-                    .addComponent(riRomCodeLabel)
-                    .addComponent(riRomSupportLabel))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(riRomNameLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
+                    .addComponent(riRomCodeLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(riRomSupportLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         romInfoPanelLayout.setVerticalGroup(
             romInfoPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -3973,6 +3997,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
             }
         });
 
+        gameMascotLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/dabomstew/pkrandom/gui/emptyIcon.png"))); // NOI18N
+        gameMascotLabel.setText(bundle.getString("RandomizerGUI.gameMascotLabel.text")); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -3981,29 +4008,31 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(generalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(193, 193, 193)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(layout.createSequentialGroup()
+                                .addComponent(generalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(loadQSButton)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addComponent(saveQSButton))
-                                    .addComponent(romInfoPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addComponent(updateSettingsButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(openROMButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(saveROMButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
-                                    .addComponent(usePresetsButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(versionLabel)
+                                    .addComponent(romInfoPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(31, 31, 31)
+                                .addComponent(gameMascotLabel)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(websiteLinkLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addComponent(randomizerOptionsPane, javax.swing.GroupLayout.PREFERRED_SIZE, 759, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(openROMButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(saveROMButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(usePresetsButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(updateSettingsButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(randomizerOptionsPane, javax.swing.GroupLayout.PREFERRED_SIZE, 759, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(versionLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(websiteLinkLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -4011,29 +4040,28 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(romInfoPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(loadQSButton)
-                                    .addComponent(saveQSButton)))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(openROMButton)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(saveROMButton)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(usePresetsButton)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(updateSettingsButton)))
+                        .addComponent(romInfoPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(versionLabel)
-                            .addComponent(websiteLinkLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(loadQSButton)
+                            .addComponent(saveQSButton)))
+                    .addComponent(gameMascotLabel)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(openROMButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(saveROMButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(usePresetsButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(updateSettingsButton))
                     .addComponent(generalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(websiteLinkLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(versionLabel))
+                .addGap(13, 13, 13)
                 .addComponent(randomizerOptionsPane, javax.swing.GroupLayout.PREFERRED_SIZE, 457, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(89, Short.MAX_VALUE))
         );
 
         pack();
@@ -4050,6 +4078,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.ButtonGroup fieldItemsButtonGroup;
     private javax.swing.JPanel fieldItemsInnerPanel;
     private javax.swing.JPanel fieldItemsPanel;
+    private javax.swing.JLabel gameMascotLabel;
     private javax.swing.JPanel generalOptionsPanel;
     private javax.swing.JCheckBox goCondenseEvosCheckBox;
     private javax.swing.JCheckBox goRemoveTradeEvosCheckBox;
