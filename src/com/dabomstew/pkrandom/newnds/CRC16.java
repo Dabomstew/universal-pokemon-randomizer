@@ -3,9 +3,9 @@ package com.dabomstew.pkrandom.newnds;
 /*----------------------------------------------------------------------------*/
 /*--  CRC16.java - crc16 calculator for NDS checksums                       --*/
 /*--  Code derived from "Nintendo DS rom tool", copyright (C) DevkitPro     --*/
-/*--  Original Code by Rafael Vuijk, Dave Murphy, Alexei Karpenko			--*/
-/*--																		--*/
-/*--  Ported to Java by Dabomstew under the terms of the GPL:				--*/
+/*--  Original Code by Rafael Vuijk, Dave Murphy, Alexei Karpenko           --*/
+/*--                                                                        --*/
+/*--  Ported to Java by Dabomstew under the terms of the GPL:               --*/
 /*--                                                                        --*/
 /*--  This program is free software: you can redistribute it and/or modify  --*/
 /*--  it under the terms of the GNU General Public License as published by  --*/

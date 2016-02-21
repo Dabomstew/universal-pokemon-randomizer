@@ -8,7 +8,7 @@ import java.io.IOException;
 /*--  blz.c - Bottom LZ coding for Nintendo GBA/DS                          --*/
 /*--  Copyright (C) 2011 CUE                                                --*/
 /*--                                                                        --*/
-/*--  Ported to Java by Dabomstew under the terms of the GPL:				--*/
+/*--  Ported to Java by Dabomstew under the terms of the GPL:               --*/
 /*--                                                                        --*/
 /*--  This program is free software: you can redistribute it and/or modify  --*/
 /*--  it under the terms of the GNU General Public License as published by  --*/

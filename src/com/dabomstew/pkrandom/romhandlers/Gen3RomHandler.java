@@ -1,13 +1,13 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 /*----------------------------------------------------------------------------*/
-/*--  Gen3RomHandler.java - randomizer handler for R/S/E/FR/LG.				--*/
-/*--  																		--*/
-/*--  Part of "Universal Pokemon Randomizer" by Dabomstew					--*/
-/*--  Pokemon and any associated names and the like are						--*/
-/*--  trademark and (C) Nintendo 1996-2012.									--*/
-/*--  																		--*/
-/*--  The custom code written here is licensed under the terms of the GPL:	--*/
+/*--  Gen3RomHandler.java - randomizer handler for R/S/E/FR/LG.             --*/
+/*--                                                                        --*/
+/*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
+/*--  Pokemon and any associated names and the like are                     --*/
+/*--  trademark and (C) Nintendo 1996-2012.                                 --*/
+/*--                                                                        --*/
+/*--  The custom code written here is licensed under the terms of the GPL:  --*/
 /*--                                                                        --*/
 /*--  This program is free software: you can redistribute it and/or modify  --*/
 /*--  it under the terms of the GNU General Public License as published by  --*/

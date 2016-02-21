@@ -1,9 +1,9 @@
 package thenewpoketext;
 
 /*----------------------------------------------------------------------------*/
-/*--  UnicodeParser.java - maintains the poke<->unicode text table			--*/
+/*--  UnicodeParser.java - maintains the poke<->unicode text table          --*/
 /*--  Code loosely derived from "thenewpoketext", copyright (C) loadingNOW  --*/
-/*--  Ported to Java and customized by Dabomstew							--*/
+/*--  Ported to Java and customized by Dabomstew                            --*/
 /*----------------------------------------------------------------------------*/
 
 import java.io.FileNotFoundException;

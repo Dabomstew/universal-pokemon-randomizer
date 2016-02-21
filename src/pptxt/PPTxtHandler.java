@@ -1,9 +1,9 @@
 package pptxt;
 
 /*----------------------------------------------------------------------------*/
-/*--  PPTxtHandler.java - handles generation 5 games text encoding			--*/
-/*--  Code derived from "PPTXT", copyright (C) SCV?     					--*/
-/*--  Ported to Java and bugfixed/customized by Dabomstew					--*/
+/*--  PPTxtHandler.java - handles generation 5 games text encoding          --*/
+/*--  Code derived from "PPTXT", copyright (C) SCV?                         --*/
+/*--  Ported to Java and bugfixed/customized by Dabomstew                   --*/
 /*----------------------------------------------------------------------------*/
 
 import java.io.FileNotFoundException;

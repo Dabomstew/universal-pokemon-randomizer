@@ -1,15 +1,15 @@
 package com.dabomstew.pkrandom;
 
 /*----------------------------------------------------------------------------*/
-/*--  RandomSource.java - functions as a centralized source of randomness	--*/
-/*--  			     	  to allow the same seed to produce the same random --*/
-/*--					  ROM consistently.           						--*/
-/*--  																		--*/
-/*--  Part of "Universal Pokemon Randomizer" by Dabomstew					--*/
-/*--  Pokemon and any associated names and the like are						--*/
-/*--  trademark and (C) Nintendo 1996-2012.									--*/
-/*--  																		--*/
-/*--  The custom code written here is licensed under the terms of the GPL:	--*/
+/*--  RandomSource.java - functions as a centralized source of randomness   --*/
+/*--                      to allow the same seed to produce the same random --*/
+/*--                      ROM consistently.                                 --*/
+/*--                                                                        --*/
+/*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
+/*--  Pokemon and any associated names and the like are                     --*/
+/*--  trademark and (C) Nintendo 1996-2012.                                 --*/
+/*--                                                                        --*/
+/*--  The custom code written here is licensed under the terms of the GPL:  --*/
 /*--                                                                        --*/
 /*--  This program is free software: you can redistribute it and/or modify  --*/
 /*--  it under the terms of the GNU General Public License as published by  --*/

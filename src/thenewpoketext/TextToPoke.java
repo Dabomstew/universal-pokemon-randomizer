@@ -1,9 +1,9 @@
 package thenewpoketext;
 
 /*----------------------------------------------------------------------------*/
-/*--  TextToPoke.java - encodes gen4 games text from Unicode				--*/
-/*--  Code derived from "thenewpoketext", copyright (C) loadingNOW     		--*/
-/*--  Ported to Java and bugfixed/customized by Dabomstew					--*/
+/*--  TextToPoke.java - encodes gen4 games text from Unicode                --*/
+/*--  Code derived from "thenewpoketext", copyright (C) loadingNOW          --*/
+/*--  Ported to Java and bugfixed/customized by Dabomstew                   --*/
 /*----------------------------------------------------------------------------*/
 
 import java.util.ArrayList;

@@ -2,13 +2,13 @@ package com.dabomstew.pkrandom.pokemon;
 
 /*----------------------------------------------------------------------------*/
 /*--  Pokemon.java - represents an individual Pokemon, and contains         --*/
-/*--				 common Pokemon-related functions.                      --*/
-/*--  																		--*/
-/*--  Part of "Universal Pokemon Randomizer" by Dabomstew					--*/
-/*--  Pokemon and any associated names and the like are						--*/
-/*--  trademark and (C) Nintendo 1996-2012.									--*/
-/*--  																		--*/
-/*--  The custom code written here is licensed under the terms of the GPL:	--*/
+/*--                 common Pokemon-related functions.                      --*/
+/*--                                                                        --*/
+/*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
+/*--  Pokemon and any associated names and the like are                     --*/
+/*--  trademark and (C) Nintendo 1996-2012.                                 --*/
+/*--                                                                        --*/
+/*--  The custom code written here is licensed under the terms of the GPL:  --*/
 /*--                                                                        --*/
 /*--  This program is free software: you can redistribute it and/or modify  --*/
 /*--  it under the terms of the GNU General Public License as published by  --*/

@@ -6,14 +6,14 @@ package com.dabomstew.pkrandom.gui;
 
 /*----------------------------------------------------------------------------*/
 /*--  PresetMakeDialog.java - a dialog to allow preset pairs to either be   --*/
-/*--						  copied down or saved to a binary file for		--*/
-/*--						  later use.									--*/
-/*--  																		--*/
-/*--  Part of "Universal Pokemon Randomizer" by Dabomstew					--*/
-/*--  Pokemon and any associated names and the like are						--*/
-/*--  trademark and (C) Nintendo 1996-2012.									--*/
-/*--  																		--*/
-/*--  The custom code written here is licensed under the terms of the GPL:	--*/
+/*--                          copied down or saved to a binary file for     --*/
+/*--                          later use.                                    --*/
+/*--                                                                        --*/
+/*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
+/*--  Pokemon and any associated names and the like are                     --*/
+/*--  trademark and (C) Nintendo 1996-2012.                                 --*/
+/*--                                                                        --*/
+/*--  The custom code written here is licensed under the terms of the GPL:  --*/
 /*--                                                                        --*/
 /*--  This program is free software: you can redistribute it and/or modify  --*/
 /*--  it under the terms of the GNU General Public License as published by  --*/
