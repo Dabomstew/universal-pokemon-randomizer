@@ -24,6 +24,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.awt.image.BufferedImage;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
@@ -413,6 +414,8 @@ public interface RomHandler {
 	public int internalStringLength(String string);
 
 	public void applySignature();
+	
+	public BufferedImage getMascotImage();
 
 	public boolean isROMHack();
 

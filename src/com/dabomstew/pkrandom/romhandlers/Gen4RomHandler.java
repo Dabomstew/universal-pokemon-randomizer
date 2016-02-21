@@ -23,6 +23,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -2793,5 +2794,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		} else {
 			return validPokemon.get(random.nextInt(validPokemon.size()));
 		}
+	}
+	
+	@Override
+	public BufferedImage getMascotImage() {
+		// TODO implement
+		return null;
 	}
 }

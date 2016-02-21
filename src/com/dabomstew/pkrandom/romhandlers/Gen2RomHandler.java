@@ -23,6 +23,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -2375,5 +2376,11 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 	public List<Integer> getEarlyRequiredHMMoves() {
 		// just cut
 		return Gen2Constants.earlyRequiredHMMoves;
+	}
+	
+	@Override
+	public BufferedImage getMascotImage() {
+		// TODO implement
+		return null;
 	}
 }

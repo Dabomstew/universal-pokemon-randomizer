@@ -47,6 +47,8 @@ public class Pokemon implements Comparable<Pokemon> {
 			darkGrassHeldItem;
 	
 	public int genderRatio;
+	
+	public int frontSpritePointer;
 
 	public ExpCurve growthCurve;
 

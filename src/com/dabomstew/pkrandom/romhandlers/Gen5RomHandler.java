@@ -23,6 +23,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -56,8 +57,7 @@ import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
-
-import dsdecmp.DSDecmp;
+import compressors.DSDecmp;
 
 public class Gen5RomHandler extends AbstractDSRomHandler {
 
@@ -2462,5 +2462,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 		} else {
 			return Gen5Constants.bw1EarlyRequiredHMMoves;
 		}
+	}
+	
+	@Override
+	public BufferedImage getMascotImage() {
+		// TODO implement
+		return null;
 	}
 }

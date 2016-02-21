@@ -1,4 +1,4 @@
-package dsdecmp;
+package compressors;
 
 import com.dabomstew.pkrandom.FileFunctions;
 

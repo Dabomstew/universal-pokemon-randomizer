@@ -43,6 +43,7 @@ import java.util.TreeSet;
 import java.util.zip.CRC32;
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen3Constants;
@@ -58,8 +59,7 @@ import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
-
-import dsdecmp.DSDecmp;
+import compressors.DSDecmp;
 
 public class Gen3RomHandler extends AbstractGBRomHandler {
 
@@ -3100,6 +3100,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		return this.isRomHack;
 	}
 
+	@Override
 	public BufferedImage getMascotImage() {
 		Pokemon mascotPk = randomPokemon();
 		int mascotPokemon = pokedexToInternal[mascotPk.number];
@@ -3112,40 +3113,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		byte[] truePalette = DSDecmp.Decompress(rom, palOffset);
 
 		// Convert palette into RGB
-		int[] convPalette = new int[15];
+		int[] convPalette = new int[16];
+		// Leave palette[0] as 00000000 for transparency
 		for (int i = 0; i < 15; i++) {
 			int palValue = readWord(truePalette, i * 2 + 2);
-			int red = (palValue & 0x1F) << 3;
-			int green = (palValue & 0x3E0) >> 2;
-			int blue = (palValue & 0x7C00) >> 7;
-			convPalette[i] = 0xFF000000 | (red << 16) | (green << 8) | blue;
+			convPalette[i+1] = GFXFunctions.conv16BitColorToARGB(palValue);
 		}
 
-		// Make buffer
-		BufferedImage bim = new BufferedImage(64, 64,
-				BufferedImage.TYPE_INT_ARGB);
-
-		// 8x8 tiles, 32 bytes each
-		// each byte is 2 pixels, too
-		// least significant nibble appears BEFORE most significant
-		for (int i = 0; i < 2048; i++) {
-			int tile = i / 32;
-			int xInTile = (i % 4) * 2;
-			int yInTile = (i / 4) % 8;
-			int xTile = tile % 8;
-			int yTile = tile / 8;
-			int lowerBit = trueFrontSprite[i] & 0x0F;
-			if (lowerBit > 0) {
-				bim.setRGB(xTile * 8 + xInTile, yTile * 8 + yInTile,
-						convPalette[lowerBit - 1]);
-			}
-			int upperBit = (trueFrontSprite[i] & 0xF0) >> 4;
-			if (upperBit > 0) {
-				bim.setRGB(xTile * 8 + xInTile + 1, yTile * 8 + yInTile,
-						convPalette[upperBit - 1]);
-			}
-		}
-
+		// Make image, 4bpp
+		BufferedImage bim = GFXFunctions.drawTiledImage(trueFrontSprite, convPalette, 64, 64, 4);
 		return bim;
 	}
 }
