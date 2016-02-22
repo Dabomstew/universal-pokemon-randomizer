@@ -1,6 +1,8 @@
 package com.dabomstew.pkrandom;
 
 import java.awt.image.BufferedImage;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class GFXFunctions {
 
@@ -50,6 +52,43 @@ public class GFXFunctions {
         int green = (int) (((palValue & 0x3E0) >> 5) * 8.25);
         int blue = (int) (((palValue & 0x7C00) >> 10) * 8.25);
         return 0xFF000000 | (red << 16) | (green << 8) | blue;
+    }
+
+    public static void pseudoTransparency(BufferedImage img, int transColor) {
+        int width = img.getWidth();
+        int height = img.getHeight();
+        Queue<Integer> visitPixels = new LinkedList<Integer>();
+        boolean[][] queued = new boolean[width][height];
+
+        for (int x = 0; x < width; x++) {
+            queuePixel(x, 0, width, height, visitPixels, queued);
+            queuePixel(x, height - 1, width, height, visitPixels, queued);
+        }
+
+        for (int y = 0; y < height; y++) {
+            queuePixel(0, y, width, height, visitPixels, queued);
+            queuePixel(width - 1, y, width, height, visitPixels, queued);
+        }
+
+        while (!visitPixels.isEmpty()) {
+            int nextPixel = visitPixels.poll();
+            int x = nextPixel % width;
+            int y = nextPixel / width;
+            if (img.getRGB(x, y) == transColor) {
+                img.setRGB(x, y, 0);
+                queuePixel(x - 1, y, width, height, visitPixels, queued);
+                queuePixel(x + 1, y, width, height, visitPixels, queued);
+                queuePixel(x, y - 1, width, height, visitPixels, queued);
+                queuePixel(x, y + 1, width, height, visitPixels, queued);
+            }
+        }
+    }
+
+    private static void queuePixel(int x, int y, int width, int height, Queue<Integer> queue, boolean[][] queued) {
+        if (x >= 0 && x < width && y >= 0 && y < height && !queued[x][y]) {
+            queue.add((y) * width + (x));
+            queued[x][y] = true;
+        }
     }
 
 }

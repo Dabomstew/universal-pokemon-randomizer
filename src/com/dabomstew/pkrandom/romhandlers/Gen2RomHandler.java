@@ -2280,8 +2280,8 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
             mascot = randomPokemon();
         }
 
-        // Each Pokemon has a front and back pic with a bank and a pointer (3*2
-        // = 6)
+        // Each Pokemon has a front and back pic with a bank and a pointer 
+        // (3*2=6)
         // There is no zero-entry.
         int picPointer = romEntry.getValue("PicPointers") + (mascot.number - 1) * 6;
         int picWidth = mascot.picDimensions & 0x0F;
@@ -2324,6 +2324,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
         byte[] data = mscSprite.getFlattenedData();
 
         BufferedImage bim = GFXFunctions.drawTiledImage(data, palette, w, h, 8);
+        GFXFunctions.pseudoTransparency(bim, palette[0]);
 
         return bim;
     }

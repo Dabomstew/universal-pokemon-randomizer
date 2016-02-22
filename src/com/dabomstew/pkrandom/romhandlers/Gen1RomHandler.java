@@ -2472,9 +2472,9 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
             fsBank = 0x9;
         } else if (idx < 0x4A) {
             fsBank = 0xA;
-        } else if (idx < 0x74) {
+        } else if (idx < 0x74 || idx == 0x74 && mascot.frontSpritePointer > 0x7000) {
             fsBank = 0xB;
-        } else if (idx < 0x99) {
+        } else if (idx < 0x99 || idx == 0x99 && mascot.frontSpritePointer > 0x7000) {
             fsBank = 0xC;
         } else {
             fsBank = 0xD;
@@ -2503,6 +2503,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
         byte[] data = mscSprite.getFlattenedData();
 
         BufferedImage bim = GFXFunctions.drawTiledImage(data, palette, w, h, 8);
+        GFXFunctions.pseudoTransparency(bim, palette[0]);
 
         return bim;
     }
