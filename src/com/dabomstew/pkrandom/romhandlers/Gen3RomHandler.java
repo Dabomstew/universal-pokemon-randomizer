@@ -1840,7 +1840,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 // create the new MT text
                 int oldPointer = readPointer(tte.actualOffset);
                 if (oldPointer < 0 || oldPointer >= rom.length) {
-                    throw new RuntimeException(
+                    throw new RandomizationException(
                             "Move Tutor Text update failed: couldn't read a move tutor text pointer.");
                 }
                 String moveName = this.moves[moves.get(tte.number)].name;
