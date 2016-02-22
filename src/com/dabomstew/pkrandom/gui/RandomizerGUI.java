@@ -38,8 +38,10 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -1646,9 +1648,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
             }
         });
 
-        long time = System.currentTimeMillis();
+        Date now = new Date();
+        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
         try {
-            String errlog = "error_" + time + ".txt";
+            String errlog = "error_" + ft.format(now) + ".txt";
             PrintStream ps = new PrintStream(new FileOutputStream(errlog));
             ps.println("Randomizer Version: " + Constants.UPDATE_VERSION);
             PrintStream e1 = System.err;

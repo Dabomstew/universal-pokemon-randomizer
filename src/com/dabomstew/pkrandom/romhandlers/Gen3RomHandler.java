@@ -426,6 +426,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         loadPokedex();
         loadPokemonStats();
         constructPokemonList();
+        populateEvolutions();
         loadMoves();
 
         // Get wild Pokemon offset
@@ -666,7 +667,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         CRC32 checksum = new CRC32();
         checksum.update(rom);
         long csum = checksum.getValue();
-        // TODO: there might be more valid BPRE 1.0 checksums?
         return csum != 3716707868L;
     }
 
@@ -765,7 +765,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int pkoffs = offs + i * Gen3Constants.baseStatsEntrySize;
             loadBasicPokeStats(pk, pkoffs);
         }
-        populateEvolutions();
     }
 
     private void savePokemonStats() {
