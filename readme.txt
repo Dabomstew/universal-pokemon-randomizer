@@ -1,5 +1,5 @@
-Universal Pokemon Randomizer 1.6.3b
-by Dabomstew, 2012-15
+Universal Pokemon Randomizer 1.7.0
+by Dabomstew, 2012-16
 
 Homepage: http://pokehacks.dabomstew.com/randomizer/index.php
 Source: https://github.com/Dabomstew/universal-pokemon-randomizer
@@ -50,8 +50,10 @@ Libraries Used
   * Code from CUE's Nintendo DS Compressors for arm9.bin (de)compressing
     (under GPL)
 	http://gbatemp.net/threads/nintendo-ds-gba-compressors.313278/
-  * DSDecmp for LZ11 decompression (under MIT)
-    http://code.google.com/p/dsdecmp/
+  * DSDecmp for LZ10/11 decompression (under MIT)
+    https://github.com/Barubary/dsdecmp
+  * Code from pokemon-reverse-engineering tools for Gen1/2 pic decompression
+    https://github.com/pret/pokemon-reverse-engineering-tools
  
 Features
 --------
@@ -64,6 +66,8 @@ of it if you haven't played Pokemon games much before.
   * The base stats which define the potential of each Pokemon
   * The elemental types of each Pokemon
   * The abilities of each Pokemon, in games where Pokemon have abilities
+  * The Pokemon that each Pokemon evolves into, if it evolved to begin with.
+  * The properties of each move, such as its power, accuracy and typing.
   * The moves that Pokemon learn by gaining levels
   * The contents of each TM which can be taught to Pokemon to give them
     additional moves 
@@ -85,11 +89,15 @@ How To Use
 ----------
 Extract this ZIP file before doing anything else!!!
 
-Make sure you have Java 1.6 or later installed, then run the included JAR file.
+Make sure you have Java 1.6 or later installed, then run the included EXE or JAR file.
 
-In some situations, you will be able to just double-click on the JAR file and
-the program will run. If not, execute the following command from your command
-line in the directory where you have extracted the program:
+If you open the EXE file without Java installed, it should prompt you to
+install it. Follow the prompts and then re-open it once you have Java installed.
+
+If you're using the JAR release, in some situations, you will be able to just
+double-click on the JAR file and the program will run. If not, execute the
+following command from your command line in the directory where you have
+extracted the program:
 
 java -jar randomizer.jar
 
@@ -99,7 +107,7 @@ randomized, then save the randomized ROM.
 Games/ROMs supported
 --------------------
 
-Version 1.6.3 supports the following official ROMs:
+Version 1.7.0 supports the following official ROMs:
 
   * Pokemon Red (any)
   * Pokemon Blue (any)
@@ -133,9 +141,11 @@ this randomizer is still targeted at English games - so users of foreign
 language games may still find that the functionality is a bit limited or
 small amounts of English text appear ingame where they did not before.
 
-Randomizing ROM hacks of the above games isn't a supported feature yet, but may
-still be possible depending on the specifics of the hack itself. In general,
-the simpler a hack is, the more likely it will be able to be randomized.
+Randomizing ROM hacks of the above games is not supported for the most part.
+It may still be possible depending on the specifics of the hack itself.
+In general, the simpler a hack is, the more likely it will be able to be randomized.
+Fire Red hacks are more likely to work than any others, due to specific
+code added in 1.7.0 attempting to deal with them.
 
 License
 -------
@@ -146,10 +156,6 @@ Source code can be obtained from:
 https://github.com/Dabomstew/universal-pokemon-randomizer
 
 Other libraries used are under more liberal licenses, compatible with the GPL.
-
-Known Issues
-------------
-See https://code.google.com/p/universal-pokemon-randomizer/wiki/KnownIssues
 
 Useful/Interesting Links
 ------------------------
