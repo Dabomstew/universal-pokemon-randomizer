@@ -1701,10 +1701,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 
     @Override
     public String getDefaultExtension() {
-        if (((rom[GBConstants.isGBCOffset] & 0xFF) & 0x80) > 0) {
-            return "gbc";
-        }
-        return "sgb";
+        return "gbc";
     }
 
     @Override
