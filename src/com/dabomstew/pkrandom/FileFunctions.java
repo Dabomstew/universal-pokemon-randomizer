@@ -166,8 +166,6 @@ public class FileFunctions {
     public static void applyPatch(byte[] rom, String patchName) throws IOException {
         byte[] patch = getCodeTweakFile(patchName + ".ips");
 
-        System.out.println(patch.length);
-        System.out.println(Arrays.toString(patch));
         // check sig
         int patchlen = patch.length;
         if (patchlen < 8 || patch[0] != 'P' || patch[1] != 'A' || patch[2] != 'T' || patch[3] != 'C' || patch[4] != 'H') {
