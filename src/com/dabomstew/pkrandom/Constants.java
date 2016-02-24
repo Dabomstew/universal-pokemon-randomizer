@@ -6,7 +6,7 @@ public class Constants {
 
     public static final String AUTOUPDATE_URL = "http://pokehacks.dabomstew.com/randomizer/autoupdate/";
     public static final String WEBSITE_URL = "http://pokehacks.dabomstew.com/randomizer/";
-    public static final int UPDATE_VERSION = 1700;
+    public static final int UPDATE_VERSION = 1701;
     public static final String ROOT_PATH = getRootPath();
 
     private static String getRootPath() {

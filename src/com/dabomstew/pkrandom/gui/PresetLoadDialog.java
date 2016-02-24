@@ -202,6 +202,8 @@ public class PresetLoadDialog extends javax.swing.JDialog {
                 versionWanted = "1.6.1";
             } else if (presetVN == 162) {
                 versionWanted = "1.6.2";
+            } else if (presetVN == 163) {
+                versionWanted = "1.6.3b";
             }
             JOptionPane.showMessageDialog(this,
                     String.format(bundle.getString("PresetLoadDialog.olderVersionRequired"), versionWanted));
