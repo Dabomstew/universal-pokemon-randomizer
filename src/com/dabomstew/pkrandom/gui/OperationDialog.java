@@ -9,6 +9,8 @@ import java.io.InputStream;
 
 import javax.swing.ImageIcon;
 
+import com.dabomstew.pkrandom.FileFunctions;
+
 /**
  * 
  * @author Stewart
@@ -98,8 +100,7 @@ public class OperationDialog extends javax.swing.JDialog {
         try {
             InputStream in = OperationDialog.class
                     .getResourceAsStream("/com/dabomstew/pkrandom/gui/loading.gif");
-            byte[] buf = new byte[in.available()];
-            in.read(buf);
+            byte[] buf = FileFunctions.readFullyIntoBuffer(in, in.available());
             in.close();
             Image image = Toolkit.getDefaultToolkit().createImage(buf);
             return new ImageIcon(image);

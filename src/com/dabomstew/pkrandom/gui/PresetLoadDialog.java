@@ -42,6 +42,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
@@ -273,14 +274,11 @@ public class PresetLoadDialog extends javax.swing.JDialog {
                 long seed = dis.readLong();
                 String preset = dis.readUTF();
                 int tclen = dis.readInt();
-                trainerClasses = new byte[tclen];
-                dis.read(trainerClasses);
+                trainerClasses = FileFunctions.readFullyIntoBuffer(dis, tclen);
                 int tnlen = dis.readInt();
-                trainerNames = new byte[tnlen];
-                dis.read(trainerNames);
+                trainerNames = FileFunctions.readFullyIntoBuffer(dis, tnlen);
                 int nnlen = dis.readInt();
-                nicknames = new byte[nnlen];
-                dis.read(nicknames);
+                nicknames = FileFunctions.readFullyIntoBuffer(dis, nnlen);
                 changeFieldsWithoutCheck = true;
                 this.randomSeedField.setText(Long.toString(seed));
                 this.configStringField.setText(checkByte + "" + preset);

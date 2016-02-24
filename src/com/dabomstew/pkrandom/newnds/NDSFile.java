@@ -1,10 +1,11 @@
 package com.dabomstew.pkrandom.newnds;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+
+import com.dabomstew.pkrandom.FileFunctions;
 
 /*----------------------------------------------------------------------------*/
 /*--  NDSFile.java - an entry in the FAT/FNT filesystem                     --*/
@@ -75,10 +76,7 @@ public class NDSFile {
             return newcopy;
         } else {
             String tmpDir = parent.getTmpFolder();
-            FileInputStream fis = new FileInputStream(tmpDir + this.extFilename);
-            byte[] file = new byte[fis.available()];
-            fis.read(file);
-            fis.close();
+            byte[] file = FileFunctions.readFileFullyIntoBuffer(tmpDir + this.extFilename);
             return file;
         }
     }

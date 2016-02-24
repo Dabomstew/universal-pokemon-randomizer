@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
+import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.newnds.NDSRom;
 import com.dabomstew.pkrandom.pokemon.Type;
@@ -269,8 +270,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         try {
             FileInputStream fis = new FileInputStream(filename);
             fis.skip(0x0C);
-            byte[] sig = new byte[4];
-            fis.read(sig);
+            byte[] sig = FileFunctions.readFullyIntoBuffer(fis, 4);
             fis.close();
             String ndsCode = new String(sig, "US-ASCII");
             return ndsCode;

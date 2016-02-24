@@ -1,7 +1,6 @@
 package com.dabomstew.pkrandom.newnds;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -11,6 +10,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import com.dabomstew.pkrandom.Constants;
+import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
 
 import cuecompressors.BLZCoder;
@@ -101,8 +101,9 @@ public class NDSRom {
     private void readFileSystem() throws IOException {
         // read rom code
         baseRom.seek(0x0C);
+
         byte[] sig = new byte[4];
-        baseRom.read(sig);
+        baseRom.readFully(sig);
         this.romCode = new String(sig, "US-ASCII");
 
         baseRom.seek(0x40);
@@ -483,7 +484,7 @@ public class NDSRom {
                 // found a footer
                 arm9_footer = new byte[12];
                 writeToByteArr(arm9_footer, 0, 4, 0xDEC00621);
-                this.baseRom.read(arm9_footer, 4, 8);
+                this.baseRom.readFully(arm9_footer, 4, 8);
                 arm9_has_footer = true;
             } else {
                 arm9_has_footer = false;
@@ -552,10 +553,7 @@ public class NDSRom {
             }
         } else {
             if (writingEnabled) {
-                FileInputStream fis = new FileInputStream(tmpFolder + "arm9.bin");
-                byte[] file = new byte[fis.available()];
-                fis.read(file);
-                fis.close();
+                byte[] file = FileFunctions.readFileFullyIntoBuffer(tmpFolder + "arm9.bin");
                 return file;
             } else {
                 byte[] newcopy = new byte[this.arm9_ramstored.length];

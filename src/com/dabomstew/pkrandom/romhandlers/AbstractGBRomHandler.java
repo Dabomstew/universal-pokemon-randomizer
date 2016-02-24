@@ -24,11 +24,15 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Random;
+
+import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 
 public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
@@ -89,21 +93,24 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
     protected static byte[] loadFile(String filename) {
         try {
-            FileInputStream fis = new FileInputStream(filename);
-            byte[] file = new byte[fis.available()];
-            fis.read(file);
-            fis.close();
-            return file;
+            return FileFunctions.readFileFullyIntoBuffer(filename);
         } catch (IOException ex) {
-            return new byte[0];
+            throw new RandomizerIOException(ex);
         }
     }
 
     protected static byte[] loadFilePartial(String filename, int maxBytes) {
         try {
+            File fh = new File(filename);
+            if (!fh.exists() || !fh.isFile() || !fh.canRead()) {
+                return new byte[0];
+            }
+            long fileSize = fh.length();
+            if (fileSize > Integer.MAX_VALUE) {
+                return new byte[0];
+            }
             FileInputStream fis = new FileInputStream(filename);
-            byte[] file = new byte[Math.min(maxBytes, fis.available())];
-            fis.read(file);
+            byte[] file = FileFunctions.readFullyIntoBuffer(fis, Math.min((int) fileSize, maxBytes));
             fis.close();
             return file;
         } catch (IOException ex) {

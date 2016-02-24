@@ -1,8 +1,9 @@
 package cuecompressors;
 
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import com.dabomstew.pkrandom.FileFunctions;
 
 /*----------------------------------------------------------------------------*/
 /*--  blz.c - Bottom LZ coding for Nintendo GBA/DS                          --*/
@@ -141,10 +142,7 @@ public class BLZCoder {
         try {
             System.out.printf("- decoding '%s'", filename);
             long startTime = System.currentTimeMillis();
-            FileInputStream fis = new FileInputStream(filename);
-            byte[] buf = new byte[fis.available()];
-            fis.read(buf);
-            fis.close();
+            byte[] buf = FileFunctions.readFileFullyIntoBuffer(filename);
             BLZResult result = BLZ_Decode(buf);
             if (result != null)
                 Save(filename, result.buffer, result.length);
@@ -296,10 +294,7 @@ public class BLZCoder {
         try {
             System.out.printf("- encoding '%s'", filename);
             long startTime = System.currentTimeMillis();
-            FileInputStream fis = new FileInputStream(filename);
-            byte[] buf = new byte[fis.available()];
-            fis.read(buf);
-            fis.close();
+            byte[] buf = FileFunctions.readFileFullyIntoBuffer(filename);
             BLZResult result = BLZ_Encode(buf, mode);
             if (result != null)
                 Save(filename, result.buffer, result.length);

@@ -89,11 +89,39 @@ public class FileFunctions {
         System.arraycopy(valueBytes, 0, data, offset, 4);
     }
 
+    public static byte[] readFileFullyIntoBuffer(String filename) throws IOException {
+        File fh = new File(filename);
+        if (!fh.exists() || !fh.isFile() || !fh.canRead()) {
+            throw new FileNotFoundException(filename);
+        }
+        long fileSize = fh.length();
+        if (fileSize > Integer.MAX_VALUE) {
+            throw new IOException(filename + " is too long to read in as a byte-array.");
+        }
+        FileInputStream fis = new FileInputStream(filename);
+        byte[] buf = readFullyIntoBuffer(fis, (int) fileSize);
+        fis.close();
+        return buf;
+    }
+
+    public static byte[] readFullyIntoBuffer(InputStream in, int bytes) throws IOException {
+        byte[] buf = new byte[bytes];
+        readFully(in, buf, 0, bytes);
+        return buf;
+    }
+
+    public static void readFully(InputStream in, byte[] buf, int offset, int length) throws IOException {
+        int offs = 0, read = 0;
+        while (offs < length && (read = in.read(buf, offs + offset, length - offs)) != -1) {
+            offs += read;
+        }
+    }
+
     public static byte[] getConfigAsBytes(String filename) throws IOException {
         InputStream in = openConfig(filename);
-        byte[] bytes = new byte[in.available()];
-        in.read(bytes);
-        return bytes;
+        byte[] buf = readFullyIntoBuffer(in, in.available());
+        in.close();
+        return buf;
     }
 
     public static int getFileChecksum(String filename) {
@@ -141,11 +169,7 @@ public class FileFunctions {
 
     public static byte[] getCodeTweakFile(String filename) throws IOException {
         InputStream is = FileFunctions.class.getResourceAsStream("/com/dabomstew/pkrandom/patches/" + filename);
-        byte[] buf = new byte[is.available()];
-        int offs = 0, read = 0;
-        while (offs < buf.length && (read = is.read(buf, offs, buf.length - offs)) != -1) {
-            offs += read;
-        }
+        byte[] buf = readFullyIntoBuffer(is, is.available());
         is.close();
         return buf;
     }

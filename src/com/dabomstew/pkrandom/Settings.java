@@ -194,8 +194,7 @@ public class Settings {
             throw new UnsupportedOperationException("Cannot read settings from a newer version of the randomizer.");
         }
         int length = in.read();
-        byte[] buffer = new byte[length];
-        in.read(buffer);
+        byte[] buffer = FileFunctions.readFullyIntoBuffer(in, length);
         String settings = new String(buffer, "UTF-8");
         boolean oldUpdate = false;
 

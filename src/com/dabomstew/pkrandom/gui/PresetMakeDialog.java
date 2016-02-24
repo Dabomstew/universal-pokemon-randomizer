@@ -221,8 +221,7 @@ public class PresetMakeDialog extends javax.swing.JDialog {
     }// GEN-LAST:event_produceFileButtonActionPerformed
 
     protected static byte[] readFile(InputStream is) throws IOException {
-        byte[] file = new byte[is.available()];
-        is.read(file);
+        byte[] file = FileFunctions.readFullyIntoBuffer(is, is.available());
         is.close();
         return file;
     }
