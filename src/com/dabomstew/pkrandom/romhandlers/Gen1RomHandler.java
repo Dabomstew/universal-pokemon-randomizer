@@ -964,6 +964,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
         oldRodEnc.level = rom[oldRodOffset + 2] & 0xFF;
         oldRodEnc.pokemon = pokes[pokeRBYToNumTable[rom[oldRodOffset + 1] & 0xFF]];
         oldRodSet.encounters.add(oldRodEnc);
+        oldRodSet.bannedPokemon.add(ghostMarowak);
         encounters.add(oldRodSet);
 
         // good rod
@@ -976,6 +977,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
             enc.pokemon = pokes[pokeRBYToNumTable[rom[goodRodOffset + grSlot * 2 + 1] & 0xFF]];
             goodRodSet.encounters.add(enc);
         }
+        goodRodSet.bannedPokemon.add(ghostMarowak);
         encounters.add(goodRodSet);
 
         // super rod
@@ -992,6 +994,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
                     thisSet.encounters.add(enc);
                     superRodOffset += 2;
                 }
+                thisSet.bannedPokemon.add(ghostMarowak);
                 encounters.add(thisSet);
             }
         } else {
@@ -1016,6 +1019,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
                         thisSet.encounters.add(enc);
                         setOffset += 2;
                     }
+                    thisSet.bannedPokemon.add(ghostMarowak);
                     encounters.add(thisSet);
                 } else {
                     for (EncounterSet es : encounters) {
