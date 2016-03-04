@@ -62,6 +62,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.xml.bind.DatatypeConverter;
@@ -107,6 +108,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     // Settings
     private boolean autoUpdateEnabled;
     private boolean haveCheckedCustomNames;
+    private boolean useScrollPaneMode;
     private ImageIcon emptyIcon = new ImageIcon(getClass().getResource("/com/dabomstew/pkrandom/gui/emptyIcon.png"));
 
     java.util.ResourceBundle bundle;
@@ -132,7 +134,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 javax.swing.UIManager.setLookAndFeel(lafName);
                 onWindowsNativeLAF = true;
             }
-            System.out.println(lafName);
         } catch (ClassNotFoundException ex) {
             java.util.logging.Logger.getLogger(RandomizerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null,
                     ex);
@@ -164,23 +165,28 @@ public class RandomizerGUI extends javax.swing.JFrame {
      * @param autoupdate
      */
     public RandomizerGUI(boolean autoupdate, boolean onWindowsLAF) {
-
+        ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
         bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle"); // NOI18N
         testForRequiredConfigs();
         checkHandlers = new RomHandler.Factory[] { new Gen1RomHandler.Factory(), new Gen2RomHandler.Factory(),
                 new Gen3RomHandler.Factory(), new Gen4RomHandler.Factory(), new Gen5RomHandler.Factory() };
-        initComponents();
-        initTweaksPanel();
-        guiCleanup(onWindowsLAF);
-        noTweaksLayout = miscTweaksPanel.getLayout();
-        initialiseState();
         autoUpdateEnabled = true;
         haveCheckedCustomNames = false;
+        useScrollPaneMode = !onWindowsLAF;
         attemptReadConfig();
         if (!autoupdate) {
             // override autoupdate
             autoUpdateEnabled = false;
         }
+        initComponents();
+        initTweaksPanel();
+        guiCleanup();
+        if (useScrollPaneMode) {
+            scrollPaneSetup();
+        }
+        noTweaksLayout = miscTweaksPanel.getLayout();
+        initialiseState();
+
         boolean canWrite = attemptWriteConfig();
         if (!canWrite) {
             JOptionPane.showMessageDialog(null, bundle.getString("RandomizerGUI.cantWriteConfigFile"));
@@ -194,7 +200,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         }
     }
 
-    private void guiCleanup(boolean onWindowsLAF) {
+    private void guiCleanup() {
         // All systems: test for font size and adjust if required
         Font f = pokeLimitCB.getFont();
         if (f == null || !f.getFontName().equalsIgnoreCase("tahoma") || f.getSize() != 11) {
@@ -206,15 +212,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 cb.setFont(regularFont);
             }
         }
-
-        // Non-Windows scrollbar mode?
-        // TODO make this an option, instead
-        if (!onWindowsLAF) {
-            scrollPaneMode();
-        }
     }
 
-    private void scrollPaneMode() {
+    private void scrollPaneSetup() {
         /* @formatter:off */
         JScrollPane optionsScrollPane = new JScrollPane();
         optionsScrollPane.getVerticalScrollBar().setUnitIncrement(16);
@@ -414,7 +414,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         optionsScrollPane.setViewportView(optionsContainerPanel);
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             
@@ -440,7 +439,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                             .addComponent(openROMButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(saveROMButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(usePresetsButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(updateSettingsButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(settingsButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(versionLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -450,7 +449,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(generalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(gameMascotLabel)
@@ -461,7 +460,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(usePresetsButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(updateSettingsButton))
+                        .addComponent(settingsButton))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(romInfoPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -473,10 +472,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(versionLabel)
                     .addComponent(websiteLinkLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(optionsScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 457, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(22, 22, 22))
+                .addComponent(optionsScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 457, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE))
         );
         getContentPane().remove(randomizerOptionsPane);
+        getContentPane().setLayout(layout);
         /* @formatter:on */
     }
 
@@ -630,6 +630,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                             autoUpdateEnabled = Boolean.parseBoolean(tokens[1].trim());
                         } else if (key.equalsIgnoreCase("checkedcustomnames")) {
                             haveCheckedCustomNames = Boolean.parseBoolean(tokens[1].trim());
+                        } else if (key.equalsIgnoreCase("usescrollpane")) {
+                            useScrollPaneMode = Boolean.parseBoolean(tokens[1].trim());
                         }
                     }
                 }
@@ -650,6 +652,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             PrintStream ps = new PrintStream(new FileOutputStream(fh), true, "UTF-8");
             ps.println("autoupdate=" + autoUpdateEnabled);
             ps.println("checkedcustomnames=" + haveCheckedCustomNames);
+            ps.println("usescrollpane=" + useScrollPaneMode);
             ps.close();
             return true;
         } catch (IOException e) {
@@ -2019,13 +2022,19 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
     // actions
 
-    private void updateSettingsButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_updateSettingsButtonActionPerformed
+    private void settingsButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_updateSettingsButtonActionPerformed
         if (autoUpdateEnabled) {
             toggleAutoUpdatesMenuItem.setText(bundle.getString("RandomizerGUI.disableAutoUpdate"));
         } else {
             toggleAutoUpdatesMenuItem.setText(bundle.getString("RandomizerGUI.enableAutoUpdate"));
         }
-        updateSettingsMenu.show(updateSettingsButton, 0, updateSettingsButton.getHeight());
+
+        if (useScrollPaneMode) {
+            toggleScrollPaneMenuItem.setText(bundle.getString("RandomizerGUI.changeToTabbedPane"));
+        } else {
+            toggleScrollPaneMenuItem.setText(bundle.getString("RandomizerGUI.changeToScrollPane"));
+        }
+        updateSettingsMenu.show(settingsButton, 0, settingsButton.getHeight());
     }// GEN-LAST:event_updateSettingsButtonActionPerformed
 
     private void toggleAutoUpdatesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_toggleAutoUpdatesMenuItemActionPerformed
@@ -2041,6 +2050,18 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private void manualUpdateMenuItemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_manualUpdateMenuItemActionPerformed
         new UpdateCheckThread(this, true).start();
     }// GEN-LAST:event_manualUpdateMenuItemActionPerformed
+
+    private void toggleScrollPaneMenuItemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_toggleScrollPaneMenuItemActionPerformed
+        int response = JOptionPane.showConfirmDialog(RandomizerGUI.this,
+                bundle.getString("RandomizerGUI.displayModeChangeDialog.text"),
+                bundle.getString("RandomizerGUI.displayModeChangeDialog.title"), JOptionPane.YES_NO_OPTION);
+        if (response == JOptionPane.YES_OPTION) {
+            useScrollPaneMode = !useScrollPaneMode;
+            JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.displayModeChanged"));
+            attemptWriteConfig();
+            System.exit(0);
+        }
+    }// GEN-LAST:event_toggleScrollPaneMenuItemActionPerformed
 
     private void loadQSButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_loadQSButtonActionPerformed
         if (this.romHandler == null) {
@@ -2372,6 +2393,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         updateSettingsMenu = new javax.swing.JPopupMenu();
         toggleAutoUpdatesMenuItem = new javax.swing.JMenuItem();
         manualUpdateMenuItem = new javax.swing.JMenuItem();
+        toggleScrollPaneMenuItem = new javax.swing.JMenuItem();
         pokeEvolutionsButtonGroup = new javax.swing.ButtonGroup();
         generalOptionsPanel = new javax.swing.JPanel();
         pokeLimitCB = new javax.swing.JCheckBox();
@@ -2387,7 +2409,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         usePresetsButton = new javax.swing.JButton();
         loadQSButton = new javax.swing.JButton();
         saveQSButton = new javax.swing.JButton();
-        updateSettingsButton = new javax.swing.JButton();
+        settingsButton = new javax.swing.JButton();
         randomizerOptionsPane = new javax.swing.JTabbedPane();
         pokeTraitsPanel = new javax.swing.JPanel();
         pokemonTypesPanel = new javax.swing.JPanel();
@@ -2544,9 +2566,16 @@ public class RandomizerGUI extends javax.swing.JFrame {
         });
         updateSettingsMenu.add(manualUpdateMenuItem);
 
+        toggleScrollPaneMenuItem.setText(bundle.getString("RandomizerGUI.toggleScrollPaneMenuItem.text")); // NOI18N
+        toggleScrollPaneMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                toggleScrollPaneMenuItemActionPerformed(evt);
+            }
+        });
+        updateSettingsMenu.add(toggleScrollPaneMenuItem);
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle(bundle.getString("RandomizerGUI.title")); // NOI18N
-        setResizable(false);
 
         generalOptionsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("RandomizerGUI.generalOptionsPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
 
@@ -2669,10 +2698,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
             }
         });
 
-        updateSettingsButton.setText(bundle.getString("RandomizerGUI.updateSettingsButton.text")); // NOI18N
-        updateSettingsButton.addActionListener(new java.awt.event.ActionListener() {
+        settingsButton.setText(bundle.getString("RandomizerGUI.settingsButton.text")); // NOI18N
+        settingsButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                updateSettingsButtonActionPerformed(evt);
+                settingsButtonActionPerformed(evt);
             }
         });
 
@@ -4146,26 +4175,24 @@ public class RandomizerGUI extends javax.swing.JFrame {
                             .addComponent(romInfoPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(28, 28, 28)
                         .addComponent(gameMascotLabel)
-                        .addGap(37, 37, 37)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(openROMButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(saveROMButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(usePresetsButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(updateSettingsButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(settingsButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, 0))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(versionLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(websiteLinkLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(randomizerOptionsPane, javax.swing.GroupLayout.PREFERRED_SIZE, 759, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(randomizerOptionsPane, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(generalOptionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(gameMascotLabel)
@@ -4176,7 +4203,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(usePresetsButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(updateSettingsButton))
+                        .addComponent(settingsButton))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(romInfoPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -4188,12 +4215,14 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(versionLabel)
                     .addComponent(websiteLinkLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(randomizerOptionsPane, javax.swing.GroupLayout.PREFERRED_SIZE, 457, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(22, 22, 22))
+                .addComponent(randomizerOptionsPane, javax.swing.GroupLayout.PREFERRED_SIZE, 457, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel abilitiesPanel;
@@ -4293,6 +4322,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JFileChooser romSaveChooser;
     private javax.swing.JButton saveQSButton;
     private javax.swing.JButton saveROMButton;
+    private javax.swing.JButton settingsButton;
     private javax.swing.JComboBox spCustomPoke1Chooser;
     private javax.swing.JComboBox spCustomPoke2Chooser;
     private javax.swing.JComboBox spCustomPoke3Chooser;
@@ -4328,6 +4358,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JRadioButton tmmUnchangedRB;
     private javax.swing.JCheckBox tnRandomizeCB;
     private javax.swing.JMenuItem toggleAutoUpdatesMenuItem;
+    private javax.swing.JMenuItem toggleScrollPaneMenuItem;
     private javax.swing.JCheckBox tpNoEarlyShedinjaCB;
     private javax.swing.JCheckBox tpNoLegendariesCB;
     private javax.swing.JCheckBox tpPowerLevelsCB;
@@ -4339,7 +4370,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.ButtonGroup trainerPokesButtonGroup;
     private javax.swing.JPanel trainersInnerPanel;
     private javax.swing.JPanel trainersPokemonPanel;
-    private javax.swing.JButton updateSettingsButton;
     private javax.swing.JPopupMenu updateSettingsMenu;
     private javax.swing.JButton usePresetsButton;
     private javax.swing.JLabel versionLabel;
