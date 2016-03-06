@@ -2493,6 +2493,11 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
         if (romEntry.getValue("MonPaletteIndicesOffset") > 0 && romEntry.getValue("SGBPalettesOffset") > 0) {
             int palIndex = rom[romEntry.getValue("MonPaletteIndicesOffset") + mascot.number] & 0xFF;
             int palOffset = romEntry.getValue("SGBPalettesOffset") + palIndex * 8;
+            if(romEntry.isYellow && romEntry.nonJapanese == 1) {
+                // Non-japanese Yellow can use GBC palettes instead.
+                // Stored directly after regular SGB palettes.
+                palOffset += 320;
+            }
             palette = new int[4];
             for (int i = 0; i < 4; i++) {
                 palette[i] = GFXFunctions.conv16BitColorToARGB(readWord(palOffset + i * 2));
@@ -2508,4 +2513,6 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 
         return bim;
     }
+    
+    
 }
