@@ -445,11 +445,11 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
             moves[i].name = moveNames[i];
             moves[i].number = i;
             moves[i].internalId = i;
-            moves[i].effectIndex = rom[offs + (i - 1) * 7] & 0xFF;
-            moves[i].hitratio = ((rom[offs + (i - 1) * 7 + 3] & 0xFF) + 0) / 255.0 * 100;
-            moves[i].power = rom[offs + (i - 1) * 7 + 1] & 0xFF;
-            moves[i].pp = rom[offs + (i - 1) * 7 + 4] & 0xFF;
-            moves[i].type = Gen2Constants.typeTable[rom[offs + (i - 1) * 7 + 2]];
+            moves[i].effectIndex = rom[offs + (i - 1) * 7 + 1] & 0xFF;
+            moves[i].hitratio = ((rom[offs + (i - 1) * 7 + 4] & 0xFF) + 0) / 255.0 * 100;
+            moves[i].power = rom[offs + (i - 1) * 7 + 2] & 0xFF;
+            moves[i].pp = rom[offs + (i - 1) * 7 + 5] & 0xFF;
+            moves[i].type = Gen2Constants.typeTable[rom[offs + (i - 1) * 7 + 3]];
         }
 
     }
