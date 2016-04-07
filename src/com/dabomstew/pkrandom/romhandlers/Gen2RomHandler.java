@@ -457,9 +457,9 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
     private void saveMoves() {
         int offs = romEntry.getValue("MoveDataOffset");
         for (int i = 1; i <= 251; i++) {
-            rom[offs + (i - 1) * 7] = (byte) moves[i].effectIndex;
-            rom[offs + (i - 1) * 7 + 1] = (byte) moves[i].power;
-            rom[offs + (i - 1) * 7 + 2] = Gen2Constants.typeToByte(moves[i].type);
+            rom[offs + (i - 1) * 7 + 1] = (byte) moves[i].effectIndex;
+            rom[offs + (i - 1) * 7 + 2] = (byte) moves[i].power;
+            rom[offs + (i - 1) * 7 + 3] = Gen2Constants.typeToByte(moves[i].type);
             int hitratio = (int) Math.round(moves[i].hitratio * 2.55);
             if (hitratio < 0) {
                 hitratio = 0;
@@ -467,8 +467,8 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
             if (hitratio > 255) {
                 hitratio = 255;
             }
-            rom[offs + (i - 1) * 7 + 3] = (byte) hitratio;
-            rom[offs + (i - 1) * 7 + 4] = (byte) moves[i].pp;
+            rom[offs + (i - 1) * 7 + 4] = (byte) hitratio;
+            rom[offs + (i - 1) * 7 + 5] = (byte) moves[i].pp;
         }
     }
 
