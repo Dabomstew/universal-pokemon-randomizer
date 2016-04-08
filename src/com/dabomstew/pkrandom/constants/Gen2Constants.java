@@ -33,7 +33,7 @@ public class Gen2Constants {
 
     public static final int landEncounterSlots = 7, seaEncounterSlots = 3;
 
-    public static final int gameCornerRepeatPKIndex1 = 0x11, gameCornerRepeatPKIndex2 = 0x16;
+    public static final int oddEggPokemonCount = 14;
 
     public static final int unownIndex = 201, slowpokeIndex = 79, seadraIndex = 117, poliwhirlIndex = 61;
 
