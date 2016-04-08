@@ -150,12 +150,10 @@ public class Randomizer {
         }
 
         maybeLogBaseStatAndTypeChanges(log, romHandler);
-        if (raceMode) {
-            for (Pokemon pkmn : romHandler.getPokemon()) {
-                if (pkmn != null) {
-                    checkValue = addToCV(checkValue, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk,
-                            pkmn.spdef, pkmn.ability1, pkmn.ability2, pkmn.ability3);
-                }
+        for (Pokemon pkmn : romHandler.getPokemon()) {
+            if (pkmn != null) {
+                checkValue = addToCV(checkValue, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk,
+                        pkmn.spdef, pkmn.ability1, pkmn.ability2, pkmn.ability3);
             }
         }
 
@@ -277,12 +275,10 @@ public class Randomizer {
             romHandler.metronomeOnlyMode();
         }
 
-        if (raceMode) {
-            List<Trainer> trainers = romHandler.getTrainers();
-            for (Trainer t : trainers) {
-                for (TrainerPokemon tpk : t.pokemon) {
-                    checkValue = addToCV(checkValue, tpk.level, tpk.pokemon.number);
-                }
+        List<Trainer> trainers = romHandler.getTrainers();
+        for (Trainer t : trainers) {
+            for (TrainerPokemon tpk : t.pokemon) {
+                checkValue = addToCV(checkValue, tpk.level, tpk.pokemon.number);
             }
         }
 
@@ -322,12 +318,10 @@ public class Randomizer {
         }
 
         maybeLogWildPokemonChanges(log, romHandler);
-        if (raceMode) {
-            List<EncounterSet> encounters = romHandler.getEncounters(settings.isUseTimeBasedEncounters());
-            for (EncounterSet es : encounters) {
-                for (Encounter e : es.encounters) {
-                    checkValue = addToCV(checkValue, e.level, e.pokemon.number);
-                }
+        List<EncounterSet> encounters = romHandler.getEncounters(settings.isUseTimeBasedEncounters());
+        for (EncounterSet es : encounters) {
+            for (Encounter e : es.encounters) {
+                checkValue = addToCV(checkValue, e.level, e.pokemon.number);
             }
         }
 
@@ -339,9 +333,7 @@ public class Randomizer {
             List<Integer> tmMoves = romHandler.getTMMoves();
             for (int i = 0; i < tmMoves.size(); i++) {
                 log.printf("TM%02d %s" + NEWLINE, i + 1, moves.get(tmMoves.get(i)).name);
-                if (raceMode) {
-                    checkValue = addToCV(checkValue, tmMoves.get(i));
-                }
+                checkValue = addToCV(checkValue, tmMoves.get(i));
             }
             log.println();
         } else if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
@@ -384,9 +376,7 @@ public class Randomizer {
                 for (int i = 0; i < newMtMoves.size(); i++) {
                     log.printf("%s => %s" + NEWLINE, moves.get(oldMtMoves.get(i)).name,
                             moves.get(newMtMoves.get(i)).name);
-                    if (raceMode) {
-                        checkValue = addToCV(checkValue, newMtMoves.get(i));
-                    }
+                    checkValue = addToCV(checkValue, newMtMoves.get(i));
                 }
                 log.println();
             } else if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
@@ -452,6 +442,9 @@ public class Randomizer {
 
         // Signature...
         romHandler.applySignature();
+
+        // Record check value?
+        romHandler.writeCheckValueToROM(checkValue);
 
         // Save
         romHandler.saveRom(filename);
@@ -693,9 +686,7 @@ public class Randomizer {
                 for (int i = 0; i < oldStatics.size(); i++) {
                     Pokemon oldP = oldStatics.get(i);
                     Pokemon newP = newStatics.get(i);
-                    if (raceMode) {
-                        checkValue = addToCV(checkValue, newP.number);
-                    }
+                    checkValue = addToCV(checkValue, newP.number);
                     log.print(oldP.name);
                     if (seenPokemon.containsKey(oldP)) {
                         int amount = seenPokemon.get(oldP);

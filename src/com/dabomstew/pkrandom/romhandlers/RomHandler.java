@@ -413,6 +413,8 @@ public interface RomHandler {
     public boolean isROMHack();
 
     public int generationOfPokemon();
+    
+    public void writeCheckValueToROM(int value);
 
     // code tweaks
 
