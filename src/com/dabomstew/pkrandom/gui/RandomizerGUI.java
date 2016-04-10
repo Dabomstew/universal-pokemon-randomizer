@@ -1629,6 +1629,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tmLearningSanityCB.setSelected(settings.isTmLevelUpMoveSanity());
         this.tmKeepFieldMovesCB.setSelected(settings.isKeepFieldMoveTMs());
         this.thcFullRB.setSelected(settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.FULL);
+        this.tmFullHMCompatCB.setSelected(settings.isFullHMCompat());
 
         this.mtcRandomTotalRB
                 .setSelected(settings.getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.COMPLETELY_RANDOM);
