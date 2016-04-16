@@ -1679,6 +1679,11 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
         // line size minus one for space
         return Gen2Constants.maxTrainerNameLength;
     }
+    
+    @Override
+    public int maxSumOfTrainerNameLengths() {
+        return romEntry.getValue("MaxSumOfTrainerNameLengths");
+    }
 
     @Override
     public List<Integer> getTCNameLengthsByTrainer() {
