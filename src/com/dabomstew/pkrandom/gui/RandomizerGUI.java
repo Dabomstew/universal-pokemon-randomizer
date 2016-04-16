@@ -1299,15 +1299,21 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         if (this.tpUnchangedRB.isSelected()) {
             this.tpPowerLevelsCB.setEnabled(false);
-            this.tpRivalCarriesStarterCB.setEnabled(false);
             this.tpNoLegendariesCB.setEnabled(false);
             this.tpNoEarlyShedinjaCB.setEnabled(false);
             this.tpNoEarlyShedinjaCB.setSelected(false);
         } else {
             this.tpPowerLevelsCB.setEnabled(true);
-            this.tpRivalCarriesStarterCB.setEnabled(true);
             this.tpNoLegendariesCB.setEnabled(true);
             this.tpNoEarlyShedinjaCB.setEnabled(true);
+        }
+        
+        if(!this.spUnchangedRB.isSelected() || !this.tpUnchangedRB.isSelected()) {
+            this.tpRivalCarriesStarterCB.setEnabled(true);
+        }
+        else {
+            this.tpRivalCarriesStarterCB.setEnabled(false);
+            this.tpRivalCarriesStarterCB.setSelected(false);
         }
 
         if (this.tpTypeThemedRB.isSelected()) {

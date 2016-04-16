@@ -176,13 +176,14 @@ public interface RomHandler {
 
     public void setTrainers(List<Trainer> trainerData);
 
-    public void randomizeTrainerPokes(boolean rivalCarriesStarter, boolean usePowerLevels, boolean noLegendaries,
+    public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard);
+
+    public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
             boolean noEarlyWonderGuard);
 
-    public void typeThemeTrainerPokes(boolean rivalCarriesStarter, boolean usePowerLevels, boolean weightByFrequency,
-            boolean noLegendaries, boolean noEarlyWonderGuard);
-
     public boolean typeInGame(Type type);
+
+    public void rivalCarriesStarter();
 
     // Randomizer: moves learnt
 
@@ -413,7 +414,7 @@ public interface RomHandler {
     public boolean isROMHack();
 
     public int generationOfPokemon();
-    
+
     public void writeCheckValueToROM(int value);
 
     // code tweaks

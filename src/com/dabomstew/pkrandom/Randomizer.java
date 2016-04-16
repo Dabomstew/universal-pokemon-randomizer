@@ -248,13 +248,17 @@ public class Randomizer {
 
         // Trainer Pokemon
         if (settings.getTrainersMod() == Settings.TrainersMod.RANDOM) {
-            romHandler.randomizeTrainerPokes(settings.isRivalCarriesStarterThroughout(),
-                    settings.isTrainersUsePokemonOfSimilarStrength(), settings.isTrainersBlockLegendaries(),
-                    settings.isTrainersBlockEarlyWonderGuard());
-        } else if (settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED) {
-            romHandler.typeThemeTrainerPokes(settings.isRivalCarriesStarterThroughout(),
-                    settings.isTrainersUsePokemonOfSimilarStrength(), settings.isTrainersMatchTypingDistribution(),
+            romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard());
+        } else if (settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED) {
+            romHandler.typeThemeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
+                    settings.isTrainersMatchTypingDistribution(), settings.isTrainersBlockLegendaries(),
+                    settings.isTrainersBlockEarlyWonderGuard());
+        }
+
+        if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)
+                && settings.isRivalCarriesStarterThroughout()) {
+            romHandler.rivalCarriesStarter();
         }
 
         // Trainer names & class names randomization
@@ -636,7 +640,7 @@ public class Randomizer {
     }
 
     private void maybeLogTrainerChanges(final PrintStream log, final RomHandler romHandler) {
-        if (settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED) {
+        if (settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED && !settings.isRivalCarriesStarterThroughout()) {
             log.println("Trainers: Unchanged." + NEWLINE);
         } else {
             log.println("--Trainers Pokemon--");

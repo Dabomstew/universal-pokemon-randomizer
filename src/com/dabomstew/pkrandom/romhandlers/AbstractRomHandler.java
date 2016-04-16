@@ -851,8 +851,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizeTrainerPokes(boolean rivalCarriesStarter, boolean usePowerLevels, boolean noLegendaries,
-            boolean noEarlyWonderGuard) {
+    public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         cachedReplacementLists = new TreeMap<Type, List<Pokemon>>();
@@ -871,19 +870,13 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        // Rival carries starter?
-        if (rivalCarriesStarter) {
-            rivalCarriesStarterUpdate(currentTrainers, "RIVAL", 1);
-            rivalCarriesStarterUpdate(currentTrainers, "FRIEND", 2);
-        }
-
         // Save it all up
         this.setTrainers(currentTrainers);
     }
 
     @Override
-    public void typeThemeTrainerPokes(boolean rivalCarriesStarter, boolean usePowerLevels, boolean weightByFrequency,
-            boolean noLegendaries, boolean noEarlyWonderGuard) {
+    public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
+            boolean noEarlyWonderGuard) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         cachedReplacementLists = new TreeMap<Type, List<Pokemon>>();
@@ -977,13 +970,16 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        // Rival carries starter?
-        if (rivalCarriesStarter) {
-            rivalCarriesStarterUpdate(currentTrainers, "RIVAL", 1);
-            rivalCarriesStarterUpdate(currentTrainers, "FRIEND", 2);
-        }
-
         // Save it all up
+        this.setTrainers(currentTrainers);
+    }
+
+    @Override
+    public void rivalCarriesStarter() {
+        checkPokemonRestrictions();
+        List<Trainer> currentTrainers = this.getTrainers();
+        rivalCarriesStarterUpdate(currentTrainers, "RIVAL", 1);
+        rivalCarriesStarterUpdate(currentTrainers, "FRIEND", 2);
         this.setTrainers(currentTrainers);
     }
 
@@ -3311,7 +3307,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         // override until detection implemented
         return false;
     }
-    
+
     @Override
     public void writeCheckValueToROM(int value) {
         // do nothing
