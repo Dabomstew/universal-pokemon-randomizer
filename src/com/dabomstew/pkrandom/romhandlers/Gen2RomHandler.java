@@ -713,13 +713,6 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public void shufflePokemonStats() {
-        for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
-            pokes[i].shuffleStats(this.random);
-        }
-    }
-
-    @Override
     public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
         int offset = romEntry.getValue("WildPokemonOffset");
         List<EncounterSet> areas = new ArrayList<EncounterSet>();

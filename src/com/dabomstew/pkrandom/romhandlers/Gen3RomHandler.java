@@ -1191,13 +1191,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public void shufflePokemonStats() {
-        for (int i = 1; i < numRealPokemon; i++) {
-            pokemonList.get(i).shuffleStats(this.random);
-        }
-    }
-
-    @Override
     public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
         if (!mapLoadingDone) {
             preprocessMaps();

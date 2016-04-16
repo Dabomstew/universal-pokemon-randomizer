@@ -92,7 +92,7 @@ public interface RomHandler {
     // Randomizer: Pokemon stats
 
     // Run the stats shuffler on each Pokemon.
-    public void shufflePokemonStats();
+    public void shufflePokemonStats(boolean evolutionSanity);
 
     // Randomise stats following evolutions for proportions or not (see
     // tooltips)
@@ -112,6 +112,57 @@ public interface RomHandler {
     // Give a random Pokemon who has 2 evolution stages
     // Should make a good starter Pokemon
     public Pokemon random2EvosPokemon();
+
+    // Randomizer: types
+
+    // return a random type valid in this game.
+    // straightforward except for gen1 where dark&steel are excluded.
+    public Type randomType();
+
+    public boolean typeInGame(Type type);
+
+    // randomise Pokemon types, with a switch on whether evolutions
+    // should follow the same types or not.
+    // some evolutions dont anyway, e.g. Eeveelutions, Hitmons
+    public void randomizePokemonTypes(boolean evolutionSanity);
+
+    // Randomizer: pokemon abilities
+    public int abilitiesPerPokemon();
+
+    public int highestAbilityIndex();
+
+    public String abilityName(int number);
+
+    public void randomizeAbilities(boolean evolutionSanity, boolean allowWonderGuard);
+
+    // Randomizer: wild pokemon
+    public List<EncounterSet> getEncounters(boolean useTimeOfDay);
+
+    public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters);
+
+    public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
+            boolean noLegendaries);
+
+    public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
+            boolean usePowerLevels, boolean noLegendaries);
+
+    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries);
+
+    public boolean hasTimeBasedEncounters();
+
+    public List<Pokemon> bannedForWildEncounters();
+
+    // Randomizer: trainer pokemon
+    public List<Trainer> getTrainers();
+
+    public void setTrainers(List<Trainer> trainerData);
+
+    public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard);
+
+    public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
+            boolean noEarlyWonderGuard);
+
+    public void rivalCarriesStarter();
 
     // Randomizer: moves
 
@@ -142,48 +193,6 @@ public interface RomHandler {
 
     // return all the moves valid in this game.
     public List<Move> getMoves();
-
-    // Randomizer: types
-
-    // return a random type valid in this game.
-    // straightforward except for gen1 where dark&steel are excluded.
-    public Type randomType();
-
-    // randomise Pokemon types, with a switch on whether evolutions
-    // should follow the same types or not.
-    // some evolutions dont anyway, e.g. Eeveelutions, Hitmons
-    public void randomizePokemonTypes(boolean evolutionSanity);
-
-    // Randomizer: wild pokemon
-    public List<EncounterSet> getEncounters(boolean useTimeOfDay);
-
-    public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters);
-
-    public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-            boolean noLegendaries);
-
-    public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
-            boolean usePowerLevels, boolean noLegendaries);
-
-    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries);
-
-    public boolean hasTimeBasedEncounters();
-
-    public List<Pokemon> bannedForWildEncounters();
-
-    // Randomizer: trainer pokemon
-    public List<Trainer> getTrainers();
-
-    public void setTrainers(List<Trainer> trainerData);
-
-    public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard);
-
-    public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
-            boolean noEarlyWonderGuard);
-
-    public boolean typeInGame(Type type);
-
-    public void rivalCarriesStarter();
 
     // Randomizer: moves learnt
 
@@ -287,7 +296,7 @@ public interface RomHandler {
 
     // Returns this with or without the class
     public int maxTrainerNameLength();
-    
+
     // Only relevant for gen2, which has fluid trainer name length but
     // only a certain amount of space in the ROM bank.
     public int maxSumOfTrainerNameLengths();
@@ -308,15 +317,6 @@ public interface RomHandler {
     public int maxTrainerClassNameLength();
 
     public void randomizeTrainerClassNames(byte[] presetNames);
-
-    // Randomizer: pokemon abilities
-    public int abilitiesPerPokemon();
-
-    public int highestAbilityIndex();
-
-    public String abilityName(int number);
-
-    public void randomizeAbilities(boolean allowWonderGuard);
 
     // Items
 

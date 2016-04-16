@@ -54,24 +54,36 @@ public class Pokemon implements Comparable<Pokemon> {
     public List<Evolution> evolutionsFrom = new ArrayList<Evolution>();
     public List<Evolution> evolutionsTo = new ArrayList<Evolution>();
 
+    public List<Integer> shuffledStatsOrder = null;
+
     // A flag to use for things like recursive stats copying.
     // Must not rely on the state of this flag being preserved between calls.
     public boolean temporaryFlag;
 
     public Pokemon() {
+        shuffledStatsOrder = Arrays.asList(0, 1, 2, 3, 4, 5);
     }
 
     public void shuffleStats(Random random) {
+        Collections.shuffle(shuffledStatsOrder, random);
+        applyShuffledOrderToStats();
+    }
+    
+    public void copyShuffledStatsUpEvolution(Pokemon evolvesFrom) {
+        shuffledStatsOrder = evolvesFrom.shuffledStatsOrder;
+        applyShuffledOrderToStats();
+    }
+
+    private void applyShuffledOrderToStats() {
         List<Integer> stats = Arrays.asList(hp, attack, defense, spatk, spdef, speed);
-        Collections.shuffle(stats, random);
 
         // Copy in new stats
-        hp = stats.get(0);
-        attack = stats.get(1);
-        defense = stats.get(2);
-        spatk = stats.get(3);
-        spdef = stats.get(4);
-        speed = stats.get(5);
+        hp = stats.get(shuffledStatsOrder.get(0));
+        attack = stats.get(shuffledStatsOrder.get(1));
+        defense = stats.get(shuffledStatsOrder.get(2));
+        spatk = stats.get(shuffledStatsOrder.get(3));
+        spdef = stats.get(shuffledStatsOrder.get(4));
+        speed = stats.get(shuffledStatsOrder.get(5));
 
         // make special the average of spatk and spdef
         special = (int) Math.ceil((spatk + spdef) / 2.0f);

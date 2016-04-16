@@ -654,14 +654,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public void shufflePokemonStats() {
-        for (int i = 1; i <= Gen5Constants.pokemonCount; i++) {
-            pokes[i].shuffleStats(this.random);
-        }
-
-    }
-
-    @Override
     public List<Move> getMoves() {
         return Arrays.asList(moves);
     }

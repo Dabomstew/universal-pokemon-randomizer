@@ -897,13 +897,6 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public void shufflePokemonStats() {
-        for (int i = 1; i <= pokedexCount; i++) {
-            pokes[i].shuffleStats(this.random);
-        }
-    }
-
-    @Override
     public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
         List<EncounterSet> encounters = new ArrayList<EncounterSet>();
 

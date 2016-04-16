@@ -85,12 +85,12 @@ public abstract class AbstractRomHandler implements RomHandler {
         this.logStream = logStream;
     }
 
-    /* Public Methods, implemented here for all gens */
+    /*
+     * Public Methods, implemented here for all gens. Unlikely to be overridden.
+     */
 
-    protected void checkPokemonRestrictions() {
-        if (!restrictionsSet) {
-            setPokemonPool(null);
-        }
+    public void setLog(PrintStream logStream) {
+        this.logStream = logStream;
     }
 
     public void setPokemonPool(GenRestrictions restrictions) {
@@ -198,50 +198,42 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizePokemonStats(boolean evolutionSanity) {
-        List<Pokemon> allPokes = this.getPokemon();
-
+    public void shufflePokemonStats(boolean evolutionSanity) {
         if (evolutionSanity) {
+            copyUpEvolutionsHelper(new BasePokemonAction() {
+                public void applyTo(Pokemon pk) {
+                    pk.shuffleStats(AbstractRomHandler.this.random);
+                }
+            }, new EvolvedPokemonAction() {
+                public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
+                    evTo.copyShuffledStatsUpEvolution(evFrom);
+                }
+            });
+        } else {
+            List<Pokemon> allPokes = this.getPokemon();
             for (Pokemon pk : allPokes) {
                 if (pk != null) {
-                    pk.temporaryFlag = false;
+                    pk.shuffleStats(this.random);
                 }
             }
-            // Spread stats up MOST evolutions.
-            Set<Pokemon> dontCopyPokes = RomFunctions.getBasicOrNoCopyPokemon(this);
+        }
+    }
 
-            for (Pokemon pk : dontCopyPokes) {
-                pk.randomizeStatsWithinBST(this.random);
-                pk.temporaryFlag = true;
-            }
+    @Override
+    public void randomizePokemonStats(boolean evolutionSanity) {
 
-            // go "up" evolutions looking for pre-evos to do first
-            for (Pokemon pk : allPokes) {
-                if (pk != null && !pk.temporaryFlag) {
-                    // Non-randomized pokes at this point must have
-                    // a linear chain of single evolutions down to
-                    // a randomized poke.
-                    Stack<Evolution> currentStack = new Stack<Evolution>();
-                    Evolution ev = pk.evolutionsTo.get(0);
-                    while (!ev.from.temporaryFlag) {
-                        currentStack.push(ev);
-                        ev = ev.from.evolutionsTo.get(0);
-                    }
-
-                    // Now "ev" is set to an evolution from a randomized Pokemon
-                    // to a non-randomized.
-                    // Carry stats up, then do the same for everything left on
-                    // the stack.
-                    ev.to.copyRandomizedStatsUpEvolution(ev.from);
-                    ev.to.temporaryFlag = true;
-                    while (!currentStack.isEmpty()) {
-                        ev = currentStack.pop();
-                        ev.to.copyRandomizedStatsUpEvolution(ev.from);
-                        ev.to.temporaryFlag = true;
-                    }
+        if (evolutionSanity) {
+            copyUpEvolutionsHelper(new BasePokemonAction() {
+                public void applyTo(Pokemon pk) {
+                    pk.randomizeStatsWithinBST(AbstractRomHandler.this.random);
                 }
-            }
+            }, new EvolvedPokemonAction() {
+                public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
+                    evTo.copyRandomizedStatsUpEvolution(evFrom);
+                }
+            });
         } else {
+            List<Pokemon> allPokes = this.getPokemon();
             for (Pokemon pk : allPokes) {
                 if (pk != null) {
                     pk.randomizeStatsWithinBST(this.random);
@@ -249,215 +241,6 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-    }
-
-    protected void applyCamelCaseNames() {
-        List<Pokemon> pokes = getPokemon();
-        for (Pokemon pkmn : pokes) {
-            if (pkmn == null) {
-                continue;
-            }
-            pkmn.name = RomFunctions.camelCase(pkmn.name);
-        }
-
-    }
-
-    @Override
-    public void minimumCatchRate(int rateNonLegendary, int rateLegendary) {
-        List<Pokemon> pokes = getPokemon();
-        for (Pokemon pkmn : pokes) {
-            if (pkmn == null) {
-                continue;
-            }
-            int minCatchRate = pkmn.isLegendary() ? rateLegendary : rateNonLegendary;
-            pkmn.catchRate = Math.max(pkmn.catchRate, minCatchRate);
-        }
-
-    }
-
-    @Override
-    public void standardizeEXPCurves() {
-        List<Pokemon> pokes = getPokemon();
-        for (Pokemon pkmn : pokes) {
-            if (pkmn == null) {
-                continue;
-            }
-            pkmn.growthCurve = pkmn.isLegendary() ? ExpCurve.SLOW : ExpCurve.MEDIUM_FAST;
-        }
-    }
-
-    @Override
-    public void randomizePokemonTypes(boolean evolutionSanity) {
-        List<Pokemon> allPokes = this.getPokemon();
-        if (evolutionSanity) {
-            // Type randomization with evolution sanity
-            for (Pokemon pk : allPokes) {
-                if (pk != null) {
-                    pk.temporaryFlag = false;
-                }
-            }
-
-            // Step 1: Basic or Excluded From Copying Pokemon
-            // A Basic/EFC pokemon has a 35% chance of a second type if it has
-            // an evolution that copies type/stats, a 50% chance otherwise
-            Set<Pokemon> dontCopyPokes = RomFunctions.getBasicOrNoCopyPokemon(this);
-
-            for (Pokemon pk : dontCopyPokes) {
-                pk.primaryType = randomType();
-                pk.secondaryType = null;
-                if (pk.evolutionsFrom.size() == 1 && pk.evolutionsFrom.get(0).carryStats) {
-                    if (this.random.nextDouble() < 0.35) {
-                        pk.secondaryType = randomType();
-                        while (pk.secondaryType == pk.primaryType) {
-                            pk.secondaryType = randomType();
-                        }
-                    }
-                } else {
-                    if (this.random.nextDouble() < 0.5) {
-                        pk.secondaryType = randomType();
-                        while (pk.secondaryType == pk.primaryType) {
-                            pk.secondaryType = randomType();
-                        }
-                    }
-                }
-                pk.temporaryFlag = true;
-            }
-
-            // go "up" evolutions looking for pre-evos to do first
-            Set<Pokemon> middleEvos = RomFunctions.getMiddleEvolutions(this);
-            for (Pokemon pk : allPokes) {
-                if (pk != null && !pk.temporaryFlag) {
-                    // Non-randomized pokes at this point must have
-                    // a linear chain of single evolutions down to
-                    // a randomized poke.
-                    Stack<Evolution> currentStack = new Stack<Evolution>();
-                    Evolution ev = pk.evolutionsTo.get(0);
-                    while (!ev.from.temporaryFlag) {
-                        currentStack.push(ev);
-                        ev = ev.from.evolutionsTo.get(0);
-                    }
-
-                    // Now "ev" is set to an evolution from a randomized Pokemon
-                    // to a non-randomized.
-                    // Carry types up, add the chance to add secondary, then
-                    // continue up the stack as required.
-                    while (true) {
-                        Pokemon to = ev.to;
-                        Pokemon from = ev.from;
-                        to.primaryType = from.primaryType;
-                        to.secondaryType = from.secondaryType;
-
-                        if (to.secondaryType == null) {
-                            double chance = middleEvos.contains(to) ? 0.15 : 0.25;
-                            if (this.random.nextDouble() < chance) {
-                                to.secondaryType = randomType();
-                                while (to.secondaryType == to.primaryType) {
-                                    to.secondaryType = randomType();
-                                }
-                            }
-                        }
-
-                        to.temporaryFlag = true;
-
-                        if (currentStack.isEmpty()) {
-                            break;
-                        } else {
-                            ev = currentStack.pop();
-                        }
-                    }
-                }
-            }
-        } else {
-            // Entirely random types
-            for (Pokemon pkmn : allPokes) {
-                if (pkmn != null) {
-                    pkmn.primaryType = randomType();
-                    pkmn.secondaryType = null;
-                    if (this.random.nextDouble() < 0.5) {
-                        pkmn.secondaryType = randomType();
-                        while (pkmn.secondaryType == pkmn.primaryType) {
-                            pkmn.secondaryType = randomType();
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private static final int WONDER_GUARD_INDEX = 25;
-
-    @Override
-    public void randomizeAbilities(boolean allowWonderGuard) {
-        // Abilities don't exist in some games...
-        if (this.abilitiesPerPokemon() == 0) {
-            return;
-        }
-
-        // Deal with "natural" abilities first regardless
-        List<Pokemon> allPokes = this.getPokemon();
-        int maxAbility = this.highestAbilityIndex();
-        for (Pokemon pk : allPokes) {
-            if (pk == null) {
-                continue;
-            }
-
-            // Wonder Guard?
-            if (pk.ability1 != WONDER_GUARD_INDEX && pk.ability2 != WONDER_GUARD_INDEX
-                    && pk.ability3 != WONDER_GUARD_INDEX) {
-                // Pick first ability
-                pk.ability1 = this.random.nextInt(maxAbility) + 1;
-                // Wonder guard block
-                if (!allowWonderGuard) {
-                    while (pk.ability1 == WONDER_GUARD_INDEX) {
-                        pk.ability1 = this.random.nextInt(maxAbility) + 1;
-                    }
-                }
-
-                // Second ability?
-                if (this.random.nextDouble() < 0.5) {
-                    // Yes, second ability
-                    pk.ability2 = this.random.nextInt(maxAbility) + 1;
-                    // Wonder guard? Also block first ability from reappearing
-                    if (allowWonderGuard) {
-                        while (pk.ability2 == pk.ability1) {
-                            pk.ability2 = this.random.nextInt(maxAbility) + 1;
-                        }
-                    } else {
-                        while (pk.ability2 == WONDER_GUARD_INDEX || pk.ability2 == pk.ability1) {
-                            pk.ability2 = this.random.nextInt(maxAbility) + 1;
-                        }
-                    }
-                } else {
-                    // Nope
-                    pk.ability2 = 0;
-                }
-            }
-        }
-
-        // DW Abilities?
-        if (this.abilitiesPerPokemon() == 3) {
-            // Give a random DW ability to every Pokemon
-            for (Pokemon pk : allPokes) {
-                if (pk == null) {
-                    continue;
-                }
-                if (pk.ability1 != WONDER_GUARD_INDEX && pk.ability2 != WONDER_GUARD_INDEX
-                        && pk.ability3 != WONDER_GUARD_INDEX) {
-                    pk.ability3 = this.random.nextInt(maxAbility) + 1;
-                    // Wonder guard? Also block other abilities from reappearing
-                    if (allowWonderGuard) {
-                        while (pk.ability3 == pk.ability1 || pk.ability3 == pk.ability2) {
-                            pk.ability3 = this.random.nextInt(maxAbility) + 1;
-                        }
-                    } else {
-                        while (pk.ability3 == WONDER_GUARD_INDEX || pk.ability3 == pk.ability1
-                                || pk.ability3 == pk.ability2) {
-                            pk.ability3 = this.random.nextInt(maxAbility) + 1;
-                        }
-                    }
-                }
-            }
-        }
     }
 
     public Pokemon randomPokemon() {
@@ -500,6 +283,187 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
         return twoEvoPokes.get(this.random.nextInt(twoEvoPokes.size()));
+    }
+
+    @Override
+    public Type randomType() {
+        Type t = Type.randomType(this.random);
+        while (!typeInGame(t)) {
+            t = Type.randomType(this.random);
+        }
+        return t;
+    }
+
+    @Override
+    public void randomizePokemonTypes(boolean evolutionSanity) {
+        List<Pokemon> allPokes = this.getPokemon();
+        if (evolutionSanity) {
+            // Type randomization with evolution sanity
+            copyUpEvolutionsHelper(new BasePokemonAction() {
+                public void applyTo(Pokemon pk) {
+                    // Step 1: Basic or Excluded From Copying Pokemon
+                    // A Basic/EFC pokemon has a 35% chance of a second type if
+                    // it has an evolution that copies type/stats, a 50% chance
+                    // otherwise
+                    pk.primaryType = randomType();
+                    pk.secondaryType = null;
+                    if (pk.evolutionsFrom.size() == 1 && pk.evolutionsFrom.get(0).carryStats) {
+                        if (AbstractRomHandler.this.random.nextDouble() < 0.35) {
+                            pk.secondaryType = randomType();
+                            while (pk.secondaryType == pk.primaryType) {
+                                pk.secondaryType = randomType();
+                            }
+                        }
+                    } else {
+                        if (AbstractRomHandler.this.random.nextDouble() < 0.5) {
+                            pk.secondaryType = randomType();
+                            while (pk.secondaryType == pk.primaryType) {
+                                pk.secondaryType = randomType();
+                            }
+                        }
+                    }
+                }
+            }, new EvolvedPokemonAction() {
+                public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
+                    evTo.primaryType = evFrom.primaryType;
+                    evTo.secondaryType = evFrom.secondaryType;
+
+                    if (evTo.secondaryType == null) {
+                        double chance = toMonIsFinalEvo ? 0.25 : 0.15;
+                        if (AbstractRomHandler.this.random.nextDouble() < chance) {
+                            evTo.secondaryType = randomType();
+                            while (evTo.secondaryType == evTo.primaryType) {
+                                evTo.secondaryType = randomType();
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            // Entirely random types
+            for (Pokemon pkmn : allPokes) {
+                if (pkmn != null) {
+                    pkmn.primaryType = randomType();
+                    pkmn.secondaryType = null;
+                    if (this.random.nextDouble() < 0.5) {
+                        pkmn.secondaryType = randomType();
+                        while (pkmn.secondaryType == pkmn.primaryType) {
+                            pkmn.secondaryType = randomType();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static final int WONDER_GUARD_INDEX = 25;
+
+    @Override
+    public void randomizeAbilities(boolean evolutionSanity, boolean allowWonderGuard) {
+        // Abilities don't exist in some games...
+        if (this.abilitiesPerPokemon() == 0) {
+            return;
+        }
+
+        final boolean hasDWAbilities = (this.abilitiesPerPokemon() == 3);
+        final boolean allowWG = allowWonderGuard;
+        final int maxAbility = this.highestAbilityIndex();
+
+        if (evolutionSanity) {
+            // copy abilities straight up evolution lines
+            // still keep WG as an exception, though
+
+            copyUpEvolutionsHelper(new BasePokemonAction() {
+                public void applyTo(Pokemon pk) {
+                    if (pk.ability1 != WONDER_GUARD_INDEX && pk.ability2 != WONDER_GUARD_INDEX
+                            && pk.ability3 != WONDER_GUARD_INDEX) {
+                        // Pick first ability
+                        pk.ability1 = pickRandomAbility(maxAbility, allowWG);
+
+                        // Second ability?
+                        if (AbstractRomHandler.this.random.nextDouble() < 0.5) {
+                            // Yes, second ability
+                            pk.ability2 = pickRandomAbility(maxAbility, allowWG, pk.ability1);
+                        } else {
+                            // Nope
+                            pk.ability2 = 0;
+                        }
+
+                        // Third ability?
+                        if (hasDWAbilities) {
+                            pk.ability3 = pickRandomAbility(maxAbility, allowWG, pk.ability1, pk.ability2);
+                        }
+                    }
+                }
+            }, new EvolvedPokemonAction() {
+                public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
+                    if (evTo.ability1 != WONDER_GUARD_INDEX && evTo.ability2 != WONDER_GUARD_INDEX
+                            && evTo.ability3 != WONDER_GUARD_INDEX) {
+                        evTo.ability1 = evFrom.ability1;
+                        evTo.ability2 = evFrom.ability2;
+                        evTo.ability3 = evFrom.ability3;
+                    }
+                }
+            });
+        }
+
+        else {
+            List<Pokemon> allPokes = this.getPokemon();
+            for (Pokemon pk : allPokes) {
+                if (pk == null) {
+                    continue;
+                }
+
+                // Don't remove WG if already in place.
+                if (pk.ability1 != WONDER_GUARD_INDEX && pk.ability2 != WONDER_GUARD_INDEX
+                        && pk.ability3 != WONDER_GUARD_INDEX) {
+                    // Pick first ability
+                    pk.ability1 = this.pickRandomAbility(maxAbility, allowWonderGuard);
+
+                    // Second ability?
+                    if (this.random.nextDouble() < 0.5) {
+                        // Yes, second ability
+                        pk.ability2 = this.pickRandomAbility(maxAbility, allowWonderGuard, pk.ability1);
+                    } else {
+                        // Nope
+                        pk.ability2 = 0;
+                    }
+
+                    // Third ability?
+                    if (hasDWAbilities) {
+                        pk.ability3 = pickRandomAbility(maxAbility, allowWG, pk.ability1, pk.ability2);
+                    }
+                }
+            }
+        }
+    }
+
+    private int pickRandomAbility(int maxAbility, boolean allowWonderGuard, int... alreadySetAbilities) {
+        int newAbility = 0;
+
+        while (true) {
+            newAbility = this.random.nextInt(maxAbility) + 1;
+
+            if (!allowWonderGuard && newAbility == WONDER_GUARD_INDEX) {
+                continue;
+            }
+
+            boolean repeat = false;
+            for (int i = 0; i < alreadySetAbilities.length; i++) {
+                if (alreadySetAbilities[i] == newAbility) {
+                    repeat = true;
+                    break;
+                }
+            }
+
+            if (repeat) {
+                continue;
+            } else {
+                break;
+            }
+        }
+
+        return newAbility;
     }
 
     @Override
@@ -986,1242 +950,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         this.setTrainers(currentTrainers);
     }
 
-    @Override
-    public void randomizeMovesLearnt(boolean typeThemed, boolean noBroken, boolean forceFourStartingMoves) {
-        // Get current sets
-        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
-        List<Integer> allBanned = new ArrayList<Integer>();
-        List<Integer> hms = this.getHMMoves();
-        allBanned.addAll(hms);
-        @SuppressWarnings("unchecked")
-        List<Integer> banned = noBroken ? this.getGameBreakingMoves() : Collections.EMPTY_LIST;
-        allBanned.addAll(banned);
-        allBanned.addAll(this.getMovesBannedFromLevelup());
-        for (Pokemon pkmn : movesets.keySet()) {
-            Set<Integer> learnt = new TreeSet<Integer>();
-            List<MoveLearnt> moves = movesets.get(pkmn);
-            // 4 starting moves?
-            if (forceFourStartingMoves) {
-                int lv1count = 0;
-                for (MoveLearnt ml : moves) {
-                    if (ml.level == 1) {
-                        lv1count++;
-                    }
-                }
-                if (lv1count < 4) {
-                    for (int i = 0; i < 4 - lv1count; i++) {
-                        MoveLearnt fakeLv1 = new MoveLearnt();
-                        fakeLv1.level = 1;
-                        fakeLv1.move = 0;
-                        moves.add(0, fakeLv1);
-                    }
-                }
-            }
-            // Last level 1 move should be replaced with a damaging one
-            int damagingMove = pickMove(pkmn, typeThemed, true, allBanned);
-            // Find last lv1 move
-            // lv1index ends up as the index of the first non-lv1 move
-            int lv1index = 0;
-            while (lv1index < moves.size() && moves.get(lv1index).level == 1) {
-                lv1index++;
-            }
-            // last lv1 move is 1 before lv1index
-            if (lv1index == 0) {
-                lv1index++;
-            }
-            moves.get(lv1index - 1).move = damagingMove;
-            moves.get(lv1index - 1).level = 1; // just in case
-            learnt.add(damagingMove);
-            // Rest replace with randoms
-            for (int i = 0; i < moves.size(); i++) {
-                if (i == (lv1index - 1)) {
-                    continue;
-                }
-                int picked = pickMove(pkmn, typeThemed, false, allBanned);
-                while (learnt.contains(picked)) {
-                    picked = pickMove(pkmn, typeThemed, false, allBanned);
-                }
-                moves.get(i).move = picked;
-                learnt.add(picked);
-            }
-        }
-        // Done, save
-        this.setMovesLearnt(movesets);
-
-    }
-
-    private static final int METRONOME_MOVE = 118;
-
-    @Override
-    public void metronomeOnlyMode() {
-
-        // movesets
-        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
-
-        MoveLearnt metronomeML = new MoveLearnt();
-        metronomeML.level = 1;
-        metronomeML.move = METRONOME_MOVE;
-
-        for (List<MoveLearnt> ms : movesets.values()) {
-            if (ms != null && ms.size() > 0) {
-                ms.clear();
-                ms.add(metronomeML);
-            }
-        }
-
-        this.setMovesLearnt(movesets);
-
-        // trainers
-        // run this to remove all custom non-Metronome moves
-        this.setTrainers(this.getTrainers());
-
-        // tms
-        List<Integer> tmMoves = this.getTMMoves();
-
-        for (int i = 0; i < tmMoves.size(); i++) {
-            tmMoves.set(i, METRONOME_MOVE);
-        }
-
-        this.setTMMoves(tmMoves);
-
-        // movetutors
-        if (this.hasMoveTutors()) {
-            List<Integer> mtMoves = this.getMoveTutorMoves();
-
-            for (int i = 0; i < mtMoves.size(); i++) {
-                mtMoves.set(i, METRONOME_MOVE);
-            }
-
-            this.setMoveTutorMoves(mtMoves);
-        }
-
-        // move tweaks
-        List<Move> moveData = this.getMoves();
-
-        Move metronome = moveData.get(METRONOME_MOVE);
-
-        metronome.pp = 40;
-
-        List<Integer> hms = this.getHMMoves();
-
-        for (int hm : hms) {
-            Move thisHM = moveData.get(hm);
-            thisHM.pp = 0;
-        }
-    }
-
-    @Override
-    public void randomizeStaticPokemon(boolean legendForLegend) {
-        // Load
-        checkPokemonRestrictions();
-        List<Pokemon> currentStaticPokemon = this.getStaticPokemon();
-        List<Pokemon> replacements = new ArrayList<Pokemon>();
-        List<Pokemon> banned = this.bannedForStaticPokemon();
-
-        if (legendForLegend) {
-            List<Pokemon> legendariesLeft = new ArrayList<Pokemon>(onlyLegendaryList);
-            List<Pokemon> nonlegsLeft = new ArrayList<Pokemon>(noLegendaryList);
-            legendariesLeft.removeAll(banned);
-            nonlegsLeft.removeAll(banned);
-            for (int i = 0; i < currentStaticPokemon.size(); i++) {
-                Pokemon old = currentStaticPokemon.get(i);
-                Pokemon newPK;
-                if (old.isLegendary()) {
-                    newPK = legendariesLeft.remove(this.random.nextInt(legendariesLeft.size()));
-                    if (legendariesLeft.size() == 0) {
-                        legendariesLeft.addAll(onlyLegendaryList);
-                        legendariesLeft.removeAll(banned);
-                    }
-                } else {
-                    newPK = nonlegsLeft.remove(this.random.nextInt(nonlegsLeft.size()));
-                    if (nonlegsLeft.size() == 0) {
-                        nonlegsLeft.addAll(noLegendaryList);
-                        nonlegsLeft.removeAll(banned);
-                    }
-                }
-                replacements.add(newPK);
-            }
-        } else {
-            List<Pokemon> pokemonLeft = new ArrayList<Pokemon>(mainPokemonList);
-            pokemonLeft.removeAll(banned);
-            for (int i = 0; i < currentStaticPokemon.size(); i++) {
-                Pokemon newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
-                if (pokemonLeft.size() == 0) {
-                    pokemonLeft.addAll(mainPokemonList);
-                    pokemonLeft.removeAll(banned);
-                }
-                replacements.add(newPK);
-            }
-        }
-
-        // Save
-        this.setStaticPokemon(replacements);
-    }
-
-    @Override
-    public void randomizeTMMoves(boolean noBroken, boolean preserveField) {
-        // Pick some random TM moves.
-        int tmCount = this.getTMCount();
-        List<Move> allMoves = this.getMoves();
-        List<Integer> newTMs = new ArrayList<Integer>();
-        List<Integer> hms = this.getHMMoves();
-        List<Integer> oldTMs = this.getTMMoves();
-        @SuppressWarnings("unchecked")
-        List<Integer> banned = new ArrayList<Integer>(noBroken ? this.getGameBreakingMoves() : Collections.EMPTY_LIST);
-        // field moves?
-        List<Integer> fieldMoves = this.getFieldMoves();
-        if (preserveField) {
-            List<Integer> banExistingField = new ArrayList<Integer>(oldTMs);
-            banExistingField.retainAll(fieldMoves);
-            banned.addAll(banExistingField);
-        }
-        for (int i = 0; i < tmCount; i++) {
-            if (preserveField && fieldMoves.contains(oldTMs.get(i))) {
-                newTMs.add(oldTMs.get(i));
-            } else {
-                int chosenMove = this.random.nextInt(allMoves.size() - 1) + 1;
-                while (newTMs.contains(chosenMove) || RomFunctions.bannedRandomMoves[chosenMove]
-                        || hms.contains(chosenMove) || banned.contains(chosenMove)) {
-                    chosenMove = this.random.nextInt(allMoves.size() - 1) + 1;
-                }
-                newTMs.add(chosenMove);
-            }
-        }
-        this.setTMMoves(newTMs);
-    }
-
-    @Override
-    public void randomizeTMHMCompatibility(boolean preferSameType) {
-        // Get current compatibility
-        // new: increase HM chances if required early on
-        List<Integer> requiredEarlyOn = this.getEarlyRequiredHMMoves();
-        Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
-        List<Integer> tmHMs = new ArrayList<Integer>(this.getTMMoves());
-        tmHMs.addAll(this.getHMMoves());
-        List<Move> moveData = this.getMoves();
-        for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
-            Pokemon pkmn = compatEntry.getKey();
-            boolean[] flags = compatEntry.getValue();
-            for (int i = 1; i <= tmHMs.size(); i++) {
-                int move = tmHMs.get(i - 1);
-                Move mv = moveData.get(move);
-                double probability = 0.5;
-                if (preferSameType) {
-                    if (pkmn.primaryType.equals(mv.type)
-                            || (pkmn.secondaryType != null && pkmn.secondaryType.equals(mv.type))) {
-                        probability = 0.9;
-                    } else if (mv.type != null && mv.type.equals(Type.NORMAL)) {
-                        probability = 0.5;
-                    } else {
-                        probability = 0.25;
-                    }
-                }
-                if (requiredEarlyOn.contains(move)) {
-                    probability = Math.min(1.0, probability * 1.5);
-                }
-                flags[i] = (this.random.nextDouble() < probability);
-            }
-        }
-
-        // Set the new compatibility
-        this.setTMHMCompatibility(compat);
-    }
-
-    @Override
-    public void fullTMHMCompatibility() {
-        Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
-        for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
-            boolean[] flags = compatEntry.getValue();
-            for (int i = 1; i < flags.length; i++) {
-                flags[i] = true;
-            }
-        }
-        this.setTMHMCompatibility(compat);
-    }
-
-    @Override
-    public void fullHMCompatibility() {
-        Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
-        int tmCount = this.getTMCount();
-        for (boolean[] flags : compat.values()) {
-            for (int i = tmCount + 1; i < flags.length; i++) {
-                flags[i] = true;
-            }
-        }
-
-        // Set the new compatibility
-        this.setTMHMCompatibility(compat);
-    }
-
-    @Override
-    public void ensureTMCompatSanity() {
-        // if a pokemon learns a move in its moveset
-        // and there is a TM of that move, make sure
-        // that TM can be learned.
-        Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
-        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
-        List<Integer> tmMoves = this.getTMMoves();
-        for (Pokemon pkmn : compat.keySet()) {
-            List<MoveLearnt> moveset = movesets.get(pkmn);
-            boolean[] pkmnCompat = compat.get(pkmn);
-            for (MoveLearnt ml : moveset) {
-                if (tmMoves.contains(ml.move)) {
-                    int tmIndex = tmMoves.indexOf(ml.move);
-                    pkmnCompat[tmIndex + 1] = true;
-                }
-            }
-        }
-        this.setTMHMCompatibility(compat);
-    }
-
-    @Override
-    public void randomizeMoveTutorMoves(boolean noBroken, boolean preserveField) {
-        if (!this.hasMoveTutors()) {
-            return;
-        }
-        // Pick some random Move Tutor moves, excluding TMs.
-        List<Move> allMoves = this.getMoves();
-        List<Integer> tms = this.getTMMoves();
-        List<Integer> newMTs = new ArrayList<Integer>();
-        List<Integer> oldMTs = this.getMoveTutorMoves();
-        int mtCount = oldMTs.size();
-        List<Integer> hms = this.getHMMoves();
-        @SuppressWarnings("unchecked")
-        List<Integer> banned = new ArrayList<Integer>(noBroken ? this.getGameBreakingMoves() : Collections.EMPTY_LIST);
-        // field moves?
-        List<Integer> fieldMoves = this.getFieldMoves();
-        if (preserveField) {
-            List<Integer> banExistingField = new ArrayList<Integer>(oldMTs);
-            banExistingField.retainAll(fieldMoves);
-            banned.addAll(banExistingField);
-        }
-        for (int i = 0; i < mtCount; i++) {
-            if (preserveField && fieldMoves.contains(oldMTs.get(i))) {
-                newMTs.add(oldMTs.get(i));
-            } else {
-                int chosenMove = this.random.nextInt(allMoves.size() - 1) + 1;
-                while (newMTs.contains(chosenMove) || tms.contains(chosenMove)
-                        || RomFunctions.bannedRandomMoves[chosenMove] || hms.contains(chosenMove)
-                        || banned.contains(chosenMove)) {
-                    chosenMove = this.random.nextInt(allMoves.size() - 1) + 1;
-                }
-                newMTs.add(chosenMove);
-            }
-        }
-        this.setMoveTutorMoves(newMTs);
-    }
-
-    @Override
-    public void randomizeMoveTutorCompatibility(boolean preferSameType) {
-        if (!this.hasMoveTutors()) {
-            return;
-        }
-        // Get current compatibility
-        Map<Pokemon, boolean[]> compat = this.getMoveTutorCompatibility();
-        List<Integer> mts = this.getMoveTutorMoves();
-        List<Move> moveData = this.getMoves();
-        for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
-            Pokemon pkmn = compatEntry.getKey();
-            boolean[] flags = compatEntry.getValue();
-            for (int i = 1; i <= mts.size(); i++) {
-                int move = mts.get(i - 1);
-                Move mv = moveData.get(move);
-                double probability = 0.5;
-                if (preferSameType) {
-                    if (pkmn.primaryType.equals(mv.type)
-                            || (pkmn.secondaryType != null && pkmn.secondaryType.equals(mv.type))) {
-                        probability = 0.9;
-                    } else if (mv.type != null && mv.type.equals(Type.NORMAL)) {
-                        probability = 0.5;
-                    } else {
-                        probability = 0.25;
-                    }
-                }
-                flags[i] = (this.random.nextDouble() < probability);
-            }
-        }
-
-        // Set the new compatibility
-        this.setMoveTutorCompatibility(compat);
-
-    }
-
-    @Override
-    public void fullMoveTutorCompatibility() {
-        if (!this.hasMoveTutors()) {
-            return;
-        }
-        Map<Pokemon, boolean[]> compat = this.getMoveTutorCompatibility();
-        for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
-            boolean[] flags = compatEntry.getValue();
-            for (int i = 1; i < flags.length; i++) {
-                flags[i] = true;
-            }
-        }
-        this.setMoveTutorCompatibility(compat);
-    }
-
-    @Override
-    public void ensureMoveTutorCompatSanity() {
-        if (!this.hasMoveTutors()) {
-            return;
-        }
-        // if a pokemon learns a move in its moveset
-        // and there is a tutor of that move, make sure
-        // that tutor can be learned.
-        Map<Pokemon, boolean[]> compat = this.getMoveTutorCompatibility();
-        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
-        List<Integer> mtMoves = this.getMoveTutorMoves();
-        for (Pokemon pkmn : compat.keySet()) {
-            List<MoveLearnt> moveset = movesets.get(pkmn);
-            boolean[] pkmnCompat = compat.get(pkmn);
-            for (MoveLearnt ml : moveset) {
-                if (mtMoves.contains(ml.move)) {
-                    int mtIndex = mtMoves.indexOf(ml.move);
-                    pkmnCompat[mtIndex + 1] = true;
-                }
-            }
-        }
-        this.setMoveTutorCompatibility(compat);
-
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void randomizeTrainerNames(byte[] presetNames) {
-        List<String>[] allTrainerNames = new List[] { new ArrayList<String>(), new ArrayList<String>() };
-        Map<Integer, List<String>> trainerNamesByLength[] = new Map[] { new TreeMap<Integer, List<String>>(),
-                new TreeMap<Integer, List<String>>() };
-        // Check for the file
-        if (FileFunctions.configExists(tnamesFile)) {
-            try {
-                Scanner sc = null;
-                if (presetNames == null) {
-                    sc = new Scanner(FileFunctions.openConfig(tnamesFile), "UTF-8");
-                } else {
-                    sc = new Scanner(new ByteArrayInputStream(presetNames), "UTF-8");
-                }
-                while (sc.hasNextLine()) {
-                    String trainername = sc.nextLine().trim();
-                    if (trainername.isEmpty()) {
-                        continue;
-                    }
-                    if (trainername.startsWith("\uFEFF")) {
-                        trainername = trainername.substring(1);
-                    }
-                    int idx = trainername.contains("&") ? 1 : 0;
-                    int len = this.internalStringLength(trainername);
-                    if (len <= 10) {
-                        allTrainerNames[idx].add(trainername);
-                        if (trainerNamesByLength[idx].containsKey(len)) {
-                            trainerNamesByLength[idx].get(len).add(trainername);
-                        } else {
-                            List<String> namesOfThisLength = new ArrayList<String>();
-                            namesOfThisLength.add(trainername);
-                            trainerNamesByLength[idx].put(len, namesOfThisLength);
-                        }
-                    }
-                }
-                sc.close();
-            } catch (FileNotFoundException e) {
-                // Can't read, just don't load anything
-            }
-        }
-
-        // Get the current trainer names data
-        List<String> currentTrainerNames = this.getTrainerNames();
-        if (currentTrainerNames.size() == 0) {
-            // RBY have no trainer names
-            return;
-        }
-        TrainerNameMode mode = this.trainerNameMode();
-        int maxLength = this.maxTrainerNameLength();
-        int totalMaxLength = this.maxSumOfTrainerNameLengths();
-
-        boolean success = false;
-        int tries = 0;
-
-        // Init the translation map and new list
-        Map<String, String> translation = new HashMap<String, String>();
-        List<String> newTrainerNames = new ArrayList<String>();
-        List<Integer> tcNameLengths = this.getTCNameLengthsByTrainer();
-
-        // loop until we successfully pick names that fit
-        // should always succeed first attempt except for gen2.
-        while (!success && tries < 10000) {
-            success = true;
-            translation.clear();
-            newTrainerNames.clear();
-            int totalLength = 0;
-
-            // Start choosing
-            int tnIndex = -1;
-            for (String trainerName : currentTrainerNames) {
-                tnIndex++;
-                if (translation.containsKey(trainerName) && trainerName.equalsIgnoreCase("GRUNT") == false
-                        && trainerName.equalsIgnoreCase("EXECUTIVE") == false) {
-                    // use an already picked translation
-                    newTrainerNames.add(translation.get(trainerName));
-                    totalLength += this.internalStringLength(translation.get(trainerName));
-                } else {
-                    int idx = trainerName.contains("&") ? 1 : 0;
-                    List<String> pickFrom = allTrainerNames[idx];
-                    int intStrLen = this.internalStringLength(trainerName);
-                    if (mode == TrainerNameMode.SAME_LENGTH) {
-                        pickFrom = trainerNamesByLength[idx].get(intStrLen);
-                    }
-                    String changeTo = trainerName;
-                    int ctl = intStrLen;
-                    if (pickFrom != null && pickFrom.size() > 0 && intStrLen > 1) {
-                        int innerTries = 0;
-                        changeTo = pickFrom.get(this.random.nextInt(pickFrom.size()));
-                        ctl = this.internalStringLength(changeTo);
-                        while ((mode == TrainerNameMode.MAX_LENGTH && ctl > maxLength)
-                                || (mode == TrainerNameMode.MAX_LENGTH_WITH_CLASS && ctl + tcNameLengths.get(tnIndex) > maxLength)) {
-                            innerTries++;
-                            if (innerTries == 100) {
-                                changeTo = trainerName;
-                                ctl = intStrLen;
-                                break;
-                            }
-                            changeTo = pickFrom.get(this.random.nextInt(pickFrom.size()));
-                            ctl = this.internalStringLength(changeTo);
-                        }
-                    }
-                    translation.put(trainerName, changeTo);
-                    newTrainerNames.add(changeTo);
-                    totalLength += ctl;
-                }
-
-                if (totalLength > totalMaxLength) {
-                    success = false;
-                    tries++;
-                    break;
-                }
-            }
-        }
-
-        if (!success) {
-            throw new RandomizationException("Could not randomize trainer names in a reasonable amount of attempts."
-                    + "\nPlease add some shorter names to your trainer names file.");
-        }
-
-        // Done choosing, save
-        this.setTrainerNames(newTrainerNames);
-    }
-
-    @Override
-    public int maxTrainerNameLength() {
-        // default: no real limit
-        return Integer.MAX_VALUE;
-    }
-
-    @Override
-    public int maxSumOfTrainerNameLengths() {
-        // default: no real limit
-        return Integer.MAX_VALUE;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void randomizeTrainerClassNames(byte[] presetNames) {
-        List<String> allTrainerClasses[] = new List[] { new ArrayList<String>(), new ArrayList<String>() };
-        Map<Integer, List<String>> trainerClassesByLength[] = new Map[] { new HashMap<Integer, List<String>>(),
-                new HashMap<Integer, List<String>>() };
-        // Check for the file
-        if (FileFunctions.configExists(tclassesFile)) {
-            try {
-                Scanner sc = null;
-                if (presetNames == null) {
-                    sc = new Scanner(FileFunctions.openConfig(tclassesFile), "UTF-8");
-                } else {
-                    sc = new Scanner(new ByteArrayInputStream(presetNames), "UTF-8");
-                }
-                while (sc.hasNextLine()) {
-                    String trainerClassName = sc.nextLine().trim();
-                    if (trainerClassName.isEmpty()) {
-                        continue;
-                    }
-                    if (trainerClassName.startsWith("\uFEFF")) {
-                        trainerClassName = trainerClassName.substring(1);
-                    }
-                    String checkName = trainerClassName.toLowerCase();
-                    int idx = (checkName.endsWith("couple") || checkName.contains(" and ") || checkName.endsWith("kin")
-                            || checkName.endsWith("team") || checkName.contains("&") || (checkName.endsWith("s") && !checkName
-                            .endsWith("ss"))) ? 1 : 0;
-                    allTrainerClasses[idx].add(trainerClassName);
-                    int len = this.internalStringLength(trainerClassName);
-                    if (trainerClassesByLength[idx].containsKey(len)) {
-                        trainerClassesByLength[idx].get(len).add(trainerClassName);
-                    } else {
-                        List<String> namesOfThisLength = new ArrayList<String>();
-                        namesOfThisLength.add(trainerClassName);
-                        trainerClassesByLength[idx].put(len, namesOfThisLength);
-                    }
-                }
-                sc.close();
-            } catch (FileNotFoundException e) {
-                // Can't read, just don't load anything
-            }
-        }
-
-        // Get the current trainer names data
-        List<String> currentClassNames = this.getTrainerClassNames();
-        boolean mustBeSameLength = this.fixedTrainerClassNamesLength();
-        int maxLength = this.maxTrainerClassNameLength();
-
-        // Init the translation map and new list
-        Map<String, String> translation = new HashMap<String, String>();
-        List<String> newClassNames = new ArrayList<String>();
-
-        // Start choosing
-        for (String trainerClassName : currentClassNames) {
-            if (translation.containsKey(trainerClassName)) {
-                // use an already picked translation
-                newClassNames.add(translation.get(trainerClassName));
-            } else {
-                String checkName = trainerClassName.toLowerCase();
-                int idx = (checkName.endsWith("couple") || checkName.contains(" and ") || checkName.endsWith("kin")
-                        || checkName.endsWith("team") || checkName.contains(" & ") || (checkName.endsWith("s") && !checkName
-                        .endsWith("ss"))) ? 1 : 0;
-                List<String> pickFrom = allTrainerClasses[idx];
-                int intStrLen = this.internalStringLength(trainerClassName);
-                if (mustBeSameLength) {
-                    pickFrom = trainerClassesByLength[idx].get(intStrLen);
-                }
-                String changeTo = trainerClassName;
-                if (pickFrom != null && pickFrom.size() > 0) {
-                    changeTo = pickFrom.get(this.random.nextInt(pickFrom.size()));
-                    while (changeTo.length() > maxLength) {
-                        changeTo = pickFrom.get(this.random.nextInt(pickFrom.size()));
-                    }
-                }
-                translation.put(trainerClassName, changeTo);
-                newClassNames.add(changeTo);
-            }
-        }
-
-        // Done choosing, save
-        this.setTrainerClassNames(newClassNames);
-    }
-
-    @Override
-    public int maxTrainerClassNameLength() {
-        // default: no real limit
-        return Integer.MAX_VALUE;
-    }
-
-    @Override
-    public void randomizeWildHeldItems(boolean banBadItems) {
-        List<Pokemon> pokemon = allPokemonWithoutNull();
-        ItemList possibleItems = banBadItems ? this.getNonBadItems() : this.getAllowedItems();
-        for (Pokemon pk : pokemon) {
-            if (pk.guaranteedHeldItem == -1 && pk.commonHeldItem == -1 && pk.rareHeldItem == -1
-                    && pk.darkGrassHeldItem == -1) {
-                // No held items at all, abort
-                return;
-            }
-            boolean canHaveDarkGrass = pk.darkGrassHeldItem != -1;
-            if (pk.guaranteedHeldItem != -1) {
-                // Guaranteed held items are supported.
-                if (pk.guaranteedHeldItem > 0) {
-                    // Currently have a guaranteed item
-                    double decision = this.random.nextDouble();
-                    if (decision < 0.9) {
-                        // Stay as guaranteed
-                        canHaveDarkGrass = false;
-                        pk.guaranteedHeldItem = possibleItems.randomItem(this.random);
-                    } else {
-                        // Change to 25% or 55% chance
-                        pk.guaranteedHeldItem = 0;
-                        pk.commonHeldItem = possibleItems.randomItem(this.random);
-                        pk.rareHeldItem = possibleItems.randomItem(this.random);
-                        while (pk.rareHeldItem == pk.commonHeldItem) {
-                            pk.rareHeldItem = possibleItems.randomItem(this.random);
-                        }
-                    }
-                } else {
-                    // No guaranteed item atm
-                    double decision = this.random.nextDouble();
-                    if (decision < 0.5) {
-                        // No held item at all
-                        pk.commonHeldItem = 0;
-                        pk.rareHeldItem = 0;
-                    } else if (decision < 0.65) {
-                        // Just a rare item
-                        pk.commonHeldItem = 0;
-                        pk.rareHeldItem = possibleItems.randomItem(this.random);
-                    } else if (decision < 0.8) {
-                        // Just a common item
-                        pk.commonHeldItem = possibleItems.randomItem(this.random);
-                        pk.rareHeldItem = 0;
-                    } else if (decision < 0.95) {
-                        // Both a common and rare item
-                        pk.commonHeldItem = possibleItems.randomItem(this.random);
-                        pk.rareHeldItem = possibleItems.randomItem(this.random);
-                        while (pk.rareHeldItem == pk.commonHeldItem) {
-                            pk.rareHeldItem = possibleItems.randomItem(this.random);
-                        }
-                    } else {
-                        // Guaranteed item
-                        canHaveDarkGrass = false;
-                        pk.guaranteedHeldItem = possibleItems.randomItem(this.random);
-                        pk.commonHeldItem = 0;
-                        pk.rareHeldItem = 0;
-                    }
-                }
-            } else {
-                // Code for no guaranteed items
-                double decision = this.random.nextDouble();
-                if (decision < 0.5) {
-                    // No held item at all
-                    pk.commonHeldItem = 0;
-                    pk.rareHeldItem = 0;
-                } else if (decision < 0.65) {
-                    // Just a rare item
-                    pk.commonHeldItem = 0;
-                    pk.rareHeldItem = possibleItems.randomItem(this.random);
-                } else if (decision < 0.8) {
-                    // Just a common item
-                    pk.commonHeldItem = possibleItems.randomItem(this.random);
-                    pk.rareHeldItem = 0;
-                } else {
-                    // Both a common and rare item
-                    pk.commonHeldItem = possibleItems.randomItem(this.random);
-                    pk.rareHeldItem = possibleItems.randomItem(this.random);
-                    while (pk.rareHeldItem == pk.commonHeldItem) {
-                        pk.rareHeldItem = possibleItems.randomItem(this.random);
-                    }
-                }
-            }
-
-            if (canHaveDarkGrass) {
-                double dgDecision = this.random.nextDouble();
-                if (dgDecision < 0.5) {
-                    // Yes, dark grass item
-                    pk.darkGrassHeldItem = possibleItems.randomItem(this.random);
-                } else {
-                    pk.darkGrassHeldItem = 0;
-                }
-            } else if (pk.darkGrassHeldItem != -1) {
-                pk.darkGrassHeldItem = 0;
-            }
-        }
-
-    }
-
-    @Override
-    public void randomizeStarterHeldItems(boolean banBadItems) {
-        List<Integer> oldHeldItems = this.getStarterHeldItems();
-        List<Integer> newHeldItems = new ArrayList<Integer>();
-        ItemList possibleItems = banBadItems ? this.getNonBadItems() : this.getAllowedItems();
-        for (int i = 0; i < oldHeldItems.size(); i++) {
-            newHeldItems.add(possibleItems.randomItem(this.random));
-        }
-        this.setStarterHeldItems(newHeldItems);
-    }
-
-    @Override
-    public void shuffleFieldItems() {
-        List<Integer> currentItems = this.getRegularFieldItems();
-        List<Integer> currentTMs = this.getCurrentFieldTMs();
-
-        Collections.shuffle(currentItems, this.random);
-        Collections.shuffle(currentTMs, this.random);
-
-        this.setRegularFieldItems(currentItems);
-        this.setFieldTMs(currentTMs);
-    }
-
-    @Override
-    public void randomizeFieldItems(boolean banBadItems) {
-        ItemList possibleItems = banBadItems ? this.getNonBadItems() : this.getAllowedItems();
-        List<Integer> currentItems = this.getRegularFieldItems();
-        List<Integer> currentTMs = this.getCurrentFieldTMs();
-        List<Integer> requiredTMs = this.getRequiredFieldTMs();
-
-        int fieldItemCount = currentItems.size();
-        int fieldTMCount = currentTMs.size();
-        int reqTMCount = requiredTMs.size();
-        int totalTMCount = this.getTMCount();
-
-        List<Integer> newItems = new ArrayList<Integer>();
-        List<Integer> newTMs = new ArrayList<Integer>();
-
-        for (int i = 0; i < fieldItemCount; i++) {
-            newItems.add(possibleItems.randomNonTM(this.random));
-        }
-
-        newTMs.addAll(requiredTMs);
-
-        for (int i = reqTMCount; i < fieldTMCount; i++) {
-            while (true) {
-                int tm = this.random.nextInt(totalTMCount) + 1;
-                if (!newTMs.contains(tm)) {
-                    newTMs.add(tm);
-                    break;
-                }
-            }
-        }
-
-        Collections.shuffle(newItems, this.random);
-        Collections.shuffle(newTMs, this.random);
-
-        this.setRegularFieldItems(newItems);
-        this.setFieldTMs(newTMs);
-    }
-
-    @Override
-    public void randomizeIngameTrades(boolean randomizeRequest, byte[] presetNicknames, boolean randomNickname,
-            byte[] presetTrainerNames, boolean randomOT, boolean randomStats, boolean randomItem) {
-        checkPokemonRestrictions();
-        // Process trainer names
-        List<String> singleTrainerNames = new ArrayList<String>();
-        // Check for the file
-        if (FileFunctions.configExists(tnamesFile) && randomOT) {
-            int maxOT = this.maxTradeOTNameLength();
-            try {
-                Scanner sc = null;
-                if (presetTrainerNames == null) {
-                    sc = new Scanner(FileFunctions.openConfig(tnamesFile), "UTF-8");
-                } else {
-                    sc = new Scanner(new ByteArrayInputStream(presetTrainerNames), "UTF-8");
-                }
-                while (sc.hasNextLine()) {
-                    String trainername = sc.nextLine().trim();
-                    if (trainername.isEmpty()) {
-                        continue;
-                    }
-                    if (trainername.startsWith("\uFEFF")) {
-                        trainername = trainername.substring(1);
-                    }
-                    int idx = trainername.contains("&") ? 1 : 0;
-                    int len = this.internalStringLength(trainername);
-                    if (len <= maxOT && idx == 0 && !singleTrainerNames.contains(trainername)) {
-                        singleTrainerNames.add(trainername);
-                    }
-                }
-                sc.close();
-            } catch (FileNotFoundException e) {
-                // Can't read, just don't load anything
-            }
-        }
-
-        // Process nicknames
-        List<String> nicknames = new ArrayList<String>();
-        // Check for the file
-        if (FileFunctions.configExists(nnamesFile) && randomNickname) {
-            int maxNN = this.maxTradeNicknameLength();
-            try {
-                Scanner sc = null;
-                if (presetNicknames == null) {
-                    sc = new Scanner(FileFunctions.openConfig(nnamesFile), "UTF-8");
-                } else {
-                    sc = new Scanner(new ByteArrayInputStream(presetNicknames), "UTF-8");
-                }
-                while (sc.hasNextLine()) {
-                    String nickname = sc.nextLine().trim();
-                    if (nickname.isEmpty()) {
-                        continue;
-                    }
-                    if (nickname.startsWith("\uFEFF")) {
-                        nickname = nickname.substring(1);
-                    }
-                    int len = this.internalStringLength(nickname);
-                    if (len <= maxNN && !nicknames.contains(nickname)) {
-                        nicknames.add(nickname);
-                    }
-                }
-                sc.close();
-            } catch (FileNotFoundException e) {
-                // Can't read, just don't load anything
-            }
-        }
-
-        // get old trades
-        List<IngameTrade> trades = this.getIngameTrades();
-        List<Pokemon> usedRequests = new ArrayList<Pokemon>();
-        List<Pokemon> usedGivens = new ArrayList<Pokemon>();
-        List<String> usedOTs = new ArrayList<String>();
-        List<String> usedNicknames = new ArrayList<String>();
-        ItemList possibleItems = this.getAllowedItems();
-
-        int nickCount = nicknames.size();
-        int trnameCount = singleTrainerNames.size();
-
-        for (IngameTrade trade : trades) {
-            // pick new given pokemon
-            Pokemon oldgiven = trade.givenPokemon;
-            Pokemon given = this.randomPokemon();
-            while (usedGivens.contains(given)) {
-                given = this.randomPokemon();
-            }
-            usedGivens.add(given);
-            trade.givenPokemon = given;
-
-            // requested pokemon?
-            if (oldgiven == trade.requestedPokemon) {
-                // preserve trades for the same pokemon
-                trade.requestedPokemon = given;
-            } else if (randomizeRequest) {
-                Pokemon request = this.randomPokemon();
-                while (usedRequests.contains(request) || request == given) {
-                    request = this.randomPokemon();
-                }
-                usedRequests.add(request);
-                trade.requestedPokemon = request;
-            }
-
-            // nickname?
-            if (randomNickname && nickCount > usedNicknames.size()) {
-                String nickname = nicknames.get(this.random.nextInt(nickCount));
-                while (usedNicknames.contains(nickname)) {
-                    nickname = nicknames.get(this.random.nextInt(nickCount));
-                }
-                usedNicknames.add(nickname);
-                trade.nickname = nickname;
-            } else if (trade.nickname.equalsIgnoreCase(oldgiven.name)) {
-                // change the name for sanity
-                trade.nickname = trade.givenPokemon.name;
-            }
-
-            if (randomOT && trnameCount > usedOTs.size()) {
-                String ot = singleTrainerNames.get(this.random.nextInt(trnameCount));
-                while (usedOTs.contains(ot)) {
-                    ot = singleTrainerNames.get(this.random.nextInt(trnameCount));
-                }
-                usedOTs.add(ot);
-                trade.otName = ot;
-                trade.otId = this.random.nextInt(65536);
-            }
-
-            if (randomStats) {
-                int maxIV = this.hasDVs() ? 16 : 32;
-                for (int i = 0; i < trade.ivs.length; i++) {
-                    trade.ivs[i] = this.random.nextInt(maxIV);
-                }
-            }
-
-            if (randomItem) {
-                trade.item = possibleItems.randomItem(this.random);
-            }
-        }
-
-        // things that the game doesn't support should just be ignored
-        this.setIngameTrades(trades);
-    }
-
-    @Override
-    public int maxTradeNicknameLength() {
-        return 10;
-    }
-
-    @Override
-    public int maxTradeOTNameLength() {
-        return 7;
-    }
-
-    @Override
-    public void condenseLevelEvolutions(int maxLevel, int maxIntermediateLevel) {
-        List<Pokemon> allPokemon = this.getPokemon();
-        Set<Evolution> changedEvos = new TreeSet<Evolution>();
-        // search for level evolutions
-        for (Pokemon pk : allPokemon) {
-            if (pk != null) {
-                for (Evolution checkEvo : pk.evolutionsFrom) {
-                    if (checkEvo.type.usesLevel()) {
-                        // bring down the level of this evo if it exceeds max
-                        // level
-                        if (checkEvo.extraInfo > maxLevel) {
-                            checkEvo.extraInfo = maxLevel;
-                            changedEvos.add(checkEvo);
-                        }
-                        // Now, seperately, if an intermediate level evo is too
-                        // high, bring it down
-                        for (Evolution otherEvo : pk.evolutionsTo) {
-                            if (otherEvo.type.usesLevel() && otherEvo.extraInfo > maxIntermediateLevel) {
-                                otherEvo.extraInfo = maxIntermediateLevel;
-                                changedEvos.add(otherEvo);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        // Log changes now that we're done (to avoid repeats)
-        log("--Condensed Level Evolutions--");
-        for (Evolution evol : changedEvos) {
-            log(String.format("%s now evolves into %s at minimum level %d", evol.from.name, evol.to.name,
-                    evol.extraInfo));
-        }
-        logBlankLine();
-
-    }
-
-    @Override
-    public void randomizeEvolutions(boolean similarStrength, boolean sameType, boolean limitToThreeStages,
-            boolean forceChange) {
-        checkPokemonRestrictions();
-        List<Pokemon> pokemonPool = new ArrayList<Pokemon>(mainPokemonList);
-        int stageLimit = limitToThreeStages ? 3 : 10;
-
-        // Cache old evolutions for data later
-        Map<Pokemon, List<Evolution>> originalEvos = new HashMap<Pokemon, List<Evolution>>();
-        for (Pokemon pk : pokemonPool) {
-            originalEvos.put(pk, new ArrayList<Evolution>(pk.evolutionsFrom));
-        }
-
-        Set<EvolutionPair> newEvoPairs = new HashSet<EvolutionPair>();
-        Set<EvolutionPair> oldEvoPairs = new HashSet<EvolutionPair>();
-
-        if (forceChange) {
-            for (Pokemon pk : pokemonPool) {
-                for (Evolution ev : pk.evolutionsFrom) {
-                    oldEvoPairs.add(new EvolutionPair(ev.from, ev.to));
-                }
-            }
-        }
-
-        List<Pokemon> replacements = new ArrayList<Pokemon>();
-
-        int loops = 0;
-        while (loops < 1) {
-            // Setup for this loop.
-            boolean hadError = false;
-            for (Pokemon pk : pokemonPool) {
-                pk.evolutionsFrom.clear();
-                pk.evolutionsTo.clear();
-            }
-            newEvoPairs.clear();
-
-            // Shuffle pokemon list so the results aren't overly predictable.
-            Collections.shuffle(pokemonPool, this.random);
-
-            for (Pokemon fromPK : pokemonPool) {
-                List<Evolution> oldEvos = originalEvos.get(fromPK);
-                for (Evolution ev : oldEvos) {
-                    // Pick a Pokemon as replacement
-                    replacements.clear();
-
-                    // Step 1: base filters
-                    for (Pokemon pk : mainPokemonList) {
-                        // Prevent evolving into oneself (mandatory)
-                        if (pk == fromPK) {
-                            continue;
-                        }
-
-                        // Force same EXP curve (mandatory)
-                        if (pk.growthCurve != fromPK.growthCurve) {
-                            continue;
-                        }
-
-                        EvolutionPair ep = new EvolutionPair(fromPK, pk);
-                        // Prevent split evos choosing the same Pokemon
-                        // (mandatory)
-                        if (newEvoPairs.contains(ep)) {
-                            continue;
-                        }
-
-                        // Prevent evolving into old thing if flagged
-                        if (forceChange && oldEvoPairs.contains(ep)) {
-                            continue;
-                        }
-
-                        // Prevent evolution that causes cycle (mandatory)
-                        if (evoCycleCheck(fromPK, pk)) {
-                            continue;
-                        }
-
-                        // Prevent evolution that exceeds stage limit
-                        Evolution tempEvo = new Evolution(fromPK, pk, false, EvolutionType.NONE, 0);
-                        fromPK.evolutionsFrom.add(tempEvo);
-                        pk.evolutionsTo.add(tempEvo);
-                        boolean exceededLimit = false;
-
-                        Set<Pokemon> related = relatedPokemon(fromPK);
-
-                        for (Pokemon pk2 : related) {
-                            int numPreEvos = numPreEvolutions(pk2, stageLimit);
-                            if (numPreEvos >= stageLimit) {
-                                exceededLimit = true;
-                                break;
-                            } else if (numPreEvos == stageLimit - 1 && pk2.evolutionsFrom.size() == 0
-                                    && originalEvos.get(pk2).size() > 0) {
-                                exceededLimit = true;
-                                break;
-                            }
-                        }
-
-                        fromPK.evolutionsFrom.remove(tempEvo);
-                        pk.evolutionsTo.remove(tempEvo);
-
-                        if (exceededLimit) {
-                            continue;
-                        }
-
-                        // Passes everything, add as a candidate.
-                        replacements.add(pk);
-                    }
-
-                    // If we don't have any candidates after Step 1, severe
-                    // failure
-                    // exit out of this loop and try again from scratch
-                    if (replacements.size() == 0) {
-                        hadError = true;
-                        break;
-                    }
-
-                    // Step 2: filter by type, if needed
-                    if (replacements.size() > 1 && sameType) {
-                        Set<Pokemon> includeType = new HashSet<Pokemon>();
-                        for (Pokemon pk : replacements) {
-                            if (pk.primaryType == fromPK.primaryType
-                                    || (fromPK.secondaryType != null && pk.primaryType == fromPK.secondaryType)
-                                    || (pk.secondaryType != null && pk.secondaryType == fromPK.primaryType)
-                                    || (fromPK.secondaryType != null && pk.secondaryType != null && pk.secondaryType == fromPK.secondaryType)) {
-                                includeType.add(pk);
-                            }
-                        }
-
-                        if (includeType.size() != 0) {
-                            replacements.retainAll(includeType);
-                        }
-                    }
-
-                    // Step 3: pick - by similar strength or otherwise
-                    Pokemon picked = null;
-
-                    if (replacements.size() == 1) {
-                        // Foregone conclusion.
-                        picked = replacements.get(0);
-                    } else if (similarStrength) {
-                        picked = pickEvoPowerLvlReplacement(replacements, ev.to);
-                    } else {
-                        picked = replacements.get(this.random.nextInt(replacements.size()));
-                    }
-
-                    // Step 4: add it to the new evos pool
-                    Evolution newEvo = new Evolution(fromPK, picked, ev.carryStats, ev.type, ev.extraInfo);
-                    fromPK.evolutionsFrom.add(newEvo);
-                    picked.evolutionsTo.add(newEvo);
-                    newEvoPairs.add(new EvolutionPair(fromPK, picked));
-                }
-
-                if (hadError) {
-                    // No need to check the other Pokemon if we already errored
-                    break;
-                }
-            }
-
-            // If no error, done and return
-            if (!hadError) {
-                return;
-            } else {
-                loops++;
-            }
-        }
-
-        // If we made it out of the loop, we weren't able to randomize evos.
-        throw new RandomizationException("Not able to randomize evolutions in a sane amount of retries.");
-    }
-
-    private Pokemon pickEvoPowerLvlReplacement(List<Pokemon> pokemonPool, Pokemon current) {
-        // start with within 10% and add 5% either direction till we find
-        // something
-        int currentBST = current.bstForPowerLevels();
-        int minTarget = currentBST - currentBST / 10;
-        int maxTarget = currentBST + currentBST / 10;
-        List<Pokemon> canPick = new ArrayList<Pokemon>();
-        int expandRounds = 0;
-        while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 3)) {
-            for (Pokemon pk : pokemonPool) {
-                if (pk.bstForPowerLevels() >= minTarget && pk.bstForPowerLevels() <= maxTarget && !canPick.contains(pk)) {
-                    canPick.add(pk);
-                }
-            }
-            minTarget -= currentBST / 20;
-            maxTarget += currentBST / 20;
-            expandRounds++;
-        }
-        return canPick.get(this.random.nextInt(canPick.size()));
-    }
-
-    private static class EvolutionPair {
-        private Pokemon from;
-        private Pokemon to;
-
-        public EvolutionPair(Pokemon from, Pokemon to) {
-            this.from = from;
-            this.to = to;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((from == null) ? 0 : from.hashCode());
-            result = prime * result + ((to == null) ? 0 : to.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            EvolutionPair other = (EvolutionPair) obj;
-            if (from == null) {
-                if (other.from != null)
-                    return false;
-            } else if (!from.equals(other.from))
-                return false;
-            if (to == null) {
-                if (other.to != null)
-                    return false;
-            } else if (!to.equals(other.to))
-                return false;
-            return true;
-        }
-    }
-
-    /**
-     * Check whether adding an evolution from one Pokemon to another will cause
-     * an evolution cycle.
-     * 
-     * @param from
-     * @param to
-     * @param newEvos
-     * @return
-     */
-    private boolean evoCycleCheck(Pokemon from, Pokemon to) {
-        Evolution tempEvo = new Evolution(from, to, false, EvolutionType.NONE, 0);
-        from.evolutionsFrom.add(tempEvo);
-        Set<Pokemon> visited = new HashSet<Pokemon>();
-        Set<Pokemon> recStack = new HashSet<Pokemon>();
-        boolean recur = isCyclic(from, visited, recStack);
-        from.evolutionsFrom.remove(tempEvo);
-        return recur;
-    }
-
-    private boolean isCyclic(Pokemon pk, Set<Pokemon> visited, Set<Pokemon> recStack) {
-        if (!visited.contains(pk)) {
-            visited.add(pk);
-            recStack.add(pk);
-            for (Evolution ev : pk.evolutionsFrom) {
-                if (!visited.contains(ev.to) && isCyclic(ev.to, visited, recStack)) {
-                    return true;
-                } else if (recStack.contains(ev.to)) {
-                    return true;
-                }
-            }
-        }
-        recStack.remove(pk);
-        return false;
-    }
-
     // MOVE DATA
     // All randomizers don't touch move ID 165 (Struggle)
     // They also have other exclusions where necessary to stop things glitching.
@@ -2328,53 +1056,6 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-    }
-
-    private Map<Integer, boolean[]> moveUpdates;
-
-    @Override
-    public void initMoveUpdates() {
-        moveUpdates = new TreeMap<Integer, boolean[]>();
-    }
-
-    @Override
-    public void printMoveUpdates() {
-        log("--Move Updates--");
-        List<Move> moves = this.getMoves();
-        for (int moveID : moveUpdates.keySet()) {
-            boolean[] changes = moveUpdates.get(moveID);
-            Move mv = moves.get(moveID);
-            List<String> nonTypeChanges = new ArrayList<String>();
-            if (changes[0]) {
-                nonTypeChanges.add(String.format("%d power", mv.power));
-            }
-            if (changes[1]) {
-                nonTypeChanges.add(String.format("%d PP", mv.pp));
-            }
-            if (changes[2]) {
-                nonTypeChanges.add(String.format("%.00f%% accuracy", mv.hitratio));
-            }
-            String logStr = "Made " + mv.name;
-            // type or not?
-            if (changes[3]) {
-                logStr += " be " + mv.type + "-type";
-                if (nonTypeChanges.size() > 0) {
-                    logStr += " and";
-                }
-            }
-            if (nonTypeChanges.size() > 0) {
-                logStr += " have ";
-                if (nonTypeChanges.size() == 3) {
-                    logStr += nonTypeChanges.get(0) + ", " + nonTypeChanges.get(1) + " and " + nonTypeChanges.get(2);
-                } else if (nonTypeChanges.size() == 2) {
-                    logStr += nonTypeChanges.get(0) + " and " + nonTypeChanges.get(1);
-                } else {
-                    logStr += nonTypeChanges.get(0);
-                }
-            }
-            log(logStr);
-        }
-        logBlankLine();
     }
 
     @Override
@@ -2742,6 +1423,1190 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
+    private Map<Integer, boolean[]> moveUpdates;
+
+    @Override
+    public void initMoveUpdates() {
+        moveUpdates = new TreeMap<Integer, boolean[]>();
+    }
+
+    @Override
+    public void printMoveUpdates() {
+        log("--Move Updates--");
+        List<Move> moves = this.getMoves();
+        for (int moveID : moveUpdates.keySet()) {
+            boolean[] changes = moveUpdates.get(moveID);
+            Move mv = moves.get(moveID);
+            List<String> nonTypeChanges = new ArrayList<String>();
+            if (changes[0]) {
+                nonTypeChanges.add(String.format("%d power", mv.power));
+            }
+            if (changes[1]) {
+                nonTypeChanges.add(String.format("%d PP", mv.pp));
+            }
+            if (changes[2]) {
+                nonTypeChanges.add(String.format("%.00f%% accuracy", mv.hitratio));
+            }
+            String logStr = "Made " + mv.name;
+            // type or not?
+            if (changes[3]) {
+                logStr += " be " + mv.type + "-type";
+                if (nonTypeChanges.size() > 0) {
+                    logStr += " and";
+                }
+            }
+            if (nonTypeChanges.size() > 0) {
+                logStr += " have ";
+                if (nonTypeChanges.size() == 3) {
+                    logStr += nonTypeChanges.get(0) + ", " + nonTypeChanges.get(1) + " and " + nonTypeChanges.get(2);
+                } else if (nonTypeChanges.size() == 2) {
+                    logStr += nonTypeChanges.get(0) + " and " + nonTypeChanges.get(1);
+                } else {
+                    logStr += nonTypeChanges.get(0);
+                }
+            }
+            log(logStr);
+        }
+        logBlankLine();
+    }
+
+    @Override
+    public void randomizeMovesLearnt(boolean typeThemed, boolean noBroken, boolean forceFourStartingMoves) {
+        // Get current sets
+        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+        List<Integer> allBanned = new ArrayList<Integer>();
+        List<Integer> hms = this.getHMMoves();
+        allBanned.addAll(hms);
+        @SuppressWarnings("unchecked")
+        List<Integer> banned = noBroken ? this.getGameBreakingMoves() : Collections.EMPTY_LIST;
+        allBanned.addAll(banned);
+        allBanned.addAll(this.getMovesBannedFromLevelup());
+        for (Pokemon pkmn : movesets.keySet()) {
+            Set<Integer> learnt = new TreeSet<Integer>();
+            List<MoveLearnt> moves = movesets.get(pkmn);
+            // 4 starting moves?
+            if (forceFourStartingMoves) {
+                int lv1count = 0;
+                for (MoveLearnt ml : moves) {
+                    if (ml.level == 1) {
+                        lv1count++;
+                    }
+                }
+                if (lv1count < 4) {
+                    for (int i = 0; i < 4 - lv1count; i++) {
+                        MoveLearnt fakeLv1 = new MoveLearnt();
+                        fakeLv1.level = 1;
+                        fakeLv1.move = 0;
+                        moves.add(0, fakeLv1);
+                    }
+                }
+            }
+            // Last level 1 move should be replaced with a damaging one
+            int damagingMove = pickMove(pkmn, typeThemed, true, allBanned);
+            // Find last lv1 move
+            // lv1index ends up as the index of the first non-lv1 move
+            int lv1index = 0;
+            while (lv1index < moves.size() && moves.get(lv1index).level == 1) {
+                lv1index++;
+            }
+            // last lv1 move is 1 before lv1index
+            if (lv1index == 0) {
+                lv1index++;
+            }
+            moves.get(lv1index - 1).move = damagingMove;
+            moves.get(lv1index - 1).level = 1; // just in case
+            learnt.add(damagingMove);
+            // Rest replace with randoms
+            for (int i = 0; i < moves.size(); i++) {
+                if (i == (lv1index - 1)) {
+                    continue;
+                }
+                int picked = pickMove(pkmn, typeThemed, false, allBanned);
+                while (learnt.contains(picked)) {
+                    picked = pickMove(pkmn, typeThemed, false, allBanned);
+                }
+                moves.get(i).move = picked;
+                learnt.add(picked);
+            }
+        }
+        // Done, save
+        this.setMovesLearnt(movesets);
+
+    }
+
+    private static final int METRONOME_MOVE = 118;
+
+    @Override
+    public void metronomeOnlyMode() {
+
+        // movesets
+        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+
+        MoveLearnt metronomeML = new MoveLearnt();
+        metronomeML.level = 1;
+        metronomeML.move = METRONOME_MOVE;
+
+        for (List<MoveLearnt> ms : movesets.values()) {
+            if (ms != null && ms.size() > 0) {
+                ms.clear();
+                ms.add(metronomeML);
+            }
+        }
+
+        this.setMovesLearnt(movesets);
+
+        // trainers
+        // run this to remove all custom non-Metronome moves
+        this.setTrainers(this.getTrainers());
+
+        // tms
+        List<Integer> tmMoves = this.getTMMoves();
+
+        for (int i = 0; i < tmMoves.size(); i++) {
+            tmMoves.set(i, METRONOME_MOVE);
+        }
+
+        this.setTMMoves(tmMoves);
+
+        // movetutors
+        if (this.hasMoveTutors()) {
+            List<Integer> mtMoves = this.getMoveTutorMoves();
+
+            for (int i = 0; i < mtMoves.size(); i++) {
+                mtMoves.set(i, METRONOME_MOVE);
+            }
+
+            this.setMoveTutorMoves(mtMoves);
+        }
+
+        // move tweaks
+        List<Move> moveData = this.getMoves();
+
+        Move metronome = moveData.get(METRONOME_MOVE);
+
+        metronome.pp = 40;
+
+        List<Integer> hms = this.getHMMoves();
+
+        for (int hm : hms) {
+            Move thisHM = moveData.get(hm);
+            thisHM.pp = 0;
+        }
+    }
+
+    @Override
+    public void randomizeStaticPokemon(boolean legendForLegend) {
+        // Load
+        checkPokemonRestrictions();
+        List<Pokemon> currentStaticPokemon = this.getStaticPokemon();
+        List<Pokemon> replacements = new ArrayList<Pokemon>();
+        List<Pokemon> banned = this.bannedForStaticPokemon();
+
+        if (legendForLegend) {
+            List<Pokemon> legendariesLeft = new ArrayList<Pokemon>(onlyLegendaryList);
+            List<Pokemon> nonlegsLeft = new ArrayList<Pokemon>(noLegendaryList);
+            legendariesLeft.removeAll(banned);
+            nonlegsLeft.removeAll(banned);
+            for (int i = 0; i < currentStaticPokemon.size(); i++) {
+                Pokemon old = currentStaticPokemon.get(i);
+                Pokemon newPK;
+                if (old.isLegendary()) {
+                    newPK = legendariesLeft.remove(this.random.nextInt(legendariesLeft.size()));
+                    if (legendariesLeft.size() == 0) {
+                        legendariesLeft.addAll(onlyLegendaryList);
+                        legendariesLeft.removeAll(banned);
+                    }
+                } else {
+                    newPK = nonlegsLeft.remove(this.random.nextInt(nonlegsLeft.size()));
+                    if (nonlegsLeft.size() == 0) {
+                        nonlegsLeft.addAll(noLegendaryList);
+                        nonlegsLeft.removeAll(banned);
+                    }
+                }
+                replacements.add(newPK);
+            }
+        } else {
+            List<Pokemon> pokemonLeft = new ArrayList<Pokemon>(mainPokemonList);
+            pokemonLeft.removeAll(banned);
+            for (int i = 0; i < currentStaticPokemon.size(); i++) {
+                Pokemon newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
+                if (pokemonLeft.size() == 0) {
+                    pokemonLeft.addAll(mainPokemonList);
+                    pokemonLeft.removeAll(banned);
+                }
+                replacements.add(newPK);
+            }
+        }
+
+        // Save
+        this.setStaticPokemon(replacements);
+    }
+
+    @Override
+    public void randomizeTMMoves(boolean noBroken, boolean preserveField) {
+        // Pick some random TM moves.
+        int tmCount = this.getTMCount();
+        List<Move> allMoves = this.getMoves();
+        List<Integer> newTMs = new ArrayList<Integer>();
+        List<Integer> hms = this.getHMMoves();
+        List<Integer> oldTMs = this.getTMMoves();
+        @SuppressWarnings("unchecked")
+        List<Integer> banned = new ArrayList<Integer>(noBroken ? this.getGameBreakingMoves() : Collections.EMPTY_LIST);
+        // field moves?
+        List<Integer> fieldMoves = this.getFieldMoves();
+        if (preserveField) {
+            List<Integer> banExistingField = new ArrayList<Integer>(oldTMs);
+            banExistingField.retainAll(fieldMoves);
+            banned.addAll(banExistingField);
+        }
+        for (int i = 0; i < tmCount; i++) {
+            if (preserveField && fieldMoves.contains(oldTMs.get(i))) {
+                newTMs.add(oldTMs.get(i));
+            } else {
+                int chosenMove = this.random.nextInt(allMoves.size() - 1) + 1;
+                while (newTMs.contains(chosenMove) || RomFunctions.bannedRandomMoves[chosenMove]
+                        || hms.contains(chosenMove) || banned.contains(chosenMove)) {
+                    chosenMove = this.random.nextInt(allMoves.size() - 1) + 1;
+                }
+                newTMs.add(chosenMove);
+            }
+        }
+        this.setTMMoves(newTMs);
+    }
+
+    @Override
+    public void randomizeTMHMCompatibility(boolean preferSameType) {
+        // Get current compatibility
+        // new: increase HM chances if required early on
+        List<Integer> requiredEarlyOn = this.getEarlyRequiredHMMoves();
+        Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
+        List<Integer> tmHMs = new ArrayList<Integer>(this.getTMMoves());
+        tmHMs.addAll(this.getHMMoves());
+        List<Move> moveData = this.getMoves();
+        for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
+            Pokemon pkmn = compatEntry.getKey();
+            boolean[] flags = compatEntry.getValue();
+            for (int i = 1; i <= tmHMs.size(); i++) {
+                int move = tmHMs.get(i - 1);
+                Move mv = moveData.get(move);
+                double probability = 0.5;
+                if (preferSameType) {
+                    if (pkmn.primaryType.equals(mv.type)
+                            || (pkmn.secondaryType != null && pkmn.secondaryType.equals(mv.type))) {
+                        probability = 0.9;
+                    } else if (mv.type != null && mv.type.equals(Type.NORMAL)) {
+                        probability = 0.5;
+                    } else {
+                        probability = 0.25;
+                    }
+                }
+                if (requiredEarlyOn.contains(move)) {
+                    probability = Math.min(1.0, probability * 1.5);
+                }
+                flags[i] = (this.random.nextDouble() < probability);
+            }
+        }
+
+        // Set the new compatibility
+        this.setTMHMCompatibility(compat);
+    }
+
+    @Override
+    public void fullTMHMCompatibility() {
+        Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
+        for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
+            boolean[] flags = compatEntry.getValue();
+            for (int i = 1; i < flags.length; i++) {
+                flags[i] = true;
+            }
+        }
+        this.setTMHMCompatibility(compat);
+    }
+
+    @Override
+    public void ensureTMCompatSanity() {
+        // if a pokemon learns a move in its moveset
+        // and there is a TM of that move, make sure
+        // that TM can be learned.
+        Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
+        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+        List<Integer> tmMoves = this.getTMMoves();
+        for (Pokemon pkmn : compat.keySet()) {
+            List<MoveLearnt> moveset = movesets.get(pkmn);
+            boolean[] pkmnCompat = compat.get(pkmn);
+            for (MoveLearnt ml : moveset) {
+                if (tmMoves.contains(ml.move)) {
+                    int tmIndex = tmMoves.indexOf(ml.move);
+                    pkmnCompat[tmIndex + 1] = true;
+                }
+            }
+        }
+        this.setTMHMCompatibility(compat);
+    }
+
+    @Override
+    public void fullHMCompatibility() {
+        Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
+        int tmCount = this.getTMCount();
+        for (boolean[] flags : compat.values()) {
+            for (int i = tmCount + 1; i < flags.length; i++) {
+                flags[i] = true;
+            }
+        }
+
+        // Set the new compatibility
+        this.setTMHMCompatibility(compat);
+    }
+
+    @Override
+    public void randomizeMoveTutorMoves(boolean noBroken, boolean preserveField) {
+        if (!this.hasMoveTutors()) {
+            return;
+        }
+        // Pick some random Move Tutor moves, excluding TMs.
+        List<Move> allMoves = this.getMoves();
+        List<Integer> tms = this.getTMMoves();
+        List<Integer> newMTs = new ArrayList<Integer>();
+        List<Integer> oldMTs = this.getMoveTutorMoves();
+        int mtCount = oldMTs.size();
+        List<Integer> hms = this.getHMMoves();
+        @SuppressWarnings("unchecked")
+        List<Integer> banned = new ArrayList<Integer>(noBroken ? this.getGameBreakingMoves() : Collections.EMPTY_LIST);
+        // field moves?
+        List<Integer> fieldMoves = this.getFieldMoves();
+        if (preserveField) {
+            List<Integer> banExistingField = new ArrayList<Integer>(oldMTs);
+            banExistingField.retainAll(fieldMoves);
+            banned.addAll(banExistingField);
+        }
+        for (int i = 0; i < mtCount; i++) {
+            if (preserveField && fieldMoves.contains(oldMTs.get(i))) {
+                newMTs.add(oldMTs.get(i));
+            } else {
+                int chosenMove = this.random.nextInt(allMoves.size() - 1) + 1;
+                while (newMTs.contains(chosenMove) || tms.contains(chosenMove)
+                        || RomFunctions.bannedRandomMoves[chosenMove] || hms.contains(chosenMove)
+                        || banned.contains(chosenMove)) {
+                    chosenMove = this.random.nextInt(allMoves.size() - 1) + 1;
+                }
+                newMTs.add(chosenMove);
+            }
+        }
+        this.setMoveTutorMoves(newMTs);
+    }
+
+    @Override
+    public void randomizeMoveTutorCompatibility(boolean preferSameType) {
+        if (!this.hasMoveTutors()) {
+            return;
+        }
+        // Get current compatibility
+        Map<Pokemon, boolean[]> compat = this.getMoveTutorCompatibility();
+        List<Integer> mts = this.getMoveTutorMoves();
+        List<Move> moveData = this.getMoves();
+        for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
+            Pokemon pkmn = compatEntry.getKey();
+            boolean[] flags = compatEntry.getValue();
+            for (int i = 1; i <= mts.size(); i++) {
+                int move = mts.get(i - 1);
+                Move mv = moveData.get(move);
+                double probability = 0.5;
+                if (preferSameType) {
+                    if (pkmn.primaryType.equals(mv.type)
+                            || (pkmn.secondaryType != null && pkmn.secondaryType.equals(mv.type))) {
+                        probability = 0.9;
+                    } else if (mv.type != null && mv.type.equals(Type.NORMAL)) {
+                        probability = 0.5;
+                    } else {
+                        probability = 0.25;
+                    }
+                }
+                flags[i] = (this.random.nextDouble() < probability);
+            }
+        }
+
+        // Set the new compatibility
+        this.setMoveTutorCompatibility(compat);
+
+    }
+
+    @Override
+    public void fullMoveTutorCompatibility() {
+        if (!this.hasMoveTutors()) {
+            return;
+        }
+        Map<Pokemon, boolean[]> compat = this.getMoveTutorCompatibility();
+        for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
+            boolean[] flags = compatEntry.getValue();
+            for (int i = 1; i < flags.length; i++) {
+                flags[i] = true;
+            }
+        }
+        this.setMoveTutorCompatibility(compat);
+    }
+
+    @Override
+    public void ensureMoveTutorCompatSanity() {
+        if (!this.hasMoveTutors()) {
+            return;
+        }
+        // if a pokemon learns a move in its moveset
+        // and there is a tutor of that move, make sure
+        // that tutor can be learned.
+        Map<Pokemon, boolean[]> compat = this.getMoveTutorCompatibility();
+        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+        List<Integer> mtMoves = this.getMoveTutorMoves();
+        for (Pokemon pkmn : compat.keySet()) {
+            List<MoveLearnt> moveset = movesets.get(pkmn);
+            boolean[] pkmnCompat = compat.get(pkmn);
+            for (MoveLearnt ml : moveset) {
+                if (mtMoves.contains(ml.move)) {
+                    int mtIndex = mtMoves.indexOf(ml.move);
+                    pkmnCompat[mtIndex + 1] = true;
+                }
+            }
+        }
+        this.setMoveTutorCompatibility(compat);
+
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void randomizeTrainerNames(byte[] presetNames) {
+        List<String>[] allTrainerNames = new List[] { new ArrayList<String>(), new ArrayList<String>() };
+        Map<Integer, List<String>> trainerNamesByLength[] = new Map[] { new TreeMap<Integer, List<String>>(),
+                new TreeMap<Integer, List<String>>() };
+        // Check for the file
+        if (FileFunctions.configExists(tnamesFile)) {
+            try {
+                Scanner sc = null;
+                if (presetNames == null) {
+                    sc = new Scanner(FileFunctions.openConfig(tnamesFile), "UTF-8");
+                } else {
+                    sc = new Scanner(new ByteArrayInputStream(presetNames), "UTF-8");
+                }
+                while (sc.hasNextLine()) {
+                    String trainername = sc.nextLine().trim();
+                    if (trainername.isEmpty()) {
+                        continue;
+                    }
+                    if (trainername.startsWith("\uFEFF")) {
+                        trainername = trainername.substring(1);
+                    }
+                    int idx = trainername.contains("&") ? 1 : 0;
+                    int len = this.internalStringLength(trainername);
+                    if (len <= 10) {
+                        allTrainerNames[idx].add(trainername);
+                        if (trainerNamesByLength[idx].containsKey(len)) {
+                            trainerNamesByLength[idx].get(len).add(trainername);
+                        } else {
+                            List<String> namesOfThisLength = new ArrayList<String>();
+                            namesOfThisLength.add(trainername);
+                            trainerNamesByLength[idx].put(len, namesOfThisLength);
+                        }
+                    }
+                }
+                sc.close();
+            } catch (FileNotFoundException e) {
+                // Can't read, just don't load anything
+            }
+        }
+
+        // Get the current trainer names data
+        List<String> currentTrainerNames = this.getTrainerNames();
+        if (currentTrainerNames.size() == 0) {
+            // RBY have no trainer names
+            return;
+        }
+        TrainerNameMode mode = this.trainerNameMode();
+        int maxLength = this.maxTrainerNameLength();
+        int totalMaxLength = this.maxSumOfTrainerNameLengths();
+
+        boolean success = false;
+        int tries = 0;
+
+        // Init the translation map and new list
+        Map<String, String> translation = new HashMap<String, String>();
+        List<String> newTrainerNames = new ArrayList<String>();
+        List<Integer> tcNameLengths = this.getTCNameLengthsByTrainer();
+
+        // loop until we successfully pick names that fit
+        // should always succeed first attempt except for gen2.
+        while (!success && tries < 10000) {
+            success = true;
+            translation.clear();
+            newTrainerNames.clear();
+            int totalLength = 0;
+
+            // Start choosing
+            int tnIndex = -1;
+            for (String trainerName : currentTrainerNames) {
+                tnIndex++;
+                if (translation.containsKey(trainerName) && trainerName.equalsIgnoreCase("GRUNT") == false
+                        && trainerName.equalsIgnoreCase("EXECUTIVE") == false) {
+                    // use an already picked translation
+                    newTrainerNames.add(translation.get(trainerName));
+                    totalLength += this.internalStringLength(translation.get(trainerName));
+                } else {
+                    int idx = trainerName.contains("&") ? 1 : 0;
+                    List<String> pickFrom = allTrainerNames[idx];
+                    int intStrLen = this.internalStringLength(trainerName);
+                    if (mode == TrainerNameMode.SAME_LENGTH) {
+                        pickFrom = trainerNamesByLength[idx].get(intStrLen);
+                    }
+                    String changeTo = trainerName;
+                    int ctl = intStrLen;
+                    if (pickFrom != null && pickFrom.size() > 0 && intStrLen > 1) {
+                        int innerTries = 0;
+                        changeTo = pickFrom.get(this.random.nextInt(pickFrom.size()));
+                        ctl = this.internalStringLength(changeTo);
+                        while ((mode == TrainerNameMode.MAX_LENGTH && ctl > maxLength)
+                                || (mode == TrainerNameMode.MAX_LENGTH_WITH_CLASS && ctl + tcNameLengths.get(tnIndex) > maxLength)) {
+                            innerTries++;
+                            if (innerTries == 100) {
+                                changeTo = trainerName;
+                                ctl = intStrLen;
+                                break;
+                            }
+                            changeTo = pickFrom.get(this.random.nextInt(pickFrom.size()));
+                            ctl = this.internalStringLength(changeTo);
+                        }
+                    }
+                    translation.put(trainerName, changeTo);
+                    newTrainerNames.add(changeTo);
+                    totalLength += ctl;
+                }
+
+                if (totalLength > totalMaxLength) {
+                    success = false;
+                    tries++;
+                    break;
+                }
+            }
+        }
+
+        if (!success) {
+            throw new RandomizationException("Could not randomize trainer names in a reasonable amount of attempts."
+                    + "\nPlease add some shorter names to your trainer names file.");
+        }
+
+        // Done choosing, save
+        this.setTrainerNames(newTrainerNames);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void randomizeTrainerClassNames(byte[] presetNames) {
+        List<String> allTrainerClasses[] = new List[] { new ArrayList<String>(), new ArrayList<String>() };
+        Map<Integer, List<String>> trainerClassesByLength[] = new Map[] { new HashMap<Integer, List<String>>(),
+                new HashMap<Integer, List<String>>() };
+        // Check for the file
+        if (FileFunctions.configExists(tclassesFile)) {
+            try {
+                Scanner sc = null;
+                if (presetNames == null) {
+                    sc = new Scanner(FileFunctions.openConfig(tclassesFile), "UTF-8");
+                } else {
+                    sc = new Scanner(new ByteArrayInputStream(presetNames), "UTF-8");
+                }
+                while (sc.hasNextLine()) {
+                    String trainerClassName = sc.nextLine().trim();
+                    if (trainerClassName.isEmpty()) {
+                        continue;
+                    }
+                    if (trainerClassName.startsWith("\uFEFF")) {
+                        trainerClassName = trainerClassName.substring(1);
+                    }
+                    String checkName = trainerClassName.toLowerCase();
+                    int idx = (checkName.endsWith("couple") || checkName.contains(" and ") || checkName.endsWith("kin")
+                            || checkName.endsWith("team") || checkName.contains("&") || (checkName.endsWith("s") && !checkName
+                            .endsWith("ss"))) ? 1 : 0;
+                    allTrainerClasses[idx].add(trainerClassName);
+                    int len = this.internalStringLength(trainerClassName);
+                    if (trainerClassesByLength[idx].containsKey(len)) {
+                        trainerClassesByLength[idx].get(len).add(trainerClassName);
+                    } else {
+                        List<String> namesOfThisLength = new ArrayList<String>();
+                        namesOfThisLength.add(trainerClassName);
+                        trainerClassesByLength[idx].put(len, namesOfThisLength);
+                    }
+                }
+                sc.close();
+            } catch (FileNotFoundException e) {
+                // Can't read, just don't load anything
+            }
+        }
+
+        // Get the current trainer names data
+        List<String> currentClassNames = this.getTrainerClassNames();
+        boolean mustBeSameLength = this.fixedTrainerClassNamesLength();
+        int maxLength = this.maxTrainerClassNameLength();
+
+        // Init the translation map and new list
+        Map<String, String> translation = new HashMap<String, String>();
+        List<String> newClassNames = new ArrayList<String>();
+
+        // Start choosing
+        for (String trainerClassName : currentClassNames) {
+            if (translation.containsKey(trainerClassName)) {
+                // use an already picked translation
+                newClassNames.add(translation.get(trainerClassName));
+            } else {
+                String checkName = trainerClassName.toLowerCase();
+                int idx = (checkName.endsWith("couple") || checkName.contains(" and ") || checkName.endsWith("kin")
+                        || checkName.endsWith("team") || checkName.contains(" & ") || (checkName.endsWith("s") && !checkName
+                        .endsWith("ss"))) ? 1 : 0;
+                List<String> pickFrom = allTrainerClasses[idx];
+                int intStrLen = this.internalStringLength(trainerClassName);
+                if (mustBeSameLength) {
+                    pickFrom = trainerClassesByLength[idx].get(intStrLen);
+                }
+                String changeTo = trainerClassName;
+                if (pickFrom != null && pickFrom.size() > 0) {
+                    changeTo = pickFrom.get(this.random.nextInt(pickFrom.size()));
+                    while (changeTo.length() > maxLength) {
+                        changeTo = pickFrom.get(this.random.nextInt(pickFrom.size()));
+                    }
+                }
+                translation.put(trainerClassName, changeTo);
+                newClassNames.add(changeTo);
+            }
+        }
+
+        // Done choosing, save
+        this.setTrainerClassNames(newClassNames);
+    }
+
+    @Override
+    public void randomizeWildHeldItems(boolean banBadItems) {
+        List<Pokemon> pokemon = allPokemonWithoutNull();
+        ItemList possibleItems = banBadItems ? this.getNonBadItems() : this.getAllowedItems();
+        for (Pokemon pk : pokemon) {
+            if (pk.guaranteedHeldItem == -1 && pk.commonHeldItem == -1 && pk.rareHeldItem == -1
+                    && pk.darkGrassHeldItem == -1) {
+                // No held items at all, abort
+                return;
+            }
+            boolean canHaveDarkGrass = pk.darkGrassHeldItem != -1;
+            if (pk.guaranteedHeldItem != -1) {
+                // Guaranteed held items are supported.
+                if (pk.guaranteedHeldItem > 0) {
+                    // Currently have a guaranteed item
+                    double decision = this.random.nextDouble();
+                    if (decision < 0.9) {
+                        // Stay as guaranteed
+                        canHaveDarkGrass = false;
+                        pk.guaranteedHeldItem = possibleItems.randomItem(this.random);
+                    } else {
+                        // Change to 25% or 55% chance
+                        pk.guaranteedHeldItem = 0;
+                        pk.commonHeldItem = possibleItems.randomItem(this.random);
+                        pk.rareHeldItem = possibleItems.randomItem(this.random);
+                        while (pk.rareHeldItem == pk.commonHeldItem) {
+                            pk.rareHeldItem = possibleItems.randomItem(this.random);
+                        }
+                    }
+                } else {
+                    // No guaranteed item atm
+                    double decision = this.random.nextDouble();
+                    if (decision < 0.5) {
+                        // No held item at all
+                        pk.commonHeldItem = 0;
+                        pk.rareHeldItem = 0;
+                    } else if (decision < 0.65) {
+                        // Just a rare item
+                        pk.commonHeldItem = 0;
+                        pk.rareHeldItem = possibleItems.randomItem(this.random);
+                    } else if (decision < 0.8) {
+                        // Just a common item
+                        pk.commonHeldItem = possibleItems.randomItem(this.random);
+                        pk.rareHeldItem = 0;
+                    } else if (decision < 0.95) {
+                        // Both a common and rare item
+                        pk.commonHeldItem = possibleItems.randomItem(this.random);
+                        pk.rareHeldItem = possibleItems.randomItem(this.random);
+                        while (pk.rareHeldItem == pk.commonHeldItem) {
+                            pk.rareHeldItem = possibleItems.randomItem(this.random);
+                        }
+                    } else {
+                        // Guaranteed item
+                        canHaveDarkGrass = false;
+                        pk.guaranteedHeldItem = possibleItems.randomItem(this.random);
+                        pk.commonHeldItem = 0;
+                        pk.rareHeldItem = 0;
+                    }
+                }
+            } else {
+                // Code for no guaranteed items
+                double decision = this.random.nextDouble();
+                if (decision < 0.5) {
+                    // No held item at all
+                    pk.commonHeldItem = 0;
+                    pk.rareHeldItem = 0;
+                } else if (decision < 0.65) {
+                    // Just a rare item
+                    pk.commonHeldItem = 0;
+                    pk.rareHeldItem = possibleItems.randomItem(this.random);
+                } else if (decision < 0.8) {
+                    // Just a common item
+                    pk.commonHeldItem = possibleItems.randomItem(this.random);
+                    pk.rareHeldItem = 0;
+                } else {
+                    // Both a common and rare item
+                    pk.commonHeldItem = possibleItems.randomItem(this.random);
+                    pk.rareHeldItem = possibleItems.randomItem(this.random);
+                    while (pk.rareHeldItem == pk.commonHeldItem) {
+                        pk.rareHeldItem = possibleItems.randomItem(this.random);
+                    }
+                }
+            }
+
+            if (canHaveDarkGrass) {
+                double dgDecision = this.random.nextDouble();
+                if (dgDecision < 0.5) {
+                    // Yes, dark grass item
+                    pk.darkGrassHeldItem = possibleItems.randomItem(this.random);
+                } else {
+                    pk.darkGrassHeldItem = 0;
+                }
+            } else if (pk.darkGrassHeldItem != -1) {
+                pk.darkGrassHeldItem = 0;
+            }
+        }
+
+    }
+
+    @Override
+    public void randomizeStarterHeldItems(boolean banBadItems) {
+        List<Integer> oldHeldItems = this.getStarterHeldItems();
+        List<Integer> newHeldItems = new ArrayList<Integer>();
+        ItemList possibleItems = banBadItems ? this.getNonBadItems() : this.getAllowedItems();
+        for (int i = 0; i < oldHeldItems.size(); i++) {
+            newHeldItems.add(possibleItems.randomItem(this.random));
+        }
+        this.setStarterHeldItems(newHeldItems);
+    }
+
+    @Override
+    public void shuffleFieldItems() {
+        List<Integer> currentItems = this.getRegularFieldItems();
+        List<Integer> currentTMs = this.getCurrentFieldTMs();
+
+        Collections.shuffle(currentItems, this.random);
+        Collections.shuffle(currentTMs, this.random);
+
+        this.setRegularFieldItems(currentItems);
+        this.setFieldTMs(currentTMs);
+    }
+
+    @Override
+    public void randomizeFieldItems(boolean banBadItems) {
+        ItemList possibleItems = banBadItems ? this.getNonBadItems() : this.getAllowedItems();
+        List<Integer> currentItems = this.getRegularFieldItems();
+        List<Integer> currentTMs = this.getCurrentFieldTMs();
+        List<Integer> requiredTMs = this.getRequiredFieldTMs();
+
+        int fieldItemCount = currentItems.size();
+        int fieldTMCount = currentTMs.size();
+        int reqTMCount = requiredTMs.size();
+        int totalTMCount = this.getTMCount();
+
+        List<Integer> newItems = new ArrayList<Integer>();
+        List<Integer> newTMs = new ArrayList<Integer>();
+
+        for (int i = 0; i < fieldItemCount; i++) {
+            newItems.add(possibleItems.randomNonTM(this.random));
+        }
+
+        newTMs.addAll(requiredTMs);
+
+        for (int i = reqTMCount; i < fieldTMCount; i++) {
+            while (true) {
+                int tm = this.random.nextInt(totalTMCount) + 1;
+                if (!newTMs.contains(tm)) {
+                    newTMs.add(tm);
+                    break;
+                }
+            }
+        }
+
+        Collections.shuffle(newItems, this.random);
+        Collections.shuffle(newTMs, this.random);
+
+        this.setRegularFieldItems(newItems);
+        this.setFieldTMs(newTMs);
+    }
+
+    @Override
+    public void randomizeIngameTrades(boolean randomizeRequest, byte[] presetNicknames, boolean randomNickname,
+            byte[] presetTrainerNames, boolean randomOT, boolean randomStats, boolean randomItem) {
+        checkPokemonRestrictions();
+        // Process trainer names
+        List<String> singleTrainerNames = new ArrayList<String>();
+        // Check for the file
+        if (FileFunctions.configExists(tnamesFile) && randomOT) {
+            int maxOT = this.maxTradeOTNameLength();
+            try {
+                Scanner sc = null;
+                if (presetTrainerNames == null) {
+                    sc = new Scanner(FileFunctions.openConfig(tnamesFile), "UTF-8");
+                } else {
+                    sc = new Scanner(new ByteArrayInputStream(presetTrainerNames), "UTF-8");
+                }
+                while (sc.hasNextLine()) {
+                    String trainername = sc.nextLine().trim();
+                    if (trainername.isEmpty()) {
+                        continue;
+                    }
+                    if (trainername.startsWith("\uFEFF")) {
+                        trainername = trainername.substring(1);
+                    }
+                    int idx = trainername.contains("&") ? 1 : 0;
+                    int len = this.internalStringLength(trainername);
+                    if (len <= maxOT && idx == 0 && !singleTrainerNames.contains(trainername)) {
+                        singleTrainerNames.add(trainername);
+                    }
+                }
+                sc.close();
+            } catch (FileNotFoundException e) {
+                // Can't read, just don't load anything
+            }
+        }
+
+        // Process nicknames
+        List<String> nicknames = new ArrayList<String>();
+        // Check for the file
+        if (FileFunctions.configExists(nnamesFile) && randomNickname) {
+            int maxNN = this.maxTradeNicknameLength();
+            try {
+                Scanner sc = null;
+                if (presetNicknames == null) {
+                    sc = new Scanner(FileFunctions.openConfig(nnamesFile), "UTF-8");
+                } else {
+                    sc = new Scanner(new ByteArrayInputStream(presetNicknames), "UTF-8");
+                }
+                while (sc.hasNextLine()) {
+                    String nickname = sc.nextLine().trim();
+                    if (nickname.isEmpty()) {
+                        continue;
+                    }
+                    if (nickname.startsWith("\uFEFF")) {
+                        nickname = nickname.substring(1);
+                    }
+                    int len = this.internalStringLength(nickname);
+                    if (len <= maxNN && !nicknames.contains(nickname)) {
+                        nicknames.add(nickname);
+                    }
+                }
+                sc.close();
+            } catch (FileNotFoundException e) {
+                // Can't read, just don't load anything
+            }
+        }
+
+        // get old trades
+        List<IngameTrade> trades = this.getIngameTrades();
+        List<Pokemon> usedRequests = new ArrayList<Pokemon>();
+        List<Pokemon> usedGivens = new ArrayList<Pokemon>();
+        List<String> usedOTs = new ArrayList<String>();
+        List<String> usedNicknames = new ArrayList<String>();
+        ItemList possibleItems = this.getAllowedItems();
+
+        int nickCount = nicknames.size();
+        int trnameCount = singleTrainerNames.size();
+
+        for (IngameTrade trade : trades) {
+            // pick new given pokemon
+            Pokemon oldgiven = trade.givenPokemon;
+            Pokemon given = this.randomPokemon();
+            while (usedGivens.contains(given)) {
+                given = this.randomPokemon();
+            }
+            usedGivens.add(given);
+            trade.givenPokemon = given;
+
+            // requested pokemon?
+            if (oldgiven == trade.requestedPokemon) {
+                // preserve trades for the same pokemon
+                trade.requestedPokemon = given;
+            } else if (randomizeRequest) {
+                Pokemon request = this.randomPokemon();
+                while (usedRequests.contains(request) || request == given) {
+                    request = this.randomPokemon();
+                }
+                usedRequests.add(request);
+                trade.requestedPokemon = request;
+            }
+
+            // nickname?
+            if (randomNickname && nickCount > usedNicknames.size()) {
+                String nickname = nicknames.get(this.random.nextInt(nickCount));
+                while (usedNicknames.contains(nickname)) {
+                    nickname = nicknames.get(this.random.nextInt(nickCount));
+                }
+                usedNicknames.add(nickname);
+                trade.nickname = nickname;
+            } else if (trade.nickname.equalsIgnoreCase(oldgiven.name)) {
+                // change the name for sanity
+                trade.nickname = trade.givenPokemon.name;
+            }
+
+            if (randomOT && trnameCount > usedOTs.size()) {
+                String ot = singleTrainerNames.get(this.random.nextInt(trnameCount));
+                while (usedOTs.contains(ot)) {
+                    ot = singleTrainerNames.get(this.random.nextInt(trnameCount));
+                }
+                usedOTs.add(ot);
+                trade.otName = ot;
+                trade.otId = this.random.nextInt(65536);
+            }
+
+            if (randomStats) {
+                int maxIV = this.hasDVs() ? 16 : 32;
+                for (int i = 0; i < trade.ivs.length; i++) {
+                    trade.ivs[i] = this.random.nextInt(maxIV);
+                }
+            }
+
+            if (randomItem) {
+                trade.item = possibleItems.randomItem(this.random);
+            }
+        }
+
+        // things that the game doesn't support should just be ignored
+        this.setIngameTrades(trades);
+    }
+
+    @Override
+    public void condenseLevelEvolutions(int maxLevel, int maxIntermediateLevel) {
+        List<Pokemon> allPokemon = this.getPokemon();
+        Set<Evolution> changedEvos = new TreeSet<Evolution>();
+        // search for level evolutions
+        for (Pokemon pk : allPokemon) {
+            if (pk != null) {
+                for (Evolution checkEvo : pk.evolutionsFrom) {
+                    if (checkEvo.type.usesLevel()) {
+                        // bring down the level of this evo if it exceeds max
+                        // level
+                        if (checkEvo.extraInfo > maxLevel) {
+                            checkEvo.extraInfo = maxLevel;
+                            changedEvos.add(checkEvo);
+                        }
+                        // Now, seperately, if an intermediate level evo is too
+                        // high, bring it down
+                        for (Evolution otherEvo : pk.evolutionsTo) {
+                            if (otherEvo.type.usesLevel() && otherEvo.extraInfo > maxIntermediateLevel) {
+                                otherEvo.extraInfo = maxIntermediateLevel;
+                                changedEvos.add(otherEvo);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // Log changes now that we're done (to avoid repeats)
+        log("--Condensed Level Evolutions--");
+        for (Evolution evol : changedEvos) {
+            log(String.format("%s now evolves into %s at minimum level %d", evol.from.name, evol.to.name,
+                    evol.extraInfo));
+        }
+        logBlankLine();
+
+    }
+
+    @Override
+    public void randomizeEvolutions(boolean similarStrength, boolean sameType, boolean limitToThreeStages,
+            boolean forceChange) {
+        checkPokemonRestrictions();
+        List<Pokemon> pokemonPool = new ArrayList<Pokemon>(mainPokemonList);
+        int stageLimit = limitToThreeStages ? 3 : 10;
+
+        // Cache old evolutions for data later
+        Map<Pokemon, List<Evolution>> originalEvos = new HashMap<Pokemon, List<Evolution>>();
+        for (Pokemon pk : pokemonPool) {
+            originalEvos.put(pk, new ArrayList<Evolution>(pk.evolutionsFrom));
+        }
+
+        Set<EvolutionPair> newEvoPairs = new HashSet<EvolutionPair>();
+        Set<EvolutionPair> oldEvoPairs = new HashSet<EvolutionPair>();
+
+        if (forceChange) {
+            for (Pokemon pk : pokemonPool) {
+                for (Evolution ev : pk.evolutionsFrom) {
+                    oldEvoPairs.add(new EvolutionPair(ev.from, ev.to));
+                }
+            }
+        }
+
+        List<Pokemon> replacements = new ArrayList<Pokemon>();
+
+        int loops = 0;
+        while (loops < 1) {
+            // Setup for this loop.
+            boolean hadError = false;
+            for (Pokemon pk : pokemonPool) {
+                pk.evolutionsFrom.clear();
+                pk.evolutionsTo.clear();
+            }
+            newEvoPairs.clear();
+
+            // Shuffle pokemon list so the results aren't overly predictable.
+            Collections.shuffle(pokemonPool, this.random);
+
+            for (Pokemon fromPK : pokemonPool) {
+                List<Evolution> oldEvos = originalEvos.get(fromPK);
+                for (Evolution ev : oldEvos) {
+                    // Pick a Pokemon as replacement
+                    replacements.clear();
+
+                    // Step 1: base filters
+                    for (Pokemon pk : mainPokemonList) {
+                        // Prevent evolving into oneself (mandatory)
+                        if (pk == fromPK) {
+                            continue;
+                        }
+
+                        // Force same EXP curve (mandatory)
+                        if (pk.growthCurve != fromPK.growthCurve) {
+                            continue;
+                        }
+
+                        EvolutionPair ep = new EvolutionPair(fromPK, pk);
+                        // Prevent split evos choosing the same Pokemon
+                        // (mandatory)
+                        if (newEvoPairs.contains(ep)) {
+                            continue;
+                        }
+
+                        // Prevent evolving into old thing if flagged
+                        if (forceChange && oldEvoPairs.contains(ep)) {
+                            continue;
+                        }
+
+                        // Prevent evolution that causes cycle (mandatory)
+                        if (evoCycleCheck(fromPK, pk)) {
+                            continue;
+                        }
+
+                        // Prevent evolution that exceeds stage limit
+                        Evolution tempEvo = new Evolution(fromPK, pk, false, EvolutionType.NONE, 0);
+                        fromPK.evolutionsFrom.add(tempEvo);
+                        pk.evolutionsTo.add(tempEvo);
+                        boolean exceededLimit = false;
+
+                        Set<Pokemon> related = relatedPokemon(fromPK);
+
+                        for (Pokemon pk2 : related) {
+                            int numPreEvos = numPreEvolutions(pk2, stageLimit);
+                            if (numPreEvos >= stageLimit) {
+                                exceededLimit = true;
+                                break;
+                            } else if (numPreEvos == stageLimit - 1 && pk2.evolutionsFrom.size() == 0
+                                    && originalEvos.get(pk2).size() > 0) {
+                                exceededLimit = true;
+                                break;
+                            }
+                        }
+
+                        fromPK.evolutionsFrom.remove(tempEvo);
+                        pk.evolutionsTo.remove(tempEvo);
+
+                        if (exceededLimit) {
+                            continue;
+                        }
+
+                        // Passes everything, add as a candidate.
+                        replacements.add(pk);
+                    }
+
+                    // If we don't have any candidates after Step 1, severe
+                    // failure
+                    // exit out of this loop and try again from scratch
+                    if (replacements.size() == 0) {
+                        hadError = true;
+                        break;
+                    }
+
+                    // Step 2: filter by type, if needed
+                    if (replacements.size() > 1 && sameType) {
+                        Set<Pokemon> includeType = new HashSet<Pokemon>();
+                        for (Pokemon pk : replacements) {
+                            if (pk.primaryType == fromPK.primaryType
+                                    || (fromPK.secondaryType != null && pk.primaryType == fromPK.secondaryType)
+                                    || (pk.secondaryType != null && pk.secondaryType == fromPK.primaryType)
+                                    || (fromPK.secondaryType != null && pk.secondaryType != null && pk.secondaryType == fromPK.secondaryType)) {
+                                includeType.add(pk);
+                            }
+                        }
+
+                        if (includeType.size() != 0) {
+                            replacements.retainAll(includeType);
+                        }
+                    }
+
+                    // Step 3: pick - by similar strength or otherwise
+                    Pokemon picked = null;
+
+                    if (replacements.size() == 1) {
+                        // Foregone conclusion.
+                        picked = replacements.get(0);
+                    } else if (similarStrength) {
+                        picked = pickEvoPowerLvlReplacement(replacements, ev.to);
+                    } else {
+                        picked = replacements.get(this.random.nextInt(replacements.size()));
+                    }
+
+                    // Step 4: add it to the new evos pool
+                    Evolution newEvo = new Evolution(fromPK, picked, ev.carryStats, ev.type, ev.extraInfo);
+                    fromPK.evolutionsFrom.add(newEvo);
+                    picked.evolutionsTo.add(newEvo);
+                    newEvoPairs.add(new EvolutionPair(fromPK, picked));
+                }
+
+                if (hadError) {
+                    // No need to check the other Pokemon if we already errored
+                    break;
+                }
+            }
+
+            // If no error, done and return
+            if (!hadError) {
+                return;
+            } else {
+                loops++;
+            }
+        }
+
+        // If we made it out of the loop, we weren't able to randomize evos.
+        throw new RandomizationException("Not able to randomize evolutions in a sane amount of retries.");
+    }
+
+    @Override
+    public void minimumCatchRate(int rateNonLegendary, int rateLegendary) {
+        List<Pokemon> pokes = getPokemon();
+        for (Pokemon pkmn : pokes) {
+            if (pkmn == null) {
+                continue;
+            }
+            int minCatchRate = pkmn.isLegendary() ? rateLegendary : rateNonLegendary;
+            pkmn.catchRate = Math.max(pkmn.catchRate, minCatchRate);
+        }
+
+    }
+
+    @Override
+    public void standardizeEXPCurves() {
+        List<Pokemon> pokes = getPokemon();
+        for (Pokemon pkmn : pokes) {
+            if (pkmn == null) {
+                continue;
+            }
+            pkmn.growthCurve = pkmn.isLegendary() ? ExpCurve.SLOW : ExpCurve.MEDIUM_FAST;
+        }
+    }
+
+    /* Private methods/structs used internally by the above methods */
+
     private void updateMovePower(List<Move> moves, int moveNum, int power) {
         Move mv = moves.get(moveNum);
         if (mv.power != power) {
@@ -2781,6 +2646,165 @@ public abstract class AbstractRomHandler implements RomHandler {
             moveUpdates.put(moveNum, updateField);
         } else {
             moveUpdates.get(moveNum)[updateType] = true;
+        }
+    }
+
+    private Pokemon pickEvoPowerLvlReplacement(List<Pokemon> pokemonPool, Pokemon current) {
+        // start with within 10% and add 5% either direction till we find
+        // something
+        int currentBST = current.bstForPowerLevels();
+        int minTarget = currentBST - currentBST / 10;
+        int maxTarget = currentBST + currentBST / 10;
+        List<Pokemon> canPick = new ArrayList<Pokemon>();
+        int expandRounds = 0;
+        while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 3)) {
+            for (Pokemon pk : pokemonPool) {
+                if (pk.bstForPowerLevels() >= minTarget && pk.bstForPowerLevels() <= maxTarget && !canPick.contains(pk)) {
+                    canPick.add(pk);
+                }
+            }
+            minTarget -= currentBST / 20;
+            maxTarget += currentBST / 20;
+            expandRounds++;
+        }
+        return canPick.get(this.random.nextInt(canPick.size()));
+    }
+
+    private static class EvolutionPair {
+        private Pokemon from;
+        private Pokemon to;
+
+        public EvolutionPair(Pokemon from, Pokemon to) {
+            this.from = from;
+            this.to = to;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((from == null) ? 0 : from.hashCode());
+            result = prime * result + ((to == null) ? 0 : to.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            EvolutionPair other = (EvolutionPair) obj;
+            if (from == null) {
+                if (other.from != null)
+                    return false;
+            } else if (!from.equals(other.from))
+                return false;
+            if (to == null) {
+                if (other.to != null)
+                    return false;
+            } else if (!to.equals(other.to))
+                return false;
+            return true;
+        }
+    }
+
+    /**
+     * Check whether adding an evolution from one Pokemon to another will cause
+     * an evolution cycle.
+     * 
+     * @param from
+     * @param to
+     * @param newEvos
+     * @return
+     */
+    private boolean evoCycleCheck(Pokemon from, Pokemon to) {
+        Evolution tempEvo = new Evolution(from, to, false, EvolutionType.NONE, 0);
+        from.evolutionsFrom.add(tempEvo);
+        Set<Pokemon> visited = new HashSet<Pokemon>();
+        Set<Pokemon> recStack = new HashSet<Pokemon>();
+        boolean recur = isCyclic(from, visited, recStack);
+        from.evolutionsFrom.remove(tempEvo);
+        return recur;
+    }
+
+    private boolean isCyclic(Pokemon pk, Set<Pokemon> visited, Set<Pokemon> recStack) {
+        if (!visited.contains(pk)) {
+            visited.add(pk);
+            recStack.add(pk);
+            for (Evolution ev : pk.evolutionsFrom) {
+                if (!visited.contains(ev.to) && isCyclic(ev.to, visited, recStack)) {
+                    return true;
+                } else if (recStack.contains(ev.to)) {
+                    return true;
+                }
+            }
+        }
+        recStack.remove(pk);
+        return false;
+    }
+
+    private interface BasePokemonAction {
+        public void applyTo(Pokemon pk);
+    }
+
+    private interface EvolvedPokemonAction {
+        public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo);
+    }
+
+    /**
+     * Universal implementation for things that have "copy X up evolutions"
+     * support.
+     * 
+     * @param bpAction
+     *            Method to run on all base or no-copy Pokemon
+     * @param epAction
+     *            Method to run on all evolved Pokemon with a linear chain of
+     *            single evolutions.
+     */
+    private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction) {
+        List<Pokemon> allPokes = this.getPokemon();
+        for (Pokemon pk : allPokes) {
+            if (pk != null) {
+                pk.temporaryFlag = false;
+            }
+        }
+
+        // Get evolution data.
+        Set<Pokemon> dontCopyPokes = RomFunctions.getBasicOrNoCopyPokemon(this);
+        Set<Pokemon> middleEvos = RomFunctions.getMiddleEvolutions(this);
+
+        for (Pokemon pk : dontCopyPokes) {
+            bpAction.applyTo(pk);
+            pk.temporaryFlag = true;
+        }
+
+        // go "up" evolutions looking for pre-evos to do first
+        for (Pokemon pk : allPokes) {
+            if (pk != null && !pk.temporaryFlag) {
+                // Non-randomized pokes at this point must have
+                // a linear chain of single evolutions down to
+                // a randomized poke.
+                Stack<Evolution> currentStack = new Stack<Evolution>();
+                Evolution ev = pk.evolutionsTo.get(0);
+                while (!ev.from.temporaryFlag) {
+                    currentStack.push(ev);
+                    ev = ev.from.evolutionsTo.get(0);
+                }
+
+                // Now "ev" is set to an evolution from a Pokemon that has had
+                // the base action done on it to one that hasn't.
+                // Do the evolution action for everything left on the stack.
+                epAction.applyTo(ev.from, ev.to, !middleEvos.contains(ev.to));
+                ev.to.temporaryFlag = true;
+                while (!currentStack.isEmpty()) {
+                    ev = currentStack.pop();
+                    epAction.applyTo(ev.from, ev.to, !middleEvos.contains(ev.to));
+                    ev.to.temporaryFlag = true;
+                }
+            }
         }
     }
 
@@ -3221,10 +3245,23 @@ public abstract class AbstractRomHandler implements RomHandler {
         return canPick.get(this.random.nextInt(canPick.size()));
     }
 
-    /* Helper methods used by subclasses */
+    /* Helper methods used by subclasses and/or this class */
 
-    public void setLog(PrintStream logStream) {
-        this.logStream = logStream;
+    protected void checkPokemonRestrictions() {
+        if (!restrictionsSet) {
+            setPokemonPool(null);
+        }
+    }
+
+    protected void applyCamelCaseNames() {
+        List<Pokemon> pokes = getPokemon();
+        for (Pokemon pkmn : pokes) {
+            if (pkmn == null) {
+                continue;
+            }
+            pkmn.name = RomFunctions.camelCase(pkmn.name);
+        }
+
     }
 
     protected void log(String log) {
@@ -3269,11 +3306,14 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     /* Default Implementations */
     /* Used when a subclass doesn't override */
+    /*
+     * The implication here is that these WILL be overridden by at least one
+     * subclass.
+     */
 
     @Override
-    public boolean hasTimeBasedEncounters() {
-        // DEFAULT: no
-        return false;
+    public boolean canChangeStarters() {
+        return true;
     }
 
     @Override
@@ -3287,22 +3327,9 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public Type randomType() {
-        Type t = Type.randomType(this.random);
-        while (!typeInGame(t)) {
-            t = Type.randomType(this.random);
-        }
-        return t;
-    }
-
-    @Override
-    public boolean isYellow() {
+    public boolean hasTimeBasedEncounters() {
+        // DEFAULT: no
         return false;
-    }
-
-    @Override
-    public boolean canChangeStarters() {
-        return true;
     }
 
     @SuppressWarnings("unchecked")
@@ -3313,19 +3340,42 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @SuppressWarnings("unchecked")
     @Override
+    public List<Integer> getMovesBannedFromLevelup() {
+        return (List<Integer>) Collections.EMPTY_LIST;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public List<Pokemon> bannedForStaticPokemon() {
         return (List<Pokemon>) Collections.EMPTY_LIST;
     }
 
     @Override
-    public int miscTweaksAvailable() {
-        // default: none
-        return 0;
+    public int maxTrainerNameLength() {
+        // default: no real limit
+        return Integer.MAX_VALUE;
     }
 
     @Override
-    public void applyMiscTweak(MiscTweak tweak) {
-        // default: do nothing
+    public int maxSumOfTrainerNameLengths() {
+        // default: no real limit
+        return Integer.MAX_VALUE;
+    }
+
+    @Override
+    public int maxTrainerClassNameLength() {
+        // default: no real limit
+        return Integer.MAX_VALUE;
+    }
+
+    @Override
+    public int maxTradeNicknameLength() {
+        return 10;
+    }
+
+    @Override
+    public int maxTradeOTNameLength() {
+        return 7;
     }
 
     @Override
@@ -3334,10 +3384,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         return Arrays.asList(49, 82);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<Integer> getMovesBannedFromLevelup() {
-        return (List<Integer>) Collections.EMPTY_LIST;
+    public boolean isYellow() {
+        return false;
     }
 
     @Override
@@ -3351,4 +3400,14 @@ public abstract class AbstractRomHandler implements RomHandler {
         // do nothing
     }
 
+    @Override
+    public int miscTweaksAvailable() {
+        // default: none
+        return 0;
+    }
+
+    @Override
+    public void applyMiscTweak(MiscTweak tweak) {
+        // default: do nothing
+    }
 }
