@@ -1290,12 +1290,12 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     tpk.AILevel = ailevel;
                     tpk.ability = trpoke[pokeOffs + 1] & 0xFF;
                     pokeOffs += 6;
-                    if (tr.poketype >= 2) {
+                    if ((tr.poketype & 2) == 2) {
                         int heldItem = readWord(trpoke, pokeOffs);
                         tpk.heldItem = heldItem;
                         pokeOffs += 2;
                     }
-                    if (tr.poketype % 2 == 1) {
+                    if ((tr.poketype & 1) == 1) {
                         int attack1 = readWord(trpoke, pokeOffs);
                         int attack2 = readWord(trpoke, pokeOffs + 2);
                         int attack3 = readWord(trpoke, pokeOffs + 4);
@@ -1333,13 +1333,18 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         try {
             NARCContents trainers = this.readNARC(romEntry.getString("TrainerData"));
             NARCContents trpokes = new NARCContents();
+
+            // Get current movesets in case we need to reset them for certain
+            // trainer mons.
+            Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+
             // empty entry
             trpokes.files.add(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 });
             int trainernum = trainers.files.size();
             for (int i = 1; i < trainernum; i++) {
                 byte[] trainer = trainers.files.get(i);
                 Trainer tr = allTrainers.next();
-                tr.poketype = 0; // write as type 0 for no item/moves
+                // preserve original poketype
                 trainer[0] = (byte) tr.poketype;
                 int numPokes = tr.pokemon.size();
                 trainer[3] = (byte) numPokes;
@@ -1348,30 +1353,37 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 if (romEntry.romType != Gen4Constants.Type_DP) {
                     bytesNeeded += 2 * numPokes;
                 }
-                if (tr.poketype % 2 == 1) {
+                if ((tr.poketype & 1) == 1) {
                     bytesNeeded += 8 * numPokes;
                 }
-                if (tr.poketype >= 2) {
+                if ((tr.poketype & 2) == 2) {
                     bytesNeeded += 2 * numPokes;
                 }
                 byte[] trpoke = new byte[bytesNeeded];
                 int pokeOffs = 0;
                 Iterator<TrainerPokemon> tpokes = tr.pokemon.iterator();
                 for (int poke = 0; poke < numPokes; poke++) {
-                    TrainerPokemon tpk = tpokes.next();
-                    writeWord(trpoke, pokeOffs, tpk.AILevel);
-                    writeWord(trpoke, pokeOffs + 2, tpk.level);
-                    writeWord(trpoke, pokeOffs + 4, tpk.pokemon.number);
+                    TrainerPokemon tp = tpokes.next();
+                    writeWord(trpoke, pokeOffs, tp.AILevel);
+                    writeWord(trpoke, pokeOffs + 2, tp.level);
+                    writeWord(trpoke, pokeOffs + 4, tp.pokemon.number);
                     pokeOffs += 6;
-                    if (tr.poketype >= 2) {
-                        writeWord(trpoke, pokeOffs, tpk.heldItem);
+                    if ((tr.poketype & 2) == 2) {
+                        writeWord(trpoke, pokeOffs, tp.heldItem);
                         pokeOffs += 2;
                     }
-                    if (tr.poketype % 2 == 1) {
-                        writeWord(trpoke, pokeOffs, tpk.move1);
-                        writeWord(trpoke, pokeOffs + 2, tpk.move2);
-                        writeWord(trpoke, pokeOffs + 4, tpk.move3);
-                        writeWord(trpoke, pokeOffs + 6, tpk.move4);
+                    if ((tr.poketype & 1) == 1) {
+                        if (tp.resetMoves) {
+                            int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon, movesets, tp.level);
+                            for (int m = 0; m < 4; m++) {
+                                writeWord(trpoke, pokeOffs + m * 2, pokeMoves[m]);
+                            }
+                        } else {
+                            writeWord(trpoke, pokeOffs, tp.move1);
+                            writeWord(trpoke, pokeOffs + 2, tp.move2);
+                            writeWord(trpoke, pokeOffs + 4, tp.move3);
+                            writeWord(trpoke, pokeOffs + 6, tp.move4);
+                        }
                         pokeOffs += 8;
                     }
                     // Plat/HGSS have another random pokeOffs +=2 here.

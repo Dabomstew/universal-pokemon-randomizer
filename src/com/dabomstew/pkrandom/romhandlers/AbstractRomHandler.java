@@ -867,6 +867,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (TrainerPokemon tp : t.pokemon) {
                 boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
                 tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, null, noLegendaries, wgAllowed);
+                tp.resetMoves = true;
             }
         }
 
@@ -944,6 +945,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 for (TrainerPokemon tp : t.pokemon) {
                     boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
                     tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForGroup, noLegendaries, wgAllowed);
+                    tp.resetMoves = true;
                 }
             }
         }
@@ -966,6 +968,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 for (TrainerPokemon tp : t.pokemon) {
                     boolean shedAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
                     tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForTrainer, noLegendaries, shedAllowed);
+                    tp.resetMoves = true;
                 }
             }
         }
@@ -3041,6 +3044,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                 }
                 bestPoke.pokemon = starter;
+                bestPoke.resetMoves = true;
             }
         }
 

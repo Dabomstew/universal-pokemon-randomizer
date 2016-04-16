@@ -1025,11 +1025,11 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
                     tp.level = rom[offs] & 0xFF;
                     tp.pokemon = pokes[rom[offs + 1] & 0xFF];
                     offs += 2;
-                    if (dataType == 2 || dataType == 3) {
+                    if ((dataType & 2) == 2) {
                         tp.heldItem = rom[offs] & 0xFF;
                         offs++;
                     }
-                    if (dataType % 2 == 1) {
+                    if ((dataType & 1) == 1) {
                         tp.move1 = rom[offs] & 0xFF;
                         tp.move2 = rom[offs + 1] & 0xFF;
                         tp.move3 = rom[offs + 2] & 0xFF;
@@ -1063,6 +1063,10 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
             pointers[i] = calculateOffset(bankOf(traineroffset), pointer);
         }
 
+        // Get current movesets in case we need to reset them for certain
+        // trainer mons.
+        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+
         Iterator<Trainer> allTrainers = trainerData.iterator();
         for (int i = 1; i <= traineramount; i++) {
             int offs = pointers[i];
@@ -1076,8 +1080,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
                 int trnamelen = internalStringLength(tr.name);
                 writeFixedLengthString(tr.name, offs, trnamelen + 1);
                 offs += trnamelen + 1;
-                // Poketype
-                tr.poketype = 0; // remove held items and moves
+                // Write out new trainer data
                 rom[offs++] = (byte) tr.poketype;
                 Iterator<TrainerPokemon> tPokes = tr.pokemon.iterator();
                 for (int tpnum = 0; tpnum < tr.pokemon.size(); tpnum++) {
@@ -1085,15 +1088,22 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
                     rom[offs] = (byte) tp.level;
                     rom[offs + 1] = (byte) tp.pokemon.number;
                     offs += 2;
-                    if (tr.poketype == 2 || tr.poketype == 3) {
+                    if ((tr.poketype & 2) == 2) {
                         rom[offs] = (byte) tp.heldItem;
                         offs++;
                     }
-                    if (tr.poketype % 2 == 1) {
-                        rom[offs] = (byte) tp.move1;
-                        rom[offs + 1] = (byte) tp.move2;
-                        rom[offs + 2] = (byte) tp.move3;
-                        rom[offs + 3] = (byte) tp.move4;
+                    if ((tr.poketype & 1) == 1) {
+                        if (tp.resetMoves) {
+                            int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon, movesets, tp.level);
+                            for (int m = 0; m < 4; m++) {
+                                rom[offs + m] = (byte) pokeMoves[m];
+                            }
+                        } else {
+                            rom[offs] = (byte) tp.move1;
+                            rom[offs + 1] = (byte) tp.move2;
+                            rom[offs + 2] = (byte) tp.move3;
+                            rom[offs + 3] = (byte) tp.move4;
+                        }
                         offs += 4;
                     }
                 }
@@ -2356,13 +2366,13 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 
         return bim;
     }
-    
+
     @Override
     public void writeCheckValueToROM(int value) {
-        if(romEntry.getValue("CheckValueOffset") > 0) {
+        if (romEntry.getValue("CheckValueOffset") > 0) {
             int cvOffset = romEntry.getValue("CheckValueOffset");
-            for(int i=0;i<4;i++) {
-                rom[cvOffset+i] = (byte) ((value >> (3-i)*8) & 0xFF);
+            for (int i = 0; i < 4; i++) {
+                rom[cvOffset + i] = (byte) ((value >> (3 - i) * 8) & 0xFF);
             }
         }
     }

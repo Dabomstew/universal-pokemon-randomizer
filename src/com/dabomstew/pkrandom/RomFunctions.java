@@ -24,12 +24,14 @@ package com.dabomstew.pkrandom;
 /*----------------------------------------------------------------------------*/
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import com.dabomstew.pkrandom.pokemon.Evolution;
+import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
@@ -117,6 +119,59 @@ public class RomFunctions {
             }
         }
         return finalEvolutions;
+    }
+
+    /**
+     * Get the 4 moves known by a Pokemon at a particular level.
+     * 
+     * @param pkmn
+     * @param movesets
+     * @param level
+     * @return
+     */
+    public static int[] getMovesAtLevel(Pokemon pkmn, Map<Pokemon, List<MoveLearnt>> movesets, int level) {
+        return getMovesAtLevel(pkmn, movesets, level, 0);
+    }
+    
+    public static int[] getMovesAtLevel(Pokemon pkmn, Map<Pokemon, List<MoveLearnt>> movesets, int level, int emptyValue) {
+        int[] curMoves = new int[4];
+        
+        if(emptyValue != 0) {
+            Arrays.fill(curMoves, emptyValue);
+        }
+        
+        int moveCount = 0;
+        List<MoveLearnt> movepool = movesets.get(pkmn);
+        for (MoveLearnt ml : movepool) {
+            if (ml.level > level) {
+                // we're done
+                break;
+            }
+
+            boolean alreadyKnownMove = false;
+            for (int i = 0; i < moveCount; i++) {
+                if (curMoves[i] == ml.move) {
+                    alreadyKnownMove = true;
+                    break;
+                }
+            }
+
+            if (!alreadyKnownMove) {
+                // add this move to the moveset
+                if (moveCount == 4) {
+                    // shift moves up and add to last slot
+                    for (int i = 0; i < 3; i++) {
+                        curMoves[i] = curMoves[i + 1];
+                    }
+                    curMoves[3] = ml.move;
+                } else {
+                    // add to next available slot
+                    curMoves[moveCount++] = ml.move;
+                }
+            }
+        }
+
+        return curMoves;
     }
 
     public static String camelCase(String original) {

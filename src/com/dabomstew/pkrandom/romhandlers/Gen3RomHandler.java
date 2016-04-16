@@ -1434,24 +1434,82 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int amount = romEntry.getValue("TrainerCount");
         int entryLen = romEntry.getValue("TrainerEntrySize");
         Iterator<Trainer> theTrainers = trainerData.iterator();
+        int fso = romEntry.getValue("FreeSpace");
+
+        // Get current movesets in case we need to reset them for certain
+        // trainer mons.
+        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+
         for (int i = 1; i < amount; i++) {
             int trOffset = baseOffset + i * entryLen;
             Trainer tr = theTrainers.next();
-            // Write out the data as type 0 to avoid moves & hold items carrying
-            // over
-            rom[trOffset] = 0;
-            rom[trOffset + (entryLen - 8)] = (byte) tr.pokemon.size();
-            int pointerToPokes = readPointer(trOffset + (entryLen - 4));
+            // Do we need to repoint this trainer's data?
+            int oldPokeType = rom[trOffset] & 0xFF;
+            int oldPokeCount = rom[trOffset + (entryLen - 8)] & 0xFF;
+            int newPokeCount = tr.pokemon.size();
+            int newDataSize = newPokeCount * ((tr.poketype & 1) == 1 ? 16 : 8);
+            int oldDataSize = oldPokeCount * ((oldPokeType & 1) == 1 ? 16 : 8);
+
+            // write out new data first...
+            rom[trOffset] = (byte) tr.poketype;
+            rom[trOffset + (entryLen - 8)] = (byte) newPokeCount;
+
+            // now, do we need to repoint?
+            int pointerToPokes;
+            if (newDataSize > oldDataSize) {
+                int writeSpace = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, newDataSize, fso, true);
+                if (writeSpace < fso) {
+                    throw new RandomizerIOException("ROM is full");
+                }
+                writePointer(trOffset + (entryLen - 4), writeSpace);
+                pointerToPokes = writeSpace;
+            } else {
+                pointerToPokes = readPointer(trOffset + (entryLen - 4));
+            }
+
             Iterator<TrainerPokemon> pokes = tr.pokemon.iterator();
-            // Pokemon data!
-            // if (pokeDataType == 0) {
-            // blocks of 8 bytes
-            for (int poke = 0; poke < tr.pokemon.size(); poke++) {
-                TrainerPokemon thisPoke = pokes.next();
-                writeWord(pointerToPokes + poke * 8, thisPoke.AILevel);
-                writeWord(pointerToPokes + poke * 8 + 2, thisPoke.level);
-                writeWord(pointerToPokes + poke * 8 + 4, pokedexToInternal[thisPoke.pokemon.number]);
-                writeWord(pointerToPokes + poke * 8 + 6, 0);
+
+            // Write out Pokemon data!
+            if ((tr.poketype & 1) == 1) {
+                // custom moves, blocks of 16 bytes
+                for (int poke = 0; poke < newPokeCount; poke++) {
+                    TrainerPokemon tp = pokes.next();
+                    writeWord(pointerToPokes + poke * 8, tp.AILevel);
+                    writeWord(pointerToPokes + poke * 8 + 2, tp.level);
+                    writeWord(pointerToPokes + poke * 8 + 4, pokedexToInternal[tp.pokemon.number]);
+                    int movesStart;
+                    if ((tr.poketype & 2) == 2) {
+                        writeWord(pointerToPokes + poke * 8 + 6, tp.heldItem);
+                        movesStart = 8;
+                    } else {
+                        movesStart = 6;
+                        writeWord(pointerToPokes + poke * 8 + 14, 0);
+                    }
+                    if (tp.resetMoves) {
+                        int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon, movesets, tp.level);
+                        for (int m = 0; m < 4; m++) {
+                            writeWord(pointerToPokes + poke * 8 + movesStart + m * 2, pokeMoves[m]);
+                        }
+                    } else {
+                        writeWord(pointerToPokes + poke * 8 + movesStart, tp.move1);
+                        writeWord(pointerToPokes + poke * 8 + movesStart + 2, tp.move2);
+                        writeWord(pointerToPokes + poke * 8 + movesStart + 4, tp.move3);
+                        writeWord(pointerToPokes + poke * 8 + movesStart + 6, tp.move4);
+                    }
+                }
+            } else {
+                // no moves, blocks of 8 bytes
+                for (int poke = 0; poke < newPokeCount; poke++) {
+                    TrainerPokemon tp = pokes.next();
+                    writeWord(pointerToPokes + poke * 8, tp.AILevel);
+                    writeWord(pointerToPokes + poke * 8 + 2, tp.level);
+                    writeWord(pointerToPokes + poke * 8 + 4, pokedexToInternal[tp.pokemon.number]);
+                    if ((tr.poketype & 2) == 2) {
+                        writeWord(pointerToPokes + poke * 8 + 6, tp.heldItem);
+                    } else {
+                        writeWord(pointerToPokes + poke * 8 + 6, 0);
+                    }
+                }
             }
         }
 

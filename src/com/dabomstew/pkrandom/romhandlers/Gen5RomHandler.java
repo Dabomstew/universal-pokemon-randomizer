@@ -1021,12 +1021,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     tpk.AILevel = ailevel;
                     tpk.ability = trpoke[pokeOffs + 1] & 0xFF;
                     pokeOffs += 8;
-                    if (tr.poketype >= 2) {
+                    if ((tr.poketype & 2) == 2) {
                         int heldItem = readWord(trpoke, pokeOffs);
                         tpk.heldItem = heldItem;
                         pokeOffs += 2;
                     }
-                    if (tr.poketype % 2 == 1) {
+                    if ((tr.poketype & 1) == 1) {
                         int attack1 = readWord(trpoke, pokeOffs);
                         int attack2 = readWord(trpoke, pokeOffs + 2);
                         int attack3 = readWord(trpoke, pokeOffs + 4);
@@ -1058,9 +1058,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                             tpk.AILevel = 255;
                             tpk.heldItem = readWord(pkmndata, 12);
                             tpk.move1 = readWord(pkmndata, 2);
-                            tpk.move2 = readWord(pkmndata, 2);
-                            tpk.move3 = readWord(pkmndata, 2);
-                            tpk.move4 = readWord(pkmndata, 2);
+                            tpk.move2 = readWord(pkmndata, 4);
+                            tpk.move3 = readWord(pkmndata, 6);
+                            tpk.move4 = readWord(pkmndata, 8);
                             tr.pokemon.add(tpk);
                         }
                         allTrainers.add(tr);
@@ -1080,44 +1080,54 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         try {
             NARCContents trainers = this.readNARC(romEntry.getString("TrainerData"));
             NARCContents trpokes = new NARCContents();
+            // Get current movesets in case we need to reset them for certain
+            // trainer mons.
+            Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
             // empty entry
             trpokes.files.add(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 });
             int trainernum = trainers.files.size();
             for (int i = 1; i < trainernum; i++) {
                 byte[] trainer = trainers.files.get(i);
                 Trainer tr = allTrainers.next();
-                tr.poketype = 0; // write as type 0 for no item/moves
+                // preserve original poketype for held item & moves
                 trainer[0] = (byte) tr.poketype;
                 int numPokes = tr.pokemon.size();
                 trainer[3] = (byte) numPokes;
 
                 int bytesNeeded = 8 * numPokes;
-                if (tr.poketype % 2 == 1) {
+                if ((tr.poketype & 1) == 1) {
                     bytesNeeded += 8 * numPokes;
                 }
-                if (tr.poketype >= 2) {
+                if ((tr.poketype & 2) == 2) {
                     bytesNeeded += 2 * numPokes;
                 }
                 byte[] trpoke = new byte[bytesNeeded];
                 int pokeOffs = 0;
                 Iterator<TrainerPokemon> tpokes = tr.pokemon.iterator();
                 for (int poke = 0; poke < numPokes; poke++) {
-                    TrainerPokemon tpk = tpokes.next();
-                    trpoke[pokeOffs] = (byte) tpk.AILevel;
+                    TrainerPokemon tp = tpokes.next();
+                    trpoke[pokeOffs] = (byte) tp.AILevel;
                     // no gender or ability info, so no byte 1
-                    writeWord(trpoke, pokeOffs + 2, tpk.level);
-                    writeWord(trpoke, pokeOffs + 4, tpk.pokemon.number);
+                    writeWord(trpoke, pokeOffs + 2, tp.level);
+                    writeWord(trpoke, pokeOffs + 4, tp.pokemon.number);
                     // no form info, so no byte 6/7
                     pokeOffs += 8;
-                    if (tr.poketype >= 2) {
-                        writeWord(trpoke, pokeOffs, tpk.heldItem);
+                    if ((tr.poketype & 2) == 2) {
+                        writeWord(trpoke, pokeOffs, tp.heldItem);
                         pokeOffs += 2;
                     }
-                    if (tr.poketype % 2 == 1) {
-                        writeWord(trpoke, pokeOffs, tpk.move1);
-                        writeWord(trpoke, pokeOffs + 2, tpk.move2);
-                        writeWord(trpoke, pokeOffs + 4, tpk.move3);
-                        writeWord(trpoke, pokeOffs + 6, tpk.move4);
+                    if ((tr.poketype & 1) == 1) {
+                        if (tp.resetMoves) {
+                            int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon, movesets, tp.level);
+                            for (int m = 0; m < 4; m++) {
+                                writeWord(trpoke, pokeOffs + m * 2, pokeMoves[m]);
+                            }
+                        } else {
+                            writeWord(trpoke, pokeOffs, tp.move1);
+                            writeWord(trpoke, pokeOffs + 2, tp.move2);
+                            writeWord(trpoke, pokeOffs + 4, tp.move3);
+                            writeWord(trpoke, pokeOffs + 6, tp.move4);
+                        }
                         pokeOffs += 8;
                     }
                 }
@@ -1128,49 +1138,26 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             // Deal with PWT
             if (romEntry.romType == Gen5Constants.Type_BW2 && !romEntry.getString("DriftveilPokemon").isEmpty()) {
                 NARCContents driftveil = this.readNARC(romEntry.getString("DriftveilPokemon"));
-                Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
                 for (int trno = 0; trno < 2; trno++) {
                     Trainer tr = allTrainers.next();
                     Iterator<TrainerPokemon> tpks = tr.pokemon.iterator();
                     for (int poke = 0; poke < 3; poke++) {
                         byte[] pkmndata = driftveil.files.get(trno * 3 + poke + 1);
-                        TrainerPokemon tpk = tpks.next();
+                        TrainerPokemon tp = tpks.next();
                         // pokemon and held item
-                        writeWord(pkmndata, 0, tpk.pokemon.number);
-                        writeWord(pkmndata, 12, tpk.heldItem);
-                        // pick 4 moves, based on moveset@25
-                        int[] moves = new int[4];
-                        int moveCount = 0;
-                        List<MoveLearnt> set = movesets.get(tpk.pokemon);
-                        for (int i = 0; i < set.size(); i++) {
-                            MoveLearnt ml = set.get(i);
-                            if (ml.level > 25) {
-                                break;
+                        writeWord(pkmndata, 0, tp.pokemon.number);
+                        writeWord(pkmndata, 12, tp.heldItem);
+                        // handle moves
+                        if (tp.resetMoves) {
+                            int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon, movesets, tp.level);
+                            for (int m = 0; m < 4; m++) {
+                                writeWord(pkmndata, 2 + m * 2, pokeMoves[m]);
                             }
-                            // unconditional learn?
-                            if (moveCount < 4) {
-                                moves[moveCount++] = ml.move;
-                            } else {
-                                // already knows?
-                                boolean doTeach = true;
-                                for (int j = 0; j < 4; j++) {
-                                    if (moves[j] == ml.move) {
-                                        doTeach = false;
-                                        break;
-                                    }
-                                }
-                                if (doTeach) {
-                                    // shift up
-                                    for (int j = 0; j < 3; j++) {
-                                        moves[j] = moves[j + 1];
-                                    }
-                                    moves[3] = ml.move;
-                                }
-                            }
-                        }
-                        // write the moveset we calculated
-                        for (int i = 0; i < 4; i++) {
-                            writeWord(pkmndata, 2 + i * 2, moves[i]);
+                        } else {
+                            writeWord(pkmndata, 2, tp.move1);
+                            writeWord(pkmndata, 4, tp.move2);
+                            writeWord(pkmndata, 6, tp.move3);
+                            writeWord(pkmndata, 8, tp.move4);
                         }
                     }
                 }

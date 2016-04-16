@@ -36,6 +36,8 @@ public class TrainerPokemon {
     public int AILevel;
     public int heldItem;
     public int ability;
+    
+    public boolean resetMoves = false;
 
     public String toString() {
         return pokemon.name + " Lv" + level;
