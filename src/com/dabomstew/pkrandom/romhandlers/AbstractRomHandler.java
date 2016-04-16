@@ -686,9 +686,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                         pType.removeAll(banned);
                         cachedPokeLists.put(areaTheme, pType);
                     }
-                    possiblePokemon = cachedPokeLists.get(areaTheme);
+                    possiblePokemon = new ArrayList<Pokemon>(cachedPokeLists.get(areaTheme));
                     if (area.bannedPokemon.size() > 0) {
-                        possiblePokemon = new ArrayList<Pokemon>(possiblePokemon);
                         possiblePokemon.removeAll(area.bannedPokemon);
                     }
                     if (possiblePokemon.size() < inArea.size()) {
