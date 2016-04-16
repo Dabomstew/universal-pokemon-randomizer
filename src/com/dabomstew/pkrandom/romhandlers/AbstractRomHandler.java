@@ -1436,46 +1436,74 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         TrainerNameMode mode = this.trainerNameMode();
         int maxLength = this.maxTrainerNameLength();
+        int totalMaxLength = this.maxSumOfTrainerNameLengths();
+
+        boolean success = false;
+        int tries = 0;
 
         // Init the translation map and new list
         Map<String, String> translation = new HashMap<String, String>();
         List<String> newTrainerNames = new ArrayList<String>();
         List<Integer> tcNameLengths = this.getTCNameLengthsByTrainer();
 
-        // Start choosing
-        int tnIndex = -1;
-        for (String trainerName : currentTrainerNames) {
-            tnIndex++;
-            if (translation.containsKey(trainerName) && trainerName.equalsIgnoreCase("GRUNT") == false
-                    && trainerName.equalsIgnoreCase("EXECUTIVE") == false) {
-                // use an already picked translation
-                newTrainerNames.add(translation.get(trainerName));
-            } else {
-                int idx = trainerName.contains("&") ? 1 : 0;
-                List<String> pickFrom = allTrainerNames[idx];
-                int intStrLen = this.internalStringLength(trainerName);
-                if (mode == TrainerNameMode.SAME_LENGTH) {
-                    pickFrom = trainerNamesByLength[idx].get(intStrLen);
-                }
-                String changeTo = trainerName;
-                if (pickFrom != null && pickFrom.size() > 0 && intStrLen > 1) {
-                    int tries = 0;
-                    changeTo = pickFrom.get(this.random.nextInt(pickFrom.size()));
-                    int ctl = this.internalStringLength(changeTo);
-                    while ((mode == TrainerNameMode.MAX_LENGTH && ctl > maxLength)
-                            || (mode == TrainerNameMode.MAX_LENGTH_WITH_CLASS && ctl + tcNameLengths.get(tnIndex) > maxLength)) {
-                        tries++;
-                        if (tries == 50) {
-                            changeTo = trainerName;
-                            break;
-                        }
+        // loop until we successfully pick names that fit
+        // should always succeed first attempt except for gen2.
+        while (!success && tries < 10000) {
+            success = true;
+            translation.clear();
+            newTrainerNames.clear();
+            int totalLength = 0;
+
+            // Start choosing
+            int tnIndex = -1;
+            for (String trainerName : currentTrainerNames) {
+                tnIndex++;
+                if (translation.containsKey(trainerName) && trainerName.equalsIgnoreCase("GRUNT") == false
+                        && trainerName.equalsIgnoreCase("EXECUTIVE") == false) {
+                    // use an already picked translation
+                    newTrainerNames.add(translation.get(trainerName));
+                    totalLength += this.internalStringLength(translation.get(trainerName));
+                } else {
+                    int idx = trainerName.contains("&") ? 1 : 0;
+                    List<String> pickFrom = allTrainerNames[idx];
+                    int intStrLen = this.internalStringLength(trainerName);
+                    if (mode == TrainerNameMode.SAME_LENGTH) {
+                        pickFrom = trainerNamesByLength[idx].get(intStrLen);
+                    }
+                    String changeTo = trainerName;
+                    int ctl = intStrLen;
+                    if (pickFrom != null && pickFrom.size() > 0 && intStrLen > 1) {
+                        int innerTries = 0;
                         changeTo = pickFrom.get(this.random.nextInt(pickFrom.size()));
                         ctl = this.internalStringLength(changeTo);
+                        while ((mode == TrainerNameMode.MAX_LENGTH && ctl > maxLength)
+                                || (mode == TrainerNameMode.MAX_LENGTH_WITH_CLASS && ctl + tcNameLengths.get(tnIndex) > maxLength)) {
+                            innerTries++;
+                            if (innerTries == 100) {
+                                changeTo = trainerName;
+                                ctl = intStrLen;
+                                break;
+                            }
+                            changeTo = pickFrom.get(this.random.nextInt(pickFrom.size()));
+                            ctl = this.internalStringLength(changeTo);
+                        }
                     }
+                    translation.put(trainerName, changeTo);
+                    newTrainerNames.add(changeTo);
+                    totalLength += ctl;
                 }
-                translation.put(trainerName, changeTo);
-                newTrainerNames.add(changeTo);
+
+                if (totalLength > totalMaxLength) {
+                    success = false;
+                    tries++;
+                    break;
+                }
             }
+        }
+
+        if (!success) {
+            throw new RandomizationException("Could not randomize trainer names in a reasonable amount of attempts."
+                    + "\nPlease add some shorter names to your trainer names file.");
         }
 
         // Done choosing, save
@@ -1484,6 +1512,12 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public int maxTrainerNameLength() {
+        // default: no real limit
+        return Integer.MAX_VALUE;
+    }
+
+    @Override
+    public int maxSumOfTrainerNameLengths() {
         // default: no real limit
         return Integer.MAX_VALUE;
     }

@@ -287,6 +287,10 @@ public interface RomHandler {
 
     // Returns this with or without the class
     public int maxTrainerNameLength();
+    
+    // Only relevant for gen2, which has fluid trainer name length but
+    // only a certain amount of space in the ROM bank.
+    public int maxSumOfTrainerNameLengths();
 
     // Only needed if above mode is "MAX LENGTH WITH CLASS"
     public List<Integer> getTCNameLengthsByTrainer();
