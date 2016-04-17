@@ -196,6 +196,11 @@ public class SettingsUpdater {
             
             // empty byte for fully evolved trainer mon setting
             insertExtraByte(13, (byte) 30);
+            
+            // bytes for "good damaging moves" settings
+            insertExtraByte(12, (byte) 0);
+            insertExtraByte(20, (byte) 0);
+            insertExtraByte(22, (byte) 0);
         }
 
         // fix checksum

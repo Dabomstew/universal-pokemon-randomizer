@@ -203,15 +203,17 @@ public class Randomizer {
         // Movesets
         boolean noBrokenMoves = settings.doBlockBrokenMoves();
         boolean forceFourLv1s = romHandler.supportsFourStartingMoves() && settings.isStartWithFourMoves();
+        double msGoodDamagingProb = settings.isMovesetsForceGoodDamaging() ? settings.getMovesetsGoodDamagingPercent() / 100.0
+                : 0;
         if (settings.getMovesetsMod() == Settings.MovesetsMod.RANDOM_PREFER_SAME_TYPE) {
-            // TODO implement the proportion of good damaging moves
-            // setting/slider
-            romHandler.randomizeMovesLearnt(true, noBrokenMoves, forceFourLv1s, 0);
+            romHandler.randomizeMovesLearnt(true, noBrokenMoves, forceFourLv1s, msGoodDamagingProb);
         } else if (settings.getMovesetsMod() == Settings.MovesetsMod.COMPLETELY_RANDOM) {
-            romHandler.randomizeMovesLearnt(false, noBrokenMoves, forceFourLv1s, 0);
+            romHandler.randomizeMovesLearnt(false, noBrokenMoves, forceFourLv1s, msGoodDamagingProb);
         }
-        
-        // TODO make settings for the sorting movesets by damage option
+
+        if (settings.isReorderDamagingMoves()) {
+            romHandler.orderDamagingMovesByDamage();
+        }
 
         // Show the new movesets if applicable
         if (settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED) {
@@ -354,9 +356,9 @@ public class Randomizer {
         // TMs
         if (!(settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY)
                 && settings.getTmsMod() == Settings.TMsMod.RANDOM) {
-            // TODO implement the proportion of good damaging moves
-            // setting/slider
-            romHandler.randomizeTMMoves(noBrokenMoves, settings.isKeepFieldMoveTMs(), 0);
+            double goodDamagingProb = settings.isTmsForceGoodDamaging() ? settings.getTmsGoodDamagingPercent() / 100.0
+                    : 0;
+            romHandler.randomizeTMMoves(noBrokenMoves, settings.isKeepFieldMoveTMs(), goodDamagingProb);
             log.println("--TM Moves--");
             List<Integer> tmMoves = romHandler.getTMMoves();
             for (int i = 0; i < tmMoves.size(); i++) {
@@ -398,9 +400,9 @@ public class Randomizer {
             if (!(settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY)
                     && settings.getMoveTutorMovesMod() == Settings.MoveTutorMovesMod.RANDOM) {
                 List<Integer> oldMtMoves = romHandler.getMoveTutorMoves();
-                // TODO implement the proportion of good damaging moves
-                // setting/slider
-                romHandler.randomizeMoveTutorMoves(noBrokenMoves, settings.isKeepFieldMoveTutors(), 0);
+                double goodDamagingProb = settings.isTutorsForceGoodDamaging() ? settings
+                        .getTutorsGoodDamagingPercent() / 100.0 : 0;
+                romHandler.randomizeMoveTutorMoves(noBrokenMoves, settings.isKeepFieldMoveTutors(), goodDamagingProb);
                 log.println("--Move Tutor Moves--");
                 List<Integer> newMtMoves = romHandler.getMoveTutorMoves();
                 for (int i = 0; i < newMtMoves.size(); i++) {

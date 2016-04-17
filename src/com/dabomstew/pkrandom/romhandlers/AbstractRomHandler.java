@@ -1762,16 +1762,18 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Pick some random TM moves.
         int tmCount = this.getTMCount();
         List<Move> allMoves = this.getMoves();
-        List<Integer> newTMs = new ArrayList<Integer>();
         List<Integer> hms = this.getHMMoves();
         List<Integer> oldTMs = this.getTMMoves();
         @SuppressWarnings("unchecked")
         List<Integer> banned = new ArrayList<Integer>(noBroken ? this.getGameBreakingMoves() : Collections.EMPTY_LIST);
         // field moves?
         List<Integer> fieldMoves = this.getFieldMoves();
+        int preservedFieldMoveCount = 0;
+
         if (preserveField) {
             List<Integer> banExistingField = new ArrayList<Integer>(oldTMs);
             banExistingField.retainAll(fieldMoves);
+            preservedFieldMoveCount = banExistingField.size();
             banned.addAll(banExistingField);
         }
 
@@ -1793,19 +1795,35 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Move> usableDamagingMoves = new ArrayList<Move>(usableMoves);
         usableDamagingMoves.removeAll(unusableDamagingMoves);
 
+        // pick (tmCount - preservedFieldMoveCount) moves
+        List<Integer> pickedMoves = new ArrayList<Integer>();
+
+        for (int i = 0; i < tmCount - preservedFieldMoveCount; i++) {
+            Move chosenMove;
+            if (random.nextDouble() < goodDamagingProbability && usableDamagingMoves.size() > 0) {
+                chosenMove = usableDamagingMoves.get(random.nextInt(usableDamagingMoves.size()));
+            } else {
+                chosenMove = usableMoves.get(random.nextInt(usableMoves.size()));
+            }
+            pickedMoves.add(chosenMove.number);
+            usableMoves.remove(chosenMove);
+            usableDamagingMoves.remove(chosenMove);
+        }
+
+        // shuffle the picked moves because high goodDamagingProbability
+        // could bias them towards early numbers otherwise
+
+        Collections.shuffle(pickedMoves, random);
+
+        // finally, distribute them as tms
+        int pickedMoveIndex = 0;
+        List<Integer> newTMs = new ArrayList<Integer>();
+
         for (int i = 0; i < tmCount; i++) {
             if (preserveField && fieldMoves.contains(oldTMs.get(i))) {
                 newTMs.add(oldTMs.get(i));
             } else {
-                Move chosenMove;
-                if (random.nextDouble() < goodDamagingProbability && usableDamagingMoves.size() > 0) {
-                    chosenMove = usableDamagingMoves.get(random.nextInt(usableDamagingMoves.size()));
-                } else {
-                    chosenMove = usableMoves.get(random.nextInt(usableMoves.size()));
-                }
-                newTMs.add(chosenMove.number);
-                usableMoves.remove(chosenMove);
-                usableDamagingMoves.remove(chosenMove);
+                newTMs.add(pickedMoves.get(pickedMoveIndex++));
             }
         }
 
@@ -1905,7 +1923,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Pick some random Move Tutor moves, excluding TMs.
         List<Move> allMoves = this.getMoves();
         List<Integer> tms = this.getTMMoves();
-        List<Integer> newMTs = new ArrayList<Integer>();
         List<Integer> oldMTs = this.getMoveTutorMoves();
         int mtCount = oldMTs.size();
         List<Integer> hms = this.getHMMoves();
@@ -1914,9 +1931,11 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // field moves?
         List<Integer> fieldMoves = this.getFieldMoves();
+        int preservedFieldMoveCount = 0;
         if (preserveField) {
             List<Integer> banExistingField = new ArrayList<Integer>(oldMTs);
             banExistingField.retainAll(fieldMoves);
+            preservedFieldMoveCount = banExistingField.size();
             banned.addAll(banExistingField);
         }
 
@@ -1939,19 +1958,35 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Move> usableDamagingMoves = new ArrayList<Move>(usableMoves);
         usableDamagingMoves.removeAll(unusableDamagingMoves);
 
+        // pick (tmCount - preservedFieldMoveCount) moves
+        List<Integer> pickedMoves = new ArrayList<Integer>();
+
+        for (int i = 0; i < mtCount - preservedFieldMoveCount; i++) {
+            Move chosenMove;
+            if (random.nextDouble() < goodDamagingProbability && usableDamagingMoves.size() > 0) {
+                chosenMove = usableDamagingMoves.get(random.nextInt(usableDamagingMoves.size()));
+            } else {
+                chosenMove = usableMoves.get(random.nextInt(usableMoves.size()));
+            }
+            pickedMoves.add(chosenMove.number);
+            usableMoves.remove(chosenMove);
+            usableDamagingMoves.remove(chosenMove);
+        }
+
+        // shuffle the picked moves because high goodDamagingProbability
+        // could bias them towards early numbers otherwise
+
+        Collections.shuffle(pickedMoves, random);
+
+        // finally, distribute them as tutors
+        int pickedMoveIndex = 0;
+        List<Integer> newMTs = new ArrayList<Integer>();
+
         for (int i = 0; i < mtCount; i++) {
             if (preserveField && fieldMoves.contains(oldMTs.get(i))) {
                 newMTs.add(oldMTs.get(i));
             } else {
-                Move chosenMove;
-                if (random.nextDouble() < goodDamagingProbability && usableDamagingMoves.size() > 0) {
-                    chosenMove = usableDamagingMoves.get(random.nextInt(usableDamagingMoves.size()));
-                } else {
-                    chosenMove = usableMoves.get(random.nextInt(usableMoves.size()));
-                }
-                newMTs.add(chosenMove.number);
-                usableMoves.remove(chosenMove);
-                usableDamagingMoves.remove(chosenMove);
+                newMTs.add(pickedMoves.get(pickedMoveIndex++));
             }
         }
 

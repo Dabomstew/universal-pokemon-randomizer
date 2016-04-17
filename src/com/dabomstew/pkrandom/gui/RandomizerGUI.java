@@ -28,7 +28,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.LayoutManager;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -781,6 +780,12 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.pms4MovesCB.setEnabled(false);
         this.pms4MovesCB.setSelected(false);
         this.pms4MovesCB.setVisible(true);
+        this.pmsReorderDamagingMovesCB.setEnabled(false);
+        this.pmsReorderDamagingMovesCB.setSelected(false);
+        this.pmsForceGoodDamagingCB.setEnabled(false);
+        this.pmsForceGoodDamagingCB.setSelected(false);
+        this.pmsForceGoodDamagingSlider.setEnabled(false);
+        this.pmsForceGoodDamagingSlider.setValue(this.pmsForceGoodDamagingSlider.getMinimum());
 
         this.ptRandomFollowEvosRB.setEnabled(false);
         this.ptRandomTotalRB.setEnabled(false);
@@ -865,6 +870,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tmKeepFieldMovesCB.setSelected(false);
         this.tmFullHMCompatCB.setEnabled(false);
         this.tmFullHMCompatCB.setSelected(false);
+        this.tmForceGoodDamagingCB.setEnabled(false);
+        this.tmForceGoodDamagingCB.setSelected(false);
+        this.tmForceGoodDamagingSlider.setEnabled(false);
+        this.tmForceGoodDamagingSlider.setValue(this.tmForceGoodDamagingSlider.getMinimum());
 
         this.mtmRandomRB.setEnabled(false);
         this.mtmUnchangedRB.setEnabled(false);
@@ -880,6 +889,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.mtLearningSanityCB.setSelected(false);
         this.mtKeepFieldMovesCB.setEnabled(false);
         this.mtKeepFieldMovesCB.setSelected(false);
+        this.mtForceGoodDamagingCB.setEnabled(false);
+        this.mtForceGoodDamagingCB.setSelected(false);
+        this.mtForceGoodDamagingSlider.setEnabled(false);
+        this.mtForceGoodDamagingSlider.setValue(this.mtForceGoodDamagingSlider.getMinimum());
 
         this.mtMovesPanel.setVisible(true);
         this.mtCompatPanel.setVisible(true);
@@ -1243,7 +1256,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
         BufferedImage nImg = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
         int hW = handlerImg.getWidth();
         int hH = handlerImg.getHeight();
-        Graphics g = nImg.getGraphics();
         nImg.getGraphics().drawImage(handlerImg, 64 - hW / 2, 64 - hH / 2, this);
         return new ImageIcon(nImg);
     }
@@ -1418,11 +1430,15 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.tmLearningSanityCB.setSelected(false);
             this.tmKeepFieldMovesCB.setEnabled(false);
             this.tmKeepFieldMovesCB.setSelected(false);
+            this.tmForceGoodDamagingCB.setEnabled(false);
+            this.tmForceGoodDamagingCB.setSelected(false);
 
             this.mtLearningSanityCB.setEnabled(false);
             this.mtLearningSanityCB.setSelected(false);
             this.mtKeepFieldMovesCB.setEnabled(false);
             this.mtKeepFieldMovesCB.setSelected(false);
+            this.mtForceGoodDamagingCB.setEnabled(false);
+            this.mtForceGoodDamagingCB.setSelected(false);
         } else {
             this.tmmUnchangedRB.setEnabled(true);
             this.tmmRandomRB.setEnabled(true);
@@ -1440,9 +1456,12 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
             if (!(this.tmmUnchangedRB.isSelected())) {
                 this.tmKeepFieldMovesCB.setEnabled(true);
+                this.tmForceGoodDamagingCB.setEnabled(true);
             } else {
                 this.tmKeepFieldMovesCB.setEnabled(false);
                 this.tmKeepFieldMovesCB.setSelected(false);
+                this.tmForceGoodDamagingCB.setEnabled(false);
+                this.tmForceGoodDamagingCB.setSelected(false);
             }
 
             if (this.romHandler.hasMoveTutors()
@@ -1456,10 +1475,27 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
             if (this.romHandler.hasMoveTutors() && !(this.mtmUnchangedRB.isSelected())) {
                 this.mtKeepFieldMovesCB.setEnabled(true);
+                this.mtForceGoodDamagingCB.setEnabled(true);
             } else {
                 this.mtKeepFieldMovesCB.setEnabled(false);
                 this.mtKeepFieldMovesCB.setSelected(false);
+                this.mtForceGoodDamagingCB.setEnabled(false);
+                this.mtForceGoodDamagingCB.setSelected(false);
             }
+        }
+
+        if (this.tmForceGoodDamagingCB.isSelected()) {
+            this.tmForceGoodDamagingSlider.setEnabled(true);
+        } else {
+            this.tmForceGoodDamagingSlider.setEnabled(false);
+            this.tmForceGoodDamagingSlider.setValue(this.tmForceGoodDamagingSlider.getMinimum());
+        }
+
+        if (this.mtForceGoodDamagingCB.isSelected()) {
+            this.mtForceGoodDamagingSlider.setEnabled(true);
+        } else {
+            this.mtForceGoodDamagingSlider.setEnabled(false);
+            this.mtForceGoodDamagingSlider.setValue(this.mtForceGoodDamagingSlider.getMinimum());
         }
 
         this.tmFullHMCompatCB.setEnabled(!this.thcFullRB.isSelected());
@@ -1467,8 +1503,21 @@ public class RandomizerGUI extends javax.swing.JFrame {
         if (this.pmsMetronomeOnlyRB.isSelected() || this.pmsUnchangedRB.isSelected()) {
             this.pms4MovesCB.setEnabled(false);
             this.pms4MovesCB.setSelected(false);
+            this.pmsForceGoodDamagingCB.setEnabled(false);
+            this.pmsForceGoodDamagingCB.setSelected(false);
+            this.pmsReorderDamagingMovesCB.setEnabled(false);
+            this.pmsReorderDamagingMovesCB.setSelected(false);
         } else {
             this.pms4MovesCB.setEnabled(true);
+            this.pmsForceGoodDamagingCB.setEnabled(true);
+            this.pmsReorderDamagingMovesCB.setEnabled(true);
+        }
+
+        if (this.pmsForceGoodDamagingCB.isSelected()) {
+            this.pmsForceGoodDamagingSlider.setEnabled(true);
+        } else {
+            this.pmsForceGoodDamagingSlider.setEnabled(false);
+            this.pmsForceGoodDamagingSlider.setValue(this.pmsForceGoodDamagingSlider.getMinimum());
         }
 
         if (this.fiRandomRB.isSelected() && this.fiRandomRB.isVisible() && this.fiRandomRB.isEnabled()) {
@@ -1626,6 +1675,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.pmsUnchangedRB.setSelected(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED);
         this.pmsMetronomeOnlyRB.setSelected(settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY);
         this.pms4MovesCB.setSelected(settings.isStartWithFourMoves());
+        this.pmsReorderDamagingMovesCB.setSelected(settings.isReorderDamagingMoves());
+        this.pmsForceGoodDamagingCB.setSelected(settings.isMovesetsForceGoodDamaging());
+        this.pmsForceGoodDamagingSlider.setValue(settings.getMovesetsGoodDamagingPercent());
 
         this.tpPowerLevelsCB.setSelected(settings.isTrainersUsePokemonOfSimilarStrength());
         this.tpRandomRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.RANDOM);
@@ -1674,6 +1726,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tmKeepFieldMovesCB.setSelected(settings.isKeepFieldMoveTMs());
         this.thcFullRB.setSelected(settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.FULL);
         this.tmFullHMCompatCB.setSelected(settings.isFullHMCompat());
+        this.tmForceGoodDamagingCB.setSelected(settings.isTmsForceGoodDamaging());
+        this.tmForceGoodDamagingSlider.setValue(settings.getTmsGoodDamagingPercent());
 
         this.mtcRandomTotalRB
                 .setSelected(settings.getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.COMPLETELY_RANDOM);
@@ -1687,6 +1741,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.mtKeepFieldMovesCB.setSelected(settings.isKeepFieldMoveTutors());
         this.mtcFullRB
                 .setSelected(settings.getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.FULL);
+        this.mtForceGoodDamagingCB.setSelected(settings.isTutorsForceGoodDamaging());
+        this.mtForceGoodDamagingSlider.setValue(settings.getTutorsGoodDamagingPercent());
 
         this.igtBothRB
                 .setSelected(settings.getInGameTradesMod() == Settings.InGameTradesMod.RANDOMIZE_GIVEN_AND_REQUESTED);
@@ -1769,6 +1825,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setMovesetsMod(pmsUnchangedRB.isSelected(), pmsRandomTypeRB.isSelected(),
                 pmsRandomTotalRB.isSelected(), pmsMetronomeOnlyRB.isSelected());
         settings.setStartWithFourMoves(pms4MovesCB.isSelected());
+        settings.setReorderDamagingMoves(pmsReorderDamagingMovesCB.isSelected());
+
+        settings.setMovesetsForceGoodDamaging(pmsForceGoodDamagingCB.isSelected());
+        settings.setMovesetsGoodDamagingPercent(pmsForceGoodDamagingSlider.getValue());
 
         settings.setTrainersMod(tpUnchangedRB.isSelected(), tpRandomRB.isSelected(), tpTypeThemedRB.isSelected());
         settings.setTrainersUsePokemonOfSimilarStrength(tpPowerLevelsCB.isSelected());
@@ -1800,12 +1860,16 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setTmLevelUpMoveSanity(tmLearningSanityCB.isSelected());
         settings.setKeepFieldMoveTMs(tmKeepFieldMovesCB.isSelected());
         settings.setFullHMCompat(tmFullHMCompatCB.isSelected());
+        settings.setTmsForceGoodDamaging(tmForceGoodDamagingCB.isSelected());
+        settings.setTmsGoodDamagingPercent(tmForceGoodDamagingSlider.getValue());
 
         settings.setMoveTutorMovesMod(mtmUnchangedRB.isSelected(), mtmRandomRB.isSelected());
         settings.setMoveTutorsCompatibilityMod(mtcUnchangedRB.isSelected(), mtcRandomTypeRB.isSelected(),
                 mtcRandomTotalRB.isSelected(), mtcFullRB.isSelected());
         settings.setTutorLevelUpMoveSanity(mtLearningSanityCB.isSelected());
         settings.setKeepFieldMoveTutors(mtKeepFieldMovesCB.isSelected());
+        settings.setTutorsForceGoodDamaging(mtForceGoodDamagingCB.isSelected());
+        settings.setTutorsGoodDamagingPercent(mtForceGoodDamagingSlider.getValue());
 
         settings.setInGameTradesMod(igtUnchangedRB.isSelected(), igtGivenOnlyRB.isSelected(), igtBothRB.isSelected());
         settings.setRandomizeInGameTradesItems(igtRandomItemCB.isSelected());
@@ -2407,6 +2471,18 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_wpCatchRateCBActionPerformed
 
+    private void pmsForceGoodDamagingCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pmsForceGoodDamagingCBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_pmsForceGoodDamagingCBActionPerformed
+
+    private void tmForceGoodDamagingCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tmForceGoodDamagingCBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_tmForceGoodDamagingCBActionPerformed
+
+    private void mtForceGoodDamagingCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_mtForceGoodDamagingCBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_mtForceGoodDamagingCBActionPerformed
+
     /* @formatter:off */
     /**
      * This method is called from within the constructor to initialize the form.
@@ -2537,6 +2613,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
         pmsRandomTotalRB = new javax.swing.JRadioButton();
         pmsMetronomeOnlyRB = new javax.swing.JRadioButton();
         pms4MovesCB = new javax.swing.JCheckBox();
+        pmsReorderDamagingMovesCB = new javax.swing.JCheckBox();
+        pmsForceGoodDamagingCB = new javax.swing.JCheckBox();
+        pmsForceGoodDamagingSlider = new javax.swing.JSlider();
         moveDataPanel = new javax.swing.JPanel();
         mdRandomPowerCB = new javax.swing.JCheckBox();
         mdRandomAccuracyCB = new javax.swing.JCheckBox();
@@ -2584,6 +2663,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         tmLearningSanityCB = new javax.swing.JCheckBox();
         tmKeepFieldMovesCB = new javax.swing.JCheckBox();
         tmFullHMCompatCB = new javax.swing.JCheckBox();
+        tmForceGoodDamagingCB = new javax.swing.JCheckBox();
+        tmForceGoodDamagingSlider = new javax.swing.JSlider();
         tmHmCompatPanel = new javax.swing.JPanel();
         thcUnchangedRB = new javax.swing.JRadioButton();
         thcRandomTypeRB = new javax.swing.JRadioButton();
@@ -2595,6 +2676,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         mtmRandomRB = new javax.swing.JRadioButton();
         mtLearningSanityCB = new javax.swing.JCheckBox();
         mtKeepFieldMovesCB = new javax.swing.JCheckBox();
+        mtForceGoodDamagingCB = new javax.swing.JCheckBox();
+        mtForceGoodDamagingSlider = new javax.swing.JSlider();
         mtCompatPanel = new javax.swing.JPanel();
         mtcUnchangedRB = new javax.swing.JRadioButton();
         mtcRandomTypeRB = new javax.swing.JRadioButton();
@@ -2865,7 +2948,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(pbsChangesShuffleRB)
                     .addComponent(pbsChangesUnchangedRB)
                     .addComponent(pbsChangesRandomRB))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 92, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 110, Short.MAX_VALUE)
                 .addGroup(baseStatsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(pbsStandardEXPCurvesCB)
                     .addComponent(pbsFollowEvolutionsCB))
@@ -3144,7 +3227,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                         .addGroup(starterPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(spHeldItemsBanBadCB)
                             .addComponent(spHeldItemsCB))))
-                .addContainerGap(168, Short.MAX_VALUE))
+                .addContainerGap(186, Short.MAX_VALUE))
         );
         starterPokemonPanelLayout.setVerticalGroup(
             starterPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -3192,7 +3275,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(stpUnchangedRB)
                     .addComponent(stpRandomL4LRB)
                     .addComponent(stpRandomTotalRB))
-                .addContainerGap(407, Short.MAX_VALUE))
+                .addContainerGap(425, Short.MAX_VALUE))
         );
         staticPokemonPanelLayout.setVerticalGroup(
             staticPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -3256,7 +3339,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(igtUnchangedRB)
                     .addComponent(igtGivenOnlyRB)
                     .addComponent(igtBothRB))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 229, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 247, Short.MAX_VALUE)
                 .addGroup(inGameTradesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(igtRandomItemCB)
                     .addComponent(igtRandomNicknameCB)
@@ -3304,7 +3387,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addComponent(staticPokemonPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(inGameTradesPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(29, Short.MAX_VALUE))
+                .addContainerGap(49, Short.MAX_VALUE))
         );
 
         randomizerOptionsPane.addTab(bundle.getString("RandomizerGUI.startersInnerPanel.TabConstraints.tabTitle"), startersInnerPanel); // NOI18N
@@ -3351,6 +3434,25 @@ public class RandomizerGUI extends javax.swing.JFrame {
         pms4MovesCB.setText(bundle.getString("RandomizerGUI.pms4MovesCB.text")); // NOI18N
         pms4MovesCB.setToolTipText(bundle.getString("RandomizerGUI.pms4MovesCB.toolTipText")); // NOI18N
 
+        pmsReorderDamagingMovesCB.setText(bundle.getString("RandomizerGUI.pmsReorderDamagingMovesCB.text")); // NOI18N
+        pmsReorderDamagingMovesCB.setToolTipText(bundle.getString("RandomizerGUI.pmsReorderDamagingMovesCB.toolTipText")); // NOI18N
+
+        pmsForceGoodDamagingCB.setText(bundle.getString("RandomizerGUI.pmsForceGoodDamagingCB.text")); // NOI18N
+        pmsForceGoodDamagingCB.setToolTipText(bundle.getString("RandomizerGUI.pmsForceGoodDamagingCB.toolTipText")); // NOI18N
+        pmsForceGoodDamagingCB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pmsForceGoodDamagingCBActionPerformed(evt);
+            }
+        });
+
+        pmsForceGoodDamagingSlider.setMajorTickSpacing(20);
+        pmsForceGoodDamagingSlider.setMinorTickSpacing(5);
+        pmsForceGoodDamagingSlider.setPaintLabels(true);
+        pmsForceGoodDamagingSlider.setPaintTicks(true);
+        pmsForceGoodDamagingSlider.setSnapToTicks(true);
+        pmsForceGoodDamagingSlider.setToolTipText(bundle.getString("RandomizerGUI.pmsForceGoodDamagingSlider.toolTipText")); // NOI18N
+        pmsForceGoodDamagingSlider.setValue(0);
+
         javax.swing.GroupLayout pokemonMovesetsPanelLayout = new javax.swing.GroupLayout(pokemonMovesetsPanel);
         pokemonMovesetsPanel.setLayout(pokemonMovesetsPanelLayout);
         pokemonMovesetsPanelLayout.setHorizontalGroup(
@@ -3358,29 +3460,47 @@ public class RandomizerGUI extends javax.swing.JFrame {
             .addGroup(pokemonMovesetsPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pokemonMovesetsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(pmsMetronomeOnlyRB)
                     .addGroup(pokemonMovesetsPanelLayout.createSequentialGroup()
-                        .addGroup(pokemonMovesetsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(pmsUnchangedRB)
-                            .addComponent(pmsRandomTypeRB)
-                            .addComponent(pmsRandomTotalRB))
-                        .addGap(224, 224, 224)
-                        .addComponent(pms4MovesCB)))
-                .addContainerGap(114, Short.MAX_VALUE))
+                        .addComponent(pmsUnchangedRB)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(pms4MovesCB)
+                        .addGap(151, 151, 151))
+                    .addGroup(pokemonMovesetsPanelLayout.createSequentialGroup()
+                        .addComponent(pmsRandomTypeRB)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(pmsReorderDamagingMovesCB)
+                        .addGap(203, 203, 203))
+                    .addGroup(pokemonMovesetsPanelLayout.createSequentialGroup()
+                        .addComponent(pmsRandomTotalRB)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(pmsForceGoodDamagingCB)
+                        .addGap(161, 161, 161))
+                    .addGroup(pokemonMovesetsPanelLayout.createSequentialGroup()
+                        .addComponent(pmsMetronomeOnlyRB)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(pmsForceGoodDamagingSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(152, 152, 152))))
         );
         pokemonMovesetsPanelLayout.setVerticalGroup(
             pokemonMovesetsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pokemonMovesetsPanelLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(pmsUnchangedRB)
+                .addContainerGap()
+                .addGroup(pokemonMovesetsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(pmsUnchangedRB)
+                    .addComponent(pms4MovesCB))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pokemonMovesetsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(pmsRandomTypeRB)
-                    .addComponent(pms4MovesCB))
+                    .addComponent(pmsReorderDamagingMovesCB))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(pmsRandomTotalRB)
+                .addGroup(pokemonMovesetsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(pmsRandomTotalRB)
+                    .addComponent(pmsForceGoodDamagingCB))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(pmsMetronomeOnlyRB))
+                .addGroup(pokemonMovesetsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pmsMetronomeOnlyRB)
+                    .addComponent(pmsForceGoodDamagingSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         moveDataPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("RandomizerGUI.moveDataPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
@@ -3422,7 +3542,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(mdRandomAccuracyCB)
                     .addComponent(mdRandomPPCB)
                     .addComponent(mdRandomTypeCB))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 211, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 229, Short.MAX_VALUE)
                 .addGroup(moveDataPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(mdRandomCategoryCB)
                     .addGroup(moveDataPanelLayout.createSequentialGroup()
@@ -3468,7 +3588,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addComponent(moveDataPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(pokemonMovesetsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(147, Short.MAX_VALUE))
+                .addContainerGap(130, Short.MAX_VALUE))
         );
 
         randomizerOptionsPane.addTab(bundle.getString("RandomizerGUI.movesAndSetsPanel.TabConstraints.tabTitle"), movesAndSetsPanel); // NOI18N
@@ -3570,7 +3690,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                             .addComponent(tcnRandomizeCB)
                             .addComponent(tpForceFullyEvolvedCB)
                             .addComponent(tpForceFullyEvolvedSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(143, Short.MAX_VALUE))
+                .addContainerGap(161, Short.MAX_VALUE))
         );
         trainersPokemonPanelLayout.setVerticalGroup(
             trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -3613,7 +3733,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             .addGroup(trainersInnerPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(trainersPokemonPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(266, Short.MAX_VALUE))
+                .addContainerGap(286, Short.MAX_VALUE))
         );
 
         randomizerOptionsPane.addTab(bundle.getString("RandomizerGUI.trainersInnerPanel.TabConstraints.tabTitle"), trainersInnerPanel); // NOI18N
@@ -3785,7 +3905,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(wpCatchRateSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(wpHeldItemsBanBadCB))
-                .addContainerGap(13, Short.MAX_VALUE))
+                .addContainerGap(31, Short.MAX_VALUE))
         );
         wildPokemonPanelLayout.setVerticalGroup(
             wildPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -3831,7 +3951,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             .addGroup(wildsInnerPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(wildPokemonPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(246, Short.MAX_VALUE))
+                .addContainerGap(266, Short.MAX_VALUE))
         );
 
         randomizerOptionsPane.addTab(bundle.getString("RandomizerGUI.wildsInnerPanel.TabConstraints.tabTitle"), wildsInnerPanel); // NOI18N
@@ -3868,6 +3988,22 @@ public class RandomizerGUI extends javax.swing.JFrame {
         tmFullHMCompatCB.setText(bundle.getString("RandomizerGUI.tmFullHMCompatCB.text")); // NOI18N
         tmFullHMCompatCB.setToolTipText(bundle.getString("RandomizerGUI.tmFullHMCompatCB.toolTipText")); // NOI18N
 
+        tmForceGoodDamagingCB.setText(bundle.getString("RandomizerGUI.tmForceGoodDamagingCB.text")); // NOI18N
+        tmForceGoodDamagingCB.setToolTipText(bundle.getString("RandomizerGUI.tmForceGoodDamagingCB.toolTipText")); // NOI18N
+        tmForceGoodDamagingCB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tmForceGoodDamagingCBActionPerformed(evt);
+            }
+        });
+
+        tmForceGoodDamagingSlider.setMajorTickSpacing(20);
+        tmForceGoodDamagingSlider.setMinorTickSpacing(5);
+        tmForceGoodDamagingSlider.setPaintLabels(true);
+        tmForceGoodDamagingSlider.setPaintTicks(true);
+        tmForceGoodDamagingSlider.setSnapToTicks(true);
+        tmForceGoodDamagingSlider.setToolTipText(bundle.getString("RandomizerGUI.tmForceGoodDamagingSlider.toolTipText")); // NOI18N
+        tmForceGoodDamagingSlider.setValue(0);
+
         javax.swing.GroupLayout tmMovesPanelLayout = new javax.swing.GroupLayout(tmMovesPanel);
         tmMovesPanel.setLayout(tmMovesPanelLayout);
         tmMovesPanelLayout.setHorizontalGroup(
@@ -3876,18 +4012,20 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(tmMovesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(tmmUnchangedRB)
-                    .addComponent(tmmRandomRB))
-                .addGap(67, 67, 67)
+                    .addComponent(tmmRandomRB)
+                    .addComponent(tmFullHMCompatCB))
+                .addGap(17, 17, 17)
                 .addGroup(tmMovesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(tmFullHMCompatCB)
+                    .addComponent(tmForceGoodDamagingSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(tmForceGoodDamagingCB)
                     .addComponent(tmKeepFieldMovesCB)
                     .addComponent(tmLearningSanityCB))
-                .addContainerGap(105, Short.MAX_VALUE))
+                .addContainerGap(52, Short.MAX_VALUE))
         );
         tmMovesPanelLayout.setVerticalGroup(
             tmMovesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(tmMovesPanelLayout.createSequentialGroup()
-                .addContainerGap()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(tmMovesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(tmmUnchangedRB)
                     .addComponent(tmLearningSanityCB))
@@ -3896,8 +4034,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(tmmRandomRB)
                     .addComponent(tmKeepFieldMovesCB))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(tmFullHMCompatCB)
-                .addContainerGap(33, Short.MAX_VALUE))
+                .addGroup(tmMovesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(tmFullHMCompatCB)
+                    .addComponent(tmForceGoodDamagingCB))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(tmForceGoodDamagingSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         tmHmCompatPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(bundle.getString("RandomizerGUI.tmHmCompatPanel.border.title"))); // NOI18N
@@ -3973,7 +4114,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             .addGroup(tmhmsPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(tmMovesPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 30, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(tmHmCompatPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -3983,7 +4124,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(tmhmsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(tmHmCompatPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(tmMovesPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(tmMovesPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
 
         moveTutorsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("RandomizerGUI.moveTutorsPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
@@ -4015,6 +4157,22 @@ public class RandomizerGUI extends javax.swing.JFrame {
         mtKeepFieldMovesCB.setText(bundle.getString("RandomizerGUI.mtKeepFieldMovesCB.text")); // NOI18N
         mtKeepFieldMovesCB.setToolTipText(bundle.getString("RandomizerGUI.mtKeepFieldMovesCB.toolTipText")); // NOI18N
 
+        mtForceGoodDamagingCB.setText(bundle.getString("RandomizerGUI.mtForceGoodDamagingCB.text")); // NOI18N
+        mtForceGoodDamagingCB.setToolTipText(bundle.getString("RandomizerGUI.mtForceGoodDamagingCB.toolTipText")); // NOI18N
+        mtForceGoodDamagingCB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mtForceGoodDamagingCBActionPerformed(evt);
+            }
+        });
+
+        mtForceGoodDamagingSlider.setMajorTickSpacing(20);
+        mtForceGoodDamagingSlider.setMinorTickSpacing(5);
+        mtForceGoodDamagingSlider.setPaintLabels(true);
+        mtForceGoodDamagingSlider.setPaintTicks(true);
+        mtForceGoodDamagingSlider.setSnapToTicks(true);
+        mtForceGoodDamagingSlider.setToolTipText(bundle.getString("RandomizerGUI.mtForceGoodDamagingSlider.toolTipText")); // NOI18N
+        mtForceGoodDamagingSlider.setValue(0);
+
         javax.swing.GroupLayout mtMovesPanelLayout = new javax.swing.GroupLayout(mtMovesPanel);
         mtMovesPanel.setLayout(mtMovesPanelLayout);
         mtMovesPanelLayout.setHorizontalGroup(
@@ -4026,9 +4184,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(mtmRandomRB))
                 .addGap(64, 64, 64)
                 .addGroup(mtMovesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(mtForceGoodDamagingSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(mtForceGoodDamagingCB)
                     .addComponent(mtKeepFieldMovesCB)
                     .addComponent(mtLearningSanityCB))
-                .addContainerGap(94, Short.MAX_VALUE))
+                .addContainerGap(85, Short.MAX_VALUE))
         );
         mtMovesPanelLayout.setVerticalGroup(
             mtMovesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -4041,6 +4201,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addGroup(mtMovesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(mtmRandomRB)
                     .addComponent(mtKeepFieldMovesCB))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(mtForceGoodDamagingCB)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(mtForceGoodDamagingSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -4124,7 +4288,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(mtCompatPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(mtNoExistLabel))
-                .addContainerGap(24, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         moveTutorsPanelLayout.setVerticalGroup(
             moveTutorsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -4151,10 +4315,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
             tmHmTutorPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, tmHmTutorPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(tmhmsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(tmhmsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(moveTutorsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(17, Short.MAX_VALUE))
         );
 
         randomizerOptionsPane.addTab(bundle.getString("RandomizerGUI.tmHmTutorPanel.TabConstraints.tabTitle"), tmHmTutorPanel); // NOI18N
@@ -4205,7 +4369,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                         .addComponent(fiRandomRB)
                         .addGap(76, 76, 76)
                         .addComponent(fiBanBadCB)))
-                .addContainerGap(466, Short.MAX_VALUE))
+                .addContainerGap(484, Short.MAX_VALUE))
         );
         fieldItemsPanelLayout.setVerticalGroup(
             fieldItemsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -4234,7 +4398,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             .addGroup(fieldItemsInnerPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(fieldItemsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(322, Short.MAX_VALUE))
+                .addContainerGap(342, Short.MAX_VALUE))
         );
 
         randomizerOptionsPane.addTab(bundle.getString("RandomizerGUI.fieldItemsInnerPanel.TabConstraints.tabTitle"), fieldItemsInnerPanel); // NOI18N
@@ -4250,14 +4414,14 @@ public class RandomizerGUI extends javax.swing.JFrame {
             .addGroup(miscTweaksPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(mtNoneAvailableLabel)
-                .addContainerGap(418, Short.MAX_VALUE))
+                .addContainerGap(436, Short.MAX_VALUE))
         );
         miscTweaksPanelLayout.setVerticalGroup(
             miscTweaksPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(miscTweaksPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(mtNoneAvailableLabel)
-                .addContainerGap(368, Short.MAX_VALUE))
+                .addContainerGap(388, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout miscTweaksInnerPanelLayout = new javax.swing.GroupLayout(miscTweaksInnerPanel);
@@ -4397,6 +4561,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JPanel movesAndSetsPanel;
     private javax.swing.JPanel mtCompatPanel;
     private javax.swing.ButtonGroup mtCompatibilityButtonGroup;
+    private javax.swing.JCheckBox mtForceGoodDamagingCB;
+    private javax.swing.JSlider mtForceGoodDamagingSlider;
     private javax.swing.JCheckBox mtKeepFieldMovesCB;
     private javax.swing.JCheckBox mtLearningSanityCB;
     private javax.swing.ButtonGroup mtMovesButtonGroup;
@@ -4426,9 +4592,12 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox peThreeStagesCB;
     private javax.swing.JRadioButton peUnchangedRB;
     private javax.swing.JCheckBox pms4MovesCB;
+    private javax.swing.JCheckBox pmsForceGoodDamagingCB;
+    private javax.swing.JSlider pmsForceGoodDamagingSlider;
     private javax.swing.JRadioButton pmsMetronomeOnlyRB;
     private javax.swing.JRadioButton pmsRandomTotalRB;
     private javax.swing.JRadioButton pmsRandomTypeRB;
+    private javax.swing.JCheckBox pmsReorderDamagingMovesCB;
     private javax.swing.JRadioButton pmsUnchangedRB;
     private javax.swing.ButtonGroup pokeAbilitiesButtonGroup;
     private javax.swing.ButtonGroup pokeEvolutionsButtonGroup;
@@ -4479,6 +4648,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JRadioButton thcRandomTotalRB;
     private javax.swing.JRadioButton thcRandomTypeRB;
     private javax.swing.JRadioButton thcUnchangedRB;
+    private javax.swing.JCheckBox tmForceGoodDamagingCB;
+    private javax.swing.JSlider tmForceGoodDamagingSlider;
     private javax.swing.JCheckBox tmFullHMCompatCB;
     private javax.swing.JPanel tmHmCompatPanel;
     private javax.swing.ButtonGroup tmHmCompatibilityButtonGroup;
