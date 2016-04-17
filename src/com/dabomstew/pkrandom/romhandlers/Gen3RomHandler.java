@@ -798,14 +798,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             moves[i].power = rom[offs + i * 0xC + 1] & 0xFF;
             moves[i].pp = rom[offs + i * 0xC + 4] & 0xFF;
             moves[i].type = Gen3Constants.typeTable[rom[offs + i * 0xC + 2]];
-            
-            if(RomFunctions.normalMultihitMoves.contains(i)) {
+
+            if (RomFunctions.normalMultihitMoves.contains(i)) {
                 moves[i].hitCount = 3;
-            }
-            else if(RomFunctions.doubleHitMoves.contains(i)) {
+            } else if (RomFunctions.doubleHitMoves.contains(i)) {
                 moves[i].hitCount = 2;
-            }
-            else if(i == RomFunctions.TRIPLE_KICK_INDEX) {
+            } else if (i == RomFunctions.TRIPLE_KICK_INDEX) {
                 moves[i].hitCount = 2.71; // this assumes the first hit lands
             }
         }
@@ -1094,9 +1092,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
 
         // Support Deoxys/Mew starters in E/FR/LG
-        if (!havePatchedObedience) {
-            attemptObedienceEvolutionPatches();
-        }
+        attemptObedienceEvolutionPatches();
         int baseOffset = romEntry.getValue("StarterPokemon");
 
         int starter0 = pokedexToInternal[newStarters.get(0).number];
@@ -1298,9 +1294,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     @Override
     public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters) {
         // Support Deoxys/Mew catches in E/FR/LG
-        if (!havePatchedObedience) {
-            attemptObedienceEvolutionPatches();
-        }
+        attemptObedienceEvolutionPatches();
 
         int startOffs = romEntry.getValue("WildPokemon");
         Iterator<EncounterSet> encounterAreas = encounters.iterator();
@@ -1685,9 +1679,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     @Override
     public boolean setStaticPokemon(List<Pokemon> staticPokemon) {
         // Support Deoxys/Mew gifts/catches in E/FR/LG
-        if (!havePatchedObedience) {
-            attemptObedienceEvolutionPatches();
-        }
+        attemptObedienceEvolutionPatches();
 
         List<StaticPokemon> staticsHere = romEntry.staticPokemon;
         if (staticPokemon.size() != staticsHere.size()) {
@@ -2040,6 +2032,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void attemptObedienceEvolutionPatches() {
+        if (havePatchedObedience) {
+            return;
+        }
+
         havePatchedObedience = true;
         // This routine *appears* to only exist in E/FR/LG...
         // Look for the deoxys part which is
@@ -2265,6 +2261,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public void removeTradeEvolutions(boolean changeMoveEvos) {
+        attemptObedienceEvolutionPatches();
+
         // no move evos, so no need to check for those
         log("--Removing Trade Evolutions--");
         for (Pokemon pkmn : pokes) {
