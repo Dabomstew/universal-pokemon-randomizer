@@ -193,6 +193,9 @@ public class SettingsUpdater {
             
             // clean up byte 1 (keep bits 0-3, move bit 7 to 4, clear 5-7)
             dataBlock[1] = (byte) ((dataBlock[1] & 0x0F) | ((dataBlock[1] & 0x80) >> 3));
+            
+            // empty byte for fully evolved trainer mon setting
+            insertExtraByte(13, (byte) 0);
         }
 
         // fix checksum

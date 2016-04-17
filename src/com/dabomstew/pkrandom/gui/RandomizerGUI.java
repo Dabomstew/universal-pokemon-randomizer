@@ -796,12 +796,16 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpNoEarlyShedinjaCB.setEnabled(false);
         this.tpNoEarlyShedinjaCB.setVisible(true);
         this.tpUnchangedRB.setEnabled(false);
+        this.tpForceFullyEvolvedCB.setEnabled(false);
+        this.tpForceFullyEvolvedSlider.setEnabled(false);
         this.tpUnchangedRB.setSelected(true);
         this.tpPowerLevelsCB.setSelected(false);
         this.tpRivalCarriesStarterCB.setSelected(false);
         this.tpTypeWeightingCB.setSelected(false);
         this.tpNoLegendariesCB.setSelected(false);
         this.tpNoEarlyShedinjaCB.setSelected(false);
+        this.tpForceFullyEvolvedCB.setSelected(false);
+        this.tpForceFullyEvolvedSlider.setValue(this.tpForceFullyEvolvedSlider.getMinimum());
 
         this.tnRandomizeCB.setEnabled(false);
         this.tcnRandomizeCB.setEnabled(false);
@@ -830,6 +834,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         this.wpCatchRateCB.setEnabled(false);
         this.wpCatchRateCB.setSelected(false);
+        this.wpCatchRateSlider.setEnabled(false);
+        this.wpCatchRateSlider.setValue(this.wpCatchRateSlider.getMinimum());
 
         this.wpHeldItemsCB.setEnabled(false);
         this.wpHeldItemsCB.setSelected(false);
@@ -1315,10 +1321,20 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.tpNoLegendariesCB.setEnabled(false);
             this.tpNoEarlyShedinjaCB.setEnabled(false);
             this.tpNoEarlyShedinjaCB.setSelected(false);
+            this.tpForceFullyEvolvedCB.setEnabled(false);
+            this.tpForceFullyEvolvedCB.setSelected(false);
         } else {
             this.tpPowerLevelsCB.setEnabled(true);
             this.tpNoLegendariesCB.setEnabled(true);
             this.tpNoEarlyShedinjaCB.setEnabled(true);
+            this.tpForceFullyEvolvedCB.setEnabled(true);
+        }
+
+        if (this.tpForceFullyEvolvedCB.isSelected()) {
+            this.tpForceFullyEvolvedSlider.setEnabled(true);
+        } else {
+            this.tpForceFullyEvolvedSlider.setEnabled(false);
+            this.tpForceFullyEvolvedSlider.setValue(this.tpForceFullyEvolvedSlider.getMinimum());
         }
 
         if (!this.spUnchangedRB.isSelected() || !this.tpUnchangedRB.isSelected()) {
@@ -1368,6 +1384,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
         } else {
             this.wpHeldItemsBanBadCB.setEnabled(false);
             this.wpHeldItemsBanBadCB.setSelected(false);
+        }
+
+        if (this.wpCatchRateCB.isSelected()) {
+            this.wpCatchRateSlider.setEnabled(true);
+        } else {
+            this.wpCatchRateSlider.setEnabled(false);
+            this.wpCatchRateSlider.setValue(this.wpCatchRateSlider.getMinimum());
         }
 
         if (this.igtUnchangedRB.isSelected()) {
@@ -1612,6 +1635,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpUnchangedRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED);
         this.tpNoLegendariesCB.setSelected(settings.isTrainersBlockLegendaries());
         this.tpNoEarlyShedinjaCB.setSelected(settings.isTrainersBlockEarlyWonderGuard());
+        this.tpForceFullyEvolvedCB.setSelected(settings.isTrainersForceFullyEvolved());
+        this.tpForceFullyEvolvedSlider.setValue(settings.getTrainersForceFullyEvolvedLevel());
 
         this.wpARCatchEmAllRB
                 .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL);
@@ -1625,6 +1650,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.wpUseTimeCB.setSelected(settings.isUseTimeBasedEncounters());
 
         this.wpCatchRateCB.setSelected(settings.isUseMinimumCatchRate());
+        this.wpCatchRateSlider.setValue(settings.getMinimumCatchRateLevel());
         this.wpNoLegendariesCB.setSelected(settings.isBlockWildLegendaries());
         this.wpARSimilarStrengthRB
                 .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH);
@@ -1750,6 +1776,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setTrainersMatchTypingDistribution(tpTypeWeightingCB.isSelected());
         settings.setTrainersBlockLegendaries(tpNoLegendariesCB.isSelected());
         settings.setTrainersBlockEarlyWonderGuard(tpNoEarlyShedinjaCB.isSelected());
+        settings.setTrainersForceFullyEvolved(tpForceFullyEvolvedCB.isSelected());
+        settings.setTrainersForceFullyEvolvedLevel(tpForceFullyEvolvedSlider.getValue());
 
         settings.setWildPokemonMod(wpUnchangedRB.isSelected(), wpRandomRB.isSelected(), wpArea11RB.isSelected(),
                 wpGlobalRB.isSelected());
@@ -1757,6 +1785,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 wpARCatchEmAllRB.isSelected(), wpARTypeThemedRB.isSelected());
         settings.setUseTimeBasedEncounters(wpUseTimeCB.isSelected());
         settings.setUseMinimumCatchRate(wpCatchRateCB.isSelected());
+        settings.setMinimumCatchRateLevel(wpCatchRateSlider.getValue());
         settings.setBlockWildLegendaries(wpNoLegendariesCB.isSelected());
         settings.setRandomizeWildPokemonHeldItems(wpHeldItemsCB.isSelected());
         settings.setBanBadRandomWildPokemonHeldItems(wpHeldItemsBanBadCB.isSelected());
@@ -2370,6 +2399,14 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_pbsChangesRandomRBActionPerformed
 
+    private void tpForceFullyEvolvedCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tpForceFullyEvolvedCBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_tpForceFullyEvolvedCBActionPerformed
+
+    private void wpCatchRateCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpCatchRateCBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_wpCatchRateCBActionPerformed
+
     /* @formatter:off */
     /**
      * This method is called from within the constructor to initialize the form.
@@ -2520,6 +2557,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         tnRandomizeCB = new javax.swing.JCheckBox();
         tcnRandomizeCB = new javax.swing.JCheckBox();
         tpNoEarlyShedinjaCB = new javax.swing.JCheckBox();
+        tpForceFullyEvolvedCB = new javax.swing.JCheckBox();
+        tpForceFullyEvolvedSlider = new javax.swing.JSlider();
         wildsInnerPanel = new javax.swing.JPanel();
         wildPokemonPanel = new javax.swing.JPanel();
         wpUnchangedRB = new javax.swing.JRadioButton();
@@ -2536,6 +2575,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         wpCatchRateCB = new javax.swing.JCheckBox();
         wpHeldItemsCB = new javax.swing.JCheckBox();
         wpHeldItemsBanBadCB = new javax.swing.JCheckBox();
+        wpCatchRateSlider = new javax.swing.JSlider();
         tmHmTutorPanel = new javax.swing.JPanel();
         tmhmsPanel = new javax.swing.JPanel();
         tmMovesPanel = new javax.swing.JPanel();
@@ -3264,7 +3304,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addComponent(staticPokemonPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(inGameTradesPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(20, Short.MAX_VALUE))
+                .addContainerGap(29, Short.MAX_VALUE))
         );
 
         randomizerOptionsPane.addTab(bundle.getString("RandomizerGUI.startersInnerPanel.TabConstraints.tabTitle"), startersInnerPanel); // NOI18N
@@ -3428,7 +3468,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addComponent(moveDataPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(pokemonMovesetsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(138, Short.MAX_VALUE))
+                .addContainerGap(147, Short.MAX_VALUE))
         );
 
         randomizerOptionsPane.addTab(bundle.getString("RandomizerGUI.movesAndSetsPanel.TabConstraints.tabTitle"), movesAndSetsPanel); // NOI18N
@@ -3487,6 +3527,23 @@ public class RandomizerGUI extends javax.swing.JFrame {
         tpNoEarlyShedinjaCB.setText(bundle.getString("RandomizerGUI.tpNoEarlyShedinjaCB.text")); // NOI18N
         tpNoEarlyShedinjaCB.setToolTipText(bundle.getString("RandomizerGUI.tpNoEarlyShedinjaCB.toolTipText")); // NOI18N
 
+        tpForceFullyEvolvedCB.setText(bundle.getString("RandomizerGUI.tpForceFullyEvolvedCB.text")); // NOI18N
+        tpForceFullyEvolvedCB.setToolTipText(bundle.getString("RandomizerGUI.tpForceFullyEvolvedCB.toolTipText")); // NOI18N
+        tpForceFullyEvolvedCB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tpForceFullyEvolvedCBActionPerformed(evt);
+            }
+        });
+
+        tpForceFullyEvolvedSlider.setMajorTickSpacing(5);
+        tpForceFullyEvolvedSlider.setMaximum(65);
+        tpForceFullyEvolvedSlider.setMinimum(30);
+        tpForceFullyEvolvedSlider.setMinorTickSpacing(1);
+        tpForceFullyEvolvedSlider.setPaintLabels(true);
+        tpForceFullyEvolvedSlider.setPaintTicks(true);
+        tpForceFullyEvolvedSlider.setToolTipText(bundle.getString("RandomizerGUI.tpForceFullyEvolvedSlider.toolTipText")); // NOI18N
+        tpForceFullyEvolvedSlider.setValue(30);
+
         javax.swing.GroupLayout trainersPokemonPanelLayout = new javax.swing.GroupLayout(trainersPokemonPanel);
         trainersPokemonPanel.setLayout(trainersPokemonPanelLayout);
         trainersPokemonPanelLayout.setHorizontalGroup(
@@ -3501,18 +3558,19 @@ public class RandomizerGUI extends javax.swing.JFrame {
                             .addComponent(tpRandomRB))
                         .addGap(47, 47, 47)
                         .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(tpNoEarlyShedinjaCB)
-                            .addGroup(trainersPokemonPanelLayout.createSequentialGroup()
-                                .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(tpTypeWeightingCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(tpRivalCarriesStarterCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(tpPowerLevelsCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(tpNoLegendariesCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGap(18, 18, 18)
-                                .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(tnRandomizeCB)
-                                    .addComponent(tcnRandomizeCB))))))
-                .addContainerGap(166, Short.MAX_VALUE))
+                            .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(tpTypeWeightingCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(tpRivalCarriesStarterCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(tpPowerLevelsCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(tpNoLegendariesCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(tpNoEarlyShedinjaCB))
+                        .addGap(18, 18, 18)
+                        .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(tnRandomizeCB)
+                            .addComponent(tcnRandomizeCB)
+                            .addComponent(tpForceFullyEvolvedCB)
+                            .addComponent(tpForceFullyEvolvedSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(143, Short.MAX_VALUE))
         );
         trainersPokemonPanelLayout.setVerticalGroup(
             trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -3529,11 +3587,15 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(tpTypeThemedRB)
-                    .addComponent(tpTypeWeightingCB))
+                    .addComponent(tpTypeWeightingCB)
+                    .addComponent(tpForceFullyEvolvedCB))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(tpNoLegendariesCB)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(tpNoEarlyShedinjaCB)
+                .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(trainersPokemonPanelLayout.createSequentialGroup()
+                        .addComponent(tpNoLegendariesCB)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(tpNoEarlyShedinjaCB))
+                    .addComponent(tpForceFullyEvolvedSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -3550,8 +3612,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             trainersInnerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(trainersInnerPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(trainersPokemonPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(261, Short.MAX_VALUE))
+                .addComponent(trainersPokemonPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(266, Short.MAX_VALUE))
         );
 
         randomizerOptionsPane.addTab(bundle.getString("RandomizerGUI.trainersInnerPanel.TabConstraints.tabTitle"), trainersInnerPanel); // NOI18N
@@ -3675,6 +3737,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         wpCatchRateCB.setText(bundle.getString("RandomizerGUI.wpCatchRateCB.text")); // NOI18N
         wpCatchRateCB.setToolTipText(bundle.getString("RandomizerGUI.wpCatchRateCB.toolTipText")); // NOI18N
+        wpCatchRateCB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                wpCatchRateCBActionPerformed(evt);
+            }
+        });
 
         wpHeldItemsCB.setText(bundle.getString("RandomizerGUI.wpHeldItemsCB.text")); // NOI18N
         wpHeldItemsCB.setToolTipText(bundle.getString("RandomizerGUI.wpHeldItemsCB.toolTipText")); // NOI18N
@@ -3686,6 +3753,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         wpHeldItemsBanBadCB.setText(bundle.getString("RandomizerGUI.wpHeldItemsBanBadCB.text")); // NOI18N
         wpHeldItemsBanBadCB.setToolTipText(bundle.getString("RandomizerGUI.wpHeldItemsBanBadCB.toolTipText")); // NOI18N
+
+        wpCatchRateSlider.setMajorTickSpacing(1);
+        wpCatchRateSlider.setMaximum(4);
+        wpCatchRateSlider.setMinimum(1);
+        wpCatchRateSlider.setPaintLabels(true);
+        wpCatchRateSlider.setToolTipText(bundle.getString("RandomizerGUI.wpCatchRateSlider.toolTipText")); // NOI18N
+        wpCatchRateSlider.setValue(1);
 
         javax.swing.GroupLayout wildPokemonPanelLayout = new javax.swing.GroupLayout(wildPokemonPanel);
         wildPokemonPanel.setLayout(wildPokemonPanelLayout);
@@ -3704,10 +3778,14 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addGroup(wildPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(wpUseTimeCB)
                     .addComponent(wpNoLegendariesCB)
-                    .addComponent(wpCatchRateCB)
-                    .addComponent(wpHeldItemsCB)
+                    .addGroup(wildPokemonPanelLayout.createSequentialGroup()
+                        .addGroup(wildPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(wpCatchRateCB)
+                            .addComponent(wpHeldItemsCB))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(wpCatchRateSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(wpHeldItemsBanBadCB))
-                .addContainerGap(199, Short.MAX_VALUE))
+                .addContainerGap(13, Short.MAX_VALUE))
         );
         wildPokemonPanelLayout.setVerticalGroup(
             wildPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -3726,13 +3804,17 @@ public class RandomizerGUI extends javax.swing.JFrame {
                         .addComponent(wpUseTimeCB)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(wpNoLegendariesCB)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(wpCatchRateCB)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(wpHeldItemsCB)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(wildPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(wpCatchRateSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(wildPokemonPanelLayout.createSequentialGroup()
+                                .addComponent(wpCatchRateCB)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(wpHeldItemsCB)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(wpHeldItemsBanBadCB))
-                    .addComponent(wildPokemonARulePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(wildPokemonARulePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(9, 9, 9))
         );
 
         javax.swing.GroupLayout wildsInnerPanelLayout = new javax.swing.GroupLayout(wildsInnerPanel);
@@ -4152,7 +4234,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             .addGroup(fieldItemsInnerPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(fieldItemsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(313, Short.MAX_VALUE))
+                .addContainerGap(322, Short.MAX_VALUE))
         );
 
         randomizerOptionsPane.addTab(bundle.getString("RandomizerGUI.fieldItemsInnerPanel.TabConstraints.tabTitle"), fieldItemsInnerPanel); // NOI18N
@@ -4175,7 +4257,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             .addGroup(miscTweaksPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(mtNoneAvailableLabel)
-                .addContainerGap(359, Short.MAX_VALUE))
+                .addContainerGap(368, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout miscTweaksInnerPanelLayout = new javax.swing.GroupLayout(miscTweaksInnerPanel);
@@ -4411,6 +4493,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox tnRandomizeCB;
     private javax.swing.JMenuItem toggleAutoUpdatesMenuItem;
     private javax.swing.JMenuItem toggleScrollPaneMenuItem;
+    private javax.swing.JCheckBox tpForceFullyEvolvedCB;
+    private javax.swing.JSlider tpForceFullyEvolvedSlider;
     private javax.swing.JCheckBox tpNoEarlyShedinjaCB;
     private javax.swing.JCheckBox tpNoLegendariesCB;
     private javax.swing.JCheckBox tpPowerLevelsCB;
@@ -4437,6 +4521,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JRadioButton wpARTypeThemedRB;
     private javax.swing.JRadioButton wpArea11RB;
     private javax.swing.JCheckBox wpCatchRateCB;
+    private javax.swing.JSlider wpCatchRateSlider;
     private javax.swing.JRadioButton wpGlobalRB;
     private javax.swing.JCheckBox wpHeldItemsBanBadCB;
     private javax.swing.JCheckBox wpHeldItemsCB;

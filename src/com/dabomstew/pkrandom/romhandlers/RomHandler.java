@@ -163,6 +163,8 @@ public interface RomHandler {
             boolean noEarlyWonderGuard);
 
     public void rivalCarriesStarter();
+    
+    public void forceFullyEvolvedTrainerPokes(int minLevel);
 
     // Randomizer: moves
 

@@ -950,6 +950,24 @@ public abstract class AbstractRomHandler implements RomHandler {
         this.setTrainers(currentTrainers);
     }
 
+    @Override
+    public void forceFullyEvolvedTrainerPokes(int minLevel) {
+        checkPokemonRestrictions();
+        List<Trainer> currentTrainers = this.getTrainers();
+        for (Trainer t : currentTrainers) {
+            for (TrainerPokemon tp : t.pokemon) {
+                if (tp.level >= minLevel) {
+                    Pokemon newPokemon = fullyEvolve(tp.pokemon);
+                    if (newPokemon != tp.pokemon) {
+                        tp.pokemon = newPokemon;
+                        tp.resetMoves = true;
+                    }
+                }
+            }
+        }
+        this.setTrainers(currentTrainers);
+    }
+
     // MOVE DATA
     // All randomizers don't touch move ID 165 (Struggle)
     // They also have other exclusions where necessary to stop things glitching.
@@ -3166,6 +3184,38 @@ public abstract class AbstractRomHandler implements RomHandler {
                 return maxEvos;
             }
         }
+    }
+
+    private Pokemon fullyEvolve(Pokemon pokemon) {
+        Set<Pokemon> seenMons = new HashSet<Pokemon>();
+        seenMons.add(pokemon);
+
+        while (true) {
+            if (pokemon.evolutionsFrom.size() == 0) {
+                // fully evolved
+                break;
+            }
+
+            // check for cyclic evolutions from what we've already seen
+            boolean cyclic = false;
+            for (Evolution ev : pokemon.evolutionsFrom) {
+                if (seenMons.contains(ev.to)) {
+                    // cyclic evolution detected - bail now
+                    cyclic = true;
+                    break;
+                }
+            }
+
+            if (cyclic) {
+                break;
+            }
+
+            // pick a random evolution to continue from
+            pokemon = pokemon.evolutionsFrom.get(random.nextInt(pokemon.evolutionsFrom.size())).to;
+            seenMons.add(pokemon);
+        }
+
+        return pokemon;
     }
 
     private Set<Pokemon> relatedPokemon(Pokemon original) {

@@ -257,6 +257,10 @@ public class Randomizer {
                 && settings.isRivalCarriesStarterThroughout()) {
             romHandler.rivalCarriesStarter();
         }
+        
+        if(settings.isTrainersForceFullyEvolved()) {
+            romHandler.forceFullyEvolvedTrainerPokes(settings.getTrainersForceFullyEvolvedLevel());
+        }
 
         // Trainer names & class names randomization
         // done before trainer log to add proper names
@@ -288,12 +292,29 @@ public class Randomizer {
 
         // Wild Pokemon
         if (settings.isUseMinimumCatchRate()) {
-            if (romHandler instanceof Gen5RomHandler) {
-                romHandler.minimumCatchRate(50, 25);
-            } else {
-                romHandler.minimumCatchRate(75, 37);
+            boolean gen5 = romHandler instanceof Gen5RomHandler;
+            int normalMin, legendaryMin;
+            switch (settings.getMinimumCatchRateLevel()) {
+            case 1:
+            default:
+                normalMin = gen5 ? 50 : 75;
+                legendaryMin = gen5 ? 25 : 37;
+                break;
+            case 2:
+                normalMin = gen5 ? 100 : 128;
+                legendaryMin = gen5 ? 45 : 64;
+                break;
+            case 3:
+                normalMin = gen5 ? 180 : 200;
+                legendaryMin = gen5 ? 75 : 100;
+                break;
+            case 4:
+                normalMin = legendaryMin = 255;
+                break;
             }
+            romHandler.minimumCatchRate(normalMin, legendaryMin);
         }
+        
         switch (settings.getWildPokemonMod()) {
         case RANDOM:
             romHandler.randomEncounters(settings.isUseTimeBasedEncounters(),
