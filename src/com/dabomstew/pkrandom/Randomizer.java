@@ -204,10 +204,14 @@ public class Randomizer {
         boolean noBrokenMoves = settings.doBlockBrokenMoves();
         boolean forceFourLv1s = romHandler.supportsFourStartingMoves() && settings.isStartWithFourMoves();
         if (settings.getMovesetsMod() == Settings.MovesetsMod.RANDOM_PREFER_SAME_TYPE) {
-            romHandler.randomizeMovesLearnt(true, noBrokenMoves, forceFourLv1s);
+            // TODO implement the proportion of good damaging moves
+            // setting/slider
+            romHandler.randomizeMovesLearnt(true, noBrokenMoves, forceFourLv1s, 0);
         } else if (settings.getMovesetsMod() == Settings.MovesetsMod.COMPLETELY_RANDOM) {
-            romHandler.randomizeMovesLearnt(false, noBrokenMoves, forceFourLv1s);
+            romHandler.randomizeMovesLearnt(false, noBrokenMoves, forceFourLv1s, 0);
         }
+        
+        // TODO make settings for the sorting movesets by damage option
 
         // Show the new movesets if applicable
         if (settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED) {
@@ -257,8 +261,8 @@ public class Randomizer {
                 && settings.isRivalCarriesStarterThroughout()) {
             romHandler.rivalCarriesStarter();
         }
-        
-        if(settings.isTrainersForceFullyEvolved()) {
+
+        if (settings.isTrainersForceFullyEvolved()) {
             romHandler.forceFullyEvolvedTrainerPokes(settings.getTrainersForceFullyEvolvedLevel());
         }
 
@@ -314,7 +318,7 @@ public class Randomizer {
             }
             romHandler.minimumCatchRate(normalMin, legendaryMin);
         }
-        
+
         switch (settings.getWildPokemonMod()) {
         case RANDOM:
             romHandler.randomEncounters(settings.isUseTimeBasedEncounters(),
@@ -350,7 +354,9 @@ public class Randomizer {
         // TMs
         if (!(settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY)
                 && settings.getTmsMod() == Settings.TMsMod.RANDOM) {
-            romHandler.randomizeTMMoves(noBrokenMoves, settings.isKeepFieldMoveTMs());
+            // TODO implement the proportion of good damaging moves
+            // setting/slider
+            romHandler.randomizeTMMoves(noBrokenMoves, settings.isKeepFieldMoveTMs(), 0);
             log.println("--TM Moves--");
             List<Integer> tmMoves = romHandler.getTMMoves();
             for (int i = 0; i < tmMoves.size(); i++) {
@@ -392,7 +398,9 @@ public class Randomizer {
             if (!(settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY)
                     && settings.getMoveTutorMovesMod() == Settings.MoveTutorMovesMod.RANDOM) {
                 List<Integer> oldMtMoves = romHandler.getMoveTutorMoves();
-                romHandler.randomizeMoveTutorMoves(noBrokenMoves, settings.isKeepFieldMoveTutors());
+                // TODO implement the proportion of good damaging moves
+                // setting/slider
+                romHandler.randomizeMoveTutorMoves(noBrokenMoves, settings.isKeepFieldMoveTutors(), 0);
                 log.println("--Move Tutor Moves--");
                 List<Integer> newMtMoves = romHandler.getMoveTutorMoves();
                 for (int i = 0; i < newMtMoves.size(); i++) {

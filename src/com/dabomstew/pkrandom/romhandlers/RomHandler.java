@@ -163,7 +163,7 @@ public interface RomHandler {
             boolean noEarlyWonderGuard);
 
     public void rivalCarriesStarter();
-    
+
     public void forceFullyEvolvedTrainerPokes(int minLevel);
 
     // Randomizer: moves
@@ -204,7 +204,10 @@ public interface RomHandler {
 
     public List<Integer> getMovesBannedFromLevelup();
 
-    public void randomizeMovesLearnt(boolean typeThemed, boolean noBroken, boolean forceFourStartingMoves);
+    public void randomizeMovesLearnt(boolean typeThemed, boolean noBroken, boolean forceFourStartingMoves,
+            double goodDamagingProbability);
+    
+    public void orderDamagingMovesByDamage();
 
     public void metronomeOnlyMode();
 
@@ -230,7 +233,7 @@ public interface RomHandler {
 
     public void setTMMoves(List<Integer> moveIndexes);
 
-    public void randomizeTMMoves(boolean noBroken, boolean preserveField);
+    public void randomizeTMMoves(boolean noBroken, boolean preserveField, double goodDamagingProbability);
 
     public int getTMCount();
 
@@ -270,7 +273,7 @@ public interface RomHandler {
 
     public void setMoveTutorMoves(List<Integer> moves);
 
-    public void randomizeMoveTutorMoves(boolean noBroken, boolean preserveField);
+    public void randomizeMoveTutorMoves(boolean noBroken, boolean preserveField, double goodDamagingProbability);
 
     public Map<Pokemon, boolean[]> getMoveTutorCompatibility();
 
