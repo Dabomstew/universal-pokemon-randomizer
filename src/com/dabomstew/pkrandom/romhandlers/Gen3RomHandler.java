@@ -798,6 +798,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             moves[i].power = rom[offs + i * 0xC + 1] & 0xFF;
             moves[i].pp = rom[offs + i * 0xC + 4] & 0xFF;
             moves[i].type = Gen3Constants.typeTable[rom[offs + i * 0xC + 2]];
+            
+            if(RomFunctions.normalMultihitMoves.contains(i)) {
+                moves[i].hitCount = 3;
+            }
+            else if(RomFunctions.doubleHitMoves.contains(i)) {
+                moves[i].hitCount = 2;
+            }
+            else if(i == RomFunctions.TRIPLE_KICK_INDEX) {
+                moves[i].hitCount = 2.71; // this assumes the first hit lands
+            }
         }
 
     }

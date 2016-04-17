@@ -327,6 +327,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 moves[i].pp = moveData[6] & 0xFF;
                 moves[i].type = Gen4Constants.typeTable[moveData[4] & 0xFF];
                 moves[i].category = Gen4Constants.moveCategoryIndices[moveData[2] & 0xFF];
+                
+                if(RomFunctions.normalMultihitMoves.contains(i)) {
+                    moves[i].hitCount = 3;
+                }
+                else if(RomFunctions.doubleHitMoves.contains(i)) {
+                    moves[i].hitCount = 2;
+                }
+                else if(i == RomFunctions.TRIPLE_KICK_INDEX) {
+                    moves[i].hitCount = 2.71; // this assumes the first hit lands
+                }
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);

@@ -973,6 +973,15 @@ public abstract class AbstractRomHandler implements RomHandler {
                         mv.power += 50;
                     }
                 }
+
+                if (mv.hitCount != 1) {
+                    // Divide randomized power by average hit count, round to
+                    // nearest 5
+                    mv.power = (int) (Math.round(mv.power / mv.hitCount / 5) * 5);
+                    if (mv.power == 0) {
+                        mv.power = 5;
+                    }
+                }
             }
         }
     }
@@ -982,7 +991,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Move> moves = this.getMoves();
         for (Move mv : moves) {
             if (mv != null && mv.internalId != 165) {
-                mv.pp = random.nextInt(8) * 5 + 5; // 5 ... 40 inclusive
+                if (random.nextInt(3) != 2) {
+                    // "average" PP: 15-25
+                    mv.pp = random.nextInt(3) * 5 + 15;
+                } else {
+                    // "extreme" PP: 5-40
+                    mv.pp = random.nextInt(8) * 5 + 5;
+                }
             }
         }
     }
@@ -999,8 +1014,12 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                 if (mv.hitratio <= 50) {
                     // lowest tier (acc <= 50)
-                    // new accuracy = rand(20...100) inclusive
-                    mv.hitratio = random.nextInt(17) * 5 + 20;
+                    // new accuracy = rand(20...50) inclusive
+                    // with a 10% chance to increase by 50%
+                    mv.hitratio = random.nextInt(7) * 5 + 20;
+                    if (random.nextInt(10) == 0) {
+                        mv.hitratio = (mv.hitratio * 3 / 2) / 5 * 5;
+                    }
                 } else if (mv.hitratio < 90) {
                     // middle tier (50 < acc < 90)
                     // count down from 100% to 20% in 5% increments with 20%
@@ -2626,7 +2645,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private void updateMoveAccuracy(List<Move> moves, int moveNum, int accuracy) {
         Move mv = moves.get(moveNum);
         if (Math.abs(mv.hitratio - accuracy) >= 1) {
-            mv.setAccuracy(accuracy);
+            mv.hitratio = accuracy;
             addMoveUpdate(moveNum, 2);
         }
     }

@@ -357,6 +357,16 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 moves[i].pp = moveData[5] & 0xFF;
                 moves[i].type = Gen5Constants.typeTable[moveData[0] & 0xFF];
                 moves[i].category = Gen5Constants.moveCategoryIndices[moveData[2] & 0xFF];
+                
+                if(RomFunctions.normalMultihitMoves.contains(i)) {
+                    moves[i].hitCount = 19/6.0;
+                }
+                else if(RomFunctions.doubleHitMoves.contains(i)) {
+                    moves[i].hitCount = 2;
+                }
+                else if(i == RomFunctions.TRIPLE_KICK_INDEX) {
+                    moves[i].hitCount = 2.71; // this assumes the first hit lands
+                }
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);

@@ -71,6 +71,35 @@ public class RomFunctions {
 
     }
 
+    /* @formatter:off */
+    public static final List<Integer> normalMultihitMoves = Arrays.asList(
+            292, // Arm Thrust
+            140, // Barrage
+            198, // Bone Rush
+            331, // Bullet Seed
+            4, // Comet Punch
+            3, // DoubleSlap
+            31, // Fury Attack
+            154, // Fury Swipes
+            333, // Icicle Spear
+            42, // Pin Missile
+            350, // Rock Blast
+            131, // Spike Cannon
+            541 // Tail Slap
+            );
+    
+    public static final List<Integer> doubleHitMoves = Arrays.asList(
+            155, // Bonemerang
+            458, // Double Hit
+            24, // Double Kick
+            530, // Dual Chop
+            544, // Gear Grind
+            41 // Twineedle
+            );
+    
+    public static final int TRIPLE_KICK_INDEX = 167;
+    /* @formatter:on */
+
     public static Set<Pokemon> getBasicOrNoCopyPokemon(RomHandler baseRom) {
         List<Pokemon> allPokes = baseRom.getPokemon();
         Set<Pokemon> dontCopyPokes = new TreeSet<Pokemon>();
@@ -132,14 +161,14 @@ public class RomFunctions {
     public static int[] getMovesAtLevel(Pokemon pkmn, Map<Pokemon, List<MoveLearnt>> movesets, int level) {
         return getMovesAtLevel(pkmn, movesets, level, 0);
     }
-    
+
     public static int[] getMovesAtLevel(Pokemon pkmn, Map<Pokemon, List<MoveLearnt>> movesets, int level, int emptyValue) {
         int[] curMoves = new int[4];
-        
-        if(emptyValue != 0) {
+
+        if (emptyValue != 0) {
             Arrays.fill(curMoves, emptyValue);
         }
-        
+
         int moveCount = 0;
         List<MoveLearnt> movepool = movesets.get(pkmn);
         for (MoveLearnt ml : movepool) {

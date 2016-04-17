@@ -34,14 +34,11 @@ public class Move {
     public Type type;
     public int effectIndex;
     public MoveCategory category;
+    public double hitCount = 1; // not saved, only used in randomized move powers.
 
     public String toString() {
         return "#" + number + " " + name + " - Power: " + power + ", Base PP: " + pp + ", Type: " + type + ", Hit%: "
                 + (hitratio) + ", Effect: " + effectIndex;
-    }
-
-    public void setAccuracy(double percent) {
-        hitratio = percent;
     }
 
 }
