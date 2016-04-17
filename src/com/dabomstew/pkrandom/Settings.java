@@ -21,7 +21,7 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 public class Settings {
 
-    public static final int VERSION = 170;
+    public static final int VERSION = 171;
 
     public static final int LENGTH_OF_SETTINGS_DATA = 31;
 
@@ -41,11 +41,12 @@ public class Settings {
     private boolean limitPokemon;
 
     public enum BaseStatisticsMod {
-        UNCHANGED, SHUFFLE, RANDOM_FOLLOW_EVOLUTIONS, COMPLETELY_RANDOM,
+        UNCHANGED, SHUFFLE, RANDOM,
     }
 
     private BaseStatisticsMod baseStatisticsMod = BaseStatisticsMod.UNCHANGED;
     private boolean standardizeEXPCurves;
+    private boolean baseStatsFollowEvolutions;
 
     public enum AbilitiesMod {
         UNCHANGED, RANDOMIZE
@@ -53,6 +54,7 @@ public class Settings {
 
     private AbilitiesMod abilitiesMod = AbilitiesMod.UNCHANGED;
     private boolean allowWonderGuard = true;
+    private boolean abilitiesFollowEvolutions;
 
     public enum StartersMod {
         UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS
@@ -214,13 +216,11 @@ public class Settings {
 
         // 0: general options #1 + trainer/class names
         out.write(makeByteSelected(changeImpossibleEvolutions, updateMoves, updateMovesLegacy, randomizeTrainerNames,
-                randomizeTrainerClassNames));
+                randomizeTrainerClassNames, makeEvolutionsEasier));
 
         // 1: pokemon base stats & abilities
-        out.write(makeByteSelected(baseStatisticsMod == BaseStatisticsMod.RANDOM_FOLLOW_EVOLUTIONS,
-                baseStatisticsMod == BaseStatisticsMod.COMPLETELY_RANDOM,
+        out.write(makeByteSelected(baseStatsFollowEvolutions, baseStatisticsMod == BaseStatisticsMod.RANDOM,
                 baseStatisticsMod == BaseStatisticsMod.SHUFFLE, baseStatisticsMod == BaseStatisticsMod.UNCHANGED,
-                abilitiesMod == AbilitiesMod.UNCHANGED, abilitiesMod == AbilitiesMod.RANDOMIZE, allowWonderGuard,
                 standardizeEXPCurves));
 
         // 2: pokemon types & more general options
@@ -228,9 +228,10 @@ public class Settings {
                 typesMod == TypesMod.COMPLETELY_RANDOM, typesMod == TypesMod.UNCHANGED, raceMode, blockBrokenMoves,
                 limitPokemon));
 
-        // v162: 3: new general options byte added (the rest were full)
+        // 3: v171: changed to the abilities byte
 
-        out.write(makeByteSelected(makeEvolutionsEasier));
+        out.write(makeByteSelected(abilitiesMod == AbilitiesMod.UNCHANGED, abilitiesMod == AbilitiesMod.RANDOMIZE,
+                allowWonderGuard, abilitiesFollowEvolutions));
 
         // 4: starter pokemon stuff
         out.write(makeByteSelected(startersMod == StartersMod.CUSTOM, startersMod == StartersMod.COMPLETELY_RANDOM,
@@ -366,17 +367,14 @@ public class Settings {
         settings.setUpdateMovesLegacy(restoreState(data[0], 2));
         settings.setRandomizeTrainerNames(restoreState(data[0], 3));
         settings.setRandomizeTrainerClassNames(restoreState(data[0], 4));
+        settings.setMakeEvolutionsEasier(restoreState(data[0], 5));
 
         settings.setBaseStatisticsMod(restoreEnum(BaseStatisticsMod.class, data[1], 3, // UNCHANGED
                 2, // SHUFFLE
-                0, // RANDOM_FOLLOW_EVOLUTIONS
-                1 // COMPLETELY_RANDOM
+                1 // RANDOM
         ));
-        settings.setAbilitiesMod(restoreEnum(AbilitiesMod.class, data[1], 4, // UNCHANGED
-                5 // RANDOMIZE
-        ));
-        settings.setAllowWonderGuard(restoreState(data[1], 6));
-        settings.setStandardizeEXPCurves(restoreState(data[1], 7));
+        settings.setStandardizeEXPCurves(restoreState(data[1], 4));
+        settings.setBaseStatsFollowEvolutions(restoreState(data[1], 0));
 
         settings.setTypesMod(restoreEnum(TypesMod.class, data[2], 2, // UNCHANGED
                 0, // RANDOM_FOLLOW_EVOLUTIONS
@@ -385,8 +383,14 @@ public class Settings {
         settings.setRaceMode(restoreState(data[2], 3));
         settings.setBlockBrokenMoves(restoreState(data[2], 4));
         settings.setLimitPokemon(restoreState(data[2], 5));
+        
+        settings.setAbilitiesMod(restoreEnum(AbilitiesMod.class, data[3], 0, // UNCHANGED
+                1 // RANDOMIZE
+        ));
+        settings.setAllowWonderGuard(restoreState(data[3], 2));
+        settings.setAbilitiesFollowEvolutions(restoreState(data[3], 3));
 
-        settings.setMakeEvolutionsEasier(restoreState(data[3], 0));
+        
 
         settings.setStartersMod(restoreEnum(StartersMod.class, data[4], 2, // UNCHANGED
                 0, // CUSTOM
@@ -772,6 +776,15 @@ public class Settings {
         return setBaseStatisticsMod(getEnum(BaseStatisticsMod.class, bools));
     }
 
+    public boolean isBaseStatsFollowEvolutions() {
+        return baseStatsFollowEvolutions;
+    }
+
+    public Settings setBaseStatsFollowEvolutions(boolean baseStatsFollowEvolutions) {
+        this.baseStatsFollowEvolutions = baseStatsFollowEvolutions;
+        return this;
+    }
+
     public boolean isStandardizeEXPCurves() {
         return standardizeEXPCurves;
     }
@@ -800,6 +813,15 @@ public class Settings {
 
     public Settings setAllowWonderGuard(boolean allowWonderGuard) {
         this.allowWonderGuard = allowWonderGuard;
+        return this;
+    }
+
+    public boolean isAbilitiesFollowEvolutions() {
+        return abilitiesFollowEvolutions;
+    }
+
+    public Settings setAbilitiesFollowEvolutions(boolean abilitiesFollowEvolutions) {
+        this.abilitiesFollowEvolutions = abilitiesFollowEvolutions;
         return this;
     }
 

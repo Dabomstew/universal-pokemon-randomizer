@@ -172,6 +172,29 @@ public class SettingsUpdater {
             dataBlock[2] = getRemappedByte(dataBlock[2], new int[] { 0, 1, 2, 4, 6, 7 });
         }
 
+        if (oldVersion < 171) {
+            // 170 to 171: base stats follow evolutions is now a checkbox
+            // so if it's set in the settings file (byte 1 bit 0), turn on the
+            // "random" radiobox (byte 1 bit 1)
+            if ((dataBlock[1] & 1) != 0) {
+                dataBlock[1] |= (1 << 1);
+            }
+            
+            // shift around stuff to give abilities their own byte.
+            
+            // move byte 3 bit 0 to byte 0 bit 5
+            // (byte 0 got cleared out by things becoming Tweaks in 170)
+            if((dataBlock[3] & 1) != 0) {
+                dataBlock[0] |= (1 << 5);
+            }
+            
+            // move bits 4-6 from byte 1 to byte 3
+            dataBlock[3] = (byte) ((dataBlock[1] & 0x70) >> 4);
+            
+            // clean up byte 1 (keep bits 0-3, move bit 7 to 4, clear 5-7)
+            dataBlock[1] = (byte) ((dataBlock[1] & 0x0F) | ((dataBlock[1] & 0x80) >> 3));
+        }
+
         // fix checksum
         CRC32 checksum = new CRC32();
         checksum.update(dataBlock, 0, actualDataLength - 16);

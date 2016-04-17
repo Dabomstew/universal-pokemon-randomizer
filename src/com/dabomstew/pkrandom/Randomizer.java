@@ -111,14 +111,10 @@ public class Randomizer {
         // Base stats changing
         switch (settings.getBaseStatisticsMod()) {
         case SHUFFLE:
-            // TODO allow shuffle+follow evolutions
-            romHandler.shufflePokemonStats(false);
+            romHandler.shufflePokemonStats(settings.isBaseStatsFollowEvolutions());
             break;
-        case RANDOM_FOLLOW_EVOLUTIONS:
-            romHandler.randomizePokemonStats(true);
-            break;
-        case COMPLETELY_RANDOM:
-            romHandler.randomizePokemonStats(false);
+        case RANDOM:
+            romHandler.randomizePokemonStats(settings.isBaseStatsFollowEvolutions());
             break;
         default:
             break;
@@ -130,8 +126,7 @@ public class Randomizer {
 
         // Abilities? (new 1.0.2)
         if (romHandler.abilitiesPerPokemon() > 0 && settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE) {
-            // TODO allow follow evolutions for abilities
-            romHandler.randomizeAbilities(false, settings.isAllowWonderGuard());
+            romHandler.randomizeAbilities(settings.isAbilitiesFollowEvolutions(), settings.isAllowWonderGuard());
         }
 
         // Pokemon Types
