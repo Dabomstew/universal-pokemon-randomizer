@@ -48,6 +48,7 @@ import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
@@ -269,7 +270,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private boolean loadedWildMapNames;
     private Map<Integer, String> wildMapNames;
 
-    private NARCContents pokeNarc, moveNarc, stringsNarc, storyTextNarc, scriptNarc;
+    private NARCArchive pokeNarc, moveNarc, stringsNarc, storyTextNarc, scriptNarc;
 
     @Override
     protected boolean detectNDSRom(String ndsCode) {
@@ -357,15 +358,14 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 moves[i].pp = moveData[5] & 0xFF;
                 moves[i].type = Gen5Constants.typeTable[moveData[0] & 0xFF];
                 moves[i].category = Gen5Constants.moveCategoryIndices[moveData[2] & 0xFF];
-                
-                if(RomFunctions.normalMultihitMoves.contains(i)) {
-                    moves[i].hitCount = 19/6.0;
-                }
-                else if(RomFunctions.doubleHitMoves.contains(i)) {
+
+                if (RomFunctions.normalMultihitMoves.contains(i)) {
+                    moves[i].hitCount = 19 / 6.0;
+                } else if (RomFunctions.doubleHitMoves.contains(i)) {
                     moves[i].hitCount = 2;
-                }
-                else if(i == RomFunctions.TRIPLE_KICK_INDEX) {
-                    moves[i].hitCount = 2.71; // this assumes the first hit lands
+                } else if (i == RomFunctions.TRIPLE_KICK_INDEX) {
+                    moves[i].hitCount = 2.71; // this assumes the first hit
+                                              // lands
                 }
             }
         } catch (IOException e) {
@@ -528,7 +528,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public List<Pokemon> getStarters() {
-        NARCContents scriptNARC = scriptNarc;
+        NARCArchive scriptNARC = scriptNarc;
         List<Pokemon> starters = new ArrayList<Pokemon>();
         for (int i = 0; i < 3; i++) {
             OffsetWithinEntry[] thisStarter = romEntry.offsetArrayEntries.get("StarterOffsets" + (i + 1));
@@ -545,7 +545,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         // Fix up starter offsets
         try {
-            NARCContents scriptNARC = scriptNarc;
+            NARCArchive scriptNARC = scriptNarc;
             for (int i = 0; i < 3; i++) {
                 int starter = newStarters.get(i).number;
                 OffsetWithinEntry[] thisStarter = romEntry.offsetArrayEntries.get("StarterOffsets" + (i + 1));
@@ -591,8 +591,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
 
             // Starter sprites
-            NARCContents starterNARC = this.readNARC(romEntry.getString("StarterGraphics"));
-            NARCContents pokespritesNARC = this.readNARC(romEntry.getString("PokemonGraphics"));
+            NARCArchive starterNARC = this.readNARC(romEntry.getString("StarterGraphics"));
+            NARCArchive pokespritesNARC = this.readNARC(romEntry.getString("PokemonGraphics"));
             replaceStarterFiles(starterNARC, pokespritesNARC, 0, newStarters.get(0).number);
             replaceStarterFiles(starterNARC, pokespritesNARC, 1, newStarters.get(1).number);
             replaceStarterFiles(starterNARC, pokespritesNARC, 2, newStarters.get(2).number);
@@ -653,7 +653,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         // do nothing
     }
 
-    private void replaceStarterFiles(NARCContents starterNARC, NARCContents pokespritesNARC, int starterIndex,
+    private void replaceStarterFiles(NARCArchive starterNARC, NARCArchive pokespritesNARC, int starterIndex,
             int pokeNumber) throws IOException, InterruptedException {
         starterNARC.files.set(starterIndex * 2, pokespritesNARC.files.get(pokeNumber * 20 + 18));
         // Get the picture...
@@ -674,7 +674,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             loadWildMapNames();
         }
         try {
-            NARCContents encounterNARC = readNARC(romEntry.getString("WildPokemon"));
+            NARCArchive encounterNARC = readNARC(romEntry.getString("WildPokemon"));
             List<EncounterSet> encounters = new ArrayList<EncounterSet>();
             int idx = -1;
             for (byte[] entry : encounterNARC.files) {
@@ -734,7 +734,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encountersList) {
         try {
-            NARCContents encounterNARC = readNARC(romEntry.getString("WildPokemon"));
+            NARCArchive encounterNARC = readNARC(romEntry.getString("WildPokemon"));
             Iterator<EncounterSet> encounters = encountersList.iterator();
             for (byte[] entry : encounterNARC.files) {
                 writeEncounterEntry(encounters, entry, 0);
@@ -760,7 +760,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 // disabled: habitat list changes cause a crash if too many
                 // entries for now.
 
-                // NARCContents habitatNARC = readNARC(romEntry
+                // NARCArchive habitatNARC = readNARC(romEntry
                 // .getString("HabitatList"));
                 // for (int i = 0; i < habitatNARC.files.size(); i++) {
                 // byte[] oldEntry = habitatNARC.files.get(i);
@@ -800,7 +800,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 // habitatNARC);
 
                 // Area Data
-                NARCContents areaNARC = this.readNARC(romEntry.getString("PokemonAreaData"));
+                NARCArchive areaNARC = this.readNARC(romEntry.getString("PokemonAreaData"));
                 List<byte[]> newFiles = new ArrayList<byte[]>();
                 for (int i = 0; i < Gen5Constants.pokemonCount; i++) {
                     byte[] nf = new byte[Gen5Constants.bw2AreaDataEntryLength];
@@ -984,8 +984,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public List<Trainer> getTrainers() {
         List<Trainer> allTrainers = new ArrayList<Trainer>();
         try {
-            NARCContents trainers = this.readNARC(romEntry.getString("TrainerData"));
-            NARCContents trpokes = this.readNARC(romEntry.getString("TrainerPokemon"));
+            NARCArchive trainers = this.readNARC(romEntry.getString("TrainerData"));
+            NARCArchive trpokes = this.readNARC(romEntry.getString("TrainerPokemon"));
             int trainernum = trainers.files.size();
             List<String> tclasses = this.getTrainerClassNames();
             List<String> tnames = this.getTrainerNames();
@@ -1047,7 +1047,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 Gen5Constants.tagTrainersBW(allTrainers);
             } else {
                 if (!romEntry.getString("DriftveilPokemon").isEmpty()) {
-                    NARCContents driftveil = this.readNARC(romEntry.getString("DriftveilPokemon"));
+                    NARCArchive driftveil = this.readNARC(romEntry.getString("DriftveilPokemon"));
                     for (int trno = 0; trno < 2; trno++) {
                         Trainer tr = new Trainer();
                         tr.poketype = 3;
@@ -1080,8 +1080,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public void setTrainers(List<Trainer> trainerData) {
         Iterator<Trainer> allTrainers = trainerData.iterator();
         try {
-            NARCContents trainers = this.readNARC(romEntry.getString("TrainerData"));
-            NARCContents trpokes = new NARCContents();
+            NARCArchive trainers = this.readNARC(romEntry.getString("TrainerData"));
+            NARCArchive trpokes = new NARCArchive();
             // Get current movesets in case we need to reset them for certain
             // trainer mons.
             Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
@@ -1139,7 +1139,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             this.writeNARC(romEntry.getString("TrainerPokemon"), trpokes);
             // Deal with PWT
             if (romEntry.romType == Gen5Constants.Type_BW2 && !romEntry.getString("DriftveilPokemon").isEmpty()) {
-                NARCContents driftveil = this.readNARC(romEntry.getString("DriftveilPokemon"));
+                NARCArchive driftveil = this.readNARC(romEntry.getString("DriftveilPokemon"));
                 for (int trno = 0; trno < 2; trno++) {
                     Trainer tr = allTrainers.next();
                     Iterator<TrainerPokemon> tpks = tr.pokemon.iterator();
@@ -1174,7 +1174,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public Map<Pokemon, List<MoveLearnt>> getMovesLearnt() {
         Map<Pokemon, List<MoveLearnt>> movesets = new TreeMap<Pokemon, List<MoveLearnt>>();
         try {
-            NARCContents movesLearnt = this.readNARC(romEntry.getString("PokemonMovesets"));
+            NARCArchive movesLearnt = this.readNARC(romEntry.getString("PokemonMovesets"));
             for (int i = 1; i <= Gen5Constants.pokemonCount; i++) {
                 Pokemon pkmn = pokes[i];
                 byte[] movedata = movesLearnt.files.get(i);
@@ -1200,7 +1200,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     public void setMovesLearnt(Map<Pokemon, List<MoveLearnt>> movesets) {
         try {
-            NARCContents movesLearnt = readNARC(romEntry.getString("PokemonMovesets"));
+            NARCArchive movesLearnt = readNARC(romEntry.getString("PokemonMovesets"));
             for (int i = 1; i <= Gen5Constants.pokemonCount; i++) {
                 Pokemon pkmn = pokes[i];
                 List<MoveLearnt> learnt = movesets.get(pkmn);
@@ -1228,11 +1228,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         private int[] files;
         private int[] offsets;
 
-        public Pokemon getPokemon(Gen5RomHandler parent, NARCContents scriptNARC) {
+        public Pokemon getPokemon(Gen5RomHandler parent, NARCArchive scriptNARC) {
             return parent.pokes[parent.readWord(scriptNARC.files.get(files[0]), offsets[0])];
         }
 
-        public void setPokemon(Gen5RomHandler parent, NARCContents scriptNARC, Pokemon pkmn) {
+        public void setPokemon(Gen5RomHandler parent, NARCArchive scriptNARC, Pokemon pkmn) {
             int value = pkmn.number;
             for (int i = 0; i < offsets.length; i++) {
                 byte[] file = scriptNARC.files.get(files[i]);
@@ -1252,7 +1252,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         if (!romEntry.staticPokemonSupport) {
             return sp;
         }
-        NARCContents scriptNARC = scriptNarc;
+        NARCArchive scriptNARC = scriptNarc;
         for (StaticPokemon statP : romEntry.staticPokemon) {
             sp.add(statP.getPokemon(this, scriptNARC));
         }
@@ -1268,7 +1268,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             return false;
         }
         Iterator<Pokemon> statics = staticPokemon.iterator();
-        NARCContents scriptNARC = scriptNarc;
+        NARCArchive scriptNARC = scriptNarc;
         for (StaticPokemon statP : romEntry.staticPokemon) {
             statP.setPokemon(this, scriptNARC, statics.next());
         }
@@ -1310,7 +1310,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         int[] allowedUnovaPokemon = Gen5Constants.bw2HiddenHollowUnovaPokemon;
         int randomSize = Gen5Constants.nonUnovaPokemonCount + allowedUnovaPokemon.length;
         try {
-            NARCContents hhNARC = this.readNARC(romEntry.getString("HiddenHollows"));
+            NARCArchive hhNARC = this.readNARC(romEntry.getString("HiddenHollows"));
             for (byte[] hhEntry : hhNARC.files) {
                 for (int version = 0; version < 2; version++) {
                     for (int rarityslot = 0; rarityslot < 3; rarityslot++) {
@@ -1624,13 +1624,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     private List<String> getStrings(boolean isStoryText, int index) {
-        NARCContents baseNARC = isStoryText ? storyTextNarc : stringsNarc;
+        NARCArchive baseNARC = isStoryText ? storyTextNarc : stringsNarc;
         byte[] rawFile = baseNARC.files.get(index);
         return new ArrayList<String>(PPTxtHandler.readTexts(rawFile));
     }
 
     private void setStrings(boolean isStoryText, int index, List<String> strings) {
-        NARCContents baseNARC = isStoryText ? storyTextNarc : stringsNarc;
+        NARCArchive baseNARC = isStoryText ? storyTextNarc : stringsNarc;
         byte[] oldRawFile = baseNARC.files.get(index);
         byte[] newRawFile = PPTxtHandler.saveEntry(oldRawFile, strings);
         baseNARC.files.set(index, newRawFile);
@@ -1666,7 +1666,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         // Read NARC
         try {
-            NARCContents evoNARC = readNARC(romEntry.getString("PokemonEvolutions"));
+            NARCArchive evoNARC = readNARC(romEntry.getString("PokemonEvolutions"));
             for (int i = 1; i <= Gen5Constants.pokemonCount; i++) {
                 Pokemon pk = pokes[i];
                 byte[] evoEntry = evoNARC.files.get(i);
@@ -1697,7 +1697,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     private void writeEvolutions() {
         try {
-            NARCContents evoNARC = readNARC(romEntry.getString("PokemonEvolutions"));
+            NARCArchive evoNARC = readNARC(romEntry.getString("PokemonEvolutions"));
             for (int i = 1; i <= Gen5Constants.pokemonCount; i++) {
                 byte[] evoEntry = evoNARC.files.get(i);
                 Pokemon pk = pokes[i];
@@ -2154,7 +2154,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public List<IngameTrade> getIngameTrades() {
         List<IngameTrade> trades = new ArrayList<IngameTrade>();
         try {
-            NARCContents tradeNARC = this.readNARC(romEntry.getString("InGameTrades"));
+            NARCArchive tradeNARC = this.readNARC(romEntry.getString("InGameTrades"));
             List<String> tradeStrings = getStrings(false, romEntry.getInt("IngameTradesTextOffset"));
             int[] unused = romEntry.arrayEntries.get("TradesUnused");
             int unusedOffset = 0;
@@ -2192,7 +2192,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         // info
         int tradeOffset = 0;
         try {
-            NARCContents tradeNARC = this.readNARC(romEntry.getString("InGameTrades"));
+            NARCArchive tradeNARC = this.readNARC(romEntry.getString("InGameTrades"));
             List<String> tradeStrings = getStrings(false, romEntry.getInt("IngameTradesTextOffset"));
             int tradeCount = tradeNARC.files.size();
             int[] unused = romEntry.arrayEntries.get("TradesUnused");
@@ -2254,7 +2254,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
 
         try {
-            NARCContents babyNARC = readNARC(romEntry.getString("BabyPokemon"));
+            NARCArchive babyNARC = readNARC(romEntry.getString("BabyPokemon"));
             // baby pokemon
             for (int i = 1; i <= Gen5Constants.pokemonCount; i++) {
                 Pokemon baby = pokes[i];
@@ -2298,7 +2298,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public BufferedImage getMascotImage() {
         try {
             Pokemon pk = randomPokemon();
-            NARCContents pokespritesNARC = this.readNARC(romEntry.getString("PokemonGraphics"));
+            NARCArchive pokespritesNARC = this.readNARC(romEntry.getString("PokemonGraphics"));
 
             // First prepare the palette, it's the easy bit
             byte[] rawPalette = pokespritesNARC.files.get(pk.number * 20 + 18);

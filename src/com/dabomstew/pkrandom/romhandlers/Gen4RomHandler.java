@@ -48,6 +48,7 @@ import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen4Constants;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
@@ -249,10 +250,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     private Pokemon[] pokes;
     private List<Pokemon> pokemonList;
     private Move[] moves;
-    private NARCContents pokeNarc, moveNarc;
-    private NARCContents msgNarc;
-    private NARCContents scriptNarc;
-    private NARCContents eventNarc;
+    private NARCArchive pokeNarc, moveNarc;
+    private NARCArchive msgNarc;
+    private NARCArchive scriptNarc;
+    private NARCArchive eventNarc;
     private byte[] arm9;
     private List<String> abilityNames;
     private List<String> itemNames;
@@ -327,15 +328,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 moves[i].pp = moveData[6] & 0xFF;
                 moves[i].type = Gen4Constants.typeTable[moveData[4] & 0xFF];
                 moves[i].category = Gen4Constants.moveCategoryIndices[moveData[2] & 0xFF];
-                
-                if(RomFunctions.normalMultihitMoves.contains(i)) {
+
+                if (RomFunctions.normalMultihitMoves.contains(i)) {
                     moves[i].hitCount = 3;
-                }
-                else if(RomFunctions.doubleHitMoves.contains(i)) {
+                } else if (RomFunctions.doubleHitMoves.contains(i)) {
                     moves[i].hitCount = 2;
-                }
-                else if(i == RomFunctions.TRIPLE_KICK_INDEX) {
-                    moves[i].hitCount = 2.71; // this assumes the first hit lands
+                } else if (i == RomFunctions.TRIPLE_KICK_INDEX) {
+                    moves[i].hitCount = 2.71; // this assumes the first hit
+                                              // lands
                 }
             }
         } catch (IOException e) {
@@ -581,7 +581,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 // it means: StoreStarter2 0x800C; If 0x800C 152; CheckLR B_!=
                 // <offset to follow>
                 byte[] magic = Gen4Constants.hgssRivalScriptMagic;
-                NARCContents scriptNARC = scriptNarc;
+                NARCArchive scriptNARC = scriptNarc;
                 for (int i = 0; i < filesWithRivalScript.length; i++) {
                     int fileCheck = filesWithRivalScript[i];
                     byte[] file = scriptNARC.files.get(fileCheck);
@@ -639,7 +639,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 int[] filesWithRivalScript = (romEntry.romType == Gen4Constants.Type_Plat) ? Gen4Constants.ptFilesWithRivalScript
                         : Gen4Constants.dpFilesWithRivalScript;
                 byte[] magic = Gen4Constants.dpptRivalScriptMagic;
-                NARCContents scriptNARC = scriptNarc;
+                NARCArchive scriptNARC = scriptNarc;
                 for (int i = 0; i < filesWithRivalScript.length; i++) {
                     int fileCheck = filesWithRivalScript[i];
                     byte[] file = scriptNARC.files.get(fileCheck);
@@ -783,7 +783,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         // Determine file to use
         String encountersFile = romEntry.getString("WildPokemon");
 
-        NARCContents encounterData = readNARC(encountersFile);
+        NARCArchive encounterData = readNARC(encountersFile);
         List<EncounterSet> encounters = new ArrayList<EncounterSet>();
         // Credit for
         // https://github.com/magical/pokemon-encounters/blob/master/nds/encounters-gen4-sinnoh.py
@@ -896,7 +896,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     private List<EncounterSet> getEncountersHGSS(boolean useTimeOfDay) throws IOException {
         String encountersFile = romEntry.getString("WildPokemon");
-        NARCContents encounterData = readNARC(encountersFile);
+        NARCArchive encounterData = readNARC(encountersFile);
         List<EncounterSet> encounters = new ArrayList<EncounterSet>();
         // Credit for
         // https://github.com/magical/pokemon-encounters/blob/master/nds/encounters-gen4-johto.py
@@ -1034,7 +1034,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     private void setEncountersDPPt(boolean useTimeOfDay, List<EncounterSet> encounterList) throws IOException {
         // Determine file to use
         String encountersFile = romEntry.getString("WildPokemon");
-        NARCContents encounterData = readNARC(encountersFile);
+        NARCArchive encounterData = readNARC(encountersFile);
         Iterator<EncounterSet> encounters = encounterList.iterator();
         // Credit for
         // https://github.com/magical/pokemon-encounters/blob/master/nds/encounters-gen4-sinnoh.py
@@ -1127,7 +1127,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     private void setEncountersHGSS(boolean useTimeOfDay, List<EncounterSet> encounterList) throws IOException {
         String encountersFile = romEntry.getString("WildPokemon");
-        NARCContents encounterData = readNARC(encountersFile);
+        NARCArchive encounterData = readNARC(encountersFile);
         Iterator<EncounterSet> encounters = encounterList.iterator();
         // Credit for
         // https://github.com/magical/pokemon-encounters/blob/master/nds/encounters-gen4-johto.py
@@ -1266,8 +1266,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     public List<Trainer> getTrainers() {
         List<Trainer> allTrainers = new ArrayList<Trainer>();
         try {
-            NARCContents trainers = this.readNARC(romEntry.getString("TrainerData"));
-            NARCContents trpokes = this.readNARC(romEntry.getString("TrainerPokemon"));
+            NARCArchive trainers = this.readNARC(romEntry.getString("TrainerData"));
+            NARCArchive trpokes = this.readNARC(romEntry.getString("TrainerPokemon"));
             List<String> tclasses = this.getTrainerClassNames();
             List<String> tnames = this.getTrainerNames();
             int trainernum = trainers.files.size();
@@ -1334,8 +1334,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     public void setTrainers(List<Trainer> trainerData) {
         Iterator<Trainer> allTrainers = trainerData.iterator();
         try {
-            NARCContents trainers = this.readNARC(romEntry.getString("TrainerData"));
-            NARCContents trpokes = new NARCContents();
+            NARCArchive trainers = this.readNARC(romEntry.getString("TrainerData"));
+            NARCArchive trpokes = new NARCArchive();
 
             // Get current movesets in case we need to reset them for certain
             // trainer mons.
@@ -1408,7 +1408,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     public Map<Pokemon, List<MoveLearnt>> getMovesLearnt() {
         Map<Pokemon, List<MoveLearnt>> movesets = new TreeMap<Pokemon, List<MoveLearnt>>();
         try {
-            NARCContents movesLearnt = this.readNARC(romEntry.getString("PokemonMovesets"));
+            NARCArchive movesLearnt = this.readNARC(romEntry.getString("PokemonMovesets"));
             for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
                 Pokemon pkmn = pokes[i];
                 byte[] rom = movesLearnt.files.get(i);
@@ -1438,7 +1438,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     public void setMovesLearnt(Map<Pokemon, List<MoveLearnt>> movesets) {
         int[] extraLearnSets = new int[] { 7, 13, 13 };
         // Build up a new NARC
-        NARCContents movesLearnt = new NARCContents();
+        NARCArchive movesLearnt = new NARCArchive();
         // The blank moveset
         byte[] blankSet = new byte[] { (byte) 0xFF, (byte) 0xFF, 0, 0 };
         movesLearnt.files.add(blankSet);
@@ -1480,11 +1480,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         private int[] files;
         private int[] offsets;
 
-        public Pokemon getPokemon(Gen4RomHandler parent, NARCContents scriptNARC) {
+        public Pokemon getPokemon(Gen4RomHandler parent, NARCArchive scriptNARC) {
             return parent.pokes[parent.readWord(scriptNARC.files.get(files[0]), offsets[0])];
         }
 
-        public void setPokemon(Gen4RomHandler parent, NARCContents scriptNARC, Pokemon pkmn) {
+        public void setPokemon(Gen4RomHandler parent, NARCArchive scriptNARC, Pokemon pkmn) {
             int value = pkmn.number;
             for (int i = 0; i < offsets.length; i++) {
                 byte[] file = scriptNARC.files.get(files[i]);
@@ -1500,12 +1500,12 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             return sp;
         }
         try {
-            NARCContents scriptNARC = scriptNarc;
+            NARCArchive scriptNARC = scriptNarc;
             for (StaticPokemon statP : romEntry.staticPokemon) {
                 sp.add(statP.getPokemon(this, scriptNARC));
             }
             if (romEntry.arrayEntries.containsKey("StaticPokemonTrades")) {
-                NARCContents tradeNARC = this.readNARC(romEntry.getString("InGameTrades"));
+                NARCArchive tradeNARC = this.readNARC(romEntry.getString("InGameTrades"));
                 int[] trades = romEntry.arrayEntries.get("StaticPokemonTrades");
                 for (int tradeNum : trades) {
                     sp.add(pokes[readLong(tradeNARC.files.get(tradeNum), 0)]);
@@ -1546,12 +1546,12 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         }
         try {
             Iterator<Pokemon> statics = staticPokemon.iterator();
-            NARCContents scriptNARC = scriptNarc;
+            NARCArchive scriptNARC = scriptNarc;
             for (StaticPokemon statP : romEntry.staticPokemon) {
                 statP.setPokemon(this, scriptNARC, statics.next());
             }
             if (romEntry.arrayEntries.containsKey("StaticPokemonTrades")) {
-                NARCContents tradeNARC = this.readNARC(romEntry.getString("InGameTrades"));
+                NARCArchive tradeNARC = this.readNARC(romEntry.getString("InGameTrades"));
                 int[] trades = romEntry.arrayEntries.get("StaticPokemonTrades");
                 for (int tradeNum : trades) {
                     Pokemon thisTrade = statics.next();
@@ -1934,7 +1934,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
         // Read NARC
         try {
-            NARCContents evoNARC = readNARC(romEntry.getString("PokemonEvolutions"));
+            NARCArchive evoNARC = readNARC(romEntry.getString("PokemonEvolutions"));
             for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
                 Pokemon pk = pokes[i];
                 byte[] evoEntry = evoNARC.files.get(i);
@@ -1965,7 +1965,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     private void writeEvolutions() {
         try {
-            NARCContents evoNARC = readNARC(romEntry.getString("PokemonEvolutions"));
+            NARCArchive evoNARC = readNARC(romEntry.getString("PokemonEvolutions"));
             for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
                 byte[] evoEntry = evoNARC.files.get(i);
                 int evosWritten = 0;
@@ -2364,7 +2364,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     public List<IngameTrade> getIngameTrades() {
         List<IngameTrade> trades = new ArrayList<IngameTrade>();
         try {
-            NARCContents tradeNARC = this.readNARC(romEntry.getString("InGameTrades"));
+            NARCArchive tradeNARC = this.readNARC(romEntry.getString("InGameTrades"));
             int[] spTrades = new int[0];
             if (romEntry.arrayEntries.containsKey("StaticPokemonTrades")) {
                 spTrades = romEntry.arrayEntries.get("StaticPokemonTrades");
@@ -2407,7 +2407,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         int tradeOffset = 0;
         List<IngameTrade> oldTrades = this.getIngameTrades();
         try {
-            NARCContents tradeNARC = this.readNARC(romEntry.getString("InGameTrades"));
+            NARCArchive tradeNARC = this.readNARC(romEntry.getString("InGameTrades"));
             int[] spTrades = new int[0];
             if (romEntry.arrayEntries.containsKey("StaticPokemonTrades")) {
                 spTrades = romEntry.arrayEntries.get("StaticPokemonTrades");
@@ -2637,7 +2637,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     public BufferedImage getMascotImage() {
         try {
             Pokemon pk = randomPokemon();
-            NARCContents pokespritesNARC = this.readNARC(romEntry.getString("PokemonGraphics"));
+            NARCArchive pokespritesNARC = this.readNARC(romEntry.getString("PokemonGraphics"));
             int spriteIndex = pk.number * 6 + 2 + random.nextInt(2);
             int palIndex = pk.number * 6 + 4;
             if (random.nextInt(10) == 0) {

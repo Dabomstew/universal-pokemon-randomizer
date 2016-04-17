@@ -26,12 +26,11 @@ package com.dabomstew.pkrandom.romhandlers;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Map;
 import java.util.Random;
-import java.util.TreeMap;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.newnds.NDSRom;
 import com.dabomstew.pkrandom.pokemon.Type;
 
@@ -107,163 +106,12 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         return true;
     }
 
-    public NARCContents readNARC(String subpath) throws IOException {
-        Map<String, byte[]> frames = readNitroFrames(subpath);
-        if (!frames.containsKey("FATB") || !frames.containsKey("FNTB") || !frames.containsKey("FIMG")) {
-            System.err.println("Not a valid narc file");
-            return null;
-        }
-        // File contents
-        NARCContents narc = new NARCContents();
-        byte[] fatbframe = frames.get("FATB");
-        byte[] fimgframe = frames.get("FIMG");
-        int fileCount = readLong(fatbframe, 0);
-        for (int i = 0; i < fileCount; i++) {
-            int startOffset = readLong(fatbframe, 4 + i * 8);
-            int endOffset = readLong(fatbframe, 8 + i * 8);
-            int length = (endOffset - startOffset);
-            byte[] thisFile = new byte[length];
-            System.arraycopy(fimgframe, startOffset, thisFile, 0, length);
-            narc.files.add(thisFile);
-        }
-        // Filenames?
-        byte[] fntbframe = frames.get("FNTB");
-        int unk1 = readLong(fntbframe, 0);
-        if (unk1 == 8) {
-            // Filenames exist
-            narc.hasFilenames = true;
-            int offset = 8;
-            for (int i = 0; i < fileCount; i++) {
-                int fnLength = (fntbframe[offset] & 0xFF);
-                offset++;
-                byte[] filenameBA = new byte[fnLength];
-                System.arraycopy(fntbframe, offset, filenameBA, 0, fnLength);
-                String filename = new String(filenameBA, "US-ASCII");
-                narc.filenames.add(filename);
-            }
-        } else {
-            narc.hasFilenames = false;
-            for (int i = 0; i < fileCount; i++) {
-                narc.filenames.add(null);
-            }
-        }
-        return narc;
+    public NARCArchive readNARC(String subpath) throws IOException {
+        return new NARCArchive(readFile(subpath));
     }
 
-    public void writeNARC(String subpath, NARCContents narc) throws IOException {
-        // Get bytes required for FIMG frame
-        int bytesRequired = 0;
-        for (byte[] file : narc.files) {
-            bytesRequired += Math.ceil(file.length / 4.0) * 4;
-        }
-        // FIMG frame & FATB frame build
-
-        // 4 for numentries, 8*size for entries, 8 for nitro header
-        byte[] fatbFrame = new byte[4 + narc.files.size() * 8 + 8];
-        // bytesRequired + 8 for nitro header
-        byte[] fimgFrame = new byte[bytesRequired + 8];
-
-        // Nitro headers
-        fatbFrame[0] = 'B';
-        fatbFrame[1] = 'T';
-        fatbFrame[2] = 'A';
-        fatbFrame[3] = 'F';
-        writeLong(fatbFrame, 4, fatbFrame.length);
-
-        fimgFrame[0] = 'G';
-        fimgFrame[1] = 'M';
-        fimgFrame[2] = 'I';
-        fimgFrame[3] = 'F';
-        writeLong(fimgFrame, 4, fimgFrame.length);
-        int offset = 0;
-
-        writeLong(fatbFrame, 8, narc.files.size());
-        for (int i = 0; i < narc.files.size(); i++) {
-            byte[] file = narc.files.get(i);
-            int bytesRequiredForFile = (int) (Math.ceil(file.length / 4.0) * 4);
-            System.arraycopy(file, 0, fimgFrame, offset + 8, file.length);
-            for (int filler = file.length; filler < bytesRequiredForFile; filler++) {
-                fimgFrame[offset + 8 + filler] = (byte) 0xFF;
-            }
-            writeLong(fatbFrame, 12 + i * 8, offset);
-            writeLong(fatbFrame, 16 + i * 8, offset + file.length);
-            offset += bytesRequiredForFile;
-        }
-
-        // FNTB Frame
-        int bytesForFNTBFrame = 16;
-        if (narc.hasFilenames) {
-            for (String filename : narc.filenames) {
-                bytesForFNTBFrame += filename.getBytes("US-ASCII").length + 1;
-            }
-        }
-        byte[] fntbFrame = new byte[bytesForFNTBFrame];
-
-        fntbFrame[0] = 'B';
-        fntbFrame[1] = 'T';
-        fntbFrame[2] = 'N';
-        fntbFrame[3] = 'F';
-        writeLong(fntbFrame, 4, fntbFrame.length);
-
-        if (narc.hasFilenames) {
-            writeLong(fntbFrame, 8, 8);
-            writeLong(fntbFrame, 12, 0x10000);
-            int fntbOffset = 16;
-            for (String filename : narc.filenames) {
-                byte[] fntbfilename = filename.getBytes("US-ASCII");
-                fntbFrame[fntbOffset] = (byte) fntbfilename.length;
-                System.arraycopy(fntbfilename, 0, fntbFrame, fntbOffset + 1, fntbfilename.length);
-                fntbOffset += 1 + fntbfilename.length;
-            }
-        } else {
-            writeLong(fntbFrame, 8, 4);
-            writeLong(fntbFrame, 12, 0x10000);
-        }
-
-        // Now for the actual Nitro file
-        int nitrolength = 16 + fatbFrame.length + fntbFrame.length + fimgFrame.length;
-        byte[] nitroFile = new byte[nitrolength];
-        nitroFile[0] = 'N';
-        nitroFile[1] = 'A';
-        nitroFile[2] = 'R';
-        nitroFile[3] = 'C';
-        writeWord(nitroFile, 4, 0xFFFE);
-        writeWord(nitroFile, 6, 0x0100);
-        writeLong(nitroFile, 8, nitrolength);
-        writeWord(nitroFile, 12, 0x10);
-        writeWord(nitroFile, 14, 3);
-        System.arraycopy(fatbFrame, 0, nitroFile, 16, fatbFrame.length);
-        System.arraycopy(fntbFrame, 0, nitroFile, 16 + fatbFrame.length, fntbFrame.length);
-        System.arraycopy(fimgFrame, 0, nitroFile, 16 + fatbFrame.length + fntbFrame.length, fimgFrame.length);
-        this.writeFile(subpath, nitroFile);
-    }
-
-    private Map<String, byte[]> readNitroFrames(String filename) throws IOException {
-        byte[] wholeFile = this.readFile(filename);
-
-        // Read the number of frames
-        int frameCount = readWord(wholeFile, 0x0E);
-
-        // each frame
-        int offset = 0x10;
-        Map<String, byte[]> frames = new TreeMap<String, byte[]>();
-        for (int i = 0; i < frameCount; i++) {
-            byte[] magic = new byte[] { wholeFile[offset + 3], wholeFile[offset + 2], wholeFile[offset + 1],
-                    wholeFile[offset] };
-            String magicS = new String(magic, "US-ASCII");
-
-            int frame_size = readLong(wholeFile, offset + 4);
-            // Patch for BB/VW and other DS hacks which don't update
-            // the size of their expanded NARCs correctly
-            if (i == frameCount - 1 && offset + frame_size < wholeFile.length) {
-                frame_size = wholeFile.length - offset;
-            }
-            byte[] frame = new byte[frame_size - 8];
-            System.arraycopy(wholeFile, offset + 8, frame, 0, frame_size - 8);
-            frames.put(magicS, frame);
-            offset += frame_size;
-        }
-        return frames;
+    public void writeNARC(String subpath, NARCArchive narc) throws IOException {
+        this.writeFile(subpath, narc.getBytes());
     }
 
     protected static String getROMCodeFromFile(String filename) {
