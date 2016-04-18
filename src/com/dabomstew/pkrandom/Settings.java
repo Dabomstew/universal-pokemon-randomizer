@@ -47,6 +47,7 @@ public class Settings {
     private BaseStatisticsMod baseStatisticsMod = BaseStatisticsMod.UNCHANGED;
     private boolean standardizeEXPCurves;
     private boolean baseStatsFollowEvolutions;
+    private boolean updateBaseStats;
 
     public enum AbilitiesMod {
         UNCHANGED, RANDOMIZE
@@ -231,7 +232,7 @@ public class Settings {
         // 1: pokemon base stats & abilities
         out.write(makeByteSelected(baseStatsFollowEvolutions, baseStatisticsMod == BaseStatisticsMod.RANDOM,
                 baseStatisticsMod == BaseStatisticsMod.SHUFFLE, baseStatisticsMod == BaseStatisticsMod.UNCHANGED,
-                standardizeEXPCurves));
+                standardizeEXPCurves, updateBaseStats));
 
         // 2: pokemon types & more general options
         out.write(makeByteSelected(typesMod == TypesMod.RANDOM_FOLLOW_EVOLUTIONS,
@@ -398,6 +399,7 @@ public class Settings {
         ));
         settings.setStandardizeEXPCurves(restoreState(data[1], 4));
         settings.setBaseStatsFollowEvolutions(restoreState(data[1], 0));
+        settings.setUpdateBaseStats(restoreState(data[1], 5));
 
         settings.setTypesMod(restoreEnum(TypesMod.class, data[2], 2, // UNCHANGED
                 0, // RANDOM_FOLLOW_EVOLUTIONS
@@ -827,6 +829,15 @@ public class Settings {
 
     public Settings setStandardizeEXPCurves(boolean standardizeEXPCurves) {
         this.standardizeEXPCurves = standardizeEXPCurves;
+        return this;
+    }
+
+    public boolean isUpdateBaseStats() {
+        return updateBaseStats;
+    }
+
+    public Settings setUpdateBaseStats(boolean updateBaseStats) {
+        this.updateBaseStats = updateBaseStats;
         return this;
     }
 

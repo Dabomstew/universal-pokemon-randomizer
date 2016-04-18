@@ -100,12 +100,25 @@ public class Randomizer {
         int currentMiscTweaks = settings.getCurrentMiscTweaks();
         if (romHandler.miscTweaksAvailable() != 0) {
             int codeTweaksAvailable = romHandler.miscTweaksAvailable();
+            List<MiscTweak> tweaksToApply = new ArrayList<MiscTweak>();
 
             for (MiscTweak mt : MiscTweak.allTweaks) {
                 if ((codeTweaksAvailable & mt.getValue()) > 0 && (currentMiscTweaks & mt.getValue()) > 0) {
-                    romHandler.applyMiscTweak(mt);
+                    tweaksToApply.add(mt);
                 }
             }
+            
+            // Sort so priority is respected in tweak ordering.
+            Collections.sort(tweaksToApply);
+            
+            // Now apply in order.
+            for(MiscTweak mt : tweaksToApply) {
+                romHandler.applyMiscTweak(mt);
+            }
+        }
+        
+        if(settings.isUpdateBaseStats()) {
+            romHandler.updatePokemonStats();
         }
 
         // Base stats changing

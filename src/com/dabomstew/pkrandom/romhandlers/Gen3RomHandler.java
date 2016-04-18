@@ -334,6 +334,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private int[] internalToPokedex, pokedexToInternal;
     private int pokedexCount;
     private String[] pokeNames;
+    private ItemList allowedItems, nonBadItems;
 
     @Override
     public boolean detectRom(byte[] rom) {
@@ -451,6 +452,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         loadAbilityNames();
         loadItemNames();
 
+        allowedItems = Gen3Constants.allowedItems.copy();
+        nonBadItems = Gen3Constants.nonBadItems.copy();
     }
 
     private int findPointerPrefixAndSuffix(String prefix, String suffix) {
@@ -2696,12 +2699,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public ItemList getAllowedItems() {
-        return Gen3Constants.allowedItems;
+        return allowedItems;
     }
 
     @Override
     public ItemList getNonBadItems() {
-        return Gen3Constants.nonBadItems;
+        return nonBadItems;
     }
 
     private void loadItemNames() {
@@ -2950,7 +2953,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 || romEntry.getValue("CatchingTutorialPlayerMonOffset") > 0) {
             available |= MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getValue();
         }
-
+        available |= MiscTweak.BAN_LUCKY_EGG.getValue();
         return available;
     }
 
@@ -2966,6 +2969,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             patchForNationalDex();
         } else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
             randomizeCatchingTutorial();
+        } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
+            allowedItems.banSingles(Gen3Constants.luckyEggIndex);
+            nonBadItems.banSingles(Gen3Constants.luckyEggIndex);
         }
     }
 

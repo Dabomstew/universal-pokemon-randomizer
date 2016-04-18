@@ -160,6 +160,8 @@ public class Gen3Constants {
     public static final List<Integer> frlgEarlyRequiredHMMoves = Arrays.asList(15);
 
     public static final List<Integer> battleTrappingAbilities = Arrays.asList(23, 42, 71);
+    
+    public static final int luckyEggIndex = 0xC5;
 
     private static Type[] constructTypeTable() {
         Type[] table = new Type[256];

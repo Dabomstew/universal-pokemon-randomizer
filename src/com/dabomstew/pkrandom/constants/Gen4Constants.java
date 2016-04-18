@@ -74,6 +74,8 @@ public class Gen4Constants {
     public static final int scriptListTerminator = 0xFD13;
 
     public static final int itemScriptVariable = 0x8008;
+    
+    public static final int luckyEggIndex = 0xE7;
 
     // The original slot each of the 20 "alternate" slots is mapped to
     // swarmx2, dayx2, nightx2, pokeradarx4, GBAx10

@@ -259,6 +259,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     private List<String> itemNames;
     private boolean loadedWildMapNames;
     private Map<Integer, String> wildMapNames;
+    private ItemList allowedItems, nonBadItems;
 
     private RomEntry romEntry;
 
@@ -309,6 +310,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         abilityNames = getStrings(romEntry.getInt("AbilityNamesTextOffset"));
         itemNames = getStrings(romEntry.getInt("ItemNamesTextOffset"));
         loadedWildMapNames = false;
+
+        allowedItems = Gen4Constants.allowedItems.copy();
+        nonBadItems = Gen4Constants.nonBadItems.copy();
     }
 
     private void loadMoves() {
@@ -2187,12 +2191,12 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     @Override
     public ItemList getAllowedItems() {
-        return Gen4Constants.allowedItems;
+        return allowedItems;
     }
 
     @Override
     public ItemList getNonBadItems() {
-        return Gen4Constants.nonBadItems;
+        return nonBadItems;
     }
 
     @Override
@@ -2561,6 +2565,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         if (romEntry.tweakFiles.get("FastestTextTweak") != null) {
             available |= MiscTweak.FASTEST_TEXT.getValue();
         }
+        available |= MiscTweak.BAN_LUCKY_EGG.getValue();
         return available;
     }
 
@@ -2572,6 +2577,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             randomizeCatchingTutorial();
         } else if (tweak == MiscTweak.FASTEST_TEXT) {
             applyFastestText();
+        } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
+            allowedItems.banSingles(Gen4Constants.luckyEggIndex);
+            nonBadItems.banSingles(Gen4Constants.luckyEggIndex);
         }
     }
 

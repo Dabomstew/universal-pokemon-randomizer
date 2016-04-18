@@ -80,6 +80,8 @@ public class Gen5Constants {
             hiddenItemVarSet = 0x8000;
 
     public static final int scriptListTerminator = 0xFD13;
+    
+    public static final int luckyEggIndex = 0xE7;
 
     public static final MoveCategory[] moveCategoryIndices = { MoveCategory.STATUS, MoveCategory.PHYSICAL,
             MoveCategory.SPECIAL };

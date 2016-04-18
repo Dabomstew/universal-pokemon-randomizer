@@ -63,6 +63,8 @@ public class Gen2Constants {
 
     public static final int tmBlockOneIndex = 191, tmBlockOneSize = 4, tmBlockTwoIndex = 196, tmBlockTwoSize = 24,
             tmBlockThreeIndex = 221, tmBlockThreeSize = 22;
+    
+    public static final int luckyEggIndex = 0x7E;
 
     private static Type[] constructTypeTable() {
         Type[] table = new Type[256];

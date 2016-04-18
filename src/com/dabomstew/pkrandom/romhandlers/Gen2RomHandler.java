@@ -281,6 +281,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
     private String[][] mapNames;
     private String[] landmarkNames;
     private boolean isVietCrystal;
+    private ItemList allowedItems, nonBadItems;
 
     @Override
     public boolean detectRom(byte[] rom) {
@@ -319,6 +320,8 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
         loadLandmarkNames();
         preprocessMaps();
         loadItemNames();
+        allowedItems = Gen2Constants.allowedItems.copy();
+        nonBadItems = Gen2Constants.nonBadItems.copy();
     }
 
     private static RomEntry checkRomEntry(byte[] rom) {
@@ -441,14 +444,12 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
             moves[i].power = rom[offs + (i - 1) * 7 + 2] & 0xFF;
             moves[i].pp = rom[offs + (i - 1) * 7 + 5] & 0xFF;
             moves[i].type = Gen2Constants.typeTable[rom[offs + (i - 1) * 7 + 3]];
-            
-            if(RomFunctions.normalMultihitMoves.contains(i)) {
+
+            if (RomFunctions.normalMultihitMoves.contains(i)) {
                 moves[i].hitCount = 3;
-            }
-            else if(RomFunctions.doubleHitMoves.contains(i)) {
+            } else if (RomFunctions.doubleHitMoves.contains(i)) {
                 moves[i].hitCount = 2;
-            }
-            else if(i == RomFunctions.TRIPLE_KICK_INDEX) {
+            } else if (i == RomFunctions.TRIPLE_KICK_INDEX) {
                 moves[i].hitCount = 2.71; // this assumes the first hit lands
             }
         }
@@ -1682,7 +1683,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
         // line size minus one for space
         return Gen2Constants.maxTrainerNameLength;
     }
-    
+
     @Override
     public int maxSumOfTrainerNameLengths() {
         return romEntry.getValue("MaxSumOfTrainerNameLengths");
@@ -1770,6 +1771,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
         if (romEntry.arrayEntries.containsKey("CatchingTutorialOffsets")) {
             available |= MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getValue();
         }
+        available |= MiscTweak.BAN_LUCKY_EGG.getValue();
         return available;
     }
 
@@ -1783,6 +1785,9 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
             applyCamelCaseNames();
         } else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
             randomizeCatchingTutorial();
+        } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
+            allowedItems.banSingles(Gen2Constants.luckyEggIndex);
+            nonBadItems.banSingles(Gen2Constants.luckyEggIndex);
         }
     }
 
@@ -1840,12 +1845,12 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 
     @Override
     public ItemList getAllowedItems() {
-        return Gen2Constants.allowedItems;
+        return allowedItems;
     }
 
     @Override
     public ItemList getNonBadItems() {
-        return Gen2Constants.nonBadItems;
+        return nonBadItems;
     }
 
     private void loadItemNames() {

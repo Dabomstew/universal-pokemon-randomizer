@@ -46,6 +46,7 @@ import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.constants.Gen3Constants;
 import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
@@ -269,6 +270,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private List<String> itemNames;
     private boolean loadedWildMapNames;
     private Map<Integer, String> wildMapNames;
+    private ItemList allowedItems, nonBadItems;
 
     private NARCArchive pokeNarc, moveNarc, stringsNarc, storyTextNarc, scriptNarc;
 
@@ -321,6 +323,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         abilityNames = getStrings(false, romEntry.getInt("AbilityNamesTextOffset"));
         itemNames = getStrings(false, romEntry.getInt("ItemNamesTextOffset"));
         loadedWildMapNames = false;
+
+        allowedItems = Gen3Constants.allowedItems.copy();
+        nonBadItems = Gen3Constants.nonBadItems.copy();
     }
 
     private void loadPokemonStats() {
@@ -1291,6 +1296,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         if (romEntry.tweakFiles.get("FastestTextTweak") != null) {
             available |= MiscTweak.FASTEST_TEXT.getValue();
         }
+        available |= MiscTweak.BAN_LUCKY_EGG.getValue();
         return available;
     }
 
@@ -1300,6 +1306,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             randomizeHiddenHollowPokemon();
         } else if (tweak == MiscTweak.FASTEST_TEXT) {
             applyFastestText();
+        } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
+            allowedItems.banSingles(Gen5Constants.luckyEggIndex);
+            nonBadItems.banSingles(Gen5Constants.luckyEggIndex);
         }
     }
 
@@ -1909,12 +1918,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public ItemList getAllowedItems() {
-        return Gen5Constants.allowedItems;
+        return allowedItems;
     }
 
     @Override
     public ItemList getNonBadItems() {
-        return Gen5Constants.nonBadItems;
+        return nonBadItems;
     }
 
     @Override

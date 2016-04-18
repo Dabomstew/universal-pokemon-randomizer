@@ -243,6 +243,76 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
     }
+    
+    @Override
+    public void updatePokemonStats() {
+        List<Pokemon> pokes = getPokemon();
+        
+        // non-special stat gen1 pokemon
+        pokes.get(15).attack = 90; // BEEDRILL
+        pokes.get(18).speed = 101; // PIDGEOT
+        pokes.get(25).defense = 40; // PIKACHU
+        pokes.get(26).speed = 110; // RAICHU
+        pokes.get(31).attack = 92; // NIDOQUEEN
+        pokes.get(34).attack = 102; // NIDOKING
+        pokes.get(62).attack = 95; // POLIWRATH
+        pokes.get(76).attack = 120; // GOLEM
+        
+        // behavior regarding special stat changes
+        // depending on whether this is actually gen1 or not.
+        if(generationOfPokemon() == 1) {
+            // only update the pokemon who's updated stat was
+            // equal to their Gen1 special stat.
+            
+            pokes.get(12).special = 90; // BUTTERFREE
+            // skip PIKACHU s.def
+            pokes.get(36).special = 95; // CLEFABLE
+            // skip WIGGLYTUFF s.atk
+            pokes.get(45).special = 110; // VILEPLUME
+            // skip ALAKAZAM s.def
+            // skip VICTREEBEL s.def
+        }
+        else {
+            // do the special stat changes then move on from gen2 onwards
+            
+            pokes.get(12).spatk = 90; // BUTTERFREE
+            pokes.get(25).spdef = 50; // PIKACHU
+            pokes.get(36).spatk = 95; // CLEFABLE
+            pokes.get(40).spatk = 85; // WIGGLYTUFF
+            pokes.get(45).spatk = 110; // VILEPLUME
+            pokes.get(65).spdef = 95; // ALAKAZAM
+            pokes.get(71).spdef = 70; // VICTREEBEL
+            
+            // gen 2
+            pokes.get(181).defense = 85; // AMPHAROS
+            pokes.get(182).defense = 95; // BELLOSSOM
+            pokes.get(184).spatk = 60; // AZUMARILL
+            pokes.get(189).spdef = 95; // JUMPLUFF
+            
+            // gen 3
+            if(generationOfPokemon() >= 3) {
+                pokes.get(267).spatk = 100; // BEAUTIFLY
+                pokes.get(295).spdef = 73; // EXPLOUD
+            }
+            
+            // gen 4
+            if(generationOfPokemon() >= 4) {
+                pokes.get(398).spdef = 60; // STARAPTOR
+                pokes.get(407).defense = 65; // ROSERADE
+            }
+            
+            // gen 5
+            if(generationOfPokemon() >= 5) {
+                pokes.get(508).attack = 110; // STOUTLAND
+                pokes.get(521).attack = 115; // UNFEZANT
+                pokes.get(526).spdef = 80; // GIGALITH
+                pokes.get(537).attack = 95; // SEISMITOAD
+                pokes.get(542).spdef = 80; // LEAVANNY
+                pokes.get(545).attack = 100; // SCOLIPEDE
+                pokes.get(553).defense = 80; // KROOKODILE
+            }
+        }
+    }
 
     public Pokemon randomPokemon() {
         checkPokemonRestrictions();

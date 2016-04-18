@@ -729,6 +729,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.pbsStandardEXPCurvesCB.setSelected(false);
         this.pbsFollowEvolutionsCB.setEnabled(false);
         this.pbsFollowEvolutionsCB.setSelected(false);
+        this.pbsUpdateStatsCB.setEnabled(false);
+        this.pbsUpdateStatsCB.setSelected(false);
 
         this.abilitiesPanel.setVisible(true);
         this.paUnchangedRB.setEnabled(false);
@@ -1068,6 +1070,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
             this.pbsStandardEXPCurvesCB.setEnabled(true);
             this.pbsStandardEXPCurvesCB.setSelected(false);
+            
+            this.pbsUpdateStatsCB.setEnabled(romHandler.generationOfPokemon() < 6);
+            this.pbsUpdateStatsCB.setSelected(false);
 
             if (romHandler.abilitiesPerPokemon() > 0) {
                 this.paUnchangedRB.setEnabled(true);
@@ -1630,6 +1635,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.pbsChangesUnchangedRB.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.UNCHANGED);
         this.pbsStandardEXPCurvesCB.setSelected(settings.isStandardizeEXPCurves());
         this.pbsFollowEvolutionsCB.setSelected(settings.isBaseStatsFollowEvolutions());
+        this.pbsUpdateStatsCB.setSelected(settings.isUpdateBaseStats());
 
         this.paUnchangedRB.setSelected(settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED);
         this.paRandomizeRB.setSelected(settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
@@ -1788,6 +1794,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 pbsChangesRandomRB.isSelected());
         settings.setStandardizeEXPCurves(pbsStandardEXPCurvesCB.isSelected());
         settings.setBaseStatsFollowEvolutions(pbsFollowEvolutionsCB.isSelected());
+        settings.setUpdateBaseStats(pbsUpdateStatsCB.isSelected());
 
         settings.setAbilitiesMod(paUnchangedRB.isSelected(), paRandomizeRB.isSelected());
         settings.setAllowWonderGuard(paWonderGuardCB.isSelected());
@@ -2569,6 +2576,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         pbsChangesRandomRB = new javax.swing.JRadioButton();
         pbsStandardEXPCurvesCB = new javax.swing.JCheckBox();
         pbsFollowEvolutionsCB = new javax.swing.JCheckBox();
+        pbsUpdateStatsCB = new javax.swing.JCheckBox();
         abilitiesPanel = new javax.swing.JPanel();
         paUnchangedRB = new javax.swing.JRadioButton();
         paRandomizeRB = new javax.swing.JRadioButton();
@@ -2938,6 +2946,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
         pbsFollowEvolutionsCB.setText(bundle.getString("RandomizerGUI.pbsFollowEvolutionsCB.text")); // NOI18N
         pbsFollowEvolutionsCB.setToolTipText(bundle.getString("RandomizerGUI.pbsFollowEvolutionsCB.toolTipText")); // NOI18N
 
+        pbsUpdateStatsCB.setText(bundle.getString("RandomizerGUI.pbsUpdateStatsCB.text")); // NOI18N
+        pbsUpdateStatsCB.setToolTipText(bundle.getString("RandomizerGUI.pbsUpdateStatsCB.toolTipText")); // NOI18N
+
         javax.swing.GroupLayout baseStatsPanelLayout = new javax.swing.GroupLayout(baseStatsPanel);
         baseStatsPanel.setLayout(baseStatsPanelLayout);
         baseStatsPanelLayout.setHorizontalGroup(
@@ -2951,7 +2962,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 92, Short.MAX_VALUE)
                 .addGroup(baseStatsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(pbsStandardEXPCurvesCB)
-                    .addComponent(pbsFollowEvolutionsCB))
+                    .addComponent(pbsFollowEvolutionsCB)
+                    .addComponent(pbsUpdateStatsCB))
                 .addGap(38, 38, 38))
         );
         baseStatsPanelLayout.setVerticalGroup(
@@ -2966,7 +2978,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(pbsChangesShuffleRB)
                     .addComponent(pbsFollowEvolutionsCB))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(pbsChangesRandomRB)
+                .addGroup(baseStatsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(pbsChangesRandomRB)
+                    .addComponent(pbsUpdateStatsCB))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -4587,6 +4601,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JRadioButton pbsChangesUnchangedRB;
     private javax.swing.JCheckBox pbsFollowEvolutionsCB;
     private javax.swing.JCheckBox pbsStandardEXPCurvesCB;
+    private javax.swing.JCheckBox pbsUpdateStatsCB;
     private javax.swing.JCheckBox peForceChangeCB;
     private javax.swing.JRadioButton peRandomRB;
     private javax.swing.JCheckBox peSameTypeCB;
