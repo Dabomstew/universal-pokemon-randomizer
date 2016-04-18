@@ -46,7 +46,6 @@ import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
-import com.dabomstew.pkrandom.constants.Gen3Constants;
 import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
@@ -324,8 +323,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         itemNames = getStrings(false, romEntry.getInt("ItemNamesTextOffset"));
         loadedWildMapNames = false;
 
-        allowedItems = Gen3Constants.allowedItems.copy();
-        nonBadItems = Gen3Constants.nonBadItems.copy();
+        allowedItems = Gen5Constants.allowedItems.copy();
+        nonBadItems = Gen5Constants.nonBadItems.copy();
     }
 
     private void loadPokemonStats() {
