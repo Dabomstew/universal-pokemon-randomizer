@@ -14,7 +14,7 @@ import java.util.zip.ZipInputStream;
 
 import javax.swing.JOptionPane;
 
-import com.dabomstew.pkrandom.Constants;
+import com.dabomstew.pkrandom.SysConstants;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.Utils;
 
@@ -176,15 +176,15 @@ public class UpdateFoundDialog extends javax.swing.JDialog {
             return;
         }
         String deltaFile = "delta_"
-                + Constants.UPDATE_VERSION
+                + SysConstants.UPDATE_VERSION
                 + "_"
                 + targetVersion
                 + (randomizerBinary.toLowerCase().endsWith(".exe") ? "_win"
                         : "") + ".zip";
         try {
-            byte[] zip = FileFunctions.downloadFile(Constants.AUTOUPDATE_URL
+            byte[] zip = FileFunctions.downloadFile(SysConstants.AUTOUPDATE_URL
                     + deltaFile);
-            extract(zip, new File(Constants.ROOT_PATH), randomizerBinary);
+            extract(zip, new File(SysConstants.ROOT_PATH), randomizerBinary);
             JOptionPane
                     .showMessageDialog(
                             this,
@@ -202,7 +202,7 @@ public class UpdateFoundDialog extends javax.swing.JDialog {
     }// GEN-LAST:event_downloadUpdateBtnActionPerformed
 
     private void attemptOpenBrowser() {
-        String targetURL = Constants.WEBSITE_URL;
+        String targetURL = SysConstants.WEBSITE_URL;
         Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop()
                 : null;
 

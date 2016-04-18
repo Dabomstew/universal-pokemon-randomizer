@@ -47,6 +47,7 @@ import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen3Constants;
+import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.Encounter;
@@ -802,11 +803,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             moves[i].pp = rom[offs + i * 0xC + 4] & 0xFF;
             moves[i].type = Gen3Constants.typeTable[rom[offs + i * 0xC + 2]];
 
-            if (RomFunctions.normalMultihitMoves.contains(i)) {
+            if (GlobalConstants.normalMultihitMoves.contains(i)) {
                 moves[i].hitCount = 3;
-            } else if (RomFunctions.doubleHitMoves.contains(i)) {
+            } else if (GlobalConstants.doubleHitMoves.contains(i)) {
                 moves[i].hitCount = 2;
-            } else if (i == RomFunctions.TRIPLE_KICK_INDEX) {
+            } else if (i == GlobalConstants.TRIPLE_KICK_INDEX) {
                 moves[i].hitCount = 2.71; // this assumes the first hit lands
             }
         }
@@ -1268,7 +1269,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     private boolean hasBattleTrappingAbility(Pokemon pokemon) {
         return pokemon != null
-                && (Gen3Constants.battleTrappingAbilities.contains(pokemon.ability1) || Gen3Constants.battleTrappingAbilities
+                && (GlobalConstants.battleTrappingAbilities.contains(pokemon.ability1) || GlobalConstants.battleTrappingAbilities
                         .contains(pokemon.ability2));
     }
 

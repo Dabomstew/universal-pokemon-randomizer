@@ -50,6 +50,7 @@ import java.util.TreeSet;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
@@ -243,11 +244,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
     }
-    
+
     @Override
     public void updatePokemonStats() {
         List<Pokemon> pokes = getPokemon();
-        
+
         // non-special stat gen1 pokemon
         pokes.get(15).attack = 90; // BEEDRILL
         pokes.get(18).speed = 101; // PIDGEOT
@@ -257,13 +258,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         pokes.get(34).attack = 102; // NIDOKING
         pokes.get(62).attack = 95; // POLIWRATH
         pokes.get(76).attack = 120; // GOLEM
-        
+
         // behavior regarding special stat changes
         // depending on whether this is actually gen1 or not.
-        if(generationOfPokemon() == 1) {
+        if (generationOfPokemon() == 1) {
             // only update the pokemon who's updated stat was
             // equal to their Gen1 special stat.
-            
+
             pokes.get(12).special = 90; // BUTTERFREE
             // skip PIKACHU s.def
             pokes.get(36).special = 95; // CLEFABLE
@@ -271,10 +272,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             pokes.get(45).special = 110; // VILEPLUME
             // skip ALAKAZAM s.def
             // skip VICTREEBEL s.def
-        }
-        else {
+        } else {
             // do the special stat changes then move on from gen2 onwards
-            
+
             pokes.get(12).spatk = 90; // BUTTERFREE
             pokes.get(25).spdef = 50; // PIKACHU
             pokes.get(36).spatk = 95; // CLEFABLE
@@ -282,27 +282,27 @@ public abstract class AbstractRomHandler implements RomHandler {
             pokes.get(45).spatk = 110; // VILEPLUME
             pokes.get(65).spdef = 95; // ALAKAZAM
             pokes.get(71).spdef = 70; // VICTREEBEL
-            
+
             // gen 2
             pokes.get(181).defense = 85; // AMPHAROS
             pokes.get(182).defense = 95; // BELLOSSOM
             pokes.get(184).spatk = 60; // AZUMARILL
             pokes.get(189).spdef = 95; // JUMPLUFF
-            
+
             // gen 3
-            if(generationOfPokemon() >= 3) {
+            if (generationOfPokemon() >= 3) {
                 pokes.get(267).spatk = 100; // BEAUTIFLY
                 pokes.get(295).spdef = 73; // EXPLOUD
             }
-            
+
             // gen 4
-            if(generationOfPokemon() >= 4) {
+            if (generationOfPokemon() >= 4) {
                 pokes.get(398).spdef = 60; // STARAPTOR
                 pokes.get(407).defense = 65; // ROSERADE
             }
-            
+
             // gen 5
-            if(generationOfPokemon() >= 5) {
+            if (generationOfPokemon() >= 5) {
                 pokes.get(508).attack = 110; // STOUTLAND
                 pokes.get(521).attack = 115; // UNFEZANT
                 pokes.get(526).spdef = 80; // GIGALITH
@@ -427,17 +427,30 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
-    private static final int WONDER_GUARD_INDEX = 25;
-
     @Override
-    public void randomizeAbilities(boolean evolutionSanity, boolean allowWonderGuard) {
+    public void randomizeAbilities(boolean evolutionSanity, boolean allowWonderGuard, boolean banTrappingAbilities,
+            boolean banNegativeAbilities) {
         // Abilities don't exist in some games...
         if (this.abilitiesPerPokemon() == 0) {
             return;
         }
 
         final boolean hasDWAbilities = (this.abilitiesPerPokemon() == 3);
-        final boolean allowWG = allowWonderGuard;
+
+        final List<Integer> bannedAbilities = new ArrayList<Integer>();
+
+        if (!allowWonderGuard) {
+            bannedAbilities.add(GlobalConstants.WONDER_GUARD_INDEX);
+        }
+
+        if (banTrappingAbilities) {
+            bannedAbilities.addAll(GlobalConstants.battleTrappingAbilities);
+        }
+
+        if (banNegativeAbilities) {
+            bannedAbilities.addAll(GlobalConstants.negativeAbilities);
+        }
+
         final int maxAbility = this.highestAbilityIndex();
 
         if (evolutionSanity) {
@@ -446,15 +459,16 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             copyUpEvolutionsHelper(new BasePokemonAction() {
                 public void applyTo(Pokemon pk) {
-                    if (pk.ability1 != WONDER_GUARD_INDEX && pk.ability2 != WONDER_GUARD_INDEX
-                            && pk.ability3 != WONDER_GUARD_INDEX) {
+                    if (pk.ability1 != GlobalConstants.WONDER_GUARD_INDEX
+                            && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX
+                            && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX) {
                         // Pick first ability
-                        pk.ability1 = pickRandomAbility(maxAbility, allowWG);
+                        pk.ability1 = pickRandomAbility(maxAbility, bannedAbilities);
 
                         // Second ability?
                         if (AbstractRomHandler.this.random.nextDouble() < 0.5) {
                             // Yes, second ability
-                            pk.ability2 = pickRandomAbility(maxAbility, allowWG, pk.ability1);
+                            pk.ability2 = pickRandomAbility(maxAbility, bannedAbilities, pk.ability1);
                         } else {
                             // Nope
                             pk.ability2 = 0;
@@ -462,14 +476,15 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                         // Third ability?
                         if (hasDWAbilities) {
-                            pk.ability3 = pickRandomAbility(maxAbility, allowWG, pk.ability1, pk.ability2);
+                            pk.ability3 = pickRandomAbility(maxAbility, bannedAbilities, pk.ability1, pk.ability2);
                         }
                     }
                 }
             }, new EvolvedPokemonAction() {
                 public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
-                    if (evTo.ability1 != WONDER_GUARD_INDEX && evTo.ability2 != WONDER_GUARD_INDEX
-                            && evTo.ability3 != WONDER_GUARD_INDEX) {
+                    if (evTo.ability1 != GlobalConstants.WONDER_GUARD_INDEX
+                            && evTo.ability2 != GlobalConstants.WONDER_GUARD_INDEX
+                            && evTo.ability3 != GlobalConstants.WONDER_GUARD_INDEX) {
                         evTo.ability1 = evFrom.ability1;
                         evTo.ability2 = evFrom.ability2;
                         evTo.ability3 = evFrom.ability3;
@@ -486,15 +501,16 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
 
                 // Don't remove WG if already in place.
-                if (pk.ability1 != WONDER_GUARD_INDEX && pk.ability2 != WONDER_GUARD_INDEX
-                        && pk.ability3 != WONDER_GUARD_INDEX) {
+                if (pk.ability1 != GlobalConstants.WONDER_GUARD_INDEX
+                        && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX
+                        && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX) {
                     // Pick first ability
-                    pk.ability1 = this.pickRandomAbility(maxAbility, allowWonderGuard);
+                    pk.ability1 = this.pickRandomAbility(maxAbility, bannedAbilities);
 
                     // Second ability?
                     if (this.random.nextDouble() < 0.5) {
                         // Yes, second ability
-                        pk.ability2 = this.pickRandomAbility(maxAbility, allowWonderGuard, pk.ability1);
+                        pk.ability2 = this.pickRandomAbility(maxAbility, bannedAbilities, pk.ability1);
                     } else {
                         // Nope
                         pk.ability2 = 0;
@@ -502,20 +518,20 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                     // Third ability?
                     if (hasDWAbilities) {
-                        pk.ability3 = pickRandomAbility(maxAbility, allowWG, pk.ability1, pk.ability2);
+                        pk.ability3 = pickRandomAbility(maxAbility, bannedAbilities, pk.ability1, pk.ability2);
                     }
                 }
             }
         }
     }
 
-    private int pickRandomAbility(int maxAbility, boolean allowWonderGuard, int... alreadySetAbilities) {
+    private int pickRandomAbility(int maxAbility, List<Integer> bannedAbilities, int... alreadySetAbilities) {
         int newAbility = 0;
 
         while (true) {
             newAbility = this.random.nextInt(maxAbility) + 1;
 
-            if (!allowWonderGuard && newAbility == WONDER_GUARD_INDEX) {
+            if (bannedAbilities.contains(newAbility)) {
                 continue;
             }
 
@@ -1719,8 +1735,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         this.setMovesLearnt(movesets);
     }
 
-    private static final int METRONOME_MOVE = 118;
-
     @Override
     public void metronomeOnlyMode() {
 
@@ -1729,7 +1743,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         MoveLearnt metronomeML = new MoveLearnt();
         metronomeML.level = 1;
-        metronomeML.move = METRONOME_MOVE;
+        metronomeML.move = GlobalConstants.METRONOME_MOVE;
 
         for (List<MoveLearnt> ms : movesets.values()) {
             if (ms != null && ms.size() > 0) {
@@ -1748,7 +1762,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Integer> tmMoves = this.getTMMoves();
 
         for (int i = 0; i < tmMoves.size(); i++) {
-            tmMoves.set(i, METRONOME_MOVE);
+            tmMoves.set(i, GlobalConstants.METRONOME_MOVE);
         }
 
         this.setTMMoves(tmMoves);
@@ -1758,7 +1772,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             List<Integer> mtMoves = this.getMoveTutorMoves();
 
             for (int i = 0; i < mtMoves.size(); i++) {
-                mtMoves.set(i, METRONOME_MOVE);
+                mtMoves.set(i, GlobalConstants.METRONOME_MOVE);
             }
 
             this.setMoveTutorMoves(mtMoves);
@@ -1767,7 +1781,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         // move tweaks
         List<Move> moveData = this.getMoves();
 
-        Move metronome = moveData.get(METRONOME_MOVE);
+        Move metronome = moveData.get(GlobalConstants.METRONOME_MOVE);
 
         metronome.pp = 40;
 
@@ -1854,9 +1868,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         Set<Move> unusableDamagingMoves = new HashSet<Move>();
 
         for (Move mv : usableMoves) {
-            if (RomFunctions.bannedRandomMoves[mv.number] || hms.contains(mv.number) || banned.contains(mv.number)) {
+            if (GlobalConstants.bannedRandomMoves[mv.number] || hms.contains(mv.number) || banned.contains(mv.number)) {
                 unusableMoves.add(mv);
-            } else if (RomFunctions.bannedForDamagingMove[mv.number] || mv.power < MIN_DAMAGING_MOVE_POWER) {
+            } else if (GlobalConstants.bannedForDamagingMove[mv.number]
+                    || mv.power < GlobalConstants.MIN_DAMAGING_MOVE_POWER) {
                 unusableDamagingMoves.add(mv);
             }
         }
@@ -2016,10 +2031,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         Set<Move> unusableDamagingMoves = new HashSet<Move>();
 
         for (Move mv : usableMoves) {
-            if (RomFunctions.bannedRandomMoves[mv.number] || tms.contains(mv.number) || hms.contains(mv.number)
+            if (GlobalConstants.bannedRandomMoves[mv.number] || tms.contains(mv.number) || hms.contains(mv.number)
                     || banned.contains(mv.number)) {
                 unusableMoves.add(mv);
-            } else if (RomFunctions.bannedForDamagingMove[mv.number] || mv.power < MIN_DAMAGING_MOVE_POWER) {
+            } else if (GlobalConstants.bannedForDamagingMove[mv.number]
+                    || mv.power < GlobalConstants.MIN_DAMAGING_MOVE_POWER) {
                 unusableDamagingMoves.add(mv);
             }
         }
@@ -3076,8 +3092,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
-    private static final int MIN_DAMAGING_MOVE_POWER = 50;
-
     private int pickMove(List<Move> allMoves, Pokemon pkmn, boolean typeThemed, boolean damaging,
             Set<Integer> bannedForThisGame, Set<Integer> alreadyPicked) {
         // If damaging, we want a move with at least 90% accuracy and
@@ -3133,7 +3147,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Filter by only bans first
         List<Move> canPick = new ArrayList<Move>();
         for (Move mv : allMoves) {
-            if (mv != null && !RomFunctions.bannedRandomMoves[mv.number] && !bannedForThisGame.contains(mv.number)
+            if (mv != null && !GlobalConstants.bannedRandomMoves[mv.number] && !bannedForThisGame.contains(mv.number)
                     && !alreadyPicked.contains(mv.number)) {
                 canPick.add(mv);
             }
@@ -3143,8 +3157,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (damaging) {
             List<Move> filtered = new ArrayList<Move>(canPick);
             for (Move mv : canPick) {
-                if (RomFunctions.bannedForDamagingMove[mv.number] || mv.power < MIN_DAMAGING_MOVE_POWER
-                        || (mv.power < 2 * MIN_DAMAGING_MOVE_POWER && mv.hitratio < 90)) {
+                if (GlobalConstants.bannedForDamagingMove[mv.number]
+                        || mv.power < GlobalConstants.MIN_DAMAGING_MOVE_POWER
+                        || (mv.power < 2 * GlobalConstants.MIN_DAMAGING_MOVE_POWER && mv.hitratio < 90)) {
                     filtered.remove(mv);
                 }
             }
@@ -3524,8 +3539,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 for (Pokemon pk : pickFrom) {
                     if (pk.bstForPowerLevels() >= minTarget
                             && pk.bstForPowerLevels() <= maxTarget
-                            && (wonderGuardAllowed || (pk.ability1 != WONDER_GUARD_INDEX
-                                    && pk.ability2 != WONDER_GUARD_INDEX && pk.ability3 != WONDER_GUARD_INDEX))) {
+                            && (wonderGuardAllowed || (pk.ability1 != GlobalConstants.WONDER_GUARD_INDEX
+                                    && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX))) {
                         canPick.add(pk);
                     }
                 }
@@ -3539,8 +3554,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                 return pickFrom.get(this.random.nextInt(pickFrom.size()));
             } else {
                 Pokemon pk = pickFrom.get(this.random.nextInt(pickFrom.size()));
-                while (pk.ability1 == WONDER_GUARD_INDEX || pk.ability2 == WONDER_GUARD_INDEX
-                        || pk.ability3 == WONDER_GUARD_INDEX) {
+                while (pk.ability1 == GlobalConstants.WONDER_GUARD_INDEX
+                        || pk.ability2 == GlobalConstants.WONDER_GUARD_INDEX
+                        || pk.ability3 == GlobalConstants.WONDER_GUARD_INDEX) {
                     pk = pickFrom.get(this.random.nextInt(pickFrom.size()));
                 }
                 return pk;

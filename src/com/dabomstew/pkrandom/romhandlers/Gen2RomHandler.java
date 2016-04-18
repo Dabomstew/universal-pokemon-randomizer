@@ -48,6 +48,7 @@ import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.constants.Gen2Constants;
+import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
@@ -445,11 +446,11 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
             moves[i].pp = rom[offs + (i - 1) * 7 + 5] & 0xFF;
             moves[i].type = Gen2Constants.typeTable[rom[offs + (i - 1) * 7 + 3]];
 
-            if (RomFunctions.normalMultihitMoves.contains(i)) {
+            if (GlobalConstants.normalMultihitMoves.contains(i)) {
                 moves[i].hitCount = 3;
-            } else if (RomFunctions.doubleHitMoves.contains(i)) {
+            } else if (GlobalConstants.doubleHitMoves.contains(i)) {
                 moves[i].hitCount = 2;
-            } else if (i == RomFunctions.TRIPLE_KICK_INDEX) {
+            } else if (i == GlobalConstants.TRIPLE_KICK_INDEX) {
                 moves[i].hitCount = 2.71; // this assumes the first hit lands
             }
         }

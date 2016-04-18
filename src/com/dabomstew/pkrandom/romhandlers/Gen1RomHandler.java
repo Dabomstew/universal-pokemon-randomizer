@@ -46,6 +46,7 @@ import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.constants.Gen1Constants;
+import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.Encounter;
@@ -501,11 +502,10 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
                 moves[trueMoveIndex].power = rom[movesOffset + (i - 1) * 6 + 2] & 0xFF;
                 moves[trueMoveIndex].pp = rom[movesOffset + (i - 1) * 6 + 5] & 0xFF;
                 moves[trueMoveIndex].type = idToType(rom[movesOffset + (i - 1) * 6 + 3] & 0xFF);
-                
-                if(RomFunctions.normalMultihitMoves.contains(i)) {
+
+                if (GlobalConstants.normalMultihitMoves.contains(i)) {
                     moves[trueMoveIndex].hitCount = 3;
-                }
-                else if(RomFunctions.doubleHitMoves.contains(i)) {
+                } else if (GlobalConstants.doubleHitMoves.contains(i)) {
                     moves[trueMoveIndex].hitCount = 2;
                 }
             }
@@ -2493,7 +2493,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
         if (romEntry.getValue("MonPaletteIndicesOffset") > 0 && romEntry.getValue("SGBPalettesOffset") > 0) {
             int palIndex = rom[romEntry.getValue("MonPaletteIndicesOffset") + mascot.number] & 0xFF;
             int palOffset = romEntry.getValue("SGBPalettesOffset") + palIndex * 8;
-            if(romEntry.isYellow && romEntry.nonJapanese == 1) {
+            if (romEntry.isYellow && romEntry.nonJapanese == 1) {
                 // Non-japanese Yellow can use GBC palettes instead.
                 // Stored directly after regular SGB palettes.
                 palOffset += 320;
@@ -2513,6 +2513,5 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 
         return bim;
     }
-    
-    
+
 }

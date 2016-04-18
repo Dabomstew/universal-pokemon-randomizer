@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.dabomstew.pkrandom.Constants;
+import com.dabomstew.pkrandom.SysConstants;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
 
@@ -68,11 +68,11 @@ public class NDSRom {
         String dataFolder = "tmp_" + rawFilename.substring(0, rawFilename.lastIndexOf('.'));
         // remove nonsensical chars
         dataFolder = dataFolder.replaceAll("[^A-Za-z0-9_]+", "");
-        File tmpFolder = new File(Constants.ROOT_PATH + dataFolder);
+        File tmpFolder = new File(SysConstants.ROOT_PATH + dataFolder);
         tmpFolder.mkdir();
         if (tmpFolder.canWrite()) {
             writingEnabled = true;
-            this.tmpFolder = Constants.ROOT_PATH + dataFolder + File.separator;
+            this.tmpFolder = SysConstants.ROOT_PATH + dataFolder + File.separator;
             tmpFolder.deleteOnExit();
         } else {
             writingEnabled = false;

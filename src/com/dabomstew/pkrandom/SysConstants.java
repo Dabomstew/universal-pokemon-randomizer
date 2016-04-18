@@ -2,7 +2,7 @@ package com.dabomstew.pkrandom;
 
 import java.io.File;
 
-public class Constants {
+public class SysConstants {
 
     public static final String AUTOUPDATE_URL = "http://pokehacks.dabomstew.com/randomizer/autoupdate/";
     public static final String WEBSITE_URL = "http://pokehacks.dabomstew.com/randomizer/";

@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 import javax.swing.SwingUtilities;
 
-import com.dabomstew.pkrandom.Constants;
+import com.dabomstew.pkrandom.SysConstants;
 import com.dabomstew.pkrandom.FileFunctions;
 
 public class UpdateCheckThread extends Thread {
@@ -22,19 +22,19 @@ public class UpdateCheckThread extends Thread {
     public void run() {
         boolean found = false;
         try {
-            byte[] versionCheck = FileFunctions.downloadFile(Constants.AUTOUPDATE_URL + "latest.txt");
+            byte[] versionCheck = FileFunctions.downloadFile(SysConstants.AUTOUPDATE_URL + "latest.txt");
             int version = Integer.parseInt(new String(versionCheck));
-            if (version > Constants.UPDATE_VERSION) {
-                byte[] output = FileFunctions.downloadFile(Constants.AUTOUPDATE_URL + "version.txt");
+            if (version > SysConstants.UPDATE_VERSION) {
+                byte[] output = FileFunctions.downloadFile(SysConstants.AUTOUPDATE_URL + "version.txt");
                 Scanner sc = new Scanner(new ByteArrayInputStream(output));
                 final int newVersion = Integer.parseInt(sc.nextLine());
-                if (newVersion > Constants.UPDATE_VERSION) {
+                if (newVersion > SysConstants.UPDATE_VERSION) {
                     // Update found, parse changelog
                     StringBuilder changelog = new StringBuilder();
                     int clid = Integer.parseInt(sc.nextLine());
                     String nl = System.getProperty("line.separator");
                     boolean first = true;
-                    while (clid > Constants.UPDATE_VERSION && sc.hasNext()) {
+                    while (clid > SysConstants.UPDATE_VERSION && sc.hasNext()) {
                         if (!first) {
                             changelog.append(nl);
                         }

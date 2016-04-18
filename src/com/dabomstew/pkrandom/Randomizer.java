@@ -107,17 +107,17 @@ public class Randomizer {
                     tweaksToApply.add(mt);
                 }
             }
-            
+
             // Sort so priority is respected in tweak ordering.
             Collections.sort(tweaksToApply);
-            
+
             // Now apply in order.
-            for(MiscTweak mt : tweaksToApply) {
+            for (MiscTweak mt : tweaksToApply) {
                 romHandler.applyMiscTweak(mt);
             }
         }
-        
-        if(settings.isUpdateBaseStats()) {
+
+        if (settings.isUpdateBaseStats()) {
             romHandler.updatePokemonStats();
         }
 
@@ -139,7 +139,8 @@ public class Randomizer {
 
         // Abilities? (new 1.0.2)
         if (romHandler.abilitiesPerPokemon() > 0 && settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE) {
-            romHandler.randomizeAbilities(settings.isAbilitiesFollowEvolutions(), settings.isAllowWonderGuard());
+            romHandler.randomizeAbilities(settings.isAbilitiesFollowEvolutions(), settings.isAllowWonderGuard(),
+                    settings.isBanTrappingAbilities(), settings.isBanNegativeAbilities());
         }
 
         // Pokemon Types

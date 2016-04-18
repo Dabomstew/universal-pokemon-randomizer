@@ -66,12 +66,12 @@ import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.xml.bind.DatatypeConverter;
 
-import com.dabomstew.pkrandom.Constants;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.Randomizer;
 import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.SysConstants;
 import com.dabomstew.pkrandom.Utils;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
@@ -560,8 +560,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         boolean foundCustom = false;
         for (int file = 0; file < 3; file++) {
-            File oldFile = new File(Constants.ROOT_PATH + "/config/" + cnamefiles[file]);
-            File currentFile = new File(Constants.ROOT_PATH + cnamefiles[file]);
+            File oldFile = new File(SysConstants.ROOT_PATH + "/config/" + cnamefiles[file]);
+            File currentFile = new File(SysConstants.ROOT_PATH + cnamefiles[file]);
             if (oldFile.exists() && oldFile.canRead() && !currentFile.exists()) {
                 try {
                     int crc = FileFunctions.getFileChecksum(new FileInputStream(oldFile));
@@ -581,11 +581,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
             boolean onefailed = false;
             if (response == JOptionPane.YES_OPTION) {
                 for (String filename : cnamefiles) {
-                    if (new File(Constants.ROOT_PATH + "/config/" + filename).canRead()) {
+                    if (new File(SysConstants.ROOT_PATH + "/config/" + filename).canRead()) {
                         try {
-                            FileInputStream fis = new FileInputStream(new File(Constants.ROOT_PATH + "config/"
+                            FileInputStream fis = new FileInputStream(new File(SysConstants.ROOT_PATH + "config/"
                                     + filename));
-                            FileOutputStream fos = new FileOutputStream(new File(Constants.ROOT_PATH + filename));
+                            FileOutputStream fos = new FileOutputStream(new File(SysConstants.ROOT_PATH + filename));
                             byte[] buf = new byte[1024];
                             int len;
                             while ((len = fis.read(buf)) > 0) {
@@ -609,7 +609,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     }
 
     private void attemptReadConfig() {
-        File fh = new File(Constants.ROOT_PATH + "config.ini");
+        File fh = new File(SysConstants.ROOT_PATH + "config.ini");
         if (!fh.exists() || !fh.canRead()) {
             return;
         }
@@ -642,7 +642,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     }
 
     private boolean attemptWriteConfig() {
-        File fh = new File(Constants.ROOT_PATH + "config.ini");
+        File fh = new File(SysConstants.ROOT_PATH + "config.ini");
         if (fh.exists() && !fh.canWrite()) {
             return false;
         }
@@ -676,17 +676,17 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private void initialiseState() {
         this.romHandler = null;
         this.currentRestrictions = null;
-        this.websiteLinkLabel.setText("<html><a href=\"" + Constants.WEBSITE_URL + "\">" + Constants.WEBSITE_URL
+        this.websiteLinkLabel.setText("<html><a href=\"" + SysConstants.WEBSITE_URL + "\">" + SysConstants.WEBSITE_URL
                 + "</a>");
         initialFormState();
-        this.romOpenChooser.setCurrentDirectory(new File(Constants.ROOT_PATH));
-        this.romSaveChooser.setCurrentDirectory(new File(Constants.ROOT_PATH));
-        if (new File(Constants.ROOT_PATH + "settings/").exists()) {
-            this.qsOpenChooser.setCurrentDirectory(new File(Constants.ROOT_PATH + "settings/"));
-            this.qsSaveChooser.setCurrentDirectory(new File(Constants.ROOT_PATH + "settings/"));
+        this.romOpenChooser.setCurrentDirectory(new File(SysConstants.ROOT_PATH));
+        this.romSaveChooser.setCurrentDirectory(new File(SysConstants.ROOT_PATH));
+        if (new File(SysConstants.ROOT_PATH + "settings/").exists()) {
+            this.qsOpenChooser.setCurrentDirectory(new File(SysConstants.ROOT_PATH + "settings/"));
+            this.qsSaveChooser.setCurrentDirectory(new File(SysConstants.ROOT_PATH + "settings/"));
         } else {
-            this.qsOpenChooser.setCurrentDirectory(new File(Constants.ROOT_PATH));
-            this.qsSaveChooser.setCurrentDirectory(new File(Constants.ROOT_PATH));
+            this.qsOpenChooser.setCurrentDirectory(new File(SysConstants.ROOT_PATH));
+            this.qsSaveChooser.setCurrentDirectory(new File(SysConstants.ROOT_PATH));
         }
     }
 
@@ -737,9 +737,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.paRandomizeRB.setEnabled(false);
         this.paWonderGuardCB.setEnabled(false);
         this.paFollowEvolutionsCB.setEnabled(false);
+        this.paBanTrappingCB.setEnabled(false);
+        this.paBanNegativeCB.setEnabled(false);
         this.paUnchangedRB.setSelected(true);
         this.paWonderGuardCB.setSelected(false);
         this.paFollowEvolutionsCB.setSelected(false);
+        this.paBanTrappingCB.setSelected(false);
+        this.paBanNegativeCB.setSelected(false);
 
         this.spCustomPoke1Chooser.setEnabled(false);
         this.spCustomPoke2Chooser.setEnabled(false);
@@ -1070,7 +1074,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
             this.pbsStandardEXPCurvesCB.setEnabled(true);
             this.pbsStandardEXPCurvesCB.setSelected(false);
-            
+
             this.pbsUpdateStatsCB.setEnabled(romHandler.generationOfPokemon() < 6);
             this.pbsUpdateStatsCB.setSelected(false);
 
@@ -1326,11 +1330,17 @@ public class RandomizerGUI extends javax.swing.JFrame {
         if (this.paRandomizeRB.isSelected()) {
             this.paWonderGuardCB.setEnabled(true);
             this.paFollowEvolutionsCB.setEnabled(true);
+            this.paBanTrappingCB.setEnabled(true);
+            this.paBanNegativeCB.setEnabled(true);
         } else {
             this.paWonderGuardCB.setEnabled(false);
             this.paWonderGuardCB.setSelected(false);
             this.paFollowEvolutionsCB.setEnabled(false);
             this.paFollowEvolutionsCB.setSelected(false);
+            this.paBanTrappingCB.setEnabled(false);
+            this.paBanTrappingCB.setSelected(false);
+            this.paBanNegativeCB.setEnabled(false);
+            this.paBanNegativeCB.setSelected(false);
         }
 
         if (this.tpUnchangedRB.isSelected()) {
@@ -1641,6 +1651,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.paRandomizeRB.setSelected(settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
         this.paWonderGuardCB.setSelected(settings.isAllowWonderGuard());
         this.paFollowEvolutionsCB.setSelected(settings.isAbilitiesFollowEvolutions());
+        this.paBanTrappingCB.setSelected(settings.isBanTrappingAbilities());
+        this.paBanNegativeCB.setSelected(settings.isBanNegativeAbilities());
 
         this.ptRandomFollowEvosRB.setSelected(settings.getTypesMod() == Settings.TypesMod.RANDOM_FOLLOW_EVOLUTIONS);
         this.ptRandomTotalRB.setSelected(settings.getTypesMod() == Settings.TypesMod.COMPLETELY_RANDOM);
@@ -1799,6 +1811,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setAbilitiesMod(paUnchangedRB.isSelected(), paRandomizeRB.isSelected());
         settings.setAllowWonderGuard(paWonderGuardCB.isSelected());
         settings.setAbilitiesFollowEvolutions(paFollowEvolutionsCB.isSelected());
+        settings.setBanTrappingAbilities(paBanTrappingCB.isSelected());
+        settings.setBanNegativeAbilities(paBanNegativeCB.isSelected());
 
         settings.setTypesMod(ptUnchangedRB.isSelected(), ptRandomFollowEvosRB.isSelected(),
                 ptRandomTotalRB.isSelected());
@@ -2101,7 +2115,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         try {
             String errlog = "error_" + ft.format(now) + ".txt";
             PrintStream ps = new PrintStream(new FileOutputStream(errlog));
-            ps.println("Randomizer Version: " + Constants.UPDATE_VERSION);
+            ps.println("Randomizer Version: " + SysConstants.UPDATE_VERSION);
             PrintStream e1 = System.err;
             System.setErr(ps);
             if (this.romHandler != null) {
@@ -2444,7 +2458,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private void websiteLinkLabelMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_websiteLinkLabelMouseClicked
         Desktop desktop = java.awt.Desktop.getDesktop();
         try {
-            desktop.browse(new URI(Constants.WEBSITE_URL));
+            desktop.browse(new URI(SysConstants.WEBSITE_URL));
         } catch (IOException e) {
         } catch (URISyntaxException e) {
         }
@@ -2582,6 +2596,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
         paRandomizeRB = new javax.swing.JRadioButton();
         paWonderGuardCB = new javax.swing.JCheckBox();
         paFollowEvolutionsCB = new javax.swing.JCheckBox();
+        paBansLabel = new javax.swing.JLabel();
+        paBanTrappingCB = new javax.swing.JCheckBox();
+        paBanNegativeCB = new javax.swing.JCheckBox();
         pokemonEvolutionsPanel = new javax.swing.JPanel();
         peUnchangedRB = new javax.swing.JRadioButton();
         peRandomRB = new javax.swing.JRadioButton();
@@ -2959,7 +2976,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(pbsChangesShuffleRB)
                     .addComponent(pbsChangesUnchangedRB)
                     .addComponent(pbsChangesRandomRB))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 92, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 66, Short.MAX_VALUE)
                 .addGroup(baseStatsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(pbsStandardEXPCurvesCB)
                     .addComponent(pbsFollowEvolutionsCB)
@@ -3011,6 +3028,14 @@ public class RandomizerGUI extends javax.swing.JFrame {
         paFollowEvolutionsCB.setText(bundle.getString("RandomizerGUI.paFollowEvolutionsCB.text")); // NOI18N
         paFollowEvolutionsCB.setToolTipText(bundle.getString("RandomizerGUI.paFollowEvolutionsCB.toolTipText")); // NOI18N
 
+        paBansLabel.setText(bundle.getString("RandomizerGUI.paBansLabel.text")); // NOI18N
+
+        paBanTrappingCB.setText(bundle.getString("RandomizerGUI.paBanTrappingCB.text")); // NOI18N
+        paBanTrappingCB.setToolTipText(bundle.getString("RandomizerGUI.paBanTrappingCB.toolTipText")); // NOI18N
+
+        paBanNegativeCB.setText(bundle.getString("RandomizerGUI.paBanNegativeCB.text")); // NOI18N
+        paBanNegativeCB.setToolTipText(bundle.getString("RandomizerGUI.paBanNegativeCB.toolTipText")); // NOI18N
+
         javax.swing.GroupLayout abilitiesPanelLayout = new javax.swing.GroupLayout(abilitiesPanel);
         abilitiesPanel.setLayout(abilitiesPanelLayout);
         abilitiesPanelLayout.setHorizontalGroup(
@@ -3018,13 +3043,23 @@ public class RandomizerGUI extends javax.swing.JFrame {
             .addGroup(abilitiesPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(abilitiesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(paUnchangedRB)
-                    .addComponent(paRandomizeRB))
-                .addGap(32, 32, 32)
+                    .addGroup(abilitiesPanelLayout.createSequentialGroup()
+                        .addGroup(abilitiesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(paUnchangedRB)
+                            .addComponent(paRandomizeRB))
+                        .addGap(32, 32, 32))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, abilitiesPanelLayout.createSequentialGroup()
+                        .addComponent(paBansLabel)
+                        .addGap(18, 18, 18)))
                 .addGroup(abilitiesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(paWonderGuardCB)
-                    .addComponent(paFollowEvolutionsCB))
-                .addContainerGap(102, Short.MAX_VALUE))
+                    .addGroup(abilitiesPanelLayout.createSequentialGroup()
+                        .addGroup(abilitiesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(paFollowEvolutionsCB)
+                            .addComponent(paBanTrappingCB))
+                        .addGap(18, 18, 18)
+                        .addComponent(paBanNegativeCB)))
+                .addContainerGap(25, Short.MAX_VALUE))
         );
         abilitiesPanelLayout.setVerticalGroup(
             abilitiesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -3037,6 +3072,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addGroup(abilitiesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(paRandomizeRB)
                     .addComponent(paFollowEvolutionsCB))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(abilitiesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(paBansLabel)
+                    .addComponent(paBanTrappingCB)
+                    .addComponent(paBanNegativeCB))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -4592,6 +4632,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JRadioButton mtmRandomRB;
     private javax.swing.JRadioButton mtmUnchangedRB;
     private javax.swing.JButton openROMButton;
+    private javax.swing.JCheckBox paBanNegativeCB;
+    private javax.swing.JCheckBox paBanTrappingCB;
+    private javax.swing.JLabel paBansLabel;
     private javax.swing.JCheckBox paFollowEvolutionsCB;
     private javax.swing.JRadioButton paRandomizeRB;
     private javax.swing.JRadioButton paUnchangedRB;

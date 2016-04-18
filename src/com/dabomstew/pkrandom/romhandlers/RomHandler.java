@@ -97,7 +97,7 @@ public interface RomHandler {
     // Randomise stats following evolutions for proportions or not (see
     // tooltips)
     public void randomizePokemonStats(boolean evolutionSanity);
-    
+
     // Update base stats to gen6
     public void updatePokemonStats();
 
@@ -136,7 +136,8 @@ public interface RomHandler {
 
     public String abilityName(int number);
 
-    public void randomizeAbilities(boolean evolutionSanity, boolean allowWonderGuard);
+    public void randomizeAbilities(boolean evolutionSanity, boolean allowWonderGuard, boolean banTrappingAbilities,
+            boolean banNegativeAbilities);
 
     // Randomizer: wild pokemon
     public List<EncounterSet> getEncounters(boolean useTimeOfDay);
@@ -209,7 +210,7 @@ public interface RomHandler {
 
     public void randomizeMovesLearnt(boolean typeThemed, boolean noBroken, boolean forceFourStartingMoves,
             double goodDamagingProbability);
-    
+
     public void orderDamagingMovesByDamage();
 
     public void metronomeOnlyMode();
