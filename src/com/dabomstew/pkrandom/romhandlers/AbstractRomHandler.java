@@ -2157,6 +2157,10 @@ public abstract class AbstractRomHandler implements RomHandler {
     @SuppressWarnings("unchecked")
     @Override
     public void randomizeTrainerNames(byte[] presetNames) {
+        if (!this.canChangeTrainerText()) {
+            return;
+        }
+
         List<String>[] allTrainerNames = new List[] { new ArrayList<String>(), new ArrayList<String>() };
         Map<Integer, List<String>> trainerNamesByLength[] = new Map[] { new TreeMap<Integer, List<String>>(),
                 new TreeMap<Integer, List<String>>() };
@@ -2281,6 +2285,10 @@ public abstract class AbstractRomHandler implements RomHandler {
     @SuppressWarnings("unchecked")
     @Override
     public void randomizeTrainerClassNames(byte[] presetNames) {
+        if (!this.canChangeTrainerText()) {
+            return;
+        }
+
         List<String> allTrainerClasses[] = new List[] { new ArrayList<String>(), new ArrayList<String>() };
         Map<Integer, List<String>> trainerClassesByLength[] = new Map[] { new HashMap<Integer, List<String>>(),
                 new HashMap<Integer, List<String>>() };

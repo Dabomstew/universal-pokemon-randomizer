@@ -1814,6 +1814,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
         logBlankLine();
     }
+    
+    @Override
+    public boolean canChangeTrainerText() {
+        return true;
+    }
 
     @Override
     public List<String> getTrainerNames() {

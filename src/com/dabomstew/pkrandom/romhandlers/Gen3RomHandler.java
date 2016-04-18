@@ -2344,6 +2344,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
         logBlankLine();
     }
+    
+    @Override
+    public boolean canChangeTrainerText() {
+        return true;
+    }
 
     @Override
     public List<String> getTrainerNames() {

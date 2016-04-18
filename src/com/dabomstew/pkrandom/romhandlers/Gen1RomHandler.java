@@ -1594,6 +1594,11 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
         }
         return tcNames;
     }
+    
+    @Override
+    public boolean canChangeTrainerText() {
+        return romEntry.getValue("CanChangeTrainerText") > 0;
+    }
 
     @Override
     public List<String> getTrainerNames() {

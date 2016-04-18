@@ -1564,6 +1564,11 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
         logBlankLine();
 
     }
+    
+    @Override
+    public boolean canChangeTrainerText() {
+        return romEntry.getValue("CanChangeTrainerText") > 0;
+    }
 
     @Override
     public List<String> getTrainerNames() {

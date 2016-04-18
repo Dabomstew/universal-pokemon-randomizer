@@ -824,6 +824,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tnRandomizeCB.setSelected(false);
         this.tcnRandomizeCB.setSelected(false);
 
+        this.tnRandomizeCB.setVisible(true);
+        this.tcnRandomizeCB.setVisible(true);
+
         this.wpUnchangedRB.setEnabled(false);
         this.wpRandomRB.setEnabled(false);
         this.wpArea11RB.setEnabled(false);
@@ -1133,10 +1136,12 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.tpTypeThemedRB.setEnabled(true);
             this.tpUnchangedRB.setEnabled(true);
             this.tpUnchangedRB.setSelected(true);
-            this.tnRandomizeCB.setEnabled(true);
-            this.tcnRandomizeCB.setEnabled(true);
+            this.tnRandomizeCB.setEnabled(romHandler.canChangeTrainerText());
+            this.tcnRandomizeCB.setEnabled(romHandler.canChangeTrainerText());
+            this.tnRandomizeCB.setVisible(romHandler.canChangeTrainerText());
+            this.tcnRandomizeCB.setVisible(romHandler.canChangeTrainerText());
 
-            if (romHandler instanceof Gen1RomHandler || romHandler instanceof Gen2RomHandler) {
+            if (romHandler.generationOfPokemon() < 3) {
                 this.tpNoEarlyShedinjaCB.setVisible(false);
             } else {
                 this.tpNoEarlyShedinjaCB.setVisible(true);

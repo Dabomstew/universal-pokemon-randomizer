@@ -292,6 +292,8 @@ public interface RomHandler {
     public void ensureMoveTutorCompatSanity();
 
     // Randomizer: trainer names
+    
+    public boolean canChangeTrainerText();
 
     public List<String> getTrainerNames();
 
