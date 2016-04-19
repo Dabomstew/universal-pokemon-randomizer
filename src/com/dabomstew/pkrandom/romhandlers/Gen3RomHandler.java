@@ -1775,7 +1775,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 // create the new TM text
                 int oldPointer = readPointer(tte.actualOffset);
                 if (oldPointer < 0 || oldPointer >= rom.length) {
-                    throw new RandomizationException("TM Text update failed: couldn't read a TM text pointer.");
+                    String nl = System.getProperty("line.separator");
+                    log("Couldn't insert new TM text. Skipping remaining TM text updates." + nl);
+                    return;
                 }
                 String moveName = this.moves[moveIndexes.get(tte.number - 1)].name;
                 // temporarily use underscores to stop the move name being split
@@ -2344,7 +2346,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
         logBlankLine();
     }
-    
+
     @Override
     public boolean canChangeTrainerText() {
         return true;

@@ -1,5 +1,30 @@
 package com.dabomstew.pkrandom;
 
+/*----------------------------------------------------------------------------*/
+/*--  Settings.java - encapsulates a configuration of settings used by the  --*/
+/*--                  randomizer to determine how to randomize the          --*/
+/*--                  target game.                                          --*/
+/*--                                                                        --*/
+/*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
+/*--  Pokemon and any associated names and the like are                     --*/
+/*--  trademark and (C) Nintendo 1996-2012.                                 --*/
+/*--                                                                        --*/
+/*--  The custom code written here is licensed under the terms of the GPL:  --*/
+/*--                                                                        --*/
+/*--  This program is free software: you can redistribute it and/or modify  --*/
+/*--  it under the terms of the GNU General Public License as published by  --*/
+/*--  the Free Software Foundation, either version 3 of the License, or     --*/
+/*--  (at your option) any later version.                                   --*/
+/*--                                                                        --*/
+/*--  This program is distributed in the hope that it will be useful,       --*/
+/*--  but WITHOUT ANY WARRANTY; without even the implied warranty of        --*/
+/*--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          --*/
+/*--  GNU General Public License for more details.                          --*/
+/*--                                                                        --*/
+/*--  You should have received a copy of the GNU General Public License     --*/
+/*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
+/*----------------------------------------------------------------------------*/
+
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -260,7 +285,7 @@ public class Settings {
         out.write(makeByteSelected(movesetsMod == MovesetsMod.COMPLETELY_RANDOM,
                 movesetsMod == MovesetsMod.RANDOM_PREFER_SAME_TYPE, movesetsMod == MovesetsMod.UNCHANGED,
                 movesetsMod == MovesetsMod.METRONOME_ONLY, startWithFourMoves, reorderDamagingMoves));
-        
+
         // 12 movesets good damaging
         out.write((movesetsForceGoodDamaging ? 0x80 : 0) | movesetsGoodDamagingPercent);
 
@@ -304,7 +329,7 @@ public class Settings {
         // 19 tms part 2
         // new in 170
         out.write(makeByteSelected(fullHMCompat));
-        
+
         // 20 tms good damaging
         out.write((tmsForceGoodDamaging ? 0x80 : 0) | tmsGoodDamagingPercent);
 
@@ -315,7 +340,7 @@ public class Settings {
                 moveTutorMovesMod == MoveTutorMovesMod.RANDOM, moveTutorMovesMod == MoveTutorMovesMod.UNCHANGED,
                 tutorLevelUpMoveSanity, keepFieldMoveTutors,
                 moveTutorsCompatibilityMod == MoveTutorsCompatibilityMod.FULL));
-        
+
         // 22 tutors good damaging
         out.write((tutorsForceGoodDamaging ? 0x80 : 0) | tutorsGoodDamagingPercent);
 
@@ -437,7 +462,7 @@ public class Settings {
         ));
         settings.setStartWithFourMoves(restoreState(data[11], 4));
         settings.setReorderDamagingMoves(restoreState(data[11], 5));
-        
+
         settings.setMovesetsForceGoodDamaging(restoreState(data[12], 7));
         settings.setMovesetsGoodDamagingPercent(data[12] & 0x7F);
 
@@ -490,7 +515,7 @@ public class Settings {
         settings.setTmLevelUpMoveSanity(restoreState(data[18], 5));
         settings.setKeepFieldMoveTMs(restoreState(data[18], 6));
         settings.setFullHMCompat(restoreState(data[19], 0));
-        
+
         settings.setTmsForceGoodDamaging(restoreState(data[20], 7));
         settings.setTmsGoodDamagingPercent(data[20] & 0x7F);
 
@@ -504,7 +529,7 @@ public class Settings {
         ));
         settings.setTutorLevelUpMoveSanity(restoreState(data[21], 5));
         settings.setKeepFieldMoveTutors(restoreState(data[21], 6));
-        
+
         settings.setTutorsForceGoodDamaging(restoreState(data[22], 7));
         settings.setTutorsGoodDamagingPercent(data[22] & 0x7F);
 

@@ -1,5 +1,31 @@
 package com.dabomstew.pkrandom;
 
+/*----------------------------------------------------------------------------*/
+/*--  SettingsUpdater.java - handles the process of updating a Settings file--*/
+/*--                         from an old randomizer version to use the      --*/
+/*--                         correct binary format so it can be loaded by   --*/
+/*--                         the current version.                           --*/
+/*--                                                                        --*/
+/*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
+/*--  Pokemon and any associated names and the like are                     --*/
+/*--  trademark and (C) Nintendo 1996-2012.                                 --*/
+/*--                                                                        --*/
+/*--  The custom code written here is licensed under the terms of the GPL:  --*/
+/*--                                                                        --*/
+/*--  This program is free software: you can redistribute it and/or modify  --*/
+/*--  it under the terms of the GNU General Public License as published by  --*/
+/*--  the Free Software Foundation, either version 3 of the License, or     --*/
+/*--  (at your option) any later version.                                   --*/
+/*--                                                                        --*/
+/*--  This program is distributed in the hope that it will be useful,       --*/
+/*--  but WITHOUT ANY WARRANTY; without even the implied warranty of        --*/
+/*--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          --*/
+/*--  GNU General Public License for more details.                          --*/
+/*--                                                                        --*/
+/*--  You should have received a copy of the GNU General Public License     --*/
+/*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
+/*----------------------------------------------------------------------------*/
+
 import java.nio.ByteBuffer;
 import java.util.zip.CRC32;
 
@@ -179,24 +205,24 @@ public class SettingsUpdater {
             if ((dataBlock[1] & 1) != 0) {
                 dataBlock[1] |= (1 << 1);
             }
-            
+
             // shift around stuff to give abilities their own byte.
-            
+
             // move byte 3 bit 0 to byte 0 bit 5
             // (byte 0 got cleared out by things becoming Tweaks in 170)
-            if((dataBlock[3] & 1) != 0) {
+            if ((dataBlock[3] & 1) != 0) {
                 dataBlock[0] |= (1 << 5);
             }
-            
+
             // move bits 4-6 from byte 1 to byte 3
             dataBlock[3] = (byte) ((dataBlock[1] & 0x70) >> 4);
-            
+
             // clean up byte 1 (keep bits 0-3, move bit 7 to 4, clear 5-7)
             dataBlock[1] = (byte) ((dataBlock[1] & 0x0F) | ((dataBlock[1] & 0x80) >> 3));
-            
+
             // empty byte for fully evolved trainer mon setting
             insertExtraByte(13, (byte) 30);
-            
+
             // bytes for "good damaging moves" settings
             insertExtraByte(12, (byte) 0);
             insertExtraByte(20, (byte) 0);
