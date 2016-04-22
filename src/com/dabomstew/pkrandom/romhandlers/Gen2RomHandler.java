@@ -2105,7 +2105,10 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
         int otLength = romEntry.getValue("TradeOTLength");
         int[] unused = romEntry.arrayEntries.get("TradesUnused");
         int unusedOffset = 0;
-        int entryLength = nicknameLength + otLength + 10;
+        int entryLength = nicknameLength + otLength + 9;
+        if (entryLength % 2 != 0) {
+            entryLength++;
+        }
 
         for (int entry = 0; entry < tableSize; entry++) {
             if (unusedOffset < unused.length && unused[unusedOffset] == entry) {

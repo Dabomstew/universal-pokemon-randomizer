@@ -717,7 +717,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         int picked = this.random.nextInt(allPokes.size());
                         Pokemon pickedMN = allPokes.get(picked);
                         areaMap.put(areaPk, pickedMN);
-                        pickablePokemon.remove(picked);
+                        pickablePokemon.remove(pickedMN);
                         if (allPokes != pickablePokemon) {
                             allPokes.remove(pickedMN);
                         }
