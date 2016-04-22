@@ -4575,8 +4575,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(versionLabel)
                     .addComponent(websiteLinkLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(randomizerOptionsPane, javax.swing.GroupLayout.PREFERRED_SIZE, 465, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(randomizerOptionsPane, javax.swing.GroupLayout.PREFERRED_SIZE, 465, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();

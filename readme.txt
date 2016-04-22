@@ -1,4 +1,4 @@
-Universal Pokemon Randomizer 1.7.0b
+Universal Pokemon Randomizer 1.7.1
 by Dabomstew, 2012-16
 
 Homepage: http://pokehacks.dabomstew.com/randomizer/index.php
