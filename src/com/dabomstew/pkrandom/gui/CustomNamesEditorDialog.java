@@ -66,15 +66,11 @@ public class CustomNamesEditorDialog extends javax.swing.JDialog {
         if (!new File(SysConstants.ROOT_PATH + SysConstants.customNamesFile).exists()) {
             java.awt.EventQueue.invokeLater(new Runnable() {
                 public void run() {
-                    JOptionPane
-                            .showMessageDialog(
-                                    CustomNamesEditorDialog.this,
-                                    "Welcome to the custom names editor!"
-                                            + "\nThis is where you can edit the names used for options like \"Randomize Trainer Names\"."
-                                            + "\nThe names are initially populated with a few default names included with the randomizer."
-                                            + "\nYou can share your customized name sets with others, too!"
-                                            + "\nJust send them the " + SysConstants.customNamesFile
-                                            + " file created in the randomizer directory.");
+                    JOptionPane.showMessageDialog(
+                            CustomNamesEditorDialog.this,
+                            String.format(
+                                    "Welcome to the custom names editor!\nThis is where you can edit the names used for options like \"Randomize Trainer Names\".\nThe names are initially populated with a few default names included with the randomizer.\nYou can share your customized name sets with others, too!\nJust send them the %s file created in the randomizer directory.",
+                                    SysConstants.customNamesFile));
                 }
             });
         }
@@ -142,8 +138,9 @@ public class CustomNamesEditorDialog extends javax.swing.JDialog {
 
     private void attemptClose() {
         if (pendingChanges) {
-            int result = JOptionPane.showConfirmDialog(this, "You've made some unsaved changes to your custom names."
-                    + "\nDo you want to save them before closing the editor?");
+            int result = JOptionPane
+                    .showConfirmDialog(this,
+                            "You've made some unsaved changes to your custom names.\nDo you want to save them before closing the editor?");
             if (result == JOptionPane.YES_OPTION) {
                 if (save()) {
                     dispose();
@@ -211,7 +208,8 @@ public class CustomNamesEditorDialog extends javax.swing.JDialog {
         closeBtn = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        setTitle("Custom Names Editor");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle"); // NOI18N
+        setTitle(bundle.getString("CustomNamesEditorDialog.title")); // NOI18N
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
@@ -225,7 +223,7 @@ public class CustomNamesEditorDialog extends javax.swing.JDialog {
         trainerNamesText.setRows(5);
         trainerNamesSP.setViewportView(trainerNamesText);
 
-        editorTabsPane.addTab("Trainer Names", trainerNamesSP);
+        editorTabsPane.addTab(bundle.getString("CustomNamesEditorDialog.trainerNamesSP.TabConstraints.tabTitle"), trainerNamesSP); // NOI18N
 
         trainerClassesSP.setHorizontalScrollBar(null);
 
@@ -233,7 +231,7 @@ public class CustomNamesEditorDialog extends javax.swing.JDialog {
         trainerClassesText.setRows(5);
         trainerClassesSP.setViewportView(trainerClassesText);
 
-        editorTabsPane.addTab("Trainer Classes", trainerClassesSP);
+        editorTabsPane.addTab(bundle.getString("CustomNamesEditorDialog.trainerClassesSP.TabConstraints.tabTitle"), trainerClassesSP); // NOI18N
 
         doublesTrainerNamesSP.setHorizontalScrollBar(null);
 
@@ -241,7 +239,7 @@ public class CustomNamesEditorDialog extends javax.swing.JDialog {
         doublesTrainerNamesText.setRows(5);
         doublesTrainerNamesSP.setViewportView(doublesTrainerNamesText);
 
-        editorTabsPane.addTab("Doubles Trainer Names", doublesTrainerNamesSP);
+        editorTabsPane.addTab(bundle.getString("CustomNamesEditorDialog.doublesTrainerNamesSP.TabConstraints.tabTitle"), doublesTrainerNamesSP); // NOI18N
 
         doublesTrainerClassesSP.setHorizontalScrollBar(null);
 
@@ -249,7 +247,7 @@ public class CustomNamesEditorDialog extends javax.swing.JDialog {
         doublesTrainerClassesText.setRows(5);
         doublesTrainerClassesSP.setViewportView(doublesTrainerClassesText);
 
-        editorTabsPane.addTab("Doubles Trainer Classes", doublesTrainerClassesSP);
+        editorTabsPane.addTab(bundle.getString("CustomNamesEditorDialog.doublesTrainerClassesSP.TabConstraints.tabTitle"), doublesTrainerClassesSP); // NOI18N
 
         nicknamesSP.setHorizontalScrollBar(null);
 
@@ -257,16 +255,16 @@ public class CustomNamesEditorDialog extends javax.swing.JDialog {
         nicknamesText.setRows(5);
         nicknamesSP.setViewportView(nicknamesText);
 
-        editorTabsPane.addTab("Pokemon Nicknames", nicknamesSP);
+        editorTabsPane.addTab(bundle.getString("CustomNamesEditorDialog.nicknamesSP.TabConstraints.tabTitle"), nicknamesSP); // NOI18N
 
-        saveBtn.setText("Save");
+        saveBtn.setText(bundle.getString("CustomNamesEditorDialog.saveBtn.text")); // NOI18N
         saveBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 saveBtnActionPerformed(evt);
             }
         });
 
-        closeBtn.setText("Close");
+        closeBtn.setText(bundle.getString("CustomNamesEditorDialog.closeBtn.text")); // NOI18N
         closeBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 closeBtnActionPerformed(evt);
