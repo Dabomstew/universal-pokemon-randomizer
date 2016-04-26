@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
@@ -292,7 +293,7 @@ public interface RomHandler {
     public void ensureMoveTutorCompatSanity();
 
     // Randomizer: trainer names
-    
+
     public boolean canChangeTrainerText();
 
     public List<String> getTrainerNames();
@@ -315,7 +316,7 @@ public interface RomHandler {
     // Only needed if above mode is "MAX LENGTH WITH CLASS"
     public List<Integer> getTCNameLengthsByTrainer();
 
-    public void randomizeTrainerNames(byte[] presetNames);
+    public void randomizeTrainerNames(CustomNamesSet customNames);
 
     // Randomizer: trainer class names
 
@@ -327,7 +328,7 @@ public interface RomHandler {
 
     public int maxTrainerClassNameLength();
 
-    public void randomizeTrainerClassNames(byte[] presetNames);
+    public void randomizeTrainerClassNames(CustomNamesSet customNames);
 
     // Items
 
@@ -373,8 +374,8 @@ public interface RomHandler {
 
     public void setIngameTrades(List<IngameTrade> trades);
 
-    public void randomizeIngameTrades(boolean randomizeRequest, byte[] presetNicknames, boolean randomNickname,
-            byte[] presetTrainerNames, boolean randomOT, boolean randomStats, boolean randomItem);
+    public void randomizeIngameTrades(boolean randomizeRequest, boolean randomNickname, boolean randomOT,
+            boolean randomStats, boolean randomItem, CustomNamesSet customNames);
 
     public boolean hasDVs();
 

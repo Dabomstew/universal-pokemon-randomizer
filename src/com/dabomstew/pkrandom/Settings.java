@@ -46,13 +46,11 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 public class Settings {
 
-    public static final int VERSION = 171;
+    public static final int VERSION = 172;
 
     public static final int LENGTH_OF_SETTINGS_DATA = 35;
 
-    private byte[] trainerClasses;
-    private byte[] trainerNames;
-    private byte[] nicknames;
+    private CustomNamesSet customNames;
 
     private String romName;
     private boolean updatedFromOldVersion = false;
@@ -397,9 +395,7 @@ public class Settings {
 
         try {
             writeFullInt(out, (int) checksum.getValue());
-            writeFullInt(out, FileFunctions.getFileChecksum("trainerclasses.txt"));
-            writeFullInt(out, FileFunctions.getFileChecksum("trainernames.txt"));
-            writeFullInt(out, FileFunctions.getFileChecksum("nicknames.txt"));
+            writeFullInt(out, FileFunctions.getFileChecksum(SysConstants.customNamesFile));
         } catch (IOException e) {
         }
 
@@ -703,31 +699,13 @@ public class Settings {
     }
 
     // getters and setters
-
-    public byte[] getTrainerClasses() {
-        return trainerClasses;
+    
+    public CustomNamesSet getCustomNames() {
+        return customNames;
     }
-
-    public Settings setTrainerClasses(byte[] trainerClasses) {
-        this.trainerClasses = trainerClasses;
-        return this;
-    }
-
-    public byte[] getTrainerNames() {
-        return trainerNames;
-    }
-
-    public Settings setTrainerNames(byte[] trainerNames) {
-        this.trainerNames = trainerNames;
-        return this;
-    }
-
-    public byte[] getNicknames() {
-        return nicknames;
-    }
-
-    public Settings setNicknames(byte[] nicknames) {
-        this.nicknames = nicknames;
+    
+    public Settings setCustomNames(CustomNamesSet customNames) {
+        this.customNames = customNames;
         return this;
     }
 
@@ -1576,12 +1554,12 @@ public class Settings {
 
     private static void checkChecksum(byte[] data) {
         // Check the checksum
-        ByteBuffer buf = ByteBuffer.allocate(4).put(data, data.length - 16, 4);
+        ByteBuffer buf = ByteBuffer.allocate(4).put(data, data.length - 8, 4);
         buf.rewind();
         int crc = buf.getInt();
 
         CRC32 checksum = new CRC32();
-        checksum.update(data, 0, data.length - 16);
+        checksum.update(data, 0, data.length - 8);
 
         if ((int) checksum.getValue() != crc) {
             throw new IllegalArgumentException("Malformed input string");

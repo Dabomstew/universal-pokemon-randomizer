@@ -48,7 +48,7 @@ public class SettingsUpdater {
      */
     public String update(int oldVersion, String configString) {
         byte[] data = DatatypeConverter.parseBase64Binary(configString);
-        this.dataBlock = new byte[100];
+        this.dataBlock = new byte[200];
         this.actualDataLength = data.length;
         System.arraycopy(data, 0, this.dataBlock, 0, this.actualDataLength);
 
@@ -228,14 +228,20 @@ public class SettingsUpdater {
             insertExtraByte(20, (byte) 0);
             insertExtraByte(22, (byte) 0);
         }
+        
+        if(oldVersion < 172) {
+            // 171 to 172: removed separate names files in favor of one unified file
+            // so two of the trailing checksums are gone
+            actualDataLength -= 8;
+        }
 
         // fix checksum
         CRC32 checksum = new CRC32();
-        checksum.update(dataBlock, 0, actualDataLength - 16);
+        checksum.update(dataBlock, 0, actualDataLength - 8);
 
         // convert crc32 to int bytes
         byte[] crcBuf = ByteBuffer.allocate(4).putInt((int) checksum.getValue()).array();
-        System.arraycopy(crcBuf, 0, dataBlock, actualDataLength - 16, 4);
+        System.arraycopy(crcBuf, 0, dataBlock, actualDataLength - 8, 4);
 
         // have to make a new byte array to convert to base64
         byte[] finalConfigString = new byte[actualDataLength];

@@ -33,6 +33,12 @@ public class SysConstants {
     public static final String WEBSITE_URL = "http://pokehacks.dabomstew.com/randomizer/";
     public static final int UPDATE_VERSION = 1710;
     public static final String ROOT_PATH = getRootPath();
+    public static final String customNamesFile = "customnames.rncn";
+    
+    // OLD custom names files
+    public static final String tnamesFile = "trainernames.txt";
+    public static final String tclassesFile = "trainerclasses.txt";
+    public static final String nnamesFile = "nicknames.txt";
 
     private static String getRootPath() {
         try {

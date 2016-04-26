@@ -311,11 +311,11 @@ public class Randomizer {
 
         if (romHandler.canChangeTrainerText()) {
             if (settings.isRandomizeTrainerClassNames()) {
-                romHandler.randomizeTrainerClassNames(settings.getTrainerClasses());
+                romHandler.randomizeTrainerClassNames(settings.getCustomNames());
             }
 
             if (settings.isRandomizeTrainerNames()) {
-                romHandler.randomizeTrainerNames(settings.getTrainerNames());
+                romHandler.randomizeTrainerNames(settings.getCustomNames());
             }
         }
 
@@ -480,15 +480,13 @@ public class Randomizer {
         // In-game trades
         List<IngameTrade> oldTrades = romHandler.getIngameTrades();
         if (settings.getInGameTradesMod() == Settings.InGameTradesMod.RANDOMIZE_GIVEN) {
-            romHandler.randomizeIngameTrades(false, settings.getNicknames(),
-                    settings.isRandomizeInGameTradesNicknames(), settings.getTrainerNames(),
+            romHandler.randomizeIngameTrades(false, settings.isRandomizeInGameTradesNicknames(),
                     settings.isRandomizeInGameTradesOTs(), settings.isRandomizeInGameTradesIVs(),
-                    settings.isRandomizeInGameTradesItems());
+                    settings.isRandomizeInGameTradesItems(), settings.getCustomNames());
         } else if (settings.getInGameTradesMod() == Settings.InGameTradesMod.RANDOMIZE_GIVEN_AND_REQUESTED) {
-            romHandler.randomizeIngameTrades(true, settings.getNicknames(),
-                    settings.isRandomizeInGameTradesNicknames(), settings.getTrainerNames(),
+            romHandler.randomizeIngameTrades(true, settings.isRandomizeInGameTradesNicknames(),
                     settings.isRandomizeInGameTradesOTs(), settings.isRandomizeInGameTradesIVs(),
-                    settings.isRandomizeInGameTradesItems());
+                    settings.isRandomizeInGameTradesItems(), settings.getCustomNames());
         }
 
         if (!(settings.getInGameTradesMod() == Settings.InGameTradesMod.UNCHANGED)) {

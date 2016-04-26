@@ -42,7 +42,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
@@ -63,7 +63,7 @@ public class PresetLoadDialog extends javax.swing.JDialog {
     private boolean completed = false;
     private String requiredName = null;
     private volatile boolean changeFieldsWithoutCheck = false;
-    private byte[] trainerClasses = null, trainerNames = null, nicknames = null;
+    private CustomNamesSet customNames;
     java.util.ResourceBundle bundle;
 
     /**
@@ -123,6 +123,7 @@ public class PresetLoadDialog extends javax.swing.JDialog {
             invalidValues();
             return false;
         }
+        
         // 161 onwards: look for version number
         String configString = this.configStringField.getText();
         if (configString.length() < 3) {
@@ -144,8 +145,7 @@ public class PresetLoadDialog extends javax.swing.JDialog {
         }
 
         try {
-            name = this.parentGUI.getValidRequiredROMName(configString.substring(3), trainerClasses, trainerNames,
-                    nicknames);
+            name = this.parentGUI.getValidRequiredROMName(configString.substring(3), customNames);
         } catch (InvalidSupplementFilesException ex) {
             safelyClearFields();
             invalidValues();
@@ -206,6 +206,8 @@ public class PresetLoadDialog extends javax.swing.JDialog {
                 versionWanted = "1.6.3b";
             } else if (presetVN == 170) {
                 versionWanted = "1.7.0b";
+            } else if (presetVN == 171) {
+                versionWanted = "1.7.1";
             }
             JOptionPane.showMessageDialog(this,
                     String.format(bundle.getString("PresetLoadDialog.olderVersionRequired"), versionWanted));
@@ -250,16 +252,8 @@ public class PresetLoadDialog extends javax.swing.JDialog {
         return this.configStringField.getText().substring(3);
     }
 
-    public byte[] getTrainerClasses() {
-        return trainerClasses;
-    }
-
-    public byte[] getTrainerNames() {
-        return trainerNames;
-    }
-
-    public byte[] getNicknames() {
-        return nicknames;
+    public CustomNamesSet getCustomNames() {
+        return customNames;
     }
 
     private void presetFileButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_presetFileButtonActionPerformed
@@ -277,12 +271,7 @@ public class PresetLoadDialog extends javax.swing.JDialog {
                 }
                 long seed = dis.readLong();
                 String preset = dis.readUTF();
-                int tclen = dis.readInt();
-                trainerClasses = FileFunctions.readFullyIntoBuffer(dis, tclen);
-                int tnlen = dis.readInt();
-                trainerNames = FileFunctions.readFullyIntoBuffer(dis, tnlen);
-                int nnlen = dis.readInt();
-                nicknames = FileFunctions.readFullyIntoBuffer(dis, nnlen);
+                customNames = new CustomNamesSet(dis);
                 changeFieldsWithoutCheck = true;
                 this.randomSeedField.setText(Long.toString(seed));
                 this.configStringField.setText(checkByte + "" + preset);
@@ -297,8 +286,7 @@ public class PresetLoadDialog extends javax.swing.JDialog {
                     this.randomSeedField.setEnabled(true);
                     this.configStringField.setEnabled(true);
                     this.presetFileField.setText("");
-                    trainerClasses = null;
-                    trainerNames = null;
+                    customNames = null;
                     JOptionPane.showMessageDialog(this, bundle.getString("PresetLoadDialog.invalidSeedFile"));
                 }
                 dis.close();

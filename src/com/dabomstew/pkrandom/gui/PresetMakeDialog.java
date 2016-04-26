@@ -44,6 +44,7 @@ import javax.swing.SwingUtilities;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.SysConstants;
 
 /**
  * 
@@ -203,15 +204,8 @@ public class PresetMakeDialog extends javax.swing.JDialog {
                 dos.writeByte((byte) Settings.VERSION);
                 dos.writeLong(seed);
                 dos.writeUTF(configString);
-                byte[] trainerclasses = readFile(FileFunctions.openConfig("trainerclasses.txt"));
-                dos.writeInt(trainerclasses.length);
-                dos.write(trainerclasses);
-                byte[] trainernames = readFile(FileFunctions.openConfig("trainernames.txt"));
-                dos.writeInt(trainernames.length);
-                dos.write(trainernames);
-                byte[] nicknames = readFile(FileFunctions.openConfig("nicknames.txt"));
-                dos.writeInt(nicknames.length);
-                dos.write(nicknames);
+                byte[] customnames = readFile(FileFunctions.openConfig(SysConstants.customNamesFile));
+                dos.write(customnames);
                 dos.close();
                 JOptionPane.showMessageDialog(this, "Preset file saved to\n" + fh.getAbsolutePath());
             } catch (IOException ex) {

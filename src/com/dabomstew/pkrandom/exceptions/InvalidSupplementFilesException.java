@@ -34,15 +34,10 @@ public class InvalidSupplementFilesException extends Exception {
     private static final long serialVersionUID = -3778498838677886358L;
 
     public enum Type {
-        UNKNOWN, TOO_SHORT, TRAINER_CLASSES, TRAINER_NAMES, NICKNAMES
+        UNKNOWN, TOO_SHORT, CUSTOM_NAMES
     }
 
     private final Type type;
-
-    public InvalidSupplementFilesException() {
-        // legacy
-        this.type = Type.UNKNOWN;
-    }
 
     public InvalidSupplementFilesException(Type type, String message) {
         super(message);

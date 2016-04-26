@@ -26,10 +26,11 @@ bin
 nbproject
 build.xml
 manifest.mf
-nicknames.txt
-trainerclasses.txt
-trainernames.txt
+/nicknames.txt
+/trainerclasses.txt
+/trainernames.txt
 /build/
 *.dsm
 *.dsv
 build_eclipse.xml
+/customnames.rncn

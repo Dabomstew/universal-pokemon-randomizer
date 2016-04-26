@@ -28,6 +28,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -66,8 +67,8 @@ public class FileFunctions {
         return new File(original.getAbsolutePath().replace(original.getName(), "") + filename);
     }
 
-    private static List<String> overrideFiles = Arrays.asList(new String[] { "trainerclasses.txt", "trainernames.txt",
-            "nicknames.txt" });
+    private static List<String> overrideFiles = Arrays.asList(new String[] { SysConstants.customNamesFile,
+            SysConstants.tclassesFile, SysConstants.tnamesFile, SysConstants.nnamesFile });
 
     public static boolean configExists(String filename) {
         if (overrideFiles.contains(filename)) {
@@ -95,6 +96,13 @@ public class FileFunctions {
             }
         }
         return FileFunctions.class.getResourceAsStream("/com/dabomstew/pkrandom/config/" + filename);
+    }
+
+    public static CustomNamesSet getCustomNames() throws IOException {
+        InputStream is = openConfig(SysConstants.customNamesFile);
+        CustomNamesSet cns = new CustomNamesSet(is);
+        is.close();
+        return cns;
     }
 
     public static int readFullInt(byte[] data, int offset) {
@@ -138,6 +146,12 @@ public class FileFunctions {
         while (offs < length && (read = in.read(buf, offs + offset, length - offs)) != -1) {
             offs += read;
         }
+    }
+
+    public static void writeBytesToFile(String filename, byte[] data) throws IOException {
+        FileOutputStream fos = new FileOutputStream(filename);
+        fos.write(data);
+        fos.close();
     }
 
     public static byte[] getConfigAsBytes(String filename) throws IOException {

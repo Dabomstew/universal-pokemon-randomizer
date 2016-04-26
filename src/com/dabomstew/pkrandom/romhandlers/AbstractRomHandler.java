@@ -27,8 +27,6 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,13 +39,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
@@ -69,10 +66,6 @@ import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 
 public abstract class AbstractRomHandler implements RomHandler {
-
-    private static final String tnamesFile = "trainernames.txt";
-    private static final String tclassesFile = "trainerclasses.txt";
-    private static final String nnamesFile = "nicknames.txt";
 
     private boolean restrictionsSet;
     protected List<Pokemon> mainPokemonList;
@@ -1757,7 +1750,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 List<Move> pickList = validMoves;
                 if (attemptDamaging) {
                     if (typeOfMove != null) {
-                        if (checkForUnusedMove(validTypeDamagingMoves.get(typeOfMove), learnt)) {
+                        if (validTypeDamagingMoves.containsKey(typeOfMove) && checkForUnusedMove(validTypeDamagingMoves.get(typeOfMove), learnt)) {
                             pickList = validTypeDamagingMoves.get(typeOfMove);
                         } else if (checkForUnusedMove(validDamagingMoves, learnt)) {
                             pickList = validDamagingMoves;
@@ -1766,7 +1759,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         pickList = validDamagingMoves;
                     }
                 } else if (typeOfMove != null) {
-                    if (checkForUnusedMove(validTypeMoves.get(typeOfMove), learnt)) {
+                    if (validTypeMoves.containsKey(typeOfMove) && checkForUnusedMove(validTypeMoves.get(typeOfMove), learnt)) {
                         pickList = validTypeMoves.get(typeOfMove);
                     }
                 }
@@ -2261,47 +2254,42 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void randomizeTrainerNames(byte[] presetNames) {
+    public void randomizeTrainerNames(CustomNamesSet customNames) {
         if (!this.canChangeTrainerText()) {
             return;
         }
 
+        // index 0 = singles, 1 = doubles
         List<String>[] allTrainerNames = new List[] { new ArrayList<String>(), new ArrayList<String>() };
         Map<Integer, List<String>> trainerNamesByLength[] = new Map[] { new TreeMap<Integer, List<String>>(),
                 new TreeMap<Integer, List<String>>() };
-        // Check for the file
-        if (FileFunctions.configExists(tnamesFile)) {
-            try {
-                Scanner sc = null;
-                if (presetNames == null) {
-                    sc = new Scanner(FileFunctions.openConfig(tnamesFile), "UTF-8");
+
+        // Read name lists
+        for (String trainername : customNames.getTrainerNames()) {
+            int len = this.internalStringLength(trainername);
+            if (len <= 10) {
+                allTrainerNames[0].add(trainername);
+                if (trainerNamesByLength[0].containsKey(len)) {
+                    trainerNamesByLength[0].get(len).add(trainername);
                 } else {
-                    sc = new Scanner(new ByteArrayInputStream(presetNames), "UTF-8");
+                    List<String> namesOfThisLength = new ArrayList<String>();
+                    namesOfThisLength.add(trainername);
+                    trainerNamesByLength[0].put(len, namesOfThisLength);
                 }
-                while (sc.hasNextLine()) {
-                    String trainername = sc.nextLine().trim();
-                    if (trainername.isEmpty()) {
-                        continue;
-                    }
-                    if (trainername.startsWith("\uFEFF")) {
-                        trainername = trainername.substring(1);
-                    }
-                    int idx = trainername.contains("&") ? 1 : 0;
-                    int len = this.internalStringLength(trainername);
-                    if (len <= 10) {
-                        allTrainerNames[idx].add(trainername);
-                        if (trainerNamesByLength[idx].containsKey(len)) {
-                            trainerNamesByLength[idx].get(len).add(trainername);
-                        } else {
-                            List<String> namesOfThisLength = new ArrayList<String>();
-                            namesOfThisLength.add(trainername);
-                            trainerNamesByLength[idx].put(len, namesOfThisLength);
-                        }
-                    }
+            }
+        }
+
+        for (String trainername : customNames.getDoublesTrainerNames()) {
+            int len = this.internalStringLength(trainername);
+            if (len <= 10) {
+                allTrainerNames[1].add(trainername);
+                if (trainerNamesByLength[1].containsKey(len)) {
+                    trainerNamesByLength[1].get(len).add(trainername);
+                } else {
+                    List<String> namesOfThisLength = new ArrayList<String>();
+                    namesOfThisLength.add(trainername);
+                    trainerNamesByLength[1].put(len, namesOfThisLength);
                 }
-                sc.close();
-            } catch (FileNotFoundException e) {
-                // Can't read, just don't load anything
             }
         }
 
@@ -2380,7 +2368,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         if (!success) {
             throw new RandomizationException("Could not randomize trainer names in a reasonable amount of attempts."
-                    + "\nPlease add some shorter names to your trainer names file.");
+                    + "\nPlease add some shorter names to your custom trainer names.");
         }
 
         // Done choosing, save
@@ -2389,48 +2377,38 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void randomizeTrainerClassNames(byte[] presetNames) {
+    public void randomizeTrainerClassNames(CustomNamesSet customNames) {
         if (!this.canChangeTrainerText()) {
             return;
         }
 
+        // index 0 = singles, index 1 = doubles
         List<String> allTrainerClasses[] = new List[] { new ArrayList<String>(), new ArrayList<String>() };
         Map<Integer, List<String>> trainerClassesByLength[] = new Map[] { new HashMap<Integer, List<String>>(),
                 new HashMap<Integer, List<String>>() };
-        // Check for the file
-        if (FileFunctions.configExists(tclassesFile)) {
-            try {
-                Scanner sc = null;
-                if (presetNames == null) {
-                    sc = new Scanner(FileFunctions.openConfig(tclassesFile), "UTF-8");
-                } else {
-                    sc = new Scanner(new ByteArrayInputStream(presetNames), "UTF-8");
-                }
-                while (sc.hasNextLine()) {
-                    String trainerClassName = sc.nextLine().trim();
-                    if (trainerClassName.isEmpty()) {
-                        continue;
-                    }
-                    if (trainerClassName.startsWith("\uFEFF")) {
-                        trainerClassName = trainerClassName.substring(1);
-                    }
-                    String checkName = trainerClassName.toLowerCase();
-                    int idx = (checkName.endsWith("couple") || checkName.contains(" and ") || checkName.endsWith("kin")
-                            || checkName.endsWith("team") || checkName.contains("&") || (checkName.endsWith("s") && !checkName
-                            .endsWith("ss"))) ? 1 : 0;
-                    allTrainerClasses[idx].add(trainerClassName);
-                    int len = this.internalStringLength(trainerClassName);
-                    if (trainerClassesByLength[idx].containsKey(len)) {
-                        trainerClassesByLength[idx].get(len).add(trainerClassName);
-                    } else {
-                        List<String> namesOfThisLength = new ArrayList<String>();
-                        namesOfThisLength.add(trainerClassName);
-                        trainerClassesByLength[idx].put(len, namesOfThisLength);
-                    }
-                }
-                sc.close();
-            } catch (FileNotFoundException e) {
-                // Can't read, just don't load anything
+
+        // Read names data
+        for (String trainerClassName : customNames.getTrainerClasses()) {
+            allTrainerClasses[0].add(trainerClassName);
+            int len = this.internalStringLength(trainerClassName);
+            if (trainerClassesByLength[0].containsKey(len)) {
+                trainerClassesByLength[0].get(len).add(trainerClassName);
+            } else {
+                List<String> namesOfThisLength = new ArrayList<String>();
+                namesOfThisLength.add(trainerClassName);
+                trainerClassesByLength[0].put(len, namesOfThisLength);
+            }
+        }
+
+        for (String trainerClassName : customNames.getDoublesTrainerClasses()) {
+            allTrainerClasses[1].add(trainerClassName);
+            int len = this.internalStringLength(trainerClassName);
+            if (trainerClassesByLength[1].containsKey(len)) {
+                trainerClassesByLength[1].get(len).add(trainerClassName);
+            } else {
+                List<String> namesOfThisLength = new ArrayList<String>();
+                namesOfThisLength.add(trainerClassName);
+                trainerClassesByLength[1].put(len, namesOfThisLength);
             }
         }
 
@@ -2635,69 +2613,32 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizeIngameTrades(boolean randomizeRequest, byte[] presetNicknames, boolean randomNickname,
-            byte[] presetTrainerNames, boolean randomOT, boolean randomStats, boolean randomItem) {
+    public void randomizeIngameTrades(boolean randomizeRequest, boolean randomNickname, boolean randomOT,
+            boolean randomStats, boolean randomItem, CustomNamesSet customNames) {
         checkPokemonRestrictions();
         // Process trainer names
-        List<String> singleTrainerNames = new ArrayList<String>();
+        List<String> trainerNames = new ArrayList<String>();
         // Check for the file
-        if (FileFunctions.configExists(tnamesFile) && randomOT) {
+        if (randomOT) {
             int maxOT = this.maxTradeOTNameLength();
-            try {
-                Scanner sc = null;
-                if (presetTrainerNames == null) {
-                    sc = new Scanner(FileFunctions.openConfig(tnamesFile), "UTF-8");
-                } else {
-                    sc = new Scanner(new ByteArrayInputStream(presetTrainerNames), "UTF-8");
+            for (String trainername : customNames.getTrainerNames()) {
+                int len = this.internalStringLength(trainername);
+                if (len <= maxOT && !trainerNames.contains(trainername)) {
+                    trainerNames.add(trainername);
                 }
-                while (sc.hasNextLine()) {
-                    String trainername = sc.nextLine().trim();
-                    if (trainername.isEmpty()) {
-                        continue;
-                    }
-                    if (trainername.startsWith("\uFEFF")) {
-                        trainername = trainername.substring(1);
-                    }
-                    int idx = trainername.contains("&") ? 1 : 0;
-                    int len = this.internalStringLength(trainername);
-                    if (len <= maxOT && idx == 0 && !singleTrainerNames.contains(trainername)) {
-                        singleTrainerNames.add(trainername);
-                    }
-                }
-                sc.close();
-            } catch (FileNotFoundException e) {
-                // Can't read, just don't load anything
             }
         }
 
         // Process nicknames
         List<String> nicknames = new ArrayList<String>();
         // Check for the file
-        if (FileFunctions.configExists(nnamesFile) && randomNickname) {
+        if (randomNickname) {
             int maxNN = this.maxTradeNicknameLength();
-            try {
-                Scanner sc = null;
-                if (presetNicknames == null) {
-                    sc = new Scanner(FileFunctions.openConfig(nnamesFile), "UTF-8");
-                } else {
-                    sc = new Scanner(new ByteArrayInputStream(presetNicknames), "UTF-8");
+            for (String nickname : customNames.getPokemonNicknames()) {
+                int len = this.internalStringLength(nickname);
+                if (len <= maxNN && !nicknames.contains(nickname)) {
+                    nicknames.add(nickname);
                 }
-                while (sc.hasNextLine()) {
-                    String nickname = sc.nextLine().trim();
-                    if (nickname.isEmpty()) {
-                        continue;
-                    }
-                    if (nickname.startsWith("\uFEFF")) {
-                        nickname = nickname.substring(1);
-                    }
-                    int len = this.internalStringLength(nickname);
-                    if (len <= maxNN && !nicknames.contains(nickname)) {
-                        nicknames.add(nickname);
-                    }
-                }
-                sc.close();
-            } catch (FileNotFoundException e) {
-                // Can't read, just don't load anything
             }
         }
 
@@ -2710,7 +2651,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         ItemList possibleItems = this.getAllowedItems();
 
         int nickCount = nicknames.size();
-        int trnameCount = singleTrainerNames.size();
+        int trnameCount = trainerNames.size();
 
         for (IngameTrade trade : trades) {
             // pick new given pokemon
@@ -2749,9 +2690,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
 
             if (randomOT && trnameCount > usedOTs.size()) {
-                String ot = singleTrainerNames.get(this.random.nextInt(trnameCount));
+                String ot = trainerNames.get(this.random.nextInt(trnameCount));
                 while (usedOTs.contains(ot)) {
-                    ot = singleTrainerNames.get(this.random.nextInt(trnameCount));
+                    ot = trainerNames.get(this.random.nextInt(trnameCount));
                 }
                 usedOTs.add(ot);
                 trade.otName = ot;

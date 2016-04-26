@@ -66,6 +66,7 @@ import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.xml.bind.DatatypeConverter;
 
+import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RandomSource;
@@ -554,52 +555,33 @@ public class RandomizerGUI extends javax.swing.JFrame {
         return gl;
     }
 
+    /**
+     * Repurposed: now checks for converting old custom names format to new
+     */
     private void checkCustomNames() {
-        String[] cnamefiles = new String[] { "trainerclasses.txt", "trainernames.txt", "nicknames.txt" };
-        int[] defaultcsums = new int[] { -1442281799, -1499590809, 1641673648 };
+        String[] cnamefiles = new String[] { SysConstants.tnamesFile, SysConstants.tclassesFile,
+                SysConstants.nnamesFile };
 
-        boolean foundCustom = false;
+        boolean foundFile = false;
         for (int file = 0; file < 3; file++) {
-            File oldFile = new File(SysConstants.ROOT_PATH + "/config/" + cnamefiles[file]);
             File currentFile = new File(SysConstants.ROOT_PATH + cnamefiles[file]);
-            if (oldFile.exists() && oldFile.canRead() && !currentFile.exists()) {
-                try {
-                    int crc = FileFunctions.getFileChecksum(new FileInputStream(oldFile));
-                    if (crc != defaultcsums[file]) {
-                        foundCustom = true;
-                        break;
-                    }
-                } catch (FileNotFoundException e) {
-                }
+            if (currentFile.exists()) {
+                foundFile = true;
+                break;
             }
         }
 
-        if (foundCustom) {
+        if (foundFile) {
             int response = JOptionPane.showConfirmDialog(RandomizerGUI.this,
-                    bundle.getString("RandomizerGUI.copyNameFilesDialog.text"),
-                    bundle.getString("RandomizerGUI.copyNameFilesDialog.title"), JOptionPane.YES_NO_OPTION);
-            boolean onefailed = false;
+                    bundle.getString("RandomizerGUI.convertNameFilesDialog.text"),
+                    bundle.getString("RandomizerGUI.convertNameFilesDialog.title"), JOptionPane.YES_NO_OPTION);
             if (response == JOptionPane.YES_OPTION) {
-                for (String filename : cnamefiles) {
-                    if (new File(SysConstants.ROOT_PATH + "/config/" + filename).canRead()) {
-                        try {
-                            FileInputStream fis = new FileInputStream(new File(SysConstants.ROOT_PATH + "config/"
-                                    + filename));
-                            FileOutputStream fos = new FileOutputStream(new File(SysConstants.ROOT_PATH + filename));
-                            byte[] buf = new byte[1024];
-                            int len;
-                            while ((len = fis.read(buf)) > 0) {
-                                fos.write(buf, 0, len);
-                            }
-                            fos.close();
-                            fis.close();
-                        } catch (IOException ex) {
-                            onefailed = true;
-                        }
-                    }
-                }
-                if (onefailed) {
-                    JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.copyNameFilesFailed"));
+                try {
+                    CustomNamesSet newNamesData = CustomNamesSet.importOldNames();
+                    byte[] data = newNamesData.getBytes();
+                    FileFunctions.writeBytesToFile(SysConstants.customNamesFile, data);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.convertNameFilesFailed"));
                 }
             }
         }
@@ -627,7 +609,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                         String key = tokens[0].trim();
                         if (key.equalsIgnoreCase("autoupdate")) {
                             autoUpdateEnabled = Boolean.parseBoolean(tokens[1].trim());
-                        } else if (key.equalsIgnoreCase("checkedcustomnames")) {
+                        } else if (key.equalsIgnoreCase("checkedcustomnames172")) {
                             haveCheckedCustomNames = Boolean.parseBoolean(tokens[1].trim());
                         } else if (key.equalsIgnoreCase("usescrollpane")) {
                             useScrollPaneMode = Boolean.parseBoolean(tokens[1].trim());
@@ -650,7 +632,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         try {
             PrintStream ps = new PrintStream(new FileOutputStream(fh), true, "UTF-8");
             ps.println("autoupdate=" + autoUpdateEnabled);
-            ps.println("checkedcustomnames=" + haveCheckedCustomNames);
+            ps.println("checkedcustomnames=true");
+            ps.println("checkedcustomnames172=" + haveCheckedCustomNames);
             ps.println("usescrollpane=" + useScrollPaneMode);
             ps.close();
             return true;
@@ -1588,41 +1571,31 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 // Apply it
                 RandomSource.seed(seed);
                 presetMode = false;
-                performRandomization(fh.getAbsolutePath(), seed, null, null, null);
+
+                try {
+                    CustomNamesSet cns = FileFunctions.getCustomNames();
+                    performRandomization(fh.getAbsolutePath(), seed, cns);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.cantLoadCustomNames"));
+                }
+
             }
         }
     }
 
-    private Settings getCurrentSettings() {
-        byte[] trainerClasses = null;
-        byte[] trainerNames = null;
-        byte[] nicknames = null;
-
-        try {
-            trainerClasses = FileFunctions.getConfigAsBytes("trainerclasses.txt");
-            trainerNames = FileFunctions.getConfigAsBytes("trainernames.txt");
-            nicknames = FileFunctions.getConfigAsBytes("nicknames.txt");
-        } catch (IOException e) {
-        }
-
-        Settings settings = createSettingsFromState(trainerClasses, trainerNames, nicknames);
+    private Settings getCurrentSettings() throws IOException {
+        Settings settings = createSettingsFromState(FileFunctions.getCustomNames());
         return settings;
     }
 
-    public String getValidRequiredROMName(String config, byte[] trainerClasses, byte[] trainerNames, byte[] nicknames)
+    public String getValidRequiredROMName(String config, CustomNamesSet customNames)
             throws UnsupportedEncodingException, InvalidSupplementFilesException {
         try {
-            Utils.validatePresetSupplementFiles(config, trainerClasses, trainerNames, nicknames);
+            Utils.validatePresetSupplementFiles(config, customNames);
         } catch (InvalidSupplementFilesException e) {
             switch (e.getType()) {
-            case TRAINER_CLASSES:
-                JOptionPane.showMessageDialog(null, bundle.getString("RandomizerGUI.presetFailTrainerClasses"));
-                throw e;
-            case TRAINER_NAMES:
+            case CUSTOM_NAMES:
                 JOptionPane.showMessageDialog(null, bundle.getString("RandomizerGUI.presetFailTrainerNames"));
-                throw e;
-            case NICKNAMES:
-                JOptionPane.showMessageDialog(null, bundle.getString("RandomizerGUI.presetFailNicknames"));
                 throw e;
             default:
                 throw e;
@@ -1631,7 +1604,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         byte[] data = DatatypeConverter.parseBase64Binary(config);
 
         int nameLength = data[Settings.LENGTH_OF_SETTINGS_DATA] & 0xFF;
-        if (data.length != Settings.LENGTH_OF_SETTINGS_DATA + 17 + nameLength) {
+        if (data.length != Settings.LENGTH_OF_SETTINGS_DATA + 9 + nameLength) {
             return null; // not valid length
         }
         String name = new String(data, Settings.LENGTH_OF_SETTINGS_DATA + 1, nameLength, "US-ASCII");
@@ -1798,7 +1771,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.enableOrDisableSubControls();
     }
 
-    private Settings createSettingsFromState(byte[] trainerClasses, byte[] trainerNames, byte[] nicknames) {
+    private Settings createSettingsFromState(CustomNamesSet customNames) {
         Settings settings = new Settings();
         settings.setRomName(this.romHandler.getROMName());
         settings.setChangeImpossibleEvolutions(goRemoveTradeEvosCheckBox.isSelected());
@@ -1921,16 +1894,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         settings.setCurrentMiscTweaks(currentMiscTweaks);
 
-        settings.setTrainerNames(trainerNames);
-        settings.setTrainerClasses(trainerClasses);
-        settings.setNicknames(nicknames);
+        settings.setCustomNames(customNames);
 
         return settings;
     }
 
-    private void performRandomization(final String filename, final long seed, byte[] trainerClasses,
-            byte[] trainerNames, byte[] nicknames) {
-        final Settings settings = createSettingsFromState(trainerClasses, trainerNames, nicknames);
+    private void performRandomization(final String filename, final long seed, CustomNamesSet customNames) {
+        final Settings settings = createSettingsFromState(customNames);
         final boolean raceMode = settings.isRaceMode();
         // Setup verbose log
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -2016,9 +1986,14 @@ public class RandomizerGUI extends javax.swing.JFrame {
                                     initialFormState();
                                 } else {
                                     // Compile a config string
-                                    String configString = getCurrentSettings().toString();
-                                    // Show the preset maker
-                                    new PresetMakeDialog(RandomizerGUI.this, seed, configString);
+                                    try {
+                                        String configString = getCurrentSettings().toString();
+                                        // Show the preset maker
+                                        new PresetMakeDialog(RandomizerGUI.this, seed, configString);
+                                    } catch (IOException ex) {
+                                        JOptionPane.showMessageDialog(RandomizerGUI.this,
+                                                bundle.getString("RandomizerGUI.cantLoadCustomNames"));
+                                    }
 
                                     // Done
                                     RandomizerGUI.this.romHandler = null;
@@ -2085,8 +2060,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     // Apply the seed we were given
                     RandomSource.seed(seed);
                     presetMode = true;
-                    performRandomization(fh.getAbsolutePath(), seed, pld.getTrainerClasses(), pld.getTrainerNames(),
-                            pld.getNicknames());
+                    performRandomization(fh.getAbsolutePath(), seed, pld.getCustomNames());
                 } else {
                     this.romHandler = null;
                     initialFormState();
