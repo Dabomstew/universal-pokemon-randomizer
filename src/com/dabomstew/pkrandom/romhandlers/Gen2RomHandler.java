@@ -1001,18 +1001,18 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
         int traineramount = romEntry.getValue("TrainerClassAmount");
         int[] trainerclasslimits = romEntry.arrayEntries.get("TrainerDataClassCounts");
 
-        int[] pointers = new int[traineramount + 1];
-        for (int i = 1; i <= traineramount; i++) {
-            int pointer = readWord(traineroffset + (i - 1) * 2);
+        int[] pointers = new int[traineramount];
+        for (int i = 0; i < traineramount; i++) {
+            int pointer = readWord(traineroffset + i * 2);
             pointers[i] = calculateOffset(bankOf(traineroffset), pointer);
         }
 
         List<String> tcnames = this.getTrainerClassNames();
 
         List<Trainer> allTrainers = new ArrayList<Trainer>();
-        for (int i = 1; i <= traineramount; i++) {
+        for (int i = 0; i < traineramount; i++) {
             int offs = pointers[i];
-            int limit = trainerclasslimits[i];
+            int limit = trainerclasslimits[i - 1];
             for (int trnum = 0; trnum < limit; trnum++) {
                 Trainer tr = new Trainer();
                 tr.offset = offs;
@@ -1047,12 +1047,14 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
                 offs++;
             }
         }
+
         Gen2Constants.universalTrainerTags(allTrainers);
         if (romEntry.isCrystal) {
             Gen2Constants.crystalTags(allTrainers);
         } else {
             Gen2Constants.goldSilverTags(allTrainers);
         }
+
         return allTrainers;
     }
 
@@ -1062,9 +1064,9 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
         int traineramount = romEntry.getValue("TrainerClassAmount");
         int[] trainerclasslimits = romEntry.arrayEntries.get("TrainerDataClassCounts");
 
-        int[] pointers = new int[traineramount + 1];
-        for (int i = 1; i <= traineramount; i++) {
-            int pointer = readWord(traineroffset + (i - 1) * 2);
+        int[] pointers = new int[traineramount];
+        for (int i = 0; i < traineramount; i++) {
+            int pointer = readWord(traineroffset + i * 2);
             pointers[i] = calculateOffset(bankOf(traineroffset), pointer);
         }
 
@@ -1073,7 +1075,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
         Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
 
         Iterator<Trainer> allTrainers = trainerData.iterator();
-        for (int i = 1; i <= traineramount; i++) {
+        for (int i = 0; i < traineramount; i++) {
             int offs = pointers[i];
             int limit = trainerclasslimits[i];
             for (int trnum = 0; trnum < limit; trnum++) {
@@ -1743,6 +1745,16 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
     @Override
     public boolean fixedTrainerClassNamesLength() {
         return true;
+    }
+
+    @Override
+    public List<Integer> getDoublesTrainerClasses() {
+        int[] doublesClasses = romEntry.arrayEntries.get("DoublesTrainerClasses");
+        List<Integer> doubles = new ArrayList<Integer>();
+        for (int tClass : doublesClasses) {
+            doubles.add(tClass);
+        }
+        return doubles;
     }
 
     @Override

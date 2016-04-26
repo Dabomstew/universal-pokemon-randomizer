@@ -63,7 +63,7 @@ public class Gen2Constants {
 
     public static final int tmBlockOneIndex = 191, tmBlockOneSize = 4, tmBlockTwoIndex = 196, tmBlockTwoSize = 24,
             tmBlockThreeIndex = 221, tmBlockThreeSize = 22;
-    
+
     public static final int luckyEggIndex = 0x7E;
 
     private static Type[] constructTypeTable() {
@@ -354,7 +354,8 @@ public class Gen2Constants {
     private static void tbc(List<Trainer> allTrainers, int classNum, int number, String tag) {
         int currnum = -1;
         for (Trainer t : allTrainers) {
-            if (t.trainerclass == classNum) {
+            // adjusted to not change the above but use 0-indexing properly
+            if (t.trainerclass == classNum - 1) {
                 currnum++;
                 if (currnum == number) {
                     t.tag = tag;

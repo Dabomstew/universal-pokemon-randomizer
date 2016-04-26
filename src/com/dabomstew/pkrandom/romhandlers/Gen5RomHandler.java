@@ -1814,7 +1814,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
         logBlankLine();
     }
-    
+
     @Override
     public boolean canChangeTrainerText() {
         return true;
@@ -1893,6 +1893,16 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     public boolean fixedTrainerClassNamesLength() {
         return false;
+    }
+
+    @Override
+    public List<Integer> getDoublesTrainerClasses() {
+        int[] doublesClasses = romEntry.arrayEntries.get("DoublesTrainerClasses");
+        List<Integer> doubles = new ArrayList<Integer>();
+        for (int tClass : doublesClasses) {
+            doubles.add(tClass);
+        }
+        return doubles;
     }
 
     @Override

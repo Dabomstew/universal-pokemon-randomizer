@@ -1750,7 +1750,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 List<Move> pickList = validMoves;
                 if (attemptDamaging) {
                     if (typeOfMove != null) {
-                        if (validTypeDamagingMoves.containsKey(typeOfMove) && checkForUnusedMove(validTypeDamagingMoves.get(typeOfMove), learnt)) {
+                        if (validTypeDamagingMoves.containsKey(typeOfMove)
+                                && checkForUnusedMove(validTypeDamagingMoves.get(typeOfMove), learnt)) {
                             pickList = validTypeDamagingMoves.get(typeOfMove);
                         } else if (checkForUnusedMove(validDamagingMoves, learnt)) {
                             pickList = validDamagingMoves;
@@ -1759,7 +1760,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                         pickList = validDamagingMoves;
                     }
                 } else if (typeOfMove != null) {
-                    if (validTypeMoves.containsKey(typeOfMove) && checkForUnusedMove(validTypeMoves.get(typeOfMove), learnt)) {
+                    if (validTypeMoves.containsKey(typeOfMove)
+                            && checkForUnusedMove(validTypeMoves.get(typeOfMove), learnt)) {
                         pickList = validTypeMoves.get(typeOfMove);
                     }
                 }
@@ -2421,16 +2423,17 @@ public abstract class AbstractRomHandler implements RomHandler {
         Map<String, String> translation = new HashMap<String, String>();
         List<String> newClassNames = new ArrayList<String>();
 
+        int numTrainerClasses = currentClassNames.size();
+        List<Integer> doublesClasses = this.getDoublesTrainerClasses();
+
         // Start choosing
-        for (String trainerClassName : currentClassNames) {
+        for (int i = 0; i < numTrainerClasses; i++) {
+            String trainerClassName = currentClassNames.get(i);
             if (translation.containsKey(trainerClassName)) {
                 // use an already picked translation
                 newClassNames.add(translation.get(trainerClassName));
             } else {
-                String checkName = trainerClassName.toLowerCase();
-                int idx = (checkName.endsWith("couple") || checkName.contains(" and ") || checkName.endsWith("kin")
-                        || checkName.endsWith("team") || checkName.contains(" & ") || (checkName.endsWith("s") && !checkName
-                        .endsWith("ss"))) ? 1 : 0;
+                int idx = doublesClasses.contains(i) ? 1 : 0;
                 List<String> pickFrom = allTrainerClasses[idx];
                 int intStrLen = this.internalStringLength(trainerClassName);
                 if (mustBeSameLength) {

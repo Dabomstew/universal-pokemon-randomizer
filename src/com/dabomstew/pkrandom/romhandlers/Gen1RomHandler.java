@@ -32,6 +32,7 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -1594,10 +1595,15 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
         }
         return tcNames;
     }
-    
+
     @Override
     public boolean canChangeTrainerText() {
         return romEntry.getValue("CanChangeTrainerText") > 0;
+    }
+
+    @Override
+    public List<Integer> getDoublesTrainerClasses() {
+        return Collections.emptyList();
     }
 
     @Override

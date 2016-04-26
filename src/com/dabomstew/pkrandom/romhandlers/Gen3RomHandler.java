@@ -2426,6 +2426,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     public boolean fixedTrainerClassNamesLength() {
         return false;
     }
+    
+    @Override
+    public List<Integer> getDoublesTrainerClasses() {
+        int[] doublesClasses = romEntry.arrayEntries.get("DoublesTrainerClasses");
+        List<Integer> doubles = new ArrayList<Integer>();
+        for (int tClass : doublesClasses) {
+            doubles.add(tClass);
+        }
+        return doubles;
+    }
 
     @Override
     public boolean canChangeStaticPokemon() {
