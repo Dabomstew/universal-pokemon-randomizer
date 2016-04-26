@@ -194,7 +194,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
         }
         setLocationRelativeTo(null);
         setVisible(true);
-        checkCustomNames();
+        if (!haveCheckedCustomNames) {
+            checkCustomNames();
+        }
         if (autoUpdateEnabled) {
             new UpdateCheckThread(this, false).start();
         }
@@ -584,10 +586,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.convertNameFilesFailed"));
                 }
             }
+
+            haveCheckedCustomNames = true;
+            attemptWriteConfig();
         }
 
-        haveCheckedCustomNames = true;
-        attemptWriteConfig();
     }
 
     private void attemptReadConfig() {
@@ -2178,6 +2181,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
         }
     }// GEN-LAST:event_toggleScrollPaneMenuItemActionPerformed
 
+    private void customNamesEditorMenuItemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_customNamesEditorMenuItemActionPerformed
+        new CustomNamesEditorDialog(this);
+    }// GEN-LAST:event_customNamesEditorMenuItemActionPerformed
+
     private void loadQSButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_loadQSButtonActionPerformed
         if (this.romHandler == null) {
             return;
@@ -2541,6 +2548,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         toggleAutoUpdatesMenuItem = new javax.swing.JMenuItem();
         manualUpdateMenuItem = new javax.swing.JMenuItem();
         toggleScrollPaneMenuItem = new javax.swing.JMenuItem();
+        customNamesEditorMenuItem = new javax.swing.JMenuItem();
         pokeEvolutionsButtonGroup = new javax.swing.ButtonGroup();
         generalOptionsPanel = new javax.swing.JPanel();
         pokeLimitCB = new javax.swing.JCheckBox();
@@ -2735,6 +2743,14 @@ public class RandomizerGUI extends javax.swing.JFrame {
             }
         });
         updateSettingsMenu.add(toggleScrollPaneMenuItem);
+
+        customNamesEditorMenuItem.setText(bundle.getString("RandomizerGUI.customNamesEditorMenuItem.text")); // NOI18N
+        customNamesEditorMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                customNamesEditorMenuItemActionPerformed(evt);
+            }
+        });
+        updateSettingsMenu.add(customNamesEditorMenuItem);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle(bundle.getString("RandomizerGUI.title")); // NOI18N
@@ -4549,8 +4565,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(versionLabel)
                     .addComponent(websiteLinkLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(randomizerOptionsPane, javax.swing.GroupLayout.PREFERRED_SIZE, 465, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(randomizerOptionsPane, javax.swing.GroupLayout.PREFERRED_SIZE, 465, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -4560,6 +4576,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JPanel abilitiesPanel;
     private javax.swing.JPanel baseStatsPanel;
     private javax.swing.JCheckBox brokenMovesCB;
+    private javax.swing.JMenuItem customNamesEditorMenuItem;
     private javax.swing.JCheckBox fiBanBadCB;
     private javax.swing.JRadioButton fiRandomRB;
     private javax.swing.JRadioButton fiShuffleRB;

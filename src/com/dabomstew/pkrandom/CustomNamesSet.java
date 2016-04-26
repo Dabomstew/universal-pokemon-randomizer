@@ -35,9 +35,9 @@ public class CustomNamesSet {
         pokemonNicknames = readNamesBlock(data);
     }
 
-    // Private constructor: blank all lists.
-    // Used for importing old names.
-    private CustomNamesSet() {
+    // Alternate constructor: blank all lists
+    // Used for importing old names and on the editor dialog.
+    public CustomNamesSet() {
         trainerNames = new ArrayList<String>();
         trainerClasses = new ArrayList<String>();
         doublesTrainerNames = new ArrayList<String>();
@@ -83,7 +83,7 @@ public class CustomNamesSet {
     }
 
     private void writeNamesBlock(OutputStream out, List<String> names) throws IOException {
-        String newln = System.getProperty("line.separator");
+        String newln = SysConstants.LINE_SEP;
         StringBuffer outNames = new StringBuffer();
         boolean first = true;
         for (String name : names) {
@@ -118,6 +118,31 @@ public class CustomNamesSet {
 
     public List<String> getPokemonNicknames() {
         return Collections.unmodifiableList(pokemonNicknames);
+    }
+    
+    public void setTrainerNames(List<String> names) {
+        trainerNames.clear();
+        trainerNames.addAll(names);
+    }
+    
+    public void setTrainerClasses(List<String> names) {
+        trainerClasses.clear();
+        trainerClasses.addAll(names);
+    }
+    
+    public void setDoublesTrainerNames(List<String> names) {
+        doublesTrainerNames.clear();
+        doublesTrainerNames.addAll(names);
+    }
+    
+    public void setDoublesTrainerClasses(List<String> names) {
+        doublesTrainerClasses.clear();
+        doublesTrainerClasses.addAll(names);
+    }
+    
+    public void setPokemonNicknames(List<String> names) {
+        pokemonNicknames.clear();
+        pokemonNicknames.addAll(names);
     }
 
     public static CustomNamesSet importOldNames() throws FileNotFoundException {
