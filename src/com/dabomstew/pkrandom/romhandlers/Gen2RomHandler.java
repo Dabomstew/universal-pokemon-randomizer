@@ -1012,14 +1012,14 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
         List<Trainer> allTrainers = new ArrayList<Trainer>();
         for (int i = 0; i < traineramount; i++) {
             int offs = pointers[i];
-            int limit = trainerclasslimits[i - 1];
+            int limit = trainerclasslimits[i];
             for (int trnum = 0; trnum < limit; trnum++) {
                 Trainer tr = new Trainer();
                 tr.offset = offs;
                 tr.trainerclass = i;
                 String name = readVariableLengthString(offs);
                 tr.name = name;
-                tr.fullDisplayName = tcnames.get(i - 1) + " " + name;
+                tr.fullDisplayName = tcnames.get(i) + " " + name;
                 int len = lengthOfStringAt(offs);
                 offs += len + 1;
                 int dataType = rom[offs] & 0xFF;
@@ -1578,14 +1578,14 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
         int traineramount = romEntry.getValue("TrainerClassAmount");
         int[] trainerclasslimits = romEntry.arrayEntries.get("TrainerDataClassCounts");
 
-        int[] pointers = new int[traineramount + 1];
-        for (int i = 1; i <= traineramount; i++) {
-            int pointer = readWord(traineroffset + (i - 1) * 2);
+        int[] pointers = new int[traineramount];
+        for (int i = 0; i < traineramount; i++) {
+            int pointer = readWord(traineroffset + i * 2);
             pointers[i] = calculateOffset(bankOf(traineroffset), pointer);
         }
 
         List<String> allTrainers = new ArrayList<String>();
-        for (int i = 1; i <= traineramount; i++) {
+        for (int i = 0; i < traineramount; i++) {
             int offs = pointers[i];
             int limit = trainerclasslimits[i];
             for (int trnum = 0; trnum < limit; trnum++) {
@@ -1616,18 +1616,19 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
             int traineramount = romEntry.getValue("TrainerClassAmount");
             int[] trainerclasslimits = romEntry.arrayEntries.get("TrainerDataClassCounts");
 
-            int[] pointers = new int[traineramount + 1];
-            for (int i = 1; i <= traineramount; i++) {
-                int pointer = readWord(traineroffset + (i - 1) * 2);
+            int[] pointers = new int[traineramount];
+            for (int i = 0; i < traineramount; i++) {
+                int pointer = readWord(traineroffset + i * 2);
                 pointers[i] = calculateOffset(bankOf(traineroffset), pointer);
             }
+
             // Build up new trainer data using old as a guideline.
-            int[] offsetsInNew = new int[traineramount + 1];
+            int[] offsetsInNew = new int[traineramount];
             int oInNewCurrent = 0;
             Iterator<String> allTrainers = trainerNames.iterator();
             ByteArrayOutputStream newData = new ByteArrayOutputStream();
             try {
-                for (int i = 1; i <= traineramount; i++) {
+                for (int i = 0; i < traineramount; i++) {
                     int offs = pointers[i];
                     int limit = trainerclasslimits[i];
                     offsetsInNew[i] = oInNewCurrent;
@@ -1649,7 +1650,7 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
                             offs += 2;
                             if (dataType == 2 || dataType == 3) {
                                 newData.write(rom, offs, 1);
-                                oInNewCurrent += 1;
+                                oInNewCurrent++;
                                 offs++;
                             }
                             if (dataType % 2 == 1) {
@@ -1666,13 +1667,13 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
 
                 // Copy new data into ROM
                 byte[] newTrainerData = newData.toByteArray();
-                int tdBase = pointers[1];
-                System.arraycopy(newTrainerData, 0, rom, pointers[1], newTrainerData.length);
+                int tdBase = pointers[0];
+                System.arraycopy(newTrainerData, 0, rom, pointers[0], newTrainerData.length);
 
                 // Finally, update the pointers
-                for (int i = 2; i <= traineramount; i++) {
+                for (int i = 1; i < traineramount; i++) {
                     int newOffset = tdBase + offsetsInNew[i];
-                    writeWord(traineroffset + (i - 1) * 2, makeGBPointer(newOffset));
+                    writeWord(traineroffset + i * 2, makeGBPointer(newOffset));
                 }
             } catch (IOException ex) {
                 // This should never happen, but abort if it does.
@@ -1704,8 +1705,8 @@ public class Gen2RomHandler extends AbstractGBRomHandler {
         List<String> tcNames = this.getTrainerClassNames();
         List<Integer> tcLengthsByT = new ArrayList<Integer>();
 
-        for (int i = 1; i <= traineramount; i++) {
-            int len = internalStringLength(tcNames.get(i - 1));
+        for (int i = 0; i < traineramount; i++) {
+            int len = internalStringLength(tcNames.get(i));
             for (int k = 0; k < trainerclasslimits[i]; k++) {
                 tcLengthsByT.add(len);
             }
