@@ -1636,9 +1636,41 @@ public abstract class AbstractRomHandler implements RomHandler {
         allBanned.addAll(hms);
         allBanned.addAll(this.getMovesBannedFromLevelup());
 
+        // Build sets of moves
+        List<Move> validMoves = new ArrayList<Move>();
+        List<Move> validDamagingMoves = new ArrayList<Move>();
+        Map<Type, List<Move>> validTypeMoves = new HashMap<Type, List<Move>>();
+        Map<Type, List<Move>> validTypeDamagingMoves = new HashMap<Type, List<Move>>();
+
+        for (Move mv : allMoves) {
+            if (mv != null && !GlobalConstants.bannedRandomMoves[mv.number] && !allBanned.contains(mv.number)) {
+                validMoves.add(mv);
+                if (mv.type != null) {
+                    if (!validTypeMoves.containsKey(mv.type)) {
+                        validTypeMoves.put(mv.type, new ArrayList<Move>());
+                    }
+                    validTypeMoves.get(mv.type).add(mv);
+                }
+
+                if (!GlobalConstants.bannedForDamagingMove[mv.number]) {
+                    if (mv.power >= 2 * GlobalConstants.MIN_DAMAGING_MOVE_POWER
+                            || (mv.power >= GlobalConstants.MIN_DAMAGING_MOVE_POWER && mv.hitratio >= 90)) {
+                        validDamagingMoves.add(mv);
+                        if (mv.type != null) {
+                            if (!validTypeDamagingMoves.containsKey(mv.type)) {
+                                validTypeDamagingMoves.put(mv.type, new ArrayList<Move>());
+                            }
+                            validTypeDamagingMoves.get(mv.type).add(mv);
+                        }
+                    }
+                }
+            }
+        }
+
         for (Pokemon pkmn : movesets.keySet()) {
             Set<Integer> learnt = new TreeSet<Integer>();
             List<MoveLearnt> moves = movesets.get(pkmn);
+
             // 4 starting moves?
             if (forceFourStartingMoves) {
                 int lv1count = 0;
@@ -1656,30 +1688,103 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                 }
             }
-            // Last level 1 move should be replaced with a damaging one
-            int damagingMove = pickMove(allMoves, pkmn, typeThemed, true, allBanned, learnt);
+
             // Find last lv1 move
             // lv1index ends up as the index of the first non-lv1 move
             int lv1index = 0;
             while (lv1index < moves.size() && moves.get(lv1index).level == 1) {
                 lv1index++;
             }
+
             // last lv1 move is 1 before lv1index
-            if (lv1index == 0) {
-                lv1index++;
+            if (lv1index != 0) {
+                lv1index--;
             }
-            moves.get(lv1index - 1).move = damagingMove;
-            moves.get(lv1index - 1).level = 1; // just in case
-            learnt.add(damagingMove);
-            // Rest replace with randoms
+
+            // Replace moves as needed
             for (int i = 0; i < moves.size(); i++) {
-                if (i == (lv1index - 1)) {
-                    continue;
+                // should this move be forced damaging?
+                boolean attemptDamaging = i == lv1index ? true : random.nextDouble() < goodDamagingProbability;
+
+                // type themed?
+                Type typeOfMove = null;
+                if (typeThemed) {
+                    double picked = random.nextDouble();
+                    if (pkmn.primaryType == Type.NORMAL || pkmn.secondaryType == Type.NORMAL) {
+                        if (pkmn.secondaryType == null) {
+                            // Pure NORMAL: 75% normal, 25% random
+                            if (picked < 0.75) {
+                                typeOfMove = Type.NORMAL;
+                            }
+                            // else random
+                        } else {
+                            // Find the other type
+                            // Normal/OTHER: 30% normal, 55% other, 15% random
+                            Type otherType = pkmn.primaryType;
+                            if (otherType == Type.NORMAL) {
+                                otherType = pkmn.secondaryType;
+                            }
+                            if (picked < 0.3) {
+                                typeOfMove = Type.NORMAL;
+                            } else if (picked < 0.85) {
+                                typeOfMove = otherType;
+                            }
+                            // else random
+                        }
+                    } else if (pkmn.secondaryType != null) {
+                        // Primary/Secondary: 50% primary, 30% secondary, 5%
+                        // normal, 15% random
+                        if (picked < 0.5) {
+                            typeOfMove = pkmn.primaryType;
+                        } else if (picked < 0.8) {
+                            typeOfMove = pkmn.secondaryType;
+                        } else if (picked < 0.85) {
+                            typeOfMove = Type.NORMAL;
+                        }
+                        // else random
+                    } else {
+                        // Primary/None: 60% primary, 20% normal, 20% random
+                        if (picked < 0.6) {
+                            typeOfMove = pkmn.primaryType;
+                        } else if (picked < 0.8) {
+                            typeOfMove = Type.NORMAL;
+                        }
+                        // else random
+                    }
                 }
-                int picked = pickMove(allMoves, pkmn, typeThemed, random.nextDouble() < goodDamagingProbability,
-                        allBanned, learnt);
-                moves.get(i).move = picked;
-                learnt.add(picked);
+
+                // select a list to pick a move from that has at least one free
+                List<Move> pickList = validMoves;
+                if (attemptDamaging) {
+                    if (typeOfMove != null) {
+                        if (checkForUnusedMove(validTypeDamagingMoves.get(typeOfMove), learnt)) {
+                            pickList = validTypeDamagingMoves.get(typeOfMove);
+                        } else if (checkForUnusedMove(validDamagingMoves, learnt)) {
+                            pickList = validDamagingMoves;
+                        }
+                    } else if (checkForUnusedMove(validDamagingMoves, learnt)) {
+                        pickList = validDamagingMoves;
+                    }
+                } else if (typeOfMove != null) {
+                    if (checkForUnusedMove(validTypeMoves.get(typeOfMove), learnt)) {
+                        pickList = validTypeMoves.get(typeOfMove);
+                    }
+                }
+
+                // now pick a move until we get a valid one
+                Move mv = pickList.get(random.nextInt(pickList.size()));
+                while (learnt.contains(mv.number)) {
+                    mv = pickList.get(random.nextInt(pickList.size()));
+                }
+
+                // write it
+                moves.get(i).move = mv.number;
+                if (i == lv1index) {
+                    // just in case, set this to lv1
+                    moves.get(i).level = 1;
+                }
+                learnt.add(mv.number);
+
             }
         }
         // Done, save
@@ -3100,99 +3205,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
-    private int pickMove(List<Move> allMoves, Pokemon pkmn, boolean typeThemed, boolean damaging,
-            Set<Integer> bannedForThisGame, Set<Integer> alreadyPicked) {
-        // If damaging, we want a move with at least 90% accuracy and
-        // MIN_DAMAGING_MOVE_POWER power
-        // OR 2*MIN_DAMAGING_MOVE_POWER power
-
-        Type typeOfMove = null;
-        double picked = this.random.nextDouble();
-        // Type?
-        if (typeThemed) {
-            if (pkmn.primaryType == Type.NORMAL || pkmn.secondaryType == Type.NORMAL) {
-                if (pkmn.secondaryType == null) {
-                    // Pure NORMAL: 75% normal, 25% random
-                    if (picked < 0.75) {
-                        typeOfMove = Type.NORMAL;
-                    }
-                    // else random
-                } else {
-                    // Find the other type
-                    // Normal/OTHER: 30% normal, 55% other, 15% random
-                    Type otherType = pkmn.primaryType;
-                    if (otherType == Type.NORMAL) {
-                        otherType = pkmn.secondaryType;
-                    }
-                    if (picked < 0.3) {
-                        typeOfMove = Type.NORMAL;
-                    } else if (picked < 0.85) {
-                        typeOfMove = otherType;
-                    }
-                    // else random
-                }
-            } else if (pkmn.secondaryType != null) {
-                // Primary/Secondary: 50% primary, 30% secondary, 5% normal, 15%
-                // random
-                if (picked < 0.5) {
-                    typeOfMove = pkmn.primaryType;
-                } else if (picked < 0.8) {
-                    typeOfMove = pkmn.secondaryType;
-                } else if (picked < 0.85) {
-                    typeOfMove = Type.NORMAL;
-                }
-                // else random
-            } else {
-                // Primary/None: 60% primary, 20% normal, 20% random
-                if (picked < 0.6) {
-                    typeOfMove = pkmn.primaryType;
-                } else if (picked < 0.8) {
-                    typeOfMove = Type.NORMAL;
-                }
-                // else random
+    private boolean checkForUnusedMove(List<Move> potentialList, Set<Integer> alreadyUsed) {
+        for (Move mv : potentialList) {
+            if (!alreadyUsed.contains(mv.number)) {
+                return true;
             }
         }
-        // Filter by only bans first
-        List<Move> canPick = new ArrayList<Move>();
-        for (Move mv : allMoves) {
-            if (mv != null && !GlobalConstants.bannedRandomMoves[mv.number] && !bannedForThisGame.contains(mv.number)
-                    && !alreadyPicked.contains(mv.number)) {
-                canPick.add(mv);
-            }
-        }
-
-        // Next, attempt to filter for damaging moves
-        if (damaging) {
-            List<Move> filtered = new ArrayList<Move>(canPick);
-            for (Move mv : canPick) {
-                if (GlobalConstants.bannedForDamagingMove[mv.number]
-                        || mv.power < GlobalConstants.MIN_DAMAGING_MOVE_POWER
-                        || (mv.power < 2 * GlobalConstants.MIN_DAMAGING_MOVE_POWER && mv.hitratio < 90)) {
-                    filtered.remove(mv);
-                }
-            }
-
-            if (filtered.size() > 0) {
-                canPick = filtered;
-            }
-        }
-
-        // Finally, attempt to filter by type.
-        if (typeOfMove != null) {
-            List<Move> filtered = new ArrayList<Move>(canPick);
-            for (Move mv : canPick) {
-                if (mv.type != typeOfMove) {
-                    filtered.remove(mv);
-                }
-            }
-
-            if (filtered.size() > 0) {
-                canPick = filtered;
-            }
-        }
-
-        // pick a random result
-        return canPick.get(this.random.nextInt(canPick.size())).number;
+        return false;
     }
 
     private List<Pokemon> pokemonOfType(Type type, boolean noLegendaries) {
