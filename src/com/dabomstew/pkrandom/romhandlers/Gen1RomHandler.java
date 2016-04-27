@@ -602,7 +602,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return names;
     }
 
-    
     @Override
     public List<Pokemon> getStarters() {
         // Get the starters

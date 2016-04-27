@@ -329,7 +329,7 @@ public interface RomHandler {
     public int maxTrainerClassNameLength();
 
     public void randomizeTrainerClassNames(CustomNamesSet customNames);
-    
+
     public List<Integer> getDoublesTrainerClasses();
 
     // Items

@@ -121,7 +121,8 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         return readString(offset, length, false);
     }
 
-    // pads the length with terminators, so length should be at least str's len + 1
+    // pads the length with terminators, so length should be at least str's len
+    // + 1
     protected void writeFixedLengthString(String str, int offset, int length) {
         byte[] translated = translateString(str);
         int len = Math.min(translated.length, length);
@@ -179,7 +180,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         }
 
     }
-    
+
     protected static boolean romCode(byte[] rom, String code) {
         try {
             int sigOffset = GBConstants.romCodeOffset;

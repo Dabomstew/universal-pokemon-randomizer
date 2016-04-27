@@ -524,8 +524,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         if (romEntry.getValue("CanChangeStarterText") > 0) {
             int[] starterTextOffsets = romEntry.arrayEntries.get("StarterTextOffsets");
             for (int i = 0; i < 3 && i < starterTextOffsets.length; i++) {
-                writeVariableLengthString(String.format("%s?\\e", newStarters.get(i).name),
-                        starterTextOffsets[i], true);
+                writeVariableLengthString(String.format("%s?\\e", newStarters.get(i).name), starterTextOffsets[i], true);
             }
         }
         return true;
