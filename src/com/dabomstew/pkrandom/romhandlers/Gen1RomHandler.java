@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,7 +43,6 @@ import java.util.TreeMap;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
-import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.constants.Gen1Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
@@ -65,7 +63,7 @@ import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 import compressors.Gen1Decmp;
 
-public class Gen1RomHandler extends AbstractGBRomHandler {
+public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     public static class Factory extends RomHandler.Factory {
 
@@ -340,9 +338,6 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
     private List<Pokemon> pokemonList;
     private RomEntry romEntry;
     private Move[] moves;
-    private String[] tb;
-    private Map<String, Byte> d;
-    private int longestTableToken;
     private String[] itemNames;
     private String[] mapNames;
     private SubMap[] maps;
@@ -367,8 +362,6 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
         pokeRBYToNumTable = new int[256];
         moveNumToRomTable = new int[256];
         moveRomToNumTable = new int[256];
-        tb = new String[256];
-        d = new HashMap<String, Byte>();
         maps = new SubMap[256];
         xAccNerfed = false;
         clearTextTables();
@@ -420,41 +413,6 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
         return null;
     }
 
-    private void clearTextTables() {
-        tb = new String[256];
-        d.clear();
-        longestTableToken = 0;
-    }
-
-    private void readTextTable(String name) {
-        try {
-            Scanner sc = new Scanner(FileFunctions.openConfig(name + ".tbl"), "UTF-8");
-            while (sc.hasNextLine()) {
-                String q = sc.nextLine();
-                if (!q.trim().isEmpty()) {
-                    String[] r = q.split("=", 2);
-                    if (r[1].endsWith("\r\n")) {
-                        r[1] = r[1].substring(0, r[1].length() - 2);
-                    }
-                    int hexcode = Integer.parseInt(r[0], 16);
-                    if (tb[hexcode] != null) {
-                        String oldMatch = tb[hexcode];
-                        tb[hexcode] = null;
-                        if (d.get(oldMatch) == hexcode) {
-                            d.remove(oldMatch);
-                        }
-                    }
-                    tb[hexcode] = r[1];
-                    longestTableToken = Math.max(longestTableToken, r[1].length());
-                    d.put(r[1], (byte) hexcode);
-                }
-            }
-            sc.close();
-        } catch (FileNotFoundException e) {
-        }
-
-    }
-
     @Override
     public void savingRom() {
         savePokemonStats();
@@ -466,8 +424,8 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
         int offset = romEntry.getValue("MoveNamesOffset");
         String[] moveNames = new String[moveCount + 1];
         for (int i = 1; i <= moveCount; i++) {
-            moveNames[i] = readVariableLengthString(offset);
-            offset += lengthOfStringAt(offset) + 1;
+            moveNames[i] = readVariableLengthString(offset, false);
+            offset += lengthOfStringAt(offset, false) + 1;
         }
         return moveNames;
     }
@@ -644,129 +602,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
         return names;
     }
 
-    private String readString(int offset, int maxLength) {
-        StringBuilder string = new StringBuilder();
-        for (int c = 0; c < maxLength; c++) {
-            int currChar = rom[offset + c] & 0xFF;
-            if (tb[currChar] != null) {
-                string.append(tb[currChar]);
-            } else {
-                if (currChar == GBConstants.stringTerminator || currChar == GBConstants.stringNull) {
-                    break;
-                } else {
-                    string.append("\\x" + String.format("%02X", currChar));
-                }
-            }
-        }
-        return string.toString();
-    }
-
-    public byte[] translateString(String text) {
-        List<Byte> data = new ArrayList<Byte>();
-        while (text.length() != 0) {
-            int i = Math.max(0, longestTableToken - text.length());
-            if (text.charAt(0) == '\\' && text.charAt(1) == 'x') {
-                data.add((byte) Integer.parseInt(text.substring(2, 4), 16));
-                text = text.substring(4);
-            } else {
-                while (!(d.containsKey(text.substring(0, longestTableToken - i)) || (i == longestTableToken))) {
-                    i++;
-                }
-                if (i == longestTableToken) {
-                    text = text.substring(1);
-                } else {
-                    data.add(d.get(text.substring(0, longestTableToken - i)));
-                    text = text.substring(longestTableToken - i);
-                }
-            }
-        }
-        byte[] ret = new byte[data.size()];
-        for (int i = 0; i < ret.length; i++) {
-            ret[i] = data.get(i);
-        }
-        return ret;
-    }
-
-    private String readFixedLengthString(int offset, int length) {
-        return readString(offset, length);
-    }
-
-    private void writeFixedLengthString(String str, int offset, int length) {
-        byte[] translated = translateString(str);
-        int len = Math.min(translated.length, length);
-        System.arraycopy(translated, 0, rom, offset, len);
-        while (len < length) {
-            rom[offset + len] = GBConstants.stringTerminator;
-            len++;
-        }
-    }
-
-    private int makeGBPointer(int offset) {
-        if (offset < GBConstants.bankSize) {
-            return offset;
-        } else {
-            return (offset % GBConstants.bankSize) + GBConstants.bankSize;
-        }
-    }
-
-    private int bankOf(int offset) {
-        return (offset / GBConstants.bankSize);
-    }
-
-    private int calculateOffset(int bank, int pointer) {
-        if (pointer < GBConstants.bankSize) {
-            return pointer;
-        } else {
-            return (pointer % GBConstants.bankSize) + bank * GBConstants.bankSize;
-        }
-    }
-
-    public String readVariableLengthString(int offset) {
-        return readString(offset, Integer.MAX_VALUE);
-    }
-
-    public byte[] traduire(String str) {
-        return translateString(str);
-    }
-
-    public String readVariableLengthScriptString(int offset) {
-        return readString(offset, Integer.MAX_VALUE);
-    }
-
-    private void writeFixedLengthScriptString(String str, int offset, int length) {
-        byte[] translated = translateString(str);
-        int len = Math.min(translated.length, length);
-        System.arraycopy(translated, 0, rom, offset, len);
-        while (len < length) {
-            rom[offset + len] = GBConstants.stringNull;
-            len++;
-        }
-    }
-
-    private int lengthOfStringAt(int offset) {
-        int len = 0;
-        while (rom[offset + len] != GBConstants.stringTerminator && rom[offset + len] != GBConstants.stringNull) {
-            len++;
-        }
-        return len;
-    }
-
-    private static boolean romSig(byte[] rom, String sig) {
-        try {
-            int sigOffset = GBConstants.romSigOffset;
-            byte[] sigBytes = sig.getBytes("US-ASCII");
-            for (int i = 0; i < sigBytes.length; i++) {
-                if (rom[sigOffset + i] != sigBytes[i]) {
-                    return false;
-                }
-            }
-            return true;
-        } catch (UnsupportedEncodingException ex) {
-            return false;
-        }
-
-    }
-
+    
     @Override
     public List<Pokemon> getStarters() {
         // Get the starters
@@ -807,10 +643,10 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
 
             // Starter text
             if (romEntry.getValue("CanChangeStarterText") > 0) {
-                List<Integer> starterTextOffsets = RomFunctions.search(rom, traduire("So! You want the"));
-                for (int i = 0; i < 3 && i < starterTextOffsets.size(); i++) {
-                    writeFixedLengthScriptString("So! You want\\n" + newStarters.get(i).name + "?\\e",
-                            starterTextOffsets.get(i), lengthOfStringAt(starterTextOffsets.get(i)) + 1);
+                int[] starterTextOffsets = romEntry.arrayEntries.get("StarterTextOffsets");
+                for (int i = 0; i < 3 && i < starterTextOffsets.length; i++) {
+                    writeVariableLengthString(String.format("So! You want\\n%s?\\e", newStarters.get(i).name),
+                            starterTextOffsets[i], true);
                 }
             }
 
@@ -1439,7 +1275,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
         for (TMTextEntry tte : romEntry.tmTexts) {
             String moveName = moveNames[moveNumToRomTable[moveIndexes.get(tte.number - 1)]];
             String text = tte.template.replace("%m", moveName);
-            writeFixedLengthScriptString(text, tte.offset, lengthOfStringAt(tte.offset));
+            writeVariableLengthString(text, tte.offset, true);
         }
     }
 
@@ -1589,8 +1425,8 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
         List<String> tcNames = new ArrayList<String>();
         int offset = offsets[offsets.length - 1];
         for (int j = 0; j < Gen1Constants.tclassesCounts[1]; j++) {
-            String name = readVariableLengthString(offset);
-            offset += (internalStringLength(name) + 1);
+            String name = readVariableLengthString(offset, false);
+            offset += lengthOfStringAt(offset, false) + 1;
             tcNames.add(name);
         }
         return tcNames;
@@ -1612,8 +1448,8 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
         List<String> trainerNames = new ArrayList<String>();
         int offset = offsets[offsets.length - 1];
         for (int j = 0; j < Gen1Constants.tclassesCounts[1]; j++) {
-            String name = readVariableLengthString(offset);
-            offset += (internalStringLength(name) + 1);
+            String name = readVariableLengthString(offset, false);
+            offset += lengthOfStringAt(offset, false) + 1;
             if (Gen1Constants.singularTrainers.contains(j)) {
                 trainerNames.add(name);
             }
@@ -1628,12 +1464,12 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
             Iterator<String> trainerNamesI = trainerNames.iterator();
             int offset = offsets[offsets.length - 1];
             for (int j = 0; j < Gen1Constants.tclassesCounts[1]; j++) {
-                String name = readVariableLengthString(offset);
+                int oldLength = lengthOfStringAt(offset, false) + 1;
                 if (Gen1Constants.singularTrainers.contains(j)) {
                     String newName = trainerNamesI.next();
-                    writeFixedLengthString(newName, offset, internalStringLength(name) + 1);
+                    writeFixedLengthString(newName, offset, oldLength);
                 }
-                offset += (internalStringLength(name) + 1);
+                offset += oldLength;
             }
         }
     }
@@ -1657,8 +1493,8 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
             for (int i = 0; i < offsets.length; i++) {
                 int offset = offsets[i];
                 for (int j = 0; j < Gen1Constants.tclassesCounts[i]; j++) {
-                    String name = readVariableLengthString(offset);
-                    offset += (internalStringLength(name) + 1);
+                    String name = readVariableLengthString(offset, false);
+                    offset += lengthOfStringAt(offset, false) + 1;
                     if (i == 0 || !Gen1Constants.singularTrainers.contains(j)) {
                         trainerClassNames.add(name);
                     }
@@ -1667,8 +1503,8 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
         } else {
             int offset = offsets[0];
             for (int j = 0; j < Gen1Constants.tclassesCounts[1]; j++) {
-                String name = readVariableLengthString(offset);
-                offset += (internalStringLength(name) + 1);
+                String name = readVariableLengthString(offset, false);
+                offset += lengthOfStringAt(offset, false) + 1;
                 if (!Gen1Constants.singularTrainers.contains(j)) {
                     trainerClassNames.add(name);
                 }
@@ -1686,23 +1522,23 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
                 for (int i = 0; i < offsets.length; i++) {
                     int offset = offsets[i];
                     for (int j = 0; j < Gen1Constants.tclassesCounts[i]; j++) {
-                        String name = readVariableLengthString(offset);
+                        int oldLength = lengthOfStringAt(offset, false) + 1;
                         if (i == 0 || !Gen1Constants.singularTrainers.contains(j)) {
                             String newName = tcNamesIter.next();
-                            writeFixedLengthString(newName, offset, internalStringLength(name) + 1);
+                            writeFixedLengthString(newName, offset, oldLength);
                         }
-                        offset += (internalStringLength(name) + 1);
+                        offset += oldLength;
                     }
                 }
             } else {
                 int offset = offsets[0];
                 for (int j = 0; j < Gen1Constants.tclassesCounts[1]; j++) {
-                    String name = readVariableLengthString(offset);
+                    int oldLength = lengthOfStringAt(offset, false) + 1;
                     if (!Gen1Constants.singularTrainers.contains(j)) {
                         String newName = tcNamesIter.next();
-                        writeFixedLengthString(newName, offset, internalStringLength(name) + 1);
+                        writeFixedLengthString(newName, offset, oldLength);
                     }
-                    offset += (internalStringLength(name) + 1);
+                    offset += oldLength;
                 }
             }
         }
@@ -2046,7 +1882,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
         for (int i = 0; i < 0x25; i++) {
             int externalOffset = calculateOffset(mapNameBank, readWord(mapNameTableOffset + 1));
             usedExternal.add(externalOffset);
-            mapNames[i] = readVariableLengthString(externalOffset);
+            mapNames[i] = readVariableLengthString(externalOffset, false);
             mapNameTableOffset += 3;
         }
 
@@ -2056,7 +1892,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
         while ((rom[mapNameTableOffset] & 0xFF) != 0xFF) {
             int maxMap = rom[mapNameTableOffset] & 0xFF;
             int nameOffset = calculateOffset(mapNameBank, readWord(mapNameTableOffset + 2));
-            String actualName = readVariableLengthString(nameOffset).trim();
+            String actualName = readVariableLengthString(nameOffset, false).trim();
             if (usedExternal.contains(nameOffset)) {
                 for (int i = lastMaxMap; i < maxMap; i++) {
                     if (maps[i] != null) {
@@ -2220,7 +2056,7 @@ public class Gen1RomHandler extends AbstractGBRomHandler {
             int entryOffset = tableOffset + entry * entryLength;
             trade.requestedPokemon = pokes[pokeRBYToNumTable[rom[entryOffset] & 0xFF]];
             trade.givenPokemon = pokes[pokeRBYToNumTable[rom[entryOffset + 1] & 0xFF]];
-            trade.nickname = readString(entryOffset + 3, nicknameLength);
+            trade.nickname = readString(entryOffset + 3, nicknameLength, false);
             trades.add(trade);
         }
 
