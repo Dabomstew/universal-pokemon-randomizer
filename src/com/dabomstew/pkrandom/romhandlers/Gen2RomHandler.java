@@ -325,14 +325,14 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         // Check for specific CRC first
         int crcInHeader = ((rom[GBConstants.crcOffset] & 0xFF) << 8) | (rom[GBConstants.crcOffset + 1] & 0xFF);
         for (RomEntry re : roms) {
-            if (romSig(rom, re.romCode) && re.version == version && re.nonJapanese == nonjap
+            if (romCode(rom, re.romCode) && re.version == version && re.nonJapanese == nonjap
                     && re.crcInHeader == crcInHeader) {
                 return re;
             }
         }
         // Now check for non-specific-CRC entries
         for (RomEntry re : roms) {
-            if (romSig(rom, re.romCode) && re.version == version && re.nonJapanese == nonjap && re.crcInHeader == -1) {
+            if (romCode(rom, re.romCode) && re.version == version && re.nonJapanese == nonjap && re.crcInHeader == -1) {
                 return re;
             }
         }

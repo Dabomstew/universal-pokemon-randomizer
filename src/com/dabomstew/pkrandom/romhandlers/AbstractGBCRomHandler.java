@@ -179,5 +179,21 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         }
 
     }
+    
+    protected static boolean romCode(byte[] rom, String code) {
+        try {
+            int sigOffset = GBConstants.romCodeOffset;
+            byte[] sigBytes = code.getBytes("US-ASCII");
+            for (int i = 0; i < sigBytes.length; i++) {
+                if (rom[sigOffset + i] != sigBytes[i]) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (UnsupportedEncodingException ex) {
+            return false;
+        }
+
+    }
 
 }
