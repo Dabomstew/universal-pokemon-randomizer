@@ -306,7 +306,7 @@ public class Settings {
 
         // 16 wild pokemon 2
         // bugfix 161
-        out.write(makeByteSelected(useMinimumCatchRate, !blockWildLegendaries,
+        out.write(makeByteSelected(useMinimumCatchRate, blockWildLegendaries,
                 wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_STRENGTH, randomizeWildPokemonHeldItems,
                 banBadRandomWildPokemonHeldItems)
                 | ((minimumCatchRateLevel - 1) << 5));

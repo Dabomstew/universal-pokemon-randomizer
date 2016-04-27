@@ -233,6 +233,9 @@ public class SettingsUpdater {
             // 171 to 172: removed separate names files in favor of one unified file
             // so two of the trailing checksums are gone
             actualDataLength -= 8;
+            
+            // fix wild legendaries
+            dataBlock[16] = (byte) (dataBlock[16] ^ (1 << 1));
         }
 
         // fix checksum
