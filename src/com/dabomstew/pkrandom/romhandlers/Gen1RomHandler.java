@@ -1385,7 +1385,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                     Evolution evo = new Evolution(pkmn, pokes[otherPoke], true, type, extraInfo);
                     if (!pkmn.evolutionsFrom.contains(evo)) {
                         pkmn.evolutionsFrom.add(evo);
-                        pokes[otherPoke].evolutionsTo.add(evo);
+                        if (pokes[otherPoke] != null) {
+                            pokes[otherPoke].evolutionsTo.add(evo);
+                        }
                     }
                     realPointer += (type == EvolutionType.STONE ? 4 : 3);
                 }

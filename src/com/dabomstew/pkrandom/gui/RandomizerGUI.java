@@ -1247,17 +1247,21 @@ public class RandomizerGUI extends javax.swing.JFrame {
     }
 
     private ImageIcon makeMascotIcon() {
-        BufferedImage handlerImg = romHandler.getMascotImage();
+        try {
+            BufferedImage handlerImg = romHandler.getMascotImage();
 
-        if (handlerImg == null) {
+            if (handlerImg == null) {
+                return emptyIcon;
+            }
+
+            BufferedImage nImg = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
+            int hW = handlerImg.getWidth();
+            int hH = handlerImg.getHeight();
+            nImg.getGraphics().drawImage(handlerImg, 64 - hW / 2, 64 - hH / 2, this);
+            return new ImageIcon(nImg);
+        } catch (Exception ex) {
             return emptyIcon;
         }
-
-        BufferedImage nImg = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
-        int hW = handlerImg.getWidth();
-        int hH = handlerImg.getHeight();
-        nImg.getGraphics().drawImage(handlerImg, 64 - hW / 2, 64 - hH / 2, this);
-        return new ImageIcon(nImg);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })

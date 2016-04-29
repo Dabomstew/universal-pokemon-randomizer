@@ -49,7 +49,7 @@ public class Gen1Constants {
     public static final Type[] typeTable = constructTypeTable();
 
     private static Type[] constructTypeTable() {
-        Type[] table = new Type[0x1B];
+        Type[] table = new Type[0x20];
         table[0x00] = Type.NORMAL;
         table[0x01] = Type.FIGHTING;
         table[0x02] = Type.FLYING;
