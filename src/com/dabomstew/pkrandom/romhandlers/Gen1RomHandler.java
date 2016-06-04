@@ -373,8 +373,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         loadPokemonStats();
         pokemonList = Arrays.asList(pokes);
         loadMoves();
-        preloadMaps();
         loadItemNames();
+        preloadMaps();
         loadMapNames();
     }
 
@@ -566,6 +566,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         }
 
         pkmn.catchRate = rom[offset + Gen1Constants.bsCatchRateOffset] & 0xFF;
+        pkmn.expYield = rom[offset + Gen1Constants.bsExpYieldOffset] & 0xFF;
         pkmn.growthCurve = ExpCurve.fromByte(rom[offset + Gen1Constants.bsGrowthCurveOffset]);
         pkmn.frontSpritePointer = readWord(offset + Gen1Constants.bsFrontSpriteOffset);
 
@@ -589,6 +590,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         }
         rom[offset + Gen1Constants.bsCatchRateOffset] = (byte) pkmn.catchRate;
         rom[offset + Gen1Constants.bsGrowthCurveOffset] = pkmn.growthCurve.toByte();
+        rom[offset + Gen1Constants.bsExpYieldOffset] = (byte) pkmn.expYield;
     }
 
     private String[] readPokemonNames() {

@@ -1856,7 +1856,15 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // trainers
         // run this to remove all custom non-Metronome moves
-        this.setTrainers(this.getTrainers());
+        List<Trainer> trainers = this.getTrainers();
+        
+        for(Trainer t : trainers) {
+            for(TrainerPokemon tpk : t.pokemon) {
+                tpk.resetMoves = true;
+            }
+        }
+        
+        this.setTrainers(trainers);
 
         // tms
         List<Integer> tmMoves = this.getTMMoves();
