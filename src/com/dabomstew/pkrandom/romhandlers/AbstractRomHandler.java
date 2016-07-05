@@ -1810,7 +1810,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             Collections.shuffle(damagingMoves, random);
 
             // Sort the damaging moves by power
-            damagingMoves.sort(new Comparator<Move>() {
+            Collections.sort(damagingMoves, new Comparator<Move>() {
 
                 @Override
                 public int compare(Move m1, Move m2) {
