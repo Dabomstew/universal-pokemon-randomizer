@@ -48,7 +48,7 @@ public class Settings {
 
     public static final int VERSION = 172;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 35;
+    public static final int LENGTH_OF_SETTINGS_DATA = 36;
 
     private CustomNamesSet customNames;
 
@@ -144,7 +144,10 @@ public class Settings {
     private boolean randomizeTrainerClassNames;
     private boolean trainersForceFullyEvolved;
     private int trainersForceFullyEvolvedLevel = 30;
-
+    private boolean trainersLevelModified;
+    private int trainersLevelModifier = 0;
+    
+    
     public enum WildPokemonMod {
         UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING
     }
@@ -378,6 +381,9 @@ public class Settings {
         } catch (IOException e) {
 
         }
+        
+        // @ 35 trainer pokemon level modifier
+        out.write((trainersLevelModified ? 0x80 : 0) | trainersLevelModifier);
 
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -388,6 +394,8 @@ public class Settings {
         } catch (IOException e) {
             out.write(0);
         }
+        
+        
 
         byte[] current = out.toByteArray();
         CRC32 checksum = new CRC32();
@@ -571,6 +579,9 @@ public class Settings {
         int codeTweaks = FileFunctions.readFullInt(data, 31);
 
         settings.setCurrentMiscTweaks(codeTweaks);
+        
+        settings.setTrainersLevelModified(restoreState(data[35], 7));
+        settings.setTrainersLevelModifier(data[35] & 0x7F);
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1184,6 +1195,23 @@ public class Settings {
 
     public Settings setTrainersForceFullyEvolvedLevel(int trainersForceFullyEvolvedLevel) {
         this.trainersForceFullyEvolvedLevel = trainersForceFullyEvolvedLevel;
+        return this;
+    }
+    public boolean isTrainersLevelModified() {
+        return trainersLevelModified;
+    }
+
+    public Settings setTrainersLevelModified(boolean trainersLevelModified) {
+        this.trainersLevelModified = trainersLevelModified;
+        return this;
+    }
+
+    public int getTrainersLevelModifier() {
+        return trainersLevelModifier;
+    }
+
+    public Settings setTrainersLevelModifier(int trainersLevelModifier) {
+        this.trainersLevelModifier = trainersLevelModifier;
         return this;
     }
 

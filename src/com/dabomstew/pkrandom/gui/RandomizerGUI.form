@@ -1931,6 +1931,8 @@
                                       <Component id="tcnRandomizeCB" min="-2" max="-2" attributes="0"/>
                                       <Component id="tpForceFullyEvolvedCB" min="-2" max="-2" attributes="0"/>
                                       <Component id="tpForceFullyEvolvedSlider" min="-2" max="-2" attributes="0"/>
+                                      <Component id="tpLevelModifierCB" min="-2" max="-2" attributes="0"/>
+                                      <Component id="tpLevelModifierSlider" min="-2" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
                           </Group>
@@ -1957,6 +1959,7 @@
                               <Component id="tpTypeThemedRB" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="tpTypeWeightingCB" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="tpForceFullyEvolvedCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="tpLevelModifierCB" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
@@ -2118,6 +2121,33 @@
                       <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.tpForceFullyEvolvedSlider.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
                     <Property name="value" type="int" value="30"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="tpLevelModifierCB">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.tpLevelModifierCB.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.tpLevelModifierCB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="tpForceFullyEvolvedCBActionPerformed"/>
+                  </Events>
+                </Component>
+                <Component class="javax.swing.JSlider" name="tpLevelModifierSlider">
+                  <Properties>
+                    <Property name="majorTickSpacing" type="int" value="5"/>
+                    <Property name="maximum" type="int" value="0.5"/>
+                    <Property name="minimum" type="int" value="2"/>
+                    <Property name="minorTickSpacing" type="int" value="1"/>
+                    <Property name="paintLabels" type="boolean" value="true"/>
+                    <Property name="paintTicks" type="boolean" value="true"/>
+                    <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.tpLevelModifierSlider.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="value" type="int" value="1"/>
                   </Properties>
                 </Component>
               </SubComponents>
