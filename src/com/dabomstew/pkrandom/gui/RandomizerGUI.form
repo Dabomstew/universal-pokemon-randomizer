@@ -1884,8 +1884,8 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="trainersPokemonPanel" min="-2" pref="161" max="-2" attributes="0"/>
-                      <EmptySpace pref="265" max="32767" attributes="0"/>
+                      <Component id="trainersPokemonPanel" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace pref="180" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -1931,8 +1931,8 @@
                                       <Component id="tcnRandomizeCB" min="-2" max="-2" attributes="0"/>
                                       <Component id="tpForceFullyEvolvedCB" min="-2" max="-2" attributes="0"/>
                                       <Component id="tpForceFullyEvolvedSlider" min="-2" max="-2" attributes="0"/>
-                                      <Component id="tpLevelModifierCB" min="-2" max="-2" attributes="0"/>
-                                      <Component id="tpLevelModifierSlider" min="-2" max="-2" attributes="0"/>
+                                      <Component id="tpLevelModifierCB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="tpLevelModifierSlider" alignment="0" min="-2" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
                           </Group>
@@ -1959,7 +1959,6 @@
                               <Component id="tpTypeThemedRB" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="tpTypeWeightingCB" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="tpForceFullyEvolvedCB" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="tpLevelModifierCB" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
@@ -1970,6 +1969,10 @@
                               </Group>
                               <Component id="tpForceFullyEvolvedSlider" min="-2" max="-2" attributes="0"/>
                           </Group>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Component id="tpLevelModifierCB" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Component id="tpLevelModifierSlider" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="32767" attributes="0"/>
                       </Group>
                   </Group>
@@ -2133,21 +2136,21 @@
                     </Property>
                   </Properties>
                   <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="tpForceFullyEvolvedCBActionPerformed"/>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="tpLevelModifierCBActionPerformed"/>
                   </Events>
                 </Component>
                 <Component class="javax.swing.JSlider" name="tpLevelModifierSlider">
                   <Properties>
-                    <Property name="majorTickSpacing" type="int" value="5"/>
-                    <Property name="maximum" type="int" value="0.5"/>
-                    <Property name="minimum" type="int" value="2"/>
-                    <Property name="minorTickSpacing" type="int" value="1"/>
+                    <Property name="majorTickSpacing" type="int" value="10"/>
+                    <Property name="maximum" type="int" value="50"/>
+                    <Property name="minimum" type="int" value="-50"/>
+                    <Property name="minorTickSpacing" type="int" value="2"/>
                     <Property name="paintLabels" type="boolean" value="true"/>
                     <Property name="paintTicks" type="boolean" value="true"/>
                     <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
                       <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.tpLevelModifierSlider.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
-                    <Property name="value" type="int" value="1"/>
+                    <Property name="value" type="int" value="0"/>
                   </Properties>
                 </Component>
               </SubComponents>

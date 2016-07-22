@@ -290,11 +290,13 @@ public class Randomizer {
         // Trainer Pokemon
         if (settings.getTrainersMod() == Settings.TrainersMod.RANDOM) {
             romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
-                    settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
+                    settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
+                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
         } else if (settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED) {
             romHandler.typeThemeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersMatchTypingDistribution(), settings.isTrainersBlockLegendaries(),
-                    settings.isTrainersBlockEarlyWonderGuard());
+                    settings.isTrainersBlockEarlyWonderGuard(),
+                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
         }
 
         if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)

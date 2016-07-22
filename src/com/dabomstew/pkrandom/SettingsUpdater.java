@@ -236,6 +236,9 @@ public class SettingsUpdater {
             
             // fix wild legendaries
             dataBlock[16] = (byte) (dataBlock[16] ^ (1 << 1));
+            
+            // add space for the trainer level modifier
+            insertExtraByte(35, (byte) 50); // 50 in the settings file = +0% after adjustment
         }
 
         // fix checksum

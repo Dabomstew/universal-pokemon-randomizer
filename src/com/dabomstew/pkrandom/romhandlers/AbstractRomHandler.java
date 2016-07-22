@@ -909,7 +909,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,int levelModifier) {
+    public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
+            int levelModifier) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
 
@@ -933,7 +934,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                 boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
                 tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, null, noLegendaries, wgAllowed);
                 tp.resetMoves = true;
-                tp.level = Math.min(100 , (int)(tp.level * (1 + levelModifier/ 100f)));
+                if (levelModifier != 0) {
+                    tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
+                }
             }
         }
 
@@ -943,7 +946,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
-            boolean noEarlyWonderGuard) {
+            boolean noEarlyWonderGuard, int levelModifier) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         cachedReplacementLists = new TreeMap<Type, List<Pokemon>>();
@@ -1014,6 +1017,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                     boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
                     tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForGroup, noLegendaries, wgAllowed);
                     tp.resetMoves = true;
+                    if (levelModifier != 0) {
+                        tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
+                    }
                 }
             }
         }
@@ -1043,6 +1049,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                     boolean shedAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
                     tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForTrainer, noLegendaries, shedAllowed);
                     tp.resetMoves = true;
+                    if (levelModifier != 0) {
+                        tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
+                    }
                 }
             }
         }
@@ -1858,13 +1867,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         // trainers
         // run this to remove all custom non-Metronome moves
         List<Trainer> trainers = this.getTrainers();
-        
-        for(Trainer t : trainers) {
-            for(TrainerPokemon tpk : t.pokemon) {
+
+        for (Trainer t : trainers) {
+            for (TrainerPokemon tpk : t.pokemon) {
                 tpk.resetMoves = true;
             }
         }
-        
+
         this.setTrainers(trainers);
 
         // tms

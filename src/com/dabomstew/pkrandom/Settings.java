@@ -145,9 +145,8 @@ public class Settings {
     private boolean trainersForceFullyEvolved;
     private int trainersForceFullyEvolvedLevel = 30;
     private boolean trainersLevelModified;
-    private int trainersLevelModifier = 0;
-    
-    
+    private int trainersLevelModifier = 0; // -50 ~ 50
+
     public enum WildPokemonMod {
         UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING
     }
@@ -381,9 +380,9 @@ public class Settings {
         } catch (IOException e) {
 
         }
-        
+
         // @ 35 trainer pokemon level modifier
-        out.write((trainersLevelModified ? 0x80 : 0) | trainersLevelModifier);
+        out.write((trainersLevelModified ? 0x80 : 0) | (trainersLevelModifier+50));
 
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -394,8 +393,6 @@ public class Settings {
         } catch (IOException e) {
             out.write(0);
         }
-        
-        
 
         byte[] current = out.toByteArray();
         CRC32 checksum = new CRC32();
@@ -579,9 +576,9 @@ public class Settings {
         int codeTweaks = FileFunctions.readFullInt(data, 31);
 
         settings.setCurrentMiscTweaks(codeTweaks);
-        
+
         settings.setTrainersLevelModified(restoreState(data[35], 7));
-        settings.setTrainersLevelModifier(data[35] & 0x7F);
+        settings.setTrainersLevelModifier((data[35] & 0x7F) - 50);
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -710,11 +707,11 @@ public class Settings {
     }
 
     // getters and setters
-    
+
     public CustomNamesSet getCustomNames() {
         return customNames;
     }
-    
+
     public Settings setCustomNames(CustomNamesSet customNames) {
         this.customNames = customNames;
         return this;
@@ -1197,6 +1194,7 @@ public class Settings {
         this.trainersForceFullyEvolvedLevel = trainersForceFullyEvolvedLevel;
         return this;
     }
+
     public boolean isTrainersLevelModified() {
         return trainersLevelModified;
     }
