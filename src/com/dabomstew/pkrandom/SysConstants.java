@@ -31,7 +31,7 @@ public class SysConstants {
 
     public static final String AUTOUPDATE_URL = "http://pokehacks.dabomstew.com/randomizer/autoupdate/";
     public static final String WEBSITE_URL = "http://pokehacks.dabomstew.com/randomizer/";
-    public static final int UPDATE_VERSION = 1710;
+    public static final int UPDATE_VERSION = 1720;
     public static final String ROOT_PATH = getRootPath();
     public static final String LINE_SEP = System.getProperty("line.separator");
     public static final String customNamesFile = "customnames.rncn";
