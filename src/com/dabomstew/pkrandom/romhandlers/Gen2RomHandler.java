@@ -640,6 +640,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             enc.maxLevel = rom[offset++] & 0xFF;
             bccES.encounters.add(enc);
         }
+        // Unown is banned for Bug Catching Contest (5/8/2016)
+        bccES.bannedPokemon.add(pokes[Gen2Constants.unownIndex]);
         areas.add(bccES);
 
         return areas;
