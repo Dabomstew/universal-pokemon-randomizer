@@ -446,6 +446,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         for (int i = 1; i <= Gen4Constants.moveCount; i++) {
             byte[] data = moveNarc.files.get(i);
             writeWord(data, 0, moves[i].effectIndex);
+            data[2] = Gen4Constants.moveCategoryToByte(moves[i].category);
             data[3] = (byte) moves[i].power;
             data[4] = Gen4Constants.typeToByte(moves[i].type);
             int hitratio = (int) Math.round(moves[i].hitratio);
