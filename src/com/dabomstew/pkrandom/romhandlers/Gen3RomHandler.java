@@ -2426,7 +2426,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     public boolean fixedTrainerClassNamesLength() {
         return false;
     }
-    
+
     @Override
     public List<Integer> getDoublesTrainerClasses() {
         int[] doublesClasses = romEntry.arrayEntries.get("DoublesTrainerClasses");
@@ -2496,11 +2496,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             writePointer(spriteBase, frontSprites + introPokemon * 8);
             writePointer(spriteBase + 4, palettes + introPokemon * 8);
         } else if (romEntry.romType == Gen3Constants.RomType_Ruby || romEntry.romType == Gen3Constants.RomType_Sapp) {
-            // intro sprites : hoenn pokes only
-            int numInternalPokes = romEntry.getValue("PokemonCount");
-            int introPokemon = this.random.nextInt(Math.min(numInternalPokes, 509)) + 1;
-            while (internalToPokedex[introPokemon] < Gen3Constants.hoennPokesStart) {
-                introPokemon = this.random.nextInt(Math.min(numInternalPokes, 509)) + 1;
+            // intro sprites : any pokemon in the range 0-510 except bulbasaur
+            int introPokemon = pokedexToInternal[randomPokemon().number];
+            while (introPokemon == 1 || introPokemon > 510) {
+                introPokemon = pokedexToInternal[randomPokemon().number];
             }
             int frontSprites = romEntry.getValue("PokemonFrontSprites");
             int palettes = romEntry.getValue("PokemonNormalPalettes");
@@ -2971,6 +2970,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 || romEntry.getValue("CatchingTutorialPlayerMonOffset") > 0) {
             available |= MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getValue();
         }
+        if (romEntry.getValue("PCPotionOffset") != 0) {
+            available |= MiscTweak.RANDOMIZE_PC_POTION.getValue();
+        }
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
         return available;
     }
@@ -2990,6 +2992,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
             allowedItems.banSingles(Gen3Constants.luckyEggIndex);
             nonBadItems.banSingles(Gen3Constants.luckyEggIndex);
+        } else if (tweak == MiscTweak.RANDOMIZE_PC_POTION) {
+            randomizePCPotion();
         }
     }
 
@@ -3058,6 +3062,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             rom[tsvOffset] = 4; // slow = medium
             rom[tsvOffset + 1] = 1; // medium = fast
             rom[tsvOffset + 2] = 0; // fast = instant
+        }
+    }
+
+    private void randomizePCPotion() {
+        if (romEntry.getValue("PCPotionOffset") != 0) {
+            writeWord(romEntry.getValue("PCPotionOffset"), this.getNonBadItems().randomNonTM(this.random));
         }
     }
 
