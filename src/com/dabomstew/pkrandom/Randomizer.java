@@ -247,15 +247,42 @@ public class Randomizer {
             romHandler.randomizeMovesLearnt(true, noBrokenMoves, forceFourLv1s, msGoodDamagingProb);
         } else if (settings.getMovesetsMod() == Settings.MovesetsMod.COMPLETELY_RANDOM) {
             romHandler.randomizeMovesLearnt(false, noBrokenMoves, forceFourLv1s, msGoodDamagingProb);
+        } else if (noBrokenMoves) {
+            romHandler.removeBrokenMoves();
         }
 
         if (settings.isReorderDamagingMoves()) {
             romHandler.orderDamagingMovesByDamage();
         }
 
+
         // Show the new movesets if applicable
         if (settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED) {
-            log.println("Pokemon Movesets: Unchanged." + NEWLINE);
+            if (settings.doBlockBrokenMoves()) {
+                log.print("Pokemon Movesets: Removed Game-Breaking Moves (");
+
+                List<Integer> gameBreakingMoves = romHandler.getGameBreakingMoves();
+                int numberPrinted = 0;
+
+                for (Move move : moves) {
+                    if (move == null) {
+                        continue;
+                    }
+
+                    if (gameBreakingMoves.contains(move.number)) {
+                        numberPrinted++;
+                        log.print(move.name);
+
+                        if (numberPrinted < gameBreakingMoves.size()) {
+                            log.print(", ");
+                        }
+                    }
+                }
+
+                log.println(")" + NEWLINE);
+            } else {
+                log.println("Pokemon Movesets: Unchanged." + NEWLINE);
+            }
         } else if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
             log.println("Pokemon Movesets: Metronome Only." + NEWLINE);
         } else {
