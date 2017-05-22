@@ -909,6 +909,18 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public void levelUpTrainerPokes(int levelModifier){
+        checkPokemonRestrictions();
+        List<Trainer> currentTrainers = this.getTrainers();
+        for(Trainer t : currentTrainers)
+        for (TrainerPokemon tp : t.pokemon) {
+            if (levelModifier != 0) {
+                tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
+            }
+        }
+        this.setTrainers(currentTrainers);
+    }
+    @Override
     public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
             int levelModifier) {
         checkPokemonRestrictions();

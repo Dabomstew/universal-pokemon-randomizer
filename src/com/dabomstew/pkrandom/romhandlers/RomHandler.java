@@ -161,7 +161,9 @@ public interface RomHandler {
     public List<Trainer> getTrainers();
 
     public void setTrainers(List<Trainer> trainerData);
-
+    
+    public void levelUpTrainerPokes(int levelModifier);
+    
     public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
             int levelModifier);
 
