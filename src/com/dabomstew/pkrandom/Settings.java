@@ -83,7 +83,7 @@ public class Settings {
     private boolean banNegativeAbilities;
 
     public enum StartersMod {
-        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS
+        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_ONE_OR_TWO_EVOLUTIONS, RANDOM_WITH_TWO_EVOLUTIONS
     }
 
     private StartersMod startersMod = StartersMod.UNCHANGED;
@@ -274,7 +274,7 @@ public class Settings {
         // 4: starter pokemon stuff
         out.write(makeByteSelected(startersMod == StartersMod.CUSTOM, startersMod == StartersMod.COMPLETELY_RANDOM,
                 startersMod == StartersMod.UNCHANGED, startersMod == StartersMod.RANDOM_WITH_TWO_EVOLUTIONS,
-                randomizeStartersHeldItems, banBadRandomStarterHeldItems));
+                randomizeStartersHeldItems, banBadRandomStarterHeldItems, startersMod == StartersMod.RANDOM_WITH_ONE_OR_TWO_EVOLUTIONS));
 
         // @5 dropdowns
         write2ByteInt(out, customStarters[0] - 1);
@@ -448,6 +448,7 @@ public class Settings {
         settings.setStartersMod(restoreEnum(StartersMod.class, data[4], 2, // UNCHANGED
                 0, // CUSTOM
                 1, // COMPLETELY_RANDOM
+                6, // RANDOM_WITH_ONE_OR_TWO_EVOLUTIONS
                 3 // RANDOM_WITH_TWO_EVOLUTIONS
         ));
         settings.setRandomizeStartersHeldItems(restoreState(data[4], 4));

@@ -648,8 +648,26 @@ public class Randomizer {
                 }
                 romHandler.setStarters(starters);
                 log.println();
-            } else if (settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_TWO_EVOLUTIONS) {
+            } else if (settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_ONE_OR_TWO_EVOLUTIONS) {
                 // Randomise
+                log.println("--Random 1/2-Evolution Starters--");
+                int starterCount = 3;
+                if (romHandler.isYellow()) {
+                    starterCount = 2;
+                }
+                List<Pokemon> starters = new ArrayList<Pokemon>();
+                for (int i = 0; i < starterCount; i++) {
+                    Pokemon pkmn = romHandler.random1or2EvosPokemon();
+                    while (starters.contains(pkmn)) {
+                        pkmn = romHandler.random1or2EvosPokemon();
+                    }
+                    log.println("Set starter " + (i + 1) + " to " + pkmn.name);
+                    starters.add(pkmn);
+                }
+                romHandler.setStarters(starters);
+                log.println();
+            } else if (settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_TWO_EVOLUTIONS) {
+             // Randomise
                 log.println("--Random 2-Evolution Starters--");
                 int starterCount = 3;
                 if (romHandler.isYellow()) {

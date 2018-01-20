@@ -324,8 +324,26 @@ public abstract class AbstractRomHandler implements RomHandler {
         return onlyLegendaryList.get(this.random.nextInt(onlyLegendaryList.size()));
     }
 
-    private List<Pokemon> twoEvoPokes;
+    private List<Pokemon> oneOrTwoEvoPokes;
 
+    @Override
+    public Pokemon random1or2EvosPokemon() {
+        if (oneOrTwoEvoPokes == null) {
+            // Prepare the list
+            oneOrTwoEvoPokes = new ArrayList<Pokemon>();
+            List<Pokemon> allPokes = this.getPokemon();
+            for (Pokemon pk : allPokes) {
+                if (pk != null && pk.evolutionsTo.size() == 0 && pk.evolutionsFrom.size() > 0) {
+                    // Candidate
+                    oneOrTwoEvoPokes.add(pk);
+                }
+            }
+        }
+        return oneOrTwoEvoPokes.get(this.random.nextInt(oneOrTwoEvoPokes.size()));
+    }
+    
+    private List<Pokemon> twoEvoPokes;
+    
     @Override
     public Pokemon random2EvosPokemon() {
         if (twoEvoPokes == null) {
