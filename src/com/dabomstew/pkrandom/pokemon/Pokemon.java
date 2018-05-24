@@ -208,6 +208,27 @@ public class Pokemon implements Comparable<Pokemon> {
         return number - o.number;
     }
 
+    public static void swapStats(Pokemon swapTo, Pokemon swapFrom) {
+        List<Integer> toStats = Arrays.asList(swapTo.hp, swapTo.attack, swapTo.defense, swapTo.speed, swapTo.spatk, swapTo.spdef, swapTo.special);
+        List<Integer> fromStats = Arrays.asList(swapFrom.hp, swapFrom.attack, swapFrom.defense, swapFrom.speed, swapFrom.spatk, swapFrom.spdef, swapFrom.special);
+        
+        swapFrom.hp = toStats.get(0);
+        swapFrom.attack = toStats.get(1);
+        swapFrom.defense = toStats.get(2);
+        swapFrom.speed = toStats.get(3);
+        swapFrom.spatk = toStats.get(4);
+        swapFrom.spdef = toStats.get(5);
+        swapFrom.special = toStats.get(6);
+        
+        swapTo.hp = fromStats.get(0);
+        swapTo.attack = fromStats.get(1);
+        swapTo.defense = fromStats.get(2);
+        swapTo.speed = fromStats.get(3);
+        swapTo.spatk = fromStats.get(4);
+        swapTo.spdef = fromStats.get(5);
+        swapTo.special = fromStats.get(6);
+    }
+    
     private static final List<Integer> legendaries = Arrays.asList(144, 145, 146, 150, 151, 243, 244, 245, 249, 250,
             251, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488,
             489, 490, 491, 492, 493, 494, 638, 639, 640, 641, 642, 643, 644, 645, 646, 647, 648, 649);

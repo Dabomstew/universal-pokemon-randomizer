@@ -153,6 +153,10 @@ public class Randomizer {
         case RANDOM:
             romHandler.randomizePokemonStats(settings.isBaseStatsFollowEvolutions());
             break;
+        case RANDOM_COMPLETELY:
+            romHandler.shuffleAllPokemonBSTs();
+            romHandler.randomizePokemonStats(settings.isBaseStatsFollowEvolutions());
+            break;
         default:
             break;
         }

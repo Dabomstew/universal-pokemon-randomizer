@@ -237,6 +237,21 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
     }
+    
+    @Override
+    public void shuffleAllPokemonBSTs() {
+        List<Pokemon> allPokes = this.getPokemon();
+        for (Pokemon pk : allPokes) {
+            if (pk != null) {
+                Pokemon swapWith = null;
+                do {
+                     swapWith = allPokes.get(this.random.nextInt(allPokes.size()));
+                } while (swapWith == null);
+                  
+                Pokemon.swapStats(pk, swapWith);
+            }
+        }
+    }
 
     @Override
     public void updatePokemonStats() {

@@ -94,6 +94,9 @@ public interface RomHandler {
 
     // Run the stats shuffler on each Pokemon.
     public void shufflePokemonStats(boolean evolutionSanity);
+    
+    // Shuffle all pokemon base stat totals.
+    public void shuffleAllPokemonBSTs();
 
     // Randomise stats following evolutions for proportions or not (see
     // tooltips)
