@@ -239,6 +239,42 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
     
     @Override
+    public void randomizeCompletelyPokemonStats(boolean evolutionSanity) {
+        this.shuffleAllPokemonBSTs();
+        
+        if (evolutionSanity) {
+            List<Pokemon> allPokes = this.getPokemon();
+            int count = 0;
+            double total = 0.0;
+            
+            for (Pokemon pk : allPokes) {
+                if (pk != null) {
+                    count++;
+                    total += pk.bst();
+                }
+            }
+            final double mean = total / count;
+            
+            copyUpEvolutionsHelper(new BasePokemonAction() {
+                public void applyTo(Pokemon pk) {
+                    pk.randomizeStatsWithinBST(AbstractRomHandler.this.random);
+                }
+            }, new EvolvedPokemonAction() {
+                public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
+                    evTo.copyCompletelyRandomizedStatsUpEvolution(evFrom, AbstractRomHandler.this.random, mean);
+                }
+            });
+        } else {
+            List<Pokemon> allPokes = this.getPokemon();
+            for (Pokemon pk : allPokes) {
+                if (pk != null) {
+                    pk.randomizeStatsWithinBST(this.random);
+                }
+            }
+        }
+    }
+    
+    @Override
     public void shuffleAllPokemonBSTs() {
         List<Pokemon> allPokes = this.getPokemon();
         for (Pokemon pk : allPokes) {
@@ -248,7 +284,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                      swapWith = allPokes.get(this.random.nextInt(allPokes.size()));
                 } while (swapWith == null);
                   
-                Pokemon.swapStats(pk, swapWith);
+                Pokemon.swapStatsRandom(pk, swapWith, this.random);
             }
         }
     }

@@ -154,8 +154,7 @@ public class Randomizer {
             romHandler.randomizePokemonStats(settings.isBaseStatsFollowEvolutions());
             break;
         case RANDOM_COMPLETELY:
-            romHandler.shuffleAllPokemonBSTs();
-            romHandler.randomizePokemonStats(settings.isBaseStatsFollowEvolutions());
+            romHandler.randomizeCompletelyPokemonStats(settings.isBaseStatsFollowEvolutions());
             break;
         default:
             break;
@@ -547,15 +546,16 @@ public class Randomizer {
         } else {
             log.println("--Pokemon Base Stats & Types--");
             if (romHandler instanceof Gen1RomHandler) {
-                log.println("NUM|NAME      |TYPE             |  HP| ATK| DEF| SPE|SPEC");
+                log.println("NUM|NAME      |TYPE             |  HP| ATK| DEF| SPE|SPEC|BST");
                 for (Pokemon pkmn : allPokes) {
                     if (pkmn != null) {
                         String typeString = pkmn.primaryType == null ? "???" : pkmn.primaryType.toString();
                         if (pkmn.secondaryType != null) {
                             typeString += "/" + pkmn.secondaryType.toString();
                         }
-                        log.printf("%3d|%-10s|%-17s|%4d|%4d|%4d|%4d|%4d" + NEWLINE, pkmn.number, pkmn.name, typeString,
-                                pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.special);
+                        int total = pkmn.hp + pkmn.attack + pkmn.defense + pkmn.speed + pkmn.special;
+                        log.printf("%3d|%-10s|%-17s|%4d|%4d|%4d|%4d|%4d|%4d" + NEWLINE, pkmn.number, pkmn.name, typeString,
+                                pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.special, total);
                     }
 
                 }
