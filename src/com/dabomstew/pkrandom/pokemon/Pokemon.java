@@ -145,7 +145,7 @@ public class Pokemon implements Comparable<Pokemon> {
         double ourBST = bst();
         double theirBST = evolvesFrom.bst();
 
-        double bstRatio = Math.min(ourBST / theirBST, 1.0);
+        double bstRatio = ourBST / theirBST;
 
         hp = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.hp * bstRatio)));
         attack = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.attack * bstRatio)));
