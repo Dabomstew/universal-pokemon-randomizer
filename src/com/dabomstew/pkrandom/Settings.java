@@ -46,7 +46,7 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 public class Settings {
 
-    public static final int VERSION = 172;
+    public static final int VERSION = 180;
 
     public static final int LENGTH_OF_SETTINGS_DATA = 36;
 
@@ -152,7 +152,7 @@ public class Settings {
     }
 
     public enum WildPokemonRestrictionMod {
-        NONE, SIMILAR_STRENGTH, CATCH_EM_ALL, TYPE_THEME_AREAS
+        NONE, SIMILAR_STRENGTH, CATCH_EM_ALL, TYPE_THEME_AREAS, MATCH_TYPING_DISTRIBUTION
     }
 
     private WildPokemonMod wildPokemonMod = WildPokemonMod.UNCHANGED;
@@ -308,10 +308,11 @@ public class Settings {
 
         // 16 wild pokemon 2
         // bugfix 161
+        // changed 180
         out.write(makeByteSelected(useMinimumCatchRate, blockWildLegendaries,
                 wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_STRENGTH, randomizeWildPokemonHeldItems,
-                banBadRandomWildPokemonHeldItems)
-                | ((minimumCatchRateLevel - 1) << 5));
+                banBadRandomWildPokemonHeldItems, wildPokemonRestrictionMod == WildPokemonRestrictionMod.MATCH_TYPING_DISTRIBUTION)
+                | ((minimumCatchRateLevel - 1) << 6));
 
         // 17 static pokemon
         out.write(makeByteSelected(staticPokemonMod == StaticPokemonMod.UNCHANGED,
@@ -490,7 +491,8 @@ public class Settings {
         settings.setWildPokemonRestrictionMod(getEnum(WildPokemonRestrictionMod.class, restoreState(data[15], 2), // NONE
                 restoreState(data[16], 2), // SIMILAR_STRENGTH
                 restoreState(data[15], 0), // CATCH_EM_ALL
-                restoreState(data[15], 3) // TYPE_THEME_AREAS
+                restoreState(data[15], 3), // TYPE_THEME_AREAS
+                restoreState(data[16], 5) // MATCH_TYPING_DISTRIBUTION
         ));
         settings.setUseTimeBasedEncounters(restoreState(data[15], 7));
 
@@ -499,7 +501,7 @@ public class Settings {
         settings.setRandomizeWildPokemonHeldItems(restoreState(data[16], 3));
         settings.setBanBadRandomWildPokemonHeldItems(restoreState(data[16], 4));
 
-        settings.setMinimumCatchRateLevel(((data[16] & 0x60) >> 5) + 1);
+        settings.setMinimumCatchRateLevel(((data[16] & 0xC0) >> 6) + 1);
 
         settings.setStaticPokemonMod(restoreEnum(StaticPokemonMod.class, data[17], 0, // UNCHANGED
                 1, // RANDOM_MATCHING

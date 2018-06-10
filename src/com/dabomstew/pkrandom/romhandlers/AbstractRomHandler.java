@@ -566,7 +566,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-            boolean noLegendaries) {
+            boolean matchTypingDistribution, boolean noLegendaries) {
         checkPokemonRestrictions();
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
 
@@ -577,9 +577,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         Collections.shuffle(scrambledEncounters, this.random);
 
         List<Pokemon> banned = this.bannedForWildEncounters();
-        // Assume EITHER catch em all OR type themed OR match strength for now
+        // Assume EITHER catch em all OR type themed OR match strength for now OR match typing distribution
         if (catchEmAll) {
-
             List<Pokemon> allPokes = noLegendaries ? new ArrayList<Pokemon>(noLegendaryList) : new ArrayList<Pokemon>(
                     mainPokemonList);
             allPokes.removeAll(banned);
@@ -668,6 +667,16 @@ public abstract class AbstractRomHandler implements RomHandler {
                     enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null);
                 }
             }
+        } else if (matchTypingDistribution) {
+            for (EncounterSet area : scrambledEncounters) {
+                for (Encounter enc : area.encounters) {
+                    List<Pokemon> pokes = pokemonOfType(this.pickType(true, noLegendaries), noLegendaries);
+                    enc.pokemon = pokes.get(this.random.nextInt(pokes.size()));
+                    while (banned.contains(enc.pokemon) || area.bannedPokemon.contains(enc.pokemon)) {
+                        enc.pokemon = pokes.get(this.random.nextInt(pokes.size()));
+                    }
+                }
+            }
         } else {
             // Entirely random
             for (EncounterSet area : scrambledEncounters) {
@@ -685,7 +694,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
-            boolean usePowerLevels, boolean noLegendaries) {
+            boolean usePowerLevels, boolean matchTypingDistribution, boolean noLegendaries) {
         checkPokemonRestrictions();
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
         List<Pokemon> banned = this.bannedForWildEncounters();
@@ -808,6 +817,25 @@ public abstract class AbstractRomHandler implements RomHandler {
                     Pokemon picked = pickWildPowerLvlReplacement(localAllowed, areaPk, false, usedPks);
                     areaMap.put(areaPk, picked);
                     usedPks.add(picked);
+                }
+                for (Encounter enc : area.encounters) {
+                    // Apply the map
+                    enc.pokemon = areaMap.get(enc.pokemon);
+                }
+            }
+        } else if (matchTypingDistribution) {
+            for (EncounterSet area : scrambledEncounters) {
+                // Poke-set
+                Set<Pokemon> inArea = pokemonInArea(area);
+                // Build area map using type weighted randoms
+                Map<Pokemon, Pokemon> areaMap = new TreeMap<Pokemon, Pokemon>();
+                for (Pokemon areaPk : inArea) {
+                    List<Pokemon> pokes = pokemonOfType(this.pickType(true, noLegendaries), noLegendaries);
+                    Pokemon picked = pokes.get(this.random.nextInt(pokes.size()));
+                    while (areaMap.containsValue(picked) || banned.contains(picked) || area.bannedPokemon.contains(picked)) {
+                        picked = pokes.get(this.random.nextInt(pokes.size()));
+                    }
+                    areaMap.put(areaPk, picked);
                 }
                 for (Encounter enc : area.encounters) {
                     // Apply the map
