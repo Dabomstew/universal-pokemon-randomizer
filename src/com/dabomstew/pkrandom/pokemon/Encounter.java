@@ -40,4 +40,7 @@ public class Encounter {
         }
     }
 
+    public int maximumLevel() {
+        return Math.max(level, maxLevel);
+    }
 }

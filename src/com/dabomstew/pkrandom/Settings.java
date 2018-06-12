@@ -163,6 +163,7 @@ public class Settings {
     private int minimumCatchRateLevel = 1;
     private boolean randomizeWildPokemonHeldItems;
     private boolean banBadRandomWildPokemonHeldItems;
+    private boolean allowLowLevelEvolvedTypes;
 
     public enum StaticPokemonMod {
         UNCHANGED, RANDOM_MATCHING, COMPLETELY_RANDOM
@@ -315,9 +316,10 @@ public class Settings {
                 | ((minimumCatchRateLevel - 1) << 6));
 
         // 17 static pokemon
+        // changed 180: wild pokemon low level evos
         out.write(makeByteSelected(staticPokemonMod == StaticPokemonMod.UNCHANGED,
                 staticPokemonMod == StaticPokemonMod.RANDOM_MATCHING,
-                staticPokemonMod == StaticPokemonMod.COMPLETELY_RANDOM));
+                staticPokemonMod == StaticPokemonMod.COMPLETELY_RANDOM, allowLowLevelEvolvedTypes));
 
         // 18 tm randomization
         // new stuff 162
@@ -507,6 +509,7 @@ public class Settings {
                 1, // RANDOM_MATCHING
                 2 // COMPLETELY_RANDOM
         ));
+        settings.setAllowLowLevelEvolvedTypes(restoreState(data[17], 3));
 
         settings.setTmsMod(restoreEnum(TMsMod.class, data[18], 4, // UNCHANGED
                 3 // RANDOM
@@ -1293,6 +1296,15 @@ public class Settings {
 
     public Settings setBanBadRandomWildPokemonHeldItems(boolean banBadRandomWildPokemonHeldItems) {
         this.banBadRandomWildPokemonHeldItems = banBadRandomWildPokemonHeldItems;
+        return this;
+    }
+
+    public boolean isAllowLowLevelEvolvedTypes() {
+        return allowLowLevelEvolvedTypes;
+    }
+
+    public Settings setAllowLowLevelEvolvedTypes(boolean allowLowLevelEvolvedTypes) {
+        this.allowLowLevelEvolvedTypes = allowLowLevelEvolvedTypes;
         return this;
     }
 

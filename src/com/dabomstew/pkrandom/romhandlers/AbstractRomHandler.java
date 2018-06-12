@@ -567,7 +567,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-            boolean matchTypingDistribution, boolean noLegendaries) {
+            boolean matchTypingDistribution, boolean noLegendaries, boolean allowLowLevelEvolvedTypes) {
         checkPokemonRestrictions();
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
 
@@ -577,10 +577,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<EncounterSet> scrambledEncounters = new ArrayList<EncounterSet>(currentEncounters);
         Collections.shuffle(scrambledEncounters, this.random);
 
-        PokemonSet globalSet = new PokemonSet(mainPokemonList).filterLegendaries(noLegendaries)
-                .filterList(this.bannedForWildEncounters());
+        PokemonSet globalSet = new PokemonSet(mainPokemonList).filterList(this.bannedForWildEncounters());
+        if (noLegendaries) {
+            globalSet.filterLegendaries();
+        }
         for (EncounterSet area : scrambledEncounters) {
-            PokemonSet areaSet = new PokemonSet(globalSet).filterSet(area.bannedPokemon);
+            PokemonSet areaSet = new PokemonSet(globalSet).filterSet(area.bannedPokemon)
+                    .filterByMinimumLevel(area.maximumLevel());
             if (catchEmAll) {
                 PokemonSet workingSet = new PokemonSet(areaSet);
                 for (Encounter enc : area.encounters) {
@@ -616,7 +619,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-            boolean matchTypingDistribution, boolean noLegendaries) {
+            boolean matchTypingDistribution, boolean noLegendaries, boolean allowLowLevelEvolvedTypes) {
         checkPokemonRestrictions();
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
 
@@ -626,10 +629,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<EncounterSet> scrambledEncounters = new ArrayList<EncounterSet>(currentEncounters);
         Collections.shuffle(scrambledEncounters, this.random);
 
-        PokemonSet globalSet = new PokemonSet(mainPokemonList).filterLegendaries(noLegendaries)
-                .filterList(this.bannedForWildEncounters());
+        PokemonSet globalSet = new PokemonSet(mainPokemonList).filterList(this.bannedForWildEncounters());
+        if (noLegendaries) {
+            globalSet.filterLegendaries();
+        }
         for (EncounterSet area : scrambledEncounters) {
-            PokemonSet areaSet = new PokemonSet(globalSet).filterSet(area.bannedPokemon);
+            PokemonSet areaSet = new PokemonSet(globalSet).filterSet(area.bannedPokemon)
+                    .filterByMinimumLevel(area.maximumLevel());
             Set<Pokemon> inArea = pokemonInArea(area);
             Map<Pokemon, Pokemon> areaMap = new TreeMap<Pokemon, Pokemon>();
             if (catchEmAll) {
@@ -682,9 +688,15 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries) {
         checkPokemonRestrictions();
+        
+        List<Pokemon> banned = this.bannedForWildEncounters();
+        PokemonSet globalSet = new PokemonSet(mainPokemonList).filterList(banned);
+        if (noLegendaries) {
+            globalSet.filterLegendaries();
+        }
+        
         // Build the full 1-to-1 map
         Map<Pokemon, Pokemon> translateMap = new TreeMap<Pokemon, Pokemon>();
-        List<Pokemon> banned = this.bannedForWildEncounters();
         PokemonSet fromSet = new PokemonSet(mainPokemonList).filterList(banned);
         PokemonSet toSet = null;
 
@@ -695,7 +707,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         while (fromSet.size() > 0) {
             if (toSet == null || toSet.size() == 0) {
-                toSet = new PokemonSet(mainPokemonList).filterLegendaries(noLegendaries).filterList(banned);
+                toSet = new PokemonSet(globalSet);
             }
 
             Pokemon from = fromSet.randomPokemon(random);
@@ -715,12 +727,10 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             toSet.remove(to);
             translateMap.put(from, to);
-
         }
 
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
 
-        PokemonSet globalSet = new PokemonSet(mainPokemonList).filterLegendaries(noLegendaries).filterList(banned);
         for (EncounterSet area : currentEncounters) {
             for (Encounter enc : area.encounters) {
                 // Apply the map

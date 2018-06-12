@@ -150,10 +150,11 @@ public interface RomHandler {
     public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters);
 
     public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-            boolean matchTypingDistribution, boolean noLegendaries);
+            boolean matchTypingDistribution, boolean noLegendaries, boolean allowLowLevelEvolvedTypes);
 
     public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
-            boolean usePowerLevels, boolean matchTypingDistribution, boolean noLegendaries);
+            boolean usePowerLevels, boolean matchTypingDistribution, boolean noLegendaries,
+            boolean allowLowLevelEvolvedTypes);
 
     public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries);
 

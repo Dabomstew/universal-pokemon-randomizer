@@ -68,10 +68,8 @@ public class PokemonSet {
     }
 
     // Filtering
-    public PokemonSet filterLegendaries(boolean noLegendaries) {
-        if (noLegendaries) {
-            filter(p -> p.isLegendary());
-        }
+    public PokemonSet filterLegendaries() {
+        filter(p -> p.isLegendary());
         return this;
     }
 
@@ -87,6 +85,11 @@ public class PokemonSet {
         if (!set.isEmpty()) {
             filter(p -> set.contains(p));
         }
+        return this;
+    }
+
+    public PokemonSet filterByMinimumLevel(int level) {
+        filter(p -> p.minimumLevel() > level);
         return this;
     }
 
