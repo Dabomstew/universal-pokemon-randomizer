@@ -1588,25 +1588,26 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void printMoveUpdates() {
-        log("--Move Updates--");
+        log("<h2>Move Updates</h2>");
+        log("<ul>");
         List<Move> moves = this.getMoves();
         for (int moveID : moveUpdates.keySet()) {
             boolean[] changes = moveUpdates.get(moveID);
             Move mv = moves.get(moveID);
             List<String> nonTypeChanges = new ArrayList<String>();
             if (changes[0]) {
-                nonTypeChanges.add(String.format("%d power", mv.power));
+                nonTypeChanges.add(String.format("<strong>%d power</strong>", mv.power));
             }
             if (changes[1]) {
-                nonTypeChanges.add(String.format("%d PP", mv.pp));
+                nonTypeChanges.add(String.format("<strong>%d PP</strong>", mv.pp));
             }
             if (changes[2]) {
-                nonTypeChanges.add(String.format("%.00f%% accuracy", mv.hitratio));
+                nonTypeChanges.add(String.format("<strong>%.00f%% accuracy</strong>", mv.hitratio));
             }
-            String logStr = "Made " + mv.name;
+            String logStr = String.format("Made <strong>%s</strong>", mv.name);
             // type or not?
             if (changes[3]) {
-                logStr += " be " + mv.type + "-type";
+                logStr += String.format(" be <strong>%s-type</strong>", mv.type.toString());
                 if (nonTypeChanges.size() > 0) {
                     logStr += " and";
                 }
@@ -1621,8 +1622,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                     logStr += nonTypeChanges.get(0);
                 }
             }
-            log(logStr);
+            log(String.format("<li>%s</li>", logStr));
         }
+        log("</ul>");
         logBlankLine();
     }
 
@@ -2764,11 +2766,12 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
         // Log changes now that we're done (to avoid repeats)
-        log("--Condensed Level Evolutions--");
+        log("<H2>Condensed Level Evolutions</h2><ul>");
         for (Evolution evol : changedEvos) {
-            log(String.format("%s now evolves into %s at minimum level %d", evol.from.name, evol.to.name,
+            log(String.format("<li><strong>%s</strong> now evolves into <strong>%s</strong> at minimum level <strong>%d</strong></li>", evol.from.name, evol.to.name,
                     evol.extraInfo));
         }
+        log("</ul>");
         logBlankLine();
 
     }
@@ -3610,28 +3613,28 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     protected void logEvoChangeLevel(String pkFrom, String pkTo, int level) {
         if (logStream != null) {
-            logStream.printf("Made %s evolve into %s at level %d", pkFrom, pkTo, level);
+            logStream.printf("<li>Made <strong>%s</strong> evolve into <strong>%s</strong> at level <strong>%d</strong></li>", pkFrom, pkTo, level);
             logStream.println();
         }
     }
 
     protected void logEvoChangeLevelWithItem(String pkFrom, String pkTo, String itemName) {
         if (logStream != null) {
-            logStream.printf("Made %s evolve into %s by leveling up holding %s", pkFrom, pkTo, itemName);
+            logStream.printf("<li>Made <strong>%s</strong> evolve into <strong>%s</strong> by leveling up holding <strong>%s</strong></li>", pkFrom, pkTo, itemName);
             logStream.println();
         }
     }
 
     protected void logEvoChangeStone(String pkFrom, String pkTo, String itemName) {
         if (logStream != null) {
-            logStream.printf("Made %s evolve into %s using a %s", pkFrom, pkTo, itemName);
+            logStream.printf("<li>Made <strong>%s</strong> evolve into <strong>%s</strong> using a <strong>%s</strong></li>", pkFrom, pkTo, itemName);
             logStream.println();
         }
     }
 
     protected void logEvoChangeLevelWithPkmn(String pkFrom, String pkTo, String otherRequired) {
         if (logStream != null) {
-            logStream.printf("Made %s evolve into %s by leveling up with %s in the party", pkFrom, pkTo, otherRequired);
+            logStream.printf("<li>Made <strong>%s</strong> evolve into <strong>%s</strong> by leveling up with <strong>%s</strong> in the party</li>", pkFrom, pkTo, otherRequired);
             logStream.println();
         }
     }

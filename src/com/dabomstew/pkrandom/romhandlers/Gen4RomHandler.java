@@ -2001,7 +2001,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     @Override
     public void removeTradeEvolutions(boolean changeMoveEvos) {
         Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
-        log("--Removing Trade Evolutions--");
+        log("<h2>Removing Trade Evolutions</h2><ul>");
         Set<Evolution> extraEvolutions = new HashSet<Evolution>();
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
@@ -2097,6 +2097,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 }
             }
         }
+        log("</ul>");
         logBlankLine();
 
     }

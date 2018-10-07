@@ -1989,7 +1989,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                                             JOptionPane.YES_NO_OPTION);
                                     if (response == JOptionPane.YES_OPTION) {
                                         try {
-                                            FileOutputStream fos = new FileOutputStream(filename + ".log");
+                                            FileOutputStream fos = new FileOutputStream(filename + ".log.htm");
                                             fos.write(0xEF);
                                             fos.write(0xBB);
                                             fos.write(0xBF);
