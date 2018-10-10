@@ -1104,19 +1104,24 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     private void fixTypeEffectiveness() {
         // TODO rewrite to use table properly
         int base = romEntry.getValue("TypeEffectivenessOffset");
-        log("--Fixing Type Effectiveness--");
+        log("<h2>Fixing Type Effectiveness</h2>");
+        log("<ul>");
         // Change Poison SE to bug (should be neutral)
         // to Ice NE to Fire (is currently neutral)
-        log("Replaced: Poison super effective vs Bug => Ice not very effective vs Fire");
+        log("<li><strong>Replaced:</strong> <span class=\"pk-type poison\">Poison</span> <em>super effective</em> vs <span class=\"pk-type bug\">Bug</span>"
+                + " => <span class=\"pk-type ice\">Ice</span> <em>not very effective</em> vs <span class=\"pk-type fire\">Fire</span></li>");
         rom[base + 135] = typeToByte(Type.ICE);
         rom[base + 136] = typeToByte(Type.FIRE);
         rom[base + 137] = 5; // Not very effective
         // Change BUG SE to Poison to Bug NE to Poison
-        log("Changed: Bug super effective vs Poison => Bug not very effective vs Poison");
+        log("<li><strong>Changed:</strong> <span class=\"pk-type bug\">Bug</span> <em>super effective</em> vs <span class=\"pk-type poison\">Poison</span>"
+                + " => <span class=\"pk-type bug\">Bug</span> <em>not very effective</em> vs <span class=\"pk-type poison\">Poison</span></li>");
         rom[base + 203] = 5; // Not very effective
         // Change Ghost 0E to Psychic to Ghost SE to Psychic
-        log("Changed: Psychic immune to Ghost => Ghost super effective vs Psychic");
+        log("<li><strong>Changed:</strong> <span class=\"pk-type psychic\">Psychic</span> <em>immune</em> to <span class=\"pk-type ghost\">Ghost</span>"
+                + " => <span class=\"pk-type ghost\">Ghost</span> <em>super effective</em> vs <span class=\"pk-type psychic\">Psychic</span></li>");
         rom[base + 227] = 20; // Super effective
+        log("</ul>");
         logBlankLine();
     }
 

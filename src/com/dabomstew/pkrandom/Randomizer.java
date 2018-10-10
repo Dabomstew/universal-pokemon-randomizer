@@ -24,6 +24,7 @@ package com.dabomstew.pkrandom;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.TreeMap;
 
 import com.dabomstew.pkrandom.pokemon.Encounter;
@@ -73,407 +75,25 @@ public class Randomizer {
         final long startTime = System.currentTimeMillis();
         RandomSource.seed(seed);
         final boolean raceMode = settings.isRaceMode();
-
         int checkValue = 0;
+        String cssContent = "";
+        InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream("com/dabomstew/pkrandom/gui/log.css");
+        Scanner scanner = new Scanner(is);
+        
+        while(scanner.hasNextLine()) {
+            cssContent += scanner.nextLine() + "\n";
+        }
+        scanner.close();
+                
         log.println("<!DOCTYPE html>\n" + 
-                "  <head>\n" + 
-                "    <title>" + romHandler.getROMName() + " randomization log</title>\n" + 
-                "    <meta charset=\"UTF-8\">\n" + 
-                "    <style type=\"text/css\">\n" + 
-                "      body {\n" + 
-                "        background-color: #eee;\n" + 
-                "        color: #444;\n" + 
-                "        font-family: Arial, Helvetica, sans-serif;\n" + 
-                "        padding: 20px 60px;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      h2 {\n" + 
-                "        font-size: 1.8em;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      h3 {\n" + 
-                "        font-size: 1.3em;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      table {\n" + 
-                "        border: 2px solid #444;\n" + 
-                "        border-collapse: collapse;\n" + 
-                "        empty-cells: show;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      th, td {\n" + 
-                "        padding: 6px 8px;\n" + 
-                "        border-right: 1px solid #444;\n" + 
-                "        border-left: 1px solid #444;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      th {\n" + 
-                "        position: -webkit-sticky;\n" + 
-                "        position: sticky;\n" + 
-                "        top: -1px;\n" + 
-                "        z-index: 1;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      td {\n" + 
-                "        text-align: center;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      li {\n" + 
-                "        margin-top: 4px;\n" + 
-                "        margin-bottom: 4px;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .clear {\n" + 
-                "        clear: both;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-table {\n" + 
-                "        border-color: #244073;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-table th {\n" + 
-                "        background-color: #1b7df7;\n" + 
-                "        color: #eee;\n" + 
-                "        border-color: inherit;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-table tr {\n" + 
-                "        background-color: #dff0ff;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-table tr.alt {\n" + 
-                "        background-color: #c5e1f9;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-table td {\n" + 
-                "        border-color: inherit;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .moves-table {\n" + 
-                "        border-color: #881a15;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .moves-table th {\n" + 
-                "        background-color: #ff5746;\n" + 
-                "        color: #eee;\n" + 
-                "        border-color: inherit;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .moves-table tr {\n" + 
-                "        background-color: #ffecdf;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .moves-table tr.alt {\n" + 
-                "        background-color: #f9dbc5;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .moves-table td {\n" + 
-                "        border-color: inherit;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .left {\n" + 
-                "        text-align: left;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-type {\n" + 
-                "        font-family: \"Lucida Console\", Monaco, monospace;\n" + 
-                "        font-weight: bold;\n" + 
-                "        border-radius: 4px;\n" + 
-                "        color: #eee;\n" + 
-                "        padding: 4px 10px;\n" + 
-                "        margin: 2px;\n" + 
-                "        font-size: 0.9em;\n" + 
-                "        text-shadow: 0px 1px 2px #333;\n" + 
-                "        background-color: #333;\n" + 
-                "        display: inline-block;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .normal {\n" + 
-                "        background-color: #7f7f7f;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .grass {\n" + 
-                "        background-color: #19ad30;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .fire {\n" + 
-                "        background-color: #ff690f;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .water {\n" + 
-                "        background-color: #2d94ff\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .electric {\n" + 
-                "        background-color: #ffce00;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .rock {\n" + 
-                "        background-color: #6f6155;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .ground {\n" + 
-                "        background-color: #d2a96a;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .poison {\n" + 
-                "        background-color: #782fff;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .flying {\n" + 
-                "        background-color: #c1c0fa;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .ice {\n" + 
-                "        background-color:   #95d0fd;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .psychic {\n" + 
-                "        background-color: #ff6aaf;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .ghost {\n" + 
-                "        background-color: #6860a9;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .bug {\n" + 
-                "        background-color: #a8d02d;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .fighting {\n" + 
-                "        background-color: #bf533b\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .dragon {\n" + 
-                "        background-color: #00c7be;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .dark {\n" + 
-                "        background-color: #5133ad;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .steel {\n" + 
-                "        background-color: #93a8c1;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .fairy {\n" + 
-                "        background-color: #ff9ddd;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .moveset {\n" + 
-                "        padding-left: 20px;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .moveset > li {\n" + 
-                "        min-width: 90px;\n" + 
-                "        border-radius: 3px;\n" + 
-                "        display: inline-block;\n" + 
-                "        background-color: #acd;\n" + 
-                "        border: 2px solid #80b2f5;\n" + 
-                "        padding: 3px 12px;\n" + 
-                "        margin: 4px;\n" + 
-                "        color: #358;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .moveset > li > strong {\n" + 
-                "        display: block;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .moveset > li > em {\n" + 
-                "        display: block;\n" + 
-                "        font-size: 0.8em;\n" + 
-                "        text-align: right;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .tm-list {\n" + 
-                "        list-style: none;\n" + 
-                "        padding-left: 20px\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .tm-list > li {\n" + 
-                "        margin: 8px 0;\n" + 
-                "      }      \n" + 
-                "\n" + 
-                "      .tm-list > li > strong {\n" + 
-                "        border-radius: 3px;\n" + 
-                "        font-size: 1.2em;\n" + 
-                "        display: inline-block;\n" + 
-                "        color: #eee;\n" + 
-                "        background-color: #5290ec;\n" + 
-                "        padding: 5px 10px;\n" + 
-                "        margin-right: 10px;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .wild-pk-set {\n" + 
-                "        padding: 10px 20px;\n" + 
-                "        border-radius: 6px 6px 0 6px;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-set-list {\n" + 
-                "        list-style: none;\n" + 
-                "        border-radius: 0 0 10px 10px;\n" + 
-                "        margin: 0 0 40px 20px;\n" + 
-                "        padding: 10px 20px;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-set-list > li {\n" + 
-                "        display: inline-block;\n" + 
-                "        border-radius: 5px;\n" + 
-                "        padding: 8px 18px;\n" + 
-                "        margin: 4px;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-set-list > li em {\n" + 
-                "        font-size: 0.8em;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-set-grass {\n" + 
-                "        background-color: #319634;\n" + 
-                "        color: #eee;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-list-grass {\n" + 
-                "        background-color: #63d066;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-list-grass > li {\n" + 
-                "        background-color: #94e49e;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-set-surfing {\n" + 
-                "        background-color: #6edde8;\n" + 
-                "        color: #333;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-list-surfing {\n" + 
-                "        background-color: #48b9da;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-list-surfing > li {\n" + 
-                "        background-color: #7ad7ec;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-set-fishing {\n" + 
-                "        background-color: #3773e2;\n" + 
-                "        color: #eee;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-list-fishing {\n" + 
-                "        background-color: #2b4e8e;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-list-fishing > li {\n" + 
-                "        background-color: #296fd7;\n" + 
-                "        color: #eee;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-set-rock-smash {\n" + 
-                "        background-color: #96764e;\n" + 
-                "        color: #eee;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-list-rock-smash {\n" + 
-                "        background-color: #b7a070;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-list-rock-smash > li {\n" + 
-                "        background-color: #e4d0a0;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-set-poke-radar {\n" + 
-                "        background-color: #7c51c3;\n" + 
-                "        color: #eee;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-list-poke-radar {\n" + 
-                "        background-color: #af79ea;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-list-poke-radar > li {\n" + 
-                "        background-color: #d8ade6;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-set-doubles-grass {\n" + 
-                "        background-color: #346b3b;\n" + 
-                "        color: #eee;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-list-doubles-grass {\n" + 
-                "        background-color: #69b985;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-list-doubles-grass > li {\n" + 
-                "        background-color: #399255;\n" + 
-                "        color: #eee;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-set-shaking-spot {\n" + 
-                "        background-color: #5f697b;\n" + 
-                "        color: #eee;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-list-shaking-spot {\n" + 
-                "        background-color: #8da1b9;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .pk-list-shaking-spot > li {\n" + 
-                "        background-color: #b0bccc;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .trainer-box {\n" + 
-                "        float: left;\n" + 
-                "        width: 340px;\n" + 
-                "        margin: 10px 10px;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .trainer {\n" + 
-                "        background-color: #ffc379;\n" + 
-                "        padding: 10px 18px;\n" + 
-                "        border-radius: 10px 10px 0 0;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .trainer > em {\n" + 
-                "        display: block;\n" + 
-                "        font-size: 0.8em;\n" + 
-                "        margin-left: 60px;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .trainer-name {\n" + 
-                "        display: block;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .trainer-name > em {\n" + 
-                "        font-size: 0.8em;\n" + 
-                "        background-color: #ffde93;\n" + 
-                "        padding: 5px 8px;\n" + 
-                "        border-radius: 12px;\n" + 
-                "        margin-right: 2px;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .trainer-pk {\n" + 
-                "        background-color: #f1e1b7;\n" + 
-                "        height: 250px;\n" + 
-                "        list-style-type: none;\n" + 
-                "        margin: 0;\n" + 
-                "        padding: 10px 42px;\n" + 
-                "        border-radius: 0 0 10px 10px;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .trainer-pk > li {\n" + 
-                "        margin: 5px 0;\n" + 
-                "        background-color: #f5da8e;\n" + 
-                "        padding: 6px 14px;\n" + 
-                "        border-radius: 8px;\n" + 
-                "        border: 2px solid #ffb262;\n" + 
-                "      }\n" + 
-                "\n" + 
-                "      .trainer-pk > li > em {\n" + 
-                "        float: right;\n" + 
-                "        font-size: 0.8em;\n" + 
-                "      }" +
-                "    </style>\n" + 
-                "  </head>\n" + 
-                "  <body>");
+                "<head>\n" + 
+                "  <title>" + romHandler.getROMName() + " randomization log</title>\n" + 
+                "  <meta charset=\"UTF-8\">\n" + 
+                "  <style type=\"text/css\">\n" + 
+                cssContent +
+                "  </style>\n" + 
+                "</head>\n" + 
+                "<body>");
 
         // limit pokemon?
         if (settings.isLimitPokemon()) {
@@ -1108,6 +728,12 @@ public class Randomizer {
                     } else if(es.displayName.contains("Grass/Cave")) {
                         divCls = "pk-set-grass";
                         ulCls = "pk-list-grass";
+                    } else if(es.displayName.contains("Headbutt Trees")) {
+                        divCls = "pk-set-headbutt-trees";
+                        ulCls = "pk-list-headbutt-trees";
+                    } else if(es.displayName.contains("Bug Catching Contest")) {
+                        divCls = "pk-set-bug-catching-contest";
+                        ulCls = "pk-list-bug-catching-contest";
                     } else if(es.displayName.contains("Rock Smash")) {
                         divCls = "pk-set-rock-smash";
                         ulCls = "pk-list-rock-smash";
