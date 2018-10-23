@@ -215,7 +215,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizePokemonStats(boolean evolutionSanity) {
+    public void randomizePokemonStatsWithinBST(boolean evolutionSanity) {
 
         if (evolutionSanity) {
             copyUpEvolutionsHelper(new BasePokemonAction() {
@@ -236,6 +236,28 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
+    }
+    
+    @Override
+    public void randomizePokemonStatsUnrestricted(boolean evolutionSanity) {
+        if (evolutionSanity) {
+            copyUpEvolutionsHelper(new BasePokemonAction() {
+                public void applyTo(Pokemon pk) {
+                    pk.randomizeStatsNoRestrictions(random, true);
+                }
+            }, new EvolvedPokemonAction() {
+                public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
+                    evTo.copyRandomizedStatsNoRestrictionsUpEvolution(evFrom, AbstractRomHandler.this.random);
+                }
+            });
+        } else {
+            List<Pokemon> allPokes = this.getPokemon();
+            for (Pokemon pk : allPokes) {
+                if (pk != null) {
+                    pk.randomizeStatsNoRestrictions(random, false);
+                }
+            }
+        }
     }
 
     @Override

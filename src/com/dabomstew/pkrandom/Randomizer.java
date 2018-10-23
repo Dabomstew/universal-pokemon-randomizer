@@ -167,8 +167,11 @@ public class Randomizer {
         case SHUFFLE:
             romHandler.shufflePokemonStats(settings.isBaseStatsFollowEvolutions());
             break;
-        case RANDOM:
-            romHandler.randomizePokemonStats(settings.isBaseStatsFollowEvolutions());
+        case RANDOM_WITHIN_BST:
+            romHandler.randomizePokemonStatsWithinBST(settings.isBaseStatsFollowEvolutions());
+            break;
+        case RANDOM_UNRESTRICTED:
+            romHandler.randomizePokemonStatsUnrestricted(settings.isBaseStatsFollowEvolutions());
             break;
         default:
             break;
@@ -565,7 +568,7 @@ public class Randomizer {
             log.println("<h2>Pokemon Base Stats & Types</h2>");
             log.println("<table class=\"pk-table\">");
             if (romHandler instanceof Gen1RomHandler) {
-                log.println("<tr><th>NUM</th><th>NAME</th><th>TYPE</th><th>HP</th><th>ATK</th><th>DEF</th><th>SPE</th><th>SPEC</th></tr>");
+                log.println("<tr><th>NUM</th><th>NAME</th><th>TYPE</th><th>HP</th><th>ATK</th><th>DEF</th><th>SPE</th><th>SPEC</th><th>TOTAL</th></tr>");
                 for (Pokemon pkmn : allPokes) {
                     if (pkmn != null) {
                         String pkmnType1 = pkmn.primaryType == null ? "???" : pkmn.primaryType.toString();
@@ -575,13 +578,14 @@ public class Randomizer {
                             pkmnType2 = pkmn.secondaryType.toString();
                             pkmnType2 = String.format("<span class=\"pk-type %s\">%s</span>", pkmnType2.toLowerCase(), pkmnType2);
                         }
-                        log.printf("<tr%s><td>%3d</td><td class=\"left\">%s</td><td>%s%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td></tr>",
-                                pkmn.number % 2 == 0 ? " class=\"alt\"" : "", pkmn.number, pkmn.name, pkmnType1, pkmnType2, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.special);
+                        int total = pkmn.hp + pkmn.attack + pkmn.defense + pkmn.speed + pkmn.special;                        
+                        log.printf("<tr%s><td>%3d</td><td class=\"left\">%s</td><td>%s%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td></tr>",
+                                pkmn.number % 2 == 0 ? " class=\"alt\"" : "", pkmn.number, pkmn.name, pkmnType1, pkmnType2, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.special, total);
                     }
 
                 }
             } else {
-                log.print("<tr><th>NUM</th><th>NAME</th><th>TYPE</th><th>HP</th><th>ATK</th><th>DEF</th><th>SPE</th><th>SATK</th><th>SDEF</th>");
+                log.print("<tr><th>NUM</th><th>NAME</th><th>TYPE</th><th>HP</th><th>ATK</th><th>DEF</th><th>SPE</th><th>SATK</th><th>SDEF</th><th>TOTAL</th>");
                 int abils = romHandler.abilitiesPerPokemon();
                 for (int i = 0; i < abils; i++) {
                     log.printf("<th>ABILITY%d</th>", (i + 1));
@@ -597,8 +601,9 @@ public class Randomizer {
                             pkmnType2 = pkmn.secondaryType.toString();
                             pkmnType2 = String.format("<span class=\"pk-type %s\">%s</span>", pkmnType2.toLowerCase(), pkmnType2);
                         }
-                        log.printf("<tr%s><td>%3d</td><td class=\"left\">%s</td><td>%s%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td>",
-                                pkmn.number % 2 == 0 ? " class=\"alt\"" : "", pkmn.number, pkmn.name, pkmnType1, pkmnType2, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef);
+                        int total = pkmn.hp + pkmn.attack + pkmn.defense + pkmn.speed + pkmn.spatk + pkmn.spdef;
+                        log.printf("<tr%s><td>%3d</td><td class=\"left\">%s</td><td>%s%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td>",
+                                pkmn.number % 2 == 0 ? " class=\"alt\"" : "", pkmn.number, pkmn.name, pkmnType1, pkmnType2, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef, total);
                         if (abils > 0) {
                             log.printf("<td>%s</td><td>%s", romHandler.abilityName(pkmn.ability1),
                                     romHandler.abilityName(pkmn.ability2));
