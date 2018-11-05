@@ -64,7 +64,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
-import javax.xml.bind.DatatypeConverter;
 
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.FileFunctions;
@@ -1623,7 +1622,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 throw e;
             }
         }
-        byte[] data = DatatypeConverter.parseBase64Binary(config);
+        byte[] data = Utils.base64ToBytes(config);
 
         int nameLength = data[Settings.LENGTH_OF_SETTINGS_DATA] & 0xFF;
         if (data.length != Settings.LENGTH_OF_SETTINGS_DATA + 9 + nameLength) {

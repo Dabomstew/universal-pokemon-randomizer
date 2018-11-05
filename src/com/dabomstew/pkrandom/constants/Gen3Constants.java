@@ -23,6 +23,8 @@ public class Gen3Constants {
 
     public static final String wildPokemonPointerPrefix = "0348048009E00000FFFF0000";
 
+    public static final String speedchoiceWildPokemonPointerPrefix = "0348048009E00000FFFF0000"; // emerald speedchoice, was different when supporting sapphire, unnecessary now
+
     public static final String mapBanksPointerPrefix = "80180068890B091808687047";
 
     public static final String rsPokemonNamesPointerSuffix = "30B50025084CC8F7";
@@ -108,6 +110,8 @@ public class Gen3Constants {
     public static final String rsNatDexScriptPart1 = "31720167";
 
     public static final String rsNatDexScriptPart2 = "32662901082B00801102006B02021103016B020211DABE4E020211675A6A02022A008003";
+    
+    public static final String rsSpeedchoiceNatDexScriptPart2 = "32662901082B00801102FC6A02021103FD6A020211DABA4E02021167566A02022A008003";
 
     public static final String frlgPokedexScriptIdentifier = "292908258101";
 
