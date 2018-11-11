@@ -83,6 +83,8 @@ public class Gen5Constants {
     
     public static final int luckyEggIndex = 0xE7;
 
+    public static final int[] mulchIndices = {0x5F, 0x60, 0x61, 0x62};
+
     public static final MoveCategory[] moveCategoryIndices = { MoveCategory.STATUS, MoveCategory.PHYSICAL,
             MoveCategory.SPECIAL };
 

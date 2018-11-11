@@ -1297,6 +1297,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             available |= MiscTweak.FASTEST_TEXT.getValue();
         }
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
+            available |= MiscTweak.NO_FREE_LUCKY_EGG.getValue();
         return available;
     }
 
@@ -1309,6 +1310,49 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
             allowedItems.banSingles(Gen5Constants.luckyEggIndex);
             nonBadItems.banSingles(Gen5Constants.luckyEggIndex);
+        } else if (tweak == MiscTweak.NO_FREE_LUCKY_EGG) {
+            removeFreeLuckyEgg();
+        }
+    }
+
+    // Removes the free lucky egg you receive from Professor Juniper and replaces it with a gooey mulch.
+    private void removeFreeLuckyEgg() {
+        int scriptFileGifts = romEntry.getInt("LuckyEggScriptOffset");
+        int setVarGift = Gen5Constants.hiddenItemSetVarCommand;
+        int mulchIndex = this.random.nextInt(4);
+
+        byte[] itemScripts = scriptNarc.files.get(scriptFileGifts);
+        int offset = 0;
+        int lookingForEggs = romEntry.romType == Gen5Constants.Type_BW ? 1 : 2;
+        while (lookingForEggs > 0) {
+            int part1 = readWord(itemScripts, offset);
+            if (part1 == Gen5Constants.scriptListTerminator) {
+                // done
+                break;
+            }
+            int offsetInFile = readRelativePointer(itemScripts, offset);
+            offset += 4;
+            if (offsetInFile > itemScripts.length) {
+                break;
+            }
+            while (true) {
+                offsetInFile++;
+                // Gift items are not necessarily word aligned, so need to read one byte at a time
+                int b = readByte(itemScripts, offsetInFile);
+                if (b == setVarGift) {
+                    int command = readWord(itemScripts, offsetInFile);
+                    int variable = readWord(itemScripts,offsetInFile + 2);
+                    int item = readWord(itemScripts, offsetInFile + 4);
+                    if (command == setVarGift && variable == Gen5Constants.hiddenItemVarSet && item == Gen5Constants.luckyEggIndex) {
+
+                        writeWord(itemScripts, offsetInFile + 4, Gen5Constants.mulchIndices[mulchIndex]);
+                        lookingForEggs--;
+                    }
+                }
+                if (b == 0x2E) { // Beginning of a new block in the file
+                    break;
+                }
+            }
         }
     }
 

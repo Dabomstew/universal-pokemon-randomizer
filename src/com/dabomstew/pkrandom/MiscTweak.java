@@ -49,6 +49,7 @@ public class MiscTweak implements Comparable<MiscTweak> {
     public static final MiscTweak LOWER_CASE_POKEMON_NAMES = new MiscTweak(1024, "lowerCaseNames", 0);
     public static final MiscTweak RANDOMIZE_CATCHING_TUTORIAL = new MiscTweak(2048, "catchingTutorial", 0);
     public static final MiscTweak BAN_LUCKY_EGG = new MiscTweak(4096, "luckyEgg", 1);
+    public static final MiscTweak NO_FREE_LUCKY_EGG = new MiscTweak(8192,"freeLuckyEgg",0);
     /* @formatter:on */
 
     private final int value;
