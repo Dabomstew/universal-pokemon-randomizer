@@ -3136,18 +3136,17 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void applyFastestTextPatch() {
-        if (romEntry.getValue("TextSpeedValuesOffset") > 0) {
-            int tsvOffset = romEntry.getValue("TextSpeedValuesOffset");
-            rom[tsvOffset] = 4; // slow = medium
-            rom[tsvOffset + 1] = 1; // medium = fast
-            rom[tsvOffset + 2] = 0; // fast = instant
-        }
-        else if(romEntry.codeTweaks.get("InstantTextTweak") != null) {
+        if (romEntry.codeTweaks.get("InstantTextTweak") != null) {
             try {
                 FileFunctions.applyPatch(rom, romEntry.codeTweaks.get("InstantTextTweak"));
             } catch (IOException e) {
                 throw new RandomizerIOException(e);
             }
+        } else if (romEntry.getValue("TextSpeedValuesOffset") > 0) {
+            int tsvOffset = romEntry.getValue("TextSpeedValuesOffset");
+            rom[tsvOffset] = 4; // slow = medium
+            rom[tsvOffset + 1] = 1; // medium = fast
+            rom[tsvOffset + 2] = 0; // fast = instant
         }
     }
 
