@@ -145,27 +145,10 @@ public class Randomizer {
             romHandler.updatePokemonStats();
         }
 
-        // Base stats changing
-        switch (settings.getBaseStatisticsMod()) {
-        case SHUFFLE:
-            romHandler.shufflePokemonStats(settings.isBaseStatsFollowEvolutions());
-            break;
-        case RANDOM:
-            romHandler.randomizePokemonStats(settings.isBaseStatsFollowEvolutions());
-            break;
-        default:
-            break;
-        }
-
         if (settings.isStandardizeEXPCurves()) {
             romHandler.standardizeEXPCurves();
         }
 
-        // Abilities? (new 1.0.2)
-        if (romHandler.abilitiesPerPokemon() > 0 && settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE) {
-            romHandler.randomizeAbilities(settings.isAbilitiesFollowEvolutions(), settings.isAllowWonderGuard(),
-                    settings.isBanTrappingAbilities(), settings.isBanNegativeAbilities());
-        }
 
         // Pokemon Types
         switch (settings.getTypesMod()) {
@@ -182,14 +165,6 @@ public class Randomizer {
         // Wild Held Items?
         if (settings.isRandomizeWildPokemonHeldItems()) {
             romHandler.randomizeWildHeldItems(settings.isBanBadRandomWildPokemonHeldItems());
-        }
-
-        maybeLogBaseStatAndTypeChanges(log, romHandler);
-        for (Pokemon pkmn : romHandler.getPokemon()) {
-            if (pkmn != null) {
-                checkValue = addToCV(checkValue, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk,
-                        pkmn.spdef, pkmn.ability1, pkmn.ability2, pkmn.ability3);
-            }
         }
 
         // Random Evos
@@ -220,6 +195,32 @@ public class Randomizer {
             log.println();
         }
 
+        // Base stats changing
+        switch (settings.getBaseStatisticsMod()) {
+            case SHUFFLE:
+                romHandler.shufflePokemonStats(settings.isBaseStatsFollowEvolutions());
+                break;
+            case RANDOM:
+                romHandler.randomizePokemonStats(settings.isBaseStatsFollowEvolutions());
+                break;
+            default:
+                break;
+        }
+
+        // Abilities? (new 1.0.2)
+        if (romHandler.abilitiesPerPokemon() > 0 && settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE) {
+            romHandler.randomizeAbilities(settings.isAbilitiesFollowEvolutions(), settings.isAllowWonderGuard(),
+                    settings.isBanTrappingAbilities(), settings.isBanNegativeAbilities());
+        }
+
+        maybeLogBaseStatAndTypeChanges(log, romHandler);
+        for (Pokemon pkmn : romHandler.getPokemon()) {
+            if (pkmn != null) {
+                checkValue = addToCV(checkValue, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk,
+                        pkmn.spdef, pkmn.ability1, pkmn.ability2, pkmn.ability3);
+            }
+        }
+
         // Trade evolutions removal
         if (settings.isChangeImpossibleEvolutions()) {
             romHandler.removeTradeEvolutions(!(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED));
@@ -240,13 +241,14 @@ public class Randomizer {
 
         // Movesets
         boolean noBrokenMoves = settings.doBlockBrokenMoves();
-        boolean forceFourLv1s = romHandler.supportsFourStartingMoves() && settings.isStartWithFourMoves();
+        boolean forceLv1s = romHandler.supportsFourStartingMoves() && settings.isStartWithGuaranteedMoves();
+        int forceLv1Count = settings.getGuaranteedMoveCount();
         double msGoodDamagingProb = settings.isMovesetsForceGoodDamaging() ? settings.getMovesetsGoodDamagingPercent() / 100.0
                 : 0;
         if (settings.getMovesetsMod() == Settings.MovesetsMod.RANDOM_PREFER_SAME_TYPE) {
-            romHandler.randomizeMovesLearnt(true, noBrokenMoves, forceFourLv1s, msGoodDamagingProb);
+            romHandler.randomizeMovesLearnt(true, noBrokenMoves, forceLv1s, forceLv1Count, msGoodDamagingProb);
         } else if (settings.getMovesetsMod() == Settings.MovesetsMod.COMPLETELY_RANDOM) {
-            romHandler.randomizeMovesLearnt(false, noBrokenMoves, forceFourLv1s, msGoodDamagingProb);
+            romHandler.randomizeMovesLearnt(false, noBrokenMoves, forceLv1s, forceLv1Count, msGoodDamagingProb);
         }
 
         if (settings.isReorderDamagingMoves()) {

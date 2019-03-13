@@ -210,8 +210,8 @@ public interface RomHandler {
 
     public List<Integer> getMovesBannedFromLevelup();
 
-    public void randomizeMovesLearnt(boolean typeThemed, boolean noBroken, boolean forceFourStartingMoves,
-            double goodDamagingProbability);
+    public void randomizeMovesLearnt(boolean typeThemed, boolean noBroken, boolean forceStartingMoves,
+                                     int forceStartingMoveCount, double goodDamagingProbability);
 
     public void orderDamagingMovesByDamage();
 

@@ -42,7 +42,7 @@ public class RomFunctions {
         Set<Pokemon> dontCopyPokes = new TreeSet<Pokemon>();
         for (Pokemon pkmn : allPokes) {
             if (pkmn != null) {
-                if (pkmn.evolutionsTo.size() != 1) {
+                if (pkmn.evolutionsTo.size() < 1) {
                     dontCopyPokes.add(pkmn);
                 } else {
                     Evolution onlyEvo = pkmn.evolutionsTo.get(0);

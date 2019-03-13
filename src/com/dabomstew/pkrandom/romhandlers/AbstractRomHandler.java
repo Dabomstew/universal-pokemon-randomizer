@@ -72,6 +72,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     protected List<Pokemon> noLegendaryList, onlyLegendaryList;
     protected final Random random;
     protected PrintStream logStream;
+    private List<Pokemon> alreadyPicked = new ArrayList<>();
 
     /* Constructor */
 
@@ -1627,8 +1628,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizeMovesLearnt(boolean typeThemed, boolean noBroken, boolean forceFourStartingMoves,
-            double goodDamagingProbability) {
+    public void randomizeMovesLearnt(boolean typeThemed, boolean noBroken, boolean forceStartingMoves,
+                                     int forceStartingMoveCount, double goodDamagingProbability) {
         // Get current sets
         Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
         List<Integer> hms = this.getHMMoves();
@@ -1675,15 +1676,15 @@ public abstract class AbstractRomHandler implements RomHandler {
             List<MoveLearnt> moves = movesets.get(pkmn);
 
             // 4 starting moves?
-            if (forceFourStartingMoves) {
+            if (forceStartingMoves) {
                 int lv1count = 0;
                 for (MoveLearnt ml : moves) {
                     if (ml.level == 1) {
                         lv1count++;
                     }
                 }
-                if (lv1count < 4) {
-                    for (int i = 0; i < 4 - lv1count; i++) {
+                if (lv1count < forceStartingMoveCount) {
+                    for (int i = 0; i < forceStartingMoveCount - lv1count; i++) {
                         MoveLearnt fakeLv1 = new MoveLearnt();
                         fakeLv1.level = 1;
                         fakeLv1.move = 0;
@@ -1713,44 +1714,27 @@ public abstract class AbstractRomHandler implements RomHandler {
                 Type typeOfMove = null;
                 if (typeThemed) {
                     double picked = random.nextDouble();
-                    if (pkmn.primaryType == Type.NORMAL || pkmn.secondaryType == Type.NORMAL) {
-                        if (pkmn.secondaryType == null) {
-                            // Pure NORMAL: 75% normal, 25% random
-                            if (picked < 0.75) {
-                                typeOfMove = Type.NORMAL;
-                            }
-                            // else random
-                        } else {
-                            // Find the other type
-                            // Normal/OTHER: 30% normal, 55% other, 15% random
-                            Type otherType = pkmn.primaryType;
-                            if (otherType == Type.NORMAL) {
-                                otherType = pkmn.secondaryType;
-                            }
-                            if (picked < 0.3) {
-                                typeOfMove = Type.NORMAL;
-                            } else if (picked < 0.85) {
-                                typeOfMove = otherType;
-                            }
-                            // else random
-                        }
-                    } else if (pkmn.secondaryType != null) {
-                        // Primary/Secondary: 50% primary, 30% secondary, 5%
-                        // normal, 15% random
-                        if (picked < 0.5) {
-                            typeOfMove = pkmn.primaryType;
-                        } else if (picked < 0.8) {
-                            typeOfMove = pkmn.secondaryType;
-                        } else if (picked < 0.85) {
+                    if (pkmn.primaryType == Type.NORMAL && pkmn.secondaryType != null) {
+
+                        // Normal/OTHER: 10% normal, 30% other, 60% random
+                        if (picked < 0.1) {
                             typeOfMove = Type.NORMAL;
+                        } else if (picked < 0.4) {
+                            typeOfMove = pkmn.secondaryType;
+                        }
+                        // else random
+                    } else if (pkmn.secondaryType != null) {
+                        // Primary/Secondary: 20% primary, 20% secondary, 60% random
+                        if (picked < 0.2) {
+                            typeOfMove = pkmn.primaryType;
+                        } else if (picked < 0.4) {
+                            typeOfMove = pkmn.secondaryType;
                         }
                         // else random
                     } else {
-                        // Primary/None: 60% primary, 20% normal, 20% random
-                        if (picked < 0.6) {
+                        // Primary/None: 40% primary, 60% random
+                        if (picked < 0.4) {
                             typeOfMove = pkmn.primaryType;
-                        } else if (picked < 0.8) {
-                            typeOfMove = Type.NORMAL;
                         }
                         // else random
                     }
@@ -2890,7 +2874,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (replacements.size() > 1 && sameType) {
                         Set<Pokemon> includeType = new HashSet<Pokemon>();
                         for (Pokemon pk : replacements) {
-                            if (pk.primaryType == fromPK.primaryType
+                            // Special case for Eevee
+                            if (fromPK.number == 133) {
+                                if (pk.primaryType == ev.to.primaryType
+                                        || (pk.secondaryType != null) && pk.secondaryType == ev.to.primaryType) {
+                                    includeType.add(pk);
+                                }
+                            } else if (pk.primaryType == fromPK.primaryType
                                     || (fromPK.secondaryType != null && pk.primaryType == fromPK.secondaryType)
                                     || (pk.secondaryType != null && pk.secondaryType == fromPK.primaryType)
                                     || (fromPK.secondaryType != null && pk.secondaryType != null && pk.secondaryType == fromPK.secondaryType)) {
@@ -2903,16 +2893,23 @@ public abstract class AbstractRomHandler implements RomHandler {
                         }
                     }
 
+                    if (!alreadyPicked.containsAll(replacements) && !similarStrength) {
+                        replacements.removeAll(alreadyPicked);
+                    }
+
                     // Step 3: pick - by similar strength or otherwise
                     Pokemon picked = null;
 
                     if (replacements.size() == 1) {
                         // Foregone conclusion.
                         picked = replacements.get(0);
+                        alreadyPicked.add(picked);
                     } else if (similarStrength) {
                         picked = pickEvoPowerLvlReplacement(replacements, ev.to);
+                        alreadyPicked.add(picked);
                     } else {
                         picked = replacements.get(this.random.nextInt(replacements.size()));
+                        alreadyPicked.add(picked);
                     }
 
                     // Step 4: add it to the new evos pool
@@ -3015,12 +3012,20 @@ public abstract class AbstractRomHandler implements RomHandler {
         int minTarget = currentBST - currentBST / 10;
         int maxTarget = currentBST + currentBST / 10;
         List<Pokemon> canPick = new ArrayList<Pokemon>();
+        List<Pokemon> emergencyPick = new ArrayList<>();
         int expandRounds = 0;
         while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 3)) {
             for (Pokemon pk : pokemonPool) {
-                if (pk.bstForPowerLevels() >= minTarget && pk.bstForPowerLevels() <= maxTarget && !canPick.contains(pk)) {
-                    canPick.add(pk);
+                if (pk.bstForPowerLevels() >= minTarget && pk.bstForPowerLevels() <= maxTarget && !canPick.contains(pk) && !emergencyPick.contains(pk)) {
+                    if (alreadyPicked.contains(pk)) {
+                        emergencyPick.add(pk);
+                    } else {
+                        canPick.add(pk);
+                    }
                 }
+            }
+            if (expandRounds >= 2 && canPick.isEmpty()) {
+                canPick.addAll(emergencyPick);
             }
             minTarget -= currentBST / 20;
             maxTarget += currentBST / 20;
@@ -3076,7 +3081,6 @@ public abstract class AbstractRomHandler implements RomHandler {
      * 
      * @param from
      * @param to
-     * @param newEvos
      * @return
      */
     private boolean evoCycleCheck(Pokemon from, Pokemon to) {

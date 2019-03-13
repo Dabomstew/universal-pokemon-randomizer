@@ -125,7 +125,8 @@ public class Settings {
     }
 
     private MovesetsMod movesetsMod = MovesetsMod.UNCHANGED;
-    private boolean startWithFourMoves;
+    private boolean startWithGuaranteedMoves;
+    private int guaranteedMoveCount = 2;
     private boolean reorderDamagingMoves;
     private boolean movesetsForceGoodDamaging;
     private int movesetsGoodDamagingPercent = 0;
@@ -284,7 +285,8 @@ public class Settings {
         // 11 movesets
         out.write(makeByteSelected(movesetsMod == MovesetsMod.COMPLETELY_RANDOM,
                 movesetsMod == MovesetsMod.RANDOM_PREFER_SAME_TYPE, movesetsMod == MovesetsMod.UNCHANGED,
-                movesetsMod == MovesetsMod.METRONOME_ONLY, startWithFourMoves, reorderDamagingMoves));
+                movesetsMod == MovesetsMod.METRONOME_ONLY, startWithGuaranteedMoves, reorderDamagingMoves)
+                | ((guaranteedMoveCount - 2) << 6));
 
         // 12 movesets good damaging
         out.write((movesetsForceGoodDamaging ? 0x80 : 0) | movesetsGoodDamagingPercent);
@@ -461,8 +463,9 @@ public class Settings {
                 0, // COMPLETELY_RANDOM
                 3 // METRONOME_ONLY
         ));
-        settings.setStartWithFourMoves(restoreState(data[11], 4));
+        settings.setStartWithGuaranteedMoves(restoreState(data[11], 4));
         settings.setReorderDamagingMoves(restoreState(data[11], 5));
+        settings.setGuaranteedMoveCount(((data[11] & 0xC0) >> 6) + 2);
 
         settings.setMovesetsForceGoodDamaging(restoreState(data[12], 7));
         settings.setMovesetsGoodDamagingPercent(data[12] & 0x7F);
@@ -664,7 +667,7 @@ public class Settings {
         }
 
         if (!rh.supportsFourStartingMoves()) {
-            this.setStartWithFourMoves(false);
+            this.setStartWithGuaranteedMoves(false);
         }
 
         if (rh instanceof Gen1RomHandler || rh instanceof Gen2RomHandler) {
@@ -1065,12 +1068,20 @@ public class Settings {
         return setMovesetsMod(getEnum(MovesetsMod.class, bools));
     }
 
-    public boolean isStartWithFourMoves() {
-        return startWithFourMoves;
+    public boolean isStartWithGuaranteedMoves() {
+        return startWithGuaranteedMoves;
     }
 
-    public Settings setStartWithFourMoves(boolean startWithFourMoves) {
-        this.startWithFourMoves = startWithFourMoves;
+    public Settings setStartWithGuaranteedMoves(boolean startWithGuaranteedMoves) {
+        this.startWithGuaranteedMoves = startWithGuaranteedMoves;
+        return this;
+    }
+
+    public int getGuaranteedMoveCount() {
+        return guaranteedMoveCount;
+    }
+    public Settings setGuaranteedMoveCount(int guaranteedMoveCount) {
+        this.guaranteedMoveCount = guaranteedMoveCount;
         return this;
     }
 
