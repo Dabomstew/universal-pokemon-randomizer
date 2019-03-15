@@ -306,6 +306,9 @@ public interface RomHandler {
     };
 
     public TrainerNameMode trainerNameMode();
+    
+    // Banned characters in trainer names
+    public List<Character> getBannedTrainerNameCharacters();
 
     // Returns this with or without the class
     public int maxTrainerNameLength();

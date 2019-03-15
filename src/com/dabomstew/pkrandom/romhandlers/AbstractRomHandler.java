@@ -2283,11 +2283,20 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<String>[] allTrainerNames = new List[] { new ArrayList<String>(), new ArrayList<String>() };
         Map<Integer, List<String>> trainerNamesByLength[] = new Map[] { new TreeMap<Integer, List<String>>(),
                 new TreeMap<Integer, List<String>>() };
+        
+        List<Character> bans = this.getBannedTrainerNameCharacters();
 
         // Read name lists
         for (String trainername : customNames.getTrainerNames()) {
+            boolean okay = true;
+            for(char banned : bans) {
+                if(trainername.indexOf(banned) != -1) {
+                    okay = false;
+                    break;
+                }
+            }
             int len = this.internalStringLength(trainername);
-            if (len <= 10) {
+            if (len <= 10 && okay) {
                 allTrainerNames[0].add(trainername);
                 if (trainerNamesByLength[0].containsKey(len)) {
                     trainerNamesByLength[0].get(len).add(trainername);
@@ -2300,8 +2309,15 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         for (String trainername : customNames.getDoublesTrainerNames()) {
+            boolean okay = true;
+            for(char banned : bans) {
+                if(trainername.indexOf(banned) != -1) {
+                    okay = false;
+                    break;
+                }
+            }
             int len = this.internalStringLength(trainername);
-            if (len <= 10) {
+            if (len <= 10 && okay) {
                 allTrainerNames[1].add(trainername);
                 if (trainerNamesByLength[1].containsKey(len)) {
                     trainerNamesByLength[1].get(len).add(trainername);
@@ -3680,6 +3696,12 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public List<Pokemon> bannedForStaticPokemon() {
         return (List<Pokemon>) Collections.EMPTY_LIST;
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Character> getBannedTrainerNameCharacters() {
+        return (List<Character>) Collections.EMPTY_LIST;
     }
 
     @Override
