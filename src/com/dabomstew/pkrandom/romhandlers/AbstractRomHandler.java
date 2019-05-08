@@ -73,6 +73,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     protected final Random random;
     protected PrintStream logStream;
     private List<Pokemon> alreadyPicked = new ArrayList<>();
+    private List<Pokemon> giratinaPicks;
+    protected boolean ptGiratina = false;
 
     /* Constructor */
 
@@ -149,12 +151,19 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         noLegendaryList = new ArrayList<Pokemon>();
         onlyLegendaryList = new ArrayList<Pokemon>();
+        giratinaPicks = new ArrayList<>();
 
         for (Pokemon p : mainPokemonList) {
             if (p.isLegendary()) {
                 onlyLegendaryList.add(p);
             } else {
                 noLegendaryList.add(p);
+            }
+            for (int specialIntro : GlobalConstants.ptSpecialIntros) {
+                if (p.number == specialIntro) {
+                    giratinaPicks.add(p);
+                    break;
+                }
             }
         }
     }
@@ -1911,7 +1920,14 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (int i = 0; i < currentStaticPokemon.size(); i++) {
                 Pokemon old = currentStaticPokemon.get(i);
                 Pokemon newPK;
-                if (old.isLegendary()) {
+                if (old.number == 487 && ptGiratina) {
+                    newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
+                    legendariesLeft.remove(newPK);
+                    if (legendariesLeft.size() == 0) {
+                        legendariesLeft.addAll(onlyLegendaryList);
+                        legendariesLeft.removeAll(banned);
+                    }
+                } else if (old.isLegendary()) {
                     newPK = legendariesLeft.remove(this.random.nextInt(legendariesLeft.size()));
                     if (legendariesLeft.size() == 0) {
                         legendariesLeft.addAll(onlyLegendaryList);
@@ -1930,7 +1946,14 @@ public abstract class AbstractRomHandler implements RomHandler {
             List<Pokemon> pokemonLeft = new ArrayList<Pokemon>(mainPokemonList);
             pokemonLeft.removeAll(banned);
             for (int i = 0; i < currentStaticPokemon.size(); i++) {
-                Pokemon newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
+                Pokemon old = currentStaticPokemon.get(i);
+                Pokemon newPK;
+                if (old.number == 487 && ptGiratina) {
+                    newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
+                    pokemonLeft.remove(newPK);
+                } else {
+                    newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
+                }
                 if (pokemonLeft.size() == 0) {
                     pokemonLeft.addAll(mainPokemonList);
                     pokemonLeft.removeAll(banned);

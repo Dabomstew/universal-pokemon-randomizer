@@ -314,6 +314,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
         allowedItems = Gen4Constants.allowedItems.copy();
         nonBadItems = Gen4Constants.nonBadItems.copy();
+        if (romEntry.romType == Gen4Constants.Type_Plat) {
+            ptGiratina = true;
+        }
     }
 
     private void loadMoves() {
