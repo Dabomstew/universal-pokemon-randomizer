@@ -198,7 +198,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             checkCustomNames();
         }
         if (autoUpdateEnabled) {
-            new UpdateCheckThread(this, false).start();
+            //new UpdateCheckThread(this, false).start();
         }
     }
 
@@ -662,7 +662,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private void initialiseState() {
         this.romHandler = null;
         this.currentRestrictions = null;
-        this.websiteLinkLabel.setText("<html><a href=\"" + SysConstants.WEBSITE_URL + "\">" + SysConstants.WEBSITE_URL
+        this.websiteLinkLabel.setText("<html><a href=\"" + SysConstants.WEBSITE_URL_ZX + "\">" + SysConstants.WEBSITE_URL_ZX
                 + "</a>");
         initialFormState();
         this.romOpenChooser.setCurrentDirectory(new File(SysConstants.ROOT_PATH));
@@ -2201,7 +2201,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     }// GEN-LAST:event_toggleAutoUpdatesMenuItemActionPerformed
 
     private void manualUpdateMenuItemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_manualUpdateMenuItemActionPerformed
-        new UpdateCheckThread(this, true).start();
+        //new UpdateCheckThread(this, true).start();
     }// GEN-LAST:event_manualUpdateMenuItemActionPerformed
 
     private void toggleScrollPaneMenuItemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_toggleScrollPaneMenuItemActionPerformed
@@ -2483,7 +2483,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private void websiteLinkLabelMouseClicked(java.awt.event.MouseEvent evt) {// GEN-FIRST:event_websiteLinkLabelMouseClicked
         Desktop desktop = java.awt.Desktop.getDesktop();
         try {
-            desktop.browse(new URI(SysConstants.WEBSITE_URL));
+            desktop.browse(new URI(SysConstants.WEBSITE_URL_ZX));
         } catch (IOException e) {
         } catch (URISyntaxException e) {
         }
