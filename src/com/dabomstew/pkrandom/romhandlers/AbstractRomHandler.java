@@ -1095,7 +1095,6 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (TrainerPokemon tp : t.pokemon) {
                     while(isCorrectEvo(tp.pokemon,tp.level)) {
                                     tp.pokemon= tp.pokemon.evolutionsTo.get(0).from;
-                                    System.out.println(tp.pokemon);
                                     tp.resetMoves = true;
                     }
             }
