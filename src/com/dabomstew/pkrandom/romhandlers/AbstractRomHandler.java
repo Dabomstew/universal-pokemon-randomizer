@@ -1086,6 +1086,41 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         this.setTrainers(currentTrainers);
     }
+    
+    @Override
+    public void forceTrainerPokesCorrectEvo() {
+        checkPokemonRestrictions();
+        List<Trainer> currentTrainers = this.getTrainers();
+        for (Trainer t : currentTrainers) {
+            for (TrainerPokemon tp : t.pokemon) {
+                    while(isCorrectEvo(tp.pokemon,tp.level)) {
+                                    tp.pokemon= tp.pokemon.evolutionsTo.get(0).from;
+                                    System.out.println(tp.pokemon);
+                                    tp.resetMoves = true;
+                    }
+            }
+        }
+        this.setTrainers(currentTrainers);
+    }
+    
+     @Override
+    public boolean isCorrectEvo(Pokemon tp,int level) {
+        if(!(tp.evolutionsTo.size()==0)) {
+            if(!(tp.evolutionsTo.get(0).from.equals(null))) {
+                if(tp.evolutionsTo.get(0).type.usesLevel()) {
+                    if (level < tp.evolutionsTo.get(0).extraInfo) {
+                        return true;
+                    }
+                }
+                else if(tp.evolutionsTo.get(0).type.trade()||tp.evolutionsTo.get(0).type.stone()) {
+                    if(level<20) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     // MOVE DATA
     // All randomizers don't touch move ID 165 (Struggle)
