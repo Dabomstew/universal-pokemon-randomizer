@@ -171,6 +171,10 @@ public interface RomHandler {
     public void rivalCarriesStarter();
 
     public void forceFullyEvolvedTrainerPokes(int minLevel);
+    
+    public void forceTrainerPokesCorrectEvo();
+    
+    public boolean isCorrectEvo(Pokemon tp,int level);
 
     // Randomizer: moves
 
