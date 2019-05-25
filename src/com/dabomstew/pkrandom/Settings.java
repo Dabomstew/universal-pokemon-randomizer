@@ -48,7 +48,7 @@ public class Settings {
 
     public static final int VERSION = 172;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 36;
+    public static final int LENGTH_OF_SETTINGS_DATA = 37;
 
     private CustomNamesSet customNames;
 
@@ -143,6 +143,7 @@ public class Settings {
     private boolean randomizeTrainerNames;
     private boolean randomizeTrainerClassNames;
     private boolean trainersForceFullyEvolved;
+    private boolean trainersCorrectlyEvolved;
     private int trainersForceFullyEvolvedLevel = 30;
     private boolean trainersLevelModified;
     private int trainersLevelModifier = 0; // -50 ~ 50
@@ -403,6 +404,9 @@ public class Settings {
             writeFullInt(out, FileFunctions.getFileChecksum(SysConstants.customNamesFile));
         } catch (IOException e) {
         }
+        
+        //37 add correct evolution box
+        out.write(makeByteSelected(trainersCorrectlyEvolved));
 
         return DatatypeConverter.printBase64Binary(out.toByteArray());
     }
@@ -475,6 +479,7 @@ public class Settings {
         settings.setTrainersUsePokemonOfSimilarStrength(restoreState(data[13], 0));
         settings.setRivalCarriesStarterThroughout(restoreState(data[13], 2));
         settings.setTrainersMatchTypingDistribution(restoreState(data[13], 4));
+        settings.setTrainersCorrectlyEvolved(restoreState(data[37],0));
         settings.setTrainersBlockLegendaries(restoreState(data[13], 6));
         settings.setTrainersBlockEarlyWonderGuard(restoreState(data[13], 7));
 
@@ -1194,6 +1199,14 @@ public class Settings {
         this.trainersForceFullyEvolvedLevel = trainersForceFullyEvolvedLevel;
         return this;
     }
+    public Settings setTrainersCorrectlyEvolved(boolean trainersCorrectlyEvolved) {
+        this.trainersCorrectlyEvolved=trainersCorrectlyEvolved;
+        return this;
+    }
+    public boolean isTrainersCorrectlyEvolved() {
+        return trainersCorrectlyEvolved;
+    }
+
 
     public boolean isTrainersLevelModified() {
         return trainersLevelModified;
