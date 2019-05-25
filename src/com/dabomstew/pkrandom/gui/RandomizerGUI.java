@@ -794,6 +794,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpNoEarlyShedinjaCB.setVisible(true);
         this.tpUnchangedRB.setEnabled(false);
         this.tpForceFullyEvolvedCB.setEnabled(false);
+        this.tpForceCorrectEvolutionCB.setEnabled(false);
         this.tpForceFullyEvolvedSlider.setEnabled(false);
         this.tpLevelModifierCB.setEnabled(false);
         this.tpLevelModifierSlider.setEnabled(false);
@@ -806,6 +807,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpNoEarlyShedinjaCB.setSelected(false);
         this.tpForceFullyEvolvedCB.setSelected(false);
         this.tpForceFullyEvolvedSlider.setValue(this.tpForceFullyEvolvedSlider.getMinimum());
+        this.tpForceCorrectEvolutionCB.setSelected(false);
         this.tpLevelModifierCB.setSelected(false);
         this.tpLevelModifierSlider.setValue(0);
 
@@ -1350,12 +1352,15 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.tpNoEarlyShedinjaCB.setSelected(false);
             this.tpForceFullyEvolvedCB.setEnabled(false);
             this.tpForceFullyEvolvedCB.setSelected(false);
+            this.tpForceCorrectEvolutionCB.setEnabled(false);
+            this.tpForceCorrectEvolutionCB.setSelected(false);
             this.tpLevelModifierCB.setEnabled(false);
             this.tpLevelModifierCB.setSelected(false);
         } else {
             this.tpPowerLevelsCB.setEnabled(true);
             this.tpNoLegendariesCB.setEnabled(true);
             this.tpNoEarlyShedinjaCB.setEnabled(true);
+            this.tpForceCorrectEvolutionCB.setEnabled(true);
             this.tpForceFullyEvolvedCB.setEnabled(true);
             this.tpLevelModifierCB.setEnabled(true);
         }
@@ -1707,6 +1712,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpNoEarlyShedinjaCB.setSelected(settings.isTrainersBlockEarlyWonderGuard());
         this.tpForceFullyEvolvedCB.setSelected(settings.isTrainersForceFullyEvolved());
         this.tpForceFullyEvolvedSlider.setValue(settings.getTrainersForceFullyEvolvedLevel());
+        this.tpForceCorrectEvolutionCB.setSelected(settings.isTrainersCorrectlyEvolved());
         this.tpLevelModifierCB.setSelected(settings.isTrainersLevelModified());
         this.tpLevelModifierSlider.setValue(settings.getTrainersLevelModifier());
 
@@ -1860,6 +1866,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setTrainersBlockLegendaries(tpNoLegendariesCB.isSelected());
         settings.setTrainersBlockEarlyWonderGuard(tpNoEarlyShedinjaCB.isSelected());
         settings.setTrainersForceFullyEvolved(tpForceFullyEvolvedCB.isSelected());
+        settings.setTrainersCorrectlyEvolved(tpForceCorrectEvolutionCB.isSelected());
         settings.setTrainersForceFullyEvolvedLevel(tpForceFullyEvolvedSlider.getValue());
         settings.setTrainersLevelModified(tpLevelModifierCB.isSelected());
         settings.setTrainersLevelModifier(tpLevelModifierSlider.getValue());
@@ -2678,6 +2685,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         tpForceFullyEvolvedCB = new javax.swing.JCheckBox();
         tpForceFullyEvolvedSlider = new javax.swing.JSlider();
         tpLevelModifierCB = new javax.swing.JCheckBox();
+        tpForceCorrectEvolutionCB = new javax.swing.JCheckBox();
         tpLevelModifierSlider = new javax.swing.JSlider();
         wildsInnerPanel = new javax.swing.JPanel();
         wildPokemonPanel = new javax.swing.JPanel();
@@ -3726,6 +3734,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         tpNoEarlyShedinjaCB.setToolTipText(bundle.getString("RandomizerGUI.tpNoEarlyShedinjaCB.toolTipText")); // NOI18N
 
         tpForceFullyEvolvedCB.setText(bundle.getString("RandomizerGUI.tpForceFullyEvolvedCB.text")); // NOI18N
+        tpForceCorrectEvolutionCB.setText(bundle.getString("RandomizerGUI.tpForceCorrectEvolutionCB.text"));
+        tpForceCorrectEvolutionCB.setToolTipText(bundle.getString("RandomizerGUI.tpForceCorrectEvolutionCB.toolTipText"));
         tpForceFullyEvolvedCB.setToolTipText(bundle.getString("RandomizerGUI.tpForceFullyEvolvedCB.toolTipText")); // NOI18N
         tpForceFullyEvolvedCB.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -3778,7 +3788,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                                 .addComponent(tpRivalCarriesStarterCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(tpPowerLevelsCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(tpNoLegendariesCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addComponent(tpNoEarlyShedinjaCB))
+                                .addComponent(tpNoEarlyShedinjaCB)
+                                 .addComponent(tpForceCorrectEvolutionCB))
                         .addGap(18, 18, 18)
                         .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(tnRandomizeCB)
@@ -3811,7 +3822,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addGroup(trainersPokemonPanelLayout.createSequentialGroup()
                         .addComponent(tpNoLegendariesCB)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(tpNoEarlyShedinjaCB))
+                        .addComponent(tpNoEarlyShedinjaCB)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(tpForceCorrectEvolutionCB))
                     .addComponent(tpForceFullyEvolvedSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(tpLevelModifierCB)
@@ -4774,6 +4787,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JMenuItem toggleScrollPaneMenuItem;
     private javax.swing.JCheckBox tpForceFullyEvolvedCB;
     private javax.swing.JSlider tpForceFullyEvolvedSlider;
+    private javax.swing.JCheckBox tpForceCorrectEvolutionCB;
     private javax.swing.JCheckBox tpLevelModifierCB;
     private javax.swing.JSlider tpLevelModifierSlider;
     private javax.swing.JCheckBox tpNoEarlyShedinjaCB;
