@@ -4,6 +4,8 @@ By Dabomstew
 
 Homepage: http://pokehacks.dabomstew.com/randomizer/
 
+**Notice: Official updates to the randomizer have been indefinitely suspended since 2016. This repository remains available to distribute source code and facilitiate forks.**
+
 # For Program Users
 If you're looking to actually *use* the randomizer as opposed to looking at the 
 source code, you're reading the wrong readme file. This file shouldn't be 
