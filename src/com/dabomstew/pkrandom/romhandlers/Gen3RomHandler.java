@@ -2093,27 +2093,26 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void patchForNationalDex() {
-        log("--Patching for National Dex at Start of Game--");
-        String nl = System.getProperty("line.separator");
+        log("<h2>Patching for National Dex at Start of Game</h2>");
         int fso = romEntry.getValue("FreeSpace");
         if (romEntry.romType == Gen3Constants.RomType_Ruby || romEntry.romType == Gen3Constants.RomType_Sapp) {
             // Find the original pokedex script
             int pkDexOffset = find(Gen3Constants.rsPokedexScriptIdentifier);
             if (pkDexOffset < 0) {
-                log("Patch unsuccessful." + nl);
+                log("<p><span class=\"error\">Patch unsuccessful.</span></p>");
                 return;
             }
             int textPointer = readPointer(pkDexOffset - 4);
             int realScriptLocation = pkDexOffset - 8;
             int pointerLocToScript = find(pointerToHexString(realScriptLocation));
             if (pointerLocToScript < 0) {
-                log("Patch unsuccessful." + nl);
+                log("<p><span class=\"error\">Patch unsuccessful.</span></p>");
                 return;
             }
             // Find free space for our new routine
             int writeSpace = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, 44, fso);
             if (writeSpace < fso) {
-                log("Patch unsuccessful." + nl);
+                log("<p><span class=\"error\">Patch unsuccessful.</span></p>");
                 // Somehow this ROM is full
                 return;
             }
@@ -2126,14 +2125,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // Find the original pokedex script
             int pkDexOffset = find(Gen3Constants.frlgPokedexScriptIdentifier);
             if (pkDexOffset < 0) {
-                log("Patch unsuccessful." + nl);
+                log("<p><span class=\"error\">Patch unsuccessful.</span></p>");
                 return;
             }
             // Find free space for our new routine
             int writeSpace = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, 10, fso);
             if (writeSpace < fso) {
                 // Somehow this ROM is full
-                log("Patch unsuccessful." + nl);
+                log("<p><span class=\"error\">Patch unsuccessful.</span></p>");
                 return;
             }
             rom[pkDexOffset] = 4;
@@ -2168,21 +2167,21 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // Find the original pokedex script
             int pkDexOffset = find(Gen3Constants.ePokedexScriptIdentifier);
             if (pkDexOffset < 0) {
-                log("Patch unsuccessful." + nl);
+                log("<p><span class=\"error\">Patch unsuccessful.</span></p>");
                 return;
             }
             int textPointer = readPointer(pkDexOffset - 4);
             int realScriptLocation = pkDexOffset - 8;
             int pointerLocToScript = find(pointerToHexString(realScriptLocation));
             if (pointerLocToScript < 0) {
-                log("Patch unsuccessful." + nl);
+                log("<p><span class=\"error\">Patch unsuccessful.</span></p>");
                 return;
             }
             // Find free space for our new routine
             int writeSpace = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, 27, fso);
             if (writeSpace < fso) {
                 // Somehow this ROM is full
-                log("Patch unsuccessful." + nl);
+                log("<p><span class=\"error\">Patch unsuccessful.</span></p>");
                 return;
             }
             writePointer(pointerLocToScript, writeSpace);
@@ -2190,7 +2189,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             writePointer(writeSpace + 4, textPointer);
             writeHexString(Gen3Constants.eNatDexScriptPart2, writeSpace + 8);
         }
-        log("Patch successful!" + nl);
+        log("<p>Patch successful!</p>");
     }
 
     public String pointerToHexString(int pointer) {
@@ -2270,7 +2269,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         attemptObedienceEvolutionPatches();
 
         // no move evos, so no need to check for those
-        log("--Removing Trade Evolutions--");
+        log("<h2>Removing Trade Evolutions</h2><ul>");
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 for (Evolution evo : pkmn.evolutionsFrom) {
@@ -2344,6 +2343,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 }
             }
         }
+        log("</ul>");
         logBlankLine();
     }
 

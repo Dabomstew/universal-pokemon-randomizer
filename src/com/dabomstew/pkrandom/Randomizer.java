@@ -24,6 +24,7 @@ package com.dabomstew.pkrandom;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.TreeMap;
 
 import com.dabomstew.pkrandom.pokemon.Encounter;
@@ -47,8 +49,6 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 // Can randomize a file based on settings. Output varies by seed.
 public class Randomizer {
-
-    private static final String NEWLINE = System.getProperty("line.separator");
 
     private final Settings settings;
     private final RomHandler romHandler;
@@ -75,8 +75,25 @@ public class Randomizer {
         final long startTime = System.currentTimeMillis();
         RandomSource.seed(seed);
         final boolean raceMode = settings.isRaceMode();
-
         int checkValue = 0;
+        String cssContent = "";
+        InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream("com/dabomstew/pkrandom/gui/log.css");
+        Scanner scanner = new Scanner(is);
+        
+        while(scanner.hasNextLine()) {
+            cssContent += scanner.nextLine() + "\n";
+        }
+        scanner.close();
+                
+        log.println("<!DOCTYPE html>\n" + 
+                "<head>\n" + 
+                "  <title>" + romHandler.getROMName() + " randomization log</title>\n" + 
+                "  <meta charset=\"UTF-8\">\n" + 
+                "  <style type=\"text/css\">\n" + 
+                cssContent +
+                "  </style>\n" + 
+                "</head>\n" + 
+                "<body>");
 
         // limit pokemon?
         if (settings.isLimitPokemon()) {
@@ -150,8 +167,11 @@ public class Randomizer {
         case SHUFFLE:
             romHandler.shufflePokemonStats(settings.isBaseStatsFollowEvolutions());
             break;
-        case RANDOM:
-            romHandler.randomizePokemonStats(settings.isBaseStatsFollowEvolutions());
+        case RANDOM_WITHIN_BST:
+            romHandler.randomizePokemonStatsWithinBST(settings.isBaseStatsFollowEvolutions());
+            break;
+        case RANDOM_UNRESTRICTED:
+            romHandler.randomizePokemonStatsUnrestricted(settings.isBaseStatsFollowEvolutions());
             break;
         default:
             break;
@@ -198,26 +218,28 @@ public class Randomizer {
             romHandler.randomizeEvolutions(settings.isEvosSimilarStrength(), settings.isEvosSameTyping(),
                     settings.isEvosMaxThreeStages(), settings.isEvosForceChange());
 
-            log.println("--Randomized Evolutions--");
+            log.println("<h2>Randomized Evolutions</h2>");
+            log.println("<ul>");
+            
             List<Pokemon> allPokes = romHandler.getPokemon();
             for (Pokemon pk : allPokes) {
                 if (pk != null) {
                     int numEvos = pk.evolutionsFrom.size();
                     if (numEvos > 0) {
-                        StringBuilder evoStr = new StringBuilder(pk.evolutionsFrom.get(0).to.name);
+                        StringBuilder evoStr = new StringBuilder(String.format("<strong>%s</strong>", pk.evolutionsFrom.get(0).to.name));
                         for (int i = 1; i < numEvos; i++) {
                             if (i == numEvos - 1) {
-                                evoStr.append(" and " + pk.evolutionsFrom.get(i).to.name);
+                                evoStr.append(String.format(" and <strong>%s</strong>", pk.evolutionsFrom.get(i).to.name));
                             } else {
-                                evoStr.append(", " + pk.evolutionsFrom.get(i).to.name);
+                                evoStr.append(String.format(", <strong>%s</strong>", pk.evolutionsFrom.get(i).to.name));
                             }
                         }
-                        log.println(pk.name + " now evolves into " + evoStr.toString());
+                        log.println(String.format("<li><strong>%s</strong> now evolves into %s</li>", pk.name, evoStr.toString()));
                     }
                 }
             }
 
-            log.println();
+            log.println("</ul>");
         }
 
         // Trade evolutions removal
@@ -255,29 +277,26 @@ public class Randomizer {
 
         // Show the new movesets if applicable
         if (settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED) {
-            log.println("Pokemon Movesets: Unchanged." + NEWLINE);
+            log.println("<h2>Pokemon Movesets</h2><p>Unchanged.</p>");
         } else if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
-            log.println("Pokemon Movesets: Metronome Only." + NEWLINE);
+            log.println("<h2>Pokemon Movesets</h2><p>Metronome Only.</p>");
         } else {
-            log.println("--Pokemon Movesets--");
+            log.println("<h2>Pokemon Movesets</h2>");
             List<String> movesets = new ArrayList<String>();
             Map<Pokemon, List<MoveLearnt>> moveData = romHandler.getMovesLearnt();
             for (Pokemon pkmn : moveData.keySet()) {
                 StringBuilder sb = new StringBuilder();
-                sb.append(String.format("%03d %-10s : ", pkmn.number, pkmn.name));
+                sb.append(String.format("<h3>%03d %s</h3>", pkmn.number, pkmn.name));
+                sb.append("<ul class=\"moveset\">");
                 List<MoveLearnt> data = moveData.get(pkmn);
-                boolean first = true;
                 for (MoveLearnt ml : data) {
-                    if (!first) {
-                        sb.append(", ");
-                    }
                     try {
-                        sb.append(moves.get(ml.move).name).append(" at level ").append(ml.level);
+                        sb.append(String.format("<li><strong>%s</strong><em>Lv %d</em></li>", moves.get(ml.move).name, ml.level));
                     } catch (NullPointerException ex) {
-                        sb.append("invalid move at level" + ml.level);
+                        sb.append(String.format("<li><span class=\"error\">invalid move at level %d</span></li>", ml.level));
                     }
-                    first = false;
                 }
+                sb.append("</ul>");
                 movesets.add(sb.toString());
             }
             Collections.sort(movesets);
@@ -401,17 +420,18 @@ public class Randomizer {
             double goodDamagingProb = settings.isTmsForceGoodDamaging() ? settings.getTmsGoodDamagingPercent() / 100.0
                     : 0;
             romHandler.randomizeTMMoves(noBrokenMoves, settings.isKeepFieldMoveTMs(), goodDamagingProb);
-            log.println("--TM Moves--");
+            log.println("<h2>TM Moves</h2>");
+            log.println("<ul class=\"tm-list\">");
             List<Integer> tmMoves = romHandler.getTMMoves();
             for (int i = 0; i < tmMoves.size(); i++) {
-                log.printf("TM%02d %s" + NEWLINE, i + 1, moves.get(tmMoves.get(i)).name);
+                log.printf("<li><strong>TM%02d</strong> %s</li>", i + 1, moves.get(tmMoves.get(i)).name);
                 checkValue = addToCV(checkValue, tmMoves.get(i));
             }
-            log.println();
+            log.println("</ul>");
         } else if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
-            log.println("TM Moves: Metronome Only." + NEWLINE);
+            log.println("<h2>TM Moves</h2><p>Metronome Only.<p>");
         } else {
-            log.println("TM Moves: Unchanged." + NEWLINE);
+            log.println("<h2>TM Moves</h2><p>Unchanged.<p>");
         }
 
         // TM/HM compatibility
@@ -445,18 +465,19 @@ public class Randomizer {
                 double goodDamagingProb = settings.isTutorsForceGoodDamaging() ? settings
                         .getTutorsGoodDamagingPercent() / 100.0 : 0;
                 romHandler.randomizeMoveTutorMoves(noBrokenMoves, settings.isKeepFieldMoveTutors(), goodDamagingProb);
-                log.println("--Move Tutor Moves--");
+                log.println("<h2>Move Tutor Moves</h2>");
+                log.print("<ul>");
                 List<Integer> newMtMoves = romHandler.getMoveTutorMoves();
                 for (int i = 0; i < newMtMoves.size(); i++) {
-                    log.printf("%s => %s" + NEWLINE, moves.get(oldMtMoves.get(i)).name,
+                    log.printf("<li>%s => %s</li>", moves.get(oldMtMoves.get(i)).name,
                             moves.get(newMtMoves.get(i)).name);
                     checkValue = addToCV(checkValue, newMtMoves.get(i));
                 }
-                log.println();
+                log.println("</ul>");
             } else if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
-                log.println("Move Tutor Moves: Metronome Only." + NEWLINE);
+                log.println("<h2>Move Tutor Moves</h2><p>Metronome Only.</p>");
             } else {
-                log.println("Move Tutor Moves: Unchanged." + NEWLINE);
+                log.println("<h2>Move Tutor Moves</h2><p>Unchanged.</p>");
             }
 
             // Compatibility
@@ -492,17 +513,19 @@ public class Randomizer {
         }
 
         if (!(settings.getInGameTradesMod() == Settings.InGameTradesMod.UNCHANGED)) {
-            log.println("--In-Game Trades--");
+            log.println("<h2>In-Game Trades</h2>");
+            log.println("<ul>");
             List<IngameTrade> newTrades = romHandler.getIngameTrades();
             int size = oldTrades.size();
             for (int i = 0; i < size; i++) {
                 IngameTrade oldT = oldTrades.get(i);
                 IngameTrade newT = newTrades.get(i);
-                log.printf("Trading %s for %s the %s has become trading %s for %s the %s" + NEWLINE,
+                log.printf("<li>Trading <strong>%s</strong> for <em><strong>%s</strong> the <strong>%s</strong></em> "
+                        + "has become trading <strong>%s</strong> for <em><strong>%s</strong> the <strong>%s</strong></em></li>",
                         oldT.requestedPokemon.name, oldT.nickname, oldT.givenPokemon.name, newT.requestedPokemon.name,
                         newT.nickname, newT.givenPokemon.name);
             }
-            log.println();
+            log.println("</ul>");
         }
 
         // Field Items
@@ -522,12 +545,12 @@ public class Randomizer {
         romHandler.saveRom(filename);
 
         // Log tail
-        log.println("------------------------------------------------------------------");
-        log.println("Randomization of " + romHandler.getROMName() + " completed.");
-        log.println("Time elapsed: " + (System.currentTimeMillis() - startTime) + "ms");
-        log.println("RNG Calls: " + RandomSource.callsSinceSeed());
-        log.println("------------------------------------------------------------------");
-
+        log.println("<hr>");
+        log.println(String.format("<p>Randomization of <strong>%s</strong> completed.</p>", romHandler.getROMName()));
+        log.println(String.format("<p>Time elapsed: %dms<p>", (System.currentTimeMillis() - startTime)));
+        log.println(String.format("<p>RNG Calls: %d<p>", RandomSource.callsSinceSeed()));
+        log.println("</body></html>");
+        
         return checkValue;
     }
 
@@ -539,46 +562,56 @@ public class Randomizer {
                 && settings.getTypesMod() == Settings.TypesMod.UNCHANGED
                 && settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED
                 && !settings.isRandomizeWildPokemonHeldItems()) {
-            log.println("Pokemon base stats & type: unchanged" + NEWLINE);
+            log.println("<h2>Pokemon base stats & type</h2>");
+            log.println("<p>Unchanged.</p>");
         } else {
-            log.println("--Pokemon Base Stats & Types--");
+            log.println("<h2>Pokemon Base Stats & Types</h2>");
+            log.println("<table class=\"pk-table\">");
             if (romHandler instanceof Gen1RomHandler) {
-                log.println("NUM|NAME      |TYPE             |  HP| ATK| DEF| SPE|SPEC");
+                log.println("<tr><th>NUM</th><th>NAME</th><th>TYPE</th><th>HP</th><th>ATK</th><th>DEF</th><th>SPE</th><th>SPEC</th><th>TOTAL</th></tr>");
                 for (Pokemon pkmn : allPokes) {
                     if (pkmn != null) {
-                        String typeString = pkmn.primaryType == null ? "???" : pkmn.primaryType.toString();
+                        String pkmnType1 = pkmn.primaryType == null ? "???" : pkmn.primaryType.toString();
+                        pkmnType1 = String.format("<span class=\"pk-type %s\">%s</span>", pkmnType1.toLowerCase(), pkmnType1);
+                        String pkmnType2 = "";
                         if (pkmn.secondaryType != null) {
-                            typeString += "/" + pkmn.secondaryType.toString();
+                            pkmnType2 = pkmn.secondaryType.toString();
+                            pkmnType2 = String.format("<span class=\"pk-type %s\">%s</span>", pkmnType2.toLowerCase(), pkmnType2);
                         }
-                        log.printf("%3d|%-10s|%-17s|%4d|%4d|%4d|%4d|%4d" + NEWLINE, pkmn.number, pkmn.name, typeString,
-                                pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.special);
+                        int total = pkmn.hp + pkmn.attack + pkmn.defense + pkmn.speed + pkmn.special;                        
+                        log.printf("<tr%s><td>%3d</td><td class=\"left\">%s</td><td>%s%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td></tr>",
+                                pkmn.number % 2 == 0 ? " class=\"alt\"" : "", pkmn.number, pkmn.name, pkmnType1, pkmnType2, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.special, total);
                     }
 
                 }
             } else {
-                log.print("NUM|NAME      |TYPE             |  HP| ATK| DEF| SPE|SATK|SDEF");
+                log.print("<tr><th>NUM</th><th>NAME</th><th>TYPE</th><th>HP</th><th>ATK</th><th>DEF</th><th>SPE</th><th>SATK</th><th>SDEF</th><th>TOTAL</th>");
                 int abils = romHandler.abilitiesPerPokemon();
                 for (int i = 0; i < abils; i++) {
-                    log.print("|ABILITY" + (i + 1) + "    ");
+                    log.printf("<th>ABILITY%d</th>", (i + 1));
                 }
-                log.print("|ITEM");
-                log.println();
+                log.print("<th>ITEM</th>");
+                log.println("</tr>");
                 for (Pokemon pkmn : allPokes) {
                     if (pkmn != null) {
-                        String typeString = pkmn.primaryType == null ? "???" : pkmn.primaryType.toString();
+                        String pkmnType1 = pkmn.primaryType == null ? "???" : pkmn.primaryType.toString();
+                        pkmnType1 = String.format("<span class=\"pk-type %s\">%s</span>", pkmnType1.toLowerCase(), pkmnType1);
+                        String pkmnType2 = "";
                         if (pkmn.secondaryType != null) {
-                            typeString += "/" + pkmn.secondaryType.toString();
+                            pkmnType2 = pkmn.secondaryType.toString();
+                            pkmnType2 = String.format("<span class=\"pk-type %s\">%s</span>", pkmnType2.toLowerCase(), pkmnType2);
                         }
-                        log.printf("%3d|%-10s|%-17s|%4d|%4d|%4d|%4d|%4d|%4d", pkmn.number, pkmn.name, typeString,
-                                pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef);
+                        int total = pkmn.hp + pkmn.attack + pkmn.defense + pkmn.speed + pkmn.spatk + pkmn.spdef;
+                        log.printf("<tr%s><td>%3d</td><td class=\"left\">%s</td><td>%s%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td>",
+                                pkmn.number % 2 == 0 ? " class=\"alt\"" : "", pkmn.number, pkmn.name, pkmnType1, pkmnType2, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef, total);
                         if (abils > 0) {
-                            log.printf("|%-12s|%-12s", romHandler.abilityName(pkmn.ability1),
+                            log.printf("<td>%s</td><td>%s", romHandler.abilityName(pkmn.ability1),
                                     romHandler.abilityName(pkmn.ability2));
                             if (abils > 2) {
-                                log.printf("|%-12s", romHandler.abilityName(pkmn.ability3));
+                                log.printf("</td><td>%-12s", romHandler.abilityName(pkmn.ability3));
                             }
                         }
-                        log.print("|");
+                        log.print("</td><td>");
                         if (pkmn.guaranteedHeldItem > 0) {
                             log.print(itemNames[pkmn.guaranteedHeldItem] + " (100%)");
                         } else {
@@ -602,37 +635,39 @@ public class Randomizer {
                                 log.print(itemNames[pkmn.darkGrassHeldItem] + " (dark grass only)");
                             }
                         }
-                        log.println();
+                        log.println("</td></tr>");
                     }
 
                 }
             }
-            log.println();
+            log.println("</table>");
         }
     }
 
     private void maybeChangeAndLogStarters(final PrintStream log, final RomHandler romHandler) {
         if (romHandler.canChangeStarters()) {
             if (settings.getStartersMod() == Settings.StartersMod.CUSTOM) {
-                log.println("--Custom Starters--");
+                log.println("<h2>Custom Starters</h2>");
+                log.println("<ul>");
                 List<Pokemon> romPokemon = romHandler.getPokemon();
                 int[] customStarters = settings.getCustomStarters();
                 Pokemon pkmn1 = romPokemon.get(customStarters[0]);
-                log.println("Set starter 1 to " + pkmn1.name);
+                log.println(String.format("<li>Set starter 1 to <strong>%s</strong></li>", pkmn1.name));
                 Pokemon pkmn2 = romPokemon.get(customStarters[1]);
-                log.println("Set starter 2 to " + pkmn2.name);
+                log.println(String.format("<li>Set starter 2 to <strong>%s</strong></li>", pkmn2.name));
                 if (romHandler.isYellow()) {
                     romHandler.setStarters(Arrays.asList(pkmn1, pkmn2));
                 } else {
                     Pokemon pkmn3 = romPokemon.get(customStarters[2]);
-                    log.println("Set starter 3 to " + pkmn3.name);
+                    log.println(String.format("<li>Set starter 3 to <strong>%s</strong></li>", pkmn3.name));
                     romHandler.setStarters(Arrays.asList(pkmn1, pkmn2, pkmn3));
                 }
-                log.println();
+                log.println("</ul>");
 
             } else if (settings.getStartersMod() == Settings.StartersMod.COMPLETELY_RANDOM) {
                 // Randomise
-                log.println("--Random Starters--");
+                log.println("<h2>Random Starters</h2>");
+                log.println("<ul>");
                 int starterCount = 3;
                 if (romHandler.isYellow()) {
                     starterCount = 2;
@@ -643,14 +678,15 @@ public class Randomizer {
                     while (starters.contains(pkmn)) {
                         pkmn = romHandler.randomPokemon();
                     }
-                    log.println("Set starter " + (i + 1) + " to " + pkmn.name);
+                    log.println(String.format("<li>Set starter %d to <strong>%s</strong></li>", (i + 1), pkmn.name));
                     starters.add(pkmn);
                 }
                 romHandler.setStarters(starters);
-                log.println();
+                log.println("</ul>");
             } else if (settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_TWO_EVOLUTIONS) {
                 // Randomise
-                log.println("--Random 2-Evolution Starters--");
+                log.println("<h2>Random 2-Evolution Starters</h2>");
+                log.println("<ul>");
                 int starterCount = 3;
                 if (romHandler.isYellow()) {
                     starterCount = 2;
@@ -661,11 +697,11 @@ public class Randomizer {
                     while (starters.contains(pkmn)) {
                         pkmn = romHandler.random2EvosPokemon();
                     }
-                    log.println("Set starter " + (i + 1) + " to " + pkmn.name);
+                    log.println(String.format("<li>Set starter %d to <strong>%s</strong></li>", (i + 1), pkmn.name));
                     starters.add(pkmn);
                 }
                 romHandler.setStarters(starters);
-                log.println();
+                log.println("</ul>");
             }
             if (settings.isRandomizeStartersHeldItems() && !(romHandler instanceof Gen1RomHandler)) {
                 romHandler.randomizeStarterHeldItems(settings.isBanBadRandomStarterHeldItems());
@@ -675,33 +711,66 @@ public class Randomizer {
 
     private void maybeLogWildPokemonChanges(final PrintStream log, final RomHandler romHandler) {
         if (settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED) {
-            log.println("Wild Pokemon: Unchanged." + NEWLINE);
+            log.println("<h2>Wild Pokemon</h2><p>Unchanged.</p>");
         } else {
-            log.println("--Wild Pokemon--");
+            log.println("<h2>Wild Pokemon</h2>");
             List<EncounterSet> encounters = romHandler.getEncounters(settings.isUseTimeBasedEncounters());
             int idx = 0;
             for (EncounterSet es : encounters) {
                 idx++;
+                String divCls = "";
+                String ulCls = "";
+                if (es.displayName != null) {
+                    if(es.displayName.contains("Surfing")) {
+                        divCls = "pk-set-surfing";
+                        ulCls = "pk-list-surfing";
+                    } else if(es.displayName.contains("Fishing") ||
+                            es.displayName.contains("Old Rod") ||
+                            es.displayName.contains("Good Rod") ||
+                            es.displayName.contains("Super Rod")) {
+                        divCls = "pk-set-fishing";
+                        ulCls = "pk-list-fishing";
+                    } else if(es.displayName.contains("Grass/Cave")) {
+                        divCls = "pk-set-grass";
+                        ulCls = "pk-list-grass";
+                    } else if(es.displayName.contains("Headbutt Trees")) {
+                        divCls = "pk-set-headbutt-trees";
+                        ulCls = "pk-list-headbutt-trees";
+                    } else if(es.displayName.contains("Bug Catching Contest")) {
+                        divCls = "pk-set-bug-catching-contest";
+                        ulCls = "pk-list-bug-catching-contest";
+                    } else if(es.displayName.contains("Rock Smash")) {
+                        divCls = "pk-set-rock-smash";
+                        ulCls = "pk-list-rock-smash";
+                    } else if(es.displayName.contains("Swarm/Radar/GBA")) {
+                        divCls = "pk-set-poke-radar";
+                        ulCls = "pk-list-poke-radar";
+                    } else if(es.displayName.contains("Doubles Grass")) {
+                        divCls = "pk-set-doubles-grass";
+                        ulCls = "pk-list-doubles-grass";
+                    } else if(es.displayName.contains("Shaking Spots")) {
+                        divCls = "pk-set-shaking-spot";
+                        ulCls = "pk-list-shaking-spot";
+                    } 
+                }
+                log.print(String.format("<div class=\"wild-pk-set %s\">", divCls));
                 log.print("Set #" + idx + " ");
                 if (es.displayName != null) {
                     log.print("- " + es.displayName + " ");
                 }
                 log.print("(rate=" + es.rate + ")");
-                log.print(" - ");
-                boolean first = true;
+                log.print(String.format("</div><ul class=\"pk-set-list %s\">", ulCls));
                 for (Encounter e : es.encounters) {
-                    if (!first) {
-                        log.print(", ");
-                    }
-                    log.print(e.pokemon.name + " Lv");
+                    log.print("<li>");
+                    log.print(e.pokemon.name + " <em>Lv");
                     if (e.maxLevel > 0 && e.maxLevel != e.level) {
                         log.print("s " + e.level + "-" + e.maxLevel);
                     } else {
                         log.print(e.level);
                     }
-                    first = false;
+                    log.print("</em></li>");
                 }
-                log.println();
+                log.println("</ul>");
             }
             log.println();
         }
@@ -709,34 +778,30 @@ public class Randomizer {
 
     private void maybeLogTrainerChanges(final PrintStream log, final RomHandler romHandler) {
         if (settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED && !settings.isRivalCarriesStarterThroughout()) {
-            log.println("Trainers: Unchanged." + NEWLINE);
+            log.println("<h2>Trainers</h2><p>Unchanged.</p>");
         } else {
-            log.println("--Trainers Pokemon--");
+            log.println("<h2>Trainers Pokemon</h2>");
             List<Trainer> trainers = romHandler.getTrainers();
             int idx = 0;
             for (Trainer t : trainers) {
                 idx++;
-                log.print("#" + idx + " ");
+                log.print("<div class=\"trainer-box\"><div class=\"trainer\">");
+                log.printf("<span class=\"trainer-name\"><em># %d</em> ", idx);
                 if (t.fullDisplayName != null) {
-                    log.print("(" + t.fullDisplayName + ")");
+                    log.print(t.fullDisplayName + "</span>");
                 } else if (t.name != null) {
-                    log.print("(" + t.name + ")");
+                    log.print(t.name + "</span>");
                 }
                 if (t.offset != idx && t.offset != 0) {
-                    log.printf("@%X", t.offset);
+                    log.printf("<em>@%X</em>", t.offset);
                 }
-                log.print(" - ");
-                boolean first = true;
+                log.print("</div><ul class=\"trainer-pk\">");
                 for (TrainerPokemon tpk : t.pokemon) {
-                    if (!first) {
-                        log.print(", ");
-                    }
-                    log.print(tpk.pokemon.name + " Lv" + tpk.level);
-                    first = false;
+                    log.print(String.format("<li>%s <em>Lv%d</em></li>", tpk.pokemon.name, tpk.level));
                 }
-                log.println();
+                log.println("</ul></div>");
             }
-            log.println();
+            log.println("<div class=\"clear\"></div>");
         }
     }
 
@@ -751,15 +816,16 @@ public class Randomizer {
             }
             List<Pokemon> newStatics = romHandler.getStaticPokemon();
             if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED) {
-                log.println("Static Pokemon: Unchanged." + NEWLINE);
+                log.println("<h2>Static Pokemon</h2><p>Unchanged.</p>");
             } else {
-                log.println("--Static Pokemon--");
+                log.println("<h2>Static Pokemon</h2>");
+                log.println("<ul>");
                 Map<Pokemon, Integer> seenPokemon = new TreeMap<Pokemon, Integer>();
                 for (int i = 0; i < oldStatics.size(); i++) {
                     Pokemon oldP = oldStatics.get(i);
                     Pokemon newP = newStatics.get(i);
                     checkValue = addToCV(checkValue, newP.number);
-                    log.print(oldP.name);
+                    log.print("<li>" + oldP.name);
                     if (seenPokemon.containsKey(oldP)) {
                         int amount = seenPokemon.get(oldP);
                         log.print("(" + (++amount) + ")");
@@ -767,9 +833,9 @@ public class Randomizer {
                     } else {
                         seenPokemon.put(oldP, 1);
                     }
-                    log.println(" => " + newP.name);
+                    log.println(" => " + newP.name + "</li>");
                 }
-                log.println();
+                log.println("</ul>");
             }
         }
         return checkValue;
@@ -780,28 +846,30 @@ public class Randomizer {
                 && !settings.isRandomizeMovePPs() && !settings.isRandomizeMoveCategory()
                 && !settings.isRandomizeMoveTypes()) {
             if (!settings.isUpdateMoves()) {
-                log.println("Move Data: Unchanged." + NEWLINE);
+                log.println("<h2>Move Data</h2><p>Unchanged.</p>");
             }
         } else {
-            log.println("--Move Data--");
-            log.print("NUM|NAME           |TYPE    |POWER|ACC.|PP");
+            log.println("<h2>Move Data</h2>");
+            log.println("<table class=\"moves-table\">");
+            log.print("<tr><th>NUM</th><th>NAME</th><th>TYPE</th><th>POWER</th><th>ACC.</th><th>PP</th>");
             if (romHandler.hasPhysicalSpecialSplit()) {
-                log.print(" |CATEGORY");
+                log.print("<th>CATEGORY</th>");
             }
-            log.println();
+            log.println("</tr>");
             List<Move> allMoves = romHandler.getMoves();
             for (Move mv : allMoves) {
                 if (mv != null) {
                     String mvType = (mv.type == null) ? "???" : mv.type.toString();
-                    log.printf("%3d|%-15s|%-8s|%5d|%4d|%3d", mv.internalId, mv.name, mvType, mv.power,
-                            (int) mv.hitratio, mv.pp);
+                    mvType = String.format("<span class=\"pk-type %s\">%s</span>", mvType.toLowerCase(), mvType);
+                    log.printf("<tr%s><td>%d</td><td class=\"left\">%s</td><td>%s</td><td>%d</td><td>%d</td><td>%d</td>",
+                            mv.internalId % 2 == 0 ? " class=\"alt\"" : "", mv.internalId, mv.name, mvType, mv.power, (int) mv.hitratio, mv.pp);
                     if (romHandler.hasPhysicalSpecialSplit()) {
-                        log.printf("| %s", mv.category.toString());
+                        log.printf("<td>%s</td>", mv.category.toString());
                     }
-                    log.println();
+                    log.println("</tr>");
                 }
             }
-            log.println();
+            log.println("</table>");
         }
     }
 

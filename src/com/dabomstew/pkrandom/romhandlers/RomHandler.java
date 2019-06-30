@@ -97,8 +97,11 @@ public interface RomHandler {
 
     // Randomise stats following evolutions for proportions or not (see
     // tooltips)
-    public void randomizePokemonStats(boolean evolutionSanity);
+    public void randomizePokemonStatsWithinBST(boolean evolutionSanity);
 
+    // Allows more variety in Pokemon strength
+    public void randomizePokemonStatsUnrestricted(boolean evolutionSanity);
+    
     // Update base stats to gen6
     public void updatePokemonStats();
 

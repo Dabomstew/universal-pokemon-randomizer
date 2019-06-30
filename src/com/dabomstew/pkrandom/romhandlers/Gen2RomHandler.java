@@ -1359,7 +1359,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public void removeTradeEvolutions(boolean changeMoveEvos) {
         // no move evos, so no need to check for those
-        log("--Removing Trade Evolutions--");
+        log("<h2>Removing Trade Evolutions</h2><ul>");
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 for (Evolution evol : pkmn.evolutionsFrom) {
@@ -1392,6 +1392,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 }
             }
         }
+        log("</ul>");
         logBlankLine();
 
     }
