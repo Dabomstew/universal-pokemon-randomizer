@@ -68,11 +68,13 @@ public class GlobalConstants {
     
     /* @formatter:on */
 
+    public static final int[] ptSpecialIntros = { 377, 378, 379, 479, 480, 482, 483, 484, 485, 486, 487, 491, 492, 493 };
+
     public static final List<Integer> battleTrappingAbilities = Arrays.asList(23, 42, 71);
 
-    public static final List<Integer> negativeAbilities = Arrays.asList(129, 112, 54, 59, 161);
-    // Defeatist, Slow Start, Truant, Forecast, Zen Mode
-    // To test: Illusion, Imposter
+    public static final List<Integer> negativeAbilities = Arrays.asList(129, 112, 54, 59, 161, 150);
+    // Defeatist, Slow Start, Truant, Forecast, Zen Mode, Imposter
+    // To test: Illusion
 
     public static final int WONDER_GUARD_INDEX = 25;
 

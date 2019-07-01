@@ -74,7 +74,7 @@ public class Gen5Constants {
 
     public static final int waterStoneIndex = 84;
 
-    public static final int highestAbilityIndex = 123;
+    public static final int highestAbilityIndex = 164;
 
     public static final int normalItemSetVarCommand = 0x28, hiddenItemSetVarCommand = 0x2A, normalItemVarSet = 0x800C,
             hiddenItemVarSet = 0x8000;
@@ -82,6 +82,8 @@ public class Gen5Constants {
     public static final int scriptListTerminator = 0xFD13;
     
     public static final int luckyEggIndex = 0xE7;
+
+    public static final int[] mulchIndices = {0x5F, 0x60, 0x61, 0x62};
 
     public static final MoveCategory[] moveCategoryIndices = { MoveCategory.STATUS, MoveCategory.PHYSICAL,
             MoveCategory.SPECIAL };
