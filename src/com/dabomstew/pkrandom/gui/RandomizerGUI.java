@@ -711,6 +711,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.pbsChangesRandomRB.setEnabled(false);
         this.pbsChangesShuffleRB.setEnabled(false);
         this.pbsChangesRandomUnrestrictedRB.setEnabled(false);
+        this.pbsChangesRandomCompletelyRB.setEnabled(false);
         this.pbsChangesUnchangedRB.setSelected(true);
         this.pbsStandardEXPCurvesCB.setEnabled(false);
         this.pbsStandardEXPCurvesCB.setSelected(false);
@@ -1067,6 +1068,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.pbsChangesRandomRB.setEnabled(true);
             this.pbsChangesShuffleRB.setEnabled(true);
             this.pbsChangesRandomUnrestrictedRB.setEnabled(true);
+            this.pbsChangesRandomCompletelyRB.setEnabled(true);
 
             this.pbsStandardEXPCurvesCB.setEnabled(true);
             this.pbsStandardEXPCurvesCB.setSelected(false);
@@ -1645,6 +1647,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.pbsChangesRandomRB.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.RANDOM_WITHIN_BST);
         this.pbsChangesShuffleRB.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.SHUFFLE);
         this.pbsChangesRandomUnrestrictedRB.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.RANDOM_UNRESTRICTED);
+        this.pbsChangesRandomCompletelyRB.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.RANDOM_COMPLETELY);
         this.pbsChangesUnchangedRB.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.UNCHANGED);
         this.pbsStandardEXPCurvesCB.setSelected(settings.isStandardizeEXPCurves());
         this.pbsFollowEvolutionsCB.setSelected(settings.isBaseStatsFollowEvolutions());
@@ -1808,7 +1811,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setRandomizeTrainerClassNames(tcnRandomizeCB.isSelected());
 
         settings.setBaseStatisticsMod(pbsChangesUnchangedRB.isSelected(), pbsChangesShuffleRB.isSelected(),
-                pbsChangesRandomRB.isSelected(), pbsChangesRandomUnrestrictedRB.isSelected());
+                pbsChangesRandomRB.isSelected(), pbsChangesRandomUnrestrictedRB.isSelected(),
+                pbsChangesRandomRB.isSelected(), pbsChangesRandomCompletelyRB.isSelected());
         settings.setStandardizeEXPCurves(pbsStandardEXPCurvesCB.isSelected());
         settings.setBaseStatsFollowEvolutions(pbsFollowEvolutionsCB.isSelected());
         settings.setUpdateBaseStats(pbsUpdateStatsCB.isSelected());
@@ -2499,6 +2503,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private void pbsChangesRandomUnrestrictedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pbsChangesRandomUnrestrictedRBActionPerformed
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_pbsChangesRandomUnrestrictedRBActionPerformed
+    
+    private void pbsChangesRandomCompletelyRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pbsChangesRandomCompletelyRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_pbsChangesRandomCompletelyRBActionPerformed
 
     private void tpForceFullyEvolvedCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tpForceFullyEvolvedCBActionPerformed
         this.enableOrDisableSubControls();
@@ -2610,6 +2618,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         pbsChangesShuffleRB = new javax.swing.JRadioButton();
         pbsChangesRandomRB = new javax.swing.JRadioButton();
         pbsChangesRandomUnrestrictedRB = new javax.swing.JRadioButton();
+        pbsChangesRandomCompletelyRB = new javax.swing.JRadioButton();
         pbsStandardEXPCurvesCB = new javax.swing.JCheckBox();
         pbsFollowEvolutionsCB = new javax.swing.JCheckBox();
         pbsUpdateStatsCB = new javax.swing.JCheckBox();
@@ -2995,6 +3004,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
         pbsChangesRandomUnrestrictedRB.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 pbsChangesRandomUnrestrictedRBActionPerformed(evt);
+        
+                pokeStatChangesButtonGroup.add(pbsChangesRandomCompletelyRB);
+        pbsChangesRandomCompletelyRB.setText(bundle.getString("RandomizerGUI.pbsChangesRandomCompletelyRB.text")); // NOI18N
+        pbsChangesRandomCompletelyRB.setToolTipText(bundle.getString("RandomizerGUI.pbsChangesRandomCompletelyRB.toolTipText")); // NOI18N
+        pbsChangesRandomCompletelyRB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pbsChangesRandomCompletelyRBActionPerformed(evt);
             }
         });
 
@@ -3018,6 +3034,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(pbsChangesUnchangedRB)
                     .addComponent(pbsChangesRandomRB)
                     .addComponent(pbsChangesRandomUnrestrictedRB))
+                    .addComponent(pbsChangesRandomCompletelyRB))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 66, Short.MAX_VALUE)
                 .addGroup(baseStatsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(pbsStandardEXPCurvesCB)
@@ -3043,6 +3060,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(baseStatsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(pbsChangesRandomUnrestrictedRB))
+                    .addComponent(pbsChangesRandomCompletelyRB))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -4709,6 +4727,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JRadioButton paUnchangedRB;
     private javax.swing.JCheckBox paWonderGuardCB;
     private javax.swing.JRadioButton pbsChangesRandomUnrestrictedRB;
+    private javax.swing.JRadioButton pbsChangesRandomCompletelyRB;
     private javax.swing.JRadioButton pbsChangesRandomRB;
     private javax.swing.JRadioButton pbsChangesShuffleRB;
     private javax.swing.JRadioButton pbsChangesUnchangedRB;

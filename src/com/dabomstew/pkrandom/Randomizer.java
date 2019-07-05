@@ -173,6 +173,9 @@ public class Randomizer {
         case RANDOM_UNRESTRICTED:
             romHandler.randomizePokemonStatsUnrestricted(settings.isBaseStatsFollowEvolutions());
             break;
+        case RANDOM_COMPLETELY:
+            romHandler.randomizeCompletelyPokemonStats(settings.isBaseStatsFollowEvolutions());
+            break;
         default:
             break;
         }
