@@ -99,9 +99,21 @@ public interface RomHandler {
     // tooltips)
     public void randomizePokemonStats(boolean evolutionSanity);
 
+    //Randomizes pokemon base stats to be between existing observed base stat totals seen from other pokemon
+    //(see tooltips for details)
+    public void randomizePokemonBaseStats(boolean evolutionSanity, boolean randomizeRatio, boolean evosBuffStats);
+    
+    //Randomizes pokemon base stats up to +or- the given percentage.
+    //(see tooltips for details)
+    public void randomizePokemonBaseStatsPerc(boolean evolutionSanity, int percent, boolean randomizeRatio);
+    
+    //Equalizes Pokemon Stats so all pokemon will have the same base stat total
+    //(see tooltips for details)
+    public void equalizePokemonStats(boolean evolutionSanity, boolean randomizeRatio);
+    
     // Update base stats to gen6
     public void updatePokemonStats();
-
+    
     // Give a random Pokemon who's in this game
     public Pokemon randomPokemon();
 

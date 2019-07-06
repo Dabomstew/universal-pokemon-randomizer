@@ -239,6 +239,68 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public void randomizePokemonBaseStats(boolean evolutionSanity, boolean dontRandomizeRatio, boolean evosBuffStats) {
+        copyUpEvolutionsHelper(new BasePokemonAction() {
+            public void applyTo(Pokemon pk) {
+            	pk.randomizeBST(AbstractRomHandler.this.random, dontRandomizeRatio);
+            }
+        }, new EvolvedPokemonAction() {
+        	public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
+                evTo.copyRandomizedBaseStatsUpEvolution(AbstractRomHandler.this.random, evFrom, evolutionSanity, evosBuffStats);
+        	}
+        });
+    }
+    
+    @Override
+    public void randomizePokemonBaseStatsPerc(boolean evolutionSanity, int percent, boolean dontRandomizeRatio) {
+    	//In progress
+    	if (evolutionSanity) {
+            copyUpEvolutionsHelper(new BasePokemonAction() {
+                public void applyTo(Pokemon pk) {
+                    pk.randomizeBSTPerc(AbstractRomHandler.this.random, percent, dontRandomizeRatio);
+                }
+            }, new EvolvedPokemonAction() {
+                public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
+                   evTo.percentRaiseStatFloorUpEvolution(random, dontRandomizeRatio, evFrom);
+                   evTo.copyRandomizedStatsUpEvolution(evFrom);
+                }
+            });
+        } else {
+        	copyUpEvolutionsHelper(new BasePokemonAction() {
+                public void applyTo(Pokemon pk) {
+                    pk.randomizeBSTPerc(AbstractRomHandler.this.random, percent, dontRandomizeRatio);
+                }
+            }, new EvolvedPokemonAction() {
+                public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
+                   evTo.percentRaiseStatFloorUpEvolution(random, dontRandomizeRatio, evFrom);
+                }
+            });
+        }
+    }
+    
+    @Override
+    public void equalizePokemonStats(boolean evolutionSanity, boolean dontRandomizeRatio) {
+    	if (evolutionSanity) {
+            copyUpEvolutionsHelper(new BasePokemonAction() {
+                public void applyTo(Pokemon pk) {
+                    pk.equalizeBST(AbstractRomHandler.this.random, dontRandomizeRatio);
+                }
+            }, new EvolvedPokemonAction() {
+                public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
+                    evTo.copyEqualizedStatsUpEvolution(evFrom);
+                }
+            });
+        } else {
+            List<Pokemon> allPokes = this.getPokemon();
+            for (Pokemon pk : allPokes) {
+                if (pk != null) {
+                    pk.equalizeBST(this.random, dontRandomizeRatio);
+                }
+            }
+        }
+    }
+    
+    @Override
     public void updatePokemonStats() {
         List<Pokemon> pokes = getPokemon();
 
@@ -306,7 +368,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
     }
-
+    
     public Pokemon randomPokemon() {
         checkPokemonRestrictions();
         return mainPokemonList.get(this.random.nextInt(mainPokemonList.size()));
