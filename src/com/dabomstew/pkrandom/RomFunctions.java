@@ -394,7 +394,7 @@ public class RomFunctions {
                 }
                 if ((currLineCC + reqLength > maxLineLength)
                         || (currLineCC >= sentenceNewLineSize && (currLineLastChar == '.' || currLineLastChar == '?'
-                                || currLineLastChar == '!' || currLineLastChar == '…' || currLineLastChar == ','))) {
+                                || currLineLastChar == '!' || currLineLastChar == 'â€¦' || currLineLastChar == ','))) {
                     // new line
                     // Save current line, if applicable
                     if (currLineWC > 0) {

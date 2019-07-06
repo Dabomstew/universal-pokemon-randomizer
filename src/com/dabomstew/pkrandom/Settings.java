@@ -62,16 +62,13 @@ public class Settings {
     private boolean limitPokemon;
 
     public enum BaseStatisticsMod {
-        UNCHANGED, SHUFFLE, RANDOM, RANDOMBST, RANDOMBSTPERC, EQUALIZE,
+        UNCHANGED, SHUFFLE, RANDOM,
     }
 
     private BaseStatisticsMod baseStatisticsMod = BaseStatisticsMod.UNCHANGED;
     private boolean standardizeEXPCurves;
     private boolean baseStatsFollowEvolutions;
     private boolean updateBaseStats;
-    private int baseStatRange = 0;
-    private boolean DontRandomizeRatio;
-    private boolean evosBuffStats;
 
     public enum AbilitiesMod {
         UNCHANGED, RANDOMIZE
@@ -856,34 +853,7 @@ public class Settings {
         this.updateBaseStats = updateBaseStats;
         return this;
     }
-    
-    public int getBaseStatRange() {
-    	return baseStatRange;
-    }
-    
-    public Settings setBaseStatRange(int baseStatRange) {
-    	this.baseStatRange = baseStatRange;
-    	return this;
-    }
-    
-    public boolean isDontRandomizeRatio() {
-    	return DontRandomizeRatio;
-    }
-    
-    public Settings setDontRandomizeRatio(boolean DontRandomizeRatio) {
-    	this.DontRandomizeRatio = DontRandomizeRatio;
-    	return this;
-    }
 
-    public boolean isEvosBuffStats() {
-    	return evosBuffStats;
-    }
-    
-    public Settings setEvosBuffStats(boolean evosBuffStats) {
-    	this.evosBuffStats = evosBuffStats;
-    	return this;
-    }
-    
     public AbilitiesMod getAbilitiesMod() {
         return abilitiesMod;
     }
