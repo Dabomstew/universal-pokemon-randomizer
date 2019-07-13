@@ -74,7 +74,7 @@ public class Gen5Constants {
 
     public static final int waterStoneIndex = 84;
 
-    public static final int highestAbilityIndex = 123;
+    public static final int highestAbilityIndex = 164; //thanks to AshishMahto for pointing out that not all of black and white's abilities were being used. was 123 (only gen 1-4 abilities)
 
     public static final int normalItemSetVarCommand = 0x28, hiddenItemSetVarCommand = 0x2A, normalItemVarSet = 0x800C,
             hiddenItemVarSet = 0x8000;
