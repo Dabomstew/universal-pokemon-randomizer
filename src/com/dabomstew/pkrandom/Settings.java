@@ -84,7 +84,7 @@ public class Settings {
     private boolean banNegativeAbilities;
 
     public enum StartersMod {
-        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS
+        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS, RANDOM_WITH_ONE_EVOLUTION, RANDOM_WITH_NO_EVOLUTIONS
     }
 
     private StartersMod startersMod = StartersMod.UNCHANGED;
@@ -94,6 +94,8 @@ public class Settings {
     private int[] customStarters = new int[3];
     private boolean randomizeStartersHeldItems;
     private boolean banBadRandomStarterHeldItems;
+    private boolean banLegendaryStarters;
+    private boolean onlyLegendaryStarters;
 
     public enum TypesMod {
         UNCHANGED, RANDOM_FOLLOW_EVOLUTIONS, COMPLETELY_RANDOM
@@ -973,6 +975,24 @@ public class Settings {
         return this;
     }
 
+    public boolean isBanLegendaryStarters() {
+    	return banLegendaryStarters;
+    }
+    
+    public Settings setBanLegendaryStarters(boolean banLegendaryStarters) {
+    	this.banLegendaryStarters = banLegendaryStarters;
+    	return this;
+    }
+    
+    public boolean isOnlyLegendaryStarters() {
+    	return onlyLegendaryStarters;
+    }
+    
+    public Settings setOnlyLegendaryStarters(boolean onlyLegendaryStarters) {
+    	this.onlyLegendaryStarters = onlyLegendaryStarters;
+    	return this;
+    }
+    
     public TypesMod getTypesMod() {
         return typesMod;
     }

@@ -387,6 +387,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private List<Pokemon> twoEvoPokes;
+    private List<Pokemon> oneEvoPokes;
+    private List<Pokemon> noEvoPokes;
 
     @Override
     public Pokemon random2EvosPokemon() {
@@ -409,6 +411,52 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
         return twoEvoPokes.get(this.random.nextInt(twoEvoPokes.size()));
+    }
+    
+    @Override
+    public Pokemon random1EvosPokemon() {
+        if (oneEvoPokes == null) {
+            // Prepare the list
+            oneEvoPokes = new ArrayList<Pokemon>();
+            List<Pokemon> allPokes = this.getPokemon();
+            for (Pokemon pk : allPokes) {
+                if (pk != null && pk.evolutionsTo.size() == 0 && pk.evolutionsFrom.size() > 0) {
+                    // Potential candidate
+                    for (Evolution ev : pk.evolutionsFrom) {
+                        // If any of the targets here dont evolve, the original
+                        // Pokemon has 1 stage.
+                        if (ev.to.evolutionsFrom.size() == 0) {
+                            oneEvoPokes.add(pk);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return oneEvoPokes.get(this.random.nextInt(oneEvoPokes.size()));
+    }
+    
+    @Override
+    public Pokemon random0EvosPokemon(boolean banLegend, boolean onlyLegend) {
+        if (noEvoPokes == null) {
+            // Prepare the list
+            noEvoPokes = new ArrayList<Pokemon>();
+            List<Pokemon> allPokes = this.getPokemon();
+            for (Pokemon pk : allPokes) {
+                if (pk != null && pk.evolutionsTo.size() == 0 && pk.evolutionsFrom.size() == 0) {
+                	if(banLegend || onlyLegend){
+                		if(!pk.isLegendary() && banLegend) {
+                            noEvoPokes.add(pk);
+                		} else if(pk.isLegendary() && onlyLegend) {
+                			noEvoPokes.add(pk);
+                		}
+                	} else {
+                        noEvoPokes.add(pk);	
+                	}
+                }
+            }
+        }
+        return noEvoPokes.get(this.random.nextInt(noEvoPokes.size()));
     }
 
     @Override

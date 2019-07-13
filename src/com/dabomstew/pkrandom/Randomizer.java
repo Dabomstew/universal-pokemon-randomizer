@@ -675,6 +675,42 @@ public class Randomizer {
                 }
                 romHandler.setStarters(starters);
                 log.println();
+            } else if (settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_ONE_EVOLUTION) {
+                // Randomise
+                log.println("--Random 1-Evolution Starters--");
+                int starterCount = 3;
+                if (romHandler.isYellow()) {
+                    starterCount = 2;
+                }
+                List<Pokemon> starters = new ArrayList<Pokemon>();
+                for (int i = 0; i < starterCount; i++) {
+                    Pokemon pkmn = romHandler.random1EvosPokemon();
+                    while (starters.contains(pkmn)) {
+                        pkmn = romHandler.random1EvosPokemon();
+                    }
+                    log.println("Set starter " + (i + 1) + " to " + pkmn.name);
+                    starters.add(pkmn);
+                }
+                romHandler.setStarters(starters);
+                log.println();
+            } else if (settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_NO_EVOLUTIONS) {
+                // Randomise
+                log.println("--Random 0-Evolution Starters--");
+                int starterCount = 3;
+                if (romHandler.isYellow()) {
+                    starterCount = 2;
+                }
+                List<Pokemon> starters = new ArrayList<Pokemon>();
+                for (int i = 0; i < starterCount; i++) {
+                    Pokemon pkmn = romHandler.random0EvosPokemon(settings.isBanLegendaryStarters(), settings.isOnlyLegendaryStarters());
+                    while (starters.contains(pkmn)) {
+                        pkmn = romHandler.random0EvosPokemon(settings.isBanLegendaryStarters(), settings.isOnlyLegendaryStarters());
+                    }
+                    log.println("Set starter " + (i + 1) + " to " + pkmn.name);
+                    starters.add(pkmn);
+                }
+                romHandler.setStarters(starters);
+                log.println();
             }
             if (settings.isRandomizeStartersHeldItems() && !(romHandler instanceof Gen1RomHandler)) {
                 romHandler.randomizeStarterHeldItems(settings.isBanBadRandomStarterHeldItems());
