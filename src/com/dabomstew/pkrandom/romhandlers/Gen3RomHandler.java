@@ -1414,6 +1414,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             tr.poketype = pokeDataType;
             tr.name = this.readVariableLengthString(trOffset + 4);
             tr.fullDisplayName = tcnames.get(trainerclass) + " " + tr.name;
+            tr.doubleBattle = rom[trOffset + (entryLen - 0x10)] != 0;
             // Pokemon data!
             if (pokeDataType == 0) {
                 // blocks of 8 bytes
