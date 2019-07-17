@@ -153,6 +153,15 @@ public class Randomizer {
         case RANDOM:
             romHandler.randomizePokemonStats(settings.isBaseStatsFollowEvolutions());
             break;
+        case RANDOMBST:
+        	romHandler.randomizePokemonBaseStats(settings.isBaseStatsFollowEvolutions(), settings.isDontRandomizeRatio(), settings.isEvosBuffStats());
+        	break;
+        case RANDOMBSTPERC:
+        	romHandler.randomizePokemonBaseStatsPerc(settings.isBaseStatsFollowEvolutions(), settings.getBaseStatRange(), settings.isDontRandomizeRatio());
+        	break;
+        case EQUALIZE:
+        	romHandler.equalizePokemonStats(settings.isBaseStatsFollowEvolutions(), settings.isDontRandomizeRatio());
+        	break;
         default:
             break;
         }
@@ -660,6 +669,42 @@ public class Randomizer {
                     Pokemon pkmn = romHandler.random2EvosPokemon();
                     while (starters.contains(pkmn)) {
                         pkmn = romHandler.random2EvosPokemon();
+                    }
+                    log.println("Set starter " + (i + 1) + " to " + pkmn.name);
+                    starters.add(pkmn);
+                }
+                romHandler.setStarters(starters);
+                log.println();
+            } else if (settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_ONE_EVOLUTION) {
+                // Randomise
+                log.println("--Random 1-Evolution Starters--");
+                int starterCount = 3;
+                if (romHandler.isYellow()) {
+                    starterCount = 2;
+                }
+                List<Pokemon> starters = new ArrayList<Pokemon>();
+                for (int i = 0; i < starterCount; i++) {
+                    Pokemon pkmn = romHandler.random1EvosPokemon();
+                    while (starters.contains(pkmn)) {
+                        pkmn = romHandler.random1EvosPokemon();
+                    }
+                    log.println("Set starter " + (i + 1) + " to " + pkmn.name);
+                    starters.add(pkmn);
+                }
+                romHandler.setStarters(starters);
+                log.println();
+            } else if (settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_NO_EVOLUTIONS) {
+                // Randomise
+                log.println("--Random 0-Evolution Starters--");
+                int starterCount = 3;
+                if (romHandler.isYellow()) {
+                    starterCount = 2;
+                }
+                List<Pokemon> starters = new ArrayList<Pokemon>();
+                for (int i = 0; i < starterCount; i++) {
+                    Pokemon pkmn = romHandler.random0EvosPokemon(settings.isBanLegendaryStarters(), settings.isOnlyLegendaryStarters());
+                    while (starters.contains(pkmn)) {
+                        pkmn = romHandler.random0EvosPokemon(settings.isBanLegendaryStarters(), settings.isOnlyLegendaryStarters());
                     }
                     log.println("Set starter " + (i + 1) + " to " + pkmn.name);
                     starters.add(pkmn);

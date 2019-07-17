@@ -62,13 +62,16 @@ public class Settings {
     private boolean limitPokemon;
 
     public enum BaseStatisticsMod {
-        UNCHANGED, SHUFFLE, RANDOM,
+        UNCHANGED, SHUFFLE, RANDOM, RANDOMBST, RANDOMBSTPERC, EQUALIZE,
     }
 
     private BaseStatisticsMod baseStatisticsMod = BaseStatisticsMod.UNCHANGED;
     private boolean standardizeEXPCurves;
     private boolean baseStatsFollowEvolutions;
     private boolean updateBaseStats;
+    private int baseStatRange = 0;
+    private boolean DontRandomizeRatio;
+    private boolean evosBuffStats;
 
     public enum AbilitiesMod {
         UNCHANGED, RANDOMIZE
@@ -81,7 +84,7 @@ public class Settings {
     private boolean banNegativeAbilities;
 
     public enum StartersMod {
-        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS
+        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS, RANDOM_WITH_ONE_EVOLUTION, RANDOM_WITH_NO_EVOLUTIONS
     }
 
     private StartersMod startersMod = StartersMod.UNCHANGED;
@@ -91,6 +94,8 @@ public class Settings {
     private int[] customStarters = new int[3];
     private boolean randomizeStartersHeldItems;
     private boolean banBadRandomStarterHeldItems;
+    private boolean banLegendaryStarters;
+    private boolean onlyLegendaryStarters;
 
     public enum TypesMod {
         UNCHANGED, RANDOM_FOLLOW_EVOLUTIONS, COMPLETELY_RANDOM
@@ -853,7 +858,34 @@ public class Settings {
         this.updateBaseStats = updateBaseStats;
         return this;
     }
+    
+    public int getBaseStatRange() {
+    	return baseStatRange;
+    }
+    
+    public Settings setBaseStatRange(int baseStatRange) {
+    	this.baseStatRange = baseStatRange;
+    	return this;
+    }
+    
+    public boolean isDontRandomizeRatio() {
+    	return DontRandomizeRatio;
+    }
+    
+    public Settings setDontRandomizeRatio(boolean DontRandomizeRatio) {
+    	this.DontRandomizeRatio = DontRandomizeRatio;
+    	return this;
+    }
 
+    public boolean isEvosBuffStats() {
+    	return evosBuffStats;
+    }
+    
+    public Settings setEvosBuffStats(boolean evosBuffStats) {
+    	this.evosBuffStats = evosBuffStats;
+    	return this;
+    }
+    
     public AbilitiesMod getAbilitiesMod() {
         return abilitiesMod;
     }
@@ -943,6 +975,24 @@ public class Settings {
         return this;
     }
 
+    public boolean isBanLegendaryStarters() {
+    	return banLegendaryStarters;
+    }
+    
+    public Settings setBanLegendaryStarters(boolean banLegendaryStarters) {
+    	this.banLegendaryStarters = banLegendaryStarters;
+    	return this;
+    }
+    
+    public boolean isOnlyLegendaryStarters() {
+    	return onlyLegendaryStarters;
+    }
+    
+    public Settings setOnlyLegendaryStarters(boolean onlyLegendaryStarters) {
+    	this.onlyLegendaryStarters = onlyLegendaryStarters;
+    	return this;
+    }
+    
     public TypesMod getTypesMod() {
         return typesMod;
     }

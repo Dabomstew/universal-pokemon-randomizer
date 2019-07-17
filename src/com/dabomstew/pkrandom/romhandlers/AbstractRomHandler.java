@@ -239,6 +239,68 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public void randomizePokemonBaseStats(boolean evolutionSanity, boolean dontRandomizeRatio, boolean evosBuffStats) {
+        copyUpEvolutionsHelper(new BasePokemonAction() {
+            public void applyTo(Pokemon pk) {
+            	pk.randomizeBST(AbstractRomHandler.this.random, dontRandomizeRatio);
+            }
+        }, new EvolvedPokemonAction() {
+        	public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
+                evTo.copyRandomizedBaseStatsUpEvolution(AbstractRomHandler.this.random, evFrom, evolutionSanity, evosBuffStats);
+        	}
+        });
+    }
+    
+    @Override
+    public void randomizePokemonBaseStatsPerc(boolean evolutionSanity, int percent, boolean dontRandomizeRatio) {
+    	//In progress
+    	if (evolutionSanity) {
+            copyUpEvolutionsHelper(new BasePokemonAction() {
+                public void applyTo(Pokemon pk) {
+                    pk.randomizeBSTPerc(AbstractRomHandler.this.random, percent, dontRandomizeRatio);
+                }
+            }, new EvolvedPokemonAction() {
+                public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
+                   evTo.percentRaiseStatFloorUpEvolution(random, dontRandomizeRatio, evFrom);
+                   evTo.copyRandomizedStatsUpEvolution(evFrom);
+                }
+            });
+        } else {
+        	copyUpEvolutionsHelper(new BasePokemonAction() {
+                public void applyTo(Pokemon pk) {
+                    pk.randomizeBSTPerc(AbstractRomHandler.this.random, percent, dontRandomizeRatio);
+                }
+            }, new EvolvedPokemonAction() {
+                public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
+                   evTo.percentRaiseStatFloorUpEvolution(random, dontRandomizeRatio, evFrom);
+                }
+            });
+        }
+    }
+    
+    @Override
+    public void equalizePokemonStats(boolean evolutionSanity, boolean dontRandomizeRatio) {
+    	if (evolutionSanity) {
+            copyUpEvolutionsHelper(new BasePokemonAction() {
+                public void applyTo(Pokemon pk) {
+                    pk.equalizeBST(AbstractRomHandler.this.random, dontRandomizeRatio);
+                }
+            }, new EvolvedPokemonAction() {
+                public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
+                    evTo.copyEqualizedStatsUpEvolution(evFrom);
+                }
+            });
+        } else {
+            List<Pokemon> allPokes = this.getPokemon();
+            for (Pokemon pk : allPokes) {
+                if (pk != null) {
+                    pk.equalizeBST(this.random, dontRandomizeRatio);
+                }
+            }
+        }
+    }
+    
+    @Override
     public void updatePokemonStats() {
         List<Pokemon> pokes = getPokemon();
 
@@ -306,7 +368,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
     }
-
+    
     public Pokemon randomPokemon() {
         checkPokemonRestrictions();
         return mainPokemonList.get(this.random.nextInt(mainPokemonList.size()));
@@ -325,6 +387,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private List<Pokemon> twoEvoPokes;
+    private List<Pokemon> oneEvoPokes;
+    private List<Pokemon> noEvoPokes;
 
     @Override
     public Pokemon random2EvosPokemon() {
@@ -347,6 +411,52 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
         return twoEvoPokes.get(this.random.nextInt(twoEvoPokes.size()));
+    }
+    
+    @Override
+    public Pokemon random1EvosPokemon() {
+        if (oneEvoPokes == null) {
+            // Prepare the list
+            oneEvoPokes = new ArrayList<Pokemon>();
+            List<Pokemon> allPokes = this.getPokemon();
+            for (Pokemon pk : allPokes) {
+                if (pk != null && pk.evolutionsTo.size() == 0 && pk.evolutionsFrom.size() > 0) {
+                    // Potential candidate
+                    for (Evolution ev : pk.evolutionsFrom) {
+                        // If any of the targets here dont evolve, the original
+                        // Pokemon has 1 stage.
+                        if (ev.to.evolutionsFrom.size() == 0) {
+                            oneEvoPokes.add(pk);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return oneEvoPokes.get(this.random.nextInt(oneEvoPokes.size()));
+    }
+    
+    @Override
+    public Pokemon random0EvosPokemon(boolean banLegend, boolean onlyLegend) {
+        if (noEvoPokes == null) {
+            // Prepare the list
+            noEvoPokes = new ArrayList<Pokemon>();
+            List<Pokemon> allPokes = this.getPokemon();
+            for (Pokemon pk : allPokes) {
+                if (pk != null && pk.evolutionsTo.size() == 0 && pk.evolutionsFrom.size() == 0) {
+                	if(banLegend || onlyLegend){
+                		if(!pk.isLegendary() && banLegend) {
+                            noEvoPokes.add(pk);
+                		} else if(pk.isLegendary() && onlyLegend) {
+                			noEvoPokes.add(pk);
+                		}
+                	} else {
+                        noEvoPokes.add(pk);	
+                	}
+                }
+            }
+        }
+        return noEvoPokes.get(this.random.nextInt(noEvoPokes.size()));
     }
 
     @Override
