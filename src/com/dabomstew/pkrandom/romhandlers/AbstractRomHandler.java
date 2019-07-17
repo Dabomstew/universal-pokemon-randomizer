@@ -239,7 +239,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizePokemonBaseStats(boolean evolutionSanity, boolean dontRandomizeRatio, boolean evosBuffStats) {
+    public void randomizePokemonBaseStats(final boolean evolutionSanity, final boolean dontRandomizeRatio, final boolean evosBuffStats) {
         copyUpEvolutionsHelper(new BasePokemonAction() {
             public void applyTo(Pokemon pk) {
             	pk.randomizeBST(AbstractRomHandler.this.random, dontRandomizeRatio);
@@ -252,7 +252,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
     
     @Override
-    public void randomizePokemonBaseStatsPerc(boolean evolutionSanity, int percent, boolean dontRandomizeRatio) {
+    public void randomizePokemonBaseStatsPerc(boolean evolutionSanity, final int percent, final boolean dontRandomizeRatio) {
     	//In progress
     	if (evolutionSanity) {
             copyUpEvolutionsHelper(new BasePokemonAction() {
@@ -279,7 +279,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
     
     @Override
-    public void equalizePokemonStats(boolean evolutionSanity, boolean dontRandomizeRatio) {
+    public void equalizePokemonStats(boolean evolutionSanity, final boolean dontRandomizeRatio) {
     	if (evolutionSanity) {
             copyUpEvolutionsHelper(new BasePokemonAction() {
                 public void applyTo(Pokemon pk) {
