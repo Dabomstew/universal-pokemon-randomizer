@@ -383,7 +383,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
         for (RomEntry re : roms) {
             if (romCode(rom, re.romCode) && (rom[Gen3Constants.romVersionOffset] & 0xFF) == re.version) {
-                if (re.hash != null) {
+                if (re.hash != null && rom.length == romSize) {
                     try {
                         MessageDigest md = MessageDigest.getInstance("MD5");
                         byte[] digest = md.digest(rom);

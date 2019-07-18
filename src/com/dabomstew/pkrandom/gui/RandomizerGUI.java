@@ -1016,8 +1016,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
                                 }
                             });
                             try {
-                                RandomizerGUI.this.romHandler.loadRom(fh.getAbsolutePath());
-                                romLoaded = true;
+                                romLoaded = RandomizerGUI.this.romHandler.loadRom(fh.getAbsolutePath());
+                                if(!romLoaded) {
+                                    JOptionPane.showMessageDialog(RandomizerGUI.this,
+                                            String.format(bundle.getString("RandomizerGUI.unsupportedRom"), fh.getName()));
+                                }
                             } catch (Exception ex) {
                                 attemptToLogException(ex, "RandomizerGUI.loadFailed", "RandomizerGUI.loadFailedNoLog");
                             }
