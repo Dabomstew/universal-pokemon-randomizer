@@ -224,6 +224,30 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                                 tte.isMoveTutor = true;
                                 current.tmmtTexts.add(tte);
                             }
+                        } else if (r[0].equals("TMTextSpdc[]")) {
+                            if (r[1].startsWith("[") && r[1].endsWith("]")) {
+                                String[] parts = r[1].substring(1, r[1].length() - 1).split(",", 3);
+                                TMOrMTTextEntry tte = new TMOrMTTextEntry();
+                                tte.number = parseRIInt(parts[0]);
+                                tte.actualOffset = parseRIInt(parts[1]);
+                                tte.template = parts[2];
+                                tte.mapBank = -1;
+                                tte.mapNumber = -1;
+                                tte.isMoveTutor = false;
+                                current.tmmtTexts.add(tte);
+                            }
+                        } else if (r[0].equals("MoveTutorTextSpdc[]")) {
+                            if (r[1].startsWith("[") && r[1].endsWith("]")) {
+                                String[] parts = r[1].substring(1, r[1].length() - 1).split(",", 3);
+                                TMOrMTTextEntry tte = new TMOrMTTextEntry();
+                                tte.number = parseRIInt(parts[0]);
+                                tte.actualOffset = parseRIInt(parts[1]);
+                                tte.template = parts[2];
+                                tte.mapBank = -1;
+                                tte.mapNumber = -1;
+                                tte.isMoveTutor = true;
+                                current.tmmtTexts.add(tte);
+                            }
                         } else if (r[0].equals("Game")) {
                             current.romCode = r[1];
                         } else if (r[0].equals("Version")) {
