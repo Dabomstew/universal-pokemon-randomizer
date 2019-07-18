@@ -363,8 +363,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             rom[Gen3Constants.headerChecksumOffset] = 0x66;
         }
         // Wild Pokemon header
-        if ((find(rom, Gen3Constants.wildPokemonPointerPrefix) == -1)
-                && (find(rom, Gen3Constants.speedchoiceWildPokemonPointerPrefix) == -1)) {
+        if (find(rom, Gen3Constants.wildPokemonPointerPrefix) == -1 && !romCode(rom, "SPDC")) {
             return false;
         }
         // Map Banks header
@@ -438,10 +437,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         loadMoves();
 
         // Get wild Pokemon offset
-        if ("SPDC".equals(romEntry.romCode)) {
-            int baseWPOffset = findMultiple(rom, Gen3Constants.speedchoiceWildPokemonPointerPrefix).get(0);
-            romEntry.entries.put("WildPokemon", readPointer(baseWPOffset + 12));
-        } else {
+        if (!("SPDC".equals(romEntry.romCode))) {
             int baseWPOffset = findMultiple(rom, Gen3Constants.wildPokemonPointerPrefix).get(0);
             romEntry.entries.put("WildPokemon", readPointer(baseWPOffset + 12));
         }
