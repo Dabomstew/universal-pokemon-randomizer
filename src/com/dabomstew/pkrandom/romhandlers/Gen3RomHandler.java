@@ -46,12 +46,11 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.zip.CRC32;
 
-import javax.xml.bind.DatatypeConverter;
-
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.Utils;
 import com.dabomstew.pkrandom.constants.Gen3Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
@@ -388,7 +387,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     try {
                         MessageDigest md = MessageDigest.getInstance("MD5");
                         byte[] digest = md.digest(rom);
-                        String hash = DatatypeConverter.printHexBinary(digest);
+                        String hash = Utils.toHexString(digest);
                         return hash.equalsIgnoreCase(re.hash);
                     } catch (NoSuchAlgorithmException e) {
                         return false;
