@@ -29,6 +29,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,6 +45,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.zip.CRC32;
+
+import javax.xml.bind.DatatypeConverter;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.GFXFunctions;
@@ -102,6 +106,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         private String name;
         private String romCode;
         private String tableFile;
+        private String hash;
         private int version;
         private int romType;
         private boolean copyStaticPokemon;
@@ -112,7 +117,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         private Map<String, String> codeTweaks = new HashMap<String, String>();
 
         public RomEntry() {
-
+            this.hash = null;
         }
 
         public RomEntry(RomEntry toCopy) {
@@ -127,6 +132,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             this.staticPokemon.addAll(toCopy.staticPokemon);
             this.tmmtTexts.addAll(toCopy.tmmtTexts);
             this.codeTweaks.putAll(toCopy.codeTweaks);
+            this.hash = null;
         }
 
         private int getValue(String key) {
@@ -223,6 +229,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                             current.romCode = r[1];
                         } else if (r[0].equals("Version")) {
                             current.version = parseRIInt(r[1]);
+                        } else if (r[0].equals("MD5Hash")) {
+                            current.hash = r[1];
                         } else if (r[0].equals("Type")) {
                             if (r[1].equalsIgnoreCase("Ruby")) {
                                 current.romType = Gen3Constants.RomType_Ruby;
@@ -376,6 +384,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
         for (RomEntry re : roms) {
             if (romCode(rom, re.romCode) && (rom[Gen3Constants.romVersionOffset] & 0xFF) == re.version) {
+                if (re.hash != null) {
+                    try {
+                        MessageDigest md = MessageDigest.getInstance("MD5");
+                        byte[] digest = md.digest(rom);
+                        String hash = DatatypeConverter.printHexBinary(digest);
+                        return hash.equalsIgnoreCase(re.hash);
+                    } catch (NoSuchAlgorithmException e) {
+                        return false;
+                    }
+                }
                 return true; // match
             }
         }
