@@ -2395,6 +2395,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 new TreeMap<Integer, List<String>>() };
         
         List<Character> bans = this.getBannedTrainerNameCharacters();
+        
+        List<String> repeatedTrainerNames = Arrays.asList(new String[] { "GRUNT", "EXECUTIVE", "SHADOW", "ADMIN", "GOON" });
 
         // Read name lists
         for (String trainername : customNames.getTrainerNames()) {
@@ -2469,8 +2471,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             int tnIndex = -1;
             for (String trainerName : currentTrainerNames) {
                 tnIndex++;
-                if (translation.containsKey(trainerName) && trainerName.equalsIgnoreCase("GRUNT") == false
-                        && trainerName.equalsIgnoreCase("EXECUTIVE") == false) {
+                if (translation.containsKey(trainerName) && !repeatedTrainerNames.contains(trainerName.toUpperCase())) {
                     // use an already picked translation
                     newTrainerNames.add(translation.get(trainerName));
                     totalLength += this.internalStringLength(translation.get(trainerName));
