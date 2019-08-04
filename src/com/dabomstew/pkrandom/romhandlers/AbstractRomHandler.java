@@ -1,32 +1,31 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 /*----------------------------------------------------------------------------*/
-/*--  AbstractRomHandler.java - a base class for all rom handlers which     --*/
-/*--                            implements the majority of the actual       --*/
-/*--                            randomizer logic by building on the base    --*/
-/*--                            getters & setters provided by each concrete --*/
-/*--                            handler.                                    --*/
-/*--                                                                        --*/
-/*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
-/*--  Pokemon and any associated names and the like are                     --*/
-/*--  trademark and (C) Nintendo 1996-2012.                                 --*/
-/*--                                                                        --*/
-/*--  The custom code written here is licensed under the terms of the GPL:  --*/
-/*--                                                                        --*/
-/*--  This program is free software: you can redistribute it and/or modify  --*/
-/*--  it under the terms of the GNU General Public License as published by  --*/
-/*--  the Free Software Foundation, either version 3 of the License, or     --*/
-/*--  (at your option) any later version.                                   --*/
-/*--                                                                        --*/
-/*--  This program is distributed in the hope that it will be useful,       --*/
-/*--  but WITHOUT ANY WARRANTY; without even the implied warranty of        --*/
-/*--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          --*/
-/*--  GNU General Public License for more details.                          --*/
-/*--                                                                        --*/
-/*--  You should have received a copy of the GNU General Public License     --*/
-/*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
-/*----------------------------------------------------------------------------*/
-
+ /*--  AbstractRomHandler.java - a base class for all rom handlers which     --*/
+ /*--                            implements the majority of the actual       --*/
+ /*--                            randomizer logic by building on the base    --*/
+ /*--                            getters & setters provided by each concrete --*/
+ /*--                            handler.                                    --*/
+ /*--                                                                        --*/
+ /*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
+ /*--  Pokemon and any associated names and the like are                     --*/
+ /*--  trademark and (C) Nintendo 1996-2012.                                 --*/
+ /*--                                                                        --*/
+ /*--  The custom code written here is licensed under the terms of the GPL:  --*/
+ /*--                                                                        --*/
+ /*--  This program is free software: you can redistribute it and/or modify  --*/
+ /*--  it under the terms of the GNU General Public License as published by  --*/
+ /*--  the Free Software Foundation, either version 3 of the License, or     --*/
+ /*--  (at your option) any later version.                                   --*/
+ /*--                                                                        --*/
+ /*--  This program is distributed in the hope that it will be useful,       --*/
+ /*--  but WITHOUT ANY WARRANTY; without even the implied warranty of        --*/
+ /*--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          --*/
+ /*--  GNU General Public License for more details.                          --*/
+ /*--                                                                        --*/
+ /*--  You should have received a copy of the GNU General Public License     --*/
+ /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
+ /*----------------------------------------------------------------------------*/
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,7 +76,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     protected boolean ptGiratina = false;
 
     /* Constructor */
-
     public AbstractRomHandler(Random random, PrintStream logStream) {
         this.random = random;
         this.logStream = logStream;
@@ -86,7 +84,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     /*
      * Public Methods, implemented here for all gens. Unlikely to be overridden.
      */
-
     public void setLog(PrintStream logStream) {
         this.logStream = logStream;
     }
@@ -516,9 +513,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                 }
             });
-        }
-
-        else {
+        } else {
             List<Pokemon> allPokes = this.getPokemon();
             for (Pokemon pk : allPokes) {
                 if (pk == null) {
@@ -941,6 +936,20 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public void levelUpTrainerPokes(int levelModifier) {
+        checkPokemonRestrictions();
+        List<Trainer> currentTrainers = this.getTrainers();
+        for (Trainer t : currentTrainers) {
+            for (TrainerPokemon tp : t.pokemon) {
+                if (levelModifier != 0) {
+                    tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
+                }
+            }
+        }
+        this.setTrainers(currentTrainers);
+    }
+
+    @Override
     public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
             int levelModifier) {
         checkPokemonRestrictions();
@@ -1122,7 +1131,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     // MOVE DATA
     // All randomizers don't touch move ID 165 (Struggle)
     // They also have other exclusions where necessary to stop things glitching.
-
     @Override
     public void randomizeMovePowers() {
         List<Move> moves = this.getMoves();
@@ -2046,7 +2054,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // shuffle the picked moves because high goodDamagingProbability
         // could bias them towards early numbers otherwise
-
         Collections.shuffle(pickedMoves, random);
 
         // finally, distribute them as tms
@@ -2210,7 +2217,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // shuffle the picked moves because high goodDamagingProbability
         // could bias them towards early numbers otherwise
-
         Collections.shuffle(pickedMoves, random);
 
         // finally, distribute them as tutors
@@ -2311,9 +2317,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // index 0 = singles, 1 = doubles
-        List<String>[] allTrainerNames = new List[] { new ArrayList<String>(), new ArrayList<String>() };
-        Map<Integer, List<String>> trainerNamesByLength[] = new Map[] { new TreeMap<Integer, List<String>>(),
-                new TreeMap<Integer, List<String>>() };
+        List<String>[] allTrainerNames = new List[]{new ArrayList<String>(), new ArrayList<String>()};
+        Map<Integer, List<String>> trainerNamesByLength[] = new Map[]{new TreeMap<Integer, List<String>>(),
+            new TreeMap<Integer, List<String>>()};
 
         // Read name lists
         for (String trainername : customNames.getTrainerNames()) {
@@ -2434,9 +2440,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // index 0 = singles, index 1 = doubles
-        List<String> allTrainerClasses[] = new List[] { new ArrayList<String>(), new ArrayList<String>() };
-        Map<Integer, List<String>> trainerClassesByLength[] = new Map[] { new HashMap<Integer, List<String>>(),
-                new HashMap<Integer, List<String>>() };
+        List<String> allTrainerClasses[] = new List[]{new ArrayList<String>(), new ArrayList<String>()};
+        Map<Integer, List<String>> trainerClassesByLength[] = new Map[]{new HashMap<Integer, List<String>>(),
+            new HashMap<Integer, List<String>>()};
 
         // Read names data
         for (String trainerClassName : customNames.getTrainerClasses()) {
@@ -3016,7 +3022,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     /* Private methods/structs used internally by the above methods */
-
     private void updateMovePower(List<Move> moves, int moveNum, int power) {
         Move mv = moves.get(moveNum);
         if (mv.power != power) {
@@ -3089,6 +3094,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private static class EvolutionPair {
+
         private Pokemon from;
         private Pokemon to;
 
@@ -3108,23 +3114,30 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             EvolutionPair other = (EvolutionPair) obj;
             if (from == null) {
-                if (other.from != null)
+                if (other.from != null) {
                     return false;
-            } else if (!from.equals(other.from))
+                }
+            } else if (!from.equals(other.from)) {
                 return false;
+            }
             if (to == null) {
-                if (other.to != null)
+                if (other.to != null) {
                     return false;
-            } else if (!to.equals(other.to))
+                }
+            } else if (!to.equals(other.to)) {
                 return false;
+            }
             return true;
         }
     }
@@ -3132,7 +3145,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     /**
      * Check whether adding an evolution from one Pokemon to another will cause
      * an evolution cycle.
-     * 
+     *
      * @param from
      * @param to
      * @return
@@ -3164,22 +3177,22 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private interface BasePokemonAction {
+
         public void applyTo(Pokemon pk);
     }
 
     private interface EvolvedPokemonAction {
+
         public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo);
     }
 
     /**
      * Universal implementation for things that have "copy X up evolutions"
      * support.
-     * 
-     * @param bpAction
-     *            Method to run on all base or no-copy Pokemon
-     * @param epAction
-     *            Method to run on all evolved Pokemon with a linear chain of
-     *            single evolutions.
+     *
+     * @param bpAction Method to run on all base or no-copy Pokemon
+     * @param epAction Method to run on all evolved Pokemon with a linear chain
+     * of single evolutions.
      */
     private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction) {
         List<Pokemon> allPokes = this.getPokemon();
@@ -3587,7 +3600,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (pk.bstForPowerLevels() >= minTarget
                             && pk.bstForPowerLevels() <= maxTarget
                             && (wonderGuardAllowed || (pk.ability1 != GlobalConstants.WONDER_GUARD_INDEX
-                                    && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX))) {
+                            && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX))) {
                         canPick.add(pk);
                     }
                 }
@@ -3636,7 +3649,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     /* Helper methods used by subclasses and/or this class */
-
     protected void checkPokemonRestrictions() {
         if (!restrictionsSet) {
             setPokemonPool(null);
@@ -3695,12 +3707,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     /* Default Implementations */
-    /* Used when a subclass doesn't override */
-    /*
+ /* Used when a subclass doesn't override */
+ /*
      * The implication here is that these WILL be overridden by at least one
      * subclass.
      */
-
     @Override
     public boolean canChangeStarters() {
         return true;
