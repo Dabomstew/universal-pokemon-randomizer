@@ -86,6 +86,40 @@ public class Pokemon implements Comparable<Pokemon> {
         shuffledStatsOrder = Arrays.asList(0, 1, 2, 3, 4, 5);
     }
 
+    public int minimumLevel() {
+        int min = 1;
+        for (Evolution evo : evolutionsTo) {
+            int evoMin = 1;
+            if (evo.type.usesLevel()) {
+                evoMin = evo.extraInfo;
+            } else {
+                // TODO: Make this better (move MoveLearnt to Pokemon, etc.).
+                switch (evo.type) {
+                case STONE:
+                case STONE_FEMALE_ONLY:
+                case STONE_MALE_ONLY:
+                    evoMin = 24;
+                    break;
+
+                case TRADE:
+                case TRADE_ITEM:
+                case TRADE_SPECIAL:
+                    evoMin = 37;
+                    break;
+
+                default:
+                    evoMin = 33;
+                    break;
+                }
+            }
+
+            if (evoMin > min) {
+                min = evoMin;
+            }
+        }
+        return min;
+    }
+
     public void shuffleStats(Random random) {
         Collections.shuffle(shuffledStatsOrder, random);
         applyShuffledOrderToStats();

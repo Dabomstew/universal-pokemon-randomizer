@@ -228,17 +228,22 @@ public class SettingsUpdater {
             insertExtraByte(20, (byte) 0);
             insertExtraByte(22, (byte) 0);
         }
-        
+
         if(oldVersion < 172) {
             // 171 to 172: removed separate names files in favor of one unified file
             // so two of the trailing checksums are gone
             actualDataLength -= 8;
-            
+
             // fix wild legendaries
             dataBlock[16] = (byte) (dataBlock[16] ^ (1 << 1));
-            
+
             // add space for the trainer level modifier
             insertExtraByte(35, (byte) 50); // 50 in the settings file = +0% after adjustment
+        }
+
+        if(oldVersion < 180) {
+            // add wild pokemon match typing distribution, shift catch rate level
+            dataBlock[16] = (byte)((dataBlock[16] & 0x1F) | ((dataBlock[16] & 0x60) << 1));
         }
 
         // fix checksum

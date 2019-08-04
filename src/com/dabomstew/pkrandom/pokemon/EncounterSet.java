@@ -36,6 +36,14 @@ public class EncounterSet {
     public String displayName;
     public int offset;
 
+    public int maximumLevel() {
+        int max = 1;
+        for (Encounter enc : encounters) {
+            max = Math.max(enc.maximumLevel(), max);
+        }
+        return max;
+    }
+
     public String toString() {
         return "Encounter [Rate = " + rate + ", Encounters = " + encounters + "]";
     }
