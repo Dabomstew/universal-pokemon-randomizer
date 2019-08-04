@@ -301,10 +301,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Pokemon> allPokes = this.getPokemon();
         for (Pokemon pk : allPokes) {
             if (pk != null) {
-                Pokemon swapWith = null;
-                do {
+                Pokemon swapWith = pickEvoPowerLvlReplacement(allPokes, pk);
+                while(swapWith == null) {
                      swapWith = allPokes.get(this.random.nextInt(allPokes.size()));
-                } while (swapWith == null);
+                } 
                   
                 Pokemon.swapStatsRandom(pk, swapWith, this.random);
             }
@@ -3094,7 +3094,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         int expandRounds = 0;
         while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 3)) {
             for (Pokemon pk : pokemonPool) {
-                if (pk.bstForPowerLevels() >= minTarget && pk.bstForPowerLevels() <= maxTarget && !canPick.contains(pk)) {
+                if (pk.bstForPowerLevels() >= minTarget && pk.bstForPowerLevels() <= maxTarget && 
+                    !canPick.contains(pk) && pk.number != current.number){
                     canPick.add(pk);
                 }
             }
