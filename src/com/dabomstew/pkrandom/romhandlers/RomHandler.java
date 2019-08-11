@@ -222,6 +222,7 @@ public interface RomHandler {
 
     public void randomizeMovesLearnt(boolean typeThemed, boolean noBroken, boolean forceStartingMoves,
                                      int forceStartingMoveCount, double goodDamagingProbability);
+    public void removeBrokenMoves();
 
     public void orderDamagingMovesByDamage();
 

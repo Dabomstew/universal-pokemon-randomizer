@@ -276,6 +276,8 @@ public class Randomizer {
             romHandler.randomizeMovesLearnt(true, noBrokenMoves, forceLv1s, forceLv1Count, msGoodDamagingProb);
         } else if (settings.getMovesetsMod() == Settings.MovesetsMod.COMPLETELY_RANDOM) {
             romHandler.randomizeMovesLearnt(false, noBrokenMoves, forceLv1s, forceLv1Count, msGoodDamagingProb);
+        } else if (noBrokenMoves) {
+            romHandler.removeBrokenMoves();
         }
 
         if (settings.isReorderDamagingMoves()) {
@@ -284,7 +286,31 @@ public class Randomizer {
 
         // Show the new movesets if applicable
         if (settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED) {
-            log.println("<h2>Pokemon Movesets</h2><p>Unchanged.</p>");
+            if (settings.doBlockBrokenMoves()) {
+                log.print("<h2>Pokemon Movesets</h2><p>Removed Game-Breaking Moves (");
+
+                List<Integer> gameBreakingMoves = romHandler.getGameBreakingMoves();
+                int numberPrinted = 0;
+
+                for (Move move : moves) {
+                    if (move == null) {
+                        continue;
+                    }
+
+                    if (gameBreakingMoves.contains(move.number)) {
+                        numberPrinted++;
+                        log.print(move.name);
+
+                        if (numberPrinted < gameBreakingMoves.size()) {
+                            log.print(", ");
+                        }
+                    }
+                }
+
+                log.println(").</p>");
+            } else {
+                log.println("<h2>Pokemon Movesets</h2><p>Unchanged.</p>");
+            }
         } else if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
             log.println("<h2>Pokemon Movesets</h2><p>Metronome Only.</p>");
         } else {
