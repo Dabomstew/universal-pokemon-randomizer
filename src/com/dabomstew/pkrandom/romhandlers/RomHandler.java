@@ -94,6 +94,9 @@ public interface RomHandler {
 
     // Run the stats shuffler on each Pokemon.
     public void shufflePokemonStats(boolean evolutionSanity);
+    
+    // Shuffle all pokemon base stat totals.
+    public void shuffleAllPokemonBSTs();
 
     // Randomise stats following evolutions for proportions or not (see
     // tooltips)
@@ -101,6 +104,10 @@ public interface RomHandler {
 
     // Allows more variety in Pokemon strength
     public void randomizePokemonStatsUnrestricted(boolean evolutionSanity);
+
+    // Ranomise stats following evolution for proportions or not. Determine
+    // multiplier randomly to allow for more variety in evolution strength.
+    public void randomizeCompletelyPokemonStats(boolean evolutionSanity);
     
     // Update base stats to gen6
     public void updatePokemonStats();
@@ -213,8 +220,8 @@ public interface RomHandler {
 
     public List<Integer> getMovesBannedFromLevelup();
 
-    public void randomizeMovesLearnt(boolean typeThemed, boolean noBroken, boolean forceFourStartingMoves,
-            double goodDamagingProbability);
+    public void randomizeMovesLearnt(boolean typeThemed, boolean noBroken, boolean forceStartingMoves,
+                                     int forceStartingMoveCount, double goodDamagingProbability);
 
     public void orderDamagingMovesByDamage();
 

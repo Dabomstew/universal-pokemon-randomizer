@@ -127,6 +127,8 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         }
     }
 
+    protected int readByte(byte[] data, int offset) { return data[offset] & 0xFF; }
+
     protected int readWord(byte[] data, int offset) {
         return (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8);
     }

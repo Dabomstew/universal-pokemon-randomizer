@@ -64,7 +64,7 @@ public class Settings {
     private boolean limitPokemon;
 
     public enum BaseStatisticsMod {
-        UNCHANGED, SHUFFLE, RANDOM_WITHIN_BST, RANDOM_UNRESTRICTED
+        UNCHANGED, SHUFFLE, RANDOM_WITHIN_BST, RANDOM_UNRESTRICTED, RANDOM_COMPLETELY
     }
 
     private BaseStatisticsMod baseStatisticsMod = BaseStatisticsMod.UNCHANGED;
@@ -125,7 +125,8 @@ public class Settings {
     }
 
     private MovesetsMod movesetsMod = MovesetsMod.UNCHANGED;
-    private boolean startWithFourMoves;
+    private boolean startWithGuaranteedMoves;
+    private int guaranteedMoveCount = 2;
     private boolean reorderDamagingMoves;
     private boolean movesetsForceGoodDamaging;
     private int movesetsGoodDamagingPercent = 0;
@@ -259,7 +260,8 @@ public class Settings {
         // 1: pokemon base stats & abilities
         out.write(makeByteSelected(baseStatsFollowEvolutions, baseStatisticsMod == BaseStatisticsMod.RANDOM_WITHIN_BST,
                 baseStatisticsMod == BaseStatisticsMod.SHUFFLE, baseStatisticsMod == BaseStatisticsMod.UNCHANGED,
-                standardizeEXPCurves, updateBaseStats, baseStatisticsMod == BaseStatisticsMod.RANDOM_UNRESTRICTED));
+                standardizeEXPCurves, updateBaseStats, baseStatisticsMod == BaseStatisticsMod.RANDOM_UNRESTRICTED, 
+                baseStatisticsMod == BaseStatisticsMod.RANDOM_COMPLETELY));
 
         // 2: pokemon types & more general options
         out.write(makeByteSelected(typesMod == TypesMod.RANDOM_FOLLOW_EVOLUTIONS,
@@ -284,7 +286,8 @@ public class Settings {
         // 11 movesets
         out.write(makeByteSelected(movesetsMod == MovesetsMod.COMPLETELY_RANDOM,
                 movesetsMod == MovesetsMod.RANDOM_PREFER_SAME_TYPE, movesetsMod == MovesetsMod.UNCHANGED,
-                movesetsMod == MovesetsMod.METRONOME_ONLY, startWithFourMoves, reorderDamagingMoves));
+                movesetsMod == MovesetsMod.METRONOME_ONLY, startWithGuaranteedMoves, reorderDamagingMoves)
+                | ((guaranteedMoveCount - 2) << 6));
 
         // 12 movesets good damaging
         out.write((movesetsForceGoodDamaging ? 0x80 : 0) | movesetsGoodDamagingPercent);
@@ -424,7 +427,8 @@ public class Settings {
         settings.setBaseStatisticsMod(restoreEnum(BaseStatisticsMod.class, data[1], 3, // UNCHANGED
                 2, // SHUFFLE
                 1, // RANDOM_WITHIN_BST
-                6  // RANDOM_UNRESTRICTED
+                6, // RANDOM_UNRESTRICTED
+                7  // RANDOM_COMPLETELY
         ));
         settings.setStandardizeEXPCurves(restoreState(data[1], 4));
         settings.setBaseStatsFollowEvolutions(restoreState(data[1], 0));
@@ -462,8 +466,9 @@ public class Settings {
                 0, // COMPLETELY_RANDOM
                 3 // METRONOME_ONLY
         ));
-        settings.setStartWithFourMoves(restoreState(data[11], 4));
+        settings.setStartWithGuaranteedMoves(restoreState(data[11], 4));
         settings.setReorderDamagingMoves(restoreState(data[11], 5));
+        settings.setGuaranteedMoveCount(((data[11] & 0xC0) >> 6) + 2);
 
         settings.setMovesetsForceGoodDamaging(restoreState(data[12], 7));
         settings.setMovesetsGoodDamagingPercent(data[12] & 0x7F);
@@ -665,7 +670,7 @@ public class Settings {
         }
 
         if (!rh.supportsFourStartingMoves()) {
-            this.setStartWithFourMoves(false);
+            this.setStartWithGuaranteedMoves(false);
         }
 
         if (rh instanceof Gen1RomHandler || rh instanceof Gen2RomHandler) {
@@ -1066,12 +1071,20 @@ public class Settings {
         return setMovesetsMod(getEnum(MovesetsMod.class, bools));
     }
 
-    public boolean isStartWithFourMoves() {
-        return startWithFourMoves;
+    public boolean isStartWithGuaranteedMoves() {
+        return startWithGuaranteedMoves;
     }
 
-    public Settings setStartWithFourMoves(boolean startWithFourMoves) {
-        this.startWithFourMoves = startWithFourMoves;
+    public Settings setStartWithGuaranteedMoves(boolean startWithGuaranteedMoves) {
+        this.startWithGuaranteedMoves = startWithGuaranteedMoves;
+        return this;
+    }
+
+    public int getGuaranteedMoveCount() {
+        return guaranteedMoveCount;
+    }
+    public Settings setGuaranteedMoveCount(int guaranteedMoveCount) {
+        this.guaranteedMoveCount = guaranteedMoveCount;
         return this;
     }
 

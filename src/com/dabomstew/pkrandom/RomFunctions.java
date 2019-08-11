@@ -42,10 +42,13 @@ public class RomFunctions {
         Set<Pokemon> dontCopyPokes = new TreeSet<Pokemon>();
         for (Pokemon pkmn : allPokes) {
             if (pkmn != null) {
-                if (pkmn.evolutionsTo.size() != 1) {
+                //If this pokemon has no evolutions, it's a basic
+                if (pkmn.evolutionsTo.size() < 1) {
                     dontCopyPokes.add(pkmn);
                 } else {
+                    //This pokemon has evolutions, so we're only going to get the first one
                     Evolution onlyEvo = pkmn.evolutionsTo.get(0);
+                    //Split evos don't carry stats and are treated specially
                     if (!onlyEvo.carryStats) {
                         dontCopyPokes.add(pkmn);
                     }
