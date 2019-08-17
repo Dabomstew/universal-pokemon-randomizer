@@ -28,21 +28,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Random;
-import java.util.Set;
-import java.util.Stack;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
@@ -266,6 +252,57 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (pk != null) {
                     pk.randomizeStatsNoRestrictions(random, false);
                 }
+            }
+        }
+    }
+    
+    @Override
+    public void randomizeCompletelyPokemonStats(boolean evolutionSanity) {
+        this.shuffleAllPokemonBSTs();
+        
+        if (evolutionSanity) {
+            List<Pokemon> allPokes = this.getPokemon();
+            int count = 0;
+            double total = 0.0;
+            
+            for (Pokemon pk : allPokes) {
+                if (pk != null) {
+                    count++;
+                    total += pk.bst();
+                }
+            }
+            final double mean = total / count;
+            
+            copyUpEvolutionsHelper(new BasePokemonAction() {
+                public void applyTo(Pokemon pk) {
+                    pk.randomizeStatsWithinBST(AbstractRomHandler.this.random);
+                }
+            }, new EvolvedPokemonAction() {
+                public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
+                    evTo.copyCompletelyRandomizedStatsUpEvolution(evFrom, AbstractRomHandler.this.random, mean);
+                }
+            });
+        } else {
+            List<Pokemon> allPokes = this.getPokemon();
+            for (Pokemon pk : allPokes) {
+                if (pk != null) {
+                    pk.randomizeStatsWithinBST(random);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void shuffleAllPokemonBSTs() {
+        List<Pokemon> allPokes = this.getPokemon();
+        for (Pokemon pk : allPokes) {
+            if (pk != null) {
+                Pokemon swapWith = pickEvoPowerLvlReplacement(allPokes, pk);
+                while(swapWith == null) {
+                     swapWith = allPokes.get(this.random.nextInt(allPokes.size()));
+                } 
+                  
+                Pokemon.swapStatsRandom(pk, swapWith, this.random);
             }
         }
     }
@@ -1661,8 +1698,21 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public void removeBrokenMoves() {
+        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+        Set<Integer> allBanned = new HashSet<Integer>(this.getGameBreakingMoves());
+
+        for (List<MoveLearnt> movesLearnt : movesets.values()) {
+            movesLearnt.removeIf(move -> allBanned.contains(move.move));
+        }
+
+        // Done, save
+        this.setMovesLearnt(movesets);
+    }
+
+    @Override
     public void randomizeMovesLearnt(boolean typeThemed, boolean noBroken, boolean forceStartingMoves,
-                                     int forceStartingMoveCount, double goodDamagingProbability) {
+            int forceStartingMoveCount, double goodDamagingProbability) {
         // Get current sets
         Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
         List<Integer> hms = this.getHMMoves();
@@ -1749,10 +1799,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                     double picked = random.nextDouble();
                     if (pkmn.primaryType == Type.NORMAL && pkmn.secondaryType != null) {
 
-                        // Normal/OTHER: 10% normal, 30% other, 60% random
-                        if (picked < 0.1) {
+                        // Normal/OTHER: 50% normal, 30% other, 20% random
+                        if (picked < 0.5) {
                             typeOfMove = Type.NORMAL;
-                        } else if (picked < 0.4) {
+                        } else if (picked < 0.8) {
                             typeOfMove = pkmn.secondaryType;
                         }
                         // else random
@@ -1944,15 +1994,13 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (int i = 0; i < currentStaticPokemon.size(); i++) {
                 Pokemon old = currentStaticPokemon.get(i);
                 Pokemon newPK;
-                if (old.number == 487 && ptGiratina) {
-                    newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
-                    legendariesLeft.remove(newPK);
-                    if (legendariesLeft.size() == 0) {
-                        legendariesLeft.addAll(onlyLegendaryList);
-                        legendariesLeft.removeAll(banned);
+                if (old.isLegendary()) {
+                    if (old.number == 487 && ptGiratina) {
+                        newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
+                        legendariesLeft.remove(newPK);
+                    } else {
+                        newPK = legendariesLeft.remove(this.random.nextInt(legendariesLeft.size()));
                     }
-                } else if (old.isLegendary()) {
-                    newPK = legendariesLeft.remove(this.random.nextInt(legendariesLeft.size()));
                     if (legendariesLeft.size() == 0) {
                         legendariesLeft.addAll(onlyLegendaryList);
                         legendariesLeft.removeAll(banned);
