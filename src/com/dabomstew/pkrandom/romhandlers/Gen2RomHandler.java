@@ -29,6 +29,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -45,6 +47,7 @@ import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.Utils;
 import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.constants.Gen2Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
@@ -98,6 +101,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private static class RomEntry {
         private String name;
         private String romCode;
+        private String hash;
         private int version, nonJapanese;
         private String extraTableFile;
         private boolean isCrystal;
@@ -192,6 +196,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                             current.version = parseRIInt(r[1]);
                         } else if (r[0].equals("NonJapanese")) {
                             current.nonJapanese = parseRIInt(r[1]);
+                        } else if (r[0].equals("MD5Hash")) {
+                            current.hash = r[1];
                         } else if (r[0].equals("Type")) {
                             if (r[1].equalsIgnoreCase("Crystal")) {
                                 current.isCrystal = true;
@@ -290,12 +296,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         if (romSize < GBConstants.minRomSize || romSize > GBConstants.maxRomSize) {
             return false; // size check
         }
-        return checkRomEntry(rom) != null; // so it's OK if it's a valid ROM
+        return checkRomEntry(rom, romSize) != null; // so it's OK if it's a
+                                                    // valid ROM
     }
 
     @Override
     public void loadedRom() {
-        romEntry = checkRomEntry(this.rom);
+        romEntry = checkRomEntry(this.rom, this.rom.length);
         clearTextTables();
         readTextTable("gameboy_jap");
         if (romEntry.extraTableFile != null && romEntry.extraTableFile.equalsIgnoreCase("none") == false) {
@@ -320,7 +327,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         nonBadItems = Gen2Constants.nonBadItems.copy();
     }
 
-    private static RomEntry checkRomEntry(byte[] rom) {
+    private static RomEntry checkRomEntry(byte[] rom, int romLength) {
         int version = rom[GBConstants.versionOffset] & 0xFF;
         int nonjap = rom[GBConstants.jpFlagOffset] & 0xFF;
         // Check for specific CRC first
@@ -334,7 +341,19 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         // Now check for non-specific-CRC entries
         for (RomEntry re : roms) {
             if (romCode(rom, re.romCode) && re.version == version && re.nonJapanese == nonjap && re.crcInHeader == -1) {
-                return re;
+                if (re.hash != null && rom.length == romLength) {
+                    try {
+                        MessageDigest md = MessageDigest.getInstance("MD5");
+                        byte[] digest = md.digest(rom);
+                        String hash = Utils.toHexString(digest);
+                        if (hash.equalsIgnoreCase(re.hash)) {
+                            return re;
+                        }
+                    } catch (NoSuchAlgorithmException e) {
+                    }
+                } else {
+                    return re;
+                }
             }
         }
         // Not found
