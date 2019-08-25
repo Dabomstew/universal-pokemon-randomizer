@@ -699,7 +699,6 @@ public class Randomizer {
                     romHandler.setStarters(Arrays.asList(pkmn1, pkmn2, pkmn3));
                 }
                 log.println("</ul>");
-
             } else if (settings.getStartersMod() == Settings.StartersMod.COMPLETELY_RANDOM) {
                 // Randomise
                 log.println("<h2>Random Starters</h2>");
@@ -715,6 +714,25 @@ public class Randomizer {
                         pkmn = romHandler.randomPokemon();
                     }
                     log.println(String.format("<li>Set starter %d to <strong>%s</strong></li>", (i + 1), pkmn.name));
+                    starters.add(pkmn);
+                }
+                romHandler.setStarters(starters);
+                log.println("</ul>");
+            } else if (settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_ONE_OR_TWO_EVOLUTIONS) {
+                // Randomise
+                log.println("<h2>Random 1/2-Evolution Starters</h2>");
+                log.println("<ul>");
+                int starterCount = 3;
+                if (romHandler.isYellow()) {
+                    starterCount = 2;
+                }
+                List<Pokemon> starters = new ArrayList<Pokemon>();
+                for (int i = 0; i < starterCount; i++) {
+                    Pokemon pkmn = romHandler.random1or2EvosPokemon();
+                    while (starters.contains(pkmn)) {
+                        pkmn = romHandler.random1or2EvosPokemon();
+                    }
+                    log.println("Set starter " + (i + 1) + " to " + pkmn.name);
                     starters.add(pkmn);
                 }
                 romHandler.setStarters(starters);

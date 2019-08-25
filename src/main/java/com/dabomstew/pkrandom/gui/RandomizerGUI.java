@@ -744,6 +744,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.spCustomPoke3Chooser.setModel(new DefaultComboBoxModel(new String[] { "--" }));
         this.spCustomRB.setEnabled(false);
         this.spRandomRB.setEnabled(false);
+        this.spRandom1or2EvosRB.setEnabled(false);
         this.spRandom2EvosRB.setEnabled(false);
         this.spUnchangedRB.setEnabled(false);
         this.spUnchangedRB.setSelected(true);
@@ -1095,6 +1096,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             if (romHandler.canChangeStarters()) {
                 this.spCustomRB.setEnabled(true);
                 this.spRandomRB.setEnabled(true);
+                this.spRandom1or2EvosRB.setEnabled(true);
                 this.spRandom2EvosRB.setEnabled(true);
                 if (romHandler.isYellow()) {
                     this.spCustomPoke3Chooser.setVisible(false);
@@ -1686,6 +1688,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.spCustomRB.setSelected(settings.getStartersMod() == Settings.StartersMod.CUSTOM);
         this.spRandomRB.setSelected(settings.getStartersMod() == Settings.StartersMod.COMPLETELY_RANDOM);
         this.spUnchangedRB.setSelected(settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
+        this.spRandom1or2EvosRB.setSelected(settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_ONE_OR_TWO_EVOLUTIONS);
         this.spRandom2EvosRB.setSelected(settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_TWO_EVOLUTIONS);
         this.spHeldItemsCB.setSelected(settings.isRandomizeStartersHeldItems());
         this.spHeldItemsBanBadCB.setSelected(settings.isBanBadRandomStarterHeldItems());
@@ -1847,7 +1850,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setMakeEvolutionsEasier(goCondenseEvosCheckBox.isSelected());
 
         settings.setStartersMod(spUnchangedRB.isSelected(), spCustomRB.isSelected(), spRandomRB.isSelected(),
-                spRandom2EvosRB.isSelected());
+                spRandom1or2EvosRB.isSelected(), spRandom2EvosRB.isSelected());
         settings.setRandomizeStartersHeldItems(spHeldItemsCB.isSelected());
         settings.setBanBadRandomStarterHeldItems(spHeldItemsBanBadCB.isSelected());
 
@@ -2483,6 +2486,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_fiRandomRBActionPerformed
 
+    private void spRandom1or2EvosRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spRandom2EvosRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_spRandom1or2EvosRBActionPerformed
+    
     private void spRandom2EvosRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spRandom2EvosRBActionPerformed
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_spRandom2EvosRBActionPerformed
@@ -2667,6 +2674,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         spCustomPoke2Chooser = new javax.swing.JComboBox<String>();
         spCustomPoke3Chooser = new javax.swing.JComboBox<String>();
         spRandomRB = new javax.swing.JRadioButton();
+        spRandom1or2EvosRB = new javax.swing.JRadioButton();
         spRandom2EvosRB = new javax.swing.JRadioButton();
         spHeldItemsCB = new javax.swing.JCheckBox();
         spHeldItemsBanBadCB = new javax.swing.JCheckBox();
@@ -3325,6 +3333,15 @@ public class RandomizerGUI extends javax.swing.JFrame {
             }
         });
 
+        starterPokemonButtonGroup.add(spRandom1or2EvosRB);
+        spRandom1or2EvosRB.setText(bundle.getString("RandomizerGUI.spRandom1or2EvosRB.text")); // NOI18N
+        spRandom1or2EvosRB.setToolTipText(bundle.getString("RandomizerGUI.spRandom1or2EvosRB.toolTipText")); // NOI18N
+        spRandom1or2EvosRB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                spRandom1or2EvosRBActionPerformed(evt);
+            }
+        });
+        
         starterPokemonButtonGroup.add(spRandom2EvosRB);
         spRandom2EvosRB.setText(bundle.getString("RandomizerGUI.spRandom2EvosRB.text")); // NOI18N
         spRandom2EvosRB.setToolTipText(bundle.getString("RandomizerGUI.spRandom2EvosRB.toolTipText")); // NOI18N
@@ -3352,6 +3369,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             .addGroup(starterPokemonPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(starterPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(spRandom1or2EvosRB)
                     .addComponent(spRandom2EvosRB)
                     .addGroup(starterPokemonPanelLayout.createSequentialGroup()
                         .addGroup(starterPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -3388,6 +3406,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(spRandomRB)
                     .addComponent(spHeldItemsBanBadCB))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(spRandom1or2EvosRB)
                 .addComponent(spRandom2EvosRB)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -4822,6 +4841,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JRadioButton spCustomRB;
     private javax.swing.JCheckBox spHeldItemsBanBadCB;
     private javax.swing.JCheckBox spHeldItemsCB;
+    private javax.swing.JRadioButton spRandom1or2EvosRB;
     private javax.swing.JRadioButton spRandom2EvosRB;
     private javax.swing.JRadioButton spRandomRB;
     private javax.swing.JRadioButton spUnchangedRB;

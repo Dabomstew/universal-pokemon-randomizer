@@ -83,7 +83,7 @@ public class Settings {
     private boolean banNegativeAbilities;
 
     public enum StartersMod {
-        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS
+        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_ONE_OR_TWO_EVOLUTIONS, RANDOM_WITH_TWO_EVOLUTIONS
     }
 
     private StartersMod startersMod = StartersMod.UNCHANGED;

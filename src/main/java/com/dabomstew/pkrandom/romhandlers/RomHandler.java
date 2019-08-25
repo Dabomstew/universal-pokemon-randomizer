@@ -120,6 +120,10 @@ public interface RomHandler {
     // Business rules for who's legendary are in Pokemon class
     public Pokemon randomLegendaryPokemon();
 
+    // Give a random Pokemon who has 1 or two evolution stages
+    // Might make a good starter Pokemon
+    public Pokemon random1or2EvosPokemon();
+    
     // Give a random Pokemon who has 2 evolution stages
     // Should make a good starter Pokemon
     public Pokemon random2EvosPokemon();
