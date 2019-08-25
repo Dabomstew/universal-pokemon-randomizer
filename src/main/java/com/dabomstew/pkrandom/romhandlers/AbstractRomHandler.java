@@ -390,6 +390,19 @@ public abstract class AbstractRomHandler implements RomHandler {
         return onlyLegendaryList.get(this.random.nextInt(onlyLegendaryList.size()));
     }
 
+    @Override
+    public int evolutionChainSize(Pokemon pk) {
+    	System.out.println(pk.name);
+        int length = 0;
+        for (Evolution ev : pk.evolutionsFrom) {
+            int temp = evolutionChainSize(ev.to);
+            if (temp > length) {
+            	length = temp;
+            }
+        }
+        return length + 1;
+    }
+
     private List<Pokemon> oneOrTwoEvoPokes;
 
     @Override
@@ -399,7 +412,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             oneOrTwoEvoPokes = new ArrayList<Pokemon>();
             List<Pokemon> allPokes = this.getPokemon();
             for (Pokemon pk : allPokes) {
-                if (pk != null && pk.evolutionsTo.size() == 0 && pk.evolutionsFrom.size() > 0) {
+                if (pk != null) {
+                	int length = evolutionChainSize(pk);
+                	System.out.println(pk.name + " has " + length + " stages.");
+                	// Stages counts base pokemon, hence a pokemon with no evolutions has length 1
+                	if(length > 1 && length < 4)
                     // Candidate
                     oneOrTwoEvoPokes.add(pk);
                 }
@@ -417,16 +434,12 @@ public abstract class AbstractRomHandler implements RomHandler {
             twoEvoPokes = new ArrayList<Pokemon>();
             List<Pokemon> allPokes = this.getPokemon();
             for (Pokemon pk : allPokes) {
-                if (pk != null && pk.evolutionsTo.size() == 0 && pk.evolutionsFrom.size() > 0) {
-                    // Potential candidate
-                    for (Evolution ev : pk.evolutionsFrom) {
-                        // If any of the targets here evolve, the original
-                        // Pokemon has 2+ stages.
-                        if (ev.to.evolutionsFrom.size() > 0) {
-                            twoEvoPokes.add(pk);
-                            break;
-                        }
-                    }
+                if (pk != null) {
+                	int length = evolutionChainSize(pk);
+                	// Stages counts base pokemon, hence a pokemon with 2 evolutions has length 3
+                	if (length == 3) {
+                		twoEvoPokes.add(pk);
+                	}
                 }
             }
         }

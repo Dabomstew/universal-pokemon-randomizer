@@ -120,6 +120,10 @@ public interface RomHandler {
     // Business rules for who's legendary are in Pokemon class
     public Pokemon randomLegendaryPokemon();
 
+    // Return the longest number of stages in the evolution chain
+    // Useful for starter evolution length
+    public int evolutionChainSize(Pokemon pk);
+
     // Give a random Pokemon who has 1 or two evolution stages
     // Might make a good starter Pokemon
     public Pokemon random1or2EvosPokemon();
