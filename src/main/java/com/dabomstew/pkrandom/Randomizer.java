@@ -340,6 +340,9 @@ public class Randomizer {
         }
 
         // Trainer Pokemon
+        if (settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED){
+            romHandler.levelUpTrainerPokes(settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
+        }
         if (settings.getTrainersMod() == Settings.TrainersMod.RANDOM) {
             romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),

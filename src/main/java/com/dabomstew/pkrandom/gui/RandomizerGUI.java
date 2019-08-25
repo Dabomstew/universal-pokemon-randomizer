@@ -1134,6 +1134,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.tpTypeThemedRB.setEnabled(true);
             this.tpUnchangedRB.setEnabled(true);
             this.tpUnchangedRB.setSelected(true);
+            this.tpLevelModifierCB.setEnabled(true);
+            this.tpForceFullyEvolvedCB.setEnabled(true);
             this.tnRandomizeCB.setEnabled(romHandler.canChangeTrainerText());
             this.tcnRandomizeCB.setEnabled(romHandler.canChangeTrainerText());
             this.tnRandomizeCB.setVisible(romHandler.canChangeTrainerText());
@@ -1359,6 +1361,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.tpForceFullyEvolvedCB.setSelected(false);
             this.tpLevelModifierCB.setEnabled(false);
             this.tpLevelModifierCB.setSelected(false);
+            this.tpForceFullyEvolvedCB.setEnabled(true);
+            this.tpLevelModifierCB.setEnabled(true);
         } else {
             this.tpPowerLevelsCB.setEnabled(true);
             this.tpNoLegendariesCB.setEnabled(true);

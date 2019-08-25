@@ -38,3 +38,4 @@ build_eclipse.xml
 # Maven
 .idea
 /target
+/dist/

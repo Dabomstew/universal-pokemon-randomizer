@@ -1,29 +1,28 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 /*----------------------------------------------------------------------------*/
-/*--  RomHandler.java - defines the functionality that each randomization   --*/
-/*--                    handler must implement.                             --*/
-/*--                                                                        --*/
-/*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
-/*--  Pokemon and any associated names and the like are                     --*/
-/*--  trademark and (C) Nintendo 1996-2012.                                 --*/
-/*--                                                                        --*/
-/*--  The custom code written here is licensed under the terms of the GPL:  --*/
-/*--                                                                        --*/
-/*--  This program is free software: you can redistribute it and/or modify  --*/
-/*--  it under the terms of the GNU General Public License as published by  --*/
-/*--  the Free Software Foundation, either version 3 of the License, or     --*/
-/*--  (at your option) any later version.                                   --*/
-/*--                                                                        --*/
-/*--  This program is distributed in the hope that it will be useful,       --*/
-/*--  but WITHOUT ANY WARRANTY; without even the implied warranty of        --*/
-/*--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          --*/
-/*--  GNU General Public License for more details.                          --*/
-/*--                                                                        --*/
-/*--  You should have received a copy of the GNU General Public License     --*/
-/*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
-/*----------------------------------------------------------------------------*/
-
+ /*--  RomHandler.java - defines the functionality that each randomization   --*/
+ /*--                    handler must implement.                             --*/
+ /*--                                                                        --*/
+ /*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
+ /*--  Pokemon and any associated names and the like are                     --*/
+ /*--  trademark and (C) Nintendo 1996-2012.                                 --*/
+ /*--                                                                        --*/
+ /*--  The custom code written here is licensed under the terms of the GPL:  --*/
+ /*--                                                                        --*/
+ /*--  This program is free software: you can redistribute it and/or modify  --*/
+ /*--  it under the terms of the GNU General Public License as published by  --*/
+ /*--  the Free Software Foundation, either version 3 of the License, or     --*/
+ /*--  (at your option) any later version.                                   --*/
+ /*--                                                                        --*/
+ /*--  This program is distributed in the hope that it will be useful,       --*/
+ /*--  but WITHOUT ANY WARRANTY; without even the implied warranty of        --*/
+ /*--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          --*/
+ /*--  GNU General Public License for more details.                          --*/
+ /*--                                                                        --*/
+ /*--  You should have received a copy of the GNU General Public License     --*/
+ /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
+ /*----------------------------------------------------------------------------*/
 import java.awt.image.BufferedImage;
 import java.io.PrintStream;
 import java.util.List;
@@ -45,6 +44,7 @@ import com.dabomstew.pkrandom.pokemon.Type;
 public interface RomHandler {
 
     public abstract class Factory {
+
         public RomHandler create(Random random) {
             return create(random, null);
         }
@@ -55,7 +55,6 @@ public interface RomHandler {
     }
 
     // Basic load/save to filenames
-
     public boolean loadRom(String filename);
 
     public boolean saveRom(String filename);
@@ -63,7 +62,6 @@ public interface RomHandler {
     public String loadedFilename();
 
     // Log stuff
-
     public void setLog(PrintStream logStream);
 
     // Get a List of Pokemon objects in this game.
@@ -91,7 +89,6 @@ public interface RomHandler {
     public boolean canChangeStarters();
 
     // Randomizer: Pokemon stats
-
     // Run the stats shuffler on each Pokemon.
     public void shufflePokemonStats(boolean evolutionSanity);
     
@@ -128,7 +125,6 @@ public interface RomHandler {
     public Pokemon random2EvosPokemon();
 
     // Randomizer: types
-
     // return a random type valid in this game.
     // straightforward except for gen1 where dark&steel are excluded.
     public Type randomType();
@@ -172,6 +168,8 @@ public interface RomHandler {
 
     public void setTrainers(List<Trainer> trainerData);
 
+    public void levelUpTrainerPokes(int levelModifier);
+
     public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
             int levelModifier);
 
@@ -183,7 +181,6 @@ public interface RomHandler {
     public void forceFullyEvolvedTrainerPokes(int minLevel);
 
     // Randomizer: moves
-
     public void randomizeMovePowers();
 
     public void randomizeMovePPs();
@@ -213,7 +210,6 @@ public interface RomHandler {
     public List<Move> getMoves();
 
     // Randomizer: moves learnt
-
     public Map<Pokemon, List<MoveLearnt>> getMovesLearnt();
 
     public void setMovesLearnt(Map<Pokemon, List<MoveLearnt>> movesets);
@@ -231,7 +227,6 @@ public interface RomHandler {
     public boolean supportsFourStartingMoves();
 
     // Randomizer: static pokemon (except starters)
-
     public List<Pokemon> getStaticPokemon();
 
     public boolean setStaticPokemon(List<Pokemon> staticPokemon);
@@ -243,7 +238,6 @@ public interface RomHandler {
     public List<Pokemon> bannedForStaticPokemon();
 
     // Randomizer: TMs/HMs
-
     public List<Integer> getTMMoves();
 
     public List<Integer> getHMMoves();
@@ -259,13 +253,12 @@ public interface RomHandler {
     /**
      * Get TM/HM compatibility data from this rom. The result should contain a
      * boolean array for each Pokemon indexed as such:
-     * 
+     *
      * 0: blank (false) / 1 - (getTMCount()) : TM compatibility /
      * (getTMCount()+1) - (getTMCount()+getHMCount()) - HM compatibility
-     * 
+     *
      * @return
      */
-
     public Map<Pokemon, boolean[]> getTMHMCompatibility();
 
     public void setTMHMCompatibility(Map<Pokemon, boolean[]> compatData);
@@ -275,15 +268,12 @@ public interface RomHandler {
     public void fullTMHMCompatibility();
 
     // tm/moveset sanity
-
     public void ensureTMCompatSanity();
 
     // new 170: full HM (but not TM) compat override
-
     public void fullHMCompatibility();
 
     // Randomizer: move tutors
-
     public boolean hasMoveTutors();
 
     public List<Integer> getMoveTutorMoves();
@@ -301,11 +291,9 @@ public interface RomHandler {
     public void fullMoveTutorCompatibility();
 
     // mt/moveset sanity
-
     public void ensureMoveTutorCompatSanity();
 
     // Randomizer: trainer names
-
     public boolean canChangeTrainerText();
 
     public List<String> getTrainerNames();
@@ -331,7 +319,6 @@ public interface RomHandler {
     public void randomizeTrainerNames(CustomNamesSet customNames);
 
     // Randomizer: trainer class names
-
     public List<String> getTrainerClassNames();
 
     public void setTrainerClassNames(List<String> trainerClassNames);
@@ -345,7 +332,6 @@ public interface RomHandler {
     public List<Integer> getDoublesTrainerClasses();
 
     // Items
-
     public ItemList getAllowedItems();
 
     public ItemList getNonBadItems();
@@ -361,9 +347,7 @@ public interface RomHandler {
     public void randomizeStarterHeldItems(boolean banBadItems);
 
     // Field Items
-
     // TMs on the field
-
     public List<Integer> getRequiredFieldTMs();
 
     public List<Integer> getCurrentFieldTMs();
@@ -371,19 +355,16 @@ public interface RomHandler {
     public void setFieldTMs(List<Integer> fieldTMs);
 
     // Everything else
-
     public List<Integer> getRegularFieldItems();
 
     public void setRegularFieldItems(List<Integer> items);
 
     // Randomizer methods
-
     public void shuffleFieldItems();
 
     public void randomizeFieldItems(boolean banBadItems);
 
     // Trades
-
     public List<IngameTrade> getIngameTrades();
 
     public void setIngameTrades(List<IngameTrade> trades);
@@ -398,7 +379,6 @@ public interface RomHandler {
     public int maxTradeOTNameLength();
 
     // Evos
-
     public void removeTradeEvolutions(boolean changeMoveEvos);
 
     public void condenseLevelEvolutions(int maxLevel, int maxIntermediateLevel);
@@ -412,7 +392,6 @@ public interface RomHandler {
     public void standardizeEXPCurves();
 
     // (Mostly) unchanging lists of moves
-
     public List<Integer> getGameBreakingMoves();
 
     // includes game or gen-specific moves like Secret Power
@@ -424,7 +403,6 @@ public interface RomHandler {
     public List<Integer> getEarlyRequiredHMMoves();
 
     // Misc
-
     public boolean isYellow();
 
     public String getROMName();
@@ -448,7 +426,6 @@ public interface RomHandler {
     public void writeCheckValueToROM(int value);
 
     // code tweaks
-
     public int miscTweaksAvailable();
 
     public void applyMiscTweak(MiscTweak tweak);
