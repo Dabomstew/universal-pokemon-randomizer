@@ -34,18 +34,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 
-import com.dabomstew.pkrandom.pokemon.Encounter;
-import com.dabomstew.pkrandom.pokemon.EncounterSet;
-import com.dabomstew.pkrandom.pokemon.IngameTrade;
-import com.dabomstew.pkrandom.pokemon.Move;
-import com.dabomstew.pkrandom.pokemon.MoveLearnt;
-import com.dabomstew.pkrandom.pokemon.Pokemon;
-import com.dabomstew.pkrandom.pokemon.Trainer;
-import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
+import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen5RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
+import java.util.HashSet;
+import java.util.Set;
 
 // Can randomize a file based on settings. Output varies by seed.
 public class Randomizer {
@@ -709,15 +705,10 @@ public class Randomizer {
                 if (romHandler.isYellow()) {
                     starterCount = 2;
                 }
+                
                 List<Pokemon> starters = new ArrayList<Pokemon>();
-                for (int i = 0; i < starterCount; i++) {
-                    Pokemon pkmn = romHandler.randomPokemon();
-                    while (starters.contains(pkmn)) {
-                        pkmn = romHandler.randomPokemon();
-                    }
-                    log.println(String.format("<li>Set starter %d to <strong>%s</strong></li>", (i + 1), pkmn.name));
-                    starters.add(pkmn);
-                }
+                selectRandomStarter(starterCount, starters, log, () -> romHandler.randomPokemon());
+
                 romHandler.setStarters(starters);
                 log.println("</ul>");
             } else if (settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_ONE_OR_TWO_EVOLUTIONS) {
@@ -728,15 +719,10 @@ public class Randomizer {
                 if (romHandler.isYellow()) {
                     starterCount = 2;
                 }
+
                 List<Pokemon> starters = new ArrayList<Pokemon>();
-                for (int i = 0; i < starterCount; i++) {
-                    Pokemon pkmn = romHandler.random1or2EvosPokemon();
-                    while (starters.contains(pkmn)) {
-                        pkmn = romHandler.random1or2EvosPokemon();
-                    }
-                    log.println("Set starter " + (i + 1) + " to " + pkmn.name);
-                    starters.add(pkmn);
-                }
+                selectRandomStarter(starterCount, starters, log, () -> romHandler.random1or2EvosPokemon());
+
                 romHandler.setStarters(starters);
                 log.println("</ul>");
             } else if (settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_TWO_EVOLUTIONS) {
@@ -747,20 +733,35 @@ public class Randomizer {
                 if (romHandler.isYellow()) {
                     starterCount = 2;
                 }
+
                 List<Pokemon> starters = new ArrayList<Pokemon>();
-                for (int i = 0; i < starterCount; i++) {
-                    Pokemon pkmn = romHandler.random2EvosPokemon();
-                    while (starters.contains(pkmn)) {
-                        pkmn = romHandler.random2EvosPokemon();
-                    }
-                    log.println(String.format("<li>Set starter %d to <strong>%s</strong></li>", (i + 1), pkmn.name));
-                    starters.add(pkmn);
-                }
+                selectRandomStarter(starterCount, starters, log, () -> romHandler.random2EvosPokemon());
+
                 romHandler.setStarters(starters);
                 log.println("</ul>");
             }
             if (settings.isRandomizeStartersHeldItems() && !(romHandler instanceof Gen1RomHandler)) {
                 romHandler.randomizeStarterHeldItems(settings.isBanBadRandomStarterHeldItems());
+            }
+        }
+    }
+
+    private void selectRandomStarter(int starterCount, List<Pokemon> starters, 
+    final PrintStream log, Supplier<Pokemon> randomPicker) {
+        Set<Type> typesUsed = new HashSet<Type>();
+        for (int i = 0; i < starterCount; i++) {
+            Pokemon pkmn = randomPicker.get();
+            while (starters.contains(pkmn) || 
+                   (settings.isStartersUniqueTypes() &&
+                   (typesUsed.contains(pkmn.primaryType) || 
+                    pkmn.secondaryType != null && typesUsed.contains(pkmn.secondaryType)))) {
+                pkmn = randomPicker.get();
+            }
+            log.println(String.format("<li>Set starter %d to <strong>%s</strong></li>", (i + 1), pkmn.name));
+            starters.add(pkmn);
+            typesUsed.add(pkmn.primaryType);
+            if(pkmn.secondaryType != null) {
+                typesUsed.add(pkmn.secondaryType);
             }
         }
     }

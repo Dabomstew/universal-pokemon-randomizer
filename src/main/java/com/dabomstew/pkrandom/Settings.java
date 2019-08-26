@@ -93,6 +93,7 @@ public class Settings {
     private int[] customStarters = new int[3];
     private boolean randomizeStartersHeldItems;
     private boolean banBadRandomStarterHeldItems;
+    private boolean startersUniqueTypes;
 
     public enum TypesMod {
         UNCHANGED, RANDOM_FOLLOW_EVOLUTIONS, COMPLETELY_RANDOM
@@ -277,7 +278,8 @@ public class Settings {
         // 4: starter pokemon stuff
         out.write(makeByteSelected(startersMod == StartersMod.CUSTOM, startersMod == StartersMod.COMPLETELY_RANDOM,
                 startersMod == StartersMod.UNCHANGED, startersMod == StartersMod.RANDOM_WITH_TWO_EVOLUTIONS,
-                randomizeStartersHeldItems, banBadRandomStarterHeldItems, startersMod == StartersMod.RANDOM_WITH_ONE_OR_TWO_EVOLUTIONS));
+                randomizeStartersHeldItems, banBadRandomStarterHeldItems, startersUniqueTypes, 
+                startersMod == StartersMod.RANDOM_WITH_ONE_OR_TWO_EVOLUTIONS));
 
         // @5 dropdowns
         write2ByteInt(out, customStarters[0] - 1);
@@ -461,6 +463,7 @@ public class Settings {
         ));
         settings.setRandomizeStartersHeldItems(restoreState(data[4], 4));
         settings.setBanBadRandomStarterHeldItems(restoreState(data[4], 5));
+        settings.setStartersUniqueTypes(restoreState(data[4], 6));
 
         settings.setCustomStarters(new int[] { FileFunctions.read2ByteInt(data, 5) + 1,
                 FileFunctions.read2ByteInt(data, 7) + 1, FileFunctions.read2ByteInt(data, 9) + 1 });
@@ -954,6 +957,15 @@ public class Settings {
 
     public Settings setBanBadRandomStarterHeldItems(boolean banBadRandomStarterHeldItems) {
         this.banBadRandomStarterHeldItems = banBadRandomStarterHeldItems;
+        return this;
+    }
+    
+    public boolean isStartersUniqueTypes() {
+        return startersUniqueTypes;
+    }
+    
+    public Settings setStartersUniqueTypes(boolean startersUniqueTypes) {
+        this.startersUniqueTypes = startersUniqueTypes;
         return this;
     }
 

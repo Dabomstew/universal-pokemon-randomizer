@@ -315,11 +315,9 @@ public class Pokemon implements Comparable<Pokemon> {
             if(evolutionsFrom.size() > 0 || (evolutionsTo.get(0).from.evolutionsTo.size() > 0)) {
                 // 3 stages
                 ourBST = theirBST + PK_2EVOS_DIFF_MEDIAN + skewedGaussian(random.nextGaussian(), PK_2EVOS_DIFF_SKEW) * PK_2EVOS_DIFF_SD;
-                System.out.println(name + " is part of evo of 3 stages");
             } else {
                 // 2 stages
                 ourBST = theirBST + PK_1EVO_DIFF_MEDIAN + skewedGaussian(random.nextGaussian(), PK_1EVO_DIFF_SKEW) * PK_1EVO_DIFF_SD;
-                System.out.println(name + " is second evo of 2 stages");
             }
             bstRatio = ourBST / theirBST;
         } while(bstRatio < 1);
