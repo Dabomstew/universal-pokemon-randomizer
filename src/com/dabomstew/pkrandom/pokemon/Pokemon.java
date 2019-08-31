@@ -30,8 +30,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import com.dabomstew.pkrandom.romhandlers.AbstractRomHandler;
-
 public class Pokemon implements Comparable<Pokemon> {
 
     public String name;
@@ -54,7 +52,7 @@ public class Pokemon implements Comparable<Pokemon> {
     public ExpCurve growthCurve;
 
     public double percentRandomizedBuffPercent = 1;
-    
+
     public List<Evolution> evolutionsFrom = new ArrayList<Evolution>();
     public List<Evolution> evolutionsTo = new ArrayList<Evolution>();
 
@@ -72,7 +70,7 @@ public class Pokemon implements Comparable<Pokemon> {
         Collections.shuffle(shuffledStatsOrder, random);
         applyShuffledOrderToStats();
     }
-    
+
     public void copyShuffledStatsUpEvolution(Pokemon evolvesFrom) {
         shuffledStatsOrder = evolvesFrom.shuffledStatsOrder;
         applyShuffledOrderToStats();
@@ -143,356 +141,149 @@ public class Pokemon implements Comparable<Pokemon> {
 
     }
 
-    public void randomizeBST(Random random, boolean dontRandomizeRatio) {
-    	if(dontRandomizeRatio) {
-    		if (number == 292) {
-                // Shedinja is horribly broken unless we restrict him to 1HP.
-                double bstRatio = bst()/(180 + (270*random.nextDouble()));
-
-                hp = 1;
-                attack = (int) Math.max(1, Math.round(attack / bstRatio));
-                defense = (int) Math.max(1, Math.round(defense / bstRatio));
-                spatk = (int) Math.max(1, Math.round(spatk / bstRatio));
-                spdef = (int) Math.max(1, Math.round(spdef / bstRatio));
-                speed = (int) Math.max(1, Math.round(speed / bstRatio));
-
-                // Fix up special too
-                special = (int) Math.ceil((spatk + spdef) / 2.0f);
-
-            } else if(this.isLegendary()) {
-                // Minimum 20 HP, 10 everything else
-                double bstRatio = bst()/(480 + (240*random.nextDouble()));
-
-                hp = (int) Math.max(1, Math.round(hp / bstRatio));
-                attack = (int) Math.max(1, Math.round(attack / bstRatio));
-                defense = (int) Math.max(1, Math.round(defense / bstRatio));
-                spatk = (int) Math.max(1, Math.round(spatk / bstRatio));
-                spdef = (int) Math.max(1, Math.round(spdef / bstRatio));
-                speed = (int) Math.max(1, Math.round(speed / bstRatio));
-
-                // Fix up special too
-                special = (int) Math.ceil((spatk + spdef) / 2.0f);
-            } else {
-                // Minimum 20 HP, 10 everything else
-                double bstRatio = bst()/(180 + (270*random.nextDouble()));
-
-                hp = (int) Math.max(1, Math.round(hp / bstRatio));
-                attack = (int) Math.max(1, Math.round(attack / bstRatio));
-                defense = (int) Math.max(1, Math.round(defense / bstRatio));
-                spatk = (int) Math.max(1, Math.round(spatk / bstRatio));
-                spdef = (int) Math.max(1, Math.round(spdef / bstRatio));
-                speed = (int) Math.max(1, Math.round(speed / bstRatio));
-
-                // Fix up special too
-                special = (int) Math.ceil((spatk + spdef) / 2.0f);
-            }
-    	} else {
-    		if (number == 292) {
-                // Shedinja is horribly broken unless we restrict him to 1HP.
-                int bst = 129 + (int)(270*random.nextDouble());
-
-                // Make weightings
-                double atkW = random.nextDouble(), defW = random.nextDouble();
-                double spaW = random.nextDouble(), spdW = random.nextDouble(), speW = random.nextDouble();
-
-                double totW = atkW + defW + spaW + spdW + speW;
-
-                hp = 1;
-                attack = (int) Math.max(1, Math.round(atkW / totW * bst)) + 10;
-                defense = (int) Math.max(1, Math.round(defW / totW * bst)) + 10;
-                spatk = (int) Math.max(1, Math.round(spaW / totW * bst)) + 10;
-                spdef = (int) Math.max(1, Math.round(spdW / totW * bst)) + 10;
-                speed = (int) Math.max(1, Math.round(speW / totW * bst)) + 10;
-
-                // Fix up special too
-                special = (int) Math.ceil((spatk + spdef) / 2.0f);
-
-            } else if(this.isLegendary()) {
-                // Minimum 20 HP, 10 everything else
-                int bst = 410 + (int)(240*random.nextDouble());
-
-                // Make weightings
-                double hpW = random.nextDouble(), atkW = random.nextDouble(), defW = random.nextDouble();
-                double spaW = random.nextDouble(), spdW = random.nextDouble(), speW = random.nextDouble();
-
-                double totW = hpW + atkW + defW + spaW + spdW + speW;
-
-                hp = (int) Math.max(1, Math.round(hpW / totW * bst)) + 20;
-                attack = (int) Math.max(1, Math.round(atkW / totW * bst)) + 10;
-                defense = (int) Math.max(1, Math.round(defW / totW * bst)) + 10;
-                spatk = (int) Math.max(1, Math.round(spaW / totW * bst)) + 10;
-                spdef = (int) Math.max(1, Math.round(spdW / totW * bst)) + 10;
-                speed = (int) Math.max(1, Math.round(speW / totW * bst)) + 10;
-
-                // Fix up special too
-                special = (int) Math.ceil((spatk + spdef) / 2.0f);
-            } else {
-                // Minimum 20 HP, 10 everything else
-                int bst = 110 + (int)(270*random.nextDouble());
-
-                // Make weightings
-                double hpW = random.nextDouble(), atkW = random.nextDouble(), defW = random.nextDouble();
-                double spaW = random.nextDouble(), spdW = random.nextDouble(), speW = random.nextDouble();
-
-                double totW = hpW + atkW + defW + spaW + spdW + speW;
-
-                hp = (int) Math.max(1, Math.round(hpW / totW * bst)) + 20;
-                attack = (int) Math.max(1, Math.round(atkW / totW * bst)) + 10;
-                defense = (int) Math.max(1, Math.round(defW / totW * bst)) + 10;
-                spatk = (int) Math.max(1, Math.round(spaW / totW * bst)) + 10;
-                spdef = (int) Math.max(1, Math.round(spdW / totW * bst)) + 10;
-                speed = (int) Math.max(1, Math.round(speW / totW * bst)) + 10;
-
-                // Fix up special too
-                special = (int) Math.ceil((spatk + spdef) / 2.0f);
-            }
-    	}
-        // Check for something we can't store
-        if (hp > 255 || attack > 255 || defense > 255 || spatk > 255 || spdef > 255 || speed > 255) {
-            // re roll
-            randomizeStatsWithinBST(random);
+    private int pickNewBST(Random random) {
+        int minBST, maxBST;
+        int fromDepth = this.evosFromDepth();
+        int toDepth = this.evosToDepth();
+        // pick new bst based on observed ranges for different poke types
+        if (isLegendary()) {
+            minBST = 580;
+            maxBST = 720;
+        } else if (fromDepth == 0 && toDepth == 0) {
+            // solo poke
+            minBST = 175;
+            maxBST = 600;
+        } else if (fromDepth >= 2 && toDepth == 0) {
+            // first stage of 3+
+            minBST = 175;
+            maxBST = 365;
+        } else if (fromDepth == 1 && toDepth == 0) {
+            // first stage of 2
+            minBST = 175;
+            maxBST = 435;
+        } else if (toDepth >= 1 && fromDepth >= 1) {
+            // middle stage of 3+
+            minBST = 205;
+            maxBST = 465;
+        } else {
+            // last stage of 2+
+            minBST = 395;
+            maxBST = 600;
         }
+        return (int) Math.round(minBST + random.nextDouble() * (maxBST - minBST));
     }
-    
-    public void randomizeBSTPerc(Random random, int percent, boolean dontRandomizeRatio) {
-    	double modifier = 1;
-    	if(random.nextBoolean()) {
-    		modifier = 1 +((percent/100.0f)*random.nextDouble());
-    	}
-    	else {
-    		modifier = 1 - ((percent/100.0f)*random.nextDouble());
-    	}
-		if((bst() * modifier) < 180) {
-			modifier = 180/bst();
-		}
-    	if(modifier <= 0) {
-    		modifier = 1;
-    	}
-    	percentRandomizedBuffPercent = modifier;
-    	
-    	if(dontRandomizeRatio) {
-    		if (number == 292) {
-                // Shedinja is horribly broken unless we restrict him to 1HP.
-                hp = 1;
-                attack = (int) Math.max(1, Math.round(attack*modifier));
-                defense = (int) Math.max(1, Math.round(defense*modifier));
-                spatk = (int) Math.max(1, Math.round(spatk*modifier));
-                spdef = (int) Math.max(1, Math.round(spdef*modifier));
-                speed = (int) Math.max(1, Math.round(speed*modifier));
 
-                // Fix up special too
-                special = (int) Math.ceil((spatk + spdef) / 2.0f);
-
-            } else {
-                hp = (int) Math.max(1, Math.round(hp*modifier));
-                attack = (int) Math.max(1, Math.round(attack*modifier));
-                defense = (int) Math.max(1, Math.round(defense*modifier));
-                spatk = (int) Math.max(1, Math.round(spatk*modifier));
-                spdef = (int) Math.max(1, Math.round(spdef*modifier));
-                speed = (int) Math.max(1, Math.round(speed*modifier));
-
-                // Fix up special too
-                special = (int) Math.ceil((spatk + spdef) / 2.0f);
-            }
-    	} else {
-    		if (number == 292) {
-                // Shedinja is horribly broken unless we restrict him to 1HP.
-                int bst = (int)(bst()*modifier) - 51;
-
-                // Make weightings
-                double atkW = random.nextDouble(), defW = random.nextDouble();
-                double spaW = random.nextDouble(), spdW = random.nextDouble(), speW = random.nextDouble();
-
-                double totW = atkW + defW + spaW + spdW + speW;
-
-                hp = 1;
-                attack = (int) Math.max(1, Math.round(atkW / totW * bst)) + 10;
-                defense = (int) Math.max(1, Math.round(defW / totW * bst)) + 10;
-                spatk = (int) Math.max(1, Math.round(spaW / totW * bst)) + 10;
-                spdef = (int) Math.max(1, Math.round(spdW / totW * bst)) + 10;
-                speed = (int) Math.max(1, Math.round(speW / totW * bst)) + 10;
-
-                // Fix up special too
-                special = (int) Math.ceil((spatk + spdef) / 2.0f);
-
-            } else {
-                // Minimum 20 HP, 10 everything else
-                int bst = (int)(bst()*modifier) - 70;
-
-                // Make weightings
-                double hpW = random.nextDouble(), atkW = random.nextDouble(), defW = random.nextDouble();
-                double spaW = random.nextDouble(), spdW = random.nextDouble(), speW = random.nextDouble();
-
-                double totW = hpW + atkW + defW + spaW + spdW + speW;
-
-                hp = (int) Math.max(1, Math.round(hpW / totW * bst)) + 20;
-                attack = (int) Math.max(1, Math.round(atkW / totW * bst)) + 10;
-                defense = (int) Math.max(1, Math.round(defW / totW * bst)) + 10;
-                spatk = (int) Math.max(1, Math.round(spaW / totW * bst)) + 10;
-                spdef = (int) Math.max(1, Math.round(spdW / totW * bst)) + 10;
-                speed = (int) Math.max(1, Math.round(speW / totW * bst)) + 10;
-
-                // Fix up special too
-                special = (int) Math.ceil((spatk + spdef) / 2.0f);
-            }
-    	}
-
-        // Check for something we can't store
-        if (hp > 255 || attack > 255 || defense > 255 || spatk > 255 || spdef > 255 || speed > 255) {
-            // re roll
-            randomizeStatsWithinBST(random);
+    private void scaleStatsToNewBST(int newBST) {
+        double bstMult = (newBST - 70) / (bst() - 70);
+        if (number == 292) {
+            bstMult = (newBST * 5 / 6 - 50) / (bst() - 51);
+        } else {
+            hp = (int) Math.min(255, (20 + Math.round((hp - 20) * bstMult)));
         }
+
+        attack = (int) Math.min(255, (10 + Math.round((attack - 10) * bstMult)));
+        defense = (int) Math.min(255, (10 + Math.round((defense - 10) * bstMult)));
+        spatk = (int) Math.min(255, (10 + Math.round((spatk - 10) * bstMult)));
+        spdef = (int) Math.min(255, (10 + Math.round((spdef - 10) * bstMult)));
+        speed = (int) Math.min(255, (10 + Math.round((speed - 10) * bstMult)));
+
+        special = (int) Math.ceil((spatk + spdef) / 2.0f);
     }
-    
-    public void equalizeBST(Random random, boolean dontRandomizeRatio) {
-    	if (number == 292) {
-            // Shedinja is horribly broken unless we restrict him to 1HP.
-    		if(dontRandomizeRatio) {
-                double bstRatio = bst()/350f;
 
-                hp = 1;
-                attack = (int) Math.max(1, Math.round(attack/bstRatio));
-                defense = (int) Math.max(1, Math.round(defense/bstRatio));
-                spatk = (int) Math.max(1, Math.round(spatk/bstRatio));
-                spdef = (int) Math.max(1, Math.round(spdef/bstRatio));
-                speed = (int) Math.max(1, Math.round(speed/bstRatio));
+    private void randomizeStatsWithinNewBST(Random random, int newBST) {
+        if (number == 292) {
+            int allocatablePoints = newBST * 5 / 6 - 50;
 
-                // Fix up special too
-                special = (int) Math.ceil((spatk + spdef) / 2.0f);
-    		} else {
-                int bst = 300;
-
-                // Make weightings
+            // Make weightings
+            do {
                 double atkW = random.nextDouble(), defW = random.nextDouble();
                 double spaW = random.nextDouble(), spdW = random.nextDouble(), speW = random.nextDouble();
 
                 double totW = atkW + defW + spaW + spdW + speW;
 
                 hp = 1;
-                attack = (int) Math.max(1, Math.round(atkW / totW * bst)) + 10;
-                defense = (int) Math.max(1, Math.round(defW / totW * bst)) + 10;
-                spatk = (int) Math.max(1, Math.round(spaW / totW * bst)) + 10;
-                spdef = (int) Math.max(1, Math.round(spdW / totW * bst)) + 10;
-                speed = (int) Math.max(1, Math.round(speW / totW * bst)) + 10;
-
-                // Fix up special too
-                special = (int) Math.ceil((spatk + spdef) / 2.0f);
-    		}
+                attack = (int) Math.max(1, Math.round(atkW / totW * allocatablePoints)) + 10;
+                defense = (int) Math.max(1, Math.round(defW / totW * allocatablePoints)) + 10;
+                spatk = (int) Math.max(1, Math.round(spaW / totW * allocatablePoints)) + 10;
+                spdef = (int) Math.max(1, Math.round(spdW / totW * allocatablePoints)) + 10;
+                speed = (int) Math.max(1, Math.round(speW / totW * allocatablePoints)) + 10;
+            } while (hp > 255 || attack > 255 || defense > 255 || spatk > 255 || spdef > 255 || speed > 255);
         } else {
             // Minimum 20 HP, 10 everything else
-        	if(dontRandomizeRatio) {
-        		double bstRatio = bst()/420.0f;
-        		
-        		hp = (int) Math.max(1, Math.round(hp/bstRatio));
-                attack = (int) Math.max(1, Math.round(attack/bstRatio));
-                defense = (int) Math.max(1, Math.round(defense/bstRatio));
-                spatk = (int) Math.max(1, Math.round(spatk/bstRatio));
-                spdef = (int) Math.max(1, Math.round(spdef/bstRatio));
-                speed = (int) Math.max(1, Math.round(speed/bstRatio));
+            int allocatablePoints = newBST - 70;
 
-                // Fix up special too
-                special = (int) Math.ceil((spatk + spdef) / 2.0f);
-        	} else {
-        		int bst = 350;
-
+            do {
                 // Make weightings
                 double hpW = random.nextDouble(), atkW = random.nextDouble(), defW = random.nextDouble();
                 double spaW = random.nextDouble(), spdW = random.nextDouble(), speW = random.nextDouble();
 
                 double totW = hpW + atkW + defW + spaW + spdW + speW;
 
-                hp = (int) Math.max(1, Math.round(hpW / totW * bst)) + 20;
-                attack = (int) Math.max(1, Math.round(atkW / totW * bst)) + 10;
-                defense = (int) Math.max(1, Math.round(defW / totW * bst)) + 10;
-                spatk = (int) Math.max(1, Math.round(spaW / totW * bst)) + 10;
-                spdef = (int) Math.max(1, Math.round(spdW / totW * bst)) + 10;
-                speed = (int) Math.max(1, Math.round(speW / totW * bst)) + 10;
-
-                // Fix up special too
-                special = (int) Math.ceil((spatk + spdef) / 2.0f);
-        	}
+                hp = (int) Math.max(1, Math.round(hpW / totW * allocatablePoints)) + 20;
+                attack = (int) Math.max(1, Math.round(atkW / totW * allocatablePoints)) + 10;
+                defense = (int) Math.max(1, Math.round(defW / totW * allocatablePoints)) + 10;
+                spatk = (int) Math.max(1, Math.round(spaW / totW * allocatablePoints)) + 10;
+                spdef = (int) Math.max(1, Math.round(spdW / totW * allocatablePoints)) + 10;
+                speed = (int) Math.max(1, Math.round(speW / totW * allocatablePoints)) + 10;
+            } while (hp > 255 || attack > 255 || defense > 255 || spatk > 255 || spdef > 255 || speed > 255);
         }
 
-        // Check for something we can't store
-        if (hp > 255 || attack > 255 || defense > 255 || spatk > 255 || spdef > 255 || speed > 255) {
-            // re roll
-            randomizeStatsWithinBST(random);
+        special = (int) Math.ceil((spatk + spdef) / 2.0f);
+    }
+
+    public void randomizeBST(Random random, boolean dontRandomizeRatio) {
+        int newBST = pickNewBST(random);
+        if (dontRandomizeRatio) {
+            scaleStatsToNewBST(newBST);
+        } else {
+            randomizeStatsWithinNewBST(random, newBST);
         }
     }
-    
-    //TODO
-    public void percentRaiseStatFloorUpEvolution(Random random, boolean dontRandomizeRatio, Pokemon evolvesFrom)
-    {
-    	percentRandomizedBuffPercent = evolvesFrom.percentRandomizedBuffPercent;
-    	double statRatio = evolvesFrom.percentRandomizedBuffPercent;
-    	if(dontRandomizeRatio) {
-    		if (number == 292) {
-                // Shedinja is horribly broken unless we restrict him to 1HP.
-                hp = 1;
-                attack = (int) Math.max(1, Math.round(attack*statRatio));
-                defense = (int) Math.max(1, Math.round(defense*statRatio));
-                spatk = (int) Math.max(1, Math.round(spatk*statRatio));
-                spdef = (int) Math.max(1, Math.round(spdef*statRatio));
-                speed = (int) Math.max(1, Math.round(speed*statRatio));
 
-                // Fix up special too
-                special = (int) Math.ceil((spatk + spdef) / 2.0f);
+    public void randomizeBSTPerc(Random random, int percent, boolean dontRandomizeRatio) {
+        double modifier = 1;
+        if (random.nextBoolean()) {
+            modifier = 1 + ((percent / 100.0f) * random.nextDouble());
+        } else {
+            modifier = 1 - ((percent / 100.0f) * random.nextDouble());
+        }
+        if ((bst() * modifier) < 180) {
+            modifier = 180 / bst();
+        }
+        if (modifier <= 0) {
+            modifier = 1;
+        }
+        percentRandomizedBuffPercent = modifier;
+        int effectiveNewBST = (int) Math.round(bstForPowerLevels() * modifier);
 
-            } else {
-                hp = (int) Math.max(1, Math.round(hp*statRatio));
-                attack = (int) Math.max(1, Math.round(attack*statRatio));
-                defense = (int) Math.max(1, Math.round(defense*statRatio));
-                spatk = (int) Math.max(1, Math.round(spatk*statRatio));
-                spdef = (int) Math.max(1, Math.round(spdef*statRatio));
-                speed = (int) Math.max(1, Math.round(speed*statRatio));
-
-                // Fix up special too
-                special = (int) Math.ceil((spatk + spdef) / 2.0f);
-            }
-    	} else {
-    		if (number == 292) {
-                // Shedinja is horribly broken unless we restrict him to 1HP.
-                int bst = (int)(bst()*statRatio) - 51;
-
-                // Make weightings
-                double atkW = random.nextDouble(), defW = random.nextDouble();
-                double spaW = random.nextDouble(), spdW = random.nextDouble(), speW = random.nextDouble();
-
-                double totW = atkW + defW + spaW + spdW + speW;
-
-                hp = 1;
-                attack = (int) Math.max(1, Math.round(atkW / totW * bst)) + 10;
-                defense = (int) Math.max(1, Math.round(defW / totW * bst)) + 10;
-                spatk = (int) Math.max(1, Math.round(spaW / totW * bst)) + 10;
-                spdef = (int) Math.max(1, Math.round(spdW / totW * bst)) + 10;
-                speed = (int) Math.max(1, Math.round(speW / totW * bst)) + 10;
-
-                // Fix up special too
-                special = (int) Math.ceil((spatk + spdef) / 2.0f);
-
-            } else {
-                // Minimum 20 HP, 10 everything else
-                int bst = (int)(bst()*statRatio) - 70;
-
-                // Make weightings
-                double hpW = random.nextDouble(), atkW = random.nextDouble(), defW = random.nextDouble();
-                double spaW = random.nextDouble(), spdW = random.nextDouble(), speW = random.nextDouble();
-
-                double totW = hpW + atkW + defW + spaW + spdW + speW;
-
-                hp = (int) Math.max(1, Math.round(hpW / totW * bst)) + 20;
-                attack = (int) Math.max(1, Math.round(atkW / totW * bst)) + 10;
-                defense = (int) Math.max(1, Math.round(defW / totW * bst)) + 10;
-                spatk = (int) Math.max(1, Math.round(spaW / totW * bst)) + 10;
-                spdef = (int) Math.max(1, Math.round(spdW / totW * bst)) + 10;
-                speed = (int) Math.max(1, Math.round(speW / totW * bst)) + 10;
-
-                // Fix up special too
-                special = (int) Math.ceil((spatk + spdef) / 2.0f);
-            }
-    	}
+        if (dontRandomizeRatio) {
+            scaleStatsToNewBST(effectiveNewBST);
+        } else {
+            randomizeStatsWithinNewBST(random, effectiveNewBST);
+        }
     }
-    
+
+    public void equalizeBST(Random random, boolean dontRandomizeRatio) {
+        if (dontRandomizeRatio) {
+            scaleStatsToNewBST(420);
+        } else {
+            randomizeStatsWithinNewBST(random, 420);
+        }
+    }
+
+    public void percentRaiseStatFloorUpEvolution(Random random, boolean dontRandomizeRatio, Pokemon evolvesFrom) {
+        percentRandomizedBuffPercent = evolvesFrom.percentRandomizedBuffPercent;
+        double statRatio = evolvesFrom.percentRandomizedBuffPercent;
+
+        int effectiveNewBST = (int) Math.round(bstForPowerLevels() * statRatio);
+
+        if (dontRandomizeRatio) {
+            scaleStatsToNewBST(effectiveNewBST);
+        } else {
+            randomizeStatsWithinNewBST(random, effectiveNewBST);
+        }
+    }
+
     public void copyRandomizedStatsUpEvolution(Pokemon evolvesFrom) {
         double ourBST = bst();
         double theirBST = evolvesFrom.bst();
@@ -509,37 +300,22 @@ public class Pokemon implements Comparable<Pokemon> {
         special = (int) Math.ceil((spatk + spdef) / 2.0f);
     }
     
-    public void copyRandomizedBaseStatsUpEvolution(Random random, Pokemon evolvesFrom, boolean evolutionSanity, boolean evosBuffStats) {
-    	double theirBST = evolvesFrom.bst();
-        double ourBST;
-        if(evosBuffStats) {
-        	ourBST = theirBST + 95;
+    public void randomizeBSTSetAmountAbovePreevo(Random random, Pokemon evolvesFrom, boolean dontRandomizeRatio) {
+        int newBST = evolvesFrom.bstForPowerLevels() + 95;
+        if (dontRandomizeRatio) {
+            scaleStatsToNewBST(newBST);
         } else {
-        	ourBST = theirBST + (40 + 150 * random.nextDouble());
+            randomizeStatsWithinNewBST(random, newBST);
         }
-        if(evolutionSanity) {
-            double bstRatio = ourBST / theirBST;
-        	hp = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.hp * bstRatio)));
-            attack = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.attack * bstRatio)));
-            defense = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.defense * bstRatio)));
-            speed = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.speed * bstRatio)));
-            spatk = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.spatk * bstRatio)));
-            spdef = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.spdef * bstRatio)));
-        } else {
-            double gainRatio = ourBST / bst();
-        	if (!(number == 292)) {
-            	hp = (int) Math.min(255, Math.max(1, Math.round(hp * gainRatio)));
-            }
-        	hp = (int) Math.min(255, Math.max(1, Math.round(hp * gainRatio)));
-            attack = (int) Math.min(255, Math.max(1, Math.round(attack * gainRatio)));
-            defense = (int) Math.min(255, Math.max(1, Math.round(defense * gainRatio)));
-            speed = (int) Math.min(255, Math.max(1, Math.round(speed * gainRatio)));
-            spatk = (int) Math.min(255, Math.max(1, Math.round(spatk * gainRatio)));
-            spdef = (int) Math.min(255, Math.max(1, Math.round(spdef * gainRatio)));
-        }
-        special = (int) Math.ceil((spatk + spdef) / 2.0f);
     }
     
+    public void copyRandomizedBSTUpEvolution(Random random, Pokemon evolvesFrom, boolean fixedAmount) {
+        int newBST = fixedAmount ? evolvesFrom.bstForPowerLevels() + 95 : pickNewBST(random);
+        // quick and easy method to copy preevo's stat ratios with a new BST
+        scaleStatsToNewBST(newBST);
+        copyRandomizedStatsUpEvolution(evolvesFrom);
+    }
+
     public void copyEqualizedStatsUpEvolution(Pokemon evolvesFrom) {
         hp = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.hp)));
         attack = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.attack)));
@@ -610,6 +386,28 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public boolean isLegendary() {
         return legendaries.contains(this.number);
+    }
+
+    public int evosFromDepth() {
+        if (evolutionsFrom.isEmpty()) {
+            return 0;
+        }
+        int md = 0;
+        for (Evolution ef : evolutionsFrom) {
+            md = Math.max(md, ef.to.evosFromDepth());
+        }
+        return md + 1;
+    }
+
+    public int evosToDepth() {
+        if (evolutionsTo.isEmpty()) {
+            return 0;
+        }
+        int md = 0;
+        for (Evolution ef : evolutionsTo) {
+            md = Math.max(md, ef.from.evosToDepth());
+        }
+        return md + 1;
     }
 
 }
