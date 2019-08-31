@@ -174,9 +174,9 @@ public class Pokemon implements Comparable<Pokemon> {
     }
 
     private void scaleStatsToNewBST(int newBST) {
-        double bstMult = (newBST - 70) / (bst() - 70);
+        double bstMult = (newBST - 70.0) / (bst() - 70.0);
         if (number == 292) {
-            bstMult = (newBST * 5 / 6 - 50) / (bst() - 51);
+            bstMult = (newBST * 5.0 / 6 - 50.0) / (bst() - 51.0);
         } else {
             hp = (int) Math.min(255, (20 + Math.round((hp - 20) * bstMult)));
         }
