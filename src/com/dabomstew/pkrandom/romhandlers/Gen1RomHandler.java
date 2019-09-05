@@ -53,14 +53,17 @@ import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.EvolutionType;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
+import com.dabomstew.pkrandom.pokemon.FieldTM;
 import com.dabomstew.pkrandom.pokemon.IngameTrade;
 import com.dabomstew.pkrandom.pokemon.ItemList;
+import com.dabomstew.pkrandom.pokemon.ItemLocation;
 import com.dabomstew.pkrandom.pokemon.Move;
 import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
+
 import compressors.Gen1Decmp;
 
 public class Gen1RomHandler extends AbstractGBCRomHandler {
@@ -1765,7 +1768,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         private Connection[] cons;
         private int n_cons;
         private int obj_addr;
-        private List<Integer> itemOffsets;
+        private List<ItemLocationInner> itemOffsets;
     }
 
     private static class MapHeader {
@@ -1786,6 +1789,26 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         private int x_align; // u8
         private int window; // u16
         // 11 bytes
+    }
+    
+    private class ItemLocationInner {
+        private int map;
+        private int x;
+        private int y;
+        private int offset;
+        private boolean hidden;
+        public ItemLocationInner(int map, int x, int y, int offset, boolean hidden) {
+            super();
+            this.map = map;
+            this.x = x;
+            this.y = y;
+            this.offset = offset;
+            this.hidden = hidden;
+        }
+        @Override
+        public String toString() {
+            return String.format("%s @ %d, %d (%s)", mapNames[map], x, y, hidden ? "hidden" : "visible");
+        }
     }
 
     private void preloadMaps() {
@@ -1857,7 +1880,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         offs += n_signs * 3;
 
         // Finally, entities, which contain the items
-        map.itemOffsets = new ArrayList<Integer>();
+        map.itemOffsets = new ArrayList<ItemLocationInner>();
         int n_entities = rom[offs++] & 0xFF;
         for (int i = 0; i < n_entities; i++) {
             // Read text ID
@@ -1867,7 +1890,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 offs += 8;
             } else if ((tid & (1 << 7)) > 0 && (rom[offs + 6] != 0x00)) {
                 // item
-                map.itemOffsets.add(offs + 6);
+                map.itemOffsets.add(new ItemLocationInner(map.id, (rom[offs+2]&0xFF)-4, (rom[offs+1]&0xFF)-4, offs+6, false));
                 offs += 7;
             } else {
                 // generic
@@ -1920,9 +1943,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         }
     }
 
-    private List<Integer> getItemOffsets() {
+    private List<ItemLocationInner> getItemOffsets() {
 
-        List<Integer> itemOffs = new ArrayList<Integer>();
+        List<ItemLocationInner> itemOffs = new ArrayList<ItemLocationInner>();
 
         for (int i = 0; i < maps.length; i++) {
             if (maps[i] != null) {
@@ -1947,7 +1970,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
                 while ((rom[spclOffset] & 0xFF) != 0xFF) {
                     if (calculateOffset(rom[spclOffset + 3] & 0xFF, readWord(spclOffset + 4)) == hiRoutine) {
-                        itemOffs.add(spclOffset + 2);
+                        itemOffs.add(new ItemLocationInner(rom[lOffs]&0xFF, rom[spclOffset+1]&0xFF, rom[spclOffset]&0xFF, spclOffset + 2, true));
                     }
                     spclOffset += 6;
                 }
@@ -1964,7 +1987,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
                 while ((rom[spclOffset] & 0xFF) != 0xFF) {
                     if (calculateOffset(rom[spclOffset + 3] & 0xFF, readWord(spclOffset + 4)) == hiRoutine) {
-                        itemOffs.add(spclOffset + 2);
+                        itemOffs.add(new ItemLocationInner(rom[lOffs]&0xFF, rom[spclOffset+1]&0xFF, rom[spclOffset]&0xFF, spclOffset + 2, true));
                     }
                     spclOffset += 6;
                 }
@@ -1981,14 +2004,14 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public List<Integer> getCurrentFieldTMs() {
-        List<Integer> itemOffsets = getItemOffsets();
-        List<Integer> fieldTMs = new ArrayList<Integer>();
+    public List<FieldTM> getCurrentFieldTMs() {
+        List<ItemLocationInner> itemOffsets = getItemOffsets();
+        List<FieldTM> fieldTMs = new ArrayList<FieldTM>();
 
-        for (int offset : itemOffsets) {
-            int itemHere = rom[offset] & 0xFF;
+        for (ItemLocationInner il : itemOffsets) {
+            int itemHere = rom[il.offset] & 0xFF;
             if (Gen1Constants.allowedItems.isTM(itemHere)) {
-                fieldTMs.add(itemHere - Gen1Constants.tmsStartIndex + 1); // TM
+                fieldTMs.add(new FieldTM(il.toString(), itemHere - Gen1Constants.tmsStartIndex + 1)); // TM
                                                                           // offset
             }
         }
@@ -1997,27 +2020,27 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void setFieldTMs(List<Integer> fieldTMs) {
-        List<Integer> itemOffsets = getItemOffsets();
+        List<ItemLocationInner> itemOffsets = getItemOffsets();
         Iterator<Integer> iterTMs = fieldTMs.iterator();
 
-        for (int offset : itemOffsets) {
-            int itemHere = rom[offset] & 0xFF;
+        for (ItemLocationInner il : itemOffsets) {
+            int itemHere = rom[il.offset] & 0xFF;
             if (Gen1Constants.allowedItems.isTM(itemHere)) {
                 // Replace this with a TM from the list
-                rom[offset] = (byte) (iterTMs.next() + Gen1Constants.tmsStartIndex - 1);
+                rom[il.offset] = (byte) (iterTMs.next() + Gen1Constants.tmsStartIndex - 1);
             }
         }
     }
 
     @Override
-    public List<Integer> getRegularFieldItems() {
-        List<Integer> itemOffsets = getItemOffsets();
-        List<Integer> fieldItems = new ArrayList<Integer>();
+    public List<ItemLocation> getRegularFieldItems() {
+        List<ItemLocationInner> itemOffsets = getItemOffsets();
+        List<ItemLocation> fieldItems = new ArrayList<ItemLocation>();
 
-        for (int offset : itemOffsets) {
-            int itemHere = rom[offset] & 0xFF;
+        for (ItemLocationInner il : itemOffsets) {
+            int itemHere = rom[il.offset] & 0xFF;
             if (Gen1Constants.allowedItems.isAllowed(itemHere) && !(Gen1Constants.allowedItems.isTM(itemHere))) {
-                fieldItems.add(itemHere);
+                fieldItems.add(new ItemLocation(il.toString(), itemHere));
             }
         }
         return fieldItems;
@@ -2025,14 +2048,14 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void setRegularFieldItems(List<Integer> items) {
-        List<Integer> itemOffsets = getItemOffsets();
+        List<ItemLocationInner> itemOffsets = getItemOffsets();
         Iterator<Integer> iterItems = items.iterator();
 
-        for (int offset : itemOffsets) {
-            int itemHere = rom[offset] & 0xFF;
+        for (ItemLocationInner il : itemOffsets) {
+            int itemHere = rom[il.offset] & 0xFF;
             if (Gen1Constants.allowedItems.isAllowed(itemHere) && !(Gen1Constants.allowedItems.isTM(itemHere))) {
                 // Replace it
-                rom[offset] = (byte) (iterItems.next().intValue());
+                rom[il.offset] = (byte) (iterItems.next().intValue());
             }
         }
 

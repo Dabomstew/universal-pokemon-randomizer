@@ -54,9 +54,11 @@ import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.EvolutionType;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
+import com.dabomstew.pkrandom.pokemon.FieldTM;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.IngameTrade;
 import com.dabomstew.pkrandom.pokemon.ItemList;
+import com.dabomstew.pkrandom.pokemon.ItemLocation;
 import com.dabomstew.pkrandom.pokemon.Move;
 import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.pokemon.MoveLearnt;
@@ -2730,21 +2732,32 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void shuffleFieldItems() {
-        List<Integer> currentItems = this.getRegularFieldItems();
-        List<Integer> currentTMs = this.getCurrentFieldTMs();
+        List<ItemLocation> currentItems = this.getRegularFieldItems();
+        List<FieldTM> currentTMs = this.getCurrentFieldTMs();
 
         Collections.shuffle(currentItems, this.random);
         Collections.shuffle(currentTMs, this.random);
+        
+        List<Integer> newItems = new ArrayList<Integer>();
+        List<Integer> newTMs = new ArrayList<Integer>();
+        
+        for(ItemLocation il : currentItems) {
+            newItems.add(il.item);
+        }
+        
+        for(FieldTM tm : currentTMs) {
+            newTMs.add(tm.tm);
+        }
 
-        this.setRegularFieldItems(currentItems);
-        this.setFieldTMs(currentTMs);
+        this.setRegularFieldItems(newItems);
+        this.setFieldTMs(newTMs);
     }
 
     @Override
     public void randomizeFieldItems(boolean banBadItems) {
         ItemList possibleItems = banBadItems ? this.getNonBadItems() : this.getAllowedItems();
-        List<Integer> currentItems = this.getRegularFieldItems();
-        List<Integer> currentTMs = this.getCurrentFieldTMs();
+        List<ItemLocation> currentItems = this.getRegularFieldItems();
+        List<FieldTM> currentTMs = this.getCurrentFieldTMs();
         List<Integer> requiredTMs = this.getRequiredFieldTMs();
 
         int fieldItemCount = currentItems.size();

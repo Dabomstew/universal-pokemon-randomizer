@@ -60,8 +60,10 @@ import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.EvolutionType;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
+import com.dabomstew.pkrandom.pokemon.FieldTM;
 import com.dabomstew.pkrandom.pokemon.IngameTrade;
 import com.dabomstew.pkrandom.pokemon.ItemList;
+import com.dabomstew.pkrandom.pokemon.ItemLocation;
 import com.dabomstew.pkrandom.pokemon.Move;
 import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
@@ -367,7 +369,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private String[] abilityNames;
     private String[] itemNames;
     private boolean mapLoadingDone;
-    private List<Integer> itemOffs;
+    private List<ItemLocationInner> itemOffs;
     private String[][] mapNames;
     private boolean isRomHack;
     private int[] internalToPokedex, pokedexToInternal;
@@ -2732,8 +2734,33 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         romEntry.arrayEntries.put("MapBankSizes", bankMapCounts);
     }
 
+    private class ItemLocationInner {
+        private int mapBank;
+        private int mapNumber;
+        private int x;
+        private int y;
+        private int offset;
+        private boolean hidden;
+
+        public ItemLocationInner(int mapBank, int mapNumber, int x, int y, int offset, boolean hidden) {
+            super();
+            this.mapBank = mapBank;
+            this.mapNumber = mapNumber;
+            this.x = x;
+            this.y = y;
+            this.offset = offset;
+            this.hidden = hidden;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s (%d.%d) @ %d, %d (%s)", mapNames[mapBank][mapNumber], mapBank, mapNumber, x, y,
+                    hidden ? "hidden" : "visible");
+        }
+    }
+
     private void preprocessMaps() {
-        itemOffs = new ArrayList<Integer>();
+        itemOffs = new ArrayList<ItemLocationInner>();
         int bankCount = romEntry.getValue("MapBankCount");
         int[] bankMapCounts = romEntry.arrayEntries.get("MapBankSizes");
         int itemBall = romEntry.getValue("ItemBallPic");
@@ -2781,7 +2808,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                                         && rom[scriptOffset + 10] == 0x09
                                         && (rom[scriptOffset + 11] == 0x00 || rom[scriptOffset + 11] == 0x01)) {
                                     // item ball script
-                                    itemOffs.add(scriptOffset + 3);
+                                    itemOffs.add(new ItemLocationInner(bank, map, readWord(peopleOffset + p * 24 + 4),
+                                            readWord(peopleOffset + p * 24 + 6), scriptOffset + 3, false));
                                 }
                             }
                         }
@@ -2821,7 +2849,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                                 int itemHere = readWord(signpostsOffset + sp * 12 + 8);
                                 if (itemHere != 0) {
                                     // itemid 0 is coins
-                                    itemOffs.add(signpostsOffset + sp * 12 + 8);
+                                    itemOffs.add(new ItemLocationInner(bank, map, readWord(signpostsOffset + sp * 12),
+                                            readWord(signpostsOffset + sp * 12 + 2), signpostsOffset + sp * 12 + 8,
+                                            true));
                                 }
                             }
                         }
@@ -2869,20 +2899,21 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public List<Integer> getCurrentFieldTMs() {
+    public List<FieldTM> getCurrentFieldTMs() {
         if (!mapLoadingDone) {
             preprocessMaps();
             mapLoadingDone = true;
         }
-        List<Integer> fieldTMs = new ArrayList<Integer>();
+        List<FieldTM> fieldTMs = new ArrayList<FieldTM>();
 
-        for (int offset : itemOffs) {
-            int itemHere = readWord(offset);
+        for (ItemLocationInner il : itemOffs) {
+            int itemHere = readWord(il.offset);
             if (Gen3Constants.allowedItems.isTM(itemHere)) {
                 int thisTM = itemHere - Gen3Constants.tmItemOffset + 1;
                 // hack for repeat TMs
-                if (fieldTMs.contains(thisTM) == false) {
-                    fieldTMs.add(thisTM);
+                FieldTM tmObj = new FieldTM(il.toString(), thisTM);
+                if (fieldTMs.contains(tmObj) == false) {
+                    fieldTMs.add(tmObj);
                 }
             }
         }
@@ -2898,35 +2929,35 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         Iterator<Integer> iterTMs = fieldTMs.iterator();
         int[] givenTMs = new int[512];
 
-        for (int offset : itemOffs) {
-            int itemHere = readWord(offset);
+        for (ItemLocationInner il : itemOffs) {
+            int itemHere = readWord(il.offset);
             if (Gen3Constants.allowedItems.isTM(itemHere)) {
                 // Cache replaced TMs to duplicate repeats
                 if (givenTMs[itemHere] != 0) {
-                    rom[offset] = (byte) givenTMs[itemHere];
+                    writeWord(il.offset, givenTMs[itemHere]);
                 } else {
                     // Replace this with a TM from the list
                     int tm = iterTMs.next();
                     tm += Gen3Constants.tmItemOffset - 1;
                     givenTMs[itemHere] = tm;
-                    writeWord(offset, tm);
+                    writeWord(il.offset, tm);
                 }
             }
         }
     }
 
     @Override
-    public List<Integer> getRegularFieldItems() {
+    public List<ItemLocation> getRegularFieldItems() {
         if (!mapLoadingDone) {
             preprocessMaps();
             mapLoadingDone = true;
         }
-        List<Integer> fieldItems = new ArrayList<Integer>();
+        List<ItemLocation> fieldItems = new ArrayList<ItemLocation>();
 
-        for (int offset : itemOffs) {
-            int itemHere = readWord(offset);
+        for (ItemLocationInner il : itemOffs) {
+            int itemHere = readWord(il.offset);
             if (Gen3Constants.allowedItems.isAllowed(itemHere) && !(Gen3Constants.allowedItems.isTM(itemHere))) {
-                fieldItems.add(itemHere);
+                fieldItems.add(new ItemLocation(il.toString(), itemHere));
             }
         }
         return fieldItems;
@@ -2940,11 +2971,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
         Iterator<Integer> iterItems = items.iterator();
 
-        for (int offset : itemOffs) {
-            int itemHere = readWord(offset);
+        for (ItemLocationInner il : itemOffs) {
+            int itemHere = readWord(il.offset);
             if (Gen3Constants.allowedItems.isAllowed(itemHere) && !(Gen3Constants.allowedItems.isTM(itemHere))) {
                 // Replace it
-                writeWord(offset, iterItems.next());
+                writeWord(il.offset, iterItems.next());
             }
         }
 

@@ -39,9 +39,6 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
 
-import thenewpoketext.PokeTextData;
-import thenewpoketext.TextToPoke;
-
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
@@ -55,13 +52,18 @@ import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.EvolutionType;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
+import com.dabomstew.pkrandom.pokemon.FieldTM;
 import com.dabomstew.pkrandom.pokemon.IngameTrade;
 import com.dabomstew.pkrandom.pokemon.ItemList;
+import com.dabomstew.pkrandom.pokemon.ItemLocation;
 import com.dabomstew.pkrandom.pokemon.Move;
 import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
+
+import thenewpoketext.PokeTextData;
+import thenewpoketext.TextToPoke;
 
 public class Gen4RomHandler extends AbstractDSRomHandler {
 
@@ -2320,13 +2322,13 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public List<Integer> getCurrentFieldTMs() {
+    public List<FieldTM> getCurrentFieldTMs() {
         List<Integer> fieldItems = this.getFieldItems();
-        List<Integer> fieldTMs = new ArrayList<Integer>();
+        List<FieldTM> fieldTMs = new ArrayList<FieldTM>();
 
         for (int item : fieldItems) {
             if (Gen4Constants.allowedItems.isTM(item)) {
-                fieldTMs.add(item - Gen4Constants.tmItemOffset + 1);
+                fieldTMs.add(new FieldTM("Unknown", item - Gen4Constants.tmItemOffset + 1));
             }
         }
 
@@ -2351,13 +2353,13 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public List<Integer> getRegularFieldItems() {
+    public List<ItemLocation> getRegularFieldItems() {
         List<Integer> fieldItems = this.getFieldItems();
-        List<Integer> fieldRegItems = new ArrayList<Integer>();
+        List<ItemLocation> fieldRegItems = new ArrayList<ItemLocation>();
 
         for (int item : fieldItems) {
             if (Gen4Constants.allowedItems.isAllowed(item) && !(Gen4Constants.allowedItems.isTM(item))) {
-                fieldRegItems.add(item);
+                fieldRegItems.add(new ItemLocation("Unknown", item));
             }
         }
 

@@ -33,9 +33,11 @@ import java.util.Random;
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
+import com.dabomstew.pkrandom.pokemon.FieldTM;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.IngameTrade;
 import com.dabomstew.pkrandom.pokemon.ItemList;
+import com.dabomstew.pkrandom.pokemon.ItemLocation;
 import com.dabomstew.pkrandom.pokemon.Move;
 import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
@@ -376,13 +378,13 @@ public interface RomHandler {
 
     public List<Integer> getRequiredFieldTMs();
 
-    public List<Integer> getCurrentFieldTMs();
+    public List<FieldTM> getCurrentFieldTMs();
 
     public void setFieldTMs(List<Integer> fieldTMs);
 
     // Everything else
 
-    public List<Integer> getRegularFieldItems();
+    public List<ItemLocation> getRegularFieldItems();
 
     public void setRegularFieldItems(List<Integer> items);
 
