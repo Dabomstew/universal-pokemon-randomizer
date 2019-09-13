@@ -27,8 +27,11 @@ package com.dabomstew.pkrandom.pokemon;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
+import java.util.function.Consumer;
 
 public class Pokemon implements Comparable<Pokemon> {
 
@@ -386,6 +389,26 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public boolean isLegendary() {
         return legendaries.contains(this.number);
+    }
+    
+    private void forEachEvolution_helper(Consumer<Pokemon> func, Set<Pokemon> alreadyVisited) {
+        if (alreadyVisited.contains(this)) return;
+        func.accept(this);
+        alreadyVisited.add(this);
+        evolutionsFrom.forEach(evo -> evo.to.forEachEvolution_helper(func, alreadyVisited));
+        evolutionsTo.forEach(evo -> evo.from.forEachEvolution_helper(func, alreadyVisited));
+    }
+    
+    public void forEachEvolution(Consumer<Pokemon> func) {
+        Set<Pokemon> visited = new HashSet<Pokemon>();
+        forEachEvolution_helper(func, visited);
+    }
+    
+    public Pokemon getEvolutionRepresentant() {
+        // assuming no two pokemon can have the same descendent
+        // Return the lowest one in the evolution order
+        if (evolutionsTo.isEmpty()) return this;
+        return evolutionsTo.get(0).from.getEvolutionRepresentant();
     }
 
     public int evosFromDepth() {
