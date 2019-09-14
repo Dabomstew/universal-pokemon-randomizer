@@ -34,14 +34,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen5RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
-import java.util.HashSet;
-import java.util.Set;
 
 // Can randomize a file based on settings. Output varies by seed.
 public class Randomizer {
@@ -159,75 +159,37 @@ public class Randomizer {
         if (settings.isStandardizeEXPCurves()) {
             romHandler.standardizeEXPCurves();
         }
+        
+        if (settings.isUpdateBaseStats()) {
+            romHandler.updatePokemonStats();
+        }
+        
+        // Base stats adjustment (pre-evolution randomization)
+        if (settings.isStatsRandomizeFirst()) {
+            maybeChangeStats(log, romHandler);
+        }
 
+        // Pokemon Types (pre-evolution randomization)
+        if(settings.isTypesRandomizeFirst()) {
+            maybeChangeTypes(log, romHandler);
+        }
 
-        // Pokemon Types
-        switch (settings.getTypesMod()) {
-        case RANDOM_FOLLOW_EVOLUTIONS:
-            romHandler.randomizePokemonTypes(true);
-            break;
-        case COMPLETELY_RANDOM:
-            romHandler.randomizePokemonTypes(false);
-            break;
-        default:
-            break;
+        // Pokemon evolutions
+        maybeChangeEvolutions(log, romHandler);
+        
+        // Base stats adjustment (post-evolution randomization)
+        if (!settings.isStatsRandomizeFirst()) {
+            maybeChangeStats(log, romHandler);
+        }
+
+        // Pokemon Types (post-evolution randomization)
+        if(!settings.isTypesRandomizeFirst()) {
+            maybeChangeTypes(log, romHandler);
         }
 
         // Wild Held Items?
         if (settings.isRandomizeWildPokemonHeldItems()) {
             romHandler.randomizeWildHeldItems(settings.isBanBadRandomWildPokemonHeldItems());
-        }
-
-        // Random Evos
-        // Applied after type to pick new evos based on new types.
-        if (settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM) {
-            romHandler.randomizeEvolutions(settings.isEvosSimilarStrength(), settings.isEvosSameTyping(),
-                    settings.isEvosMaxThreeStages(), settings.isEvosForceChange());
-
-            log.println("<h2>Randomized Evolutions</h2>");
-            log.println("<ul>");
-            
-            List<Pokemon> allPokes = romHandler.getPokemon();
-            for (Pokemon pk : allPokes) {
-                if (pk != null) {
-                    int numEvos = pk.evolutionsFrom.size();
-                    if (numEvos > 0) {
-                        StringBuilder evoStr = new StringBuilder(String.format("<strong>%s</strong>", pk.evolutionsFrom.get(0).to.name));
-                        for (int i = 1; i < numEvos; i++) {
-                            if (i == numEvos - 1) {
-                                evoStr.append(String.format(" and <strong>%s</strong>", pk.evolutionsFrom.get(i).to.name));
-                            } else {
-                                evoStr.append(String.format(", <strong>%s</strong>", pk.evolutionsFrom.get(i).to.name));
-                            }
-                        }
-                        log.println(String.format("<li><strong>%s</strong> now evolves into %s</li>", pk.name, evoStr.toString()));
-                    }
-                }
-            }
-
-            log.println("</ul>");
-        }
-
-        if (settings.isUpdateBaseStats()) {
-            romHandler.updatePokemonStats();
-        }
-
-        // Base stats changing
-        switch (settings.getBaseStatisticsMod()) {
-        case SHUFFLE:
-            romHandler.shufflePokemonStats(settings.isBaseStatsFollowEvolutions());
-            break;
-        case RANDOM_WITHIN_BST:
-            romHandler.randomizePokemonStatsWithinBST(settings.isBaseStatsFollowEvolutions());
-            break;
-        case RANDOM_UNRESTRICTED:
-            romHandler.randomizePokemonStatsUnrestricted(settings.isBaseStatsFollowEvolutions());
-            break;
-        case RANDOM_COMPLETELY:
-            romHandler.randomizeCompletelyPokemonStats(settings.isBaseStatsFollowEvolutions());
-            break;
-        default:
-            break;
         }
 
         // Abilities? (new 1.0.2)
@@ -678,8 +640,68 @@ public class Randomizer {
         }
     }
 
+    private void maybeChangeEvolutions(final PrintStream log, final RomHandler romHandler) {
+        if (settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM) {
+            romHandler.randomizeEvolutions(settings.isEvosSimilarStrength(), settings.isEvosSameTyping(),
+                    settings.isEvosMaxThreeStages(), settings.isEvosForceChange(), settings.isEvosNoConverge(), 
+                    settings.isEvosForceGrowth());
+
+            log.println("<h2>Randomized Evolutions</h2>\n<ul>");
+            List<Pokemon> allPokes = romHandler.getPokemon();
+            for (Pokemon pk : allPokes) {
+                if (pk != null) {
+                    int numEvos = pk.evolutionsFrom.size();
+                    if (numEvos > 0) {
+                        StringBuilder evoStr = new StringBuilder(pk.evolutionsFrom.get(0).to.name);
+                        for (int i = 1; i < numEvos; i++) {
+                            if (i == numEvos - 1) {
+                                evoStr.append(" and " + pk.evolutionsFrom.get(i).to.name);
+                            } else {
+                                evoStr.append(", " + pk.evolutionsFrom.get(i).to.name);
+                            }
+                        }
+                        log.println("<li>" + pk.name + " now evolves into " + evoStr.toString() + "</li>");
+                    }
+                }
+            }
+            log.println("</ul>");
+        }        
+    }
+
+    private void maybeChangeStats(final PrintStream log, final RomHandler romHandler) {
+        switch (settings.getBaseStatisticsMod()) {
+        case SHUFFLE:
+            romHandler.shufflePokemonStats(settings.isBaseStatsFollowEvolutions());
+            break;
+        case RANDOM_WITHIN_BST:
+            romHandler.randomizePokemonStatsWithinBST(settings.isBaseStatsFollowEvolutions());
+            break;
+        case RANDOM_UNRESTRICTED:
+            romHandler.randomizePokemonStatsUnrestricted(settings.isBaseStatsFollowEvolutions());
+            break;
+        case RANDOM_COMPLETELY:
+            romHandler.randomizeCompletelyPokemonStats(settings.isBaseStatsFollowEvolutions());
+            break;
+        default:
+            break;
+        }
+    }
+
+    private void maybeChangeTypes(final PrintStream log, final RomHandler romHandler) {
+        switch (settings.getTypesMod()) {
+        case RANDOM_FOLLOW_EVOLUTIONS:
+            romHandler.randomizePokemonTypes(true);
+            break;
+        case COMPLETELY_RANDOM:
+            romHandler.randomizePokemonTypes(false);
+            break;
+        default:
+            break;
+        }
+    }
+
     private void maybeChangeAndLogStarters(final PrintStream log, final RomHandler romHandler) {
-        if (romHandler.canChangeStarters()) {
+        if (romHandler.canChangeStarters()) {  
             if (settings.getStartersMod() == Settings.StartersMod.CUSTOM) {
                 log.println("<h2>Custom Starters</h2>");
                 log.println("<ul>");
@@ -721,12 +743,13 @@ public class Randomizer {
                 }
 
                 List<Pokemon> starters = new ArrayList<Pokemon>();
-                selectRandomStarter(starterCount, starters, log, () -> romHandler.random1or2EvosPokemon());
+                selectRandomStarter(starterCount, starters, log, () -> 
+                    romHandler.random1or2EvosPokemon(settings.isStartersNoSplit()));
 
                 romHandler.setStarters(starters);
                 log.println("</ul>");
             } else if (settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_TWO_EVOLUTIONS) {
-             // Randomise
+                // Randomise
                 log.println("<h2>Random 2-Evolution Starters</h2>");
                 log.println("<ul>");
                 int starterCount = 3;
@@ -735,7 +758,8 @@ public class Randomizer {
                 }
 
                 List<Pokemon> starters = new ArrayList<Pokemon>();
-                selectRandomStarter(starterCount, starters, log, () -> romHandler.random2EvosPokemon());
+                selectRandomStarter(starterCount, starters, log, () -> 
+                    romHandler.random2EvosPokemon(settings.isStartersNoSplit()));
 
                 romHandler.setStarters(starters);
                 log.println("</ul>");

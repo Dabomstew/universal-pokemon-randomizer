@@ -91,6 +91,7 @@ public class Settings {
     // index in the rom's list of pokemon
     // offset from the dropdown index from RandomizerGUI by 1
     private int[] customStarters = new int[3];
+    private boolean startersNoSplit;
     private boolean randomizeStartersHeldItems;
     private boolean banBadRandomStarterHeldItems;
     private boolean startersUniqueTypes;
@@ -111,6 +112,10 @@ public class Settings {
     private boolean evosSameTyping;
     private boolean evosMaxThreeStages;
     private boolean evosForceChange;
+    private boolean evosNoConverge;
+    private boolean evosForceGrowth;
+    private boolean typesRandomizeFirst;
+    private boolean statsRandomizeFirst;
 
     // Move data
     private boolean randomizeMovePowers;
@@ -257,7 +262,7 @@ public class Settings {
 
         // 0: general options #1 + trainer/class names
         out.write(makeByteSelected(changeImpossibleEvolutions, updateMoves, updateMovesLegacy, randomizeTrainerNames,
-                randomizeTrainerClassNames, makeEvolutionsEasier));
+                randomizeTrainerClassNames, makeEvolutionsEasier, typesRandomizeFirst, statsRandomizeFirst));
 
         // 1: pokemon base stats & abilities
         out.write(makeByteSelected(baseStatsFollowEvolutions, baseStatisticsMod == BaseStatisticsMod.RANDOM_WITHIN_BST,
@@ -279,7 +284,7 @@ public class Settings {
         out.write(makeByteSelected(startersMod == StartersMod.CUSTOM, startersMod == StartersMod.COMPLETELY_RANDOM,
                 startersMod == StartersMod.UNCHANGED, startersMod == StartersMod.RANDOM_WITH_TWO_EVOLUTIONS,
                 randomizeStartersHeldItems, banBadRandomStarterHeldItems, startersUniqueTypes, 
-                startersMod == StartersMod.RANDOM_WITH_ONE_OR_TWO_EVOLUTIONS));
+                startersMod == StartersMod.RANDOM_WITH_ONE_OR_TWO_EVOLUTIONS, startersNoSplit));
 
         // @5 dropdowns
         write2ByteInt(out, customStarters[0] - 1);
@@ -370,7 +375,7 @@ public class Settings {
 
         // 26 evolutions
         out.write(makeByteSelected(evolutionsMod == EvolutionsMod.UNCHANGED, evolutionsMod == EvolutionsMod.RANDOM,
-                evosSimilarStrength, evosSameTyping, evosMaxThreeStages, evosForceChange));
+                evosSimilarStrength, evosSameTyping, evosMaxThreeStages, evosForceChange, evosNoConverge, evosForceGrowth));
 
         // @ 27 pokemon restrictions
         try {
@@ -428,6 +433,8 @@ public class Settings {
         settings.setRandomizeTrainerNames(restoreState(data[0], 3));
         settings.setRandomizeTrainerClassNames(restoreState(data[0], 4));
         settings.setMakeEvolutionsEasier(restoreState(data[0], 5));
+        settings.setTypesRandomizeFirst(restoreState(data[0], 6));
+        settings.setStatsRandomizeFirst(restoreState(data[0], 7));
 
         settings.setBaseStatisticsMod(restoreEnum(BaseStatisticsMod.class, data[1], 3, // UNCHANGED
                 2, // SHUFFLE
@@ -464,6 +471,7 @@ public class Settings {
         settings.setRandomizeStartersHeldItems(restoreState(data[4], 4));
         settings.setBanBadRandomStarterHeldItems(restoreState(data[4], 5));
         settings.setStartersUniqueTypes(restoreState(data[4], 6));
+        settings.setStartersNoSplit(restoreState(data[4], 7));
 
         settings.setCustomStarters(new int[] { FileFunctions.read2ByteInt(data, 5) + 1,
                 FileFunctions.read2ByteInt(data, 7) + 1, FileFunctions.read2ByteInt(data, 9) + 1 });
@@ -579,6 +587,8 @@ public class Settings {
         settings.setEvosSameTyping(restoreState(data[26], 3));
         settings.setEvosMaxThreeStages(restoreState(data[26], 4));
         settings.setEvosForceChange(restoreState(data[26], 5));
+        settings.setEvosNoConverge(restoreState(data[26], 6));
+        settings.setEvosForceGrowth(restoreState(data[26], 7));
 
         // gen restrictions
         int genLimit = FileFunctions.readFullInt(data, 27);
@@ -941,6 +951,15 @@ public class Settings {
         this.customStarters = customStarters;
         return this;
     }
+    
+    public boolean isStartersNoSplit() {
+        return startersNoSplit;
+    }
+
+    public Settings setStartersNoSplit(boolean startersNoSplit) {
+        this.startersNoSplit = startersNoSplit;
+        return this;
+    }
 
     public boolean isRandomizeStartersHeldItems() {
         return randomizeStartersHeldItems;
@@ -1028,6 +1047,42 @@ public class Settings {
 
     public Settings setEvosForceChange(boolean evosForceChange) {
         this.evosForceChange = evosForceChange;
+        return this;
+    }
+    
+    public boolean isEvosNoConverge() {
+        return evosNoConverge;
+    }
+
+    public Settings setEvosNoConverge(boolean evosNoConverge) {
+        this.evosNoConverge= evosNoConverge;
+        return this;
+    }
+    
+    public boolean isEvosForceGrowth() {
+        return evosForceGrowth;
+    }
+
+    public Settings setEvosForceGrowth(boolean evosForceGrowth) {
+        this.evosForceGrowth= evosForceGrowth;
+        return this;
+    }
+    
+    public boolean isTypesRandomizeFirst() {
+        return typesRandomizeFirst;
+    }
+
+    public Settings setTypesRandomizeFirst(boolean typesRandomizeFirst) {
+        this.typesRandomizeFirst = typesRandomizeFirst;
+        return this;
+    }
+
+    public boolean isStatsRandomizeFirst() {
+        return statsRandomizeFirst;
+    }
+
+    public Settings setStatsRandomizeFirst(boolean statsRandomizeFirst) {
+        this.statsRandomizeFirst = statsRandomizeFirst;
         return this;
     }
 

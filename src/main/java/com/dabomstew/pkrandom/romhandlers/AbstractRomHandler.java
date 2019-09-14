@@ -391,7 +391,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<Pokemon> oneOrTwoEvoPokes;
 
     @Override
-    public Pokemon random1or2EvosPokemon() {
+    public Pokemon random1or2EvosPokemon(boolean noSplitEvos) {
         if (oneOrTwoEvoPokes == null) {
             // Prepare the list
             oneOrTwoEvoPokes = new ArrayList<Pokemon>();
@@ -400,7 +400,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (pk != null) {
                 	int length = evolutionChainSize(pk);
                 	// Stages counts base pokemon, hence a pokemon with no evolutions has length 1
-                	if(length > 1 && length < 4)
+                	if(length > 1 && length < 4 && (pk.evolutionsFrom.size() == 1 || !noSplitEvos))
                     // Candidate
                     oneOrTwoEvoPokes.add(pk);
                 }
@@ -412,7 +412,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<Pokemon> twoEvoPokes;
     
     @Override
-    public Pokemon random2EvosPokemon() {
+    public Pokemon random2EvosPokemon(boolean noSplitEvos) {
         if (twoEvoPokes == null) {
             // Prepare the list
             twoEvoPokes = new ArrayList<Pokemon>();
@@ -421,7 +421,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (pk != null) {
                 	int length = evolutionChainSize(pk);
                 	// Stages counts base pokemon, hence a pokemon with 2 evolutions has length 3
-                	if (length == 3) {
+                	if (length == 3 && (pk.evolutionsFrom.size() == 1 || !noSplitEvos)) {
                 		twoEvoPokes.add(pk);
                 	}
                 }
@@ -2715,7 +2715,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeEvolutions(boolean similarStrength, boolean sameType, boolean limitToThreeStages,
-            boolean forceChange) {
+            boolean forceChange, boolean noConverge, boolean forceGrowth) {
         checkPokemonRestrictions();
         List<Pokemon> pokemonPool = new ArrayList<Pokemon>(mainPokemonList);
         int stageLimit = limitToThreeStages ? 3 : 10;
@@ -2750,7 +2750,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             newEvoPairs.clear();
 
             // Shuffle pokemon list so the results aren't overly predictable.
-            Collections.shuffle(pokemonPool, this.random);
+            Collections.shuffle(pokemonPool, this.random);    
 
             for (Pokemon fromPK : pokemonPool) {
                 List<Evolution> oldEvos = originalEvos.get(fromPK);
@@ -2811,6 +2811,25 @@ public abstract class AbstractRomHandler implements RomHandler {
                         pk.evolutionsTo.remove(tempEvo);
 
                         if (exceededLimit) {
+                            continue;
+                        }
+                        
+                        boolean alreadyUsed = false;
+                        // Prevent evolution to already used newEvo
+                        if (noConverge) {
+                            for (EvolutionPair newEvoPair : newEvoPairs) {
+                                if (pk == newEvoPair.to) {
+                                    alreadyUsed = true;
+                                }
+                            }
+                        }
+                        
+                        if (alreadyUsed) {
+                            continue;
+                        }
+                        
+                        // Prevent stat total from decreasing
+                        if (forceGrowth && pk.bstForPowerLevels() < fromPK.bstForPowerLevels()) {
                             continue;
                         }
 
