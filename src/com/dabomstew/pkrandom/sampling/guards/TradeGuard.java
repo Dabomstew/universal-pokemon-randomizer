@@ -10,4 +10,10 @@ public abstract class TradeGuard extends Guard<Pokemon> {
     public void setEncounter(IngameTrade trade) {
         this.trade = trade;
     }
+    
+    @Override
+    public double getWeight(Pokemon obj) {
+        if (trade == null) return 1;
+        return super.getWeight(obj);
+    }
 }

@@ -34,7 +34,7 @@ public final class EvolutionSanityGuard extends EncounterGuard {
     }
 
     @Override
-    public double computeWeight(Pokemon obj) {
+    protected double computeWeight(Pokemon obj) {
         int lvl = encounter.level;
         int lb = getLowerBound(obj);
         int ub = getUpperBound(obj);

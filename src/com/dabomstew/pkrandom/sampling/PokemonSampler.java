@@ -27,12 +27,13 @@ public class PokemonSampler extends WeightedRandomSampler<Pokemon> {
     public Pokemon sampleObject() {
         // sample pokemon
         Pokemon result = super.sampleObject();
+        if (result == null) return result;
         // update sample history based guards
         guards.stream().filter(g -> g instanceof SampleHistoryGuard).map(g -> (SampleHistoryGuard)g).forEach(g -> g.updateLastSample(result));
         return result;
     }
     
-    public Pokemon samplePokemon() {
+    private Pokemon doSamplePokemon() {
         // FIXME: Maybe we want to recompute the weights in batches, for performance, as well as stability (especially early when simple changes can lead to high weight fluctuations)
         // compute weights
         super.clear();
@@ -41,19 +42,38 @@ public class PokemonSampler extends WeightedRandomSampler<Pokemon> {
         return sampleObject();
     }
     
+    public Pokemon samplePokemon() {
+        guards.stream().filter(g -> g instanceof EncounterGuard).map(g -> (EncounterGuard)g).forEach(g -> g.setEncounter(null));
+        guards.stream().filter(g -> g instanceof ReplacementGuard).map(g -> (ReplacementGuard<Pokemon>)g).forEach(g -> g.setOldValue(null));
+        guards.stream().filter(g -> g instanceof TradeGuard).map(g -> (TradeGuard)g).forEach(g -> g.setEncounter(null));
+        
+        return doSamplePokemon();
+    }
+    
+    public Pokemon sampleFor(Pokemon pkmn) {
+        // Update guards
+        guards.stream().filter(g -> g instanceof EncounterGuard).map(g -> (EncounterGuard)g).forEach(g -> g.setEncounter(null));
+        guards.stream().filter(g -> g instanceof TradeGuard).map(g -> (TradeGuard)g).forEach(g -> g.setEncounter(null));
+        guards.stream().filter(g -> g instanceof ReplacementGuard).map(g -> (ReplacementGuard<Pokemon>)g).forEach(g -> g.setOldValue(pkmn));
+        
+        return doSamplePokemon();
+    }
+    
     public Pokemon sampleFor(Encounter encounter) {
         // Update guards
         guards.stream().filter(g -> g instanceof EncounterGuard).map(g -> (EncounterGuard)g).forEach(g -> g.setEncounter(encounter));
+        guards.stream().filter(g -> g instanceof TradeGuard).map(g -> (TradeGuard)g).forEach(g -> g.setEncounter(null));
         guards.stream().filter(g -> g instanceof ReplacementGuard).map(g -> (ReplacementGuard<Pokemon>)g).forEach(g -> g.setOldValue(encounter.pokemon));
         
-        return samplePokemon();
+        return doSamplePokemon();
     }
 
     public Pokemon sampleForTrade(IngameTrade trade) {
         // Update guards
+        guards.stream().filter(g -> g instanceof EncounterGuard).map(g -> (EncounterGuard)g).forEach(g -> g.setEncounter(null));
         guards.stream().filter(g -> g instanceof TradeGuard).map(g -> (TradeGuard)g).forEach(g -> g.setEncounter(trade));
         guards.stream().filter(g -> g instanceof ReplacementGuard).map(g -> (ReplacementGuard<Pokemon>)g).forEach(g -> g.setOldValue(trade.givenPokemon));
         
-        return samplePokemon();
+        return doSamplePokemon();
     }
 }

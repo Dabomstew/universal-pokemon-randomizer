@@ -10,4 +10,10 @@ public abstract class EncounterGuard extends Guard<Pokemon> {
     public void setEncounter(Encounter encounter) {
         this.encounter = encounter;
     }
+    
+    @Override
+    public double getWeight(Pokemon obj) {
+        if (encounter == null) return 1;
+        return super.getWeight(obj);
+    }
 }

@@ -46,8 +46,9 @@ public class WeightedRandomSampler<T> {
         guards.clear();
     }
     
-    public void addGuard(Guard<T> guard) {
+    public WeightedRandomSampler<T> addGuard(Guard<T> guard) {
         guards.add(guard);
+        return this;
     }
     
     public void addObject(T object) {
@@ -56,7 +57,13 @@ public class WeightedRandomSampler<T> {
             weight *= g.computeWeight(object);
             if (weight == 0) return;
         }
-        LookupEntry last = lookup.get(lookup.size() - 1);
+        LookupEntry last;
+        // a bit hacky but who cares
+        if (lookup.isEmpty()) {
+            last = new LookupEntry(0, 0, null);
+        } else {
+            last = lookup.get(lookup.size() - 1);
+        }
         LookupEntry next = new LookupEntry(last.end, last.end + weight, object);
         lookup.add(next);
     }

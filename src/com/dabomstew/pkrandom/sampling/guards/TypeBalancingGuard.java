@@ -32,7 +32,7 @@ public final class TypeBalancingGuard extends SampleHistoryGuard {
                   samples.getOrDefault(obj.secondaryType, Integer.valueOf(0)).intValue();
         // average out
         double c = (c1 + c2) / 2.;
-        double w = c / sum;
+        double w = sum == 0 ? 0 : c / sum;
         return 1 - w;
     }
 

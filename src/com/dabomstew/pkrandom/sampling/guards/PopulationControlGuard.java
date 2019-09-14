@@ -20,11 +20,11 @@ public final class PopulationControlGuard extends SampleHistoryGuard {
     }
 
     @Override
-    public double computeWeight(Pokemon obj) {
+    protected double computeWeight(Pokemon obj) {
         Integer cnt = samples.get(obj);
         // Double so we do float divide and not int div
         double c = cnt == null ? 0 : cnt.intValue();
-        double w = c / sum;
+        double w = sum == 0 ? 0 : c / sum;
         // Preferr least sampled pokemon
         return 1.-w;
     }

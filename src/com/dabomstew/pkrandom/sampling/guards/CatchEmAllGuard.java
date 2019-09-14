@@ -23,6 +23,7 @@ public final class CatchEmAllGuard extends SampleHistoryGuard {
 
     @Override
     public void updateLastSample(Pokemon pkmn) {
+        if (pkmnLeft == 0) return;
         if (gen1) { // No breeding
             // Mark pokemon as visited
             markPokemon(pkmn);
@@ -33,7 +34,7 @@ public final class CatchEmAllGuard extends SampleHistoryGuard {
     }
 
     @Override
-    public double computeWeight(Pokemon obj) {
+    protected double computeWeight(Pokemon obj) {
         // Already sampled all -> no one to prefer
         if (pkmnLeft == 0) return 1;
         // if visited ignore, else consider for sampling
