@@ -15,6 +15,10 @@ public class ItemList {
         }
     }
 
+    public int size() {
+        return items.length;
+    }
+
     public boolean isTM(int index) {
         if (index < 0 || index >= tms.length) {
             return false;

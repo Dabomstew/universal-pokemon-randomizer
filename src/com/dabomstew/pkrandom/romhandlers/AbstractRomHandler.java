@@ -30,7 +30,6 @@ package com.dabomstew.pkrandom.romhandlers;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -44,7 +43,6 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import com.dabomstew.pkrandom.CustomNamesSet;
@@ -71,12 +69,12 @@ import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.sampling.PokemonSampler;
+import com.dabomstew.pkrandom.sampling.guards.BannedGuard;
 import com.dabomstew.pkrandom.sampling.guards.CatchEmAllGuard;
 import com.dabomstew.pkrandom.sampling.guards.EvolutionSanityGuard;
 import com.dabomstew.pkrandom.sampling.guards.LegendaryEncounterGuard;
 import com.dabomstew.pkrandom.sampling.guards.PopulationControlGuard;
 import com.dabomstew.pkrandom.sampling.guards.SameEvolutionaryStepGuard;
-import com.dabomstew.pkrandom.sampling.guards.SampleHistoryGuard;
 import com.dabomstew.pkrandom.sampling.guards.SimilarStrengthGuard;
 import com.dabomstew.pkrandom.sampling.guards.TypeBalancingGuard;
 
@@ -705,12 +703,14 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // We handle smart at the beginning, because it can take catchEmAll and powerLevels into account
         if (smart) {
-            PokemonSampler smartSampler = new PokemonSampler(this.random);
             List<Pokemon> pkmn = allPokemonWithoutNull().stream().filter(p -> !banned.contains(p)).collect(Collectors.toList());
             if (noLegendaries) {
                 pkmn = pkmn.stream().filter(p -> !p.isLegendary()).collect(Collectors.toList());
             }
-            smartSampler.addGuard(new TypeBalancingGuard())
+            PokemonSampler smartSampler = new PokemonSampler(this.random, pkmn);
+            BannedGuard<Pokemon> areaBannedGuard = new BannedGuard<Pokemon>(Set.of());
+            smartSampler.addGuard(areaBannedGuard)
+                        .addGuard(new TypeBalancingGuard())
                         .addGuard(new PopulationControlGuard())
                         .addGuard(new EvolutionSanityGuard());
             if (noLegendaries) {
@@ -724,8 +724,8 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
 
             for (EncounterSet area : scrambledEncounters) {
+                areaBannedGuard.updateBannset(area.bannedPokemon);
                 for (Encounter enc : area.encounters) {
-                    smartSampler.updatePool(pkmn.stream().filter(p -> !area.bannedPokemon.contains(p)).collect(Collectors.toList()));
                     Pokemon p = smartSampler.sampleFor(enc);
                     if (p == null) throw new OutOfPokemonException("No pokemon to sample left");
                     enc.pokemon = p;
@@ -853,12 +853,14 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // We handle smart at the beginning, because it can take catchEmAll and powerLevels into account
         if (smart) {
-            PokemonSampler smartSampler = new PokemonSampler(this.random);
             List<Pokemon> pkmn = allPokemonWithoutNull().stream().filter(p -> !banned.contains(p)).collect(Collectors.toList());
             if (noLegendaries) {
                 pkmn = pkmn.stream().filter(p -> !p.isLegendary()).collect(Collectors.toList());
             }
-            smartSampler.addGuard(new TypeBalancingGuard())
+            PokemonSampler smartSampler = new PokemonSampler(this.random, pkmn);
+            BannedGuard<Pokemon> areaBannedGuard = new BannedGuard<Pokemon>(Set.of());
+            smartSampler.addGuard(areaBannedGuard)
+                        .addGuard(new TypeBalancingGuard())
                         .addGuard(new PopulationControlGuard())
                         .addGuard(new EvolutionSanityGuard());
             if (noLegendaries) {
@@ -872,7 +874,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
 
             for (EncounterSet area : scrambledEncounters) {
-                smartSampler.updatePool(pkmn.stream().filter(p -> !area.bannedPokemon.contains(p)).collect(Collectors.toList()));
+                areaBannedGuard.updateBannset(area.bannedPokemon);
                 // Build area map using randoms
                 Map<Pokemon, Pokemon> areaMap = new TreeMap<Pokemon, Pokemon>();
                 for (Encounter enc : area.encounters) {
@@ -1047,12 +1049,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             remainingRight.remove(bannedPK);
         }
         if (smart) {
-            PokemonSampler smartSampler = new PokemonSampler(this.random);
             List<Pokemon> pkmn = allPokemonWithoutNull().stream().filter(p -> !banned.contains(p)).collect(Collectors.toList());
             if (noLegendaries) {
                 pkmn = pkmn.stream().filter(p -> !p.isLegendary()).collect(Collectors.toList());
             }
-            smartSampler.updatePool(pkmn);
+            PokemonSampler smartSampler = new PokemonSampler(this.random, pkmn);
             smartSampler.addGuard(new TypeBalancingGuard())
                         .addGuard(new PopulationControlGuard())
                         .addGuard(new SameEvolutionaryStepGuard());

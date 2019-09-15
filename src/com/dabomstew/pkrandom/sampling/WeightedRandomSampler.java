@@ -2,7 +2,10 @@ package com.dabomstew.pkrandom.sampling;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
+
+import com.dabomstew.pkrandom.sampling.guards.CompositeGuard;
 
 public class WeightedRandomSampler<T> {
     
@@ -18,8 +21,21 @@ public class WeightedRandomSampler<T> {
     }
     
     private final Random random;
-    protected final List<Guard<T>> guards = new ArrayList<Guard<T>>();
+    private final List<Guard<T>> guards = new ArrayList<Guard<T>>();
     private final List<LookupEntry> lookup = new ArrayList<LookupEntry>();
+    
+    public List<Guard<T>> getGuards(boolean resolveComposites) {
+        if (!resolveComposites) return Collections.unmodifiableList(guards);
+        List<Guard<T>> result = new ArrayList<Guard<T>>();
+        for (Guard<T> g: guards) {
+            if (g instanceof CompositeGuard) {
+                result.addAll(((CompositeGuard<T>) g).getLeafs());
+            } else {
+                result.add(g);
+            }
+        }
+        return result;
+    }
     
     private T performLookup(double d) {
         int min = 0;

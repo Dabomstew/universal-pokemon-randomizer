@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 
-public final class PopulationControlGuard extends SampleHistoryGuard {
+public final class PopulationControlGuard extends SampleHistoryGuard<Pokemon> {
     private final Map<Pokemon, Integer> samples = new HashMap<Pokemon, Integer>();
     private int sum = 0;
 

@@ -5,7 +5,7 @@ import java.util.Set;
 
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 
-public final class CatchEmAllGuard extends SampleHistoryGuard {
+public final class CatchEmAllGuard extends SampleHistoryGuard<Pokemon> {
 
     private int pkmnLeft;
     private final boolean gen1;

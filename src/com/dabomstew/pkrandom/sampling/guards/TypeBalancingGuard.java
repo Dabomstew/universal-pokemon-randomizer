@@ -6,7 +6,7 @@ import java.util.Map;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 
-public final class TypeBalancingGuard extends SampleHistoryGuard {
+public final class TypeBalancingGuard extends SampleHistoryGuard<Pokemon> {
     private final Map<Type, Integer> samples = new HashMap<Type, Integer>();
     private int sum = 0;
     
