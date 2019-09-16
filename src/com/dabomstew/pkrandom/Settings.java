@@ -137,6 +137,7 @@ public class Settings {
         UNCHANGED, RANDOM, TYPE_THEMED
     }
 
+    //TODO: Have trainer same evo stage option save/load to config properly
     private TrainersMod trainersMod = TrainersMod.UNCHANGED;
     private boolean rivalCarriesStarterThroughout;
     private boolean trainersUsePokemonOfSimilarStrength;
@@ -149,13 +150,15 @@ public class Settings {
     private int trainersForceFullyEvolvedLevel = 30;
     private boolean trainersLevelModified;
     private int trainersLevelModifier = 0; // -50 ~ 50
+    private boolean trainersUseSameEvoStages;
 
     public enum WildPokemonMod {
         UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING
     }
 
+    //TODO: Have same evo stage save/load to config properly
     public enum WildPokemonRestrictionMod {
-        NONE, SIMILAR_STRENGTH, CATCH_EM_ALL, TYPE_THEME_AREAS
+        NONE, SIMILAR_STRENGTH, CATCH_EM_ALL, TYPE_THEME_AREAS, SAME_EVO_STAGE
     }
 
     private WildPokemonMod wildPokemonMod = WildPokemonMod.UNCHANGED;
@@ -1181,6 +1184,15 @@ public class Settings {
         this.trainersUsePokemonOfSimilarStrength = trainersUsePokemonOfSimilarStrength;
         return this;
     }
+    
+    public boolean isTrainersUseSameEvoStages() {
+        return trainersUseSameEvoStages;
+    }
+    
+    public Settings setTrainersUseSameEvoStages(boolean trainersUseSameEvoStages) {
+        this.trainersUseSameEvoStages = trainersUseSameEvoStages;
+        return this;
+    }
 
     public boolean isTrainersMatchTypingDistribution() {
         return trainersMatchTypingDistribution;
@@ -1301,7 +1313,7 @@ public class Settings {
     public boolean isBlockWildLegendaries() {
         return blockWildLegendaries;
     }
-
+    
     public Settings setBlockWildLegendaries(boolean blockWildLegendaries) {
         this.blockWildLegendaries = blockWildLegendaries;
         return this;

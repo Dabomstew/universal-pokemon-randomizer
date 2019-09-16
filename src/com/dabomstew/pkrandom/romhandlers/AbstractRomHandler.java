@@ -678,7 +678,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-            boolean noLegendaries) {
+            boolean noLegendaries, boolean useSameEvoStage) {
         checkPokemonRestrictions();
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
 
@@ -780,6 +780,20 @@ public abstract class AbstractRomHandler implements RomHandler {
                     enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null);
                 }
             }
+        } else if (useSameEvoStage) {
+            List<Pokemon> allowedPokes = noLegendaries ? new ArrayList<Pokemon>(noLegendaryList)
+                    : new ArrayList<Pokemon>(mainPokemonList);
+            allowedPokes.removeAll(banned);
+            for (EncounterSet area : scrambledEncounters) {
+                List<Pokemon> localAllowed = allowedPokes;
+                if (area.bannedPokemon.size() > 0) {
+                    localAllowed = new ArrayList<Pokemon>(allowedPokes);
+                    localAllowed.removeAll(area.bannedPokemon);
+                }
+                for (Encounter enc : area.encounters) {
+                    enc.pokemon = pickWildSameEvoStageReplacement(localAllowed, enc.pokemon, false, null);
+                }
+            }
         } else {
             // Entirely random
             for (EncounterSet area : scrambledEncounters) {
@@ -797,7 +811,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
-            boolean usePowerLevels, boolean noLegendaries) {
+            boolean usePowerLevels, boolean noLegendaries, boolean useSameEvoStage) {
         checkPokemonRestrictions();
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
         List<Pokemon> banned = this.bannedForWildEncounters();
@@ -926,7 +940,33 @@ public abstract class AbstractRomHandler implements RomHandler {
                     enc.pokemon = areaMap.get(enc.pokemon);
                 }
             }
-        } else {
+        } else if(useSameEvoStage) {
+            List<Pokemon> allowedPokes = noLegendaries ? new ArrayList<Pokemon>(noLegendaryList)
+                    : new ArrayList<Pokemon>(mainPokemonList);
+            allowedPokes.removeAll(banned);
+            for (EncounterSet area : scrambledEncounters) {
+                // Poke-set
+                Set<Pokemon> inArea = pokemonInArea(area);
+                // Build area map using randoms
+                Map<Pokemon, Pokemon> areaMap = new TreeMap<Pokemon, Pokemon>();
+                List<Pokemon> usedPks = new ArrayList<Pokemon>();
+                List<Pokemon> localAllowed = allowedPokes;
+                if (area.bannedPokemon.size() > 0) {
+                    localAllowed = new ArrayList<Pokemon>(allowedPokes);
+                    localAllowed.removeAll(area.bannedPokemon);
+                }
+                for (Pokemon areaPk : inArea) {
+                    Pokemon picked = pickWildSameEvoStageReplacement(localAllowed, areaPk, false, usedPks);
+                    areaMap.put(areaPk, picked);
+                    usedPks.add(picked);
+                }
+                for (Encounter enc : area.encounters) {
+                    // Apply the map
+                    enc.pokemon = areaMap.get(enc.pokemon);
+                }
+            }
+        }
+        else {
             // Entirely random
             for (EncounterSet area : scrambledEncounters) {
                 // Poke-set
@@ -953,7 +993,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries) {
+    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries, boolean useSameEvoStage) {
         checkPokemonRestrictions();
         // Build the full 1-to-1 map
         Map<Pokemon, Pokemon> translateMap = new TreeMap<Pokemon, Pokemon>();
@@ -981,7 +1021,21 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 remainingRight.remove(pickedRightP);
                 translateMap.put(pickedLeftP, pickedRightP);
-            } else {
+            } else if (useSameEvoStage) {
+                int pickedLeft = this.random.nextInt(remainingLeft.size());
+                Pokemon pickedLeftP = remainingLeft.remove(pickedLeft);
+                Pokemon pickedRightP = null;
+                if (remainingRight.size() == 1) {
+                    // pick this (it may or may not be the same poke)
+                    pickedRightP = remainingRight.get(0);
+                } else {
+                    // pick on power level with the current one blocked
+                    pickedRightP = pickWildSameEvoStageReplacement(remainingRight, pickedLeftP, true, null);
+                }
+                remainingRight.remove(pickedRightP);
+                translateMap.put(pickedLeftP, pickedRightP);
+            }
+            else {
                 int pickedLeft = this.random.nextInt(remainingLeft.size());
                 int pickedRight = this.random.nextInt(remainingRight.size());
                 Pokemon pickedLeftP = remainingLeft.remove(pickedLeft);
@@ -1026,7 +1080,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                     if (usePowerLevels) {
                         enc.pokemon = pickWildPowerLvlReplacement(tempPickable, enc.pokemon, false, null);
-                    } else {
+                    } else if (useSameEvoStage) {
+                        enc.pokemon = pickWildSameEvoStageReplacement(tempPickable, enc.pokemon, false, null);
+                    }
+                    else {
                         int picked = this.random.nextInt(tempPickable.size());
                         enc.pokemon = tempPickable.get(picked);
                     }
@@ -1040,7 +1097,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
-            int levelModifier) {
+            int levelModifier, boolean useSameEvoStage) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
 
@@ -1062,7 +1119,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             for (TrainerPokemon tp : t.pokemon) {
                 boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
-                tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, null, noLegendaries, wgAllowed);
+                tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, null, noLegendaries, wgAllowed, useSameEvoStage);
                 tp.resetMoves = true;
                 if (levelModifier != 0) {
                     tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
@@ -1076,7 +1133,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
-            boolean noEarlyWonderGuard, int levelModifier) {
+            boolean noEarlyWonderGuard, int levelModifier, boolean useSameEvoStage) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         cachedReplacementLists = new TreeMap<Type, List<Pokemon>>();
@@ -1145,7 +1202,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (Trainer t : trainersInGroup) {
                 for (TrainerPokemon tp : t.pokemon) {
                     boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
-                    tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForGroup, noLegendaries, wgAllowed);
+                    tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForGroup, noLegendaries, wgAllowed, useSameEvoStage);
                     tp.resetMoves = true;
                     if (levelModifier != 0) {
                         tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
@@ -1177,7 +1234,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 for (TrainerPokemon tp : t.pokemon) {
                     boolean shedAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
-                    tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForTrainer, noLegendaries, shedAllowed);
+                    tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForTrainer, noLegendaries, shedAllowed, useSameEvoStage);
                     tp.resetMoves = true;
                     if (levelModifier != 0) {
                         tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
@@ -3665,7 +3722,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<Pokemon> cachedAllList;
 
     private Pokemon pickReplacement(Pokemon current, boolean usePowerLevels, Type type, boolean noLegendaries,
-            boolean wonderGuardAllowed) {
+            boolean wonderGuardAllowed, boolean useSameEvoStage) {
         List<Pokemon> pickFrom = cachedAllList;
         if (type != null) {
             if (!cachedReplacementLists.containsKey(type)) {
@@ -3696,7 +3753,35 @@ public abstract class AbstractRomHandler implements RomHandler {
                 expandRounds++;
             }
             return canPick.get(this.random.nextInt(canPick.size()));
-        } else {
+        } else if (useSameEvoStage) {
+            List<Pokemon> canPick = new ArrayList<Pokemon>();
+            int fromDepth = current.evosFromDepth();
+            int toDepth = current.evosToDepth();
+            for (Pokemon pk : pickFrom) {
+                if (pk.evosFromDepth() == fromDepth 
+                        && pk.evosToDepth() <= toDepth
+                        && (wonderGuardAllowed || (pk.ability1 != GlobalConstants.WONDER_GUARD_INDEX
+                                && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX))) {
+                    canPick.add(pk);
+                }
+            }
+            if(canPick.isEmpty() || canPick.size() < 3) {
+                int loops = 0;
+                while(canPick.isEmpty() || canPick.size() < 3) {
+                    for (Pokemon pk : pickFrom) {
+                        if (pk.evosFromDepth() == fromDepth - loops
+                                && (wonderGuardAllowed || (pk.ability1 != GlobalConstants.WONDER_GUARD_INDEX
+                                        && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX))) {
+                            canPick.add(pk);
+                        }
+                    }
+                    loops++;
+                }
+            }
+            
+            return canPick.get(this.random.nextInt(canPick.size()));
+        }
+        else {
             if (wonderGuardAllowed) {
                 return pickFrom.get(this.random.nextInt(pickFrom.size()));
             } else {
@@ -3732,6 +3817,86 @@ public abstract class AbstractRomHandler implements RomHandler {
             maxTarget += currentBST / 20;
             expandRounds++;
         }
+        return canPick.get(this.random.nextInt(canPick.size()));
+    }
+    
+    private Pokemon pickWildSameEvoStageReplacement(List<Pokemon> pokemonPool, Pokemon current, boolean banSamePokemon,
+            List<Pokemon> usedUp) {
+        //fromDepth and toDepth = 0, no evolutions; fromDepth and toDepth = 1, 1 stage; fromDepth and toDepth = 2, 2 stages; fromDepth and toDepth = 3+, 3+ stages (not seen without evo randomization)
+        int fromDepth = current.evosFromDepth();
+        int toDepth = current.evosToDepth();
+        boolean highStageCount = (fromDepth+toDepth >= 3);
+        List<Pokemon> canPick = new ArrayList<Pokemon>();
+        if(highStageCount)
+        {
+            boolean isMiddle = fromDepth != 0 && toDepth !=0;
+            if(isMiddle)
+            {
+                for (Pokemon pk : pokemonPool) {
+                    if (pk.evosFromDepth() + pk.evosToDepth() >= 3 && pk.evosFromDepth() != 0 && pk.evosToDepth() != 0
+                            && (!banSamePokemon || pk != current) && (usedUp == null || !usedUp.contains(pk))
+                            && !canPick.contains(pk)) {
+                        canPick.add(pk);
+                    }
+                }
+            } else
+            {
+                boolean isLeft = fromDepth == 0;
+                if(isLeft)
+                {
+                    for (Pokemon pk : pokemonPool) {
+                        if (pk.evosFromDepth() + pk.evosToDepth() >= 3 && (pk.evosFromDepth() == 0)
+                                && (!banSamePokemon || pk != current) && (usedUp == null || !usedUp.contains(pk))
+                                && !canPick.contains(pk)) {
+                            canPick.add(pk);
+                        }
+                    }
+                } else {
+                    for (Pokemon pk : pokemonPool) {
+                        if (pk.evosFromDepth() + pk.evosToDepth() >= 3 && (pk.evosToDepth() == 0)
+                                && (!banSamePokemon || pk != current) && (usedUp == null || !usedUp.contains(pk))
+                                && !canPick.contains(pk)) {
+                            canPick.add(pk);
+                        }
+                    }
+                    if(canPick.isEmpty() || canPick.size() < 3) {
+                        for (Pokemon pk : pokemonPool) {
+                            if (pk.evosToDepth() == 0
+                                    && (!banSamePokemon || pk != current) && (usedUp == null || !usedUp.contains(pk))
+                                    && !canPick.contains(pk)) {
+                                canPick.add(pk);
+                            }
+                        }
+                    }
+                }
+                
+            }
+            
+        } else {
+            for (Pokemon pk : pokemonPool) {
+                if (pk.evosFromDepth() == fromDepth && pk.evosToDepth() == toDepth
+                        && (!banSamePokemon || pk != current) && (usedUp == null || !usedUp.contains(pk))
+                        && !canPick.contains(pk)) {
+                    canPick.add(pk);
+                }
+            }
+        }
+        
+        if(canPick.isEmpty() || canPick.size() < 3) {
+            int loops = 0;
+            while(canPick.isEmpty() || canPick.size() < 3)
+            {
+                for (Pokemon pk : pokemonPool) {
+                    if (pk.evosFromDepth() == fromDepth - loops
+                            && (!banSamePokemon || pk != current) && (usedUp == null || !usedUp.contains(pk))
+                            && !canPick.contains(pk)) {
+                        canPick.add(pk);
+                    }
+                }
+                loops++;
+            }
+        }
+        
         return canPick.get(this.random.nextInt(canPick.size()));
     }
 

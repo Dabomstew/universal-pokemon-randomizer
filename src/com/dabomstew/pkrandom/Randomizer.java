@@ -306,12 +306,12 @@ public class Randomizer {
         if (settings.getTrainersMod() == Settings.TrainersMod.RANDOM) {
             romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
-                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
+                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, settings.isTrainersUseSameEvoStages());
         } else if (settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED) {
             romHandler.typeThemeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersMatchTypingDistribution(), settings.isTrainersBlockLegendaries(),
                     settings.isTrainersBlockEarlyWonderGuard(),
-                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
+                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, settings.isTrainersUseSameEvoStages());
         }
 
         if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED
@@ -385,19 +385,19 @@ public class Randomizer {
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL,
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS,
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
-                    settings.isBlockWildLegendaries());
+                    settings.isBlockWildLegendaries(), settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SAME_EVO_STAGE);
             break;
         case AREA_MAPPING:
             romHandler.area1to1Encounters(settings.isUseTimeBasedEncounters(),
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL,
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS,
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
-                    settings.isBlockWildLegendaries());
+                    settings.isBlockWildLegendaries(), settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SAME_EVO_STAGE);
             break;
         case GLOBAL_MAPPING:
             romHandler.game1to1Encounters(settings.isUseTimeBasedEncounters(),
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
-                    settings.isBlockWildLegendaries());
+                    settings.isBlockWildLegendaries(), settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SAME_EVO_STAGE);
             break;
         default:
             break;

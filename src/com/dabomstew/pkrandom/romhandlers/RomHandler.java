@@ -166,12 +166,12 @@ public interface RomHandler {
     public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters);
 
     public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-            boolean noLegendaries);
+            boolean noLegendaries, boolean useSameEvoStage);
 
     public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
-            boolean usePowerLevels, boolean noLegendaries);
+            boolean usePowerLevels, boolean noLegendaries, boolean useSameEvoStage);
 
-    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries);
+    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries, boolean useSameEvoStage);
 
     public boolean hasTimeBasedEncounters();
 
@@ -183,10 +183,10 @@ public interface RomHandler {
     public void setTrainers(List<Trainer> trainerData);
 
     public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
-            int levelModifier);
+            int levelModifier, boolean useSameEvoStage);
 
     public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
-            boolean noEarlyWonderGuard, int levelModifier);
+            boolean noEarlyWonderGuard, int levelModifier, boolean useSameEvoStage);
 
     public void rivalCarriesStarter();
 
