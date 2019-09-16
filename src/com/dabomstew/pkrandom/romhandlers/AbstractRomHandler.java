@@ -77,6 +77,7 @@ import com.dabomstew.pkrandom.sampling.guards.PopulationControlGuard;
 import com.dabomstew.pkrandom.sampling.guards.SameEvolutionaryStepGuard;
 import com.dabomstew.pkrandom.sampling.guards.SimilarStrengthGuard;
 import com.dabomstew.pkrandom.sampling.guards.TypeBalancingGuard;
+import com.dabomstew.pkrandom.sampling.guards.TypeThemedGuard;
 
 public abstract class AbstractRomHandler implements RomHandler {
 
@@ -719,11 +720,18 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (catchEmAll) {
                 smartSampler.addGuard(new CatchEmAllGuard(pkmn, this instanceof Gen1RomHandler));
             }
+            // Will only be added if it is used
+            TypeThemedGuard typeTheme = new TypeThemedGuard();
+            if (typeThemed) {
+                smartSampler.addGuard(typeTheme);
+            }
             if (usePowerLevels) {
                 smartSampler.addGuard(new SimilarStrengthGuard());
             }
 
             for (EncounterSet area : scrambledEncounters) {
+                // if the guard isn't added to the sampler this will have no effect
+                typeTheme.setTheme(randomType());
                 areaBannedGuard.updateBannset(area.bannedPokemon);
                 for (Encounter enc : area.encounters) {
                     Pokemon p = smartSampler.sampleFor(enc);
