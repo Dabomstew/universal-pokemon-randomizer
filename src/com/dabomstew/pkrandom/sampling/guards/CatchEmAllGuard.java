@@ -1,44 +1,34 @@
 package com.dabomstew.pkrandom.sampling.guards;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 
 public final class CatchEmAllGuard extends SampleHistoryGuard<Pokemon> {
 
-    private int pkmnLeft;
     private final boolean gen1;
-    private final Set<Pokemon> sampledPokemon = new HashSet<Pokemon>();
+    private final Set<Pokemon> leftToSample = new HashSet<Pokemon>();
     
-    public CatchEmAllGuard(int numTotalPokemon, boolean gen1) {
-        this.pkmnLeft = numTotalPokemon;
+    public CatchEmAllGuard(List<Pokemon> listOfAllPokemon, boolean gen1) {
+        listOfAllPokemon.forEach(p -> leftToSample.add(gen1 ? p : p.getEvolutionRepresentant()));
         this.gen1 = gen1;
-    }
-    
-    private void markPokemon(Pokemon pkmn) {
-        sampledPokemon.add(pkmn);
-        pkmnLeft--;
     }
 
     @Override
     public void updateLastSample(Pokemon pkmn) {
-        if (pkmnLeft == 0) return;
-        if (gen1) { // No breeding
-            // Mark pokemon as visited
-            markPokemon(pkmn);
-        } else {
-            // Mark whole evolution chain as visited
-            pkmn.forEachEvolution(p -> markPokemon(p));
-        }
+        leftToSample.remove(gen1 ? pkmn : pkmn.getEvolutionRepresentant());
     }
 
     @Override
     protected double computeWeight(Pokemon obj) {
         // Already sampled all -> no one to prefer
-        if (pkmnLeft == 0) return 1;
+        if (leftToSample.isEmpty()) {
+            return 1;
+        }
         // if visited ignore, else consider for sampling
-        return sampledPokemon.contains(obj) ? 0 : 1;
+        return leftToSample.contains(obj) ? 1 : 0;
     }
 
 }

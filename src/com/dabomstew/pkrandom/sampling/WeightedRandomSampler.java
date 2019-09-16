@@ -1,10 +1,11 @@
 package com.dabomstew.pkrandom.sampling;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
+import com.dabomstew.pkrandom.exceptions.OutOfSamplesException;
 import com.dabomstew.pkrandom.sampling.guards.CompositeGuard;
 
 public class WeightedRandomSampler<T> {
@@ -85,7 +86,9 @@ public class WeightedRandomSampler<T> {
     }
     
     public T sampleObject() {
-        if (lookup.isEmpty()) return null;
+        if (lookup.isEmpty()) {
+            throw new OutOfSamplesException("No samples with a weigth higher than 0");
+        }
         double maxVal = lookup.get(lookup.size() - 1).end;
         double rnd = maxVal;
         // random.nextDouble in [0..1] but we have a range of [0..maxVal)

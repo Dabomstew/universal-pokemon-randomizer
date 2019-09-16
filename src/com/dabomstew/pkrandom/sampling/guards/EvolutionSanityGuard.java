@@ -3,7 +3,7 @@ package com.dabomstew.pkrandom.sampling.guards;
 import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 
-public final class EvolutionSanityGuard extends EncounterGuard {
+public final class EvolutionSanityGuard extends EncounterGuard implements BaseProbabilityGuard {
     
     private int getLowerBound(Pokemon pkmn) {
         // Basis pokemon -> Lvl 0 base line
@@ -43,9 +43,6 @@ public final class EvolutionSanityGuard extends EncounterGuard {
         }
         double mean = lvl < lb ? lb : ub;
         double stddev = mean * 0.05;
-        // Simplification, if lvl < mean - 3*stddev treat it as 0
-        // Because it effectively is
-        if (Math.abs(lvl - mean) > 3 * stddev) return 0;
         // Now gaussian, but drop normalization so we get up to 1 for lvl = mean;
         double tmp = (lvl - mean) / stddev;
         return Math.exp(-0.5 * tmp*tmp);

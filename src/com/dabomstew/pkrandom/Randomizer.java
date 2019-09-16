@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.dabomstew.pkrandom.exceptions.OutOfPokemonException;
+import com.dabomstew.pkrandom.exceptions.OutOfSamplesException;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.FieldTM;
@@ -75,7 +75,7 @@ public class Randomizer {
         return randomize(filename, log, seed);
     }
 
-    public int randomize(final String filename, final PrintStream log, long seed) throws OutOfPokemonException {
+    public int randomize(final String filename, final PrintStream log, long seed) throws OutOfSamplesException {
         final long startTime = System.currentTimeMillis();
         RandomSource.seed(seed);
         final boolean raceMode = settings.isRaceMode();

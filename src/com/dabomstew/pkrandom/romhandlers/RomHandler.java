@@ -32,7 +32,7 @@ import java.util.Random;
 
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
-import com.dabomstew.pkrandom.exceptions.OutOfPokemonException;
+import com.dabomstew.pkrandom.exceptions.OutOfSamplesException;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.FieldTM;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
@@ -167,12 +167,12 @@ public interface RomHandler {
     public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters);
 
     public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-            boolean noLegendaries, boolean smart) throws OutOfPokemonException;
+            boolean noLegendaries, boolean smart) throws OutOfSamplesException;
 
     public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
-            boolean usePowerLevels, boolean noLegendaries, boolean smart) throws OutOfPokemonException;
+            boolean usePowerLevels, boolean noLegendaries, boolean smart) throws OutOfSamplesException;
 
-    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries, boolean smart) throws OutOfPokemonException;
+    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries, boolean smart) throws OutOfSamplesException;
 
     public boolean hasTimeBasedEncounters();
 

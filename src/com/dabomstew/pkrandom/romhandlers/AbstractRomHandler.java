@@ -49,7 +49,7 @@ import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
-import com.dabomstew.pkrandom.exceptions.OutOfPokemonException;
+import com.dabomstew.pkrandom.exceptions.OutOfSamplesException;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
@@ -689,7 +689,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-            boolean noLegendaries, boolean smart) throws OutOfPokemonException {
+            boolean noLegendaries, boolean smart) throws OutOfSamplesException {
         checkPokemonRestrictions();
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
 
@@ -717,7 +717,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 smartSampler.addGuard(new LegendaryEncounterGuard());
             }
             if (catchEmAll) {
-                smartSampler.addGuard(new CatchEmAllGuard(pkmn.size(), this instanceof Gen1RomHandler));
+                smartSampler.addGuard(new CatchEmAllGuard(pkmn, this instanceof Gen1RomHandler));
             }
             if (usePowerLevels) {
                 smartSampler.addGuard(new SimilarStrengthGuard());
@@ -727,7 +727,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 areaBannedGuard.updateBannset(area.bannedPokemon);
                 for (Encounter enc : area.encounters) {
                     Pokemon p = smartSampler.sampleFor(enc);
-                    if (p == null) throw new OutOfPokemonException("No pokemon to sample left");
                     enc.pokemon = p;
                 }
             }
@@ -840,7 +839,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
-            boolean usePowerLevels, boolean noLegendaries, boolean smart) throws OutOfPokemonException {
+            boolean usePowerLevels, boolean noLegendaries, boolean smart) throws OutOfSamplesException {
         checkPokemonRestrictions();
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
         List<Pokemon> banned = this.bannedForWildEncounters();
@@ -867,7 +866,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 smartSampler.addGuard(new LegendaryEncounterGuard());
             }
             if (catchEmAll) {
-                smartSampler.addGuard(new CatchEmAllGuard(pkmn.size(), this instanceof Gen1RomHandler));
+                smartSampler.addGuard(new CatchEmAllGuard(pkmn, this instanceof Gen1RomHandler));
             }
             if (usePowerLevels) {
                 smartSampler.addGuard(new SimilarStrengthGuard());
@@ -883,8 +882,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                         p = smartSampler.sampleFor(enc);
                         areaMap.put(enc.pokemon, p);
                     }
-                    if (p == null) throw new OutOfPokemonException("No pokemon to sample left");
-                    
                     enc.pokemon = p;
                 }
             }
@@ -1034,7 +1031,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries, boolean smart) throws OutOfPokemonException {
+    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries, boolean smart) throws OutOfSamplesException {
         checkPokemonRestrictions();
         // Build the full 1-to-1 map
         Map<Pokemon, Pokemon> translateMap = new TreeMap<Pokemon, Pokemon>();
@@ -1067,7 +1064,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 int pickedLeft = this.random.nextInt(remainingLeft.size());
                 Pokemon pickedLeftP = remainingLeft.remove(pickedLeft);
                 Pokemon pickedRightP = smartSampler.sampleFor(pickedLeftP);
-                if (pickedRightP == null) throw new OutOfPokemonException("No pokemon to sample left");
                 translateMap.put(pickedLeftP, pickedRightP);
             }
         } else {
