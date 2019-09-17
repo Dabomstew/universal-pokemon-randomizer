@@ -270,7 +270,7 @@ public enum Type {
             }});
             // Water: ICE, Normal
             put(WATER, new HashMap<Type, Double>() {{
-                            put(WATER, Double.valueOf(sameTypeProbability));
+                put(WATER, Double.valueOf(sameTypeProbability));
                 put(ICE, Double.valueOf(0.6));
                 put(NORMAL, Double.valueOf(0.5));
             }});
