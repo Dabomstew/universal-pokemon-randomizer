@@ -88,7 +88,7 @@ public class Gen4Constants {
             "Super Rod" };
     
     /* @formatter:off */
-    public static final int[] platinumOverworldDexMaps = new int[] {
+    public static final int[] dpptOverworldDexMaps = new int[] {
              1,  2,  3,  4,  5, -1, -1,  6, -1,  7, // 0-9 (cities, pkmn league, wind/ironworks)
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 10-19 (all mt coronet)
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 20-29 (mt coronet, great marsh, solaceon ruins)
@@ -110,7 +110,7 @@ public class Gen4Constants {
             47, 48, 49,                             // 180-182 (other sea routes)
     };
     
-    public static final int[] platinumDungeonDexMaps = new int[] {
+    public static final int[] dpptDungeonDexMaps = new int[] {
            -1, -1, -1, -1, -1,  1,  1, -1,  2, -1, // 0-9 (cities, pkmn league, wind/ironworks, mine/forest)
             3,  3,  3,  3,  3,  3,  3,  3,  3,  3, // 10-19 (all mt coronet)
             3,  3,  3,  4,  4,  4,  4,  4,  4,  5, // 20-29 (mt coronet, great marsh, solaceon ruins)

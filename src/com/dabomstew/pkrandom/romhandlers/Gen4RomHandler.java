@@ -1048,14 +1048,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         String encountersFile = romEntry.getString("WildPokemon");
         NARCArchive encounterData = readNARC(encountersFile);
 
-        // Only plat is implemented yet
-        if (romEntry.romType != Gen4Constants.Type_Plat) {
+        // Only d/p/pt is implemented yet
+        if (romEntry.romType == Gen4Constants.Type_HGSS) {
             return;
         }
 
         // Initialize empty area data
-        int[] owMapping = Gen4Constants.platinumOverworldDexMaps;
-        int[] dungeonMapping = Gen4Constants.platinumDungeonDexMaps;
+        int[] owMapping = Gen4Constants.dpptOverworldDexMaps;
+        int[] dungeonMapping = Gen4Constants.dpptDungeonDexMaps;
         Set[][] owAreaData = new Set[Gen4Constants.pokemonCount + 1][3];
         Set[][] dungeonAreaData = new Set[Gen4Constants.pokemonCount + 1][3];
 
