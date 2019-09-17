@@ -71,7 +71,9 @@ public class WeightedRandomSampler<T> {
     public void addObject(T object) {
         double weight = 1;
         for (Guard<T> g: guards) {
-            weight *= g.computeWeight(object);
+            // If we get problems with numeric stability close to 0, use
+            // log instead, but right now it seems to work fine
+            weight *= g.getWeight(object);
             if (weight == 0) return;
         }
         LookupEntry last;

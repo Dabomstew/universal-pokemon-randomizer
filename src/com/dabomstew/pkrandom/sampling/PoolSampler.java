@@ -16,7 +16,6 @@ public class PoolSampler<T> extends WeightedRandomSampler<T> {
 
     @Override
     public T sampleObject() {
-        // FIXME: Maybe we want to recompute the weights in batches, for performance, as well as stability (especially early when simple changes can lead to high weight fluctuations)
         // compute weights
         super.clear();
         pool.forEach(p -> super.addObject(p));

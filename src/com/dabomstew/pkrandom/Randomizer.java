@@ -382,26 +382,41 @@ public class Randomizer {
 
         switch (settings.getWildPokemonMod()) {
         case RANDOM:
-            romHandler.randomEncounters(settings.isUseTimeBasedEncounters(),
+            romHandler.smartRandomEncounters(settings.isUseTimeBasedEncounters(),
+                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL, 
+                    false, 
+                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS,
+                    true, false, true, true,
+                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
+                    settings.isBlockWildLegendaries(), false);
+            /*romHandler.randomEncounters(settings.isUseTimeBasedEncounters(),
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL,
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS,
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
-                    settings.isBlockWildLegendaries(),
-                    true);
+                    settings.isBlockWildLegendaries());*/
             break;
         case AREA_MAPPING:
-            romHandler.area1to1Encounters(settings.isUseTimeBasedEncounters(),
+            romHandler.smartRandomEncounters(settings.isUseTimeBasedEncounters(),
+                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL, 
+                    false, 
+                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS,
+                    true, false, true, true,
+                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
+                    settings.isBlockWildLegendaries(), true);
+            /*romHandler.area1to1Encounters(settings.isUseTimeBasedEncounters(),
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL,
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS,
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
-                    settings.isBlockWildLegendaries(),
-                    true);
+                    settings.isBlockWildLegendaries());*/
             break;
         case GLOBAL_MAPPING:
-            romHandler.game1to1Encounters(settings.isUseTimeBasedEncounters(),
+            romHandler.smartGame1to1Encounters(settings.isUseTimeBasedEncounters(),
+                    true, false, true, true,
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
-                    settings.isBlockWildLegendaries(),
-                    true);
+                    settings.isBlockWildLegendaries());
+            /*romHandler.game1to1Encounters(settings.isUseTimeBasedEncounters(),
+                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
+                    settings.isBlockWildLegendaries());*/
             break;
         default:
             break;

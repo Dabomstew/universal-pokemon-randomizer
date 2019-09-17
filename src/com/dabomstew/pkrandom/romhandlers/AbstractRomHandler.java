@@ -69,13 +69,17 @@ import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.sampling.PokemonSampler;
+import com.dabomstew.pkrandom.sampling.TypeSampler;
 import com.dabomstew.pkrandom.sampling.guards.BannedGuard;
 import com.dabomstew.pkrandom.sampling.guards.CatchEmAllGuard;
+import com.dabomstew.pkrandom.sampling.guards.DiversityGuard;
 import com.dabomstew.pkrandom.sampling.guards.EvolutionSanityGuard;
 import com.dabomstew.pkrandom.sampling.guards.LegendaryEncounterGuard;
 import com.dabomstew.pkrandom.sampling.guards.PopulationControlGuard;
 import com.dabomstew.pkrandom.sampling.guards.SameEvolutionaryStepGuard;
 import com.dabomstew.pkrandom.sampling.guards.SimilarStrengthGuard;
+import com.dabomstew.pkrandom.sampling.guards.SimilarTypeGuard;
+import com.dabomstew.pkrandom.sampling.guards.SimilarTypeTypeSamplerGuard;
 import com.dabomstew.pkrandom.sampling.guards.TypeBalancingGuard;
 import com.dabomstew.pkrandom.sampling.guards.TypeThemedGuard;
 
@@ -689,8 +693,176 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public void smartRandomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean allCatchable,
+            boolean typeThemed, boolean typeBalancing, boolean similarType, boolean evolutionSanity,
+            boolean populationControl, boolean usePowerLevels, boolean noLegendaries, boolean area121)
+            throws OutOfSamplesException {
+
+        List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
+
+        // New: randomize the order encounter sets are randomized in.
+        // Leads to less predictable results for various modifiers.
+        // Need to keep the original ordering around for saving though.
+        List<EncounterSet> scrambledEncounters = new ArrayList<EncounterSet>(currentEncounters);
+        Collections.shuffle(scrambledEncounters, this.random);
+
+        List<Pokemon> banned = this.bannedForWildEncounters();
+
+        // First get all sampleable Pokemons
+        List<Pokemon> pkmn = allPokemonWithoutNull().stream().filter(p -> !banned.contains(p))
+                .collect(Collectors.toList());
+        if (noLegendaries) {
+            pkmn = pkmn.stream().filter(p -> !p.isLegendary()).collect(Collectors.toList());
+        }
+
+        PokemonSampler smartSampler = new PokemonSampler(this.random, pkmn);
+        BannedGuard<Pokemon> areaBannedGuard = new BannedGuard<Pokemon>(Set.of());
+        smartSampler.addGuard(areaBannedGuard);
+        if (catchEmAll) {
+            smartSampler.addGuard(new CatchEmAllGuard(pkmn, this instanceof Gen1RomHandler || allCatchable));
+        }
+        // if typeThemed is not set, this object will never be used
+        TypeThemedGuard typeTheme = new TypeThemedGuard();
+        List<Type> typePool = Arrays.asList(Type.values());
+        TypeSampler typeSampler = new TypeSampler(this.random, typePool);
+        if (typeThemed) {
+            if (typeBalancing) {
+                typeSampler.addGuard(new DiversityGuard<Type>());
+            }
+            if (similarType) {
+                typeSampler.addGuard(new SimilarTypeTypeSamplerGuard());
+            }
+            smartSampler.addGuard(typeTheme);
+        } else {
+            if (typeBalancing) {
+                smartSampler.addGuard(new TypeBalancingGuard());
+            }
+            if (similarType) {
+                smartSampler.addGuard(new SimilarTypeGuard());
+            }
+        }
+        if (evolutionSanity) {
+            smartSampler.addGuard(new EvolutionSanityGuard());
+        }
+        if (populationControl) {
+            smartSampler.addGuard(new PopulationControlGuard());
+        }
+        if (usePowerLevels) {
+            smartSampler.addGuard(new SimilarStrengthGuard());
+        }
+        if (noLegendaries) {
+            smartSampler.addGuard(new LegendaryEncounterGuard());
+        }
+
+        for (EncounterSet area : scrambledEncounters) {
+            if (typeThemed) {
+                Type tp;
+                if (similarType) {
+                    // Choose a random representant to sample a type similar to
+                    // it's primary type
+                    int idx = random.nextInt(area.encounters.size());
+                    tp = typeSampler.sampleFor(area.encounters.get(idx).pokemon.primaryType);
+                } else {
+                    tp = typeSampler.sampleFor(null);
+                }
+                typeTheme.setTheme(tp);
+            }
+            Map<Pokemon, Pokemon> areaMap = new HashMap<Pokemon, Pokemon>();
+            areaBannedGuard.updateBannset(area.bannedPokemon);
+            for (Encounter enc : area.encounters) {
+                Pokemon p = area121 ? areaMap.get(enc.pokemon) : null;
+                if (p == null) {
+                    p = smartSampler.sampleFor(enc);
+                    if (area121) {
+                        areaMap.put(enc.pokemon, p);
+                    }
+                }
+                enc.pokemon = p;
+            }
+        }
+
+        setEncounters(useTimeOfDay, currentEncounters);
+    }
+    
+    @Override
+    public void smartGame1to1Encounters(boolean useTimeOfDay, boolean typeBalancing, boolean similarType, boolean evolutionSanity,
+            boolean populationControl, boolean usePowerLevels, boolean noLegendaries) throws OutOfSamplesException {
+        checkPokemonRestrictions();
+        // Build the full 1-to-1 map
+        Map<Pokemon, Pokemon> translateMap = new TreeMap<Pokemon, Pokemon>();
+        List<Pokemon> remainingLeft = allPokemonWithoutNull();
+        List<Pokemon> remainingRight = noLegendaries ? new ArrayList<Pokemon>(noLegendaryList)
+                : new ArrayList<Pokemon>(mainPokemonList);
+        List<Pokemon> banned = this.bannedForWildEncounters();
+        // Banned pokemon should be mapped to themselves
+        for (Pokemon bannedPK : banned) {
+            translateMap.put(bannedPK, bannedPK);
+            remainingLeft.remove(bannedPK);
+            remainingRight.remove(bannedPK);
+        }
+
+        List<Pokemon> pkmn = allPokemonWithoutNull().stream().filter(p -> !banned.contains(p))
+                .collect(Collectors.toList());
+        if (noLegendaries) {
+            pkmn = pkmn.stream().filter(p -> !p.isLegendary()).collect(Collectors.toList());
+        }
+        PokemonSampler smartSampler = new PokemonSampler(this.random, pkmn);
+        BannedGuard<Pokemon> areaBannedGuard = new BannedGuard<Pokemon>(Set.of());
+        smartSampler.addGuard(areaBannedGuard);
+        if (typeBalancing) {
+            smartSampler.addGuard(new TypeBalancingGuard());
+        }
+        if (similarType) {
+            smartSampler.addGuard(new SimilarTypeGuard());
+        }
+        if (evolutionSanity) {
+            smartSampler.addGuard(new EvolutionSanityGuard());
+            smartSampler.addGuard(new SameEvolutionaryStepGuard());
+        }
+        if (populationControl) {
+            smartSampler.addGuard(new PopulationControlGuard());
+        }
+        if (usePowerLevels) {
+            smartSampler.addGuard(new SimilarStrengthGuard());
+        }
+        if (noLegendaries) {
+            smartSampler.addGuard(new LegendaryEncounterGuard());
+        }
+        while (remainingLeft.isEmpty() == false) {
+            int pickedLeft = this.random.nextInt(remainingLeft.size());
+            Pokemon pickedLeftP = remainingLeft.remove(pickedLeft);
+            Pokemon pickedRightP = smartSampler.sampleFor(pickedLeftP);
+            translateMap.put(pickedLeftP, pickedRightP);
+        }
+
+        // Map remaining to themselves just in case
+        List<Pokemon> allPokes = allPokemonWithoutNull();
+        for (Pokemon poke : allPokes) {
+            if (!translateMap.containsKey(poke)) {
+                translateMap.put(poke, poke);
+            }
+        }
+
+        List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
+
+        for (EncounterSet area : currentEncounters) {
+            for (Encounter enc : area.encounters) {
+                areaBannedGuard.updateBannset(area.bannedPokemon);
+                // Apply the map
+                enc.pokemon = translateMap.get(enc.pokemon);
+                if (area.bannedPokemon.contains(enc.pokemon)) {
+                    // Sampled pokemon is banned -> resample new one
+                    enc.pokemon = smartSampler.sampleFor(enc);
+                }
+            }
+        }
+
+        setEncounters(useTimeOfDay, currentEncounters);
+    }
+
+    @Override
     public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-            boolean noLegendaries, boolean smart) throws OutOfSamplesException {
+            boolean noLegendaries) {
         checkPokemonRestrictions();
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
 
@@ -702,43 +874,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         List<Pokemon> banned = this.bannedForWildEncounters();
 
-        // We handle smart at the beginning, because it can take catchEmAll and powerLevels into account
-        if (smart) {
-            List<Pokemon> pkmn = allPokemonWithoutNull().stream().filter(p -> !banned.contains(p)).collect(Collectors.toList());
-            if (noLegendaries) {
-                pkmn = pkmn.stream().filter(p -> !p.isLegendary()).collect(Collectors.toList());
-            }
-            PokemonSampler smartSampler = new PokemonSampler(this.random, pkmn);
-            BannedGuard<Pokemon> areaBannedGuard = new BannedGuard<Pokemon>(Set.of());
-            smartSampler.addGuard(areaBannedGuard)
-                        .addGuard(new TypeBalancingGuard())
-                        .addGuard(new PopulationControlGuard())
-                        .addGuard(new EvolutionSanityGuard());
-            if (noLegendaries) {
-                smartSampler.addGuard(new LegendaryEncounterGuard());
-            }
-            if (catchEmAll) {
-                smartSampler.addGuard(new CatchEmAllGuard(pkmn, this instanceof Gen1RomHandler));
-            }
-            // Will only be added if it is used
-            TypeThemedGuard typeTheme = new TypeThemedGuard();
-            if (typeThemed) {
-                smartSampler.addGuard(typeTheme);
-            }
-            if (usePowerLevels) {
-                smartSampler.addGuard(new SimilarStrengthGuard());
-            }
-
-            for (EncounterSet area : scrambledEncounters) {
-                // if the guard isn't added to the sampler this will have no effect
-                typeTheme.setTheme(randomType());
-                areaBannedGuard.updateBannset(area.bannedPokemon);
-                for (Encounter enc : area.encounters) {
-                    Pokemon p = smartSampler.sampleFor(enc);
-                    enc.pokemon = p;
-                }
-            }
-        } else
         // Assume EITHER catch em all OR type themed OR match strength for now
         if (catchEmAll) {
 
@@ -847,7 +982,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
-            boolean usePowerLevels, boolean noLegendaries, boolean smart) throws OutOfSamplesException {
+            boolean usePowerLevels, boolean noLegendaries) {
         checkPokemonRestrictions();
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
         List<Pokemon> banned = this.bannedForWildEncounters();
@@ -858,42 +993,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<EncounterSet> scrambledEncounters = new ArrayList<EncounterSet>(currentEncounters);
         Collections.shuffle(scrambledEncounters, this.random);
 
-        // We handle smart at the beginning, because it can take catchEmAll and powerLevels into account
-        if (smart) {
-            List<Pokemon> pkmn = allPokemonWithoutNull().stream().filter(p -> !banned.contains(p)).collect(Collectors.toList());
-            if (noLegendaries) {
-                pkmn = pkmn.stream().filter(p -> !p.isLegendary()).collect(Collectors.toList());
-            }
-            PokemonSampler smartSampler = new PokemonSampler(this.random, pkmn);
-            BannedGuard<Pokemon> areaBannedGuard = new BannedGuard<Pokemon>(Set.of());
-            smartSampler.addGuard(areaBannedGuard)
-                        .addGuard(new TypeBalancingGuard())
-                        .addGuard(new PopulationControlGuard())
-                        .addGuard(new EvolutionSanityGuard());
-            if (noLegendaries) {
-                smartSampler.addGuard(new LegendaryEncounterGuard());
-            }
-            if (catchEmAll) {
-                smartSampler.addGuard(new CatchEmAllGuard(pkmn, this instanceof Gen1RomHandler));
-            }
-            if (usePowerLevels) {
-                smartSampler.addGuard(new SimilarStrengthGuard());
-            }
-
-            for (EncounterSet area : scrambledEncounters) {
-                areaBannedGuard.updateBannset(area.bannedPokemon);
-                // Build area map using randoms
-                Map<Pokemon, Pokemon> areaMap = new TreeMap<Pokemon, Pokemon>();
-                for (Encounter enc : area.encounters) {
-                    Pokemon p = areaMap.get(enc.pokemon);
-                    if (p == null) {
-                        p = smartSampler.sampleFor(enc);
-                        areaMap.put(enc.pokemon, p);
-                    }
-                    enc.pokemon = p;
-                }
-            }
-        } else
         // Assume EITHER catch em all OR type themed for now
         if (catchEmAll) {
             List<Pokemon> allPokes = noLegendaries ? new ArrayList<Pokemon>(noLegendaryList) : new ArrayList<Pokemon>(
@@ -1039,7 +1138,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries, boolean smart) throws OutOfSamplesException {
+    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries) {
         checkPokemonRestrictions();
         // Build the full 1-to-1 map
         Map<Pokemon, Pokemon> translateMap = new TreeMap<Pokemon, Pokemon>();
@@ -1053,60 +1152,37 @@ public abstract class AbstractRomHandler implements RomHandler {
             remainingLeft.remove(bannedPK);
             remainingRight.remove(bannedPK);
         }
-        if (smart) {
-            List<Pokemon> pkmn = allPokemonWithoutNull().stream().filter(p -> !banned.contains(p)).collect(Collectors.toList());
-            if (noLegendaries) {
-                pkmn = pkmn.stream().filter(p -> !p.isLegendary()).collect(Collectors.toList());
-            }
-            PokemonSampler smartSampler = new PokemonSampler(this.random, pkmn);
-            smartSampler.addGuard(new TypeBalancingGuard())
-                        .addGuard(new PopulationControlGuard())
-                        .addGuard(new SameEvolutionaryStepGuard());
-            if (noLegendaries) {
-                smartSampler.addGuard(new LegendaryEncounterGuard());
-            }
+        while (remainingLeft.isEmpty() == false) {
             if (usePowerLevels) {
-                smartSampler.addGuard(new SimilarStrengthGuard());
-            }
-            while (remainingLeft.isEmpty() == false) {
                 int pickedLeft = this.random.nextInt(remainingLeft.size());
                 Pokemon pickedLeftP = remainingLeft.remove(pickedLeft);
-                Pokemon pickedRightP = smartSampler.sampleFor(pickedLeftP);
+                Pokemon pickedRightP = null;
+                if (remainingRight.size() == 1) {
+                    // pick this (it may or may not be the same poke)
+                    pickedRightP = remainingRight.get(0);
+                } else {
+                    // pick on power level with the current one blocked
+                    pickedRightP = pickWildPowerLvlReplacement(remainingRight, pickedLeftP, true, null);
+                }
+                remainingRight.remove(pickedRightP);
+                translateMap.put(pickedLeftP, pickedRightP);
+            } else {
+                int pickedLeft = this.random.nextInt(remainingLeft.size());
+                int pickedRight = this.random.nextInt(remainingRight.size());
+                Pokemon pickedLeftP = remainingLeft.remove(pickedLeft);
+                Pokemon pickedRightP = remainingRight.get(pickedRight);
+                while (pickedLeftP.number == pickedRightP.number && remainingRight.size() != 1) {
+                    // Reroll for a different pokemon if at all possible
+                    pickedRight = this.random.nextInt(remainingRight.size());
+                    pickedRightP = remainingRight.get(pickedRight);
+                }
+                remainingRight.remove(pickedRight);
                 translateMap.put(pickedLeftP, pickedRightP);
             }
-        } else {
-            while (remainingLeft.isEmpty() == false) {
-                if (usePowerLevels) {
-                    int pickedLeft = this.random.nextInt(remainingLeft.size());
-                    Pokemon pickedLeftP = remainingLeft.remove(pickedLeft);
-                    Pokemon pickedRightP = null;
-                    if (remainingRight.size() == 1) {
-                        // pick this (it may or may not be the same poke)
-                        pickedRightP = remainingRight.get(0);
-                    } else {
-                        // pick on power level with the current one blocked
-                        pickedRightP = pickWildPowerLvlReplacement(remainingRight, pickedLeftP, true, null);
-                    }
-                    remainingRight.remove(pickedRightP);
-                    translateMap.put(pickedLeftP, pickedRightP);
-                } else {
-                    int pickedLeft = this.random.nextInt(remainingLeft.size());
-                    int pickedRight = this.random.nextInt(remainingRight.size());
-                    Pokemon pickedLeftP = remainingLeft.remove(pickedLeft);
-                    Pokemon pickedRightP = remainingRight.get(pickedRight);
-                    while (pickedLeftP.number == pickedRightP.number && remainingRight.size() != 1) {
-                        // Reroll for a different pokemon if at all possible
-                        pickedRight = this.random.nextInt(remainingRight.size());
-                        pickedRightP = remainingRight.get(pickedRight);
-                    }
-                    remainingRight.remove(pickedRight);
-                    translateMap.put(pickedLeftP, pickedRightP);
-                }
-                if (remainingRight.size() == 0) {
-                    // restart
-                    remainingRight.addAll(noLegendaries ? noLegendaryList : mainPokemonList);
-                    remainingRight.removeAll(banned);
-                }
+            if (remainingRight.size() == 0) {
+                // restart
+                remainingRight.addAll(noLegendaries ? noLegendaryList : mainPokemonList);
+                remainingRight.removeAll(banned);
             }
         }
 

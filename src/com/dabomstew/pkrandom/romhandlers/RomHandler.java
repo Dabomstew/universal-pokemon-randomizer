@@ -166,13 +166,22 @@ public interface RomHandler {
 
     public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters);
 
+    public void smartRandomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean allCatchable,
+            boolean typeThemed, boolean typeBalancing, boolean similarType, boolean evolutionSanity,
+            boolean populationControl, boolean usePowerLevels, boolean noLegendaries, boolean area121)
+            throws OutOfSamplesException;
+
+    public void smartGame1to1Encounters(boolean useTimeOfDay, boolean typeBalancing, boolean similarType, boolean evolutionSanity,
+            boolean populationControl, boolean usePowerLevels, boolean noLegendaries)
+            throws OutOfSamplesException;
+
     public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-            boolean noLegendaries, boolean smart) throws OutOfSamplesException;
+            boolean noLegendaries);
 
     public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
-            boolean usePowerLevels, boolean noLegendaries, boolean smart) throws OutOfSamplesException;
+            boolean usePowerLevels, boolean noLegendaries);
 
-    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries, boolean smart) throws OutOfSamplesException;
+    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries);
 
     public boolean hasTimeBasedEncounters();
 

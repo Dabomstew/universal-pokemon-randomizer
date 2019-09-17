@@ -1,32 +1,20 @@
 package com.dabomstew.pkrandom.sampling.guards;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 
-public final class PopulationControlGuard extends SampleHistoryGuard<Pokemon> {
-    private final Map<Pokemon, Integer> samples = new HashMap<Pokemon, Integer>();
-    private int sum = 0;
+public final class PopulationControlGuard extends DiversityGuard<Pokemon> {
 
     @Override
     public void updateLastSample(Pokemon pkmn) {
-        Pokemon p = pkmn.getEvolutionRepresentant();
-        Integer cnt = samples.get(p);
-        int oldVal = cnt == null ? 0 : cnt.intValue();
-        cnt = Integer.valueOf(oldVal + 1);
-        samples.put(p, cnt);
-        sum++;
+        // We want to consider whole evolution chains, otherwise 3 step evos
+        // would be preferred
+        super.updateLastSample(pkmn.getEvolutionRepresentant());
     }
 
     @Override
     protected double computeWeight(Pokemon obj) {
-        Integer cnt = samples.get(obj);
-        // Double so we do float divide and not int div
-        double c = cnt == null ? 0 : cnt.intValue();
-        double w = sum == 0 ? 0 : c / sum;
-        // Preferr least sampled pokemon
-        return 1.-w;
+        // So of course we need to compute the weight for the evo chain
+        return super.computeWeight(obj.getEvolutionRepresentant());
     }
 
 }

@@ -5,7 +5,7 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.sampling.Guard;
 
 public abstract class EncounterGuard extends Guard<Pokemon> {
-    protected Encounter encounter;
+    protected Encounter encounter = null;
     
     public void setEncounter(Encounter encounter) {
         this.encounter = encounter;
