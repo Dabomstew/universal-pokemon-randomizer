@@ -77,8 +77,7 @@ public enum Type {
                 put(GRASS, Double.valueOf(0.2));
                 put(ELECTRIC, Double.valueOf(0.2));
                 put(PSYCHIC, Double.valueOf(0.05));
-                }
-            });
+            }});
             // Fighting: Often in caves with rock, ground and steel
             put(FIGHTING, new HashMap<Type, Double>() {{
                 put(FIGHTING, Double.valueOf(1));
@@ -195,12 +194,14 @@ public enum Type {
                 put(STEEL, Double.valueOf(1));
                 put(FIGHTING, Double.valueOf(0.6));
                 put(ROCK, Double.valueOf(0.6));
-                put(STEEL, Double.valueOf(0.6));
+                put(GROUND, Double.valueOf(0.6));
                 put(POISON, Double.valueOf(0.2));
                 put(DARK, Double.valueOf(0.1));
                 put(DRAGON, Double.valueOf(0.05));
             }});
     }});
+    
+    
     
     public double getOccuranceDistance(Type rhs) {
         Map<Type, Double> rel = occuranceRelations.get(this);
@@ -210,6 +211,173 @@ public enum Type {
         }
         // Distance is 1 - weight (so same type = distance 0)
         return 1 - (rel.getOrDefault(rhs, Double.valueOf(0)).doubleValue());
+    }
+
+
+    // This is a map of related type moves
+    // e.g. water types can usually also do ice moves
+    // Non reflexive relation.
+    // The Doubles indicates the probability of learning a move of that type
+    // 1 means it can learn all types of this type 0 mean it can learn no moves
+    // Because not every move shall be learnable by a pokemon of the same type
+    // the base probability will always be 0.8
+    // I pulled these weights out of my arse according to my gut feeling
+    // Not really reliable numbers
+    private static double sameTypeProbability = 0.8;
+    @SuppressWarnings("serial")
+    public static final Map<Type, Map<Type, Double>> moveTypeRelations = Collections.unmodifiableMap(
+        new HashMap<Type, Map<Type, Double>>() {{
+            // Normal pokemon: can learn a lot of basic moves
+            put(NORMAL, new HashMap<Type, Double>() {{
+                            put(NORMAL, Double.valueOf(sameTypeProbability));
+                put(FIGHTING, Double.valueOf(0.6));
+                put(GROUND, Double.valueOf(0.5));
+                put(ROCK, Double.valueOf(0.5));
+                put(STEEL, Double.valueOf(0.5));
+                put(FIRE, Double.valueOf(0.3));
+                put(WATER, Double.valueOf(0.3));
+                put(ELECTRIC, Double.valueOf(0.3));
+                put(ICE, Double.valueOf(0.2));
+                put(POISON, Double.valueOf(0.2));
+                put(PSYCHIC, Double.valueOf(0.1));
+            }});
+            // Fighting: Similar to normal, w/o psychic
+            put(FIGHTING, new HashMap<Type, Double>() {{
+                            put(FIGHTING, Double.valueOf(sameTypeProbability));
+                put(NORMAL, Double.valueOf(0.6));
+                put(GROUND, Double.valueOf(0.5));
+                put(ROCK, Double.valueOf(0.5));
+                put(STEEL, Double.valueOf(0.5));
+                put(FIRE, Double.valueOf(0.3));
+                put(WATER, Double.valueOf(0.3));
+                put(ELECTRIC, Double.valueOf(0.3));
+                put(ICE, Double.valueOf(0.2));
+                put(POISON, Double.valueOf(0.2));
+            }});
+            // Flying: Normal Dragon and Steel moves
+            put(FLYING, new HashMap<Type, Double>() {{
+                            put(FLYING, Double.valueOf(sameTypeProbability));
+                put(NORMAL, Double.valueOf(0.7));
+                put(DRAGON, Double.valueOf(0.2));
+                put(STEEL, Double.valueOf(0.1));
+            }});
+            // Grass: Bug, Poison, Normal
+            put(GRASS, new HashMap<Type, Double>() {{
+                            put(GRASS, Double.valueOf(sameTypeProbability));
+                put(NORMAL, Double.valueOf(0.6));
+                put(POISON, Double.valueOf(0.4));
+                put(BUG, Double.valueOf(0.2));
+            }});
+            // Water: ICE, Normal
+            put(WATER, new HashMap<Type, Double>() {{
+                            put(WATER, Double.valueOf(sameTypeProbability));
+                put(ICE, Double.valueOf(0.6));
+                put(NORMAL, Double.valueOf(0.5));
+            }});
+            // Fire: Normal, Ground, Dark
+            put(FIRE, new HashMap<Type, Double>() {{
+                            put(FIRE, Double.valueOf(sameTypeProbability));
+                put(NORMAL, Double.valueOf(0.5));
+                put(DARK, Double.valueOf(0.2));
+                put(GROUND, Double.valueOf(0.1));
+            }});
+            // Rock: Normal, Ground, Steel, Fighting
+            put(ROCK, new HashMap<Type, Double>() {{
+                            put(ROCK, Double.valueOf(sameTypeProbability));
+                put(GROUND, Double.valueOf(0.7));
+                put(STEEL, Double.valueOf(0.6));
+                put(NORMAL, Double.valueOf(0.5));
+                put(FIGHTING, Double.valueOf(0.2));
+            }});
+            // Ground: Same as Rocks
+            put(GROUND, new HashMap<Type, Double>() {{
+                            put(GROUND, Double.valueOf(sameTypeProbability));
+                put(ROCK, Double.valueOf(0.7));
+                put(STEEL, Double.valueOf(0.6));
+                put(NORMAL, Double.valueOf(0.5));
+                put(FIGHTING, Double.valueOf(0.2));
+            }});
+            // Psychic: Dark, Posion, Ghost, normal
+            put(PSYCHIC, new HashMap<Type, Double>() {{
+                            put(PSYCHIC, Double.valueOf(sameTypeProbability));
+                put(NORMAL, Double.valueOf(0.5));
+                put(POISON, Double.valueOf(0.3));
+                put(GHOST, Double.valueOf(0.1));
+            }});
+            // Bug: Grass, Normal, Poison
+            put(BUG, new HashMap<Type, Double>() {{
+                            put(BUG, Double.valueOf(sameTypeProbability));
+                put(POISON, Double.valueOf(0.6));
+                put(NORMAL, Double.valueOf(0.5));
+                put(GRASS, Double.valueOf(0.3));
+            }});
+            // Dragon: Normal + Elemental + Ground/Rock + Flying
+            put(DRAGON, new HashMap<Type, Double>() {{
+                            put(DRAGON, Double.valueOf(sameTypeProbability));
+                put(NORMAL, Double.valueOf(0.6));
+                put(WATER, Double.valueOf(0.4));
+                put(ICE, Double.valueOf(0.4));
+                put(ELECTRIC, Double.valueOf(0.4));
+                put(FIRE, Double.valueOf(0.4));
+                put(FLYING, Double.valueOf(0.4));
+                put(GROUND, Double.valueOf(0.3));
+                put(ROCK, Double.valueOf(0.2));
+                put(STEEL, Double.valueOf(0.2));
+            }});
+            // Electric: Normal, Steel
+            put(ELECTRIC, new HashMap<Type, Double>() {{
+                            put(ELECTRIC, Double.valueOf(sameTypeProbability));
+                put(NORMAL, Double.valueOf(0.6));
+                put(STEEL, Double.valueOf(0.1));
+            }});
+            // Ghost: Poison, Dark, Psychic (NOT Normal!)
+            put(GHOST, new HashMap<Type, Double>() {{
+                            put(GHOST, Double.valueOf(sameTypeProbability));
+                put(DARK, Double.valueOf(0.6));
+                put(POISON, Double.valueOf(0.4));
+                put(PSYCHIC, Double.valueOf(0.2));
+            }});
+            // Dark: Ghost, Poison, psychic, normal
+            put(DARK, new HashMap<Type, Double>() {{
+                            put(DARK, Double.valueOf(sameTypeProbability));
+                put(GHOST, Double.valueOf(0.6));
+                put(NORMAL, Double.valueOf(0.4));
+                put(POISON, Double.valueOf(0.3));
+                put(PSYCHIC, Double.valueOf(0.2));
+            }});
+            // Poison: Bug, Ghost, Dark, Normal
+            put(POISON, new HashMap<Type, Double>() {{
+                            put(POISON, Double.valueOf(sameTypeProbability));
+                put(NORMAL, Double.valueOf(0.5));
+                put(BUG, Double.valueOf(0.4));
+                put(GHOST, Double.valueOf(0.2));
+                put(DARK, Double.valueOf(0.1));
+            }});
+            // Ice: Normal, Water
+            put(ICE, new HashMap<Type, Double>() {{
+                            put(ICE, Double.valueOf(sameTypeProbability));
+                put(NORMAL, Double.valueOf(0.6));
+                put(WATER, Double.valueOf(0.2));
+            }});
+                    // Steel: Similar to rock + Electric
+            put(STEEL, new HashMap<Type, Double>() {{
+                            put(STEEL, Double.valueOf(sameTypeProbability));
+                put(ROCK, Double.valueOf(0.7));
+                put(GROUND, Double.valueOf(0.6));
+                put(NORMAL, Double.valueOf(0.5));
+                put(ELECTRIC, Double.valueOf(0.1));
+                put(FIGHTING, Double.valueOf(0.1));
+            }});
+    }});
+    
+    public double getMoveTypeProbability(Type moveType, double baseProbability) {
+        Map<Type, Double> rel = moveTypeRelations.get(this);
+        if (rel == null) {
+            // TBH i have no fucking clue how to handle these types
+            return baseProbability;
+        }
+
+        return rel.getOrDefault(moveType, Double.valueOf(baseProbability)).doubleValue();
     }
 
 }

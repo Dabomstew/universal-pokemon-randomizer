@@ -437,10 +437,10 @@ public class Randomizer {
         // TM/HM compatibility
         switch (settings.getTmsHmsCompatibilityMod()) {
         case RANDOM_PREFER_TYPE:
-            romHandler.randomizeTMHMCompatibility(true);
+            romHandler.randomizeTMHMCompatibility(true, true);
             break;
         case COMPLETELY_RANDOM:
-            romHandler.randomizeTMHMCompatibility(false);
+            romHandler.randomizeTMHMCompatibility(false, false);
             break;
         case FULL:
             romHandler.fullTMHMCompatibility();
@@ -483,10 +483,10 @@ public class Randomizer {
             // Compatibility
             switch (settings.getMoveTutorsCompatibilityMod()) {
             case RANDOM_PREFER_TYPE:
-                romHandler.randomizeMoveTutorCompatibility(true);
+                romHandler.randomizeMoveTutorCompatibility(true, true);
                 break;
             case COMPLETELY_RANDOM:
-                romHandler.randomizeMoveTutorCompatibility(false);
+                romHandler.randomizeMoveTutorCompatibility(false, false);
                 break;
             case FULL:
                 romHandler.fullMoveTutorCompatibility();
