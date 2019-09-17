@@ -38,6 +38,7 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.GFXFunctions;
@@ -218,7 +219,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                                     current.arrayEntries.put(r[0], offs);
                                 }
                             } else if (r[0].endsWith("Offset") || r[0].endsWith("Count") || r[0].endsWith("Number")
-                                    || r[0].endsWith("Size")) {
+                                    || r[0].endsWith("Size") || r[0].endsWith("Index")) {
                                 int offs = parseRIInt(r[1]);
                                 current.numbers.put(r[0], offs);
                             } else {
@@ -644,7 +645,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 // the HoF times checker case is for the Fight Area or Survival
                 // Area (depending on version).
                 // the StarterBattle case is for Route 201 in Pt.
-                int[] filesWithRivalScript = (romEntry.romType == Gen4Constants.Type_Plat) ? Gen4Constants.ptFilesWithRivalScript
+                int[] filesWithRivalScript = (romEntry.romType == Gen4Constants.Type_Plat)
+                        ? Gen4Constants.ptFilesWithRivalScript
                         : Gen4Constants.dpFilesWithRivalScript;
                 byte[] magic = Gen4Constants.dpptRivalScriptMagic;
                 NARCArchive scriptNARC = scriptNarc;
@@ -661,7 +663,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                             // TODO find out what these constants are and remove
                             // them
                             if (readWord(file, jumpTo) != 0xE5 && readWord(file, jumpTo) != 0x28F
-                                    && (readWord(file, jumpTo) != 0x125 || romEntry.romType != Gen4Constants.Type_Plat)) {
+                                    && (readWord(file, jumpTo) != 0x125
+                                            || romEntry.romType != Gen4Constants.Type_Plat)) {
                                 continue; // not a rival script
                             }
                             // Replace the two starter-words 387 and 390
@@ -675,7 +678,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 // 2 for Lucas/Dawn (=4 occurrences), 1 or 2 for Barry
                 byte[] tagBattleMagic = Gen4Constants.dpptTagBattleScriptMagic1;
                 byte[] tagBattleMagic2 = Gen4Constants.dpptTagBattleScriptMagic2;
-                int[] filesWithTagBattleScript = (romEntry.romType == Gen4Constants.Type_Plat) ? Gen4Constants.ptFilesWithTagScript
+                int[] filesWithTagBattleScript = (romEntry.romType == Gen4Constants.Type_Plat)
+                        ? Gen4Constants.ptFilesWithTagScript
                         : Gen4Constants.dpFilesWithTagScript;
                 for (int i = 0; i < filesWithTagBattleScript.length; i++) {
                     int fileCheck = filesWithTagBattleScript[i];
@@ -727,8 +731,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 for (int i = 0; i < 3; i++) {
                     Pokemon newStarter = newStarters.get(i);
                     int color = (i == 0) ? 3 : i;
-                    String newStarterDesc = "\\vFF00\\z000" + color + pokedexSpeciesStrings.get(newStarter.number)
-                            + " " + newStarter.name + "\\vFF00\\z0000!\\nWill you take this Pokémon?";
+                    String newStarterDesc = "\\vFF00\\z000" + color + pokedexSpeciesStrings.get(newStarter.number) + " "
+                            + newStarter.name + "\\vFF00\\z0000!\\nWill you take this Pokémon?";
                     spStrings.set(i + 1, newStarterDesc);
                 }
                 // rewrite starter picking screen
@@ -736,9 +740,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 if (romEntry.romType == Gen4Constants.Type_DP) {
                     // what rival says after we get the Pokemon
                     List<String> lakeStrings = getStrings(romEntry.getInt("StarterLocationTextOffset"));
-                    lakeStrings
-                            .set(Gen4Constants.dpStarterStringIndex,
-                                    "\\v0103\\z0000: Fwaaah!\\nYour Pokémon totally rocked!\\pBut mine was way tougher\\nthan yours!\\p...They were other people’s\\nPokémon, though...\\pBut we had to use them...\\nThey won’t mind, will they?\\p");
+                    lakeStrings.set(Gen4Constants.dpStarterStringIndex,
+                            "\\v0103\\z0000: Fwaaah!\\nYour Pokémon totally rocked!\\pBut mine was way tougher\\nthan yours!\\p...They were other people’s\\nPokémon, though...\\pBut we had to use them...\\nThey won’t mind, will they?\\p");
                     setStrings(romEntry.getInt("StarterLocationTextOffset"), lakeStrings);
                 } else {
                     // what rival says after we get the Pokemon
@@ -1034,9 +1037,130 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             } else {
                 setEncountersDPPt(useTimeOfDay, encounters);
             }
+            updateAreaData();
         } catch (IOException ex) {
             throw new RandomizerIOException(ex);
         }
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private void updateAreaData() throws IOException {
+        String encountersFile = romEntry.getString("WildPokemon");
+        NARCArchive encounterData = readNARC(encountersFile);
+
+        // Only plat is implemented yet
+        if (romEntry.romType != Gen4Constants.Type_Plat) {
+            return;
+        }
+
+        // Initialize empty area data
+        int[] owMapping = Gen4Constants.platinumOverworldDexMaps;
+        int[] dungeonMapping = Gen4Constants.platinumDungeonDexMaps;
+        Set[][] owAreaData = new Set[Gen4Constants.pokemonCount + 1][3];
+        Set[][] dungeonAreaData = new Set[Gen4Constants.pokemonCount + 1][3];
+
+        for (int pk = 1; pk <= Gen4Constants.pokemonCount; pk++) {
+            for (int time = 0; time < 3; time++) {
+                owAreaData[pk][time] = new TreeSet();
+                dungeonAreaData[pk][time] = new TreeSet();
+            }
+        }
+
+        // Calculate area data from each poke from encounter data
+        for (int c = 0; c < encounterData.files.size(); c++) {
+            Set[][] target;
+            int index;
+            if (owMapping[c] != -1) {
+                target = owAreaData;
+                index = owMapping[c];
+            } else if (dungeonMapping[c] != -1) {
+                target = dungeonAreaData;
+                index = dungeonMapping[c];
+            } else {
+                continue;
+            }
+
+            byte[] b = encounterData.files.get(c);
+
+            int grassRate = readLong(b, 0);
+            if (grassRate != 0) {
+                // up to 4
+                List<Encounter> grassEncounters = readEncountersDPPt(b, 4, 12);
+
+                for (int i = 0; i < 12; i++) {
+                    int pknum = grassEncounters.get(i).pokemon.number;
+                    if (i == 2 || i == 3) {
+                        // morning only - time of day data for day/night for
+                        // these slots
+                        target[pknum][0].add(index);
+                    } else {
+                        // all times of day
+                        target[pknum][0].add(index);
+                        target[pknum][1].add(index);
+                        target[pknum][2].add(index);
+                    }
+                }
+
+                // time of day data for slots 2 and 3 day/night
+                for (int i = 0; i < 4; i++) {
+                    int pknum = readLong(b, 108 + 4 * i);
+                    if (pknum >= 1 && pknum <= Gen4Constants.pokemonCount) {
+                        target[pknum][i > 1 ? 2 : 1].add(index);
+                    }
+                }
+
+                // Swarm/Radar/GBA excluded from dex data deliberately
+            }
+
+            // up to 204, 5 sets of "sea" encounters to go
+            int offset = 204;
+            for (int i = 0; i < 5; i++) {
+                int rate = readLong(b, offset);
+                offset += 4;
+                List<Encounter> encountersHere = readSeaEncountersDPPt(b, offset, 5);
+                offset += 40;
+                if (rate == 0 || i == 1) {
+                    continue;
+                }
+                for (Encounter e : encountersHere) {
+                    int pknum = e.pokemon.number;
+                    target[pknum][0].add(index);
+                    target[pknum][1].add(index);
+                    target[pknum][2].add(index);
+                }
+            }
+        }
+
+        // Write new area data to its file
+        // Area data format credit to Ganix
+        String areaDataFile = romEntry.getString("AreaData");
+        NARCArchive areaData = readNARC(areaDataFile);
+        int owDataIndex = romEntry.getInt("AreaDataOverworldIndex");
+        int owTimeSep = romEntry.getInt("AreaDataOverworldTimeOffset");
+        int dungeonDataIndex = romEntry.getInt("AreaDataDungeonIndex");
+        int dungeonTimeSep = romEntry.getInt("AreaDataDungeonTimeOffset");
+
+        for (int pk = 1; pk <= Gen4Constants.pokemonCount; pk++) {
+            for (int time = 0; time < 3; time++) {
+                areaData.files.set(owDataIndex + pk + time * owTimeSep, makeAreaDataFile(owAreaData[pk][time]));
+                areaData.files.set(dungeonDataIndex + pk + time * dungeonTimeSep,
+                        makeAreaDataFile(dungeonAreaData[pk][time]));
+            }
+        }
+        
+        writeNARC(areaDataFile, areaData);
+
+    }
+
+    private byte[] makeAreaDataFile(Set data) {
+        byte[] output = new byte[data.size() * 4 + 4];
+        int idx = 0;
+        for (Object obj : data) {
+            int areaIndex = ((Integer) obj).intValue();
+            this.writeLong(output, idx, areaIndex);
+            idx += 4;
+        }
+        return output;
     }
 
     private void setEncountersDPPt(boolean useTimeOfDay, List<EncounterSet> encounterList) throws IOException {
@@ -1545,8 +1669,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         if (!romEntry.staticPokemonSupport) {
             return false;
         }
-        int sptsize = romEntry.arrayEntries.containsKey("StaticPokemonTrades") ? romEntry.arrayEntries
-                .get("StaticPokemonTrades").length : 0;
+        int sptsize = romEntry.arrayEntries.containsKey("StaticPokemonTrades")
+                ? romEntry.arrayEntries.get("StaticPokemonTrades").length
+                : 0;
         int meggsize = romEntry.getInt("MysteryEggOffset") > 0 ? 1 : 0;
         int fossilsize = romEntry.getInt("FossilTableOffset") > 0 ? 7 : 0;
         if (staticPokemon.size() != romEntry.staticPokemon.size() + sptsize + meggsize + fossilsize) {
@@ -2087,8 +2212,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                             evo.type = EvolutionType.LEVEL_ITEM_DAY;
                             // now add an extra evo for
                             // Level up w/ Held Item at Night
-                            Evolution extraEntry = new Evolution(evo.from, evo.to, true,
-                                    EvolutionType.LEVEL_ITEM_NIGHT, item);
+                            Evolution extraEntry = new Evolution(evo.from, evo.to, true, EvolutionType.LEVEL_ITEM_NIGHT,
+                                    item);
                             extraEvolutions.add(extraEntry);
                         }
                     }
