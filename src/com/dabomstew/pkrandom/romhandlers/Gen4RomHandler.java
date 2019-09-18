@@ -1005,29 +1005,30 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             }
             encounters.add(bccSet);
         }
-        
+
         // HGSS Headbutt is a mistake
-        // This code is just provided for educational purposes and deliberately left unused
-//        NARCArchive hbData = readNARC(romEntry.getString("HeadbuttData"));
-//        for(int idx = 0; idx < hbData.files.size(); idx++) {
-//            byte[] file = hbData.files.get(idx);
-//            if(file.length < 4 || readLong(file, 0) == 0) {
-//                continue;
-//            }
-//            EncounterSet hbSet = new EncounterSet();
-//            hbSet.displayName = "Headbutt Tree "+idx;
-//            hbSet.rate = 1;
-//            
-//            for(int pk=0;pk<12;pk++) {
-//                Encounter e = new Encounter();
-//                e.level = file[4 + pk * 4 + 2] & 0xFF;
-//                e.maxLevel = file[4 + pk * 4 + 3] & 0xFF;
-//                e.pokemon = pokes[readWord(file, 4 + pk * 4)];
-//                hbSet.encounters.add(e);
-//            }
-//            encounters.add(hbSet);
-//        }
-        
+        // This code is just provided for educational purposes and deliberately
+        // left unused
+        // NARCArchive hbData = readNARC(romEntry.getString("HeadbuttData"));
+        // for(int idx = 0; idx < hbData.files.size(); idx++) {
+        // byte[] file = hbData.files.get(idx);
+        // if(file.length < 4 || readLong(file, 0) == 0) {
+        // continue;
+        // }
+        // EncounterSet hbSet = new EncounterSet();
+        // hbSet.displayName = "Headbutt Tree "+idx;
+        // hbSet.rate = 1;
+        //
+        // for(int pk=0;pk<12;pk++) {
+        // Encounter e = new Encounter();
+        // e.level = file[4 + pk * 4 + 2] & 0xFF;
+        // e.maxLevel = file[4 + pk * 4 + 3] & 0xFF;
+        // e.pokemon = pokes[readWord(file, 4 + pk * 4)];
+        // hbSet.encounters.add(e);
+        // }
+        // encounters.add(hbSet);
+        // }
+
         return encounters;
     }
 
@@ -1087,22 +1088,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         String encountersFile = romEntry.getString("WildPokemon");
         NARCArchive encounterData = readNARC(encountersFile);
 
-        // Only d/p/pt is implemented yet
-        if (romEntry.romType == Gen4Constants.Type_HGSS) {
-            NARCArchive narc = readNARC("a/1/3/3");
-            narc.files.set(3, new byte[] { 19, 0, 0, 0, 0, 0, 0, 0 });
-            writeNARC("a/1/3/3", narc);
-            return;
-        }
-
         // Initialize empty area data
-        int[] owMapping = Gen4Constants.dpptOverworldDexMaps;
-        int[] dungeonMapping = Gen4Constants.dpptDungeonDexMaps;
-        Set[][] owAreaData = new Set[Gen4Constants.pokemonCount + 1][3];
-        Set[][] dungeonAreaData = new Set[Gen4Constants.pokemonCount + 1][3];
+        int[] owMapping = romEntry.romType == Gen4Constants.Type_HGSS ? Gen4Constants.hgssOverworldDexMaps
+                : Gen4Constants.dpptOverworldDexMaps;
+        int[] dungeonMapping = romEntry.romType == Gen4Constants.Type_HGSS ? Gen4Constants.hgssDungeonDexMaps
+                : Gen4Constants.dpptDungeonDexMaps;
+        Set[][] owAreaData = new Set[Gen4Constants.pokemonCount + 1][4];
+        Set[][] dungeonAreaData = new Set[Gen4Constants.pokemonCount + 1][4];
 
         for (int pk = 1; pk <= Gen4Constants.pokemonCount; pk++) {
-            for (int time = 0; time < 3; time++) {
+            for (int time = 0; time < 4; time++) {
                 owAreaData[pk][time] = new TreeSet();
                 dungeonAreaData[pk][time] = new TreeSet();
             }
@@ -1124,51 +1119,117 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
             byte[] b = encounterData.files.get(c);
 
-            int grassRate = readLong(b, 0);
-            if (grassRate != 0) {
-                // up to 4
-                List<Encounter> grassEncounters = readEncountersDPPt(b, 4, 12);
-
+            if (romEntry.romType == Gen4Constants.Type_HGSS) {
+                int[] amounts = new int[] { 0, 5, 2, 5, 5, 5 };
+                int[] rates = new int[6];
+                rates[0] = b[0] & 0xFF;
+                rates[1] = b[1] & 0xFF;
+                rates[2] = b[2] & 0xFF;
+                rates[3] = b[3] & 0xFF;
+                rates[4] = b[4] & 0xFF;
+                rates[5] = b[5] & 0xFF;
+                // Up to 8 after the rates
+                // Grass has to be handled on its own because the levels
+                // are reused for every time of day
+                int[] grassLevels = new int[12];
                 for (int i = 0; i < 12; i++) {
-                    int pknum = grassEncounters.get(i).pokemon.number;
-                    if (i == 2 || i == 3) {
-                        // morning only - time of day data for day/night for
-                        // these slots
-                        target[pknum][0].add(index);
-                    } else {
-                        // all times of day
+                    grassLevels[i] = b[8 + i] & 0xFF;
+                }
+                // Up to 20 now (12 for levels)
+                if (rates[0] != 0) {
+                    for (int time = 0; time < 3; time++) {
+                        Pokemon[] pokes = readPokemonHGSS(b, 20 + time * 24, 12);
+                        for (Pokemon pk : pokes) {
+                            target[pk.number][time].add(index);
+                        }
+                    }
+                }
+
+                // Hoenn/Sinnoh Radio: red flash
+                EncounterSet radio = readOptionalEncountersHGSS(b, 92, 4);
+                for (Encounter e : radio.encounters) {
+                    target[e.pokemon.number][3].add(index);
+                }
+
+                // Up to 100 now... 2*2*2 for radio pokemon
+                int offset = 100;
+                for (int i = 1; i < 6; i++) {
+                    List<Encounter> encountersHere = readSeaEncountersHGSS(b, offset, amounts[i]);
+                    offset += 4 * amounts[i];
+                    if (rates[i] != 0) {
+                        // Valid area.
+                        for (Encounter e : encountersHere) {
+                            target[e.pokemon.number][0].add(index);
+                            target[e.pokemon.number][1].add(index);
+                            target[e.pokemon.number][2].add(index);
+                        }
+                    }
+                }
+
+                // Swarms
+                EncounterSet swarms = readOptionalEncountersHGSS(b, offset, 4);
+                for (Encounter e : swarms.encounters) {
+                    target[e.pokemon.number][3].add(index);
+                }
+            } else {
+                // D/P/Pt
+                int grassRate = readLong(b, 0);
+                if (grassRate != 0) {
+                    // up to 4
+                    List<Encounter> grassEncounters = readEncountersDPPt(b, 4, 12);
+
+                    for (int i = 0; i < 12; i++) {
+                        int pknum = grassEncounters.get(i).pokemon.number;
+                        if (i == 2 || i == 3) {
+                            // morning only - time of day data for day/night for
+                            // these slots
+                            target[pknum][0].add(index);
+                        } else {
+                            // all times of day
+                            target[pknum][0].add(index);
+                            target[pknum][1].add(index);
+                            target[pknum][2].add(index);
+                        }
+                    }
+
+                    // time of day data for slots 2 and 3 day/night
+                    for (int i = 0; i < 4; i++) {
+                        int pknum = readLong(b, 108 + 4 * i);
+                        if (pknum >= 1 && pknum <= Gen4Constants.pokemonCount) {
+                            target[pknum][i > 1 ? 2 : 1].add(index);
+                        }
+                    }
+
+                    // Swarm/Radar/GBA excluded from dex data deliberately
+                }
+
+                // up to 204, 5 sets of "sea" encounters to go
+                int offset = 204;
+                for (int i = 0; i < 5; i++) {
+                    int rate = readLong(b, offset);
+                    offset += 4;
+                    List<Encounter> encountersHere = readSeaEncountersDPPt(b, offset, 5);
+                    offset += 40;
+                    if (rate == 0 || i == 1) {
+                        continue;
+                    }
+                    for (Encounter e : encountersHere) {
+                        int pknum = e.pokemon.number;
                         target[pknum][0].add(index);
                         target[pknum][1].add(index);
                         target[pknum][2].add(index);
                     }
                 }
-
-                // time of day data for slots 2 and 3 day/night
-                for (int i = 0; i < 4; i++) {
-                    int pknum = readLong(b, 108 + 4 * i);
-                    if (pknum >= 1 && pknum <= Gen4Constants.pokemonCount) {
-                        target[pknum][i > 1 ? 2 : 1].add(index);
-                    }
-                }
-
-                // Swarm/Radar/GBA excluded from dex data deliberately
             }
+        }
 
-            // up to 204, 5 sets of "sea" encounters to go
-            int offset = 204;
-            for (int i = 0; i < 5; i++) {
-                int rate = readLong(b, offset);
-                offset += 4;
-                List<Encounter> encountersHere = readSeaEncountersDPPt(b, offset, 5);
-                offset += 40;
-                if (rate == 0 || i == 1) {
-                    continue;
-                }
-                for (Encounter e : encountersHere) {
-                    int pknum = e.pokemon.number;
-                    target[pknum][0].add(index);
-                    target[pknum][1].add(index);
-                    target[pknum][2].add(index);
+        // HGSS only: add Bug Catching Contest red flash
+        if (romEntry.romType == Gen4Constants.Type_HGSS) {
+            byte[] bccData = readFile(romEntry.getString("BCCData"));
+            for (int set = 0; set < 4; set++) {
+                for (int pk = 0; pk < 10; pk++) {
+                    dungeonAreaData[readWord(bccData, set * 80 + pk * 8)][3]
+                            .add(Gen4Constants.hgssNationalParkDexIndex);
                 }
             }
         }
@@ -1181,12 +1242,22 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         int owTimeSep = romEntry.getInt("AreaDataOverworldTimeOffset");
         int dungeonDataIndex = romEntry.getInt("AreaDataDungeonIndex");
         int dungeonTimeSep = romEntry.getInt("AreaDataDungeonTimeOffset");
+        int owRedFlashIndex = romEntry.romType == Gen4Constants.Type_HGSS ? romEntry.getInt("AreaDataOverworldRedIndex")
+                : 0;
+        int dungeonRedFlashIndex = romEntry.romType == Gen4Constants.Type_HGSS
+                ? romEntry.getInt("AreaDataDungeonRedIndex")
+                : 0;
 
         for (int pk = 1; pk <= Gen4Constants.pokemonCount; pk++) {
             for (int time = 0; time < 3; time++) {
                 areaData.files.set(owDataIndex + pk + time * owTimeSep, makeAreaDataFile(owAreaData[pk][time]));
                 areaData.files.set(dungeonDataIndex + pk + time * dungeonTimeSep,
                         makeAreaDataFile(dungeonAreaData[pk][time]));
+            }
+            // HGSS: red flash data as well
+            if (romEntry.romType == Gen4Constants.Type_HGSS) {
+                areaData.files.set(owRedFlashIndex + pk, makeAreaDataFile(owAreaData[pk][3]));
+                areaData.files.set(dungeonRedFlashIndex + pk, makeAreaDataFile(dungeonAreaData[pk][3]));
             }
         }
 
