@@ -989,6 +989,45 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 encounters.add(swarms);
             }
         }
+
+        // Bug Catching Contest
+        byte[] bccData = readFile(romEntry.getString("BCCData"));
+        for (int set = 0; set < 4; set++) {
+            EncounterSet bccSet = new EncounterSet();
+            bccSet.displayName = "Bug Catching Contest Set " + (set + 1);
+            bccSet.rate = 1;
+            for (int pk = 0; pk < 10; pk++) {
+                Encounter e = new Encounter();
+                e.level = bccData[set * 80 + pk * 8 + 2] & 0xFF;
+                e.maxLevel = bccData[set * 80 + pk * 8 + 3] & 0xFF;
+                e.pokemon = pokes[readWord(bccData, set * 80 + pk * 8)];
+                bccSet.encounters.add(e);
+            }
+            encounters.add(bccSet);
+        }
+        
+        // HGSS Headbutt is a mistake
+        // This code is just provided for educational purposes and deliberately left unused
+//        NARCArchive hbData = readNARC(romEntry.getString("HeadbuttData"));
+//        for(int idx = 0; idx < hbData.files.size(); idx++) {
+//            byte[] file = hbData.files.get(idx);
+//            if(file.length < 4 || readLong(file, 0) == 0) {
+//                continue;
+//            }
+//            EncounterSet hbSet = new EncounterSet();
+//            hbSet.displayName = "Headbutt Tree "+idx;
+//            hbSet.rate = 1;
+//            
+//            for(int pk=0;pk<12;pk++) {
+//                Encounter e = new Encounter();
+//                e.level = file[4 + pk * 4 + 2] & 0xFF;
+//                e.maxLevel = file[4 + pk * 4 + 3] & 0xFF;
+//                e.pokemon = pokes[readWord(file, 4 + pk * 4)];
+//                hbSet.encounters.add(e);
+//            }
+//            encounters.add(hbSet);
+//        }
+        
         return encounters;
     }
 
@@ -1050,6 +1089,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
         // Only d/p/pt is implemented yet
         if (romEntry.romType == Gen4Constants.Type_HGSS) {
+            NARCArchive narc = readNARC("a/1/3/3");
+            narc.files.set(3, new byte[] { 19, 0, 0, 0, 0, 0, 0, 0 });
+            writeNARC("a/1/3/3", narc);
             return;
         }
 
@@ -1147,7 +1189,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                         makeAreaDataFile(dungeonAreaData[pk][time]));
             }
         }
-        
+
         writeNARC(areaDataFile, areaData);
 
     }
@@ -1313,6 +1355,20 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
         // Save
         writeNARC(encountersFile, encounterData);
+
+        // Bug Catching Contest
+        String bccName = romEntry.getString("BCCData");
+        byte[] bccData = readFile(bccName);
+        for (int set = 0; set < 4; set++) {
+            EncounterSet bccSet = encounters.next();
+            for (int pk = 0; pk < 10; pk++) {
+                Encounter e = bccSet.encounters.get(pk);
+                writeWord(bccData, set * 80 + pk * 8, e.pokemon.number);
+                bccData[set * 80 + pk * 8 + 2] = (byte) e.level;
+                bccData[set * 80 + pk * 8 + 3] = (byte) e.maxLevel;
+            }
+        }
+        writeFile(bccName, bccData);
 
     }
 

@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.dabomstew.pkrandom.SysConstants;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.SysConstants;
 
 import cuecompressors.BLZCoder;
 
@@ -120,7 +120,7 @@ public class NDSRom {
         Map<Integer, String> directoryPaths = new HashMap<Integer, String>();
         directoryPaths.put(0xF000, "");
         int dircount = readFromFile(baseRom, fntOffset + 0x6, 2);
-        files = new HashMap<String, NDSFile>();
+        files = new TreeMap<String, NDSFile>();
         filesByID = new HashMap<Integer, NDSFile>();
 
         // read fnt table
@@ -492,8 +492,8 @@ public class NDSRom {
             // Any extras?
             while ((readFromByteArr(arm9, arm9.length - 12, 4) == 0xDEC00621)
                     || ((readFromByteArr(arm9, arm9.length - 12, 4) == 0
-                            && readFromByteArr(arm9, arm9.length - 8, 4) == 0 && readFromByteArr(arm9, arm9.length - 4,
-                            4) == 0))) {
+                            && readFromByteArr(arm9, arm9.length - 8, 4) == 0
+                            && readFromByteArr(arm9, arm9.length - 4, 4) == 0))) {
                 if (!arm9_has_footer) {
                     arm9_has_footer = true;
                     arm9_footer = new byte[0];
@@ -682,6 +682,10 @@ public class NDSRom {
         if (offset >= 0)
             file.seek(offset);
         file.write(buf);
+    }
+
+    public Iterable<String> filenames() {
+        return this.files.keySet();
     }
 
 }

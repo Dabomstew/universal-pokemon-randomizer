@@ -131,6 +131,10 @@ public class Gen4Constants {
            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 170-179 (last few land routes, towns, resort area, first sea route)
            -1, -1, -1,                             // 180-182 (other sea routes)
    };
+    
+    public static final int[] hgssOverworldDexMaps = new int[] {
+            // todo
+    };
     /* @formatter:on */
 
     public static final String[] hgssTimeOfDayNames = new String[] { "Morning", "Day", "Night" };
