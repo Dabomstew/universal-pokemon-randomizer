@@ -71,19 +71,19 @@ public enum Type {
             // special" (mostly birds)
             put(NORMAL, new HashMap<Type, Double>() {{
                 put(NORMAL, Double.valueOf(1));
-                put(FLYING, Double.valueOf(0.6));
-                put(BUG, Double.valueOf(0.4));
-                put(FIRE, Double.valueOf(0.2));
-                put(GRASS, Double.valueOf(0.2));
-                put(ELECTRIC, Double.valueOf(0.2));
+                put(FLYING, Double.valueOf(0.4));
+                put(BUG, Double.valueOf(0.2));
+                put(FIRE, Double.valueOf(0.1));
+                put(GRASS, Double.valueOf(0.1));
+                put(ELECTRIC, Double.valueOf(0.1));
                 put(PSYCHIC, Double.valueOf(0.05));
             }});
             // Fighting: Often in caves with rock, ground and steel
             put(FIGHTING, new HashMap<Type, Double>() {{
                 put(FIGHTING, Double.valueOf(1));
-                put(ROCK, Double.valueOf(0.6));
-                put(GROUND, Double.valueOf(0.6));
-                put(STEEL, Double.valueOf(0.6));
+                put(ROCK, Double.valueOf(0.8));
+                put(GROUND, Double.valueOf(0.8));
+                put(STEEL, Double.valueOf(0.8));
                 put(POISON, Double.valueOf(0.2));
                 put(DARK, Double.valueOf(0.1));
                 put(DRAGON, Double.valueOf(0.05));
@@ -91,15 +91,15 @@ public enum Type {
             // Flying: near normals, as well as Bugs (birds need to eat)
             put(FLYING, new HashMap<Type, Double>() {{
                 put(FLYING, Double.valueOf(1));
-                put(NORMAL, Double.valueOf(0.6));
-                put(BUG, Double.valueOf(0.6));
+                put(NORMAL, Double.valueOf(0.4));
+                put(BUG, Double.valueOf(0.4));
             }});
             // Grass: Bug, Poison, Normal
             put(GRASS, new HashMap<Type, Double>() {{
                 put(GRASS, Double.valueOf(1));
-                put(NORMAL, Double.valueOf(0.6));
-                put(BUG, Double.valueOf(0.4));
+                put(NORMAL, Double.valueOf(0.4));
                 put(POISON, Double.valueOf(0.4));
+                put(BUG, Double.valueOf(0.3));
             }});
             // Water: Water (all ice types that occure with water types are
             // usually also water types)
@@ -110,54 +110,55 @@ public enum Type {
             // Fire: Normal
             put(FIRE, new HashMap<Type, Double>() {{
                 put(FIRE, Double.valueOf(1));
-                put(NORMAL, Double.valueOf(0.5));
+                put(NORMAL, Double.valueOf(0.4));
             }});
             // Rock: Caves -> same as Fighting
             put(ROCK, new HashMap<Type, Double>() {{
                 put(ROCK, Double.valueOf(1));
-                put(FIGHTING, Double.valueOf(0.6));
-                put(GROUND, Double.valueOf(0.6));
-                put(STEEL, Double.valueOf(0.6));
-                put(POISON, Double.valueOf(0.2));
+                put(FIGHTING, Double.valueOf(0.8));
+                put(GROUND, Double.valueOf(0.8));
+                put(STEEL, Double.valueOf(0.8));
+                put(POISON, Double.valueOf(0.1));
                 put(DARK, Double.valueOf(0.1));
                 put(DRAGON, Double.valueOf(0.05));
             }});
             // Ground: Same as Rocks
             put(GROUND, new HashMap<Type, Double>() {{
                 put(GROUND, Double.valueOf(1));
-                put(FIGHTING, Double.valueOf(0.6));
-                put(ROCK, Double.valueOf(0.6));
-                put(STEEL, Double.valueOf(0.6));
-                put(POISON, Double.valueOf(0.2));
+                put(FIGHTING, Double.valueOf(0.8));
+                put(ROCK, Double.valueOf(0.8));
+                put(STEEL, Double.valueOf(0.8));
+                put(POISON, Double.valueOf(0.1));
                 put(DARK, Double.valueOf(0.1));
                 put(DRAGON, Double.valueOf(0.05));
             }});
             // Psychic: Dark, Ghost, normal
             put(PSYCHIC, new HashMap<Type, Double>() {{
                 put(PSYCHIC, Double.valueOf(1));
-                put(NORMAL, Double.valueOf(0.4));
+                put(NORMAL, Double.valueOf(0.3));
                 put(GHOST, Double.valueOf(0.2));
                 put(DARK, Double.valueOf(0.1));
             }});
             // Bug: Same as grass
             put(BUG, new HashMap<Type, Double>() {{
                 put(BUG, Double.valueOf(1));
-                put(NORMAL, Double.valueOf(0.6));
-                put(GRASS, Double.valueOf(0.4));
-                put(POISON, Double.valueOf(0.4));
+                put(NORMAL, Double.valueOf(0.4));
+                put(FLYING, Double.valueOf(0.4));
+                put(POISON, Double.valueOf(0.3));
+                put(GRASS, Double.valueOf(0.2));
             }});
             // Dragon: Usually in caves, often also water
             put(DRAGON, new HashMap<Type, Double>() {{
                 put(DRAGON, Double.valueOf(1));
                 put(WATER, Double.valueOf(0.1));
-                put(GROUND, Double.valueOf(0.1));
-                put(ROCK, Double.valueOf(0.1));
+                put(GROUND, Double.valueOf(0.05));
+                put(ROCK, Double.valueOf(0.05));
             }});
             // Electric: Normal, Steel
             put(ELECTRIC, new HashMap<Type, Double>() {{
                 put(ELECTRIC, Double.valueOf(1));
-                put(NORMAL, Double.valueOf(0.4));
-                put(STEEL, Double.valueOf(0.1));
+                put(NORMAL, Double.valueOf(0.3));
+                put(STEEL, Double.valueOf(0.2));
             }});
             // Ghost: Poison, Dark, Psychic
             put(GHOST, new HashMap<Type, Double>() {{
@@ -173,29 +174,27 @@ public enum Type {
                 put(POISON, Double.valueOf(0.1));
                 put(PSYCHIC, Double.valueOf(0.1));
             }});
-            // Poison: Bugs, grass, Ghost, Caves
+            // Poison: Bugs, grass, Ghost
             put(POISON, new HashMap<Type, Double>() {{
                 put(POISON, Double.valueOf(1));
                 put(BUG, Double.valueOf(0.4));
                 put(GRASS, Double.valueOf(0.4));
                 put(GHOST, Double.valueOf(0.2));
-                put(GROUND, Double.valueOf(0.1));
-                put(ROCK, Double.valueOf(0.1));
             }});
             // Ice: Mostly water, sometimes in caves
             put(ICE, new HashMap<Type, Double>() {{
                 put(ICE, Double.valueOf(1));
                 put(WATER, Double.valueOf(0.8));
-                put(GROUND, Double.valueOf(0.1));
-                put(DARK, Double.valueOf(0.1));
+                put(GROUND, Double.valueOf(0.05));
+                put(DARK, Double.valueOf(0.05));
             }});
             // Steel: same as rock
             put(STEEL, new HashMap<Type, Double>() {{
                 put(STEEL, Double.valueOf(1));
-                put(FIGHTING, Double.valueOf(0.6));
-                put(ROCK, Double.valueOf(0.6));
-                put(GROUND, Double.valueOf(0.6));
-                put(POISON, Double.valueOf(0.2));
+                put(FIGHTING, Double.valueOf(0.8));
+                put(ROCK, Double.valueOf(0.8));
+                put(GROUND, Double.valueOf(0.8));
+                put(POISON, Double.valueOf(0.1));
                 put(DARK, Double.valueOf(0.1));
                 put(DRAGON, Double.valueOf(0.05));
             }});

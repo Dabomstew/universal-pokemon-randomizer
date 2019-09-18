@@ -20,10 +20,10 @@ public class TypeThemedGuard extends Guard<Pokemon> implements BaseProbabilityGu
         // Get minimum distance over both types
         double distance = theme.getOccuranceDistance(obj.primaryType);
         if (obj.secondaryType != null) {
-            distance = Math.min(distance, theme.getOccuranceDistance(obj.secondaryType));
+            distance = (distance + theme.getOccuranceDistance(obj.secondaryType)) / 2;
         }
         // now do gaussian with the distance
-        double stddev = 0.2;
+        double stddev = 0.12;
         double tmp = distance / stddev;
         return Math.exp(-0.5 * tmp * tmp);
     }

@@ -7,19 +7,21 @@ public class SimilarTypeGuard extends ReplacementGuard<Pokemon> implements BaseP
     @Override
     protected double computeWeight(Pokemon obj) {
         // Get the minimum distance of all types
-        double distance = oldValue.primaryType.getOccuranceDistance(obj.primaryType);
+        double d1 = oldValue.primaryType.getOccuranceDistance(obj.primaryType);
         if (oldValue.secondaryType != null) {
-            distance = Math.min(distance, oldValue.secondaryType.getOccuranceDistance(obj.primaryType));
-            if (obj.secondaryType != null) {
-                distance = Math.min(distance, oldValue.secondaryType.getOccuranceDistance(obj.secondaryType));
+            d1 = Math.min(d1, oldValue.secondaryType.getOccuranceDistance(obj.primaryType));
+        }
+        double d2 = d1;
+        if (obj.secondaryType != null) {
+            d2 =oldValue.primaryType.getOccuranceDistance(obj.secondaryType);
+            if (oldValue.secondaryType != null) {
+                d2 = Math.min(d2, oldValue.secondaryType.getOccuranceDistance(obj.secondaryType));
             }
         }
-        if (obj.secondaryType != null) {
-            distance = Math.min(distance, oldValue.primaryType.getOccuranceDistance(obj.secondaryType));
-        }
 
+        double distance = (d1 + d2) / 2;
         // now do gaussian with the distance
-        double stddev = 0.2;
+        double stddev = 0.12;
         double tmp = distance / stddev;
         return Math.exp(-0.5 * tmp * tmp);
     }
