@@ -84,7 +84,6 @@ public class Settings {
     private boolean banNegativeAbilities;
 
     
-    // TODO: Add properly saving config for random base stage setting
     public enum StartersMod {
         UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS, RANDOM_WITH_ONE_EVOLUTION, RANDOM_WITH_NO_EVOLUTIONS, RANDOM_BASE_STAGE
     }
@@ -139,7 +138,6 @@ public class Settings {
         UNCHANGED, RANDOM, TYPE_THEMED
     }
 
-    //TODO: Have trainer same evo stage option save/load to config properly
     private TrainersMod trainersMod = TrainersMod.UNCHANGED;
     private boolean rivalCarriesStarterThroughout;
     private boolean trainersUsePokemonOfSimilarStrength;
@@ -158,7 +156,6 @@ public class Settings {
         UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING
     }
 
-    //TODO: Have same evo stage save/load to config properly
     public enum WildPokemonRestrictionMod {
         NONE, SIMILAR_STRENGTH, CATCH_EM_ALL, TYPE_THEME_AREAS, SAME_EVO_STAGE
     }
@@ -318,7 +315,7 @@ public class Settings {
         // bugfix 161
         out.write(makeByteSelected(useMinimumCatchRate, blockWildLegendaries,
                 wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_STRENGTH, randomizeWildPokemonHeldItems,
-                banBadRandomWildPokemonHeldItems)
+                banBadRandomWildPokemonHeldItems, wildPokemonRestrictionMod == WildPokemonRestrictionMod.SAME_EVO_STAGE)
                 | ((minimumCatchRateLevel - 1) << 5));
 
         // 17 static pokemon
@@ -395,6 +392,9 @@ public class Settings {
         // @ 36 base stats range slider value
         out.write(baseStatRange);
 
+        // 37 trainer pokemon extended settings and misc? (couldn't fit this in existing entries)
+        out.write(makeByteSelected(trainersUseSameEvoStages));
+        
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
             out.write(romName.length);
@@ -489,6 +489,8 @@ public class Settings {
         settings.setTrainersForceFullyEvolved(restoreState(data[14], 7));
         settings.setTrainersForceFullyEvolvedLevel(data[14] & 0x7F);
 
+        settings.setTrainersUseSameEvoStages(restoreState(data[37], 0));
+        
         settings.setWildPokemonMod(restoreEnum(WildPokemonMod.class, data[15], 6, // UNCHANGED
                 5, // RANDOM
                 1, // AREA_MAPPING
@@ -497,7 +499,8 @@ public class Settings {
         settings.setWildPokemonRestrictionMod(getEnum(WildPokemonRestrictionMod.class, restoreState(data[15], 2), // NONE
                 restoreState(data[16], 2), // SIMILAR_STRENGTH
                 restoreState(data[15], 0), // CATCH_EM_ALL
-                restoreState(data[15], 3) // TYPE_THEME_AREAS
+                restoreState(data[15], 3), // TYPE_THEME_AREAS
+                restoreState(data[16], 5) // SAME_EVO_STAGE
         ));
         settings.setUseTimeBasedEncounters(restoreState(data[15], 7));
 
