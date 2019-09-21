@@ -14,7 +14,8 @@ public final class PopulationControlGuard extends DiversityGuard<Pokemon> {
     @Override
     protected double computeWeight(Pokemon obj) {
         // So of course we need to compute the weight for the evo chain
-        return super.computeWeight(obj.getEvolutionRepresentant());
+        // ^10 to increase punishment for often sampled pokemon highly
+        return Math.pow(super.computeWeight(obj.getEvolutionRepresentant()), 10);
     }
 
 }
