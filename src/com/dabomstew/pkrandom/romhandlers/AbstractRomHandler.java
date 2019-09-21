@@ -3908,7 +3908,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         
         if(canPick.isEmpty()) {
             int fromDepthMinusLoops = fromDepth;
-            while(canPick.isEmpty())
+            while(canPick.isEmpty() && fromDepthMinusLoops >= 0)
             {
                 for (Pokemon pk : pokemonPool) {
                     if (pk.evosFromDepth() == fromDepthMinusLoops
@@ -3917,11 +3917,21 @@ public abstract class AbstractRomHandler implements RomHandler {
                         canPick.add(pk);
                     }
                 }
-                if(fromDepthMinusLoops > 0) {
-                    fromDepthMinusLoops--;
-                } else {
-                    fromDepthMinusLoops = 0;
+                fromDepthMinusLoops--;
+            }
+        }
+        if(canPick.isEmpty()) {
+            int toDepthMinusLoops = toDepth;
+            while(canPick.isEmpty() && toDepthMinusLoops >= 0)
+            {
+                for (Pokemon pk : pokemonPool) {
+                    if (pk.evosToDepth() == toDepthMinusLoops
+                            && (!banSamePokemon || pk != current) && (usedUp == null || !usedUp.contains(pk))
+                            && !canPick.contains(pk)) {
+                        canPick.add(pk);
+                    }
                 }
+                toDepthMinusLoops--;
             }
         }
         
