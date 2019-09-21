@@ -38,6 +38,7 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.GFXFunctions;
@@ -175,7 +176,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                             }
                         } else if (r[0].equals("StaticPokemon[]")) {
                             if (r[1].startsWith("[") && r[1].endsWith("]")) {
-                                String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
+                                String data = r[1].substring(1, r[1].length()-1).trim();
+                                int roamerNum = -1;
+                                if(data.startsWith("r:")) {
+                                    int endOffs = data.contains(",") ? data.indexOf(",") : data.length();
+                                    roamerNum = parseRIInt(data.substring(2, endOffs));
+                                    data = data.substring(endOffs).trim();
+                                }
+                                String[] offsets = data.isEmpty() ? new String[0] : data.split(",");
                                 int[] offs = new int[offsets.length];
                                 int[] files = new int[offsets.length];
                                 int c = 0;
@@ -187,6 +195,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                                 StaticPokemon sp = new StaticPokemon();
                                 sp.files = files;
                                 sp.offsets = offs;
+                                sp.roamerNum = roamerNum;
                                 current.staticPokemon.add(sp);
                             } else {
                                 String[] parts = r[1].split("\\:");
@@ -218,7 +227,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                                     current.arrayEntries.put(r[0], offs);
                                 }
                             } else if (r[0].endsWith("Offset") || r[0].endsWith("Count") || r[0].endsWith("Number")
-                                    || r[0].endsWith("Size")) {
+                                    || r[0].endsWith("Size") || r[0].endsWith("Index")) {
                                 int offs = parseRIInt(r[1]);
                                 current.numbers.put(r[0], offs);
                             } else {
@@ -644,7 +653,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 // the HoF times checker case is for the Fight Area or Survival
                 // Area (depending on version).
                 // the StarterBattle case is for Route 201 in Pt.
-                int[] filesWithRivalScript = (romEntry.romType == Gen4Constants.Type_Plat) ? Gen4Constants.ptFilesWithRivalScript
+                int[] filesWithRivalScript = (romEntry.romType == Gen4Constants.Type_Plat)
+                        ? Gen4Constants.ptFilesWithRivalScript
                         : Gen4Constants.dpFilesWithRivalScript;
                 byte[] magic = Gen4Constants.dpptRivalScriptMagic;
                 NARCArchive scriptNARC = scriptNarc;
@@ -661,7 +671,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                             // TODO find out what these constants are and remove
                             // them
                             if (readWord(file, jumpTo) != 0xE5 && readWord(file, jumpTo) != 0x28F
-                                    && (readWord(file, jumpTo) != 0x125 || romEntry.romType != Gen4Constants.Type_Plat)) {
+                                    && (readWord(file, jumpTo) != 0x125
+                                            || romEntry.romType != Gen4Constants.Type_Plat)) {
                                 continue; // not a rival script
                             }
                             // Replace the two starter-words 387 and 390
@@ -675,7 +686,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 // 2 for Lucas/Dawn (=4 occurrences), 1 or 2 for Barry
                 byte[] tagBattleMagic = Gen4Constants.dpptTagBattleScriptMagic1;
                 byte[] tagBattleMagic2 = Gen4Constants.dpptTagBattleScriptMagic2;
-                int[] filesWithTagBattleScript = (romEntry.romType == Gen4Constants.Type_Plat) ? Gen4Constants.ptFilesWithTagScript
+                int[] filesWithTagBattleScript = (romEntry.romType == Gen4Constants.Type_Plat)
+                        ? Gen4Constants.ptFilesWithTagScript
                         : Gen4Constants.dpFilesWithTagScript;
                 for (int i = 0; i < filesWithTagBattleScript.length; i++) {
                     int fileCheck = filesWithTagBattleScript[i];
@@ -727,8 +739,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 for (int i = 0; i < 3; i++) {
                     Pokemon newStarter = newStarters.get(i);
                     int color = (i == 0) ? 3 : i;
-                    String newStarterDesc = "\\vFF00\\z000" + color + pokedexSpeciesStrings.get(newStarter.number)
-                            + " " + newStarter.name + "\\vFF00\\z0000!\\nWill you take this Pokémon?";
+                    String newStarterDesc = "\\vFF00\\z000" + color + pokedexSpeciesStrings.get(newStarter.number) + " "
+                            + newStarter.name + "\\vFF00\\z0000!\\nWill you take this Pokémon?";
                     spStrings.set(i + 1, newStarterDesc);
                 }
                 // rewrite starter picking screen
@@ -736,9 +748,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 if (romEntry.romType == Gen4Constants.Type_DP) {
                     // what rival says after we get the Pokemon
                     List<String> lakeStrings = getStrings(romEntry.getInt("StarterLocationTextOffset"));
-                    lakeStrings
-                            .set(Gen4Constants.dpStarterStringIndex,
-                                    "\\v0103\\z0000: Fwaaah!\\nYour Pokémon totally rocked!\\pBut mine was way tougher\\nthan yours!\\p...They were other people’s\\nPokémon, though...\\pBut we had to use them...\\nThey won’t mind, will they?\\p");
+                    lakeStrings.set(Gen4Constants.dpStarterStringIndex,
+                            "\\v0103\\z0000: Fwaaah!\\nYour Pokémon totally rocked!\\pBut mine was way tougher\\nthan yours!\\p...They were other people’s\\nPokémon, though...\\pBut we had to use them...\\nThey won’t mind, will they?\\p");
                     setStrings(romEntry.getInt("StarterLocationTextOffset"), lakeStrings);
                 } else {
                     // what rival says after we get the Pokemon
@@ -986,6 +997,46 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 encounters.add(swarms);
             }
         }
+
+        // Bug Catching Contest
+        byte[] bccData = readFile(romEntry.getString("BCCData"));
+        for (int set = 0; set < 4; set++) {
+            EncounterSet bccSet = new EncounterSet();
+            bccSet.displayName = "Bug Catching Contest Set " + (set + 1);
+            bccSet.rate = 1;
+            for (int pk = 0; pk < 10; pk++) {
+                Encounter e = new Encounter();
+                e.level = bccData[set * 80 + pk * 8 + 2] & 0xFF;
+                e.maxLevel = bccData[set * 80 + pk * 8 + 3] & 0xFF;
+                e.pokemon = pokes[readWord(bccData, set * 80 + pk * 8)];
+                bccSet.encounters.add(e);
+            }
+            encounters.add(bccSet);
+        }
+
+        // HGSS Headbutt is a mistake
+        // This code is just provided for educational purposes and deliberately
+        // left unused
+        // NARCArchive hbData = readNARC(romEntry.getString("HeadbuttData"));
+        // for(int idx = 0; idx < hbData.files.size(); idx++) {
+        // byte[] file = hbData.files.get(idx);
+        // if(file.length < 4 || readLong(file, 0) == 0) {
+        // continue;
+        // }
+        // EncounterSet hbSet = new EncounterSet();
+        // hbSet.displayName = "Headbutt Tree "+idx;
+        // hbSet.rate = 1;
+        //
+        // for(int pk=0;pk<12;pk++) {
+        // Encounter e = new Encounter();
+        // e.level = file[4 + pk * 4 + 2] & 0xFF;
+        // e.maxLevel = file[4 + pk * 4 + 3] & 0xFF;
+        // e.pokemon = pokes[readWord(file, 4 + pk * 4)];
+        // hbSet.encounters.add(e);
+        // }
+        // encounters.add(hbSet);
+        // }
+
         return encounters;
     }
 
@@ -1034,9 +1085,203 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             } else {
                 setEncountersDPPt(useTimeOfDay, encounters);
             }
+            updateAreaData();
         } catch (IOException ex) {
             throw new RandomizerIOException(ex);
         }
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private void updateAreaData() throws IOException {
+        String encountersFile = romEntry.getString("WildPokemon");
+        NARCArchive encounterData = readNARC(encountersFile);
+
+        // Initialize empty area data
+        int[] owMapping = romEntry.romType == Gen4Constants.Type_HGSS ? Gen4Constants.hgssOverworldDexMaps
+                : Gen4Constants.dpptOverworldDexMaps;
+        int[] dungeonMapping = romEntry.romType == Gen4Constants.Type_HGSS ? Gen4Constants.hgssDungeonDexMaps
+                : Gen4Constants.dpptDungeonDexMaps;
+        Set[][] owAreaData = new Set[Gen4Constants.pokemonCount + 1][4];
+        Set[][] dungeonAreaData = new Set[Gen4Constants.pokemonCount + 1][4];
+
+        for (int pk = 1; pk <= Gen4Constants.pokemonCount; pk++) {
+            for (int time = 0; time < 4; time++) {
+                owAreaData[pk][time] = new TreeSet();
+                dungeonAreaData[pk][time] = new TreeSet();
+            }
+        }
+
+        // Calculate area data from each poke from encounter data
+        for (int c = 0; c < encounterData.files.size(); c++) {
+            Set[][] target;
+            int index;
+            if (owMapping[c] != -1) {
+                target = owAreaData;
+                index = owMapping[c];
+            } else if (dungeonMapping[c] != -1) {
+                target = dungeonAreaData;
+                index = dungeonMapping[c];
+            } else {
+                continue;
+            }
+
+            byte[] b = encounterData.files.get(c);
+
+            if (romEntry.romType == Gen4Constants.Type_HGSS) {
+                int[] amounts = new int[] { 0, 5, 2, 5, 5, 5 };
+                int[] rates = new int[6];
+                rates[0] = b[0] & 0xFF;
+                rates[1] = b[1] & 0xFF;
+                rates[2] = b[2] & 0xFF;
+                rates[3] = b[3] & 0xFF;
+                rates[4] = b[4] & 0xFF;
+                rates[5] = b[5] & 0xFF;
+                // Up to 8 after the rates
+                // Grass has to be handled on its own because the levels
+                // are reused for every time of day
+                int[] grassLevels = new int[12];
+                for (int i = 0; i < 12; i++) {
+                    grassLevels[i] = b[8 + i] & 0xFF;
+                }
+                // Up to 20 now (12 for levels)
+                if (rates[0] != 0) {
+                    for (int time = 0; time < 3; time++) {
+                        Pokemon[] pokes = readPokemonHGSS(b, 20 + time * 24, 12);
+                        for (Pokemon pk : pokes) {
+                            target[pk.number][time].add(index);
+                        }
+                    }
+                }
+
+                // Hoenn/Sinnoh Radio: red flash
+                EncounterSet radio = readOptionalEncountersHGSS(b, 92, 4);
+                for (Encounter e : radio.encounters) {
+                    target[e.pokemon.number][3].add(index);
+                }
+
+                // Up to 100 now... 2*2*2 for radio pokemon
+                int offset = 100;
+                for (int i = 1; i < 6; i++) {
+                    List<Encounter> encountersHere = readSeaEncountersHGSS(b, offset, amounts[i]);
+                    offset += 4 * amounts[i];
+                    if (rates[i] != 0) {
+                        // Valid area.
+                        for (Encounter e : encountersHere) {
+                            target[e.pokemon.number][0].add(index);
+                            target[e.pokemon.number][1].add(index);
+                            target[e.pokemon.number][2].add(index);
+                        }
+                    }
+                }
+
+                // Swarms
+                EncounterSet swarms = readOptionalEncountersHGSS(b, offset, 4);
+                for (Encounter e : swarms.encounters) {
+                    target[e.pokemon.number][3].add(index);
+                }
+            } else {
+                // D/P/Pt
+                int grassRate = readLong(b, 0);
+                if (grassRate != 0) {
+                    // up to 4
+                    List<Encounter> grassEncounters = readEncountersDPPt(b, 4, 12);
+
+                    for (int i = 0; i < 12; i++) {
+                        int pknum = grassEncounters.get(i).pokemon.number;
+                        if (i == 2 || i == 3) {
+                            // morning only - time of day data for day/night for
+                            // these slots
+                            target[pknum][0].add(index);
+                        } else {
+                            // all times of day
+                            target[pknum][0].add(index);
+                            target[pknum][1].add(index);
+                            target[pknum][2].add(index);
+                        }
+                    }
+
+                    // time of day data for slots 2 and 3 day/night
+                    for (int i = 0; i < 4; i++) {
+                        int pknum = readLong(b, 108 + 4 * i);
+                        if (pknum >= 1 && pknum <= Gen4Constants.pokemonCount) {
+                            target[pknum][i > 1 ? 2 : 1].add(index);
+                        }
+                    }
+
+                    // Swarm/Radar/GBA excluded from dex data deliberately
+                }
+
+                // up to 204, 5 sets of "sea" encounters to go
+                int offset = 204;
+                for (int i = 0; i < 5; i++) {
+                    int rate = readLong(b, offset);
+                    offset += 4;
+                    List<Encounter> encountersHere = readSeaEncountersDPPt(b, offset, 5);
+                    offset += 40;
+                    if (rate == 0 || i == 1) {
+                        continue;
+                    }
+                    for (Encounter e : encountersHere) {
+                        int pknum = e.pokemon.number;
+                        target[pknum][0].add(index);
+                        target[pknum][1].add(index);
+                        target[pknum][2].add(index);
+                    }
+                }
+            }
+        }
+
+        // HGSS only: add Bug Catching Contest red flash
+        if (romEntry.romType == Gen4Constants.Type_HGSS) {
+            byte[] bccData = readFile(romEntry.getString("BCCData"));
+            for (int set = 0; set < 4; set++) {
+                for (int pk = 0; pk < 10; pk++) {
+                    dungeonAreaData[readWord(bccData, set * 80 + pk * 8)][3]
+                            .add(Gen4Constants.hgssNationalParkDexIndex);
+                }
+            }
+        }
+
+        // Write new area data to its file
+        // Area data format credit to Ganix
+        String areaDataFile = romEntry.getString("AreaData");
+        NARCArchive areaData = readNARC(areaDataFile);
+        int owDataIndex = romEntry.getInt("AreaDataOverworldIndex");
+        int owTimeSep = romEntry.getInt("AreaDataOverworldTimeOffset");
+        int dungeonDataIndex = romEntry.getInt("AreaDataDungeonIndex");
+        int dungeonTimeSep = romEntry.getInt("AreaDataDungeonTimeOffset");
+        int owRedFlashIndex = romEntry.romType == Gen4Constants.Type_HGSS ? romEntry.getInt("AreaDataOverworldRedIndex")
+                : 0;
+        int dungeonRedFlashIndex = romEntry.romType == Gen4Constants.Type_HGSS
+                ? romEntry.getInt("AreaDataDungeonRedIndex")
+                : 0;
+
+        for (int pk = 1; pk <= Gen4Constants.pokemonCount; pk++) {
+            for (int time = 0; time < 3; time++) {
+                areaData.files.set(owDataIndex + pk + time * owTimeSep, makeAreaDataFile(owAreaData[pk][time]));
+                areaData.files.set(dungeonDataIndex + pk + time * dungeonTimeSep,
+                        makeAreaDataFile(dungeonAreaData[pk][time]));
+            }
+            // HGSS: red flash data as well
+            if (romEntry.romType == Gen4Constants.Type_HGSS) {
+                areaData.files.set(owRedFlashIndex + pk, makeAreaDataFile(owAreaData[pk][3]));
+                areaData.files.set(dungeonRedFlashIndex + pk, makeAreaDataFile(dungeonAreaData[pk][3]));
+            }
+        }
+
+        writeNARC(areaDataFile, areaData);
+
+    }
+
+    private byte[] makeAreaDataFile(Set data) {
+        byte[] output = new byte[data.size() * 4 + 4];
+        int idx = 0;
+        for (Object obj : data) {
+            int areaIndex = ((Integer) obj).intValue();
+            this.writeLong(output, idx, areaIndex);
+            idx += 4;
+        }
+        return output;
     }
 
     private void setEncountersDPPt(boolean useTimeOfDay, List<EncounterSet> encounterList) throws IOException {
@@ -1189,6 +1434,20 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
         // Save
         writeNARC(encountersFile, encounterData);
+
+        // Bug Catching Contest
+        String bccName = romEntry.getString("BCCData");
+        byte[] bccData = readFile(bccName);
+        for (int set = 0; set < 4; set++) {
+            EncounterSet bccSet = encounters.next();
+            for (int pk = 0; pk < 10; pk++) {
+                Encounter e = bccSet.encounters.get(pk);
+                writeWord(bccData, set * 80 + pk * 8, e.pokemon.number);
+                bccData[set * 80 + pk * 8 + 2] = (byte) e.level;
+                bccData[set * 80 + pk * 8 + 3] = (byte) e.maxLevel;
+            }
+        }
+        writeFile(bccName, bccData);
 
     }
 
@@ -1483,13 +1742,152 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         }
 
     }
+    
+    protected Pokemon[] getRoamers() {
+        Pokemon[] roamers = new Pokemon[0];
+        if(romEntry.getInt("RoamerCodeOffset") > 0) {
+            int baseOffs = romEntry.getInt("RoamerCodeOffset");
+            // note: for D/P, RoamerCodeOffset is the offset of the code branch for Mesprit
+            // for Pt/HG/SS, it points at a switch jumptable for the different values passed into ActSwarmPoke
+            if(romEntry.romType == Gen4Constants.Type_Plat) {
+                // check if hack applied here
+                roamers = new Pokemon[6];
+                int firstRoamLoad = baseOffs + 0xC;
+                roamers[0] = pokes[readLong(arm9, (arm9[firstRoamLoad]&0xFF) * 4 + ((firstRoamLoad & ~3) + 4))];
+                if(arm9[baseOffs + 2] == arm9[baseOffs + 4]) {
+                    // our hack was already applied, most likely
+                    // load pokemon data from where we expect it to be with the hack
+                    roamers[1] = pokes[(arm9[baseOffs + 0x10]&0xFF) + (arm9[baseOffs + 0x12]&0xFF)];
+                    roamers[2] = roamers[1]; // unused but this is technically the truth with the hack
+                    roamers[3] = pokes[(arm9[baseOffs + 0x18]&0xFF) + (arm9[baseOffs + 0x1A]&0xFF)];
+                    roamers[4] = pokes[(arm9[baseOffs + 0x20]&0xFF) + (arm9[baseOffs + 0x22]&0xFF)];
+                    roamers[5] = pokes[(arm9[baseOffs + 0x28]&0xFF) + (arm9[baseOffs + 0x2A]&0xFF)];
+                }
+                else {
+                    // original code (probably)
+                    roamers[1] = pokes[(arm9[baseOffs + 0x12] & 0xFF) << 2];
+                    int secondRoamLoad = baseOffs + 0x1A;
+                    roamers[2] = pokes[readLong(arm9, (arm9[secondRoamLoad]&0xFF) * 4 + ((secondRoamLoad & ~3) + 4))];
+                    roamers[3] = pokes[arm9[baseOffs + 0x20] & 0xFF];
+                    roamers[4] = pokes[arm9[baseOffs + 0x26] & 0xFF];
+                    roamers[5] = pokes[arm9[baseOffs + 0x2C] & 0xFF];
+                }
+            }
+            else if(romEntry.romType == Gen4Constants.Type_HGSS) {
+                // again, look for the hack
+                roamers = new Pokemon[3];
+                if(arm9[baseOffs + 4] == arm9[baseOffs + 6]) {
+                    // hack in place
+                    roamers[0] = pokes[(arm9[baseOffs + 0x08]&0xFF) + (arm9[baseOffs + 0x0A]&0xFF)];
+                    roamers[1] = pokes[(arm9[baseOffs + 0x10]&0xFF) + (arm9[baseOffs + 0x12]&0xFF)];
+                    roamers[2] = pokes[(arm9[baseOffs + 0x18]&0xFF) + (arm9[baseOffs + 0x1A]&0xFF)];
+                }
+                else {
+                    // no hack. we have to actually check whether this is HG or SS and return the roamer accordingly
+                    roamers[0] = pokes[arm9[baseOffs+0x08] & 0xFF];
+                    roamers[1] = pokes[arm9[baseOffs+0x0E] & 0xFF];
+                    if(romEntry.romCode.startsWith("IPK")) {
+                        // heartgold - latias
+                        roamers[2] = pokes[(arm9[baseOffs+0x14]&0xFF)<<2];
+                    }
+                    else {
+                        // soulsilver - latios
+                        int latiosRoamLoad = baseOffs + 0x1C;
+                        roamers[2] = pokes[readLong(arm9, (arm9[latiosRoamLoad]&0xFF) * 4 + ((latiosRoamLoad & ~3) + 4))];
+                    }
+                }
+            }
+            else {
+                // d/p
+                roamers = new Pokemon[3];
+                roamers[0] = pokes[readLong(arm9, (arm9[baseOffs]&0xFF) * 4 + ((baseOffs & ~3) + 4))];
+                roamers[2] = pokes[readLong(arm9, (arm9[(baseOffs+0x0E)]&0xFF) * 4 + (((baseOffs+0x0E) & ~3) + 4))];
+                if(arm9[baseOffs+0x09] == 0x00) {
+                    // original code, it's a bitshift
+                    roamers[1] = pokes[(arm9[baseOffs+0x06]&0xFF)<<2];
+                }
+                else {
+                    // changed code, it's an add
+                    roamers[1] = pokes[(arm9[baseOffs+0x06]&0xFF) + (arm9[baseOffs+0x08]&0xFF)];
+                }
+            }
+        }
+        return roamers;
+    }
+    
+    protected void setRoamer(int num, Pokemon roamer) {
+        if(romEntry.getInt("RoamerCodeOffset") == 0) {
+            // do nothing
+            return;
+        }
+        Pokemon[] roamers = getRoamers();
+        roamers[num] = roamer;
+        setRoamers(roamers);
+    }
+
+    private void setRoamers(Pokemon[] roamers) {
+        if(romEntry.getInt("RoamerCodeOffset") > 0) {
+            int baseOffs = romEntry.getInt("RoamerCodeOffset");
+            // note: for D/P, RoamerCodeOffset is the offset of the code branch for Mesprit
+            // for Pt/HG/SS, it points at a switch jumptable for the different values passed into ActSwarmPoke
+            if(romEntry.romType == Gen4Constants.Type_Plat) {
+                // preserve the data-offset for the roamer 0 since we don't have enough room to not use it
+                int firstRoamLoad = baseOffs + 0xC;
+                byte firstRoamOffs = arm9[firstRoamLoad];
+                int firstRoamActualOffs = (firstRoamOffs&0xFF) * 4 + ((firstRoamLoad & ~3) + 4);
+                
+                // replace the current roamer switch table by an alternate one that allows us to load 2-byte values for all 5 used indices
+                byte[] roamerCode = {
+                        0x0A, 0x00, 0x10, 0x00, 0x10, 0x00, 0x18, 0x00, 0x20, 0x00, 0x28, 0x00, // jumptable
+                        firstRoamOffs, 0x4C, 0x32, 0x25, 0x13, (byte) 0xE0, // index 0 (unchanged)
+                        (byte) (roamers[1].number&255), 0x24, (byte) Math.max(roamers[1].number-255, 0), 0x34, 0x32, 0x25, 0x0F, (byte) 0xE0, // index 1 (also absorbs unused index 2)
+                        (byte) (roamers[3].number&255), 0x24, (byte) Math.max(roamers[3].number-255, 0), 0x34, 0x3C, 0x25, 0x0B, (byte) 0xE0, // index 3
+                        (byte) (roamers[4].number&255), 0x24, (byte) Math.max(roamers[4].number-255, 0), 0x34, 0x3C, 0x25, 0x07, (byte) 0xE0, // index 4
+                        (byte) (roamers[5].number&255), 0x24, (byte) Math.max(roamers[5].number-255, 0), 0x34, 0x3C, 0x25, 0x03, (byte) 0xE0, // index 5
+                };
+                System.arraycopy(roamerCode, 0, arm9, baseOffs, roamerCode.length);
+                // finally, just write the new poke for index 0 to the same location it was in before
+                writeLong(arm9, firstRoamActualOffs, roamers[0].number);
+            }
+            else if(romEntry.romType == Gen4Constants.Type_HGSS) {
+                // Similar story to Plat, but we don't have to keep around any old loads
+                byte[] roamerCode = {
+                        0x06, 0x00, 0x0E, 0x00, 0x16, 0x00, 0x16, 0x00, // jumptable
+                        (byte) (roamers[0].number&255), 0x26, (byte) Math.max(roamers[0].number-255, 0), 0x36, 0x28, 0x25, 0x0C, (byte) 0xE0, // index 0
+                        (byte) (roamers[1].number&255), 0x26, (byte) Math.max(roamers[1].number-255, 0), 0x36, 0x28, 0x25, 0x08, (byte) 0xE0, // index 1
+                        (byte) (roamers[2].number&255), 0x26, (byte) Math.max(roamers[2].number-255, 0), 0x36, 0x23, 0x25, 0x04, (byte) 0xE0, // index 2 (and 3)
+                };
+                System.arraycopy(roamerCode, 0, arm9, baseOffs, roamerCode.length);
+            }
+            else {
+                // D/P: Here we can just replace the original values, changing one bitshift to an add
+                byte firstRoamOffs = arm9[baseOffs];
+                int firstRoamActualOffs = (firstRoamOffs&0xFF) * 4 + ((baseOffs & ~3) + 4);
+                writeLong(arm9, firstRoamActualOffs, roamers[0].number);
+                byte secondRoamOffs = arm9[baseOffs + 0x0E];
+                int secondRoamActualOffs = (secondRoamOffs&0xFF) * 4 + (((baseOffs + 0x0E) & ~3) + 4);
+                writeLong(arm9, secondRoamActualOffs, roamers[2].number);
+                arm9[baseOffs + 0x06] = (byte) (roamers[1].number&255);
+                arm9[baseOffs + 0x08] = (byte) Math.max(roamers[1].number-255, 0);
+                arm9[baseOffs + 0x09] = 0x37;
+            }
+        }
+        
+        
+    }
 
     private static class StaticPokemon {
         private int[] files;
         private int[] offsets;
+        private int roamerNum;
 
         public Pokemon getPokemon(Gen4RomHandler parent, NARCArchive scriptNARC) {
-            return parent.pokes[parent.readWord(scriptNARC.files.get(files[0]), offsets[0])];
+            if(files.length > 0) {
+                return parent.pokes[parent.readWord(scriptNARC.files.get(files[0]), offsets[0])];
+            }
+            else {
+                return parent.getRoamers()[roamerNum];
+            }
         }
 
         public void setPokemon(Gen4RomHandler parent, NARCArchive scriptNARC, Pokemon pkmn) {
@@ -1497,6 +1895,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             for (int i = 0; i < offsets.length; i++) {
                 byte[] file = scriptNARC.files.get(files[i]);
                 parent.writeWord(file, offsets[i], value);
+            }
+            
+            if(roamerNum > -1) {
+                parent.setRoamer(roamerNum, pkmn);
             }
         }
     }
@@ -1545,8 +1947,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         if (!romEntry.staticPokemonSupport) {
             return false;
         }
-        int sptsize = romEntry.arrayEntries.containsKey("StaticPokemonTrades") ? romEntry.arrayEntries
-                .get("StaticPokemonTrades").length : 0;
+        int sptsize = romEntry.arrayEntries.containsKey("StaticPokemonTrades")
+                ? romEntry.arrayEntries.get("StaticPokemonTrades").length
+                : 0;
         int meggsize = romEntry.getInt("MysteryEggOffset") > 0 ? 1 : 0;
         int fossilsize = romEntry.getInt("FossilTableOffset") > 0 ? 7 : 0;
         if (staticPokemon.size() != romEntry.staticPokemon.size() + sptsize + meggsize + fossilsize) {
@@ -2087,8 +2490,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                             evo.type = EvolutionType.LEVEL_ITEM_DAY;
                             // now add an extra evo for
                             // Level up w/ Held Item at Night
-                            Evolution extraEntry = new Evolution(evo.from, evo.to, true,
-                                    EvolutionType.LEVEL_ITEM_NIGHT, item);
+                            Evolution extraEntry = new Evolution(evo.from, evo.to, true, EvolutionType.LEVEL_ITEM_NIGHT,
+                                    item);
                             extraEvolutions.add(extraEntry);
                         }
                     }
