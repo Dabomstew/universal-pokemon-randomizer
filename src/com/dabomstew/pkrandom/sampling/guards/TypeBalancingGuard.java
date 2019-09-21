@@ -32,8 +32,12 @@ public final class TypeBalancingGuard extends SampleHistoryGuard<Pokemon> {
                   samples.getOrDefault(obj.secondaryType, Integer.valueOf(0)).intValue();
         // average out
         double c = (c1 + c2) / 2.;
+        // evaluate share of all sampled
         double w = sum == 0 ? 0 : c / sum;
-        return 1 - w;
+        // Prefer least sampled objects
+        // (1-x^2)^4 boosts if below average (^2)
+        // but greatly punishes if above average (^4)
+        return Math.pow(1 - w * w, 4);
     }
 
 }

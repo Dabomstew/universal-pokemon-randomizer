@@ -20,9 +20,12 @@ public class DiversityGuard<T> extends SampleHistoryGuard<T> {
     protected double computeWeight(T obj) {
         // Double so we do float divide and not int div
         double c = samples.getOrDefault(obj, Integer.valueOf(0)).intValue();
+        // evaluate share of all sampled
         double w = sum == 0 ? 0 : c / sum;
         // Prefer least sampled objects
-        return 1. - w;
+        // (1-x^2)^4 boosts if below average (^2)
+        // but greatly punishes if above average (^4)
+        return Math.pow(1 - w * w, 4);
     }
 
 }
