@@ -176,7 +176,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                             }
                         } else if (r[0].equals("StaticPokemon[]")) {
                             if (r[1].startsWith("[") && r[1].endsWith("]")) {
-                                String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
+                                String data = r[1].substring(1, r[1].length()-1).trim();
+                                int roamerNum = -1;
+                                if(data.startsWith("r:")) {
+                                    int endOffs = data.contains(",") ? data.indexOf(",") : data.length();
+                                    roamerNum = parseRIInt(data.substring(2, endOffs));
+                                    data = data.substring(endOffs).trim();
+                                }
+                                String[] offsets = data.isEmpty() ? new String[0] : data.split(",");
                                 int[] offs = new int[offsets.length];
                                 int[] files = new int[offsets.length];
                                 int c = 0;
@@ -188,6 +195,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                                 StaticPokemon sp = new StaticPokemon();
                                 sp.files = files;
                                 sp.offsets = offs;
+                                sp.roamerNum = roamerNum;
                                 current.staticPokemon.add(sp);
                             } else {
                                 String[] parts = r[1].split("\\:");
@@ -1734,13 +1742,152 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         }
 
     }
+    
+    protected Pokemon[] getRoamers() {
+        Pokemon[] roamers = new Pokemon[0];
+        if(romEntry.getInt("RoamerCodeOffset") > 0) {
+            int baseOffs = romEntry.getInt("RoamerCodeOffset");
+            // note: for D/P, RoamerCodeOffset is the offset of the code branch for Mesprit
+            // for Pt/HG/SS, it points at a switch jumptable for the different values passed into ActSwarmPoke
+            if(romEntry.romType == Gen4Constants.Type_Plat) {
+                // check if hack applied here
+                roamers = new Pokemon[6];
+                int firstRoamLoad = baseOffs + 0xC;
+                roamers[0] = pokes[readLong(arm9, (arm9[firstRoamLoad]&0xFF) * 4 + ((firstRoamLoad & ~3) + 4))];
+                if(arm9[baseOffs + 2] == arm9[baseOffs + 4]) {
+                    // our hack was already applied, most likely
+                    // load pokemon data from where we expect it to be with the hack
+                    roamers[1] = pokes[(arm9[baseOffs + 0x10]&0xFF) + (arm9[baseOffs + 0x12]&0xFF)];
+                    roamers[2] = roamers[1]; // unused but this is technically the truth with the hack
+                    roamers[3] = pokes[(arm9[baseOffs + 0x18]&0xFF) + (arm9[baseOffs + 0x1A]&0xFF)];
+                    roamers[4] = pokes[(arm9[baseOffs + 0x20]&0xFF) + (arm9[baseOffs + 0x22]&0xFF)];
+                    roamers[5] = pokes[(arm9[baseOffs + 0x28]&0xFF) + (arm9[baseOffs + 0x2A]&0xFF)];
+                }
+                else {
+                    // original code (probably)
+                    roamers[1] = pokes[(arm9[baseOffs + 0x12] & 0xFF) << 2];
+                    int secondRoamLoad = baseOffs + 0x1A;
+                    roamers[2] = pokes[readLong(arm9, (arm9[secondRoamLoad]&0xFF) * 4 + ((secondRoamLoad & ~3) + 4))];
+                    roamers[3] = pokes[arm9[baseOffs + 0x20] & 0xFF];
+                    roamers[4] = pokes[arm9[baseOffs + 0x26] & 0xFF];
+                    roamers[5] = pokes[arm9[baseOffs + 0x2C] & 0xFF];
+                }
+            }
+            else if(romEntry.romType == Gen4Constants.Type_HGSS) {
+                // again, look for the hack
+                roamers = new Pokemon[3];
+                if(arm9[baseOffs + 4] == arm9[baseOffs + 6]) {
+                    // hack in place
+                    roamers[0] = pokes[(arm9[baseOffs + 0x08]&0xFF) + (arm9[baseOffs + 0x0A]&0xFF)];
+                    roamers[1] = pokes[(arm9[baseOffs + 0x10]&0xFF) + (arm9[baseOffs + 0x12]&0xFF)];
+                    roamers[2] = pokes[(arm9[baseOffs + 0x18]&0xFF) + (arm9[baseOffs + 0x1A]&0xFF)];
+                }
+                else {
+                    // no hack. we have to actually check whether this is HG or SS and return the roamer accordingly
+                    roamers[0] = pokes[arm9[baseOffs+0x08] & 0xFF];
+                    roamers[1] = pokes[arm9[baseOffs+0x0E] & 0xFF];
+                    if(romEntry.romCode.startsWith("IPK")) {
+                        // heartgold - latias
+                        roamers[2] = pokes[(arm9[baseOffs+0x14]&0xFF)<<2];
+                    }
+                    else {
+                        // soulsilver - latios
+                        int latiosRoamLoad = baseOffs + 0x1C;
+                        roamers[2] = pokes[readLong(arm9, (arm9[latiosRoamLoad]&0xFF) * 4 + ((latiosRoamLoad & ~3) + 4))];
+                    }
+                }
+            }
+            else {
+                // d/p
+                roamers = new Pokemon[3];
+                roamers[0] = pokes[readLong(arm9, (arm9[baseOffs]&0xFF) * 4 + ((baseOffs & ~3) + 4))];
+                roamers[2] = pokes[readLong(arm9, (arm9[(baseOffs+0x0E)]&0xFF) * 4 + (((baseOffs+0x0E) & ~3) + 4))];
+                if(arm9[baseOffs+0x09] == 0x00) {
+                    // original code, it's a bitshift
+                    roamers[1] = pokes[(arm9[baseOffs+0x06]&0xFF)<<2];
+                }
+                else {
+                    // changed code, it's an add
+                    roamers[1] = pokes[(arm9[baseOffs+0x06]&0xFF) + (arm9[baseOffs+0x08]&0xFF)];
+                }
+            }
+        }
+        return roamers;
+    }
+    
+    protected void setRoamer(int num, Pokemon roamer) {
+        if(romEntry.getInt("RoamerCodeOffset") == 0) {
+            // do nothing
+            return;
+        }
+        Pokemon[] roamers = getRoamers();
+        roamers[num] = roamer;
+        setRoamers(roamers);
+    }
+
+    private void setRoamers(Pokemon[] roamers) {
+        if(romEntry.getInt("RoamerCodeOffset") > 0) {
+            int baseOffs = romEntry.getInt("RoamerCodeOffset");
+            // note: for D/P, RoamerCodeOffset is the offset of the code branch for Mesprit
+            // for Pt/HG/SS, it points at a switch jumptable for the different values passed into ActSwarmPoke
+            if(romEntry.romType == Gen4Constants.Type_Plat) {
+                // preserve the data-offset for the roamer 0 since we don't have enough room to not use it
+                int firstRoamLoad = baseOffs + 0xC;
+                byte firstRoamOffs = arm9[firstRoamLoad];
+                int firstRoamActualOffs = (firstRoamOffs&0xFF) * 4 + ((firstRoamLoad & ~3) + 4);
+                
+                // replace the current roamer switch table by an alternate one that allows us to load 2-byte values for all 5 used indices
+                byte[] roamerCode = {
+                        0x0A, 0x00, 0x10, 0x00, 0x10, 0x00, 0x18, 0x00, 0x20, 0x00, 0x28, 0x00, // jumptable
+                        firstRoamOffs, 0x4C, 0x32, 0x25, 0x13, (byte) 0xE0, // index 0 (unchanged)
+                        (byte) (roamers[1].number&255), 0x24, (byte) Math.max(roamers[1].number-255, 0), 0x34, 0x32, 0x25, 0x0F, (byte) 0xE0, // index 1 (also absorbs unused index 2)
+                        (byte) (roamers[3].number&255), 0x24, (byte) Math.max(roamers[3].number-255, 0), 0x34, 0x3C, 0x25, 0x0B, (byte) 0xE0, // index 3
+                        (byte) (roamers[4].number&255), 0x24, (byte) Math.max(roamers[4].number-255, 0), 0x34, 0x3C, 0x25, 0x07, (byte) 0xE0, // index 4
+                        (byte) (roamers[5].number&255), 0x24, (byte) Math.max(roamers[5].number-255, 0), 0x34, 0x3C, 0x25, 0x03, (byte) 0xE0, // index 5
+                };
+                System.arraycopy(roamerCode, 0, arm9, baseOffs, roamerCode.length);
+                // finally, just write the new poke for index 0 to the same location it was in before
+                writeLong(arm9, firstRoamActualOffs, roamers[0].number);
+            }
+            else if(romEntry.romType == Gen4Constants.Type_HGSS) {
+                // Similar story to Plat, but we don't have to keep around any old loads
+                byte[] roamerCode = {
+                        0x06, 0x00, 0x0E, 0x00, 0x16, 0x00, 0x16, 0x00, // jumptable
+                        (byte) (roamers[0].number&255), 0x26, (byte) Math.max(roamers[0].number-255, 0), 0x36, 0x28, 0x25, 0x0C, (byte) 0xE0, // index 0
+                        (byte) (roamers[1].number&255), 0x26, (byte) Math.max(roamers[1].number-255, 0), 0x36, 0x28, 0x25, 0x08, (byte) 0xE0, // index 1
+                        (byte) (roamers[2].number&255), 0x26, (byte) Math.max(roamers[2].number-255, 0), 0x36, 0x23, 0x25, 0x04, (byte) 0xE0, // index 2 (and 3)
+                };
+                System.arraycopy(roamerCode, 0, arm9, baseOffs, roamerCode.length);
+            }
+            else {
+                // D/P: Here we can just replace the original values, changing one bitshift to an add
+                byte firstRoamOffs = arm9[baseOffs];
+                int firstRoamActualOffs = (firstRoamOffs&0xFF) * 4 + ((baseOffs & ~3) + 4);
+                writeLong(arm9, firstRoamActualOffs, roamers[0].number);
+                byte secondRoamOffs = arm9[baseOffs + 0x0E];
+                int secondRoamActualOffs = (secondRoamOffs&0xFF) * 4 + (((baseOffs + 0x0E) & ~3) + 4);
+                writeLong(arm9, secondRoamActualOffs, roamers[2].number);
+                arm9[baseOffs + 0x06] = (byte) (roamers[1].number&255);
+                arm9[baseOffs + 0x08] = (byte) Math.max(roamers[1].number-255, 0);
+                arm9[baseOffs + 0x09] = 0x37;
+            }
+        }
+        
+        
+    }
 
     private static class StaticPokemon {
         private int[] files;
         private int[] offsets;
+        private int roamerNum;
 
         public Pokemon getPokemon(Gen4RomHandler parent, NARCArchive scriptNARC) {
-            return parent.pokes[parent.readWord(scriptNARC.files.get(files[0]), offsets[0])];
+            if(files.length > 0) {
+                return parent.pokes[parent.readWord(scriptNARC.files.get(files[0]), offsets[0])];
+            }
+            else {
+                return parent.getRoamers()[roamerNum];
+            }
         }
 
         public void setPokemon(Gen4RomHandler parent, NARCArchive scriptNARC, Pokemon pkmn) {
@@ -1748,6 +1895,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             for (int i = 0; i < offsets.length; i++) {
                 byte[] file = scriptNARC.files.get(files[i]);
                 parent.writeWord(file, offsets[i], value);
+            }
+            
+            if(roamerNum > -1) {
+                parent.setRoamer(roamerNum, pkmn);
             }
         }
     }
