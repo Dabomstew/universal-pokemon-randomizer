@@ -72,11 +72,6 @@ public enum Type {
             put(NORMAL, new HashMap<Type, Double>() {{
                 put(NORMAL, Double.valueOf(1));
                 put(FLYING, Double.valueOf(0.4));
-                put(BUG, Double.valueOf(0.2));
-                put(FIRE, Double.valueOf(0.1));
-                put(GRASS, Double.valueOf(0.1));
-                put(ELECTRIC, Double.valueOf(0.1));
-                put(PSYCHIC, Double.valueOf(0.05));
             }});
             // Fighting: Often in caves with rock, ground and steel
             put(FIGHTING, new HashMap<Type, Double>() {{
@@ -84,33 +79,27 @@ public enum Type {
                 put(ROCK, Double.valueOf(0.8));
                 put(GROUND, Double.valueOf(0.8));
                 put(STEEL, Double.valueOf(0.8));
-                put(POISON, Double.valueOf(0.2));
-                put(DARK, Double.valueOf(0.1));
-                put(DRAGON, Double.valueOf(0.05));
             }});
             // Flying: near normals, as well as Bugs (birds need to eat)
             put(FLYING, new HashMap<Type, Double>() {{
                 put(FLYING, Double.valueOf(1));
                 put(NORMAL, Double.valueOf(0.4));
-                put(BUG, Double.valueOf(0.4));
             }});
             // Grass: Bug, Poison, Normal
             put(GRASS, new HashMap<Type, Double>() {{
                 put(GRASS, Double.valueOf(1));
-                put(NORMAL, Double.valueOf(0.4));
                 put(POISON, Double.valueOf(0.4));
-                put(BUG, Double.valueOf(0.3));
+                            put(BUG, Double.valueOf(0.2));
             }});
             // Water: Water (all ice types that occure with water types are
             // usually also water types)
             put(WATER, new HashMap<Type, Double>() {{
                 put(WATER, Double.valueOf(1));
-                put(DRAGON, Double.valueOf(0.05));
             }});
             // Fire: Normal
             put(FIRE, new HashMap<Type, Double>() {{
                 put(FIRE, Double.valueOf(1));
-                put(NORMAL, Double.valueOf(0.4));
+                            put(GROUND, Double.valueOf(0.2));
             }});
             // Rock: Caves -> same as Fighting
             put(ROCK, new HashMap<Type, Double>() {{
@@ -118,9 +107,6 @@ public enum Type {
                 put(FIGHTING, Double.valueOf(0.8));
                 put(GROUND, Double.valueOf(0.8));
                 put(STEEL, Double.valueOf(0.8));
-                put(POISON, Double.valueOf(0.1));
-                put(DARK, Double.valueOf(0.1));
-                put(DRAGON, Double.valueOf(0.05));
             }});
             // Ground: Same as Rocks
             put(GROUND, new HashMap<Type, Double>() {{
@@ -128,36 +114,26 @@ public enum Type {
                 put(FIGHTING, Double.valueOf(0.8));
                 put(ROCK, Double.valueOf(0.8));
                 put(STEEL, Double.valueOf(0.8));
-                put(POISON, Double.valueOf(0.1));
-                put(DARK, Double.valueOf(0.1));
-                put(DRAGON, Double.valueOf(0.05));
             }});
             // Psychic: Dark, Ghost, normal
             put(PSYCHIC, new HashMap<Type, Double>() {{
                 put(PSYCHIC, Double.valueOf(1));
-                put(NORMAL, Double.valueOf(0.3));
                 put(GHOST, Double.valueOf(0.2));
                 put(DARK, Double.valueOf(0.1));
             }});
-            // Bug: Same as grass
+                    // Bug: similar to grass
             put(BUG, new HashMap<Type, Double>() {{
                 put(BUG, Double.valueOf(1));
-                put(NORMAL, Double.valueOf(0.4));
-                put(FLYING, Double.valueOf(0.4));
                 put(POISON, Double.valueOf(0.3));
                 put(GRASS, Double.valueOf(0.2));
             }});
             // Dragon: Usually in caves, often also water
             put(DRAGON, new HashMap<Type, Double>() {{
                 put(DRAGON, Double.valueOf(1));
-                put(WATER, Double.valueOf(0.1));
-                put(GROUND, Double.valueOf(0.05));
-                put(ROCK, Double.valueOf(0.05));
             }});
-            // Electric: Normal, Steel
+                    // Electric: Steel
             put(ELECTRIC, new HashMap<Type, Double>() {{
                 put(ELECTRIC, Double.valueOf(1));
-                put(NORMAL, Double.valueOf(0.3));
                 put(STEEL, Double.valueOf(0.2));
             }});
             // Ghost: Poison, Dark, Psychic
@@ -179,14 +155,11 @@ public enum Type {
                 put(POISON, Double.valueOf(1));
                 put(BUG, Double.valueOf(0.4));
                 put(GRASS, Double.valueOf(0.4));
-                put(GHOST, Double.valueOf(0.2));
             }});
             // Ice: Mostly water, sometimes in caves
             put(ICE, new HashMap<Type, Double>() {{
                 put(ICE, Double.valueOf(1));
-                put(WATER, Double.valueOf(0.8));
-                put(GROUND, Double.valueOf(0.05));
-                put(DARK, Double.valueOf(0.05));
+                            put(WATER, Double.valueOf(0.4));
             }});
             // Steel: same as rock
             put(STEEL, new HashMap<Type, Double>() {{
@@ -194,22 +167,18 @@ public enum Type {
                 put(FIGHTING, Double.valueOf(0.8));
                 put(ROCK, Double.valueOf(0.8));
                 put(GROUND, Double.valueOf(0.8));
-                put(POISON, Double.valueOf(0.1));
-                put(DARK, Double.valueOf(0.1));
-                put(DRAGON, Double.valueOf(0.05));
             }});
     }});
     
     
     
-    public double getOccuranceDistance(Type rhs) {
+    public double getOccuranceWeight(Type rhs, double defaultWeight) {
         Map<Type, Double> rel = occuranceRelations.get(this);
         if (rel == null) {
             // TBH i have no fucking clue how to handle these types
-            return 0;
+            return defaultWeight;
         }
-        // Distance is 1 - weight (so same type = distance 0)
-        return 1 - (rel.getOrDefault(rhs, Double.valueOf(0)).doubleValue());
+        return rel.getOrDefault(rhs, Double.valueOf(defaultWeight)).doubleValue();
     }
 
 

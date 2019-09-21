@@ -6,12 +6,7 @@ public final class SimilarTypeTypeSamplerGuard extends ReplacementGuard<Type> im
 
     @Override
     protected double computeWeight(Type obj) {
-        double distance = oldValue.getOccuranceDistance(obj);
-
-        // now do gaussian with the distance
-        double stddev = 0.12;
-        double tmp = distance / stddev;
-        return Math.exp(-0.5 * tmp * tmp);
+        return oldValue.getOccuranceWeight(obj, 0.05);
     }
 
 }
