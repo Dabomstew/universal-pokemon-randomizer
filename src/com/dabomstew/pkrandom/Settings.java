@@ -83,8 +83,10 @@ public class Settings {
     private boolean banTrappingAbilities;
     private boolean banNegativeAbilities;
 
+    
+    // TODO: Add properly saving config for random base stage setting
     public enum StartersMod {
-        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS, RANDOM_WITH_ONE_EVOLUTION, RANDOM_WITH_NO_EVOLUTIONS
+        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS, RANDOM_WITH_ONE_EVOLUTION, RANDOM_WITH_NO_EVOLUTIONS, RANDOM_BASE_STAGE
     }
 
     private StartersMod startersMod = StartersMod.UNCHANGED;

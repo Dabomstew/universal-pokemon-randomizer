@@ -409,6 +409,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<Pokemon> twoEvoPokes;
     private List<Pokemon> oneEvoPokes;
     private List<Pokemon> noEvoPokes;
+    private List<Pokemon> baseEvoPokes;
 
     @Override
     public Pokemon random2EvosPokemon() {
@@ -477,6 +478,29 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
         return noEvoPokes.get(this.random.nextInt(noEvoPokes.size()));
+    }
+    
+    @Override
+    public Pokemon randomBaseEvoPokemon(boolean banLegend, boolean onlyLegend) {
+        if (baseEvoPokes == null) {
+            // Prepare the list
+            baseEvoPokes = new ArrayList<Pokemon>();
+            List<Pokemon> allPokes = this.getPokemon();
+            for (Pokemon pk : allPokes) {
+                if (pk != null && pk.evosToDepth() == 0) {
+                    if(banLegend || onlyLegend){
+                        if(!pk.isLegendary() && banLegend) {
+                            baseEvoPokes.add(pk);
+                        } else if(pk.isLegendary() && onlyLegend) {
+                            baseEvoPokes.add(pk);
+                        }
+                    } else {
+                        baseEvoPokes.add(pk); 
+                    }
+                }
+            }
+        }
+        return baseEvoPokes.get(this.random.nextInt(baseEvoPokes.size()));
     }
 
     @Override

@@ -137,6 +137,9 @@ public interface RomHandler {
     //Give a random Pokemon who has no evolution stages
     public Pokemon random0EvosPokemon(boolean banLegend, boolean onlyLegend);
 
+    //Give a random Base Stage Pokemon
+    public Pokemon randomBaseEvoPokemon(boolean banLegend, boolean onlyLegend);
+    
     // Randomizer: types
 
     // return a random type valid in this game.
