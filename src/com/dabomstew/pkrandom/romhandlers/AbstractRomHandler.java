@@ -82,6 +82,7 @@ import com.dabomstew.pkrandom.sampling.guards.SimilarTypeGuard;
 import com.dabomstew.pkrandom.sampling.guards.SimilarTypeTypeSamplerGuard;
 import com.dabomstew.pkrandom.sampling.guards.TypeBalancingGuard;
 import com.dabomstew.pkrandom.sampling.guards.TypeThemedGuard;
+import com.dabomstew.pkrandom.sampling.guards.UniqueGuard;
 
 public abstract class AbstractRomHandler implements RomHandler {
 
@@ -718,6 +719,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         PokemonSampler smartSampler = new PokemonSampler(this.random, pkmn);
         BannedGuard<Pokemon> areaBannedGuard = new BannedGuard<Pokemon>(Set.of());
         smartSampler.addGuard(areaBannedGuard);
+        UniqueGuard<Pokemon> uniq = new UniqueGuard<Pokemon>();
+        if (area121) {
+            smartSampler.addGuard(uniq);
+        }
         if (catchEmAll) {
             smartSampler.addGuard(new CatchEmAllGuard(pkmn, this instanceof Gen1RomHandler || allCatchable));
         }
@@ -755,6 +760,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         for (EncounterSet area : scrambledEncounters) {
+            if (area121) {
+                // ensure all replacements in an area are unique
+                uniq.reset();
+            }
             if (typeThemed) {
                 Type tp;
                 if (similarType) {
@@ -808,7 +817,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         PokemonSampler smartSampler = new PokemonSampler(this.random, pkmn);
         BannedGuard<Pokemon> areaBannedGuard = new BannedGuard<Pokemon>(Set.of());
-        smartSampler.addGuard(areaBannedGuard);
+        UniqueGuard<Pokemon> uniq = new UniqueGuard<Pokemon>();
+        smartSampler.addGuard(areaBannedGuard).addGuard(uniq);
         if (typeBalancing) {
             smartSampler.addGuard(new TypeBalancingGuard());
         }
@@ -846,8 +856,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
 
         for (EncounterSet area : currentEncounters) {
+            areaBannedGuard.updateBannset(area.bannedPokemon);
             for (Encounter enc : area.encounters) {
-                areaBannedGuard.updateBannset(area.bannedPokemon);
+                uniq.reset();
                 // Apply the map
                 enc.pokemon = translateMap.get(enc.pokemon);
                 if (area.bannedPokemon.contains(enc.pokemon)) {
