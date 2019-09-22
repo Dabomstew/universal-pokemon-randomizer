@@ -3637,28 +3637,28 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     protected void logEvoChangeLevel(String pkFrom, String pkTo, int level) {
         if (logStream != null) {
-            logStream.printf("Made %s evolve into %s at level %d", pkFrom, pkTo, level);
+            logStream.printf("%-15s -> %-15s at level %d", pkFrom, pkTo, level);
             logStream.println();
         }
     }
 
     protected void logEvoChangeLevelWithItem(String pkFrom, String pkTo, String itemName) {
         if (logStream != null) {
-            logStream.printf("Made %s evolve into %s by leveling up holding %s", pkFrom, pkTo, itemName);
+            logStream.printf("%-15s -> %-15s by leveling up holding %s", pkFrom, pkTo, itemName);
             logStream.println();
         }
     }
 
     protected void logEvoChangeStone(String pkFrom, String pkTo, String itemName) {
         if (logStream != null) {
-            logStream.printf("Made %s evolve into %s using a %s", pkFrom, pkTo, itemName);
+            logStream.printf("%-15s -> %-15s using a %s", pkFrom, pkTo, itemName);
             logStream.println();
         }
     }
 
     protected void logEvoChangeLevelWithPkmn(String pkFrom, String pkTo, String otherRequired) {
         if (logStream != null) {
-            logStream.printf("Made %s evolve into %s by leveling up with %s in the party", pkFrom, pkTo, otherRequired);
+            logStream.printf("%-15s -> %-15s by leveling up with %s in the party", pkFrom, pkTo, otherRequired);
             logStream.println();
         }
     }

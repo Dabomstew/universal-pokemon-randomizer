@@ -34,3 +34,6 @@ manifest.mf
 *.dsv
 build_eclipse.xml
 /customnames.rncn
+gen5r_race.rnqs
+.classpath
+.settings/org.eclipse.jdt.core.prefs
