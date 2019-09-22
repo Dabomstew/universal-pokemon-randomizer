@@ -5,6 +5,16 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
 
 public final class EvolutionSanityGuard extends EncounterGuard implements BaseProbabilityGuard {
     
+    private double decay = 0.05;
+
+    public void setDecay(double decay) {
+        this.decay = decay;
+    }
+
+    public double getDecay() {
+        return decay;
+    }
+
     private int getLowerBound(Pokemon pkmn) {
         // Basis pokemon -> Lvl 0 base line
         if (pkmn.evolutionsTo.isEmpty()) return 0;
@@ -64,7 +74,7 @@ public final class EvolutionSanityGuard extends EncounterGuard implements BasePr
             return 1;
         }
         double mean = lvl < lb ? lb : ub;
-        double stddev = mean * 0.05;
+        double stddev = mean * decay;
         // Now gaussian, but drop normalization so we get up to 1 for lvl = mean;
         double tmp = (lvl - mean) / stddev;
         return Math.exp(-0.5 * tmp*tmp);
