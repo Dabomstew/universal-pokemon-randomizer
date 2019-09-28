@@ -612,21 +612,30 @@
               <Layout>
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" alignment="1" attributes="0">
+                      <Group type="102" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="pbsChangesShuffleRB" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="pbsChangesUnchangedRB" min="-2" max="-2" attributes="0"/>
-                              <Component id="pbsChangesRandomRB" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Group type="102" alignment="1" attributes="0">
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Component id="pbsChangesShuffleRB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="pbsChangesUnchangedRB" min="-2" max="-2" attributes="0"/>
+                                      <Component id="pbsChangesRandomRB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="pbsChangesRandomUnrestrictedRB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <EmptySpace max="32767" attributes="0"/>
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Component id="pbsStatsRandomizeFirstCB" min="-2" max="-2" attributes="0"/>
+                                      <Component id="pbsStandardEXPCurvesCB" min="-2" max="-2" attributes="0"/>
+                                      <Component id="pbsFollowEvolutionsCB" min="-2" max="-2" attributes="0"/>
+                                      <Component id="pbsUpdateStatsCB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <EmptySpace min="-2" pref="64" max="-2" attributes="0"/>
+                              </Group>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <Component id="pbsChangesRandomCompletelyRB" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace max="32767" attributes="0"/>
+                              </Group>
                           </Group>
-                          <EmptySpace pref="59" max="32767" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="pbsStatsRandomizeFirstCB" min="-2" max="-2" attributes="0"/>
-                              <Component id="pbsStandardEXPCurvesCB" min="-2" max="-2" attributes="0"/>
-                              <Component id="pbsFollowEvolutionsCB" min="-2" max="-2" attributes="0"/>
-                              <Component id="pbsUpdateStatsCB" alignment="0" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace min="-2" pref="64" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -649,7 +658,12 @@
                               <Component id="pbsUpdateStatsCB" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Component id="pbsStatsRandomizeFirstCB" min="-2" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="pbsStatsRandomizeFirstCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="pbsChangesRandomUnrestrictedRB" alignment="3" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Component id="pbsChangesRandomCompletelyRB" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="32767" attributes="0"/>
                       </Group>
                   </Group>
@@ -747,6 +761,38 @@
                       <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.pbsStatsRandomizeFirstCB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
                   </Properties>
+                </Component>
+                <Component class="javax.swing.JRadioButton" name="pbsChangesRandomUnrestrictedRB">
+                  <Properties>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="pokeStatChangesButtonGroup"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.pbsChangesRandomUnrestrictedRB.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.pbsChangesRandomUnrestrictedRB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="pbsChangesRandomUnrestrictedRBActionPerformed"/>
+                  </Events>
+                </Component>
+                <Component class="javax.swing.JRadioButton" name="pbsChangesRandomCompletelyRB">
+                  <Properties>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="pokeStatChangesButtonGroup"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.pbsChangesRandomCompletelyRB.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.pbsChangesRandomCompletelyRB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="pbsChangesRandomCompletelyRBActionPerformed"/>
+                  </Events>
                 </Component>
               </SubComponents>
             </Container>
@@ -1126,7 +1172,7 @@
                       <Component id="staticPokemonPanel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="inGameTradesPanel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="28" max="32767" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -1150,26 +1196,32 @@
                       <Group type="102" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="spCustomRB" min="-2" max="-2" attributes="0"/>
+                              <Group type="102" attributes="0">
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Group type="102" alignment="0" attributes="0">
+                                          <Component id="spCustomRB" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                                          <Component id="spCustomPoke1Chooser" min="-2" pref="90" max="-2" attributes="0"/>
+                                          <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="spCustomPoke2Chooser" min="-2" pref="90" max="-2" attributes="0"/>
+                                          <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="spCustomPoke3Chooser" min="-2" pref="90" max="-2" attributes="0"/>
+                                      </Group>
+                                      <Component id="spRandomRB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="spUnchangedRB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="spRandom1or2EvosRB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  </Group>
                                   <EmptySpace type="separate" max="-2" attributes="0"/>
-                                  <Component id="spCustomPoke1Chooser" min="-2" pref="90" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="spCustomPoke2Chooser" min="-2" pref="90" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="spCustomPoke3Chooser" min="-2" pref="90" max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Component id="spNoSplitCB" min="-2" max="-2" attributes="0"/>
+                                      <Component id="spHeldItemsBanBadCB" min="-2" max="-2" attributes="0"/>
+                                      <Component id="spHeldItemsCB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="spUniqueTypesCB" min="-2" max="-2" attributes="0"/>
+                                  </Group>
                               </Group>
-                              <Component id="spRandomRB" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="spUnchangedRB" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Component id="spRandom2EvosRB" alignment="0" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace type="separate" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="spNoSplitCB" min="-2" max="-2" attributes="0"/>
-                              <Component id="spHeldItemsBanBadCB" min="-2" max="-2" attributes="0"/>
-                              <Component id="spHeldItemsCB" alignment="0" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace pref="168" max="32767" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1177,25 +1229,30 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="spUnchangedRB" min="-2" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="spUnchangedRB" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="spHeldItemsCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                          </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="spCustomRB" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="spCustomPoke1Chooser" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="spCustomPoke2Chooser" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="spCustomPoke3Chooser" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="spHeldItemsCB" alignment="3" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="spRandomRB" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="spHeldItemsBanBadCB" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="spRandom2EvosRB" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="spRandomRB" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="spNoSplitCB" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="spUniqueTypesCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="spRandom1or2EvosRB" alignment="3" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Component id="spRandom2EvosRB" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="32767" attributes="0"/>
                       </Group>
                   </Group>
@@ -1338,6 +1395,32 @@
                       <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.spNoSplitCB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
                   </Properties>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="spUniqueTypesCB">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.spUniqueTypesCB.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.spUniqueTypesCB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JRadioButton" name="spRandom1or2EvosRB">
+                  <Properties>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="starterPokemonButtonGroup"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.spRandom1or2EvosRB.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.spRandom1or2EvosRB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="spRandom1or2EvosRBActionPerformed"/>
+                  </Events>
                 </Component>
               </SubComponents>
             </Container>
@@ -1604,7 +1687,7 @@
                       <Component id="moveDataPanel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="pokemonMovesetsPanel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="109" max="32767" attributes="0"/>
+                      <EmptySpace pref="58" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -1625,34 +1708,25 @@
               <Layout>
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" attributes="0">
+                      <Group type="102" alignment="1" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="pmsUnchangedRB" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="32767" attributes="0"/>
-                                  <Component id="pms4MovesCB" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace min="-2" pref="151" max="-2" attributes="0"/>
-                              </Group>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="pmsRandomTypeRB" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="32767" attributes="0"/>
-                                  <Component id="pmsReorderDamagingMovesCB" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace min="-2" pref="203" max="-2" attributes="0"/>
-                              </Group>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="pmsRandomTotalRB" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="32767" attributes="0"/>
-                                  <Component id="pmsForceGoodDamagingCB" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace min="-2" pref="161" max="-2" attributes="0"/>
-                              </Group>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="pmsMetronomeOnlyRB" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="32767" attributes="0"/>
-                                  <Component id="pmsForceGoodDamagingSlider" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace min="-2" pref="152" max="-2" attributes="0"/>
-                              </Group>
+                              <Component id="pmsRandomTotalRB" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="pmsRandomTypeRB" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="pmsUnchangedRB" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="pmsMetronomeOnlyRB" alignment="0" min="-2" max="-2" attributes="0"/>
                           </Group>
+                          <EmptySpace pref="178" max="32767" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Group type="103" alignment="1" groupAlignment="0" attributes="0">
+                                  <Component id="pmsReorderDamagingMovesCB" min="-2" max="-2" attributes="0"/>
+                                  <Component id="pmsForceGoodDamagingSlider" min="-2" max="-2" attributes="0"/>
+                                  <Component id="pmsForceGoodDamagingCB" min="-2" max="-2" attributes="0"/>
+                                  <Component id="pmsGuaranteedMovesCB" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <Component id="pmsGuaranteedMovesSlider" alignment="1" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace min="161" pref="161" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1662,24 +1736,29 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="pmsUnchangedRB" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="pms4MovesCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="pmsGuaranteedMovesCB" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="pmsRandomTypeRB" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="pmsReorderDamagingMovesCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="1" attributes="0">
+                              <Group type="102" alignment="1" attributes="0">
+                                  <Component id="pmsRandomTypeRB" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                  <Component id="pmsRandomTotalRB" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                  <Component id="pmsMetronomeOnlyRB" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace max="32767" attributes="0"/>
+                              </Group>
+                              <Group type="102" alignment="1" attributes="0">
+                                  <Component id="pmsGuaranteedMovesSlider" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                  <Component id="pmsReorderDamagingMovesCB" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                  <Component id="pmsForceGoodDamagingCB" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                  <Component id="pmsForceGoodDamagingSlider" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace min="0" pref="6" max="32767" attributes="0"/>
+                              </Group>
                           </Group>
-                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="pmsRandomTotalRB" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="pmsForceGoodDamagingCB" alignment="3" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="pmsMetronomeOnlyRB" min="-2" max="-2" attributes="0"/>
-                              <Component id="pmsForceGoodDamagingSlider" alignment="0" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1750,13 +1829,13 @@
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="pmsMetronomeOnlyRBActionPerformed"/>
                   </Events>
                 </Component>
-                <Component class="javax.swing.JCheckBox" name="pms4MovesCB">
+                <Component class="javax.swing.JCheckBox" name="pmsGuaranteedMovesCB">
                   <Properties>
                     <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.pms4MovesCB.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.pmsGuaranteedMovesCB.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
                     <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.pms4MovesCB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.pmsGuaranteedMovesCB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
                   </Properties>
                 </Component>
@@ -1796,6 +1875,21 @@
                     <Property name="value" type="int" value="0"/>
                   </Properties>
                 </Component>
+                <Component class="javax.swing.JSlider" name="pmsGuaranteedMovesSlider">
+                  <Properties>
+                    <Property name="majorTickSpacing" type="int" value="1"/>
+                    <Property name="maximum" type="int" value="4"/>
+                    <Property name="minimum" type="int" value="2"/>
+                    <Property name="minorTickSpacing" type="int" value="1"/>
+                    <Property name="paintLabels" type="boolean" value="true"/>
+                    <Property name="paintTicks" type="boolean" value="true"/>
+                    <Property name="snapToTicks" type="boolean" value="true"/>
+                    <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.pmsGuaranteedMovesSlider.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="value" type="int" value="2"/>
+                  </Properties>
+                </Component>
               </SubComponents>
             </Container>
             <Container class="javax.swing.JPanel" name="moveDataPanel">
@@ -1821,7 +1915,7 @@
                               <Component id="mdRandomPPCB" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Component id="mdRandomTypeCB" alignment="0" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace pref="211" max="32767" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="mdRandomCategoryCB" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Group type="102" alignment="0" attributes="0">
@@ -2012,7 +2106,7 @@
                                   </Group>
                               </Group>
                           </Group>
-                          <EmptySpace pref="143" max="32767" attributes="0"/>
+                          <EmptySpace pref="145" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -2173,6 +2267,7 @@
                     <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
                       <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.tpNoEarlyShedinjaCB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
+                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="tpForceFullyEvolvedCB">
@@ -2259,7 +2354,7 @@
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="wildPokemonPanel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="245" max="32767" attributes="0"/>
+                      <EmptySpace pref="226" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -2303,6 +2398,7 @@
                                   <Component id="wpCatchRateSlider" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <Component id="wpHeldItemsBanBadCB" min="-2" max="-2" attributes="0"/>
+                              <Component id="wpAllowEvosCB" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="32767" attributes="0"/>
                       </Group>
@@ -2326,7 +2422,7 @@
                                   <Component id="wpUseTimeCB" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                   <Component id="wpNoLegendariesCB" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
+                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
                                       <Component id="wpCatchRateSlider" alignment="0" min="-2" max="-2" attributes="0"/>
                                       <Group type="102" alignment="0" attributes="0">
@@ -2337,6 +2433,8 @@
                                   </Group>
                                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                   <Component id="wpHeldItemsBanBadCB" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                  <Component id="wpAllowEvosCB" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <Component id="wildPokemonARulePanel" min="-2" max="-2" attributes="0"/>
                           </Group>
@@ -2428,19 +2526,13 @@
                           <Group type="102" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <Component id="wpARTypeThemedRB" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                                  </Group>
-                                  <Group type="102" attributes="0">
-                                      <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="wpARSimilarStrengthRB" alignment="0" min="-2" max="-2" attributes="0"/>
-                                          <Component id="wpARNoneRB" alignment="0" min="-2" max="-2" attributes="0"/>
-                                          <Component id="wpARCatchEmAllRB" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      </Group>
-                                      <EmptySpace pref="58" max="32767" attributes="0"/>
-                                  </Group>
+                                  <Component id="wpARSimilarStrengthRB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="wpARNoneRB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="wpARTypeThemedRB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="wpARCatchEmAllRB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="wpARMatchTypingRB" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
+                              <EmptySpace max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -2448,13 +2540,15 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="0" attributes="0">
                               <Component id="wpARNoneRB" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
-                              <Component id="wpARSimilarStrengthRB" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="wpARSimilarStrengthRB" min="-2" pref="23" max="-2" attributes="0"/>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="wpARCatchEmAllRB" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace pref="3" max="32767" attributes="0"/>
-                              <Component id="wpARTypeThemedRB" min="-2" pref="30" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="wpARTypeThemedRB" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="wpARMatchTypingRB" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -2529,6 +2623,23 @@
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="wpARSimilarStrengthRBActionPerformed"/>
                       </Events>
                     </Component>
+                    <Component class="javax.swing.JRadioButton" name="wpARMatchTypingRB">
+                      <Properties>
+                        <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                          <ComponentRef name="wildPokesARuleButtonGroup"/>
+                        </Property>
+                        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                          <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.wpARMatchTypingRB.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                        </Property>
+                        <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                          <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.wpAllowEvosCB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                        </Property>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="wpARMatchTypingRBActionPerformed"/>
+                      </Events>
+                    </Component>
                   </SubComponents>
                 </Container>
                 <Component class="javax.swing.JCheckBox" name="wpUseTimeCB">
@@ -2594,6 +2705,16 @@
                       <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.wpCatchRateSlider.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
                     <Property name="value" type="int" value="1"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="wpAllowEvosCB">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.wpAllowEvosCB.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.wpAllowEvosCB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                 </Component>
               </SubComponents>
@@ -3295,7 +3416,7 @@
                                   <Component id="fiBanBadCB" min="-2" max="-2" attributes="0"/>
                               </Group>
                           </Group>
-                          <EmptySpace pref="466" max="32767" attributes="0"/>
+                          <EmptySpace pref="468" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
