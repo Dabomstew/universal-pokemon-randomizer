@@ -1,20 +1,28 @@
 Universal Pokemon Randomizer
 
-By Dabomstew, fork by Voliol
+By Dabomstew
 
 Homepage: http://pokehacks.dabomstew.com/randomizer/
 
 Forks used -
 * 0xhexrobot - https://github.com/0xhexrobot/universal-pokemon-randomizer.git
 * Ajarmar - https://github.com/Ajarmar/universal-pokemon-randomizer-zx.git
+* Challenert - https://github.com/challenert/universal-pokemon-randomizer
+* Hejsil - https://github.com/Hejsil/universal-pokemon-randomizer
+* Hwaterke - https://github.com/hwaterke/universal-pokemon-randomizer
+* Juanmferreira93 - https://github.com/juanmferreira93/universal-pokemon-randomizer
+* Mikabre - https://github.com/mikabre/universal-pokemon-randomizer
+* Tj963 - https://github.com/tj963/universal-pokemon-randomizer
+* TricksterGuy - https://github.com/TricksterGuy/universal-pokemon-randomizer
+* Ttgmichael - https://github.com/ttgmichael/universal-pokemon-randomizer
+* Voliol - https://github.com/voliol/universal-pokemon-randomizer
 
-**Notice: New binary releases of the randomizer have been indefinitely suspended since 2016. This repository remains available to distribute source code and facilitiate forks.**
+**Notice: New binary releases of the randomizer have been indefinitely suspended since 2016. The original repository remains available to distribute source code and facilitiate forks.**
 
 # For Program Users
 If you're looking to actually *use* the randomizer as opposed to looking at the 
 source code, you're reading the wrong readme file. This file shouldn't be 
 included in official releases, but if it is, head on over to README.txt instead.
--by Voliol
 
 I would advise you to read this file, especially the "Fair Warning" and 
 "Compiling the Program" parts. However, there is also another file detailing the
@@ -22,63 +30,87 @@ usage of the program and giving credit to those who originally made it a possibi
 Check it out if you want to.
 
 # Fair Warning
-This GitHub repo will have live updates to the randomizer as I program them, but
-it won't be at all pretty. Expect lots of spaghetti code and very little use of
-best practices. Individual commits may well break randomization, so you might have
-to look back in the history a little before you find something usable.
+This GitHub repo should not have any automatic updates as it points to the original
+(and now archived) website. If Dabomstew ever does resume updates, there is a good
+chance that the functionality in here will break and/or be removed.
 
 # Compiling the Program
--by Voliol
 
 I do not plan to host any binaries (readymade programs that do not need to be 
 compiled before being used) for this fork. This means that if you by chance want 
 to try it out you will have to compile it by yourself. You do this by downloading 
 a Java interpreter (such as Eclipse https://www.eclipse.org/downloads/),
-which you will then have to learn to use. I won't go into details, as they
-are sure to change, but it isn't very difficult and there are plenty of
-tutorials out there to use. I wish you the best of luck :)
+which you will then have to learn to use. 
+
+As this is a Maven project, you will need to create a build/run configuration which
+accomplishes the equivalent of "mvn clean package", or just run it from the command
+line.
+
+This is subject to change. Make sure you're paying attention to which version of Java
+(currently this project is set to use Java 8) and Maven you're using.
+
+# Contacting Me
+Please only contact me with the following
+
+## Bug Reports
+A bug report must contain the following
+- Game version used
+- Options selected
+- Expected outcome
+- Erroneous outcome
+
+## Feature Requests
+A feature request must contain the following
+- What game version you're planning to use it on 
+- What you want in this feature
+- If it's similar to any existing feature in the program
+
+## Note
+I will try to reply to messages, but do not guarantee a response time. 
+Additionally, I will decline bugs or features which I feel take too 
+much time to finish.
 
 # Forks
 Fork as you like, as long as you obey the terms of the included license.
 
 # Pull Requests
-If you have fixed a bug or made a cool new feature, feel free to send in a pull
-request for me to review. Pull requests will be accepted/denied completely at my
-own discretion and may not be responded to in a timely manner if I'm busy.
-
-## Pull Requests that will probably be accepted:
-* Well-made new features: they should obviously be free from bugs to your knowledge.
-If applicable, they should be universal (major features such as randomizing a new
-aspect of the games fall under this, while more minor one-off settings / misc
-tweaks can be for only one game or one generation if appropriate)
-* Bug fixes
+If you have fixed a bug, feel free to send in a pull request for me to 
+review. Pull requests will be accepted/denied completely at my own
+discretion and may not be responded to in a timely manner if I'm busy.
 
 ## Pull Requests that will probably be denied:
-* Anything that's just pure refactoring, unless you have very good reasoning
-for its inclusion. Sorry, but you will need to convince me that it's necessary.
+* Anything that's not a bug fix.
 * Code that is blatantly stolen from somewhere else without appropriate credit.
 
-
 # Purpose
-The purpose of this fork is to fix minor issues, but also to rebalance/change some things. As such, you might find that some of the things that are changed are not necessarily _better,_ but rather just different. Regardless, these changes have the goal of making the randomizer more fun to play, so hopefully you (the person reading this) will agree that the changes are good.
+This fork was made to compile the changes from other forks into a single fork. This
+repository includes a number of changes, and the resulting fixes that were implemented
+for conflicts and oversights. 
 
-Have a look at the [release page](https://github.com/Ajarmar/universal-pokemon-randomizer-zx/releases) for changelogs.
-
-Please note that this fork was made just because I wanted to make the races with my race crew more fun, and I don't want it to be more ambitious than that. Additions/updates will be done at my discretion, so don't contact me to tell me to add things to the randomizer. Thanks!
--by Voliol
-
-I am yet not very familiar with the nature of GitHub, and exactly how 
-Pull Requests work. However, if you do create one I'll look into it and see both
-how it works and whether I am interested in such a collaboration. Being part of 
-creating the ultimate Randomizer I think would be grand, if such a oppurtunity
-arises.
+Future work will include more features that I wanted to create, such as shuffling types
+and a list of Pokemon/moves with high stats.
 
 ## Differences between this Fork and Dabomstew's Original Version
--by Voliol
- - Added an option to randomize the evolutions directly after the base stat updates, before those other things (base stats, types, abilities) that could be set to follow evolutions. With this, you will get more natural evolutionary lines. 
- - Added an option to prevent random evolutionary lines from converging.
- - Added an option to prevent pokémon from evolving into another with a lower BST.
- - Added an option to forbid lines with split evolutions from being used when choosing "Random (basic Pokémon with 2 evolutions)" as the option in starter randomization.
- - The export log contains a section meant to make it compatible with the 
-  emerald-randomizer's family pallete swaps. However, it does not fully work 
-  as intended, due to issues with the in-game indexes of gen III Pokémon.
+ * Converted project into Maven and brought minimum java version to 8.
+ * Added an option to randomize the stats and types before or after any evolution
+ randomization is applied. With this, you can get more natural evolutionary lines,
+ or maintain the old method of randomization. 
+ * Added an option to prevent random evolutionary lines from converging (2 pokemon
+ evolve into the same thing).
+ * Added an option to prevent pokémon from evolving into another with a lower BST.
+ * Added an option to forbid lines with split evolutions from being used when
+ randomizing starters.
+ * Added an option for randomizing outside of any BST cap.
+ * Added an option for fast text.
+ * Refactored "Guaranteed Four Moves" to work on a slider of 2-4.
+ * Eevee now evolves into different typed pokemon instead of sharing types (when
+ evolutions are randomized).
+ * Tweaked moveset randomization to better balance types in movesets.
+ * Added an option to shuffle base stats between pokemon.
+ * Enabled "No Broken Moves" to be used in non-random builds.
+ * Refactored "Modify Levels" to work on non-random trainers.
+ * Refactored "Force Fully Evolved" to work on non-random trainers.
+ * Added an option to randomize starters with 1 or 2 evolutions.
+ * Added an option to balance wild type frequency.
+ * Added an option to have unique starter types when randomized.
+ * Added an option for evolved pokemon to appear at lower levels.
