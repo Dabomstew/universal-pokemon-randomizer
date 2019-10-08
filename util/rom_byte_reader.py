@@ -2,7 +2,7 @@
 """
 @author: cleartonic
 """
-import os, binascii
+import os, binascii, sys
 
 # Variables
 
@@ -11,7 +11,10 @@ import os, binascii
 buffer_size = 512     
 
 # Redefine input path
-input_file = os.path.join("Pokemon Black.nds")
+if len(sys.argv) >= 2:
+    input_file = sys.argv[1]
+else:
+    input_file = os.path.join("Pokemon Black.nds")
 
 # below list corresponds to Castelia bottom shop first few items
 list_of_items = [
