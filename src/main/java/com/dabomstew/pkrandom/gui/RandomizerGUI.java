@@ -1754,6 +1754,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.pbsStandardEXPCurvesCB.setSelected(settings.isStandardizeEXPCurves());
         this.pbsFollowEvolutionsCB.setSelected(settings.isBaseStatsFollowEvolutions());
         this.pbsUpdateStatsCB.setSelected(settings.isUpdateBaseStats());
+        this.pbsStatsRandomizeFirstCB.setSelected(settings.isStatsRandomizeFirst());
 
         this.paUnchangedRB.setSelected(settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED);
         this.paRandomizeRB.setSelected(settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
@@ -1765,6 +1766,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.ptRandomFollowEvosRB.setSelected(settings.getTypesMod() == Settings.TypesMod.RANDOM_FOLLOW_EVOLUTIONS);
         this.ptRandomTotalRB.setSelected(settings.getTypesMod() == Settings.TypesMod.COMPLETELY_RANDOM);
         this.ptUnchangedRB.setSelected(settings.getTypesMod() == Settings.TypesMod.UNCHANGED);
+        this.ptTypesRandomizeFirstCB.setSelected(settings.isTypesRandomizeFirst());
         this.raceModeCB.setSelected(settings.isRaceMode());
         this.brokenMovesCB.setSelected(settings.doBlockBrokenMoves());
         this.pokeLimitCB.setSelected(settings.isLimitPokemon());
@@ -1779,6 +1781,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.spHeldItemsCB.setSelected(settings.isRandomizeStartersHeldItems());
         this.spHeldItemsBanBadCB.setSelected(settings.isBanBadRandomStarterHeldItems());
         this.spUniqueTypesCB.setSelected(settings.isStartersUniqueTypes());
+        this.spNoSplitCB.setSelected(settings.isStartersNoSplit());
 
         int[] customStarters = settings.getCustomStarters();
         this.spCustomPoke1Chooser.setSelectedIndex(customStarters[0] - 1);
@@ -1791,6 +1794,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.peSameTypeCB.setSelected(settings.isEvosSameTyping());
         this.peThreeStagesCB.setSelected(settings.isEvosMaxThreeStages());
         this.peForceChangeCB.setSelected(settings.isEvosForceChange());
+        this.peForceGrowthCB.setSelected(settings.isEvosForceGrowth());
+        this.peNoConvergeCB.setSelected(settings.isEvosNoConverge());
 
         this.mdRandomAccuracyCB.setSelected(settings.isRandomizeMoveAccuracies());
         this.mdRandomCategoryCB.setSelected(settings.isRandomizeMoveCategory());
@@ -1924,6 +1929,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setStandardizeEXPCurves(pbsStandardEXPCurvesCB.isSelected());
         settings.setBaseStatsFollowEvolutions(pbsFollowEvolutionsCB.isSelected());
         settings.setUpdateBaseStats(pbsUpdateStatsCB.isSelected());
+        settings.setStatsRandomizeFirst(pbsStatsRandomizeFirstCB.isSelected());
 
         settings.setAbilitiesMod(paUnchangedRB.isSelected(), paRandomizeRB.isSelected());
         settings.setAllowWonderGuard(paWonderGuardCB.isSelected());
@@ -1933,6 +1939,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         settings.setTypesMod(ptUnchangedRB.isSelected(), ptRandomFollowEvosRB.isSelected(),
                 ptRandomTotalRB.isSelected());
+        settings.setTypesRandomizeFirst(ptTypesRandomizeFirstCB.isSelected());
         settings.setRaceMode(raceModeCB.isSelected());
         settings.setBlockBrokenMoves(brokenMovesCB.isSelected());
         settings.setLimitPokemon(pokeLimitCB.isSelected());
@@ -1944,6 +1951,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setRandomizeStartersHeldItems(spHeldItemsCB.isSelected());
         settings.setBanBadRandomStarterHeldItems(spHeldItemsBanBadCB.isSelected());
         settings.setStartersUniqueTypes(spUniqueTypesCB.isSelected());
+        settings.setStartersNoSplit(spNoSplitCB.isSelected());
 
         int[] customStarters = new int[] { spCustomPoke1Chooser.getSelectedIndex() + 1,
                 spCustomPoke2Chooser.getSelectedIndex() + 1, spCustomPoke3Chooser.getSelectedIndex() + 1 };
@@ -1954,6 +1962,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setEvosSameTyping(peSameTypeCB.isSelected());
         settings.setEvosMaxThreeStages(peThreeStagesCB.isSelected());
         settings.setEvosForceChange(peForceChangeCB.isSelected());
+        settings.setEvosForceGrowth(peForceGrowthCB.isSelected());
+        settings.setEvosNoConverge(peNoConvergeCB.isSelected());
 
         settings.setRandomizeMoveAccuracies(mdRandomAccuracyCB.isSelected());
         settings.setRandomizeMoveCategory(mdRandomCategoryCB.isSelected());

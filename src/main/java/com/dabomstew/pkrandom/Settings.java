@@ -48,7 +48,7 @@ public class Settings {
 
     public static final int VERSION = 180;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 36;
+    public static final int LENGTH_OF_SETTINGS_DATA = 38;
 
     private CustomNamesSet customNames;
 
@@ -71,6 +71,7 @@ public class Settings {
     private boolean standardizeEXPCurves;
     private boolean baseStatsFollowEvolutions;
     private boolean updateBaseStats;
+    private boolean statsRandomizeFirst;
 
     public enum AbilitiesMod {
         UNCHANGED, RANDOMIZE
@@ -91,9 +92,9 @@ public class Settings {
     // index in the rom's list of pokemon
     // offset from the dropdown index from RandomizerGUI by 1
     private int[] customStarters = new int[3];
-    private boolean startersNoSplit;
     private boolean randomizeStartersHeldItems;
     private boolean banBadRandomStarterHeldItems;
+    private boolean startersNoSplit;
     private boolean startersUniqueTypes;
 
     public enum TypesMod {
@@ -101,6 +102,7 @@ public class Settings {
     }
 
     private TypesMod typesMod = TypesMod.UNCHANGED;
+    private boolean typesRandomizeFirst;
 
     // Evolutions
     public enum EvolutionsMod {
@@ -114,8 +116,6 @@ public class Settings {
     private boolean evosForceChange;
     private boolean evosNoConverge;
     private boolean evosForceGrowth;
-    private boolean typesRandomizeFirst;
-    private boolean statsRandomizeFirst;
 
     // Move data
     private boolean randomizeMovePowers;
@@ -244,6 +244,7 @@ public class Settings {
         int length = in.read();
         byte[] buffer = FileFunctions.readFullyIntoBuffer(in, length);
         String settings = new String(buffer, "UTF-8");
+        System.out.println(settings);
         boolean oldUpdate = false;
 
         if (version < VERSION) {
@@ -262,29 +263,27 @@ public class Settings {
 
         // 0: general options #1 + trainer/class names
         out.write(makeByteSelected(changeImpossibleEvolutions, updateMoves, updateMovesLegacy, randomizeTrainerNames,
-                randomizeTrainerClassNames, makeEvolutionsEasier, typesRandomizeFirst, statsRandomizeFirst));
+                randomizeTrainerClassNames, makeEvolutionsEasier));
 
-        // 1: pokemon base stats & abilities
+        // 1: pokemon base stats (see byte 36 for additional options)
         out.write(makeByteSelected(baseStatsFollowEvolutions, baseStatisticsMod == BaseStatisticsMod.RANDOM_WITHIN_BST,
                 baseStatisticsMod == BaseStatisticsMod.SHUFFLE, baseStatisticsMod == BaseStatisticsMod.UNCHANGED,
-                standardizeEXPCurves, updateBaseStats, baseStatisticsMod == BaseStatisticsMod.RANDOM_UNRESTRICTED, 
+                standardizeEXPCurves, updateBaseStats, baseStatisticsMod == BaseStatisticsMod.RANDOM_UNRESTRICTED,
                 baseStatisticsMod == BaseStatisticsMod.RANDOM_COMPLETELY));
 
         // 2: pokemon types & more general options
         out.write(makeByteSelected(typesMod == TypesMod.RANDOM_FOLLOW_EVOLUTIONS,
                 typesMod == TypesMod.COMPLETELY_RANDOM, typesMod == TypesMod.UNCHANGED, raceMode, blockBrokenMoves,
-                limitPokemon));
+                limitPokemon, typesRandomizeFirst));
 
         // 3: v171: changed to the abilities byte
-
         out.write(makeByteSelected(abilitiesMod == AbilitiesMod.UNCHANGED, abilitiesMod == AbilitiesMod.RANDOMIZE,
                 allowWonderGuard, abilitiesFollowEvolutions, banTrappingAbilities, banNegativeAbilities));
 
-        // 4: starter pokemon stuff
+        // 4: starter pokemon stuff (see byte 37 for additional options)
         out.write(makeByteSelected(startersMod == StartersMod.CUSTOM, startersMod == StartersMod.COMPLETELY_RANDOM,
                 startersMod == StartersMod.UNCHANGED, startersMod == StartersMod.RANDOM_WITH_TWO_EVOLUTIONS,
-                randomizeStartersHeldItems, banBadRandomStarterHeldItems, startersUniqueTypes, 
-                startersMod == StartersMod.RANDOM_WITH_ONE_OR_TWO_EVOLUTIONS, startersNoSplit));
+                randomizeStartersHeldItems, banBadRandomStarterHeldItems));
 
         // @5 dropdowns
         write2ByteInt(out, customStarters[0] - 1);
@@ -319,17 +318,16 @@ public class Settings {
 
         // 16 wild pokemon 2
         // bugfix 161
-        // changed 180
         out.write(makeByteSelected(useMinimumCatchRate, blockWildLegendaries,
                 wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_STRENGTH, randomizeWildPokemonHeldItems,
-                banBadRandomWildPokemonHeldItems, wildPokemonRestrictionMod == WildPokemonRestrictionMod.MATCH_TYPING_DISTRIBUTION)
-                | ((minimumCatchRateLevel - 1) << 6));
+                banBadRandomWildPokemonHeldItems, wildPokemonRestrictionMod == WildPokemonRestrictionMod.MATCH_TYPING_DISTRIBUTION,
+                allowLowLevelEvolvedTypes)
+                | ((minimumCatchRateLevel - 1) << 5));
 
         // 17 static pokemon
-        // changed 180: wild pokemon low level evos
         out.write(makeByteSelected(staticPokemonMod == StaticPokemonMod.UNCHANGED,
                 staticPokemonMod == StaticPokemonMod.RANDOM_MATCHING,
-                staticPokemonMod == StaticPokemonMod.COMPLETELY_RANDOM, allowLowLevelEvolvedTypes));
+                staticPokemonMod == StaticPokemonMod.COMPLETELY_RANDOM));
 
         // 18 tm randomization
         // new stuff 162
@@ -397,6 +395,14 @@ public class Settings {
         // @ 35 trainer pokemon level modifier
         out.write((trainersLevelModified ? 0x80 : 0) | (trainersLevelModifier+50));
 
+        // @ 36 Base Statistics Overflow
+        out.write(makeByteSelected(statsRandomizeFirst));
+
+        // @ 37 Starter Pokemon Overflow
+        out.write(makeByteSelected(startersMod==StartersMod.RANDOM_WITH_ONE_OR_TWO_EVOLUTIONS,
+        startersNoSplit, startersUniqueTypes));
+        
+        // @ 38 Rom Title Name (update LENGTH_OF_SETTINGS_DATA if this changes)
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
             out.write(romName.length);
@@ -407,16 +413,19 @@ public class Settings {
             out.write(0);
         }
 
+        // Create checksum to ensure correct deserialization between versions.        
         byte[] current = out.toByteArray();
         CRC32 checksum = new CRC32();
         checksum.update(current);
 
+        // Add checksum to byte array
         try {
             writeFullInt(out, (int) checksum.getValue());
             writeFullInt(out, FileFunctions.getFileChecksum(SysConstants.customNamesFile));
         } catch (IOException e) {
         }
-
+        
+        // Convert to Base64 stream for file stream
         return DatatypeConverter.printBase64Binary(out.toByteArray());
     }
 
@@ -433,8 +442,6 @@ public class Settings {
         settings.setRandomizeTrainerNames(restoreState(data[0], 3));
         settings.setRandomizeTrainerClassNames(restoreState(data[0], 4));
         settings.setMakeEvolutionsEasier(restoreState(data[0], 5));
-        settings.setTypesRandomizeFirst(restoreState(data[0], 6));
-        settings.setStatsRandomizeFirst(restoreState(data[0], 7));
 
         settings.setBaseStatisticsMod(restoreEnum(BaseStatisticsMod.class, data[1], 3, // UNCHANGED
                 2, // SHUFFLE
@@ -453,6 +460,7 @@ public class Settings {
         settings.setRaceMode(restoreState(data[2], 3));
         settings.setBlockBrokenMoves(restoreState(data[2], 4));
         settings.setLimitPokemon(restoreState(data[2], 5));
+        settings.setTypesRandomizeFirst(restoreState(data[2], 6));
 
         settings.setAbilitiesMod(restoreEnum(AbilitiesMod.class, data[3], 0, // UNCHANGED
                 1 // RANDOMIZE
@@ -462,16 +470,15 @@ public class Settings {
         settings.setBanTrappingAbilities(restoreState(data[3], 4));
         settings.setBanNegativeAbilities(restoreState(data[3], 5));
 
-        settings.setStartersMod(restoreEnum(StartersMod.class, data[4], 2, // UNCHANGED
-                0, // CUSTOM
-                1, // COMPLETELY_RANDOM
-                6, // RANDOM_WITH_ONE_OR_TWO_EVOLUTIONS
-                3 // RANDOM_WITH_TWO_EVOLUTIONS
+        settings.setStartersMod(getEnum(StartersMod.class, 
+                restoreState(data[4], 2), // UNCHANGED
+                restoreState(data[4], 0), // CUSTOM
+                restoreState(data[4], 1), // COMPLETELY_RANDOM
+                restoreState(data[37], 0), //RANDOM_WITH_ONE_OR_TWO_EVOLUTIONS
+                restoreState(data[4], 3) // RANDOM_WITH_TWO_EVOLUTIONS
         ));
         settings.setRandomizeStartersHeldItems(restoreState(data[4], 4));
         settings.setBanBadRandomStarterHeldItems(restoreState(data[4], 5));
-        settings.setStartersUniqueTypes(restoreState(data[4], 6));
-        settings.setStartersNoSplit(restoreState(data[4], 7));
 
         settings.setCustomStarters(new int[] { FileFunctions.read2ByteInt(data, 5) + 1,
                 FileFunctions.read2ByteInt(data, 7) + 1, FileFunctions.read2ByteInt(data, 9) + 1 });
@@ -519,14 +526,13 @@ public class Settings {
         settings.setBlockWildLegendaries(restoreState(data[16], 1));
         settings.setRandomizeWildPokemonHeldItems(restoreState(data[16], 3));
         settings.setBanBadRandomWildPokemonHeldItems(restoreState(data[16], 4));
-
-        settings.setMinimumCatchRateLevel(((data[16] & 0xC0) >> 6) + 1);
+        settings.setAllowLowLevelEvolvedTypes(restoreState(data[16], 6));
+        settings.setMinimumCatchRateLevel(((data[16] & 0x60) >> 5) + 1);
 
         settings.setStaticPokemonMod(restoreEnum(StaticPokemonMod.class, data[17], 0, // UNCHANGED
                 1, // RANDOM_MATCHING
                 2 // COMPLETELY_RANDOM
         ));
-        settings.setAllowLowLevelEvolvedTypes(restoreState(data[17], 3));
 
         settings.setTmsMod(restoreEnum(TMsMod.class, data[18], 4, // UNCHANGED
                 3 // RANDOM
@@ -605,6 +611,11 @@ public class Settings {
         settings.setTrainersLevelModified(restoreState(data[35], 7));
         settings.setTrainersLevelModifier((data[35] & 0x7F) - 50);
 
+        settings.setStatsRandomizeFirst(restoreState(data[36], 0));
+
+        settings.setStartersNoSplit(restoreState(data[37], 2));
+        settings.setStartersUniqueTypes(restoreState(data[37], 1));
+        
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
         settings.setRomName(romName);
@@ -881,6 +892,15 @@ public class Settings {
         return this;
     }
 
+    public boolean isStatsRandomizeFirst() {
+        return statsRandomizeFirst;
+    }
+
+    public Settings setStatsRandomizeFirst(boolean statsRandomizeFirst) {
+        this.statsRandomizeFirst = statsRandomizeFirst;
+        return this;
+    }
+
     public AbilitiesMod getAbilitiesMod() {
         return abilitiesMod;
     }
@@ -951,15 +971,6 @@ public class Settings {
         this.customStarters = customStarters;
         return this;
     }
-    
-    public boolean isStartersNoSplit() {
-        return startersNoSplit;
-    }
-
-    public Settings setStartersNoSplit(boolean startersNoSplit) {
-        this.startersNoSplit = startersNoSplit;
-        return this;
-    }
 
     public boolean isRandomizeStartersHeldItems() {
         return randomizeStartersHeldItems;
@@ -978,7 +989,16 @@ public class Settings {
         this.banBadRandomStarterHeldItems = banBadRandomStarterHeldItems;
         return this;
     }
-    
+
+    public boolean isStartersNoSplit() {
+        return startersNoSplit;
+    }
+
+    public Settings setStartersNoSplit(boolean startersNoSplit) {
+        this.startersNoSplit = startersNoSplit;
+        return this;
+    }
+
     public boolean isStartersUniqueTypes() {
         return startersUniqueTypes;
     }
@@ -999,6 +1019,15 @@ public class Settings {
 
     public Settings setTypesMod(boolean... bools) {
         return setTypesMod(getEnum(TypesMod.class, bools));
+    }
+
+    public boolean isTypesRandomizeFirst() {
+        return typesRandomizeFirst;
+    }
+
+    public Settings setTypesRandomizeFirst(boolean typesRandomizeFirst) {
+        this.typesRandomizeFirst = typesRandomizeFirst;
+        return this;
     }
 
     public EvolutionsMod getEvolutionsMod() {
@@ -1049,7 +1078,7 @@ public class Settings {
         this.evosForceChange = evosForceChange;
         return this;
     }
-    
+
     public boolean isEvosNoConverge() {
         return evosNoConverge;
     }
@@ -1065,24 +1094,6 @@ public class Settings {
 
     public Settings setEvosForceGrowth(boolean evosForceGrowth) {
         this.evosForceGrowth= evosForceGrowth;
-        return this;
-    }
-    
-    public boolean isTypesRandomizeFirst() {
-        return typesRandomizeFirst;
-    }
-
-    public Settings setTypesRandomizeFirst(boolean typesRandomizeFirst) {
-        this.typesRandomizeFirst = typesRandomizeFirst;
-        return this;
-    }
-
-    public boolean isStatsRandomizeFirst() {
-        return statsRandomizeFirst;
-    }
-
-    public Settings setStatsRandomizeFirst(boolean statsRandomizeFirst) {
-        this.statsRandomizeFirst = statsRandomizeFirst;
         return this;
     }
 
@@ -1626,7 +1637,8 @@ public class Settings {
         }
 
         int value = b & 0xFF;
-        return ((value >> index) & 0x01) == 0x01;
+        value = (value >> index) & 0x01;
+        return value == 0x01; //((value >> index) & 0x01) == 0x01;
     }
 
     private static void writeFullInt(ByteArrayOutputStream out, int value) throws IOException {
