@@ -322,6 +322,15 @@ public class Gen3Constants {
         tag(trs, 0x299, "RIVAL4-0");
         tag(trs, 0x29A, "RIVAL4-1");
 
+        // Wally
+        tag(trs, 0x290, "FRIEND1-0");
+        tag(trs, 0x207, "FRIEND2-0");
+        tag(trs, 0x291, "FRIEND3-0");
+        tag(trs, 0x292, "FRIEND4-0");
+        tag(trs, 0x293, "FRIEND5-0");
+        tag(trs, 0x294, "FRIEND6-0");
+
+
         if (romType == RomType_Ruby) {
             tag(trs, "THEMED:MAXIE", 0x259, 0x25A);
             tag(trs, "THEMED:COURTNEY", 0x257, 0x258);
@@ -403,6 +412,15 @@ public class Gen3Constants {
         tag(trs, 0x298, "RIVAL5-2");
         tag(trs, 0x299, "RIVAL5-0");
         tag(trs, 0x29A, "RIVAL5-1");
+
+        // Wally
+        tag(trs, 0x290, "FRIEND1-0");
+        tag(trs, 0x207, "FRIEND2-0");
+        tag(trs, 0x291, "FRIEND3-0");
+        tag(trs, 0x292, "FRIEND4-0");
+        tag(trs, 0x293, "FRIEND5-0");
+        tag(trs, 0x294, "FRIEND6-0");
+
 
         // Themed
         tag(trs, "THEMED:MAXIE", 0x259, 0x25A, 0x2DE);
