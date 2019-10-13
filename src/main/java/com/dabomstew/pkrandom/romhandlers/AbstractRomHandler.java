@@ -3390,6 +3390,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 // Change the highest level pokemon, not the last.
                 // BUT: last gets +2 lvl priority (effectively +1)
                 // same as above, equal priority = earlier wins
+                noRepeatTaggedTeam(t, starter);
                 TrainerPokemon bestPoke = t.pokemon.get(0);
                 int trainerPkmnCount = t.pokemon.size();
                 for (int i = 1; i < trainerPkmnCount; i++) {
@@ -3403,6 +3404,42 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
 
+    }
+
+    private void noRepeatTaggedTeam(Trainer trainer, Pokemon starter) {
+        int tries = 0;
+        Pokemon fullyEvolved = fullyEvolve(starter);
+        // Loop over entire team.
+        for(int i = 0; i < trainer.pokemon.size(); i++) {
+            if(tries > 100) {
+                System.out.println("Unable to prevent rival from duplicating team.");
+                break;
+            }
+            // Current suspect pokemon based on 'i'
+            TrainerPokemon tp = trainer.pokemon.get(i);
+            // Check if suspect pokemon matches the starter or it's full evolution
+            if(tp.pokemon == starter || tp.pokemon == fullyEvolved) {
+                // Randomize this pokemon
+                tp.pokemon = pickReplacement(tp.pokemon, true, null, true, true);
+                tp.resetMoves = true;
+                // Redo this section of the loop
+                i--;
+                tries++;
+                continue;
+            }
+            // Loop over the beginning of the team.
+            for(int j = 0; j < i; j++) {
+                if(tp.pokemon == trainer.pokemon.get(j).pokemon) {
+                    // Randomize this pokemon
+                    tp.pokemon = pickReplacement(tp.pokemon, true, null, true, true);
+                    tp.resetMoves = true;
+                    // Redo the outer section of the loop
+                    i--;
+                    tries++;
+                    break;
+                }
+            }
+        }
     }
 
     // Return the max depth of pre-evolutions a Pokemon has
