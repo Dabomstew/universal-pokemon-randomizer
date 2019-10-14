@@ -564,7 +564,7 @@ public class Randomizer {
             log.println("<h2>Pokemon Base Stats & Types</h2>");
             log.println("<table class=\"pk-table\">");
             if (romHandler instanceof Gen1RomHandler) {
-                log.println("<tr><th>NUM</th><th>NAME</th><th>TYPE</th><th>HP</th><th>ATK</th><th>DEF</th><th>SPE</th><th>SPEC</th><th>TOTAL</th></tr>");
+                log.println("<tr><th>NUM</th><th>NAME</th><th>TYPE</th><th>HP</th><th>ATK</th><th>DEF</th><th>SPE</th><th>SPEC</th><th>TOTAL</th><th>BIG</th></tr>");
                 for (Pokemon pkmn : allPokes) {
                     if (pkmn != null) {
                         String pkmnType1 = pkmn.primaryType == null ? "???" : pkmn.primaryType.toString();
@@ -574,11 +574,12 @@ public class Randomizer {
                             pkmnType2 = pkmn.secondaryType.toString();
                             pkmnType2 = String.format("<span class=\"pk-type %s\">%s</span>", pkmnType2.toLowerCase(), pkmnType2);
                         }
-                        int total = pkmn.hp + pkmn.attack + pkmn.defense + pkmn.speed + pkmn.special;                        
-                        log.printf("<tr%s><td>%3d</td><td class=\"left\">%s</td><td>%s%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td></tr>",
-                                pkmn.number % 2 == 0 ? " class=\"alt\"" : "", pkmn.number, pkmn.name, pkmnType1, pkmnType2, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.special, total);
+                        int total = pkmn.hp + pkmn.attack + pkmn.defense + pkmn.speed + pkmn.special;
+                        boolean topPoke = total > 600 || Collections.max(Arrays.asList(pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.special)) > 190;                        
+                        log.printf("<tr%s><td>%3d</td><td class=\"left\">%s</td><td>%s%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%s</td></tr>",
+                                pkmn.number % 2 == 0 ? " class=\"alt\"" : "", pkmn.number, pkmn.name, pkmnType1, pkmnType2, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.special, total, 
+                                    topPoke ? "YES" : "");
                     }
-
                 }
             } else {
                 log.print("<tr><th>NUM</th><th>NAME</th><th>TYPE</th><th>HP</th><th>ATK</th><th>DEF</th><th>SPE</th><th>SATK</th><th>SDEF</th><th>TOTAL</th>");
@@ -586,7 +587,7 @@ public class Randomizer {
                 for (int i = 0; i < abils; i++) {
                     log.printf("<th>ABILITY%d</th>", (i + 1));
                 }
-                log.print("<th>ITEM</th>");
+                log.print("<th>ITEM</th><th>BIG</th>");
                 log.println("</tr>");
                 for (Pokemon pkmn : allPokes) {
                     if (pkmn != null) {
@@ -598,6 +599,7 @@ public class Randomizer {
                             pkmnType2 = String.format("<span class=\"pk-type %s\">%s</span>", pkmnType2.toLowerCase(), pkmnType2);
                         }
                         int total = pkmn.hp + pkmn.attack + pkmn.defense + pkmn.speed + pkmn.spatk + pkmn.spdef;
+                        boolean topPoke = total > 600 || Collections.max(Arrays.asList(pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef)) > 190;             
                         log.printf("<tr%s><td>%3d</td><td class=\"left\">%s</td><td>%s%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td>",
                                 pkmn.number % 2 == 0 ? " class=\"alt\"" : "", pkmn.number, pkmn.name, pkmnType1, pkmnType2, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef, total);
                         if (abils > 0) {
@@ -631,9 +633,9 @@ public class Randomizer {
                                 log.print(itemNames[pkmn.darkGrassHeldItem] + " (dark grass only)");
                             }
                         }
-                        log.println("</td></tr>");
+                        log.printf("</td><td>%s</td>", topPoke ? "YES" : "");
+                        log.println("</tr>");
                     }
-
                 }
             }
             log.println("</table>");
@@ -936,17 +938,19 @@ public class Randomizer {
             if (romHandler.hasPhysicalSpecialSplit()) {
                 log.print("<th>CATEGORY</th>");
             }
-            log.println("</tr>");
+            log.println("<th>BIG</th></tr>");
             List<Move> allMoves = romHandler.getMoves();
             for (Move mv : allMoves) {
                 if (mv != null) {
                     String mvType = (mv.type == null) ? "???" : mv.type.toString();
+                    boolean topMove = mv.power > 95;
                     mvType = String.format("<span class=\"pk-type %s\">%s</span>", mvType.toLowerCase(), mvType);
                     log.printf("<tr%s><td>%d</td><td class=\"left\">%s</td><td>%s</td><td>%d</td><td>%d</td><td>%d</td>",
                             mv.internalId % 2 == 0 ? " class=\"alt\"" : "", mv.internalId, mv.name, mvType, mv.power, (int) mv.hitratio, mv.pp);
                     if (romHandler.hasPhysicalSpecialSplit()) {
                         log.printf("<td>%s</td>", mv.category.toString());
                     }
+                    log.printf("<td>%s</td>", topMove ? "YES" : "");
                     log.println("</tr>");
                 }
             }
