@@ -203,7 +203,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }, new EvolvedPokemonAction() {
                 public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
-                    evTo.copyRandomizedStatsUpEvolution(evFrom);
+                    evTo.copyRandomizedStatsUpEvolution(evFrom, AbstractRomHandler.this.random);
                 }
             });
         } else {

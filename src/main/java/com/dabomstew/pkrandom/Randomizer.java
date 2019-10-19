@@ -575,7 +575,7 @@ public class Randomizer {
                             pkmnType2 = String.format("<span class=\"pk-type %s\">%s</span>", pkmnType2.toLowerCase(), pkmnType2);
                         }
                         int total = pkmn.hp + pkmn.attack + pkmn.defense + pkmn.speed + pkmn.special;
-                        boolean topPoke = total > 600 || Collections.max(Arrays.asList(pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.special)) > 190;                        
+                        boolean topPoke = total > 590 || Collections.max(Arrays.asList(pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.special)) > 190;                        
                         log.printf("<tr%s><td>%3d</td><td class=\"left\">%s</td><td>%s%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%s</td></tr>",
                                 pkmn.number % 2 == 0 ? " class=\"alt\"" : "", pkmn.number, pkmn.name, pkmnType1, pkmnType2, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.special, total, 
                                     topPoke ? "YES" : "");
@@ -599,7 +599,7 @@ public class Randomizer {
                             pkmnType2 = String.format("<span class=\"pk-type %s\">%s</span>", pkmnType2.toLowerCase(), pkmnType2);
                         }
                         int total = pkmn.hp + pkmn.attack + pkmn.defense + pkmn.speed + pkmn.spatk + pkmn.spdef;
-                        boolean topPoke = total > 600 || Collections.max(Arrays.asList(pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef)) > 190;             
+                        boolean topPoke = total > 590 || Collections.max(Arrays.asList(pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef)) > 190;             
                         log.printf("<tr%s><td>%3d</td><td class=\"left\">%s</td><td>%s%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td>",
                                 pkmn.number % 2 == 0 ? " class=\"alt\"" : "", pkmn.number, pkmn.name, pkmnType1, pkmnType2, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef, total);
                         if (abils > 0) {

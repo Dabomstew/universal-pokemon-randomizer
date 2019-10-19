@@ -167,8 +167,8 @@ public class Pokemon implements Comparable<Pokemon> {
             special = (int) Math.ceil((spatk + spdef) / 2.0f);
 
         } else {
-            // Minimum 20 HP, 10 everything else
-            int bst = bst() - 70;
+            // Minimum 10 everything not including HP
+            int bst = bst() - 50;
 
             // Make weightings
             double hpW = random.nextDouble(), atkW = random.nextDouble(), defW = random.nextDouble();
@@ -176,7 +176,13 @@ public class Pokemon implements Comparable<Pokemon> {
 
             double totW = hpW + atkW + defW + spaW + spdW + speW;
 
-            hp = (int) Math.max(1, Math.round(hpW / totW * bst)) + 20;
+            // Handle HP specially to avoid skewing
+            float suggestedHP = Math.round(hpW / totW * bst);
+            hp = suggestedHP < 35 ? 35 : (int) suggestedHP;
+            // Remove any added stats from the remaining bst
+            bst -= suggestedHP < 35 ? (35-suggestedHP) : 0;
+            
+            // Handle the rest normally
             attack = (int) Math.max(1, Math.round(atkW / totW * bst)) + 10;
             defense = (int) Math.max(1, Math.round(defW / totW * bst)) + 10;
             spatk = (int) Math.max(1, Math.round(spaW / totW * bst)) + 10;
@@ -195,18 +201,34 @@ public class Pokemon implements Comparable<Pokemon> {
 
     }
 
-    public void copyRandomizedStatsUpEvolution(Pokemon evolvesFrom) {
+    public void copyRandomizedStatsUpEvolution(Pokemon evolvesFrom, Random random) {
         double ourBST = bst();
         double theirBST = evolvesFrom.bst();
 
         double bstRatio = ourBST / theirBST;
-
-        hp = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.hp * bstRatio)));
-        attack = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.attack * bstRatio)));
-        defense = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.defense * bstRatio)));
-        speed = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.speed * bstRatio)));
-        spatk = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.spatk * bstRatio)));
-        spdef = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.spdef * bstRatio)));
+        
+        // Lower HP growth by 10% to allow other stats a chance to grow (except when growth is already under 10%)
+        hp = (int) Math.min(283, Math.max(1, Math.round(evolvesFrom.hp * bstRatio)));
+        int hpDiff = 1.1f < bstRatio ? Math.round(hp * 0.1f) : 0;
+        hp -= hpDiff;
+        
+        // Convert HPDiff into series of ints
+        int hpInt = hpDiff/5;
+        int hpRem = hpDiff % 5;
+        int[] hpArray = new int[] {hpInt, hpInt, hpInt, hpInt, hpInt};
+        
+        //Add remainder to random spots in hpArray
+        for (int i = 0; i < hpRem; i++) {
+            hpArray[Math.abs(random.nextInt()%5)]++;
+        }
+        
+        
+        // Add HPDiff to remaining stats
+        attack = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.attack * bstRatio))) + hpArray[0];
+        defense = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.defense * bstRatio))) + hpArray[1];
+        speed = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.speed * bstRatio))) + hpArray[2];
+        spatk = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.spatk * bstRatio))) + hpArray[3];
+        spdef = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.spdef * bstRatio))) + hpArray[4];
 
         special = (int) Math.ceil((spatk + spdef) / 2.0f);
     }
@@ -242,7 +264,7 @@ public class Pokemon implements Comparable<Pokemon> {
             // Fix up special too
             special = (int) Math.ceil((spatk + spdef) / 2.0f);
         } else {            
-            // Minimum 20 HP, 10 everything else
+            // Minimum 10 everything not including HP
             int bst;
             if(evolutionSanity) {
                 if(evolutionsFrom.size() > 0) {
@@ -259,23 +281,23 @@ public class Pokemon implements Comparable<Pokemon> {
                     
                     if(pk2Evos) {
                         // First evo of 3 stages
-                        bst = (int) (EVO1_2EVOS_MEDIAN + skewedGaussian(random.nextGaussian(), EVO1_2EVOS_SKEW) * EVO1_2EVOS_SD - 70);
+                        bst = (int) (EVO1_2EVOS_MEDIAN + skewedGaussian(random.nextGaussian(), EVO1_2EVOS_SKEW) * EVO1_2EVOS_SD - 50);
                     } else {
                         // First evo of 2 stages
-                        bst = (int) (EVO1_1EVO_MEDIAN + skewedGaussian(random.nextGaussian(), EVO1_1EVO_SKEW) * EVO1_1EVO_SD - 70);
+                        bst = (int) (EVO1_1EVO_MEDIAN + skewedGaussian(random.nextGaussian(), EVO1_1EVO_SKEW) * EVO1_1EVO_SD - 50);
                     }
                 } else {
                     if(evolutionsTo.size() > 0) {
                         // Last evo, doesn't carry stats
-                        bst = (int) (MAX_EVO_MEDIAN + skewedGaussian(random.nextGaussian(), MAX_EVO_SKEW) * MAX_EVO_SD - 70);
+                        bst = (int) (MAX_EVO_MEDIAN + skewedGaussian(random.nextGaussian(), MAX_EVO_SKEW) * MAX_EVO_SD - 50);
                     } else {
                         // No evolutions, no pre-evolutions
-                        bst = (int) (NO_EVO_MEDIAN + skewedGaussian(random.nextGaussian(), NO_EVO_SKEW) * NO_EVO_SD - 70);                    
+                        bst = (int) (NO_EVO_MEDIAN + skewedGaussian(random.nextGaussian(), NO_EVO_SKEW) * NO_EVO_SD - 50);                    
                     }
                 }
             } else {
                 // No 'Follow evolutions'
-                bst = (int) (GENERAL_MEDIAN + skewedGaussian(random.nextGaussian(), GENERAL_SKEW) * GENERAL_SD - 70);
+                bst = (int) (GENERAL_MEDIAN + skewedGaussian(random.nextGaussian(), GENERAL_SKEW) * GENERAL_SD - 50);
             }
             
             // Make weightings
@@ -288,7 +310,13 @@ public class Pokemon implements Comparable<Pokemon> {
 
             double totW = hpW + atkW + defW + spaW + spdW + speW;
 
-            hp = (int) Math.max(1, Math.round(hpW / totW * bst)) + 20;
+            // Handle HP specially to avoid skewing
+            float suggestedHP = Math.round(hpW / totW * bst);
+            hp = suggestedHP < 35 ? 35 : (int) suggestedHP;
+            // Remove any added stats from the remaining bst
+            bst -= suggestedHP < 35 ? (35-suggestedHP) : 0;
+            
+            // Handle the rest normally
             attack = (int) Math.max(1, Math.round(atkW / totW * bst)) + 10;
             defense = (int) Math.max(1, Math.round(defW / totW * bst)) + 10;
             spatk = (int) Math.max(1, Math.round(spaW / totW * bst)) + 10;
