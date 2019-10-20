@@ -853,8 +853,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         this.stpRandomL4LRB.setEnabled(false);
         this.stpRandomTotalRB.setEnabled(false);
+        this.stpRandomPower.setEnabled(false);
+        this.stpLimitMuskateers.setEnabled(false);
         this.stpUnchangedRB.setEnabled(false);
-        this.stpUnchangedRB.setSelected(true);
+        this.stpUnchangedRB.setSelected(false);
+        this.stpLimitMuskateers.setEnabled(false);
+        this.stpLimitMuskateers.setSelected(false);
+        this.stpLimitMuskateers.setVisible(true);
 
         this.tmmRandomRB.setEnabled(false);
         this.tmmUnchangedRB.setEnabled(false);
@@ -1104,6 +1109,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.spHeldItemsCB.setVisible(hasStarterHeldItems);
             this.spHeldItemsBanBadCB.setEnabled(false);
             this.spHeldItemsBanBadCB.setVisible(hasStarterHeldItems);
+            this.stpLimitMuskateers.setEnabled(false);
 
             this.mdRandomAccuracyCB.setEnabled(true);
             this.mdRandomPowerCB.setEnabled(true);
@@ -1169,6 +1175,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             if (this.romHandler.canChangeStaticPokemon()) {
                 this.stpRandomL4LRB.setEnabled(true);
                 this.stpRandomTotalRB.setEnabled(true);
+                this.stpRandomPower.setEnabled(true);
+                this.stpLimitMuskateers.setEnabled(true);
 
             }
 
@@ -1744,7 +1752,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.stpRandomL4LRB.setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING);
         this.stpRandomTotalRB
                 .setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.COMPLETELY_RANDOM);
-
+        this.stpRandomPower
+                .setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.SIMILAR_STRENGTH);
+        this.stpLimitMuskateers.setSelected(settings.isLimitMuskateers());
+        
         this.thcRandomTotalRB
                 .setSelected(settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.COMPLETELY_RANDOM);
         this.thcRandomTypeRB
@@ -1888,8 +1899,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setBanBadRandomWildPokemonHeldItems(wpHeldItemsBanBadCB.isSelected());
 
         settings.setStaticPokemonMod(stpUnchangedRB.isSelected(), stpRandomL4LRB.isSelected(),
-                stpRandomTotalRB.isSelected());
-
+                stpRandomTotalRB.isSelected(),stpRandomPower.isSelected());
+        settings.setLimitMuskateers(spHeldItemsBanBadCB.isSelected());
+        
         settings.setTmsMod(tmmUnchangedRB.isSelected(), tmmRandomRB.isSelected());
 
         settings.setTmsHmsCompatibilityMod(thcUnchangedRB.isSelected(), thcRandomTypeRB.isSelected(),
@@ -1912,6 +1924,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setRandomizeInGameTradesItems(igtRandomItemCB.isSelected());
         settings.setRandomizeInGameTradesIVs(igtRandomIVsCB.isSelected());
         settings.setRandomizeInGameTradesNicknames(igtRandomNicknameCB.isSelected());
+        settings.setLimitMuskateers(stpLimitMuskateers.isSelected());
         settings.setRandomizeInGameTradesOTs(igtRandomOTCB.isSelected());
 
         settings.setFieldItemsMod(fiUnchangedRB.isSelected(), fiShuffleRB.isSelected(), fiRandomRB.isSelected());
@@ -2653,6 +2666,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         stpUnchangedRB = new javax.swing.JRadioButton();
         stpRandomL4LRB = new javax.swing.JRadioButton();
         stpRandomTotalRB = new javax.swing.JRadioButton();
+        stpRandomPower = new javax.swing.JRadioButton();
+        stpLimitMuskateers = new javax.swing.JCheckBox();
         inGameTradesPanel = new javax.swing.JPanel();
         igtUnchangedRB = new javax.swing.JRadioButton();
         igtGivenOnlyRB = new javax.swing.JRadioButton();
@@ -3359,6 +3374,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
         staticPokemonButtonGroup.add(stpRandomTotalRB);
         stpRandomTotalRB.setText(bundle.getString("RandomizerGUI.stpRandomTotalRB.text")); // NOI18N
         stpRandomTotalRB.setToolTipText(bundle.getString("RandomizerGUI.stpRandomTotalRB.toolTipText")); // NOI18N
+        
+        staticPokemonButtonGroup.add(stpRandomPower);
+        stpRandomPower.setText(bundle.getString("RandomizerGUI.stpRandomPower.text")); // NOI18N
+        stpRandomPower.setToolTipText(bundle.getString("RandomizerGUI.stpRandomPower.toolTipText")); // NOI18N
 
         javax.swing.GroupLayout staticPokemonPanelLayout = new javax.swing.GroupLayout(staticPokemonPanel);
         staticPokemonPanel.setLayout(staticPokemonPanelLayout);
@@ -3369,8 +3388,12 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addGroup(staticPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(stpUnchangedRB)
                     .addComponent(stpRandomL4LRB)
-                    .addComponent(stpRandomTotalRB))
-                .addContainerGap(407, Short.MAX_VALUE))
+                    .addComponent(stpRandomTotalRB)
+                    .addComponent(stpRandomPower))
+                .addContainerGap(407, Short.MAX_VALUE)
+                .addGroup(staticPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(stpLimitMuskateers))
+                    .addGap(234, 234, 234))
         );
         staticPokemonPanelLayout.setVerticalGroup(
             staticPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -3379,7 +3402,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(stpRandomL4LRB)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(stpRandomTotalRB))
+                .addComponent(stpRandomTotalRB)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(stpRandomPower))
+            .addGroup(staticPokemonPanelLayout.createSequentialGroup()
+                    .addComponent(stpLimitMuskateers)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(stpLimitMuskateers))
         );
 
         inGameTradesPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("RandomizerGUI.inGameTradesPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
@@ -3414,6 +3443,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         igtRandomNicknameCB.setText(bundle.getString("RandomizerGUI.igtRandomNicknameCB.text")); // NOI18N
         igtRandomNicknameCB.setToolTipText(bundle.getString("RandomizerGUI.igtRandomNicknameCB.toolTipText")); // NOI18N
+
+        stpLimitMuskateers.setText(bundle.getString("RandomizerGUI.stpLimitMuskateers.text")); // NOI18N
+        stpLimitMuskateers.setToolTipText(bundle.getString("RandomizerGUI.stpLimitMuskateers.toolTipText")); // NOI18N
 
         igtRandomOTCB.setText(bundle.getString("RandomizerGUI.igtRandomOTCB.text")); // NOI18N
         igtRandomOTCB.setToolTipText(bundle.getString("RandomizerGUI.igtRandomOTCB.toolTipText")); // NOI18N
@@ -4783,7 +4815,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JPanel staticPokemonPanel;
     private javax.swing.JRadioButton stpRandomL4LRB;
     private javax.swing.JRadioButton stpRandomTotalRB;
+    private javax.swing.JRadioButton stpRandomPower;
     private javax.swing.JRadioButton stpUnchangedRB;
+    private javax.swing.JCheckBox stpLimitMuskateers;
     private javax.swing.JCheckBox tcnRandomizeCB;
     private javax.swing.JRadioButton thcFullRB;
     private javax.swing.JRadioButton thcRandomTotalRB;

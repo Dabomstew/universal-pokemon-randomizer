@@ -225,7 +225,7 @@ public interface RomHandler {
 
     public boolean setStaticPokemon(List<Pokemon> staticPokemon);
 
-    public void randomizeStaticPokemon(boolean legendForLegend);
+    public void randomizeStaticPokemon(boolean swap_legendaries, boolean similar_strength, boolean limit_bw_muskateers);
 
     public boolean canChangeStaticPokemon();
 
@@ -441,5 +441,6 @@ public interface RomHandler {
     public int miscTweaksAvailable();
 
     public void applyMiscTweak(MiscTweak tweak);
+
 
 }

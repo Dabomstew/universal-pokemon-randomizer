@@ -92,6 +92,7 @@ public class Settings {
     // offset from the dropdown index from RandomizerGUI by 1
     private int[] customStarters = new int[3];
     private boolean randomizeStartersHeldItems;
+    private boolean limitMuskateers;
     private boolean banBadRandomStarterHeldItems;
 
     public enum TypesMod {
@@ -166,7 +167,7 @@ public class Settings {
     private boolean banBadRandomWildPokemonHeldItems;
 
     public enum StaticPokemonMod {
-        UNCHANGED, RANDOM_MATCHING, COMPLETELY_RANDOM
+        UNCHANGED, RANDOM_MATCHING, COMPLETELY_RANDOM, SIMILAR_STRENGTH
     }
 
     private StaticPokemonMod staticPokemonMod = StaticPokemonMod.UNCHANGED;
@@ -318,7 +319,9 @@ public class Settings {
         // 17 static pokemon
         out.write(makeByteSelected(staticPokemonMod == StaticPokemonMod.UNCHANGED,
                 staticPokemonMod == StaticPokemonMod.RANDOM_MATCHING,
-                staticPokemonMod == StaticPokemonMod.COMPLETELY_RANDOM));
+                staticPokemonMod == StaticPokemonMod.COMPLETELY_RANDOM,
+                staticPokemonMod == StaticPokemonMod.SIMILAR_STRENGTH,
+                limitMuskateers));
 
         // 18 tm randomization
         // new stuff 162
@@ -505,9 +508,12 @@ public class Settings {
 
         settings.setStaticPokemonMod(restoreEnum(StaticPokemonMod.class, data[17], 0, // UNCHANGED
                 1, // RANDOM_MATCHING
-                2 // COMPLETELY_RANDOM
+                2, // COMPLETELY_RANDOM
+                3  // SIMILAR_STRENGTH 
         ));
-
+        
+        settings.setLimitMuskateers(restoreState(data[17], 4));
+        
         settings.setTmsMod(restoreEnum(TMsMod.class, data[18], 4, // UNCHANGED
                 3 // RANDOM
         ));
@@ -948,6 +954,14 @@ public class Settings {
         return this;
     }
 
+    public boolean isLimitMuskateers() {
+        return limitMuskateers;
+    }
+    public Settings setLimitMuskateers(boolean LimitMuskateers) {
+        this.limitMuskateers = LimitMuskateers;
+        return this;
+    }
+    
     public TypesMod getTypesMod() {
         return typesMod;
     }

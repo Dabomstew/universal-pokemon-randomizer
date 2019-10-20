@@ -769,10 +769,12 @@ public class Randomizer {
             int checkValue) {
         if (romHandler.canChangeStaticPokemon()) {
             List<Pokemon> oldStatics = romHandler.getStaticPokemon();
-            if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING) {
-                romHandler.randomizeStaticPokemon(true);
+            if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING) { // Legendary for L
+                romHandler.randomizeStaticPokemon(true, false,settings.isLimitMuskateers());
             } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.COMPLETELY_RANDOM) {
-                romHandler.randomizeStaticPokemon(false);
+                romHandler.randomizeStaticPokemon(false, false,settings.isLimitMuskateers());
+            } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.SIMILAR_STRENGTH) {
+                romHandler.randomizeStaticPokemon(false, true,settings.isLimitMuskateers());
             }
             List<Pokemon> newStatics = romHandler.getStaticPokemon();
             if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED) {

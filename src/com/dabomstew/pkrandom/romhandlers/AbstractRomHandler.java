@@ -67,6 +67,7 @@ import com.dabomstew.pkrandom.pokemon.Type;
 
 public abstract class AbstractRomHandler implements RomHandler {
 
+    private static final boolean True = false;
     private boolean restrictionsSet;
     protected List<Pokemon> mainPokemonList;
     protected List<Pokemon> noLegendaryList, onlyLegendaryList;
@@ -942,7 +943,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             for (TrainerPokemon tp : t.pokemon) {
                 boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
-                tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, null, noLegendaries, wgAllowed);
+                tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, null, noLegendaries, wgAllowed, false);
                 tp.resetMoves = true;
                 if (levelModifier != 0) {
                     tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
@@ -1025,7 +1026,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (Trainer t : trainersInGroup) {
                 for (TrainerPokemon tp : t.pokemon) {
                     boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
-                    tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForGroup, noLegendaries, wgAllowed);
+                    tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForGroup, noLegendaries, wgAllowed, false);
                     tp.resetMoves = true;
                     if (levelModifier != 0) {
                         tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
@@ -1057,7 +1058,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 for (TrainerPokemon tp : t.pokemon) {
                     boolean shedAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
-                    tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForTrainer, noLegendaries, shedAllowed);
+                    tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForTrainer, noLegendaries, shedAllowed, false);
                     tp.resetMoves = true;
                     if (levelModifier != 0) {
                         tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
@@ -1905,14 +1906,13 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizeStaticPokemon(boolean legendForLegend) {
+    public void randomizeStaticPokemon(boolean swap_legendaries, boolean similar_strength, boolean limit_bw_muskateers) {
         // Load
         checkPokemonRestrictions();
         List<Pokemon> currentStaticPokemon = this.getStaticPokemon();
         List<Pokemon> replacements = new ArrayList<Pokemon>();
         List<Pokemon> banned = this.bannedForStaticPokemon();
-
-        if (legendForLegend) {
+        if (swap_legendaries) {
             List<Pokemon> legendariesLeft = new ArrayList<Pokemon>(onlyLegendaryList);
             List<Pokemon> nonlegsLeft = new ArrayList<Pokemon>(noLegendaryList);
             legendariesLeft.removeAll(banned);
@@ -1942,7 +1942,37 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 replacements.add(newPK);
             }
-        } else {
+        }
+        else if (similar_strength) {
+            List<Pokemon> pokemonLeft = new ArrayList<Pokemon>(mainPokemonList);
+            pokemonLeft.removeAll(banned);
+            for (int i = 0; i < currentStaticPokemon.size(); i++) {
+                Pokemon old = currentStaticPokemon.get(i);
+                Pokemon newPK;
+                if (old.number == 487 && ptGiratina) {
+                    newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
+                    pokemonLeft.remove(newPK);
+                } else {
+                    
+                    if ((old.number == 638 || old.number == 639 || old.number == 640) && limit_bw_muskateers) {
+                     // System.out.println(old.name + " " + old.number + ": triggered limit on replacement");
+                        newPK = pickReplacement(old, true, null, true, true, true); // This sets up picking a replacement with similar strength, and limit on bw muskateers
+                    }
+                    else {
+                        newPK = pickReplacement(old, true, null, true, true, false); // This sets up picking a replacement with similar strength
+                    }
+                    pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
+                    // System.out.println(old.name + " " + old.number + " -> " + newPK.name + " " + newPK.number);                        
+                }
+
+                if (pokemonLeft.size() == 0) {
+                    pokemonLeft.addAll(mainPokemonList);
+                    pokemonLeft.removeAll(banned);
+                }
+                replacements.add(newPK);
+            }
+        }
+        else { // Completely random
             List<Pokemon> pokemonLeft = new ArrayList<Pokemon>(mainPokemonList);
             pokemonLeft.removeAll(banned);
             for (int i = 0; i < currentStaticPokemon.size(); i++) {
@@ -1953,6 +1983,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                     pokemonLeft.remove(newPK);
                 } else {
                     newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
+                    pokemonLeft.remove(newPK);
+                    System.out.println(old.name + " " + old.number + " -> " + newPK.name + " " + newPK.number);
                 }
                 if (pokemonLeft.size() == 0) {
                     pokemonLeft.addAll(mainPokemonList);
@@ -3534,7 +3566,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<Pokemon> cachedAllList;
 
     private Pokemon pickReplacement(Pokemon current, boolean usePowerLevels, Type type, boolean noLegendaries,
-            boolean wonderGuardAllowed) {
+            boolean wonderGuardAllowed, boolean limit_bst) {
         List<Pokemon> pickFrom = cachedAllList;
         if (type != null) {
             if (!cachedReplacementLists.containsKey(type)) {
@@ -3543,7 +3575,28 @@ public abstract class AbstractRomHandler implements RomHandler {
             pickFrom = cachedReplacementLists.get(type);
         }
 
-        if (usePowerLevels) {
+        if (usePowerLevels && limit_bst) {
+            // start with pokemon BST, and only extend downwards
+            int currentBST = current.bstForPowerLevels();
+            int minTarget = currentBST - currentBST / 10;
+            int maxTarget = currentBST;
+            List<Pokemon> canPick = new ArrayList<Pokemon>();
+            int expandRounds = 0;
+            while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 2)) {
+                for (Pokemon pk : pickFrom) {
+                    if (pk.bstForPowerLevels() >= minTarget
+                            && pk.bstForPowerLevels() <= maxTarget
+                            && (wonderGuardAllowed || (pk.ability1 != GlobalConstants.WONDER_GUARD_INDEX
+                                    && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX))) {
+                        canPick.add(pk);
+                    }
+                }
+                minTarget -= currentBST / 20;
+                expandRounds++;
+            }
+            return canPick.get(this.random.nextInt(canPick.size()));
+        }    
+        else if (usePowerLevels) {
             // start with within 10% and add 5% either direction till we find
             // something
             int currentBST = current.bstForPowerLevels();
