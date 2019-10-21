@@ -307,13 +307,22 @@ public class Randomizer {
         if (settings.getTrainersMod() == Settings.TrainersMod.RANDOM) {
             romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
-                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
+                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, false, false); // final 2 booleans set up even distribution and main playthrough flags
         } else if (settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED) {
             romHandler.typeThemeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersMatchTypingDistribution(), settings.isTrainersBlockLegendaries(),
                     settings.isTrainersBlockEarlyWonderGuard(),
                     settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
+        } else if (settings.getTrainersMod() == Settings.TrainersMod.DISTRIBUTED) {
+            romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
+                    settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
+                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, true, false);
+        } else if (settings.getTrainersMod() == Settings.TrainersMod.MAINPLAYTHROUGH) {
+            romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
+                    settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
+                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, true, true);
         }
+        
 
         if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)
                 && settings.isRivalCarriesStarterThroughout()) {
@@ -527,7 +536,10 @@ public class Randomizer {
         } else if (settings.getFieldItemsMod() == Settings.FieldItemsMod.RANDOM) {
             romHandler.randomizeFieldItems(settings.isBanBadRandomFieldItems());
         }
-
+        
+        // Test output for placement history
+        romHandler.renderPlacementHistory();
+        
         // Signature...
         romHandler.applySignature();
 

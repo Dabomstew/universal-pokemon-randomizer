@@ -794,6 +794,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpNoLegendariesCB.setEnabled(false);
         this.tpNoEarlyShedinjaCB.setEnabled(false);
         this.tpNoEarlyShedinjaCB.setVisible(true);
+        this.tpEnforceDistribution.setEnabled(false);
+        this.tpEnforceDistribution.setVisible(true);
+        this.tpEnforceMainPlaythrough.setEnabled(false);
+        this.tpEnforceMainPlaythrough.setVisible(true);
         this.tpUnchangedRB.setEnabled(false);
         this.tpForceFullyEvolvedCB.setEnabled(false);
         this.tpForceFullyEvolvedSlider.setEnabled(false);
@@ -806,6 +810,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpTypeWeightingCB.setSelected(false);
         this.tpNoLegendariesCB.setSelected(false);
         this.tpNoEarlyShedinjaCB.setSelected(false);
+        this.tpEnforceDistribution.setSelected(true);
+        this.tpEnforceMainPlaythrough.setSelected(true);
         this.tpForceFullyEvolvedCB.setSelected(false);
         this.tpForceFullyEvolvedSlider.setValue(this.tpForceFullyEvolvedSlider.getMinimum());
         this.tpLevelModifierCB.setSelected(false);
@@ -1134,6 +1140,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
             this.tpRandomRB.setEnabled(true);
             this.tpTypeThemedRB.setEnabled(true);
+            this.tpEnforceDistribution.setEnabled(true);
+            this.tpEnforceMainPlaythrough.setEnabled(true);
             this.tpUnchangedRB.setEnabled(true);
             this.tpUnchangedRB.setSelected(true);
             this.tnRandomizeCB.setEnabled(romHandler.canChangeTrainerText());
@@ -1147,6 +1155,17 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 this.tpNoEarlyShedinjaCB.setVisible(true);
             }
             this.tpNoEarlyShedinjaCB.setSelected(false);
+
+            if (romHandler.generationOfPokemon() < 5) {
+                this.tpEnforceDistribution.setVisible(false);
+                this.tpEnforceMainPlaythrough.setVisible(false);
+            } else {
+                this.tpEnforceDistribution.setVisible(true);
+                this.tpEnforceMainPlaythrough.setVisible(true);
+            }
+
+            this.tpEnforceDistribution.setSelected(false);
+            this.tpEnforceMainPlaythrough.setSelected(false);
 
             this.wpArea11RB.setEnabled(true);
             this.wpGlobalRB.setEnabled(true);
@@ -1367,6 +1386,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.tpPowerLevelsCB.setEnabled(true);
             this.tpNoLegendariesCB.setEnabled(true);
             this.tpNoEarlyShedinjaCB.setEnabled(true);
+            this.tpEnforceDistribution.setEnabled(true);
+            this.tpEnforceMainPlaythrough.setEnabled(true);
             this.tpForceFullyEvolvedCB.setEnabled(true);
             this.tpLevelModifierCB.setEnabled(true);
         }
@@ -1722,6 +1743,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpTypeThemedRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED);
         this.tpTypeWeightingCB.setSelected(settings.isTrainersMatchTypingDistribution());
         this.tpUnchangedRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED);
+        this.tpEnforceDistribution.setSelected(settings.getTrainersMod() == Settings.TrainersMod.DISTRIBUTED);
+        this.tpEnforceMainPlaythrough.setSelected(settings.getTrainersMod() == Settings.TrainersMod.MAINPLAYTHROUGH);
         this.tpNoLegendariesCB.setSelected(settings.isTrainersBlockLegendaries());
         this.tpNoEarlyShedinjaCB.setSelected(settings.isTrainersBlockEarlyWonderGuard());
         this.tpForceFullyEvolvedCB.setSelected(settings.isTrainersForceFullyEvolved());
@@ -1876,12 +1899,12 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setMovesetsForceGoodDamaging(pmsForceGoodDamagingCB.isSelected());
         settings.setMovesetsGoodDamagingPercent(pmsForceGoodDamagingSlider.getValue());
 
-        settings.setTrainersMod(tpUnchangedRB.isSelected(), tpRandomRB.isSelected(), tpTypeThemedRB.isSelected());
+        settings.setTrainersMod(tpUnchangedRB.isSelected(), tpRandomRB.isSelected(), tpTypeThemedRB.isSelected(), tpEnforceDistribution.isSelected(), tpEnforceMainPlaythrough.isSelected());
         settings.setTrainersUsePokemonOfSimilarStrength(tpPowerLevelsCB.isSelected());
         settings.setRivalCarriesStarterThroughout(tpRivalCarriesStarterCB.isSelected());
         settings.setTrainersMatchTypingDistribution(tpTypeWeightingCB.isSelected());
         settings.setTrainersBlockLegendaries(tpNoLegendariesCB.isSelected());
-        settings.setTrainersBlockEarlyWonderGuard(tpNoEarlyShedinjaCB.isSelected());
+        settings.setTrainersBlockEarlyWonderGuard(tpNoEarlyShedinjaCB.isSelected());        
         settings.setTrainersForceFullyEvolved(tpForceFullyEvolvedCB.isSelected());
         settings.setTrainersForceFullyEvolvedLevel(tpForceFullyEvolvedSlider.getValue());
         settings.setTrainersLevelModified(tpLevelModifierCB.isSelected());
@@ -2397,6 +2420,14 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_tpTypeThemedRBActionPerformed
 
+    private void tpEnforceDistributionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tpTypeThemedRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_tpTypeThemedRBActionPerformed
+
+    private void tpEnforceMainPlaythroughActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tpTypeThemedRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_tpTypeThemedRBActionPerformed
+
     private void spUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spUnchangedRBActionPerformed
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_spUnchangedRBActionPerformed
@@ -2707,6 +2738,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         tnRandomizeCB = new javax.swing.JCheckBox();
         tcnRandomizeCB = new javax.swing.JCheckBox();
         tpNoEarlyShedinjaCB = new javax.swing.JCheckBox();
+        tpEnforceDistribution = new javax.swing.JRadioButton();
+        tpEnforceMainPlaythrough = new javax.swing.JRadioButton();
         tpForceFullyEvolvedCB = new javax.swing.JCheckBox();
         tpForceFullyEvolvedSlider = new javax.swing.JSlider();
         tpLevelModifierCB = new javax.swing.JCheckBox();
@@ -3764,6 +3797,24 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 tpTypeThemedRBActionPerformed(evt);
             }
         });
+        
+        trainerPokesButtonGroup.add(tpEnforceDistribution);
+        tpEnforceDistribution.setText(bundle.getString("RandomizerGUI.tpEnforceDistribution.text")); // NOI18N
+        tpEnforceDistribution.setToolTipText(bundle.getString("RandomizerGUI.tpEnforceDistribution.toolTipText")); // NOI18N
+        tpEnforceDistribution.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tpEnforceDistributionActionPerformed(evt);
+            }
+        });
+        
+        trainerPokesButtonGroup.add(tpEnforceMainPlaythrough);
+        tpEnforceMainPlaythrough.setText(bundle.getString("RandomizerGUI.tpEnforceMainPlaythrough.text")); // NOI18N
+        tpEnforceMainPlaythrough.setToolTipText(bundle.getString("RandomizerGUI.tpEnforceMainPlaythrough.toolTipText")); // NOI18N
+        tpEnforceMainPlaythrough.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tpEnforceMainPlaythroughActionPerformed(evt);
+            }
+        });
 
         tpPowerLevelsCB.setText(bundle.getString("RandomizerGUI.tpPowerLevelsCB.text")); // NOI18N
         tpPowerLevelsCB.setToolTipText(bundle.getString("RandomizerGUI.tpPowerLevelsCB.toolTipText")); // NOI18N
@@ -3834,14 +3885,18 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addGroup(trainersPokemonPanelLayout.createSequentialGroup()
                         .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(tpUnchangedRB)
-                            .addComponent(tpRandomRB))
+                            .addComponent(tpRandomRB)
+                            .addComponent(tpEnforceDistribution)
+                            .addComponent(tpEnforceMainPlaythrough)
+                            )
                         .addGap(47, 47, 47)
                         .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                 .addComponent(tpTypeWeightingCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(tpRivalCarriesStarterCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(tpPowerLevelsCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(tpNoLegendariesCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addComponent(tpNoLegendariesCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                )
                             .addComponent(tpNoEarlyShedinjaCB))
                         .addGap(18, 18, 18)
                         .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -3864,24 +3919,61 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(tpRandomRB)
                     .addComponent(tpPowerLevelsCB)
-                    .addComponent(tcnRandomizeCB))
+                    .addComponent(tcnRandomizeCB)
+                    )
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(tpTypeThemedRB)
+                    .addComponent(tpEnforceDistribution)
                     .addComponent(tpTypeWeightingCB)
-                    .addComponent(tpForceFullyEvolvedCB))
+                    )
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(trainersPokemonPanelLayout.createSequentialGroup()
+                .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(tpEnforceMainPlaythrough)
                         .addComponent(tpNoLegendariesCB)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(tpNoEarlyShedinjaCB))
-                    .addComponent(tpForceFullyEvolvedSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        )
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(tpTypeThemedRB)                        
+                        .addComponent(tpNoEarlyShedinjaCB)
+                        )
+
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(tpEnforceMainPlaythrough)                        
+                        .addComponent(tpNoEarlyShedinjaCB)
+                        )
+
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+//                .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+//                        .addComponent(tpLevelModifierCB)
+//                        )
+//                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+//                .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+//                        .addComponent(tpLevelModifierSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+//                        )
+//                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+//                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+
+//                    
+//                .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+//                    .addGroup(trainersPokemonPanelLayout.createSequentialGroup()
+//                        .addComponent(tpNoLegendariesCB)
+//                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+//                        .addComponent(tpNoEarlyShedinjaCB)
+////                        .addComponent(tpEnforceDistribution)
+////                        .addComponent(tpEnforceMainPlaythrough)
+//                        )
+//                    .addComponent(tpForceFullyEvolvedSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(tpForceFullyEvolvedCB)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(tpForceFullyEvolvedSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(tpLevelModifierCB)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(tpLevelModifierSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                )
         );
 
         javax.swing.GroupLayout trainersInnerPanelLayout = new javax.swing.GroupLayout(trainersInnerPanel);
@@ -4844,6 +4936,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox tpLevelModifierCB;
     private javax.swing.JSlider tpLevelModifierSlider;
     private javax.swing.JCheckBox tpNoEarlyShedinjaCB;
+    private javax.swing.JRadioButton tpEnforceDistribution;
+    private javax.swing.JRadioButton tpEnforceMainPlaythrough;
     private javax.swing.JCheckBox tpNoLegendariesCB;
     private javax.swing.JCheckBox tpPowerLevelsCB;
     private javax.swing.JRadioButton tpRandomRB;

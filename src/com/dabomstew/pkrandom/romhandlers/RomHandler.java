@@ -163,7 +163,7 @@ public interface RomHandler {
     public void setTrainers(List<Trainer> trainerData);
 
     public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
-            int levelModifier);
+            int levelModifier, boolean distributionSetting, boolean mainPlaythroughSetting);
 
     public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
             boolean noEarlyWonderGuard, int levelModifier);
@@ -441,6 +441,8 @@ public interface RomHandler {
     public int miscTweaksAvailable();
 
     public void applyMiscTweak(MiscTweak tweak);
+
+    public void renderPlacementHistory();
 
 
 }

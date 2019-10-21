@@ -48,6 +48,7 @@ import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
+import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
@@ -75,6 +76,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     protected PrintStream logStream;
     private List<Pokemon> alreadyPicked = new ArrayList<>();
     private List<Pokemon> giratinaPicks;
+    private Map<Pokemon, Integer> placementHistory = new HashMap<Pokemon, Integer>();
     protected boolean ptGiratina = false;
 
     /* Constructor */
@@ -921,7 +923,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
-            int levelModifier) {
+            int levelModifier, boolean distributionSetting, boolean mainPlaythroughSetting) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
 
@@ -934,6 +936,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         cachedReplacementLists = new TreeMap<Type, List<Pokemon>>();
         cachedAllList = noLegendaries ? new ArrayList<Pokemon>(noLegendaryList) : new ArrayList<Pokemon>(
                 mainPokemonList);
+        List<Integer> mainPlaythroughTrainers = getMainPlaythroughTrainers();
 
         // Fully random is easy enough - randomize then worry about rival
         // carrying starter at the end
@@ -942,8 +945,43 @@ public abstract class AbstractRomHandler implements RomHandler {
                 continue; // skip
             }
             for (TrainerPokemon tp : t.pokemon) {
-                boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
-                tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, null, noLegendaries, wgAllowed, false);
+                boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20; 
+                // new code for distribution with mainplaythrough balancing
+                // what we do is check each trainer if they're part of the main playthrough
+                // if so, add to placement history, if not, pure random
+                if (distributionSetting && mainPlaythroughSetting) {
+                    System.out.println("*** Main Playthrough Even Distribution ***");
+                    // new code for main playthrough distribution
+                    if (mainPlaythroughTrainers.contains((int)t.offset)) { // this determines if this trainer is in the pool of main playthrough
+                        // System.out.println(">>>> IN POOL: "+t.fullDisplayName);
+                        Pokemon newPK = pickReplacement(tp.pokemon, usePowerLevels, null, noLegendaries, wgAllowed, false, true); // final argument sets usePlacementHistory
+                        tp.pokemon = newPK;
+                        setPlacementHistory(newPK);                        
+                        }
+                    else { // pure random when trainer not in pool
+                        // System.out.println(">>>> NOT IN POOL: "+t.fullDisplayName);
+                        Pokemon newPK = pickReplacement(tp.pokemon, usePowerLevels, null, noLegendaries, wgAllowed, false, false);
+                        tp.pokemon = newPK;
+                    }
+                }
+                
+                else if (distributionSetting) {
+                    System.out.println("*** Full Playthrough Even Distribution ***");
+                    // new code for distribution, no main playthrough (all trainers equally distributed)
+                    // always adds to placement history
+                    Pokemon newPK = pickReplacement(tp.pokemon, usePowerLevels, null, noLegendaries, wgAllowed, false, true); // final argument sets usePlacementHistory
+                    tp.pokemon = newPK;
+                    setPlacementHistory(newPK);     
+                            
+                }
+                
+                else { 
+                    System.out.println("*** Pure Random Distribution ***");
+                    // pure random, no settings applied
+                    Pokemon newPK = pickReplacement(tp.pokemon, usePowerLevels, null, noLegendaries, wgAllowed, false, false);
+                    tp.pokemon = newPK;
+                }
+                
                 tp.resetMoves = true;
                 if (levelModifier != 0) {
                     tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
@@ -1026,7 +1064,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (Trainer t : trainersInGroup) {
                 for (TrainerPokemon tp : t.pokemon) {
                     boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
-                    tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForGroup, noLegendaries, wgAllowed, false);
+                    tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForGroup, noLegendaries, wgAllowed, false, false);
                     tp.resetMoves = true;
                     if (levelModifier != 0) {
                         tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
@@ -1058,7 +1096,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 for (TrainerPokemon tp : t.pokemon) {
                     boolean shedAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
-                    tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForTrainer, noLegendaries, shedAllowed, false);
+                    tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForTrainer, noLegendaries, shedAllowed, false, true);
                     tp.resetMoves = true;
                     if (levelModifier != 0) {
                         tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
@@ -1956,10 +1994,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                     
                     if ((old.number == 638 || old.number == 639 || old.number == 640) && limit_bw_muskateers) {
                      // System.out.println(old.name + " " + old.number + ": triggered limit on replacement");
-                        newPK = pickReplacement(old, true, null, true, true, true); // This sets up picking a replacement with similar strength, and limit on bw muskateers
+                        newPK = pickReplacement(old, true, null, true, true, true, true); // This sets up picking a replacement with similar strength
+                                                                                          // and limit on bw muskateers
                     }
                     else {
-                        newPK = pickReplacement(old, true, null, true, true, false); // This sets up picking a replacement with similar strength
+                        newPK = pickReplacement(old, true, null, true, true, false, true); // This sets up picking a replacement with similar strength
                     }
                     pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
                     // System.out.println(old.name + " " + old.number + " -> " + newPK.name + " " + newPK.number);                        
@@ -1984,7 +2023,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 } else {
                     newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
                     pokemonLeft.remove(newPK);
-                    System.out.println(old.name + " " + old.number + " -> " + newPK.name + " " + newPK.number);
+                    // System.out.println(old.name + " " + old.number + " -> " + newPK.name + " " + newPK.number);
                 }
                 if (pokemonLeft.size() == 0) {
                     pokemonLeft.addAll(mainPokemonList);
@@ -3566,8 +3605,14 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<Pokemon> cachedAllList;
 
     private Pokemon pickReplacement(Pokemon current, boolean usePowerLevels, Type type, boolean noLegendaries,
-            boolean wonderGuardAllowed, boolean limit_bst) {
-        List<Pokemon> pickFrom = cachedAllList;
+            boolean wonderGuardAllowed, boolean limit_bst, boolean usePlacementHistory) {
+        List<Pokemon> pickFrom;
+        if (usePlacementHistory) {
+            pickFrom = getBelowAveragePlacements();
+        }
+        else {
+            pickFrom = cachedAllList;
+        }
         if (type != null) {
             if (!cachedReplacementLists.containsKey(type)) {
                 cachedReplacementLists.put(type, pokemonOfType(type, noLegendaries));
@@ -3654,7 +3699,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             maxTarget += currentBST / 20;
             expandRounds++;
         }
-        return canPick.get(this.random.nextInt(canPick.size()));
+        Pokemon newPK = canPick.get(this.random.nextInt(canPick.size()));
+        // setPlacementHistory(newPK);
+        return newPK;
     }
 
     /* Helper methods used by subclasses and/or this class */
@@ -3675,7 +3722,129 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
     }
+    
+    protected void setPlacementHistory(Pokemon newPK) {
+        List<Pokemon> placedPK = new ArrayList<Pokemon>(placementHistory.keySet());
+        if (placedPK.contains(newPK)) {
+            placementHistory.put(newPK, placementHistory.get(newPK) + 1);
+        }
+        else {
+            placementHistory.put(newPK, 1);
+        }
 
+        
+    }
+
+    public int getPlacementHistory(Pokemon newPK) {
+        List<Pokemon> placedPK = new ArrayList<Pokemon>(placementHistory.keySet());
+        if (placedPK.contains(newPK)) {
+            return placementHistory.get(newPK);
+        }
+        else {
+            return 0;
+        }        
+    }
+    
+    // currently not used
+    public boolean decidePlacementAverage(Pokemon newPK) {
+        // This method will return true if the number of times a pokemon has been
+        // placed is less than average of all placed pokemon's appearances
+        // E.g., Charmander's been placed once, but the average for all pokemon is 2.2
+        // So place Charmander 
+        
+        List<Pokemon> placedPK = new ArrayList<Pokemon>(placementHistory.keySet());
+        if (placedPK.contains(newPK)) {
+            int placedPKNum = 0;
+            for (Pokemon p : placedPK) {
+                placedPKNum += placementHistory.get(p); 
+            }
+            float placedAverage = (float)placedPKNum / (float)placedPK.size();
+            if (placementHistory.get(newPK) <= placedAverage + 1) {
+                // System.out.println(newPK.name + ": " + placementHistory.get(newPK)+" "+placedAverage+" ACCEPT");
+                return true;
+            }
+            else {
+                // System.out.println(newPK.name + ": " + placementHistory.get(newPK)+" "+placedAverage+" REJECT");
+                return false;      
+            }
+        }
+        else {
+            return true; // if not placed at all, automatically flag true for placing
+            
+        }
+        
+    }
+    
+    public List<Pokemon> getBelowAveragePlacements() {
+        // This method will return true if the number of times a pokemon has been
+        // placed is less than average of all placed pokemon's appearances
+        // E.g., Charmander's been placed once, but the average for all pokemon is 2.2
+        // So add to list and return 
+        
+        List<Pokemon> toPlacePK = new ArrayList<Pokemon>();
+        List<Pokemon> placedPK = new ArrayList<Pokemon>(placementHistory.keySet());
+        List<Pokemon> allPK = cachedAllList;
+        int placedPKNum = 0;
+        for (Pokemon p : placedPK) {
+            placedPKNum += placementHistory.get(p); 
+        }
+        float placedAverage = Math.round((float)placedPKNum / (float)placedPK.size());
+
+        
+        
+        if (placedAverage != placedAverage) { // this is checking for NaN, should only happen on first call
+            placedAverage = 1;
+        }
+        
+        // now we've got placement average, iterate all pokemon and see if they qualify to be placed
+
+        for (Pokemon newPK : allPK) {
+            if (placedPK.contains(newPK)) { // if it's in the list of previously placed, then check its viability 
+                if (placementHistory.get(newPK) <= placedAverage) {
+                    // System.out.println(newPK.name + ": " + placementHistory.get(newPK)+" "+placedAverage+" ACCEPT");
+                    toPlacePK.add(newPK);
+                }
+                else {
+                 // System.out.println(newPK.name + ": " + placementHistory.get(newPK)+" "+placedAverage+" REJECT");
+                    continue;      
+                }            
+            }
+            else {
+                toPlacePK.add(newPK); // if not placed at all, automatically flag true for placing
+                
+            }
+        }
+
+        return toPlacePK; 
+        
+    }
+    
+    public List<Integer> getMainPlaythroughTrainers() {
+        if (this.getROMCode().equals("IRBO") || this.getROMCode().equals("IRAO")) { // BW1
+            List<Integer> trainers = Gen5Constants.bw1MainPlaythroughTrainers;
+            return trainers;
+        }        
+        else if (this.getROMCode().equals("IRDO") || this.getROMCode().equals("IREO")) { // BW2
+            List<Integer> trainers = Gen5Constants.bw2MainPlaythroughTrainers;
+            return trainers;
+        } 
+        else {
+            return Gen5Constants.emptyPlaythroughTrainers;
+            
+        }
+
+
+    }
+
+    public void renderPlacementHistory() {
+        List<Pokemon> placedPK = new ArrayList<Pokemon>(placementHistory.keySet());
+        for (Pokemon p : placedPK) {
+            System.out.println(p.name+": "+ placementHistory.get(p));
+        }
+        
+        
+    }
+    
     protected void log(String log) {
         if (logStream != null) {
             logStream.println(log);
