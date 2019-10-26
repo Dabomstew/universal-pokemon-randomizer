@@ -29,6 +29,7 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
@@ -339,6 +340,10 @@ public interface RomHandler {
 
     public ItemList getNonBadItems();
 
+    public List<Integer> getRegularShopItems();
+
+    public List<Integer> getOPShopItems();
+
     public void randomizeWildHeldItems(boolean banBadItems);
 
     public String[] getItemNames();
@@ -394,6 +399,16 @@ public interface RomHandler {
 
     public void randomizeEvolutions(boolean similarStrength, boolean sameType, boolean limitToThreeStages,
             boolean forceChange);
+
+    public void shuffleShopItems();
+
+    public void randomizeShopItems(boolean banBadItems, boolean banRegularShopItems, boolean banOPShopItems, boolean balancePrices);
+
+    public List<Integer> getShopItems();
+
+    public void setShopItems(List<Integer> shopItems);
+
+    public void setShopPrices();
 
     // stats stuff
     public void minimumCatchRate(int rateNonLegendary, int rateLegendary);

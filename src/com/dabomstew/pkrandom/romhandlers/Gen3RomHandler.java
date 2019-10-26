@@ -2348,6 +2348,21 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    public List<Integer> getShopItems() {
+        return null; // Not implemented
+    }
+
+    @Override
+    public void setShopItems(List<Integer> shopItems) {
+        // Not implemented
+    }
+
+    @Override
+    public void setShopPrices() {
+        // Not implemented
+    }
+
+    @Override
     public boolean canChangeTrainerText() {
         return true;
     }
@@ -2722,6 +2737,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     @Override
     public ItemList getNonBadItems() {
         return nonBadItems;
+    }
+
+    @Override
+    public List<Integer> getRegularShopItems() {
+        return null; // Not implemented
+    }
+
+    @Override
+    public List<Integer> getOPShopItems() {
+        return null; // Not implemented
     }
 
     private void loadItemNames() {

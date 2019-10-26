@@ -528,6 +528,12 @@ public class Randomizer {
             romHandler.randomizeFieldItems(settings.isBanBadRandomFieldItems());
         }
 
+        if (settings.getShopItemsMod() == Settings.ShopItemsMod.SHUFFLE) {
+            romHandler.shuffleShopItems();
+        } else if (settings.getShopItemsMod() == Settings.ShopItemsMod.RANDOM) {
+            romHandler.randomizeShopItems(settings.isBanBadRandomShopItems(),settings.isBanRegularShopItems(),settings.isBanOPShopItems(),settings.isBalanceShopPrices());
+        }
+
         // Signature...
         romHandler.applySignature();
 

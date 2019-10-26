@@ -221,6 +221,16 @@ public class Settings {
     private FieldItemsMod fieldItemsMod = FieldItemsMod.UNCHANGED;
     private boolean banBadRandomFieldItems;
 
+    public enum ShopItemsMod {
+        UNCHANGED, SHUFFLE, RANDOM
+    }
+
+    private ShopItemsMod shopItemsMod = ShopItemsMod.UNCHANGED;
+    private boolean banBadRandomShopItems;
+    private boolean banRegularShopItems;
+    private boolean banOPShopItems;
+    private boolean balanceShopPrices;
+
     // to and from strings etc
     public void write(FileOutputStream out) throws IOException {
         out.write(VERSION);
@@ -1518,6 +1528,55 @@ public class Settings {
 
     public Settings setBanBadRandomFieldItems(boolean banBadRandomFieldItems) {
         this.banBadRandomFieldItems = banBadRandomFieldItems;
+        return this;
+    }
+
+    public ShopItemsMod getShopItemsMod() {
+        return shopItemsMod;
+    }
+
+    public Settings setShopItemsMod(ShopItemsMod shopItemsMod) {
+        this.shopItemsMod = shopItemsMod;
+        return this;
+    }
+
+    public Settings setShopItemsMod(boolean... bools) {
+        return setShopItemsMod(getEnum(ShopItemsMod.class, bools));
+    }
+
+    public boolean isBanBadRandomShopItems() {
+        return banBadRandomShopItems;
+    }
+
+    public Settings setBanBadRandomShopItems(boolean banBadRandomShopItems) {
+        this.banBadRandomShopItems = banBadRandomShopItems;
+        return this;
+    }
+
+    public boolean isBanRegularShopItems() {
+        return banRegularShopItems;
+    }
+
+    public Settings setBanRegularShopItems(boolean banRegularShopItems) {
+        this.banRegularShopItems = banRegularShopItems;
+        return this;
+    }
+
+    public boolean isBanOPShopItems() {
+        return banOPShopItems;
+    }
+
+    public Settings setBanOPShopItems(boolean banOPShopItems) {
+        this.banOPShopItems = banOPShopItems;
+        return this;
+    }
+
+    public boolean isBalanceShopPrices() {
+        return balanceShopPrices;
+    }
+
+    public Settings setBalanceShopPrices(boolean balanceShopPrices) {
+        this.balanceShopPrices = balanceShopPrices;
         return this;
     }
 

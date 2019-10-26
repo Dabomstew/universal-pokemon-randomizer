@@ -2105,6 +2105,21 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public List<Integer> getShopItems() {
+        return null; // Not implemented
+    }
+
+    @Override
+    public void setShopItems(List<Integer> shopItems) {
+        // Not available
+    }
+
+    @Override
+    public void setShopPrices() {
+        // Not implemented
+    }
+
+    @Override
     public boolean canChangeTrainerText() {
         return true;
     }
@@ -2217,6 +2232,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     @Override
     public ItemList getNonBadItems() {
         return nonBadItems;
+    }
+
+    @Override
+    public List<Integer> getRegularShopItems() {
+        return null; // Not implemented
+    }
+
+    @Override
+    public List<Integer> getOPShopItems() {
+        return null; // Not implemented
     }
 
     @Override

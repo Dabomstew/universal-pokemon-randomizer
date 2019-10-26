@@ -2961,6 +2961,47 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public void shuffleShopItems() {
+        List<Integer> currentItems = this.getShopItems();
+        if (currentItems == null) return;
+        Collections.shuffle(currentItems, this.random);
+
+        this.setShopItems(currentItems);
+    }
+
+    // Note: If you use this on a game where the amount of randomizable shop items is greater than the amount of
+    // possible items, you will get owned by the while loop
+    @Override
+    public void randomizeShopItems(boolean banBadItems, boolean banRegularShopItems, boolean banOPShopItems, boolean balancePrices) {
+        if (this.getShopItems() == null) return;
+        ItemList possibleItems = banBadItems ? this.getNonBadItems() : this.getAllowedItems();
+        if (banRegularShopItems) {
+            possibleItems.banSingles(this.getRegularShopItems().stream().mapToInt(Integer::intValue).toArray());
+        }
+        if (banOPShopItems) {
+            possibleItems.banSingles(this.getOPShopItems().stream().mapToInt(Integer::intValue).toArray());
+        }
+        List<Integer> currentItems = this.getShopItems();
+
+        int shopItemCount = currentItems.size();
+
+        List<Integer> newItems = new ArrayList<Integer>();
+        int newItem;
+
+        for (int i = 0; i < shopItemCount; i++) {
+            while (newItems.contains(newItem = possibleItems.randomNonTM(this.random)));
+            newItems.add(newItem);
+        }
+
+        Collections.shuffle(newItems, this.random);
+
+        this.setShopItems(newItems);
+        if (balancePrices) {
+            this.setShopPrices();
+        }
+    }
+
+    @Override
     public void minimumCatchRate(int rateNonLegendary, int rateLegendary) {
         List<Pokemon> pokes = getPokemon();
         for (Pokemon pkmn : pokes) {

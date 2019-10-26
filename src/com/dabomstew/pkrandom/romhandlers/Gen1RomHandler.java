@@ -1423,6 +1423,21 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         logBlankLine();
     }
 
+    @Override
+    public List<Integer> getShopItems() {
+        return null; // Not implemented
+    }
+
+    @Override
+    public void setShopItems(List<Integer> shopItems) {
+        // Not implemented
+    }
+
+    @Override
+    public void setShopPrices() {
+        // Not implemented
+    }
+
     private List<String> getTrainerClassesForText() {
         int[] offsets = romEntry.arrayEntries.get("TrainerClassNamesOffsets");
         List<String> tcNames = new ArrayList<String>();
@@ -1719,6 +1734,16 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     public ItemList getNonBadItems() {
         // Gen 1 has no bad items Kappa
         return Gen1Constants.allowedItems;
+    }
+
+    @Override
+    public List<Integer> getRegularShopItems() {
+        return null; // Not implemented
+    }
+
+    @Override
+    public List<Integer> getOPShopItems() {
+        return null; // Not implemented
     }
 
     private void loadItemNames() {

@@ -276,6 +276,18 @@ def main():
                                             f.seek(-3,os.SEEK_CUR)
                                 f.seek(return_position)
                                 local_offset_in_file = read_word(f)
+                elif args[0] == "lsai": # List all items
+                    if len(args) == 3:
+                        range_start = int(args[1],16)
+                        range_end = int(args[2],16) # 6A1564C
+                    else:
+                        range_start = 0
+                        range_end = file_count
+                    with open("itemprices.txt","w") as it:
+                        for i in range(range_start, range_end):
+                            f.seek(file_table_offset + file_offsets[i])
+                            it.write("{" + str(i) + ", " + str(int.from_bytes(f.read(2),byteorder='little')) + "},\n")
+                            #print("Item 0x" + '%X' % i + " price: " + str(int.from_bytes(f.read(2),byteorder='little') * 10))
     except IndexError:
         print("Error: No file specified")
         sys.exit(2)

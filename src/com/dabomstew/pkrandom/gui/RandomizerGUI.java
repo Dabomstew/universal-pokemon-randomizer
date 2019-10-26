@@ -929,6 +929,24 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.fiBanBadCB.setSelected(false);
         this.fiBanBadCB.setVisible(true);
 
+        this.shUnchangedRB.setEnabled(false);
+        this.shShuffleRB.setEnabled(false);
+        this.shRandomRB.setEnabled(false);
+        this.shUnchangedRB.setSelected(true);
+
+        this.shBanBadCB.setEnabled(false);
+        this.shBanBadCB.setSelected(false);
+        this.shBanBadCB.setVisible(true);
+        this.shBanRegularShopCB.setEnabled(false);
+        this.shBanRegularShopCB.setSelected(false);
+        this.shBanRegularShopCB.setVisible(true);
+        this.shBanOPShopCB.setEnabled(false);
+        this.shBanOPShopCB.setSelected(false);
+        this.shBanOPShopCB.setVisible(true);
+        this.shBalancePricesCB.setEnabled(false);
+        this.shBalancePricesCB.setSelected(false);
+        this.shBalancePricesCB.setVisible(true);
+
         this.peUnchangedRB.setSelected(true);
         this.peUnchangedRB.setEnabled(false);
         this.peRandomRB.setEnabled(false);
@@ -1211,6 +1229,19 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
             this.fiBanBadCB.setEnabled(false);
             this.fiBanBadCB.setSelected(false);
+
+            this.shUnchangedRB.setEnabled(true);
+            this.shShuffleRB.setEnabled(true);
+            this.shRandomRB.setEnabled(true);
+
+            this.shBanBadCB.setEnabled(false);
+            this.shBanBadCB.setSelected(false);
+            this.shBanRegularShopCB.setEnabled(false);
+            this.shBanRegularShopCB.setSelected(false);
+            this.shBanOPShopCB.setEnabled(false);
+            this.shBanOPShopCB.setSelected(false);
+            this.shBalancePricesCB.setEnabled(false);
+            this.shBalancePricesCB.setSelected(false);
 
             this.peUnchangedRB.setEnabled(true);
             this.peUnchangedRB.setSelected(true);
@@ -1560,6 +1591,22 @@ public class RandomizerGUI extends javax.swing.JFrame {
         } else {
             this.fiBanBadCB.setEnabled(false);
             this.fiBanBadCB.setSelected(false);
+        }
+
+        if (this.shRandomRB.isSelected() && this.shRandomRB.isVisible() && this.shRandomRB.isEnabled()) {
+            this.shBanBadCB.setEnabled(true);
+            this.shBanRegularShopCB.setEnabled(true);
+            this.shBanOPShopCB.setEnabled(true);
+            this.shBalancePricesCB.setEnabled(true);
+        } else {
+            this.shBanBadCB.setEnabled(false);
+            this.shBanBadCB.setSelected(false);
+            this.shBanRegularShopCB.setEnabled(false);
+            this.shBanRegularShopCB.setSelected(false);
+            this.shBanOPShopCB.setEnabled(false);
+            this.shBanOPShopCB.setSelected(false);
+            this.shBalancePricesCB.setEnabled(false);
+            this.shBalancePricesCB.setSelected(false);
         }
 
         this.peForceChangeCB.setEnabled(this.peRandomRB.isSelected());
@@ -1916,6 +1963,14 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         settings.setFieldItemsMod(fiUnchangedRB.isSelected(), fiShuffleRB.isSelected(), fiRandomRB.isSelected());
         settings.setBanBadRandomFieldItems(fiBanBadCB.isSelected());
+
+        settings.setShopItemsMod(shUnchangedRB.isSelected(), shShuffleRB.isSelected(), shRandomRB.isSelected());
+
+        settings.setBanBadRandomShopItems(shBanBadCB.isSelected());
+        settings.setBanRegularShopItems(shBanRegularShopCB.isSelected());
+        settings.setBanOPShopItems(shBanOPShopCB.isSelected());
+        settings.setBalanceShopPrices(shBalancePricesCB.isSelected());
+
 
         settings.setCurrentRestrictions(currentRestrictions);
 
@@ -2472,6 +2527,18 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_fiRandomRBActionPerformed
 
+    private void shUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {
+        this.enableOrDisableSubControls();
+    }
+
+    private void shShuffleRBActionPerformed(java.awt.event.ActionEvent evt) {
+        this.enableOrDisableSubControls();
+    }
+
+    private void shRandomRBActionPerformed(java.awt.event.ActionEvent evt) {
+        this.enableOrDisableSubControls();
+    }
+
     private void spRandom2EvosRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spRandom2EvosRBActionPerformed
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_spRandom2EvosRBActionPerformed
@@ -2587,6 +2654,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         mtCompatibilityButtonGroup = new javax.swing.ButtonGroup();
         ingameTradesButtonGroup = new javax.swing.ButtonGroup();
         fieldItemsButtonGroup = new javax.swing.ButtonGroup();
+        shopItemsButtonGroup = new javax.swing.ButtonGroup();
         updateSettingsMenu = new javax.swing.JPopupMenu();
         toggleAutoUpdatesMenuItem = new javax.swing.JMenuItem();
         manualUpdateMenuItem = new javax.swing.JMenuItem();
@@ -2748,6 +2816,14 @@ public class RandomizerGUI extends javax.swing.JFrame {
         fiShuffleRB = new javax.swing.JRadioButton();
         fiRandomRB = new javax.swing.JRadioButton();
         fiBanBadCB = new javax.swing.JCheckBox();
+        shopItemsPanel = new javax.swing.JPanel();
+        shUnchangedRB = new javax.swing.JRadioButton();
+        shShuffleRB = new javax.swing.JRadioButton();
+        shRandomRB = new javax.swing.JRadioButton();
+        shBanBadCB = new javax.swing.JCheckBox();
+        shBanRegularShopCB = new javax.swing.JCheckBox();
+        shBanOPShopCB = new javax.swing.JCheckBox();
+        shBalancePricesCB = new javax.swing.JCheckBox();
         miscTweaksInnerPanel = new javax.swing.JPanel();
         miscTweaksPanel = new javax.swing.JPanel();
         mtNoneAvailableLabel = new javax.swing.JLabel();
@@ -4518,6 +4594,80 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(fiBanBadCB))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+        shopItemsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("RandomizerGUI.shopItemsPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
+
+        shopItemsButtonGroup.add(shUnchangedRB);
+        shUnchangedRB.setText(bundle.getString("RandomizerGUI.shUnchangedRB.text")); // NOI18N
+        shUnchangedRB.setToolTipText(bundle.getString("RandomizerGUI.shUnchangedRB.toolTipText")); // NOI18N
+        shUnchangedRB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                shUnchangedRBActionPerformed(evt);
+            }
+        });
+
+        shopItemsButtonGroup.add(shShuffleRB);
+        shShuffleRB.setText(bundle.getString("RandomizerGUI.shShuffleRB.text")); // NOI18N
+        shShuffleRB.setToolTipText(bundle.getString("RandomizerGUI.shShuffleRB.toolTipText")); // NOI18N
+        shShuffleRB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                shShuffleRBActionPerformed(evt);
+            }
+        });
+
+        shopItemsButtonGroup.add(shRandomRB);
+        shRandomRB.setText(bundle.getString("RandomizerGUI.shRandomRB.text")); // NOI18N
+        shRandomRB.setToolTipText(bundle.getString("RandomizerGUI.shRandomRB.toolTipText")); // NOI18N
+        shRandomRB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                shRandomRBActionPerformed(evt);
+            }
+        });
+
+        shBanBadCB.setText(bundle.getString("RandomizerGUI.shBanBadCB.text"));
+        shBanBadCB.setToolTipText(bundle.getString("RandomizerGUI.shBanBadCB.toolTipText"));
+
+        shBanRegularShopCB.setText(bundle.getString("RandomizerGUI.shBanRegularShopCB.text"));
+        shBanRegularShopCB.setToolTipText(bundle.getString("RandomizerGUI.shBanRegularShopCB.toolTipText"));
+
+        shBanOPShopCB.setText(bundle.getString("RandomizerGUI.shBanOPShopCB.text"));
+        shBanOPShopCB.setToolTipText(bundle.getString("RandomizerGUI.shBanOPShopCB.toolTipText"));
+
+        shBalancePricesCB.setText(bundle.getString("RandomizerGUI.shBalancePricesCB.text"));
+        shBalancePricesCB.setToolTipText(bundle.getString("RandomizerGUI.shBalancePricesCB.toolTipText"));
+
+        javax.swing.GroupLayout shopItemsPanelLayout = new javax.swing.GroupLayout(shopItemsPanel);
+        shopItemsPanel.setLayout(shopItemsPanelLayout);
+        shopItemsPanelLayout.setHorizontalGroup(
+                shopItemsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(shopItemsPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(shopItemsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(shUnchangedRB)
+                                        .addComponent(shShuffleRB)
+                                        .addGroup(shopItemsPanelLayout.createSequentialGroup()
+                                                .addComponent(shRandomRB)
+                                                .addGap(76, 76, 76)
+                                                .addComponent(shBanBadCB)
+                                                .addComponent(shBanRegularShopCB)
+                                                .addComponent(shBanOPShopCB)
+                                                .addComponent(shBalancePricesCB)))
+                                .addContainerGap(466, Short.MAX_VALUE))
+        );
+        shopItemsPanelLayout.setVerticalGroup(
+                shopItemsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(shopItemsPanelLayout.createSequentialGroup()
+                                .addComponent(shUnchangedRB)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(shShuffleRB)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(shopItemsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(shRandomRB)
+                                        .addComponent(shBanBadCB)
+                                        .addComponent(shBanRegularShopCB)
+                                        .addComponent(shBanOPShopCB)
+                                        .addComponent(shBalancePricesCB))
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout fieldItemsInnerPanelLayout = new javax.swing.GroupLayout(fieldItemsInnerPanel);
         fieldItemsInnerPanel.setLayout(fieldItemsInnerPanelLayout);
@@ -4525,7 +4675,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
             fieldItemsInnerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(fieldItemsInnerPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(fieldItemsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(fieldItemsInnerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(fieldItemsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(shopItemsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         fieldItemsInnerPanelLayout.setVerticalGroup(
@@ -4533,6 +4685,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             .addGroup(fieldItemsInnerPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(fieldItemsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(shopItemsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(321, Short.MAX_VALUE))
         );
 
@@ -4767,6 +4921,15 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JButton saveQSButton;
     private javax.swing.JButton saveROMButton;
     private javax.swing.JButton settingsButton;
+    private javax.swing.JCheckBox shBanBadCB;
+    private javax.swing.JCheckBox shBanRegularShopCB;
+    private javax.swing.JCheckBox shBanOPShopCB;
+    private javax.swing.JCheckBox shBalancePricesCB;
+    private javax.swing.JRadioButton shRandomRB;
+    private javax.swing.JRadioButton shShuffleRB;
+    private javax.swing.JRadioButton shUnchangedRB;
+    private javax.swing.ButtonGroup shopItemsButtonGroup;
+    private javax.swing.JPanel shopItemsPanel;
     private javax.swing.JComboBox spCustomPoke1Chooser;
     private javax.swing.JComboBox spCustomPoke2Chooser;
     private javax.swing.JComboBox spCustomPoke3Chooser;
