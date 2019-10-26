@@ -307,12 +307,20 @@ public class Randomizer {
         if (settings.getTrainersMod() == Settings.TrainersMod.RANDOM) {
             romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
-                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
+                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, false, false); // final 2 booleans set up even distribution and main playthrough flags
         } else if (settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED) {
             romHandler.typeThemeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersMatchTypingDistribution(), settings.isTrainersBlockLegendaries(),
                     settings.isTrainersBlockEarlyWonderGuard(),
                     settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
+        } else if (settings.getTrainersMod() == Settings.TrainersMod.DISTRIBUTED) {
+            romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
+                    settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
+                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, true, false);
+        } else if (settings.getTrainersMod() == Settings.TrainersMod.MAINPLAYTHROUGH) {
+            romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
+                    settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
+                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, true, true);
         }
 
         if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)
@@ -533,6 +541,10 @@ public class Randomizer {
         } else if (settings.getShopItemsMod() == Settings.ShopItemsMod.RANDOM) {
             romHandler.randomizeShopItems(settings.isBanBadRandomShopItems(),settings.isBanRegularShopItems(),settings.isBanOPShopItems(),settings.isBalanceShopPrices());
         }
+
+
+        // Test output for placement history
+        romHandler.renderPlacementHistory();
 
         // Signature...
         romHandler.applySignature();
@@ -775,10 +787,12 @@ public class Randomizer {
             int checkValue) {
         if (romHandler.canChangeStaticPokemon()) {
             List<Pokemon> oldStatics = romHandler.getStaticPokemon();
-            if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING) {
-                romHandler.randomizeStaticPokemon(true);
+            if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING) { // Legendary for L
+                romHandler.randomizeStaticPokemon(true, false,settings.isLimitMuskateers());
             } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.COMPLETELY_RANDOM) {
-                romHandler.randomizeStaticPokemon(false);
+                romHandler.randomizeStaticPokemon(false, false,settings.isLimitMuskateers());
+            } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.SIMILAR_STRENGTH) {
+                romHandler.randomizeStaticPokemon(false, true,settings.isLimitMuskateers());
             }
             List<Pokemon> newStatics = romHandler.getStaticPokemon();
             if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED) {

@@ -48,7 +48,7 @@ public class Settings {
 
     public static final int VERSION = 172;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 36;
+    public static final int LENGTH_OF_SETTINGS_DATA = 37;
 
     private CustomNamesSet customNames;
 
@@ -92,6 +92,7 @@ public class Settings {
     // offset from the dropdown index from RandomizerGUI by 1
     private int[] customStarters = new int[3];
     private boolean randomizeStartersHeldItems;
+    private boolean limitMuskateers;
     private boolean banBadRandomStarterHeldItems;
 
     public enum TypesMod {
@@ -132,7 +133,7 @@ public class Settings {
     private int movesetsGoodDamagingPercent = 0;
 
     public enum TrainersMod {
-        UNCHANGED, RANDOM, TYPE_THEMED
+        UNCHANGED, RANDOM, DISTRIBUTED, MAINPLAYTHROUGH, TYPE_THEMED
     }
 
     private TrainersMod trainersMod = TrainersMod.UNCHANGED;
@@ -141,6 +142,8 @@ public class Settings {
     private boolean trainersMatchTypingDistribution;
     private boolean trainersBlockLegendaries = true;
     private boolean trainersBlockEarlyWonderGuard = true;
+    private boolean trainersEnforceDistribution;
+    private boolean trainersEnforceMainPlaythrough;
     private boolean randomizeTrainerNames;
     private boolean randomizeTrainerClassNames;
     private boolean trainersForceFullyEvolved;
@@ -166,7 +169,7 @@ public class Settings {
     private boolean banBadRandomWildPokemonHeldItems;
 
     public enum StaticPokemonMod {
-        UNCHANGED, RANDOM_MATCHING, COMPLETELY_RANDOM
+        UNCHANGED, RANDOM_MATCHING, COMPLETELY_RANDOM, SIMILAR_STRENGTH
     }
 
     private StaticPokemonMod staticPokemonMod = StaticPokemonMod.UNCHANGED;
@@ -303,10 +306,12 @@ public class Settings {
 
         // 13 trainer pokemon
         // changed 160
-        out.write(makeByteSelected(trainersUsePokemonOfSimilarStrength, trainersMod == TrainersMod.RANDOM,
-                rivalCarriesStarterThroughout, trainersMod == TrainersMod.TYPE_THEMED, trainersMatchTypingDistribution,
-                trainersMod == TrainersMod.UNCHANGED, trainersBlockLegendaries, trainersBlockEarlyWonderGuard));
-
+        out.write(makeByteSelected(trainersMod == TrainersMod.UNCHANGED,
+                trainersMod == TrainersMod.RANDOM,
+                trainersMod == TrainersMod.DISTRIBUTED,
+                trainersMod == TrainersMod.MAINPLAYTHROUGH,
+                trainersMod == TrainersMod.TYPE_THEMED));
+        
         // 14 trainer pokemon force evolutions
         out.write((trainersForceFullyEvolved ? 0x80 : 0) | trainersForceFullyEvolvedLevel);
 
@@ -328,7 +333,9 @@ public class Settings {
         // 17 static pokemon
         out.write(makeByteSelected(staticPokemonMod == StaticPokemonMod.UNCHANGED,
                 staticPokemonMod == StaticPokemonMod.RANDOM_MATCHING,
-                staticPokemonMod == StaticPokemonMod.COMPLETELY_RANDOM));
+                staticPokemonMod == StaticPokemonMod.COMPLETELY_RANDOM,
+                staticPokemonMod == StaticPokemonMod.SIMILAR_STRENGTH,
+                limitMuskateers));
 
         // 18 tm randomization
         // new stuff 162
@@ -375,8 +382,17 @@ public class Settings {
         // 26 evolutions
         out.write(makeByteSelected(evolutionsMod == EvolutionsMod.UNCHANGED, evolutionsMod == EvolutionsMod.RANDOM,
                 evosSimilarStrength, evosSameTyping, evosMaxThreeStages, evosForceChange));
+        
+        // 27 pokemon trainer misc
+        out.write(makeByteSelected(trainersUsePokemonOfSimilarStrength, 
+                rivalCarriesStarterThroughout,
+                trainersMatchTypingDistribution,
+                trainersBlockLegendaries,
+                trainersBlockEarlyWonderGuard));
 
-        // @ 27 pokemon restrictions
+        
+
+        // @ 28 pokemon restrictions
         try {
             if (currentRestrictions != null) {
                 writeFullInt(out, currentRestrictions.toInt());
@@ -385,6 +401,8 @@ public class Settings {
             }
         } catch (IOException e) {
         }
+        
+
 
         // @ 31 misc tweaks
         try {
@@ -396,6 +414,7 @@ public class Settings {
         // @ 35 trainer pokemon level modifier
         out.write((trainersLevelModified ? 0x80 : 0) | (trainersLevelModifier+50));
 
+        
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
             out.write(romName.length);
@@ -481,15 +500,12 @@ public class Settings {
         settings.setMovesetsGoodDamagingPercent(data[12] & 0x7F);
 
         // changed 160
-        settings.setTrainersMod(restoreEnum(TrainersMod.class, data[13], 5, // UNCHANGED
+        settings.setTrainersMod(restoreEnum(TrainersMod.class, data[13], 0, // UNCHANGED
                 1, // RANDOM
-                3 // TYPE_THEMED
+                3, // DISTRIBUTED
+                4, // MAINPLAYTHROUGH 
+                2 // TYPE_THEMED
         ));
-        settings.setTrainersUsePokemonOfSimilarStrength(restoreState(data[13], 0));
-        settings.setRivalCarriesStarterThroughout(restoreState(data[13], 2));
-        settings.setTrainersMatchTypingDistribution(restoreState(data[13], 4));
-        settings.setTrainersBlockLegendaries(restoreState(data[13], 6));
-        settings.setTrainersBlockEarlyWonderGuard(restoreState(data[13], 7));
 
         settings.setTrainersForceFullyEvolved(restoreState(data[14], 7));
         settings.setTrainersForceFullyEvolvedLevel(data[14] & 0x7F);
@@ -515,9 +531,12 @@ public class Settings {
 
         settings.setStaticPokemonMod(restoreEnum(StaticPokemonMod.class, data[17], 0, // UNCHANGED
                 1, // RANDOM_MATCHING
-                2 // COMPLETELY_RANDOM
+                2, // COMPLETELY_RANDOM
+                3  // SIMILAR_STRENGTH 
         ));
-
+        
+        settings.setLimitMuskateers(restoreState(data[17], 4));
+        
         settings.setTmsMod(restoreEnum(TMsMod.class, data[18], 4, // UNCHANGED
                 3 // RANDOM
         ));
@@ -525,7 +544,7 @@ public class Settings {
                 1, // RANDOM_PREFER_TYPE
                 0, // COMPLETELY_RANDOM
                 7 // FULL
-        ));
+        )); 
         settings.setTmLevelUpMoveSanity(restoreState(data[18], 5));
         settings.setKeepFieldMoveTMs(restoreState(data[18], 6));
         settings.setFullHMCompat(restoreState(data[19], 0));
@@ -578,20 +597,29 @@ public class Settings {
         settings.setEvosMaxThreeStages(restoreState(data[26], 4));
         settings.setEvosForceChange(restoreState(data[26], 5));
 
+        // new pokemon trainer misc
+        settings.setTrainersUsePokemonOfSimilarStrength(restoreState(data[27], 0));
+        settings.setRivalCarriesStarterThroughout(restoreState(data[27], 1));
+        settings.setTrainersMatchTypingDistribution(restoreState(data[27], 2));
+        settings.setTrainersBlockLegendaries(restoreState(data[27], 3));
+        settings.setTrainersBlockEarlyWonderGuard(restoreState(data[27], 4));
+
+        
         // gen restrictions
-        int genLimit = FileFunctions.readFullInt(data, 27);
+        int genLimit = FileFunctions.readFullInt(data, 28);
         GenRestrictions restrictions = null;
         if (genLimit != 0) {
             restrictions = new GenRestrictions(genLimit);
         }
         settings.setCurrentRestrictions(restrictions);
 
-        int codeTweaks = FileFunctions.readFullInt(data, 31);
+        int codeTweaks = FileFunctions.readFullInt(data, 32);
 
         settings.setCurrentMiscTweaks(codeTweaks);
 
-        settings.setTrainersLevelModified(restoreState(data[35], 7));
-        settings.setTrainersLevelModifier((data[35] & 0x7F) - 50);
+        settings.setTrainersLevelModified(restoreState(data[36], 7));
+        settings.setTrainersLevelModifier((data[36] & 0x7F) - 50);
+        //settings.setTrainersLevelModifier((data[36] & 0x7F));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -958,6 +986,14 @@ public class Settings {
         return this;
     }
 
+    public boolean isLimitMuskateers() {
+        return limitMuskateers;
+    }
+    public Settings setLimitMuskateers(boolean LimitMuskateers) {
+        this.limitMuskateers = LimitMuskateers;
+        return this;
+    }
+    
     public TypesMod getTypesMod() {
         return typesMod;
     }
@@ -1171,6 +1207,25 @@ public class Settings {
         return this;
     }
 
+    public boolean isTrainersEnforceDistribution() {
+        return trainersEnforceDistribution;
+    }
+
+    public Settings setTrainersEnforceDistribution(boolean trainersEnforceDistribution) {
+        this.trainersEnforceDistribution = trainersEnforceDistribution;
+        return this;
+    }
+    
+    public boolean isTrainersEnforceMainPlaythrough() {
+        return trainersEnforceMainPlaythrough;
+    }
+
+    public Settings setTrainersEnforceMainPlaythrough(boolean trainersEnforceMainPlaythrough) {
+        this.trainersEnforceMainPlaythrough = trainersEnforceMainPlaythrough;
+        return this;
+    }
+
+    
     public boolean isTrainersBlockEarlyWonderGuard() {
         return trainersBlockEarlyWonderGuard;
     }
