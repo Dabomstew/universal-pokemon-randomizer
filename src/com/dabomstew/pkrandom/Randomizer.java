@@ -788,11 +788,11 @@ public class Randomizer {
         if (romHandler.canChangeStaticPokemon()) {
             List<Pokemon> oldStatics = romHandler.getStaticPokemon();
             if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING) { // Legendary for L
-                romHandler.randomizeStaticPokemon(true, false,settings.isLimitMuskateers());
+                romHandler.randomizeStaticPokemon(true, false,settings.isLimitMusketeers());
             } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.COMPLETELY_RANDOM) {
-                romHandler.randomizeStaticPokemon(false, false,settings.isLimitMuskateers());
+                romHandler.randomizeStaticPokemon(false, false,settings.isLimitMusketeers());
             } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.SIMILAR_STRENGTH) {
-                romHandler.randomizeStaticPokemon(false, true,settings.isLimitMuskateers());
+                romHandler.randomizeStaticPokemon(false, true,settings.isLimitMusketeers());
             }
             List<Pokemon> newStatics = romHandler.getStaticPokemon();
             if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED) {

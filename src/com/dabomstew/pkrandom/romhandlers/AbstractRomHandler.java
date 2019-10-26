@@ -1944,7 +1944,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizeStaticPokemon(boolean swap_legendaries, boolean similar_strength, boolean limit_bw_muskateers) {
+    public void randomizeStaticPokemon(boolean swap_legendaries, boolean similar_strength, boolean limit_bw_musketeers) {
         // Load
         checkPokemonRestrictions();
         List<Pokemon> currentStaticPokemon = this.getStaticPokemon();
@@ -1992,10 +1992,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                     pokemonLeft.remove(newPK);
                 } else {
                     
-                    if ((old.number == 638 || old.number == 639 || old.number == 640) && limit_bw_muskateers) {
+                    if ((old.number == 638 || old.number == 639 || old.number == 640) && limit_bw_musketeers) {
                      // System.out.println(old.name + " " + old.number + ": triggered limit on replacement");
                         newPK = pickReplacement(old, true, null, true, true, true, true); // This sets up picking a replacement with similar strength
-                                                                                          // and limit on bw muskateers
+                                                                                          // and limit on bw musketeers
                     }
                     else {
                         newPK = pickReplacement(old, true, null, true, true, false, true); // This sets up picking a replacement with similar strength

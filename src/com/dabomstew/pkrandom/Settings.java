@@ -92,7 +92,7 @@ public class Settings {
     // offset from the dropdown index from RandomizerGUI by 1
     private int[] customStarters = new int[3];
     private boolean randomizeStartersHeldItems;
-    private boolean limitMuskateers;
+    private boolean limitMusketeers;
     private boolean banBadRandomStarterHeldItems;
 
     public enum TypesMod {
@@ -335,7 +335,7 @@ public class Settings {
                 staticPokemonMod == StaticPokemonMod.RANDOM_MATCHING,
                 staticPokemonMod == StaticPokemonMod.COMPLETELY_RANDOM,
                 staticPokemonMod == StaticPokemonMod.SIMILAR_STRENGTH,
-                limitMuskateers));
+                limitMusketeers));
 
         // 18 tm randomization
         // new stuff 162
@@ -537,7 +537,7 @@ public class Settings {
                 3  // SIMILAR_STRENGTH 
         ));
         
-        settings.setLimitMuskateers(restoreState(data[17], 4));
+        settings.setLimitMusketeers(restoreState(data[17], 4));
         
         settings.setTmsMod(restoreEnum(TMsMod.class, data[18], 4, // UNCHANGED
                 3 // RANDOM
@@ -996,11 +996,11 @@ public class Settings {
         return this;
     }
 
-    public boolean isLimitMuskateers() {
-        return limitMuskateers;
+    public boolean isLimitMusketeers() {
+        return limitMusketeers;
     }
-    public Settings setLimitMuskateers(boolean LimitMuskateers) {
-        this.limitMuskateers = LimitMuskateers;
+    public Settings setLimitMusketeers(boolean limitMusketeers) {
+        this.limitMusketeers = limitMusketeers;
         return this;
     }
     
