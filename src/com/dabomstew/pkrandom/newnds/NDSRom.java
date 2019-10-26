@@ -203,7 +203,7 @@ public class NDSRom {
             int fileID = readFromByteArr(y9table, i * 32 + 24, 4);
             int start = readFromByteArr(fat, fileID * 8, 4);
             int end = readFromByteArr(fat, fileID * 8 + 4, 4);
-            overlay.offset = start; // black: 0x12FADA, white: 0x12FB01 (for TM21)
+            overlay.offset = start;
             overlay.size = end - start;
             overlay.original_size = end - start;
             overlay.fileID = fileID;
