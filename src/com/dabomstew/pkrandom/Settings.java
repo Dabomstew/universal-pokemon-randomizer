@@ -167,6 +167,7 @@ public class Settings {
     private int minimumCatchRateLevel = 1;
     private boolean randomizeWildPokemonHeldItems;
     private boolean banBadRandomWildPokemonHeldItems;
+    private boolean balanceShakingGrass;
 
     public enum StaticPokemonMod {
         UNCHANGED, RANDOM_MATCHING, COMPLETELY_RANDOM, SIMILAR_STRENGTH
@@ -327,7 +328,7 @@ public class Settings {
         // bugfix 161
         out.write(makeByteSelected(useMinimumCatchRate, blockWildLegendaries,
                 wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_STRENGTH, randomizeWildPokemonHeldItems,
-                banBadRandomWildPokemonHeldItems)
+                banBadRandomWildPokemonHeldItems, false, false, balanceShakingGrass)
                 | ((minimumCatchRateLevel - 1) << 5));
 
         // 17 static pokemon
@@ -530,6 +531,7 @@ public class Settings {
         settings.setBanBadRandomWildPokemonHeldItems(restoreState(data[16], 4));
 
         settings.setMinimumCatchRateLevel(((data[16] & 0x60) >> 5) + 1);
+        settings.setBalanceShakingGrass(restoreState(data[16], 7));
 
         settings.setStaticPokemonMod(restoreEnum(StaticPokemonMod.class, data[17], 0, // UNCHANGED
                 1, // RANDOM_MATCHING
@@ -1376,6 +1378,15 @@ public class Settings {
 
     public Settings setBanBadRandomWildPokemonHeldItems(boolean banBadRandomWildPokemonHeldItems) {
         this.banBadRandomWildPokemonHeldItems = banBadRandomWildPokemonHeldItems;
+        return this;
+    }
+
+    public boolean isBalanceShakingGrass() {
+        return balanceShakingGrass;
+    }
+
+    public Settings setBalanceShakingGrass(boolean balanceShakingGrass) {
+        this.balanceShakingGrass = balanceShakingGrass;
         return this;
     }
 

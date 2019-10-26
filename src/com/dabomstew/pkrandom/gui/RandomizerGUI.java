@@ -857,6 +857,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.wpHeldItemsBanBadCB.setSelected(false);
         this.wpHeldItemsBanBadCB.setVisible(true);
 
+        this.wpShakingGrassCB.setEnabled(false);
+        this.wpShakingGrassCB.setSelected(false);
+        this.wpShakingGrassCB.setVisible(true);
+
         this.stpRandomL4LRB.setEnabled(false);
         this.stpRandomTotalRB.setEnabled(false);
         this.stpRandomPower.setEnabled(false);
@@ -1207,6 +1211,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 this.wpHeldItemsCB.setVisible(false);
                 this.wpHeldItemsBanBadCB.setVisible(false);
             }
+            this.wpShakingGrassCB.setSelected(false);
+            this.wpShakingGrassCB.setEnabled(false);
+            this.wpShakingGrassCB.setVisible(true);
 
             this.stpUnchangedRB.setEnabled(true);
             if (this.romHandler.canChangeStaticPokemon()) {
@@ -1449,12 +1456,18 @@ public class RandomizerGUI extends javax.swing.JFrame {
         } else {
             this.tpTypeWeightingCB.setEnabled(false);
         }
-
-        if (this.wpArea11RB.isSelected() || this.wpRandomRB.isSelected()) {
+        if (this.wpRandomRB.isSelected()) {
             this.wpARNoneRB.setEnabled(true);
             this.wpARSimilarStrengthRB.setEnabled(true);
             this.wpARCatchEmAllRB.setEnabled(true);
             this.wpARTypeThemedRB.setEnabled(true);
+            this.wpShakingGrassCB.setEnabled(true);
+        } else if (this.wpArea11RB.isSelected()) {
+            this.wpARNoneRB.setEnabled(true);
+            this.wpARSimilarStrengthRB.setEnabled(true);
+            this.wpARCatchEmAllRB.setEnabled(true);
+            this.wpARTypeThemedRB.setEnabled(true);
+            this.wpShakingGrassCB.setEnabled(false);
         } else if (this.wpGlobalRB.isSelected()) {
             if (this.wpARCatchEmAllRB.isSelected() || this.wpARTypeThemedRB.isSelected()) {
                 this.wpARNoneRB.setSelected(true);
@@ -1463,12 +1476,14 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.wpARSimilarStrengthRB.setEnabled(true);
             this.wpARCatchEmAllRB.setEnabled(false);
             this.wpARTypeThemedRB.setEnabled(false);
+            this.wpShakingGrassCB.setEnabled(false);
         } else {
             this.wpARNoneRB.setEnabled(false);
             this.wpARSimilarStrengthRB.setEnabled(false);
             this.wpARCatchEmAllRB.setEnabled(false);
             this.wpARTypeThemedRB.setEnabled(false);
             this.wpARNoneRB.setSelected(true);
+            this.wpShakingGrassCB.setEnabled(false);
         }
 
         if (this.wpUnchangedRB.isSelected()) {
@@ -1817,6 +1832,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH);
         this.wpHeldItemsCB.setSelected(settings.isRandomizeWildPokemonHeldItems());
         this.wpHeldItemsBanBadCB.setSelected(settings.isBanBadRandomWildPokemonHeldItems());
+        this.wpShakingGrassCB.setSelected(settings.isBalanceShakingGrass());
 
         this.stpUnchangedRB.setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED);
         this.stpRandomL4LRB.setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING);
@@ -1975,6 +1991,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setBlockWildLegendaries(wpNoLegendariesCB.isSelected());
         settings.setRandomizeWildPokemonHeldItems(wpHeldItemsCB.isSelected());
         settings.setBanBadRandomWildPokemonHeldItems(wpHeldItemsBanBadCB.isSelected());
+        settings.setBalanceShakingGrass(wpShakingGrassCB.isSelected());
 
         settings.setStaticPokemonMod(stpUnchangedRB.isSelected(), stpRandomL4LRB.isSelected(),
                 stpRandomTotalRB.isSelected(),stpRandomPower.isSelected());
@@ -2836,6 +2853,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         wpCatchRateCB = new javax.swing.JCheckBox();
         wpHeldItemsCB = new javax.swing.JCheckBox();
         wpHeldItemsBanBadCB = new javax.swing.JCheckBox();
+        wpShakingGrassCB = new javax.swing.JCheckBox();
         wpCatchRateSlider = new javax.swing.JSlider();
         tmHmTutorPanel = new javax.swing.JPanel();
         tmhmsPanel = new javax.swing.JPanel();
@@ -4215,6 +4233,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
         wpHeldItemsBanBadCB.setText(bundle.getString("RandomizerGUI.wpHeldItemsBanBadCB.text")); // NOI18N
         wpHeldItemsBanBadCB.setToolTipText(bundle.getString("RandomizerGUI.wpHeldItemsBanBadCB.toolTipText")); // NOI18N
 
+        wpShakingGrassCB.setText(bundle.getString("RandomizerGUI.wpShakingGrassCB.text"));
+        wpShakingGrassCB.setToolTipText(bundle.getString("RandomizerGUI.wpShakingGrassCB.toolTipText"));
+
         wpCatchRateSlider.setMajorTickSpacing(1);
         wpCatchRateSlider.setMaximum(4);
         wpCatchRateSlider.setMinimum(1);
@@ -4245,7 +4266,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                             .addComponent(wpHeldItemsCB))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(wpCatchRateSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(wpHeldItemsBanBadCB))
+                    .addComponent(wpHeldItemsBanBadCB)
+                    .addComponent(wpShakingGrassCB))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         wildPokemonPanelLayout.setVerticalGroup(
@@ -4273,7 +4295,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(wpHeldItemsCB)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(wpHeldItemsBanBadCB))
+                        .addComponent(wpHeldItemsBanBadCB)
+                        .addComponent(wpShakingGrassCB))
                     .addComponent(wildPokemonARulePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(9, 9, 9))
         );
@@ -5137,6 +5160,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JSlider wpCatchRateSlider;
     private javax.swing.JRadioButton wpGlobalRB;
     private javax.swing.JCheckBox wpHeldItemsBanBadCB;
+    private javax.swing.JCheckBox wpShakingGrassCB;
     private javax.swing.JCheckBox wpHeldItemsCB;
     private javax.swing.JCheckBox wpNoLegendariesCB;
     private javax.swing.JRadioButton wpRandomRB;

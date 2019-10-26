@@ -560,7 +560,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-            boolean noLegendaries) {
+            boolean noLegendaries, boolean balanceShakingGrass) {
         checkPokemonRestrictions();
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
 
@@ -659,7 +659,15 @@ public abstract class AbstractRomHandler implements RomHandler {
                     localAllowed.removeAll(area.bannedPokemon);
                 }
                 for (Encounter enc : area.encounters) {
-                    enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null);
+                    if (balanceShakingGrass) {
+                        if (area.displayName.contains("Shaking")) {
+                            enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, (enc.level + enc.maxLevel) / 2);
+                        } else {
+                            enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100);
+                        }
+                    } else {
+                        enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100);
+                    }
                 }
             }
         } else {
@@ -799,7 +807,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     localAllowed.removeAll(area.bannedPokemon);
                 }
                 for (Pokemon areaPk : inArea) {
-                    Pokemon picked = pickWildPowerLvlReplacement(localAllowed, areaPk, false, usedPks);
+                    Pokemon picked = pickWildPowerLvlReplacement(localAllowed, areaPk, false, usedPks, 100);
                     areaMap.put(areaPk, picked);
                     usedPks.add(picked);
                 }
@@ -859,7 +867,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     pickedRightP = remainingRight.get(0);
                 } else {
                     // pick on power level with the current one blocked
-                    pickedRightP = pickWildPowerLvlReplacement(remainingRight, pickedLeftP, true, null);
+                    pickedRightP = pickWildPowerLvlReplacement(remainingRight, pickedLeftP, true, null, 100);
                 }
                 remainingRight.remove(pickedRightP);
                 translateMap.put(pickedLeftP, pickedRightP);
@@ -907,7 +915,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon!");
                     }
                     if (usePowerLevels) {
-                        enc.pokemon = pickWildPowerLvlReplacement(tempPickable, enc.pokemon, false, null);
+                        enc.pokemon = pickWildPowerLvlReplacement(tempPickable, enc.pokemon, false, null, 100);
                     } else {
                         int picked = this.random.nextInt(tempPickable.size());
                         enc.pokemon = tempPickable.get(picked);
@@ -3719,10 +3727,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private Pokemon pickWildPowerLvlReplacement(List<Pokemon> pokemonPool, Pokemon current, boolean banSamePokemon,
-            List<Pokemon> usedUp) {
+            List<Pokemon> usedUp, int bstBalanceLevel) {
         // start with within 10% and add 5% either direction till we find
         // something
-        int currentBST = current.bstForPowerLevels();
+        int balancedBST = bstBalanceLevel * 10 + 250;
+        int currentBST = Math.min(current.bstForPowerLevels(), balancedBST);
         int minTarget = currentBST - currentBST / 10;
         int maxTarget = currentBST + currentBST / 10;
         List<Pokemon> canPick = new ArrayList<Pokemon>();
