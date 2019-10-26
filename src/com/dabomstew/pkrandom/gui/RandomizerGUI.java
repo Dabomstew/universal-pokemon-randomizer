@@ -1870,6 +1870,14 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.fiUnchangedRB.setSelected(settings.getFieldItemsMod() == Settings.FieldItemsMod.UNCHANGED);
         this.fiBanBadCB.setSelected(settings.isBanBadRandomFieldItems());
 
+        this.shRandomRB.setSelected(settings.getShopItemsMod() == Settings.ShopItemsMod.RANDOM);
+        this.shShuffleRB.setSelected(settings.getShopItemsMod() == Settings.ShopItemsMod.SHUFFLE);
+        this.shUnchangedRB.setSelected(settings.getShopItemsMod() == Settings.ShopItemsMod.UNCHANGED);
+        this.shBanBadCB.setSelected(settings.isBanBadRandomShopItems());
+        this.shBanRegularShopCB.setSelected(settings.isBanRegularShopItems());
+        this.shBanOPShopCB.setSelected(settings.isBanOPShopItems());
+        this.shBalancePricesCB.setSelected(settings.isBalanceShopPrices());
+
         this.currentRestrictions = settings.getCurrentRestrictions();
         if (this.currentRestrictions != null) {
             this.currentRestrictions.limitToGen(this.romHandler.generationOfPokemon());

@@ -48,7 +48,7 @@ public class Settings {
 
     public static final int VERSION = 172;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 37;
+    public static final int LENGTH_OF_SETTINGS_DATA = 38;
 
     private CustomNamesSet customNames;
 
@@ -414,6 +414,8 @@ public class Settings {
         // @ 35 trainer pokemon level modifier
         out.write((trainersLevelModified ? 0x80 : 0) | (trainersLevelModifier+50));
 
+        out.write(makeByteSelected(shopItemsMod == ShopItemsMod.RANDOM, shopItemsMod == ShopItemsMod.SHUFFLE,
+                shopItemsMod == ShopItemsMod.UNCHANGED, banBadRandomShopItems, banRegularShopItems, banOPShopItems, balanceShopPrices));
         
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -620,6 +622,14 @@ public class Settings {
         settings.setTrainersLevelModified(restoreState(data[36], 7));
         settings.setTrainersLevelModifier((data[36] & 0x7F) - 50);
         //settings.setTrainersLevelModifier((data[36] & 0x7F));
+        settings.setShopItemsMod(restoreEnum(ShopItemsMod.class,data[37],
+                2,
+                1,
+                0));
+        settings.setBanBadRandomShopItems(restoreState(data[37],3));
+        settings.setBanRegularShopItems(restoreState(data[37],4));
+        settings.setBanOPShopItems(restoreState(data[37],5));
+        settings.setBalanceShopPrices(restoreState(data[37],6));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
