@@ -1944,13 +1944,13 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizeStaticPokemon(boolean swap_legendaries, boolean similar_strength, boolean limit_bw_musketeers) {
+    public void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMusketeers) {
         // Load
         checkPokemonRestrictions();
         List<Pokemon> currentStaticPokemon = this.getStaticPokemon();
         List<Pokemon> replacements = new ArrayList<Pokemon>();
         List<Pokemon> banned = this.bannedForStaticPokemon();
-        if (swap_legendaries) {
+        if (swapLegendaries) {
             List<Pokemon> legendariesLeft = new ArrayList<Pokemon>(onlyLegendaryList);
             List<Pokemon> nonlegsLeft = new ArrayList<Pokemon>(noLegendaryList);
             legendariesLeft.removeAll(banned);
@@ -1981,7 +1981,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 replacements.add(newPK);
             }
         }
-        else if (similar_strength) {
+        else if (similarStrength) {
             List<Pokemon> pokemonLeft = new ArrayList<Pokemon>(mainPokemonList);
             pokemonLeft.removeAll(banned);
             for (int i = 0; i < currentStaticPokemon.size(); i++) {
@@ -1992,7 +1992,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     pokemonLeft.remove(newPK);
                 } else {
                     
-                    if ((old.number == 638 || old.number == 639 || old.number == 640) && limit_bw_musketeers) {
+                    if ((old.number == 638 || old.number == 639 || old.number == 640) && limitMusketeers) {
                      // System.out.println(old.name + " " + old.number + ": triggered limit on replacement");
                         newPK = pickReplacement(old, true, null, true, true, true, true); // This sets up picking a replacement with similar strength
                                                                                           // and limit on bw musketeers
@@ -3646,7 +3646,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<Pokemon> cachedAllList;
 
     private Pokemon pickReplacement(Pokemon current, boolean usePowerLevels, Type type, boolean noLegendaries,
-            boolean wonderGuardAllowed, boolean limit_bst, boolean usePlacementHistory) {
+            boolean wonderGuardAllowed, boolean limitBST, boolean usePlacementHistory) {
         List<Pokemon> pickFrom;
         if (usePlacementHistory) {
             pickFrom = getBelowAveragePlacements();
@@ -3661,7 +3661,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             pickFrom = cachedReplacementLists.get(type);
         }
 
-        if (usePowerLevels && limit_bst) {
+        if (usePowerLevels && limitBST) {
             // start with pokemon BST, and only extend downwards
             int currentBST = current.bstForPowerLevels();
             int minTarget = currentBST - currentBST / 10;
