@@ -1430,6 +1430,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    public List<Integer> getMainPlaythroughTrainers() {
+        return new ArrayList<>(); // Not implemented
+    }
+
+    @Override
     public void setTrainers(List<Trainer> trainerData) {
         int baseOffset = romEntry.getValue("TrainerData");
         int amount = romEntry.getValue("TrainerCount");

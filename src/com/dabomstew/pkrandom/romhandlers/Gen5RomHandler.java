@@ -1100,6 +1100,19 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public List<Integer> getMainPlaythroughTrainers() {
+        if (romEntry.romType == Gen5Constants.Type_BW) { // BW1
+            return Gen5Constants.bw1MainPlaythroughTrainers;
+        }
+        else if (romEntry.romType == Gen5Constants.Type_BW2) { // BW2
+            return Gen5Constants.bw2MainPlaythroughTrainers;
+        }
+        else {
+            return Gen5Constants.emptyPlaythroughTrainers;
+        }
+    }
+
+    @Override
     public void setTrainers(List<Trainer> trainerData) {
         Iterator<Trainer> allTrainers = trainerData.iterator();
         try {

@@ -161,6 +161,8 @@ public interface RomHandler {
     // Randomizer: trainer pokemon
     public List<Trainer> getTrainers();
 
+    public List<Integer> getMainPlaythroughTrainers();
+
     public void setTrainers(List<Trainer> trainerData);
 
     public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
@@ -226,7 +228,7 @@ public interface RomHandler {
 
     public boolean setStaticPokemon(List<Pokemon> staticPokemon);
 
-    public void randomizeStaticPokemon(boolean swap_legendaries, boolean similar_strength, boolean limit_bw_muskateers);
+    public void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMusketeers);
 
     public boolean canChangeStaticPokemon();
 

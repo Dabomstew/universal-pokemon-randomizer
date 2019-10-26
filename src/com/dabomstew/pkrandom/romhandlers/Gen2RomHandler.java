@@ -888,6 +888,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public List<Integer> getMainPlaythroughTrainers() {
+        return new ArrayList<>(); // Not implemented
+    }
+
+    @Override
     public void setTrainers(List<Trainer> trainerData) {
         int traineroffset = romEntry.getValue("TrainerDataTableOffset");
         int traineramount = romEntry.getValue("TrainerClassAmount");

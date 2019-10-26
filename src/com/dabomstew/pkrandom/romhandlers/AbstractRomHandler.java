@@ -48,7 +48,6 @@ import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
-import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
@@ -3764,7 +3763,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     }
     
-    protected void setPlacementHistory(Pokemon newPK) {
+    private void setPlacementHistory(Pokemon newPK) {
         List<Pokemon> placedPK = new ArrayList<Pokemon>(placementHistory.keySet());
         if (placedPK.contains(newPK)) {
             placementHistory.put(newPK, placementHistory.get(newPK) + 1);
@@ -3776,7 +3775,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         
     }
 
-    public int getPlacementHistory(Pokemon newPK) {
+    private int getPlacementHistory(Pokemon newPK) {
         List<Pokemon> placedPK = new ArrayList<Pokemon>(placementHistory.keySet());
         if (placedPK.contains(newPK)) {
             return placementHistory.get(newPK);
@@ -3787,7 +3786,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
     
     // currently not used
-    public boolean decidePlacementAverage(Pokemon newPK) {
+    private boolean decidePlacementAverage(Pokemon newPK) {
         // This method will return true if the number of times a pokemon has been
         // placed is less than average of all placed pokemon's appearances
         // E.g., Charmander's been placed once, but the average for all pokemon is 2.2
@@ -3816,7 +3815,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         
     }
     
-    public List<Pokemon> getBelowAveragePlacements() {
+    private List<Pokemon> getBelowAveragePlacements() {
         // This method will return true if the number of times a pokemon has been
         // placed is less than average of all placed pokemon's appearances
         // E.g., Charmander's been placed once, but the average for all pokemon is 2.2
@@ -3859,24 +3858,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         return toPlacePK; 
         
     }
-    
-    public List<Integer> getMainPlaythroughTrainers() {
-        if (this.getROMCode().equals("IRBO") || this.getROMCode().equals("IRAO")) { // BW1
-            List<Integer> trainers = Gen5Constants.bw1MainPlaythroughTrainers;
-            return trainers;
-        }        
-        else if (this.getROMCode().equals("IRDO") || this.getROMCode().equals("IREO")) { // BW2
-            List<Integer> trainers = Gen5Constants.bw2MainPlaythroughTrainers;
-            return trainers;
-        } 
-        else {
-            return Gen5Constants.emptyPlaythroughTrainers;
-            
-        }
 
-
-    }
-
+    @Override
     public void renderPlacementHistory() {
         List<Pokemon> placedPK = new ArrayList<Pokemon>(placementHistory.keySet());
         for (Pokemon p : placedPK) {
