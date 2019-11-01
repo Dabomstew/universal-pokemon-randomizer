@@ -957,10 +957,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                 // what we do is check each trainer if they're part of the main playthrough
                 // if so, add to placement history, if not, pure random
                 if (distributionSetting && mainPlaythroughSetting) {
-                    System.out.println("*** Main Playthrough Even Distribution ***");
+                    // System.out.println("*** Main Playthrough Even Distribution ***");
                     // new code for main playthrough distribution
                     if (mainPlaythroughTrainers.contains((int)t.offset)) { // this determines if this trainer is in the pool of main playthrough
-                        // System.out.println(">>>> IN POOL: "+t.fullDisplayName);
+                        //System.out.println(">>>> IN POOL: "+t.fullDisplayName);
                         Pokemon newPK = pickReplacement(tp.pokemon, usePowerLevels, null, noLegendaries, wgAllowed, false, true); // final argument sets usePlacementHistory
                         tp.pokemon = newPK;
                         setPlacementHistory(newPK);                        
@@ -973,7 +973,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 
                 else if (distributionSetting) {
-                    System.out.println("*** Full Playthrough Even Distribution ***");
+                    // System.out.println("*** Full Playthrough Even Distribution ***");
                     // new code for distribution, no main playthrough (all trainers equally distributed)
                     // always adds to placement history
                     Pokemon newPK = pickReplacement(tp.pokemon, usePowerLevels, null, noLegendaries, wgAllowed, false, true); // final argument sets usePlacementHistory
@@ -983,7 +983,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 
                 else { 
-                    System.out.println("*** Pure Random Distribution ***");
+                    // System.out.println("*** Pure Random Distribution ***");
                     // pure random, no settings applied
                     Pokemon newPK = pickReplacement(tp.pokemon, usePowerLevels, null, noLegendaries, wgAllowed, false, false);
                     tp.pokemon = newPK;
@@ -1951,7 +1951,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMusketeers) {
+    public void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMusketeers, boolean limit600) {
         // Load
         checkPokemonRestrictions();
         List<Pokemon> currentStaticPokemon = this.getStaticPokemon();
@@ -1994,7 +1994,12 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (int i = 0; i < currentStaticPokemon.size(); i++) {
                 Pokemon old = currentStaticPokemon.get(i);
                 Pokemon newPK;
-                if (old.number == 487 && ptGiratina) {
+                Integer oldBST = old.hp + old.attack + old.defense + old.spatk + old.spdef + old.speed;
+                if (oldBST >= 600 && limit600) {
+                    System.out.println(old.name + " " + old.number + ": Over 600 BST, pure random");
+                    newPK = pickReplacement(old, false, null, true, false, false, false); // Pure random setup
+                }
+                else if (old.number == 487 && ptGiratina) {
                     newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
                     pokemonLeft.remove(newPK);
                 } else {
@@ -3749,7 +3754,6 @@ public abstract class AbstractRomHandler implements RomHandler {
             expandRounds++;
         }
         Pokemon newPK = canPick.get(this.random.nextInt(canPick.size()));
-        // setPlacementHistory(newPK);
         return newPK;
     }
 
@@ -3773,15 +3777,9 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
     
     private void setPlacementHistory(Pokemon newPK) {
-        List<Pokemon> placedPK = new ArrayList<Pokemon>(placementHistory.keySet());
-        if (placedPK.contains(newPK)) {
-            placementHistory.put(newPK, placementHistory.get(newPK) + 1);
-        }
-        else {
-            placementHistory.put(newPK, 1);
-        }
-
-        
+        Integer history = getPlacementHistory(newPK);
+        // System.out.println("Current history: " + newPK.name + " : " + history);
+        placementHistory.put(newPK, history + 1);        
     }
 
     private int getPlacementHistory(Pokemon newPK) {
@@ -3792,36 +3790,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         else {
             return 0;
         }        
-    }
-    
-    // currently not used
-    private boolean decidePlacementAverage(Pokemon newPK) {
-        // This method will return true if the number of times a pokemon has been
-        // placed is less than average of all placed pokemon's appearances
-        // E.g., Charmander's been placed once, but the average for all pokemon is 2.2
-        // So place Charmander 
-        
-        List<Pokemon> placedPK = new ArrayList<Pokemon>(placementHistory.keySet());
-        if (placedPK.contains(newPK)) {
-            int placedPKNum = 0;
-            for (Pokemon p : placedPK) {
-                placedPKNum += placementHistory.get(p); 
-            }
-            float placedAverage = (float)placedPKNum / (float)placedPK.size();
-            if (placementHistory.get(newPK) <= placedAverage + 1) {
-                // System.out.println(newPK.name + ": " + placementHistory.get(newPK)+" "+placedAverage+" ACCEPT");
-                return true;
-            }
-            else {
-                // System.out.println(newPK.name + ": " + placementHistory.get(newPK)+" "+placedAverage+" REJECT");
-                return false;      
-            }
-        }
-        else {
-            return true; // if not placed at all, automatically flag true for placing
-            
-        }
-        
     }
     
     private List<Pokemon> getBelowAveragePlacements() {
@@ -3864,6 +3832,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
+        // System.out.println("Size: " + toPlacePK.size());
         return toPlacePK; 
         
     }

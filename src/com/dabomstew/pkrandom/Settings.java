@@ -93,6 +93,7 @@ public class Settings {
     private int[] customStarters = new int[3];
     private boolean randomizeStartersHeldItems;
     private boolean limitMusketeers;
+    private boolean limit600;
     private boolean banBadRandomStarterHeldItems;
 
     public enum TypesMod {
@@ -336,7 +337,7 @@ public class Settings {
                 staticPokemonMod == StaticPokemonMod.RANDOM_MATCHING,
                 staticPokemonMod == StaticPokemonMod.COMPLETELY_RANDOM,
                 staticPokemonMod == StaticPokemonMod.SIMILAR_STRENGTH,
-                limitMusketeers));
+                limitMusketeers, limit600));
 
         // 18 tm randomization
         // new stuff 162
@@ -505,9 +506,9 @@ public class Settings {
         // changed 160
         settings.setTrainersMod(restoreEnum(TrainersMod.class, data[13], 0, // UNCHANGED
                 1, // RANDOM
-                3, // DISTRIBUTED
-                4, // MAINPLAYTHROUGH 
-                2 // TYPE_THEMED
+                2, // DISTRIBUTED
+                3, // MAINPLAYTHROUGH 
+                4 // TYPE_THEMED
         ));
 
         settings.setTrainersForceFullyEvolved(restoreState(data[14], 7));
@@ -540,6 +541,7 @@ public class Settings {
         ));
         
         settings.setLimitMusketeers(restoreState(data[17], 4));
+        settings.setLimit600(restoreState(data[17], 5));
         
         settings.setTmsMod(restoreEnum(TMsMod.class, data[18], 4, // UNCHANGED
                 3 // RANDOM
@@ -1003,6 +1005,14 @@ public class Settings {
     }
     public Settings setLimitMusketeers(boolean limitMusketeers) {
         this.limitMusketeers = limitMusketeers;
+        return this;
+    }
+
+    public boolean isLimit600() {
+        return limit600;
+    }
+    public Settings setLimit600(boolean limit600) {
+        this.limit600 = limit600;
         return this;
     }
     

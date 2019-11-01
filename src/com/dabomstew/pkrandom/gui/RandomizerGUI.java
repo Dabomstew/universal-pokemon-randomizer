@@ -865,11 +865,15 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.stpRandomTotalRB.setEnabled(false);
         this.stpRandomPower.setEnabled(false);
         this.stpLimitMusketeers.setEnabled(false);
+        this.stpLimit600.setEnabled(false);
         this.stpUnchangedRB.setEnabled(false);
         this.stpUnchangedRB.setSelected(false);
         this.stpLimitMusketeers.setEnabled(false);
         this.stpLimitMusketeers.setSelected(false);
         this.stpLimitMusketeers.setVisible(true);
+        this.stpLimit600.setEnabled(false);
+        this.stpLimit600.setSelected(false);
+        this.stpLimit600.setVisible(true);
 
         this.tmmRandomRB.setEnabled(false);
         this.tmmUnchangedRB.setEnabled(false);
@@ -1138,6 +1142,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.spHeldItemsBanBadCB.setEnabled(false);
             this.spHeldItemsBanBadCB.setVisible(hasStarterHeldItems);
             this.stpLimitMusketeers.setEnabled(false);
+            this.stpLimit600.setEnabled(false);
 
             this.mdRandomAccuracyCB.setEnabled(true);
             this.mdRandomPowerCB.setEnabled(true);
@@ -1221,6 +1226,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 this.stpRandomTotalRB.setEnabled(true);
                 this.stpRandomPower.setEnabled(true);
                 this.stpLimitMusketeers.setEnabled(true);
+                this.stpLimit600.setEnabled(true);
 
             }
 
@@ -1841,6 +1847,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.stpRandomPower
                 .setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.SIMILAR_STRENGTH);
         this.stpLimitMusketeers.setSelected(settings.isLimitMusketeers());
+        this.stpLimit600.setSelected(settings.isLimit600());
         
         this.thcRandomTotalRB
                 .setSelected(settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.COMPLETELY_RANDOM);
@@ -1970,7 +1977,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setMovesetsForceGoodDamaging(pmsForceGoodDamagingCB.isSelected());
         settings.setMovesetsGoodDamagingPercent(pmsForceGoodDamagingSlider.getValue());
 
-        settings.setTrainersMod(tpUnchangedRB.isSelected(), tpRandomRB.isSelected(), tpTypeThemedRB.isSelected(), tpEnforceDistribution.isSelected(), tpEnforceMainPlaythrough.isSelected());
+        settings.setTrainersMod(tpUnchangedRB.isSelected(), tpRandomRB.isSelected(), tpEnforceDistribution.isSelected(), tpEnforceMainPlaythrough.isSelected(),tpTypeThemedRB.isSelected());
         settings.setTrainersUsePokemonOfSimilarStrength(tpPowerLevelsCB.isSelected());
         settings.setRivalCarriesStarterThroughout(tpRivalCarriesStarterCB.isSelected());
         settings.setTrainersMatchTypingDistribution(tpTypeWeightingCB.isSelected());
@@ -1995,7 +2002,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         settings.setStaticPokemonMod(stpUnchangedRB.isSelected(), stpRandomL4LRB.isSelected(),
                 stpRandomTotalRB.isSelected(),stpRandomPower.isSelected());
-        settings.setLimitMusketeers(spHeldItemsBanBadCB.isSelected());
         
         settings.setTmsMod(tmmUnchangedRB.isSelected(), tmmRandomRB.isSelected());
 
@@ -2020,6 +2026,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setRandomizeInGameTradesIVs(igtRandomIVsCB.isSelected());
         settings.setRandomizeInGameTradesNicknames(igtRandomNicknameCB.isSelected());
         settings.setLimitMusketeers(stpLimitMusketeers.isSelected());
+        settings.setLimit600(stpLimit600.isSelected());
         settings.setRandomizeInGameTradesOTs(igtRandomOTCB.isSelected());
 
         settings.setFieldItemsMod(fiUnchangedRB.isSelected(), fiShuffleRB.isSelected(), fiRandomRB.isSelected());
@@ -2792,6 +2799,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         stpRandomTotalRB = new javax.swing.JRadioButton();
         stpRandomPower = new javax.swing.JRadioButton();
         stpLimitMusketeers = new javax.swing.JCheckBox();
+        stpLimit600 = new javax.swing.JCheckBox();
         inGameTradesPanel = new javax.swing.JPanel();
         igtUnchangedRB = new javax.swing.JRadioButton();
         igtGivenOnlyRB = new javax.swing.JRadioButton();
@@ -3527,7 +3535,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(stpRandomPower))
                 .addContainerGap(407, Short.MAX_VALUE)
                 .addGroup(staticPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(stpLimitMusketeers))
+                        .addComponent(stpLimitMusketeers)
+                        .addComponent(stpLimit600))
                     .addGap(234, 234, 234))
         );
         staticPokemonPanelLayout.setVerticalGroup(
@@ -3542,8 +3551,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addComponent(stpRandomPower))
             .addGroup(staticPokemonPanelLayout.createSequentialGroup()
                     .addComponent(stpLimitMusketeers)
+                    .addComponent(stpLimit600)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(stpLimitMusketeers))
+                .addComponent(stpLimitMusketeers)
+                .addComponent(stpLimit600))
         );
 
         inGameTradesPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("RandomizerGUI.inGameTradesPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
@@ -3582,6 +3593,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
         stpLimitMusketeers.setText(bundle.getString("RandomizerGUI.stpLimitMusketeers.text")); // NOI18N
         stpLimitMusketeers.setToolTipText(bundle.getString("RandomizerGUI.stpLimitMusketeers.toolTipText")); // NOI18N
 
+        stpLimit600.setText(bundle.getString("RandomizerGUI.stpLimit600.text")); // NOI18N
+        stpLimit600.setToolTipText(bundle.getString("RandomizerGUI.stpLimit600.toolTipText")); // NOI18N
+
+        
         igtRandomOTCB.setText(bundle.getString("RandomizerGUI.igtRandomOTCB.text")); // NOI18N
         igtRandomOTCB.setToolTipText(bundle.getString("RandomizerGUI.igtRandomOTCB.toolTipText")); // NOI18N
 
@@ -5104,6 +5119,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JRadioButton stpRandomPower;
     private javax.swing.JRadioButton stpUnchangedRB;
     private javax.swing.JCheckBox stpLimitMusketeers;
+    private javax.swing.JCheckBox stpLimit600;
     private javax.swing.JCheckBox tcnRandomizeCB;
     private javax.swing.JRadioButton thcFullRB;
     private javax.swing.JRadioButton thcRandomTotalRB;

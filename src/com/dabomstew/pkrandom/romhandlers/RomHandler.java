@@ -228,7 +228,7 @@ public interface RomHandler {
 
     public boolean setStaticPokemon(List<Pokemon> staticPokemon);
 
-    public void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMusketeers);
+    public void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMusketeers, boolean limit600);
 
     public boolean canChangeStaticPokemon();
 

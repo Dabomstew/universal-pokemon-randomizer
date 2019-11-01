@@ -545,7 +545,7 @@ public class Randomizer {
 
 
         // Test output for placement history
-        romHandler.renderPlacementHistory();
+        // romHandler.renderPlacementHistory();
 
         // Signature...
         romHandler.applySignature();
@@ -789,11 +789,14 @@ public class Randomizer {
         if (romHandler.canChangeStaticPokemon()) {
             List<Pokemon> oldStatics = romHandler.getStaticPokemon();
             if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING) { // Legendary for L
-                romHandler.randomizeStaticPokemon(true, false,settings.isLimitMusketeers());
+                romHandler.randomizeStaticPokemon(true, false,settings.isLimitMusketeers(),
+                        settings.isLimit600());
             } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.COMPLETELY_RANDOM) {
-                romHandler.randomizeStaticPokemon(false, false,settings.isLimitMusketeers());
+                romHandler.randomizeStaticPokemon(false, false,settings.isLimitMusketeers(),
+                        settings.isLimit600());
             } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.SIMILAR_STRENGTH) {
-                romHandler.randomizeStaticPokemon(false, true,settings.isLimitMusketeers());
+                romHandler.randomizeStaticPokemon(false, true,settings.isLimitMusketeers(),
+                        settings.isLimit600());
             }
             List<Pokemon> newStatics = romHandler.getStaticPokemon();
             if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED) {
