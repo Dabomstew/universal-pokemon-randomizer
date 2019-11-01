@@ -1996,7 +1996,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 Pokemon newPK;
                 Integer oldBST = old.hp + old.attack + old.defense + old.spatk + old.spdef + old.speed;
                 if (oldBST >= 600 && limit600) {
-                    System.out.println(old.name + " " + old.number + ": Over 600 BST, pure random");
+                    // System.out.println(old.name + " " + old.number + ": Over 600 BST, pure random");
                     newPK = pickReplacement(old, false, null, true, false, false, false); // Pure random setup
                 }
                 else if (old.number == 487 && ptGiratina) {
