@@ -672,7 +672,7 @@ public class Randomizer {
 
     private void maybeChangeStats(final PrintStream log, final RomHandler romHandler) {
         switch (settings.getBaseStatisticsMod()) {
-        case SHUFFLE:
+        case SHUFFLE_ORDER:
             romHandler.shufflePokemonStats(settings.isBaseStatsFollowEvolutions());
             break;
         case RANDOM_WITHIN_BST:
@@ -691,7 +691,7 @@ public class Randomizer {
 
     private void maybeChangeTypes(final PrintStream log, final RomHandler romHandler) {
         switch (settings.getTypesMod()) {
-        case RANDOM_FOLLOW_EVOLUTIONS:
+        case RANDOM_RETAIN:
             romHandler.randomizePokemonTypes(true);
             break;
         case COMPLETELY_RANDOM:

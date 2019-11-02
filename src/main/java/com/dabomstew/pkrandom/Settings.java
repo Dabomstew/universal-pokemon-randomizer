@@ -46,9 +46,9 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 public class Settings {
 
-    public static final int VERSION = 180;
+    public static final int VERSION = 181;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 38;
+    public static final int LENGTH_OF_SETTINGS_DATA = 40;
 
     private CustomNamesSet customNames;
 
@@ -64,7 +64,7 @@ public class Settings {
     private boolean limitPokemon;
 
     public enum BaseStatisticsMod {
-        UNCHANGED, SHUFFLE, RANDOM_WITHIN_BST, RANDOM_UNRESTRICTED, RANDOM_COMPLETELY
+        UNCHANGED, SHUFFLE_ORDER, SHUFFLE_BST, SHUFFLE_ALL, RANDOM_WITHIN_BST, RANDOM_UNRESTRICTED, RANDOM_COMPLETELY
     }
 
     private BaseStatisticsMod baseStatisticsMod = BaseStatisticsMod.UNCHANGED;
@@ -96,13 +96,17 @@ public class Settings {
     private boolean banBadRandomStarterHeldItems;
     private boolean startersNoSplit;
     private boolean startersUniqueTypes;
+    private boolean starterLimitBST;
+    private boolean startersBaseEvoOnly;
+    private int starterBSTModifier;
 
     public enum TypesMod {
-        UNCHANGED, RANDOM_FOLLOW_EVOLUTIONS, COMPLETELY_RANDOM
+        UNCHANGED, RANDOM_RETAIN, COMPLETELY_RANDOM, SHUFFLE
     }
 
     private TypesMod typesMod = TypesMod.UNCHANGED;
     private boolean typesRandomizeFirst;
+    private boolean typesFollowEvos;
 
     // Evolutions
     public enum EvolutionsMod {
@@ -267,14 +271,14 @@ public class Settings {
 
         // 1: pokemon base stats (see byte 36 for additional options)
         out.write(makeByteSelected(baseStatsFollowEvolutions, baseStatisticsMod == BaseStatisticsMod.RANDOM_WITHIN_BST,
-                baseStatisticsMod == BaseStatisticsMod.SHUFFLE, baseStatisticsMod == BaseStatisticsMod.UNCHANGED,
+                baseStatisticsMod == BaseStatisticsMod.SHUFFLE_ORDER, baseStatisticsMod == BaseStatisticsMod.UNCHANGED,
                 standardizeEXPCurves, updateBaseStats, baseStatisticsMod == BaseStatisticsMod.RANDOM_UNRESTRICTED,
                 baseStatisticsMod == BaseStatisticsMod.RANDOM_COMPLETELY));
 
-        // 2: pokemon types & more general options
-        out.write(makeByteSelected(typesMod == TypesMod.RANDOM_FOLLOW_EVOLUTIONS,
+        // 2: pokemon types & more general options (see byte 36 for additional options)
+        out.write(makeByteSelected(typesMod == TypesMod.RANDOM_RETAIN,
                 typesMod == TypesMod.COMPLETELY_RANDOM, typesMod == TypesMod.UNCHANGED, raceMode, blockBrokenMoves,
-                limitPokemon, typesRandomizeFirst));
+                limitPokemon, typesRandomizeFirst, typesMod == TypesMod.SHUFFLE));
 
         // 3: v171: changed to the abilities byte
         out.write(makeByteSelected(abilitiesMod == AbilitiesMod.UNCHANGED, abilitiesMod == AbilitiesMod.RANDOMIZE,
@@ -395,14 +399,18 @@ public class Settings {
         // @ 35 trainer pokemon level modifier
         out.write((trainersLevelModified ? 0x80 : 0) | (trainersLevelModifier+50));
 
-        // @ 36 Base Statistics Overflow
-        out.write(makeByteSelected(statsRandomizeFirst));
+        // @ 36 Base Statistics and Types Overflow
+        out.write(makeByteSelected(statsRandomizeFirst, baseStatisticsMod == BaseStatisticsMod.SHUFFLE_BST, 
+        baseStatisticsMod == BaseStatisticsMod.SHUFFLE_ALL, typesFollowEvos));
 
         // @ 37 Starter Pokemon Overflow
         out.write(makeByteSelected(startersMod==StartersMod.RANDOM_WITH_ONE_OR_TWO_EVOLUTIONS,
-        startersNoSplit, startersUniqueTypes));
+        startersNoSplit, startersUniqueTypes, starterLimitBST, startersBaseEvoOnly));
+
+        // @ 38 Starter Pokemon BST Modifier
+        write2ByteInt(out, starterBSTModifier - 1);
         
-        // @ 38 Rom Title Name (update LENGTH_OF_SETTINGS_DATA if this changes)
+        // @ 40 Rom Title Name (update LENGTH_OF_SETTINGS_DATA if this changes)
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
             out.write(romName.length);
@@ -443,19 +451,23 @@ public class Settings {
         settings.setRandomizeTrainerClassNames(restoreState(data[0], 4));
         settings.setMakeEvolutionsEasier(restoreState(data[0], 5));
 
-        settings.setBaseStatisticsMod(restoreEnum(BaseStatisticsMod.class, data[1], 3, // UNCHANGED
-                2, // SHUFFLE
-                1, // RANDOM_WITHIN_BST
-                6, // RANDOM_UNRESTRICTED
-                7  // RANDOM_COMPLETELY
+        settings.setBaseStatisticsMod(getEnum(BaseStatisticsMod.class, 
+                restoreState(data[1], 3), // UNCHANGED
+                restoreState(data[1], 2), // SHUFFLE_ORDER
+                restoreState(data[36], 1),// SHUFFLE_BST
+                restoreState(data[36], 2),// SHUFFLE_ALL
+                restoreState(data[1], 1), // RANDOM_WITHIN_BST
+                restoreState(data[1], 6), // RANDOM_UNRESTRICTED
+                restoreState(data[1], 7)  // RANDOM_COMPLETELY
         ));
         settings.setStandardizeEXPCurves(restoreState(data[1], 4));
         settings.setBaseStatsFollowEvolutions(restoreState(data[1], 0));
         settings.setUpdateBaseStats(restoreState(data[1], 5));
 
         settings.setTypesMod(restoreEnum(TypesMod.class, data[2], 2, // UNCHANGED
-                0, // RANDOM_FOLLOW_EVOLUTIONS
-                1 // COMPLETELY_RANDOM
+                0, // RANDOM_RETAIN
+                1, // COMPLETELY_RANDOM
+                7  // SHUFFLE
         ));
         settings.setRaceMode(restoreState(data[2], 3));
         settings.setBlockBrokenMoves(restoreState(data[2], 4));
@@ -612,9 +624,14 @@ public class Settings {
         settings.setTrainersLevelModifier((data[35] & 0x7F) - 50);
 
         settings.setStatsRandomizeFirst(restoreState(data[36], 0));
+        settings.setTypesFollowEvos(restoreState(data[36], 3));
 
         settings.setStartersNoSplit(restoreState(data[37], 2));
         settings.setStartersUniqueTypes(restoreState(data[37], 1));
+        settings.setStartersLimitBST(restoreState(data[37], 3));
+        settings.setStartersBaseEvoOnly(restoreState(data[37], 4));
+
+        settings.setStartersBSTLimitModifier(FileFunctions.read2ByteInt(data, 38) + 1);
         
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1007,6 +1024,30 @@ public class Settings {
         this.startersUniqueTypes = startersUniqueTypes;
         return this;
     }
+    
+    public boolean isStartersLimitBST() {
+        return starterLimitBST;
+    }
+
+    public void setStartersLimitBST(boolean starterLimitBST) {
+        this.starterLimitBST = starterLimitBST;
+    }
+
+    public boolean isStartersBaseEvoOnly() {
+        return startersBaseEvoOnly;
+    }
+
+    public void setStartersBaseEvoOnly(boolean startersBaseEvoOnly) {
+        this.startersBaseEvoOnly = startersBaseEvoOnly;
+    }
+
+    public int getStartersBSTLimitModifier() {
+        return starterBSTModifier;
+    }
+
+    public void setStartersBSTLimitModifier(int starterBSTModifier) {
+        this.starterBSTModifier = starterBSTModifier;
+    }
 
     public TypesMod getTypesMod() {
         return typesMod;
@@ -1028,6 +1069,14 @@ public class Settings {
     public Settings setTypesRandomizeFirst(boolean typesRandomizeFirst) {
         this.typesRandomizeFirst = typesRandomizeFirst;
         return this;
+    }
+
+    public boolean isTypesFollowEvolutions() {
+        return typesFollowEvos;
+    }
+
+    public void setTypesFollowEvos(boolean selected) {
+        typesFollowEvos = selected;
     }
 
     public EvolutionsMod getEvolutionsMod() {
