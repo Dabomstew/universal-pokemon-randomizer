@@ -56,4 +56,8 @@ public enum Type {
         return RomFunctions.camelCase(this.toString());
     }
 
+    public static List<Type> getTypes(int size) {
+        return VALUES.subList(0, size);
+    }
+
 }

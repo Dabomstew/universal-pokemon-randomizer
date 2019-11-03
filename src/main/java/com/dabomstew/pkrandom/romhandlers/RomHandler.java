@@ -137,12 +137,16 @@ public interface RomHandler {
     // straightforward except for gen1 where dark&steel are excluded.
     public Type randomType();
 
+    public int getTypeSize();
+
     public boolean typeInGame(Type type);
 
     // randomise Pokemon types, with a switch on whether evolutions
     // should follow the same types or not.
     // some evolutions dont anyway, e.g. Eeveelutions, Hitmons
     public void randomizePokemonTypes(boolean evolutionSanity);
+
+    public void shufflePokemonTypes();
 
     // Randomizer: pokemon abilities
     public int abilitiesPerPokemon();

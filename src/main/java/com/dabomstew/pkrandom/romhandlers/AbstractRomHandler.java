@@ -430,6 +430,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         return twoEvoPokes.get(this.random.nextInt(twoEvoPokes.size()));
     }
 
+    @Override    
+    public int getTypeSize() {
+        return 17;
+    }
+
     @Override
     public Type randomType() {
         Type t = Type.randomType(this.random);
@@ -500,6 +505,22 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
+
+    @Override
+    public void shufflePokemonTypes() {
+        List<Pokemon> allPokes = this.getPokemon();
+        List<Type> allTypes = new ArrayList<Type>(Type.getTypes(getTypeSize()));
+        Collections.shuffle(allTypes, this.random);
+
+        for (Pokemon pkmn : allPokes) {
+            if (pkmn != null) {
+                pkmn.primaryType = allTypes.get(pkmn.primaryType.ordinal());
+                if(pkmn.secondaryType != null) {
+                    pkmn.secondaryType = allTypes.get(pkmn.secondaryType.ordinal());
+                }
+            }
+        }
+    }
 
     @Override
     public void randomizeAbilities(boolean evolutionSanity, boolean allowWonderGuard, boolean banTrappingAbilities,

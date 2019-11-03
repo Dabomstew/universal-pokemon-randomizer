@@ -691,11 +691,14 @@ public class Randomizer {
 
     private void maybeChangeTypes(final PrintStream log, final RomHandler romHandler) {
         switch (settings.getTypesMod()) {
+        case SHUFFLE:
+            romHandler.shufflePokemonTypes();
+            break;
         case RANDOM_RETAIN:
-            romHandler.randomizePokemonTypes(true);
+            romHandler.randomizePokemonTypes(settings.isTypesFollowEvolutions());
             break;
         case COMPLETELY_RANDOM:
-            romHandler.randomizePokemonTypes(false);
+            romHandler.randomizePokemonTypes(settings.isTypesFollowEvolutions());
             break;
         default:
             break;

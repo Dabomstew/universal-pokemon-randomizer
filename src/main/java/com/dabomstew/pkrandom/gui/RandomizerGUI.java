@@ -1424,7 +1424,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.paBanNegativeCB.setSelected(false);
         }
 
-        if (this.ptUnchangedRB.isSelected()) {
+        if (this.ptUnchangedRB.isSelected() || this.ptShuffleRB.isSelected()) {
             this.ptFollowEvosCB.setEnabled(false);
             this.ptFollowEvosCB.setSelected(false);
         } else {
