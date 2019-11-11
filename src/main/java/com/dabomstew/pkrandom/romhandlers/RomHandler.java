@@ -147,6 +147,8 @@ public interface RomHandler {
     public void randomizePokemonTypes(boolean evolutionSanity);
 
     public void shufflePokemonTypes();
+    
+    public void randomizeRetainPokemonTypes(boolean evolutionSanity);
 
     // Randomizer: pokemon abilities
     public int abilitiesPerPokemon();

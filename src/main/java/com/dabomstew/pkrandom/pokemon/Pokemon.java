@@ -55,6 +55,7 @@ public class Pokemon implements Comparable<Pokemon> {
     public List<Evolution> evolutionsTo = new ArrayList<Evolution>();
 
     public List<Integer> shuffledStatsOrder = null;
+    public int typeChanged;
     
     private static final double GENERAL_MEDIAN = 411.5;
     private static final double GENERAL_SD = 108.5;

@@ -693,9 +693,24 @@ public class Randomizer {
         switch (settings.getTypesMod()) {
         case SHUFFLE:
             romHandler.shufflePokemonTypes();
+            log.println("<h2>Shuffled Types</h2>");
+            log.println("<table class=\"pk-table\">");
+            log.println("<tr><th>Old Type</th><th>New Type</th></tr>");
+            for(Type t: Type.getTypes(romHandler.getTypeSize())) {
+                log.println("<tr><td>");
+                log.println(String.format("<span class=\"pk-type %s\">%s</span> ", 
+                    t.toString().toLowerCase(), 
+                    t.toString()));
+                log.println("</td><td>");
+                log.println(String.format("<span class=\"pk-type %s\">%s</span> ", 
+                    Type.getShuffledList().get(t.ordinal()).toString().toLowerCase(), 
+                    Type.getShuffledList().get(t.ordinal()).toString()));
+                log.println("</td></tr>");
+            }
+            log.println("</table>");
             break;
         case RANDOM_RETAIN:
-            romHandler.randomizePokemonTypes(settings.isTypesFollowEvolutions());
+            romHandler.randomizeRetainPokemonTypes(settings.isTypesFollowEvolutions());
             break;
         case COMPLETELY_RANDOM:
             romHandler.randomizePokemonTypes(settings.isTypesFollowEvolutions());

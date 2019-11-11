@@ -451,6 +451,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             // Type randomization with evolution sanity
             copyUpEvolutionsHelper(new BasePokemonAction() {
                 public void applyTo(Pokemon pk) {
+                    // Negate dontcopypokes for split evos
+                    if(pk.evolutionsTo.size() > 0) {
+                        pk.temporaryFlag = false;
+                        return;
+                    }
                     // Step 1: Basic or Excluded From Copying Pokemon
                     // A Basic/EFC pokemon has a 35% chance of a second type if
                     // it has an evolution that copies type/stats, a 50% chance
@@ -511,12 +516,185 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Pokemon> allPokes = this.getPokemon();
         List<Type> allTypes = new ArrayList<Type>(Type.getTypes(getTypeSize()));
         Collections.shuffle(allTypes, this.random);
+        Type.setShuffledList(allTypes);
 
         for (Pokemon pkmn : allPokes) {
             if (pkmn != null) {
                 pkmn.primaryType = allTypes.get(pkmn.primaryType.ordinal());
                 if(pkmn.secondaryType != null) {
                     pkmn.secondaryType = allTypes.get(pkmn.secondaryType.ordinal());
+                }
+            }
+        }
+    }
+
+    @Override
+    public void randomizeRetainPokemonTypes(boolean evolutionSanity) {
+        List<Pokemon> allPokes = this.getPokemon();
+        if (evolutionSanity) {
+            // Type randomization with evolution sanity
+            copyUpEvolutionsHelper(new BasePokemonAction() {
+                public void applyTo(Pokemon pk) {
+                    // Negate dontcopypokes for split evos
+                    if(pk.evolutionsTo.size() > 0) {
+                        pk.temporaryFlag = false;
+                        return;
+                    }
+                    pk.typeChanged = 1;  //default to PrimaryType
+                    // Replace secondary type
+                    if (pk.secondaryType != null && AbstractRomHandler.this.random.nextDouble() < 0.5) {
+                        pk.typeChanged = 2;// SecondaryType
+                        pk.secondaryType = randomType();
+                    } 
+                    // Replace primary type
+                    else {
+                        pk.primaryType = randomType();
+                    }
+                    while(pk.primaryType == pk.secondaryType) {
+                        pk.primaryType = pk.typeChanged == 1 ? randomType() : pk.primaryType;
+                        pk.secondaryType = pk.typeChanged == 2 ? randomType() : pk.secondaryType;
+                    }
+                }
+            }, new EvolvedPokemonAction() {
+                public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
+                    // No difference in evo types so copy the prior evo                 
+                    if(evTo.evolutionsTo.size() == 1 && evTo.evolutionsTo.get(0).typesDiffer == 0){
+                        evTo.primaryType = evFrom.primaryType;
+                        evTo.secondaryType = evFrom.secondaryType;
+                        evTo.typeChanged = evFrom.typeChanged;
+                    } 
+                    // Type difference in evos (ex: Scyther into Scizor)
+                    else if(evTo.evolutionsTo.size() == 1) {
+                        switch(evTo.evolutionsTo.get(0).typesDiffer) {
+                        case 1:           
+                            evTo.primaryType = evFrom.typeChanged == 1 ? randomType() : evTo.primaryType;
+                            evTo.secondaryType = evFrom.typeChanged == 2 ? evFrom.secondaryType : evTo.secondaryType;
+                            evTo.typeChanged = evFrom.typeChanged;
+                            while(evTo.primaryType == evTo.secondaryType) {
+                                evTo.primaryType = evTo.typeChanged == 1 ? randomType() : evTo.primaryType;
+                                evTo.secondaryType = evTo.typeChanged == 2 ? randomType() : evTo.secondaryType;
+                            }
+                            break;
+                        case 2:
+                            evTo.primaryType = evFrom.typeChanged == 1 ? evFrom.primaryType : evTo.primaryType;
+                            evTo.secondaryType = evFrom.typeChanged == 2 && evTo.secondaryType != null ? 
+                                    randomType() : evTo.secondaryType;
+                            evTo.typeChanged = evTo.secondaryType != null ? evFrom.typeChanged : 1;
+                            while(evTo.primaryType == evTo.secondaryType) {
+                                evTo.primaryType = evTo.typeChanged == 1 ? randomType() : evTo.primaryType;
+                                evTo.secondaryType = evTo.typeChanged == 2 ? randomType() : evTo.secondaryType;
+                            }
+                            break;
+                        case 3:
+                            evTo.primaryType = evFrom.typeChanged == 1 ? evTo.primaryType : randomType();
+                            evTo.secondaryType = evFrom.typeChanged == 1 ? evFrom.primaryType : evTo.secondaryType;
+                            evTo.typeChanged = evFrom.typeChanged == 1 ? 2 : 1;
+                            while(evTo.primaryType == evTo.secondaryType) {
+                                evTo.primaryType = evTo.typeChanged == 1 ? randomType() : evTo.primaryType;
+                                evTo.secondaryType = evTo.typeChanged == 2 ? randomType() : evTo.secondaryType;
+                            }
+                            break;
+                        case 4:
+                            evTo.primaryType = evFrom.typeChanged == 1 ? evFrom.secondaryType: evFrom.secondaryType;
+                            evTo.secondaryType = evFrom.typeChanged == 1 && evTo.secondaryType != null ? 
+                                    randomType() : evTo.secondaryType;
+                            evTo.typeChanged = evFrom.typeChanged == 1 && evTo.secondaryType != null ? 
+                                    2 : 1;
+                            while(evTo.primaryType == evTo.secondaryType) {
+                                evTo.primaryType = evTo.typeChanged == 1 ? randomType() : evTo.primaryType;
+                                evTo.secondaryType = evTo.typeChanged == 2 ? randomType() : evTo.secondaryType;
+                            }
+                            break;
+                        }
+                    } else {
+                        // Multiple evo paths merge here. Check for similarity
+                        int similar = -1;
+                        int evoDiff = -1;
+                        for(Evolution e : evTo.evolutionsTo) {
+                            // Initialize 
+                            if (similar < 0) {
+                                similar = e.typesDiffer;
+                                evoDiff = e.from == evFrom ? e.typesDiffer : -1;
+                                continue;
+                            }
+
+                            // Get the similar type
+                            switch(e.typesDiffer) {
+                            // evTo PrimaryType is different
+                            case 1:
+                            case 3:
+                                similar = (similar&1) != 0 || similar == 0 ? 1 : -1;
+                                break;
+                            //evTo SecondaryType is different
+                            case 2:
+                            case 4:
+                                similar = (similar&1) == 0 ? 2 : -1;
+                                break;
+                            //evTo is exactly same types, no effect
+                            case 0:
+                                break;
+                            }
+
+                            // No similarity, end the loop
+                            if(similar == -1) {
+                                break;
+                            }
+                            
+                            evoDiff = e.from == evFrom ? e.typesDiffer : evoDiff;
+                        }
+                        // Only one type is similar = keep that one type
+                        if(similar > 0 && similar < 3) {
+                            evTo.typeChanged = (similar&1) == 0 ? 1:2;
+                            do {
+                                // If we're changing the first type, check which type of 
+                                // the prior evo we should copy
+                                evTo.primaryType = evTo.typeChanged == 1 ? 
+                                        evoDiff == 2 ? evFrom.primaryType : evFrom.secondaryType 
+                                        : evTo.primaryType;
+                                // If we're changing the second type, check which type
+                                // of the prior evo we should copy
+                                evTo.secondaryType = evTo.typeChanged == 2 ? 
+                                        evoDiff == 1 ? evFrom.secondaryType : evFrom.primaryType
+                                        : evTo.secondaryType;
+                            } while(evTo.primaryType == evTo.secondaryType);
+                        }
+                        // All/Nothing is similar = default type select
+                        else {
+                            evTo.typeChanged = 1; //default to PrimaryType
+                            // Replace secondary type
+                            if (evTo.secondaryType != null && AbstractRomHandler.this.random.nextDouble() < 0.5) {
+                                evTo.typeChanged = 2; // SecondaryType
+                                evTo.secondaryType = randomType();
+                            } 
+                            // Replace primary type
+                            else {
+                                evTo.primaryType = randomType();
+                            }
+                            while(evTo.primaryType == evTo.secondaryType) {
+                                evTo.primaryType = evTo.typeChanged == 1 ? randomType() : evTo.primaryType;
+                                evTo.secondaryType = evTo.typeChanged == 2 ? randomType() : evTo.secondaryType;
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            for (Pokemon pkmn : allPokes) {
+                if (pkmn != null) {
+                    pkmn.typeChanged = 1; //default to PrimaryType
+                    // Replace secondary type
+                    if (pkmn.secondaryType != null && this.random.nextDouble() < 0.5) {
+                        pkmn.typeChanged = 2; // SecondaryType
+                        pkmn.secondaryType = randomType();
+                    } 
+                    // Replace primary type
+                    else {
+                        pkmn.primaryType = randomType();
+                    }
+                    while(pkmn.primaryType == pkmn.secondaryType) {
+                        pkmn.primaryType = pkmn.typeChanged == 1 ? randomType() : pkmn.primaryType;
+                        pkmn.secondaryType = pkmn.typeChanged == 2 ? randomType() : pkmn.secondaryType;
+                    }
                 }
             }
         }
@@ -2900,8 +3078,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
 
                     // Step 3: pick - by similar strength or otherwise
-                    Pokemon picked = null;
-
+                    Pokemon picked = null;  
+                             
                     if (replacements.size() == 1) {
                         // Foregone conclusion.
                         picked = replacements.get(0);
@@ -3155,8 +3333,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         Set<Pokemon> middleEvos = RomFunctions.getMiddleEvolutions(this);
 
         for (Pokemon pk : dontCopyPokes) {
-            bpAction.applyTo(pk);
             pk.temporaryFlag = true;
+            bpAction.applyTo(pk);
         }
 
         // go "up" evolutions looking for pre-evos to do first
