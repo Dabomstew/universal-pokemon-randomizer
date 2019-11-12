@@ -28,6 +28,7 @@ package com.dabomstew.pkrandom.romhandlers;
  /*----------------------------------------------------------------------------*/
 import java.io.PrintStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
@@ -480,8 +481,24 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
             }, new EvolvedPokemonAction() {
                 public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
-                    evTo.primaryType = evFrom.primaryType;
-                    evTo.secondaryType = evFrom.secondaryType;
+                    // Special case for Eevee
+                    if(evFrom.number != 133) {
+                        evTo.primaryType = evFrom.primaryType;
+                        evTo.secondaryType = evFrom.secondaryType;
+                    } else {
+                        Set<Type> typeList = new HashSet<Type>();
+                        typeList.add(evFrom.primaryType);
+                        typeList.add(evFrom.secondaryType);
+                        for(Evolution e : evFrom.evolutionsFrom){
+                            if(e.to != evTo) {
+                                typeList.add(e.to.primaryType);
+                            }
+                            typeList.add(e.to.secondaryType);
+                        }
+                        List<Type> typeList2 = Type.getTypes(getTypeSize()).stream().filter(t -> !typeList.contains(t))
+                            .collect(Collectors.toList());
+                        evTo.primaryType = typeList2.get(AbstractRomHandler.this.random.nextInt(typeList2.size()-1));
+                    }
 
                     if (evTo.secondaryType == null) {
                         double chance = toMonIsFinalEvo ? 0.25 : 0.15;
@@ -565,6 +582,22 @@ public abstract class AbstractRomHandler implements RomHandler {
                     } 
                     // Type difference in evos (ex: Scyther into Scizor)
                     else if(evTo.evolutionsTo.size() == 1) {
+                        // Special case for Eevee
+                        if(evFrom.number == 133) {
+                            Set<Type> typeList = new HashSet<Type>();
+                            typeList.add(evFrom.primaryType);
+                            typeList.add(evFrom.secondaryType);
+                            for(Evolution e : evFrom.evolutionsFrom){
+                                if(e.to != evTo) {
+                                    typeList.add(e.to.primaryType);
+                                }
+                                typeList.add(e.to.secondaryType);
+                            }
+                            List<Type> typeList2 = Type.getTypes(getTypeSize()).stream().filter(t -> !typeList.contains(t))
+                                .collect(Collectors.toList());
+                            evTo.primaryType = typeList2.get(AbstractRomHandler.this.random.nextInt(typeList2.size()-1));
+                            return;
+                        }
                         switch(evTo.evolutionsTo.get(0).typesDiffer) {
                         case 1:           
                             evTo.primaryType = evFrom.typeChanged == 1 ? randomType() : evTo.primaryType;
