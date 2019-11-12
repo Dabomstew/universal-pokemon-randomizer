@@ -18,7 +18,7 @@ public class Gen1Constants {
     public static final int bsHPOffset = 1, bsAttackOffset = 2, bsDefenseOffset = 3, bsSpeedOffset = 4,
             bsSpecialOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7, bsCatchRateOffset = 8,
             bsExpYieldOffset = 9, bsFrontSpriteOffset = 11, bsLevel1MovesOffset = 15, bsGrowthCurveOffset = 19,
-            bsTMHMCompatOffset = 20;
+            bsTMHMCompatOffset = 20, bsExtra1Offset = 27;
 
     public static final int mewIndex = 151, marowakIndex = 105;
 
