@@ -675,6 +675,9 @@ public class Randomizer {
         case SHUFFLE_ORDER:
             romHandler.shufflePokemonStats(settings.isBaseStatsFollowEvolutions());
             break;
+        case SHUFFLE_BST:
+            romHandler.shuffleAllPokemonBSTs(settings.isBaseStatsFollowEvolutions(), false);
+            break;
         case RANDOM_WITHIN_BST:
             romHandler.randomizePokemonStatsWithinBST(settings.isBaseStatsFollowEvolutions());
             break;

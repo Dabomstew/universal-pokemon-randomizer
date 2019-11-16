@@ -93,7 +93,7 @@ public interface RomHandler {
     public void shufflePokemonStats(boolean evolutionSanity);
     
     // Shuffle all pokemon base stat totals.
-    public void shuffleAllPokemonBSTs();
+    public void shuffleAllPokemonBSTs(boolean evolutionSanity, boolean randomVariance);
 
     // Randomise stats following evolutions for proportions or not (see
     // tooltips)

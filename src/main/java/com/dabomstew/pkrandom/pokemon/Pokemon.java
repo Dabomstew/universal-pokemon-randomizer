@@ -83,6 +83,10 @@ public class Pokemon implements Comparable<Pokemon> {
     // Must not rely on the state of this flag being preserved between calls.
     public boolean temporaryFlag;
 
+    private static final List<Integer> legendaries = Arrays.asList(144, 145, 146, 150, 151, 243, 244, 245, 249, 250,
+    251, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488,
+    489, 490, 491, 492, 493, 494, 638, 639, 640, 641, 642, 643, 644, 645, 646, 647, 648, 649);
+
     public Pokemon() {
         shuffledStatsOrder = Arrays.asList(0, 1, 2, 3, 4, 5);
     }
@@ -415,6 +419,10 @@ public class Pokemon implements Comparable<Pokemon> {
         special = (int) Math.ceil((spatk + spdef) / 2.0f);
     }
 
+    public boolean isLegendary() {
+        return legendaries.contains(this.number);
+    }
+
     public int bst() {
         return hp + attack + defense + spatk + spdef + speed;
     }
@@ -467,39 +475,4 @@ public class Pokemon implements Comparable<Pokemon> {
     public int compareTo(Pokemon o) {
         return number - o.number;
     }
-
-    public static void swapStatsRandom(Pokemon swapTo, Pokemon swapFrom, Random random) {
-        List<Integer> toStats = Arrays.asList(swapTo.hp, swapTo.attack, swapTo.defense, swapTo.speed, swapTo.spatk, swapTo.spdef, swapTo.special);
-        List<Integer> fromStats = Arrays.asList(swapFrom.hp, swapFrom.attack, swapFrom.defense, swapFrom.speed, swapFrom.spatk, swapFrom.spdef, swapFrom.special);
-        
-        // Add slight variance, up to +- 10%
-        double modifier =  0.9 + (random.nextDouble() / 5);
-        
-        swapFrom.hp = (int) (toStats.get(0) * modifier);
-        swapFrom.attack = (int) (toStats.get(1) * modifier);
-        swapFrom.defense = (int) (toStats.get(2) * modifier);
-        swapFrom.speed = (int) (toStats.get(3) * modifier);
-        swapFrom.spatk = (int) (toStats.get(4) * modifier);
-        swapFrom.spdef = (int) (toStats.get(5) * modifier);
-        swapFrom.special = (int) (toStats.get(6) * modifier);
-        
-        modifier =  0.9 + (random.nextDouble() / 5);
-        
-        swapTo.hp = (int) (fromStats.get(0) * modifier);
-        swapTo.attack = (int) (fromStats.get(1) * modifier);
-        swapTo.defense = (int) (fromStats.get(2) * modifier);
-        swapTo.speed = (int) (fromStats.get(3) * modifier);
-        swapTo.spatk = (int) (fromStats.get(4) * modifier);
-        swapTo.spdef = (int)  (fromStats.get(5) * modifier);
-        swapTo.special = (int) (fromStats.get(6) * modifier);
-    }
-    
-    private static final List<Integer> legendaries = Arrays.asList(144, 145, 146, 150, 151, 243, 244, 245, 249, 250,
-            251, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488,
-            489, 490, 491, 492, 493, 494, 638, 639, 640, 641, 642, 643, 644, 645, 646, 647, 648, 649);
-
-    public boolean isLegendary() {
-        return legendaries.contains(this.number);
-    }
-
 }

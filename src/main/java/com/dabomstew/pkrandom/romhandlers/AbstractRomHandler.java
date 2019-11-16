@@ -242,10 +242,10 @@ public abstract class AbstractRomHandler implements RomHandler {
     
     @Override
     public void randomizeCompletelyPokemonStats(boolean evolutionSanity) {
-        this.shuffleAllPokemonBSTs();
+        this.shuffleAllPokemonBSTs(false, true);
         
+        List<Pokemon> allPokes = this.getPokemon();
         if (evolutionSanity) {
-            List<Pokemon> allPokes = this.getPokemon();
             int count = 0;
             double total = 0.0;
             
@@ -267,7 +267,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             });
         } else {
-            List<Pokemon> allPokes = this.getPokemon();
             for (Pokemon pk : allPokes) {
                 if (pk != null) {
                     pk.randomizeStatsWithinBST(random);
@@ -277,18 +276,73 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void shuffleAllPokemonBSTs() {
+    public void shuffleAllPokemonBSTs(boolean evolutionSanity, boolean randomVariance) {
         List<Pokemon> allPokes = this.getPokemon();
-        for (Pokemon pk : allPokes) {
-            if (pk != null) {
-                Pokemon swapWith = pickEvoPowerLvlReplacement(allPokes, pk);
-                while(swapWith == null) {
-                     swapWith = allPokes.get(this.random.nextInt(allPokes.size()));
-                } 
-                  
-                Pokemon.swapStatsRandom(pk, swapWith, this.random);
+
+        if(evolutionSanity) {
+            int count = 0;
+            double total = 0.0;
+            
+            for (Pokemon pk : allPokes) {
+                if (pk != null) {
+                    count++;
+                    total += pk.bst();
+                }
+            }
+            final double mean = total / count;
+            
+            copyUpEvolutionsHelper(new BasePokemonAction() {
+                public void applyTo(Pokemon pk) {
+                    Pokemon swapWith = pickEvoPowerLvlReplacement(allPokes, pk);
+                    while(swapWith == null) {
+                        swapWith = allPokes.get(AbstractRomHandler.this.random.nextInt(allPokes.size()));
+                    } 
+                    
+                    swapStatsRandom(pk, swapWith, AbstractRomHandler.this.random, randomVariance);
+                }
+            }, new EvolvedPokemonAction() {
+                public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
+                    evTo.copyCompletelyRandomizedStatsUpEvolution(evFrom, AbstractRomHandler.this.random, mean);
+                }
+            });
+        } else {
+            for (Pokemon pk : allPokes) {
+                if (pk != null) {
+                    Pokemon swapWith = pickEvoPowerLvlReplacement(allPokes, pk);
+                    while(swapWith == null) {
+                        swapWith = allPokes.get(this.random.nextInt(allPokes.size()));
+                    } 
+                    
+                    swapStatsRandom(pk, swapWith, this.random, randomVariance);
+                }
             }
         }
+    }
+
+    private void swapStatsRandom(Pokemon swapTo, Pokemon swapFrom, Random random, boolean randomize) {
+        List<Integer> toStats = Arrays.asList(swapTo.hp, swapTo.attack, swapTo.defense, swapTo.speed, swapTo.spatk, swapTo.spdef, swapTo.special);
+        List<Integer> fromStats = Arrays.asList(swapFrom.hp, swapFrom.attack, swapFrom.defense, swapFrom.speed, swapFrom.spatk, swapFrom.spdef, swapFrom.special);
+        
+        // Add slight variance, up to +- 10%
+        double modifier = randomize ? 0.9 + (random.nextDouble() / 5) : 1;
+        
+        swapFrom.hp = (int) (toStats.get(0) * modifier);
+        swapFrom.attack = (int) (toStats.get(1) * modifier);
+        swapFrom.defense = (int) (toStats.get(2) * modifier);
+        swapFrom.speed = (int) (toStats.get(3) * modifier);
+        swapFrom.spatk = (int) (toStats.get(4) * modifier);
+        swapFrom.spdef = (int) (toStats.get(5) * modifier);
+        swapFrom.special = (int) (toStats.get(6) * modifier);
+        
+        modifier = randomize ? 0.9 + (random.nextDouble() / 5) : 1;
+        
+        swapTo.hp = (int) (fromStats.get(0) * modifier);
+        swapTo.attack = (int) (fromStats.get(1) * modifier);
+        swapTo.defense = (int) (fromStats.get(2) * modifier);
+        swapTo.speed = (int) (fromStats.get(3) * modifier);
+        swapTo.spatk = (int) (fromStats.get(4) * modifier);
+        swapTo.spdef = (int)  (fromStats.get(5) * modifier);
+        swapTo.special = (int) (fromStats.get(6) * modifier);
     }
 
     @Override
