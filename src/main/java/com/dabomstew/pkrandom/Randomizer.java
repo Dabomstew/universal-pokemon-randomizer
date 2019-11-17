@@ -756,7 +756,9 @@ public class Randomizer {
                 }
                 
                 List<Pokemon> starters = new ArrayList<Pokemon>();
-                selectRandomStarter(starterCount, starters, log, () -> romHandler.randomPokemon());
+                selectRandomStarter(starterCount, starters, log, () -> romHandler.randomStarterPokemon(
+                    settings.isStartersNoSplit(), settings.isStartersUniqueTypes(),
+                    settings.isStartersLimitBST() ? settings.getStartersBSTLimitModifier() : 9999));
 
                 romHandler.setStarters(starters);
                 log.println("</ul>");
@@ -771,7 +773,8 @@ public class Randomizer {
 
                 List<Pokemon> starters = new ArrayList<Pokemon>();
                 selectRandomStarter(starterCount, starters, log, () -> 
-                    romHandler.random1or2EvosPokemon(settings.isStartersNoSplit()));
+                    romHandler.random1or2EvosPokemon(settings.isStartersNoSplit(), settings.isStartersUniqueTypes(),
+                    settings.isStartersLimitBST() ? settings.getStartersBSTLimitModifier() : 9999));
 
                 romHandler.setStarters(starters);
                 log.println("</ul>");
@@ -786,7 +789,8 @@ public class Randomizer {
 
                 List<Pokemon> starters = new ArrayList<Pokemon>();
                 selectRandomStarter(starterCount, starters, log, () -> 
-                    romHandler.random2EvosPokemon(settings.isStartersNoSplit()));
+                    romHandler.random2EvosPokemon(settings.isStartersNoSplit(), settings.isStartersUniqueTypes(),
+                    settings.isStartersLimitBST() ? settings.getStartersBSTLimitModifier() : 9999));
 
                 romHandler.setStarters(starters);
                 log.println("</ul>");

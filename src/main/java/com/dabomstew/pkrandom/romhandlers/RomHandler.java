@@ -124,13 +124,16 @@ public interface RomHandler {
     // Useful for starter evolution length
     public int evolutionChainSize(Pokemon pk);
 
+    // Give a random Pokemon who is eligible as a starter
+    public Pokemon randomStarterPokemon(boolean noSplitEvos, boolean uniqueTypes, int bstLimit);
+
     // Give a random Pokemon who has 1 or two evolution stages
     // Might make a good starter Pokemon
-    public Pokemon random1or2EvosPokemon(boolean b);
+    public Pokemon random1or2EvosPokemon(boolean noSplitEvos, boolean uniqueTypes, int bstLimit);
     
     // Give a random Pokemon who has 2 evolution stages
     // Should make a good starter Pokemon
-    public Pokemon random2EvosPokemon(boolean noSplitEvos);
+    public Pokemon random2EvosPokemon(boolean noSplitEvos, boolean uniqueTypes, int bstLimit);
 
     // Randomizer: types
     // return a random type valid in this game.
@@ -444,5 +447,4 @@ public interface RomHandler {
     public int miscTweaksAvailable();
 
     public void applyMiscTweak(MiscTweak tweak);
-
 }

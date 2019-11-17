@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.pokemon;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -16,6 +17,7 @@ public class PokemonSet {
     private ArrayList<Pokemon> pokes;
     private Map<Type, ArrayList<Pokemon>> pokesByType;
     private int typeCount;
+    private int uniquePokeCount;
 
     public PokemonSet() {
         pokes = new ArrayList<Pokemon>();
@@ -72,6 +74,10 @@ public class PokemonSet {
         return list.size();
     }
 
+    public int uniquePokes() {
+        return uniquePokeCount;
+    }
+
     // Filtering
     public PokemonSet filterLegendaries() {
         filter(p -> p.isLegendary());
@@ -101,6 +107,30 @@ public class PokemonSet {
     public PokemonSet remove(Pokemon poke) {
         filter(p -> p.equals(poke));
         return this;
+    }
+
+    public PokemonSet add(Pokemon poke) {
+        if (poke != null) {
+            pokes.add(poke);
+
+            ArrayList<Pokemon> set = pokesByType.get(poke.primaryType);
+            if (set == null) {
+                set = new ArrayList<Pokemon>();
+                pokesByType.put(poke.primaryType, set);
+            }
+            set.add(poke);
+
+            if (poke.secondaryType != null) {
+                set = pokesByType.get(poke.secondaryType);
+                if (set == null) {
+                    set = new ArrayList<Pokemon>();
+                    pokesByType.put(poke.secondaryType, set);
+                }
+                set.add(poke);
+            }
+        }  
+        updateTypeCount();
+        return this;      
     }
 
     public PokemonSet filter(Predicate<Pokemon> pred) {
@@ -185,8 +215,16 @@ public class PokemonSet {
     // Internal
     private void updateTypeCount() {
         typeCount = 0;
+        uniquePokeCount = 0;
+        HashSet<Pokemon> uniquePokes = null;
         for (Map.Entry<Type, ArrayList<Pokemon>> entry : pokesByType.entrySet()) {
             typeCount += entry.getValue().size();
+            if(uniquePokes == null) {
+                uniquePokes = new HashSet<Pokemon>(entry.getValue());
+            } else {
+                uniquePokes.addAll(entry.getValue());
+            }
         }
+        uniquePokeCount = uniquePokes.size();
     }
 }

@@ -443,46 +443,94 @@ public abstract class AbstractRomHandler implements RomHandler {
         return length + 1;
     }
 
-    private List<Pokemon> oneOrTwoEvoPokes;
+    private PokemonSet starterPokes;
 
     @Override
-    public Pokemon random1or2EvosPokemon(boolean noSplitEvos) {
-        if (oneOrTwoEvoPokes == null) {
+    public Pokemon randomStarterPokemon(boolean noSplitEvos, boolean uniqueTypes, int bstLimit) {
+        if (starterPokes == null) {
             // Prepare the list
-            oneOrTwoEvoPokes = new ArrayList<Pokemon>();
+            starterPokes = new PokemonSet();
             List<Pokemon> allPokes = this.getPokemon();
             for (Pokemon pk : allPokes) {
                 if (pk != null) {
-                	int length = evolutionChainSize(pk);
-                	// Stages counts base pokemon, hence a pokemon with no evolutions has length 1
-                	if(length > 1 && length < 4 && (pk.evolutionsFrom.size() == 1 || !noSplitEvos))
+                    if((pk.evolutionsFrom.size() < 2 || !noSplitEvos)
+                        && !(pk.bstForPowerLevels() > bstLimit))
                     // Candidate
-                    oneOrTwoEvoPokes.add(pk);
+                    starterPokes.add(pk);
                 }
             }
+            if (starterPokes.size() < 3 || (uniqueTypes && starterPokes.uniquePokes() < 3)) {
+                throw new RandomizationException("ERROR: Not enough starter choices available. Please " +
+                "reduce the filtering and try again.");
+            }
         }
-        return oneOrTwoEvoPokes.get(this.random.nextInt(oneOrTwoEvoPokes.size()));
+        Pokemon chosen = starterPokes.randomPokemon(this.random);
+        if(chosen == null) {
+            throw new RandomizationException("ERROR: Valid list of starters has been consumed. Please " +
+                    "reduce the filtering and try again.");
+        }
+        starterPokes.remove(chosen);
+        return chosen;
+    }
+
+    @Override
+    public Pokemon random1or2EvosPokemon(boolean noSplitEvos, boolean uniqueTypes, int bstLimit) {
+        if (starterPokes == null) {
+            // Prepare the list
+            starterPokes = new PokemonSet();
+            List<Pokemon> allPokes = this.getPokemon();
+            for (Pokemon pk : allPokes) {
+                if (pk != null) {
+                    int length = evolutionChainSize(pk);
+                    // Stages counts base pokemon, hence a pokemon with no evolutions has length 1
+                    if (length > 1 && length < 4 && (pk.evolutionsFrom.size() < 2 || !noSplitEvos)
+                        && !(pk.bstForPowerLevels() > bstLimit))
+                    // Candidate
+                    starterPokes.add(pk);
+                }
+            }
+            if (starterPokes.size() < 3 || (uniqueTypes && starterPokes.uniquePokes() < 3)) {
+                throw new RandomizationException("ERROR: Not enough starter choices available. Please " +
+                "reduce the filtering and try again.");
+            }
+        }
+        Pokemon chosen = starterPokes.randomPokemon(this.random);
+        if(chosen == null) {
+            throw new RandomizationException("ERROR: Valid list of starters has been consumed. Please " +
+                    "reduce the filtering and try again.");
+        }
+        starterPokes.remove(chosen);
+        return chosen;
     }
     
-    private List<Pokemon> twoEvoPokes;
-    
     @Override
-    public Pokemon random2EvosPokemon(boolean noSplitEvos) {
-        if (twoEvoPokes == null) {
+    public Pokemon random2EvosPokemon(boolean noSplitEvos, boolean uniqueTypes, int bstLimit) {
+        if (starterPokes == null) {
             // Prepare the list
-            twoEvoPokes = new ArrayList<Pokemon>();
+            starterPokes = new PokemonSet();
             List<Pokemon> allPokes = this.getPokemon();
             for (Pokemon pk : allPokes) {
                 if (pk != null) {
-                	int length = evolutionChainSize(pk);
-                	// Stages counts base pokemon, hence a pokemon with 2 evolutions has length 3
-                	if (length == 3 && (pk.evolutionsFrom.size() == 1 || !noSplitEvos)) {
-                		twoEvoPokes.add(pk);
-                	}
+                    int length = evolutionChainSize(pk);
+                    // Stages counts base pokemon, hence a pokemon with 2 evolutions has length 3
+                    if (length == 3 && (pk.evolutionsFrom.size() < 2 || !noSplitEvos)
+                        && !(pk.bstForPowerLevels() > bstLimit))
+                    // Candidate
+                    starterPokes.add(pk);
                 }
             }
+            if (starterPokes.size() < 3 || (uniqueTypes && starterPokes.uniquePokes() < 3)) {
+                throw new RandomizationException("ERROR: Not enough starter choices available. Please " +
+                "reduce the filtering and try again.");
+            }
         }
-        return twoEvoPokes.get(this.random.nextInt(twoEvoPokes.size()));
+        Pokemon chosen = starterPokes.randomPokemon(this.random);
+        if(chosen == null) {
+            throw new RandomizationException("ERROR: Valid list of starters has been consumed. Please " +
+                    "reduce the filtering and try again.");
+        }
+        starterPokes.remove(chosen);
+        return chosen;
     }
 
     @Override    
