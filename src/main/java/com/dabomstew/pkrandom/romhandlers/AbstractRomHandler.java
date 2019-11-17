@@ -446,7 +446,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     private PokemonSet starterPokes;
 
     @Override
-    public Pokemon randomStarterPokemon(boolean noSplitEvos, boolean uniqueTypes, int bstLimit) {
+    public Pokemon randomStarterPokemon(boolean noSplitEvos, boolean uniqueTypes, boolean baseOnly, 
+        int bstLimit) {
         if (starterPokes == null) {
             // Prepare the list
             starterPokes = new PokemonSet();
@@ -454,6 +455,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (Pokemon pk : allPokes) {
                 if (pk != null) {
                     if((pk.evolutionsFrom.size() < 2 || !noSplitEvos)
+                        && (pk.evolutionsTo.size() == 0 || !baseOnly)
                         && !(pk.bstForPowerLevels() > bstLimit))
                     // Candidate
                     starterPokes.add(pk);
@@ -474,7 +476,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public Pokemon random1or2EvosPokemon(boolean noSplitEvos, boolean uniqueTypes, int bstLimit) {
+    public Pokemon random1or2EvosPokemon(boolean noSplitEvos, boolean uniqueTypes, boolean baseOnly, 
+        int bstLimit) {
         if (starterPokes == null) {
             // Prepare the list
             starterPokes = new PokemonSet();
@@ -484,6 +487,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     int length = evolutionChainSize(pk);
                     // Stages counts base pokemon, hence a pokemon with no evolutions has length 1
                     if (length > 1 && length < 4 && (pk.evolutionsFrom.size() < 2 || !noSplitEvos)
+                        && (pk.evolutionsTo.size() == 0 || !baseOnly)
                         && !(pk.bstForPowerLevels() > bstLimit))
                     // Candidate
                     starterPokes.add(pk);
@@ -504,7 +508,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
     
     @Override
-    public Pokemon random2EvosPokemon(boolean noSplitEvos, boolean uniqueTypes, int bstLimit) {
+    public Pokemon random2EvosPokemon(boolean noSplitEvos, boolean uniqueTypes, boolean baseOnly, 
+        int bstLimit) {
         if (starterPokes == null) {
             // Prepare the list
             starterPokes = new PokemonSet();
@@ -514,6 +519,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     int length = evolutionChainSize(pk);
                     // Stages counts base pokemon, hence a pokemon with 2 evolutions has length 3
                     if (length == 3 && (pk.evolutionsFrom.size() < 2 || !noSplitEvos)
+                        && (pk.evolutionsTo.size() == 0 || !baseOnly)
                         && !(pk.bstForPowerLevels() > bstLimit))
                     // Candidate
                     starterPokes.add(pk);
