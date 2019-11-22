@@ -101,6 +101,10 @@ public class Randomizer {
             romHandler.printMoveUpdates();
         }
 
+        if(settings.shouldPatchSpecialSplit()) {
+            romHandler.patchPhysicalSpecialSplit();
+        }
+        
         if (settings.isRandomizeMovePowers()) {
             romHandler.randomizeMovePowers();
         }
@@ -117,7 +121,7 @@ public class Randomizer {
             romHandler.randomizeMoveTypes();
         }
 
-        if (settings.isRandomizeMoveCategory() && romHandler.hasPhysicalSpecialSplit()) {
+        if (settings.isRandomizeMoveCategory() && (romHandler.hasPhysicalSpecialSplit() || romHandler.canPatchPhysicalSpecialSplit())) {
             romHandler.randomizeMoveCategory();
         }
 

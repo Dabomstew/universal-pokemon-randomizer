@@ -65,6 +65,7 @@ import com.dabomstew.pkrandom.pokemon.IngameTrade;
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.ItemLocation;
 import com.dabomstew.pkrandom.pokemon.Move;
+import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
@@ -853,6 +854,18 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             moves[i].power = rom[offs + i * 0xC + 1] & 0xFF;
             moves[i].pp = rom[offs + i * 0xC + 4] & 0xFF;
             moves[i].type = Gen3Constants.typeTable[rom[offs + i * 0xC + 2]];
+            if(Gen3Constants.categoryTable[i-1] == 0)
+            {
+                moves[i].category = MoveCategory.PHYSICAL;
+            } else if(Gen3Constants.categoryTable[i-1] == 1)
+            {
+                moves[i].category = MoveCategory.SPECIAL;
+            } else if(Gen3Constants.categoryTable[i-1] == 2)
+            {
+                moves[i].category = MoveCategory.STATUS;
+            }
+            //debug
+            //System.out.println(i + ": " + moves[i].name + " : " + moves[i].category);
 
             if (GlobalConstants.normalMultihitMoves.contains(i)) {
                 moves[i].hitCount = 3;
@@ -865,6 +878,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     }
 
+    @Override
+    public boolean canPatchPhysicalSpecialSplit() {
+        if(romEntry.romType == Gen3Constants.RomType_Em || romEntry.romType == Gen3Constants.RomType_FRLG)
+        {
+            return true;
+        }
+        return false;
+    }
+    
     private void saveMoves() {
         int moveCount = romEntry.getValue("MoveCount");
         int offs = romEntry.getValue("MoveData");
@@ -881,6 +903,18 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             }
             rom[offs + i * 0xC + 3] = (byte) hitratio;
             rom[offs + i * 0xC + 4] = (byte) moves[i].pp;
+            
+            //second byte in padding, used by special split patch
+            //0 is physical, 1+ is special
+            if(moves[i].category != null)
+            {
+                if(moves[i].category.equals(MoveCategory.SPECIAL)) {
+                    rom[offs + i * 0xC + 10] = (byte) 1;
+                } else if(moves[i].category.equals(MoveCategory.PHYSICAL)) {
+                    rom[offs + i * 0xC + 10] = (byte) 0;
+                }
+                //System.out.println(i + ":" + moves[i].name + " : " + moves[i].category);
+            }
         }
     }
 
@@ -1975,7 +2009,32 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     public boolean hasMoveTutors() {
         return (romEntry.romType == Gen3Constants.RomType_Em || romEntry.romType == Gen3Constants.RomType_FRLG);
     }
-
+    
+    @Override
+    public boolean hasPhysicalSpecialSplit() {
+        return(romEntry.romType == Gen3Constants.RomType_Em || romEntry.romType == Gen3Constants.RomType_FRLG);
+    }
+    
+    @Override
+    public void patchPhysicalSpecialSplit() {
+        //TODO: credit proper patch providers (check md5 to double check)
+        if(romEntry.romType == Gen3Constants.RomType_Em)
+        {
+            try {
+                FileFunctions.applyPatch(rom, "em_en_special_split");
+            } catch (IOException e) {
+                throw new RandomizerIOException(e);
+            }
+        } else if (romEntry.romType == Gen3Constants.RomType_FRLG)
+        {
+            try {
+                FileFunctions.applyPatch(rom, "fr_en_special_split");
+            } catch (IOException e) {
+                throw new RandomizerIOException(e);
+            }
+        }
+    }
+    
     @Override
     public List<Integer> getMoveTutorMoves() {
         if (!hasMoveTutors()) {

@@ -204,8 +204,8 @@ public interface RomHandler {
     public void randomizeMoveAccuracies();
 
     public void randomizeMoveTypes();
-
-    public boolean hasPhysicalSpecialSplit();
+    
+    public void patchPhysicalSpecialSplit();
 
     public void randomizeMoveCategory();
 
@@ -440,6 +440,10 @@ public interface RomHandler {
 
     // Misc
 
+    public boolean hasPhysicalSpecialSplit();
+    
+    public boolean canPatchPhysicalSpecialSplit();
+    
     public boolean isYellow();
 
     public String getROMName();

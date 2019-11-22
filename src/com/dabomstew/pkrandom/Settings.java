@@ -121,6 +121,7 @@ public class Settings {
     private boolean randomizeMovePPs;
     private boolean randomizeMoveTypes;
     private boolean randomizeMoveCategory;
+    private boolean shouldPatchSpecialSplit;
     private boolean updateMoves;
     private boolean updateMovesLegacy;
 
@@ -393,7 +394,7 @@ public class Settings {
         out.write(baseStatRange);
 
         // 37 trainer pokemon extended settings and misc? (couldn't fit this in existing entries)
-        out.write(makeByteSelected(trainersUseSameEvoStages));
+        out.write(makeByteSelected(trainersUseSameEvoStages, shouldPatchSpecialSplit));
         
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -567,6 +568,7 @@ public class Settings {
         settings.setRandomizeMovePPs(restoreState(data[25], 2));
         settings.setRandomizeMoveTypes(restoreState(data[25], 3));
         settings.setRandomizeMoveCategory(restoreState(data[25], 4));
+        settings.setShouldPatchSpecialSplit(restoreState(data[37], 1));
 
         settings.setEvolutionsMod(restoreEnum(EvolutionsMod.class, data[26], 0, // UNCHANGED
                 1 // RANDOM
@@ -711,7 +713,11 @@ public class Settings {
             this.setRandomizeInGameTradesOTs(false);
         }
 
-        if (!rh.hasPhysicalSpecialSplit()) {
+        if(!rh.canPatchPhysicalSpecialSplit()) {
+            this.setShouldPatchSpecialSplit(false);
+        }
+        
+        if ((!rh.hasPhysicalSpecialSplit() && !rh.canPatchPhysicalSpecialSplit()) || (rh.canPatchPhysicalSpecialSplit() && !this.shouldPatchSpecialSplit())) {
             this.setRandomizeMoveCategory(false);
         }
 
@@ -1104,9 +1110,18 @@ public class Settings {
     public boolean isRandomizeMoveCategory() {
         return randomizeMoveCategory;
     }
+    
+    public boolean shouldPatchSpecialSplit() {
+        return shouldPatchSpecialSplit;
+    }
 
     public Settings setRandomizeMoveCategory(boolean randomizeMoveCategory) {
         this.randomizeMoveCategory = randomizeMoveCategory;
+        return this;
+    }
+    
+    public Settings setShouldPatchSpecialSplit(boolean shouldPatch) {
+        this.shouldPatchSpecialSplit = shouldPatch;
         return this;
     }
 

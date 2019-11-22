@@ -1411,7 +1411,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeMoveCategory() {
-        if (!this.hasPhysicalSpecialSplit()) {
+        if (!this.hasPhysicalSpecialSplit() && !this.canPatchPhysicalSpecialSplit()) {
             return;
         }
         List<Move> moves = this.getMoves();
@@ -1423,6 +1423,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
+    }
+
+    @Override
+    public void patchPhysicalSpecialSplit() {
+        //do nothing unless a game specifically specifies it can patch the split
     }
 
     @Override
@@ -4022,6 +4027,12 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public boolean hasTimeBasedEncounters() {
         // DEFAULT: no
+        return false;
+    }
+    
+    @Override
+    public boolean canPatchPhysicalSpecialSplit() {
+        //DEFAULT: no
         return false;
     }
 
