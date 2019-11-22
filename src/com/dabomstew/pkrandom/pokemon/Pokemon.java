@@ -57,6 +57,8 @@ public class Pokemon implements Comparable<Pokemon> {
     public List<Evolution> evolutionsTo = new ArrayList<Evolution>();
 
     public List<Integer> shuffledStatsOrder = null;
+    
+    public int extra1;
 
     // A flag to use for things like recursive stats copying.
     // Must not rely on the state of this flag being preserved between calls.
