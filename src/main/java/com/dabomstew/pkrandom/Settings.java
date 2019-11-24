@@ -48,7 +48,7 @@ public class Settings {
 
     public static final int VERSION = 181;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 40;
+    public static final int LENGTH_OF_SETTINGS_DATA = 41;
 
     private CustomNamesSet customNames;
 
@@ -147,6 +147,7 @@ public class Settings {
 
     private TrainersMod trainersMod = TrainersMod.UNCHANGED;
     private boolean rivalCarriesStarterThroughout;
+    private boolean rivalCarriesTeamThroughout;
     private boolean trainersUsePokemonOfSimilarStrength;
     private boolean trainersMatchTypingDistribution;
     private boolean trainersBlockLegendaries = true;
@@ -303,7 +304,7 @@ public class Settings {
         // 12 movesets good damaging
         out.write((movesetsForceGoodDamaging ? 0x80 : 0) | movesetsGoodDamagingPercent);
 
-        // 13 trainer pokemon
+        // 13 trainer pokemon (see byte 40 for additional options)
         // changed 160
         out.write(makeByteSelected(trainersUsePokemonOfSimilarStrength, trainersMod == TrainersMod.RANDOM,
                 rivalCarriesStarterThroughout, trainersMod == TrainersMod.TYPE_THEMED, trainersMatchTypingDistribution,
@@ -410,7 +411,10 @@ public class Settings {
         // @ 38 Starter Pokemon BST Modifier
         write2ByteInt(out, starterBSTModifier - 1);
         
-        // @ 40 Rom Title Name (update LENGTH_OF_SETTINGS_DATA if this changes)
+        // @ 40 Trainer Pokemon Overflow
+        out.write(makeByteSelected(rivalCarriesTeamThroughout));
+
+        // @ 41 Rom Title Name (update LENGTH_OF_SETTINGS_DATA if this changes)
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
             out.write(romName.length);
@@ -632,6 +636,8 @@ public class Settings {
         settings.setStartersBaseEvoOnly(restoreState(data[37], 4));
 
         settings.setStartersBSTLimitModifier(FileFunctions.read2ByteInt(data, 38) + 1);
+
+        settings.setRivalCarriesTeamThroughout(restoreState(data[40], 0));
         
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1029,24 +1035,27 @@ public class Settings {
         return starterLimitBST;
     }
 
-    public void setStartersLimitBST(boolean starterLimitBST) {
+    public Settings setStartersLimitBST(boolean starterLimitBST) {
         this.starterLimitBST = starterLimitBST;
+        return this;
     }
 
     public boolean isStartersBaseEvoOnly() {
         return startersBaseEvoOnly;
     }
 
-    public void setStartersBaseEvoOnly(boolean startersBaseEvoOnly) {
+    public Settings setStartersBaseEvoOnly(boolean startersBaseEvoOnly) {
         this.startersBaseEvoOnly = startersBaseEvoOnly;
+        return this;
     }
 
     public int getStartersBSTLimitModifier() {
         return starterBSTModifier;
     }
 
-    public void setStartersBSTLimitModifier(int starterBSTModifier) {
+    public Settings setStartersBSTLimitModifier(int starterBSTModifier) {
         this.starterBSTModifier = starterBSTModifier;
+        return this;
     }
 
     public TypesMod getTypesMod() {
@@ -1075,8 +1084,9 @@ public class Settings {
         return typesFollowEvos;
     }
 
-    public void setTypesFollowEvos(boolean selected) {
-        typesFollowEvos = selected;
+    public Settings setTypesFollowEvos(boolean typesFollowEvos) {
+        this.typesFollowEvos = typesFollowEvos;
+        return this;
     }
 
     public EvolutionsMod getEvolutionsMod() {
@@ -1267,6 +1277,15 @@ public class Settings {
 
     public Settings setRivalCarriesStarterThroughout(boolean rivalCarriesStarterThroughout) {
         this.rivalCarriesStarterThroughout = rivalCarriesStarterThroughout;
+        return this;
+    }
+
+    public boolean isRivalCarriesTeamThroughout() {
+        return rivalCarriesTeamThroughout;
+    }
+
+    public Settings setRivalCarriesTeamThroughout(boolean rivalCarriesTeamThroughout) {
+        this.rivalCarriesTeamThroughout = rivalCarriesTeamThroughout;
         return this;
     }
 

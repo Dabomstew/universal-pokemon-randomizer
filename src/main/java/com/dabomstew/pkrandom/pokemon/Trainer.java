@@ -30,6 +30,7 @@ public class Trainer implements Comparable<Trainer> {
     public int offset;
     public List<TrainerPokemon> pokemon = new ArrayList<TrainerPokemon>();
     public String tag;
+    public boolean isDoubleBattle;
     public boolean importantTrainer;
     public int poketype;
     public String name;

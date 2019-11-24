@@ -125,6 +125,38 @@ public class Pokemon implements Comparable<Pokemon> {
         return min;
     }
 
+    public int nearestEvoTarget(int level) {
+        int target = -1;
+        int evoMin = -1;
+        for(int i = 0; i < evolutionsFrom.size(); i++) {
+            if(evolutionsFrom.get(i).type.usesLevel()) {
+                    evoMin = evolutionsFrom.get(i).extraInfo;
+            } else {
+                switch (evolutionsFrom.get(i).type) {
+                    case STONE:
+                    case STONE_FEMALE_ONLY:
+                    case STONE_MALE_ONLY:
+                        evoMin = 24;
+                        break;
+    
+                    case TRADE:
+                    case TRADE_ITEM:
+                    case TRADE_SPECIAL:
+                        evoMin = 37;
+                        break;
+    
+                    default:
+                        evoMin = 33;
+                        break;
+                }
+            }
+
+            // Target represents the evolution index
+            target = evoMin <= level ? i : target;
+        }
+        return target;
+    }
+
     public void shuffleStats(Random random) {
         Collections.shuffle(shuffledStatsOrder, random);
         applyShuffledOrderToStats();

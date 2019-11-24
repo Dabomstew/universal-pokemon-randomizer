@@ -314,7 +314,12 @@ public class Randomizer {
 
         if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)
                 && settings.isRivalCarriesStarterThroughout()) {
-            romHandler.rivalCarriesStarter();
+                    // First randomize the starter
+                    romHandler.rivalCarriesStarter(settings.isTrainersBlockLegendaries());
+                    // Then randomize the team
+                    if (settings.isRivalCarriesTeamThroughout()) {
+                        romHandler.rivalCarriesTeam();
+                    }
         }
 
         if (settings.isTrainersForceFullyEvolved()) {

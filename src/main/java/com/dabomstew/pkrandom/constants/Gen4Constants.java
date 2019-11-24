@@ -453,8 +453,11 @@ public class Gen4Constants {
         tag(trs, 0x108, "RIVAL5-2");
 
         tagRivalConsecutive(trs, "RIVAL6", 0x11e);
+        tagAsDoubleRivalConsecutive(trs, 0x11e);
         tagRivalConsecutive(trs, "RIVAL7", 0x2e0); // dragons den tag battle
+        tagAsDoubleRivalConsecutive(trs, 0x2e0);
         tagRivalConsecutive(trs, "RIVAL8", 0x1EA);
+        tagAsDoubleRivalConsecutive(trs, 0x1EA);
 
         // Clair & Lance match in Dragons Den
         tag(trs, 0x2DE, "GYM8");
@@ -499,4 +502,10 @@ public class Gen4Constants {
 
     }
 
+    private static void tagAsDoubleRivalConsecutive(List<Trainer> allTrainers, int offsetFire) {
+        allTrainers.get(offsetFire - 1).isDoubleBattle = true;
+        allTrainers.get(offsetFire).isDoubleBattle = true;
+        allTrainers.get(offsetFire - 2).isDoubleBattle = true;
+
+    }
 }

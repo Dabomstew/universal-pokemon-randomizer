@@ -49,6 +49,73 @@ line.
 This is subject to change. Make sure you're paying attention to which version of Java
 (currently this project is set to use Java 8) and Maven you're using.
 
+# Adding Options to Interface
+
+This project has a number of files that need to be updated correctly in order to
+support any new options. 
+
+It is strongly recommended that you download NetBeans to take advantage of their
+Java Swing editor, since this project was built using it. NetBeans should be able
+to import the project as Eclipse (you will need a plug-in for this). Once you open
+`RandomizerGUI.java` in NetBeans, it should automatically switch over to a design
+perspective where you can edit it to your heart's content. Edits here will
+automatically update the `RandomizerGUI.form`, `RandomizerGUI.java`, and 
+`Bundle.properties` file.
+
+**NOTE: NetBeans does make a number of temp/lock files to keep you from editing
+other files while making design changes. It is best to have another editor like
+Eclipse or VS Code to work around NetBean's locks. Also note that you should not
+commit any temp or lock files to git. **
+
+When working with NetBeans, I recommend first editing the variable name (under Code tab)
+for any new GUI elements added. This will allow all new functions to be named correctly
+rather than named `jCheckBox1`. 
+
+Under the Properties tab, uncheck `enabled` so that the element starts disabled until
+a ROM is loaded. Check `horizontally resizable` to allow element to match the text size.
+Adjust the `text` and `toolTip` by clicking the `...` box to the right.
+Ensure `Resource Bundle` is selected, `com.dabomstew.pkrandom.gui.Bundle` is the bundle name.
+All tool tips need to start with `<html>` for proper rendering. Use `<br />` for line breaks. 
+
+Under the Code tab, use `actionPerformed` when another element will be enabled/disabled
+based on whether your element is selected or not. 
+
+You will also need to edit the `Settings.java` and `RandomizerGUI.java` files to use any new
+settings you create. 
+
+## Settings.java
+Add a variable to represent your new option. This will likely be a `private boolean`.
+Also create 2 functions, 1 to get the value of this variable (most likely a `public boolean`), 
+and 1 to set it (most likely a `public Settings`).
+
+Locate the appropriate byte to put your option under. If the byte already has 8 options,
+you will need to locate an overflow area, or create one yourself. If you make a new byte,
+you will need to update `LENGTH_OF_SETTINGS_DATA` to match the new byte location. This
+MUST be the last byte being written or read.
+
+If you have a number, it will need to conform to the binary number system.
+For example, one byte can contain a value in the range of -128 to 127. Two bytes (a short)
+can contain a value in the range of -32,768 to 32,767. There is a `write2ByteInt` in case
+you need a short. If you only need 1 byte, then use `0x80 | (your_value)`.
+
+Reading a data setting requires using `data[the_byte_location]`. For shorts, use `read2ByteInt`.
+For bytes, use `data[the_byte_location] & 0x7F`.
+
+## RandomizerGUI.java
+
+Update `restoreStateFromSettings` to retore value to your element.
+Update `createSettingsFromState` to save the value of your element to settings.
+
+Update `initialFormState` to set your element's `selected` and `enabled` to false upon ROM
+load or form reset. Update `visibility` as needed.
+
+Use `romLoaded` if your element should be active upon ROM load. Use `enableOrDisableSubControls`
+if your element should be active based on the state of another element. Remember to set the
+state back to default if the dependent state changes.
+
+If not done so already, and if you have an element with an `actionPerformed` event, update
+the function to call `this.enableOrDisableSubControls()`.
+
 # Contacting Me
 Please only contact me with the following
 

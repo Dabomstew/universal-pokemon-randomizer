@@ -2183,7 +2183,7 @@
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="trainersPokemonPanel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="180" max="32767" attributes="0"/>
+                      <EmptySpace pref="149" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -2207,34 +2207,31 @@
                       <Group type="102" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="tpUnchangedRB" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="tpRandomRB" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Component id="tpTypeThemedRB" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="tpUnchangedRB" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      <Component id="tpRandomRB" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                                  <EmptySpace min="-2" pref="47" max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="0" attributes="0">
-                                      <Group type="103" alignment="0" groupAlignment="0" max="-2" attributes="0">
-                                          <Component id="tpTypeWeightingCB" max="32767" attributes="0"/>
-                                          <Component id="tpRivalCarriesStarterCB" alignment="0" max="32767" attributes="0"/>
-                                          <Component id="tpPowerLevelsCB" alignment="0" max="32767" attributes="0"/>
-                                          <Component id="tpNoLegendariesCB" alignment="0" max="32767" attributes="0"/>
-                                      </Group>
-                                      <Component id="tpNoEarlyShedinjaCB" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                                  <EmptySpace type="separate" max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="tnRandomizeCB" min="-2" max="-2" attributes="0"/>
-                                      <Component id="tcnRandomizeCB" min="-2" max="-2" attributes="0"/>
-                                      <Component id="tpForceFullyEvolvedCB" min="-2" max="-2" attributes="0"/>
-                                      <Component id="tpForceFullyEvolvedSlider" min="-2" max="-2" attributes="0"/>
-                                      <Component id="tpLevelModifierCB" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      <Component id="tpLevelModifierSlider" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                              </Group>
                           </Group>
-                          <EmptySpace pref="619" max="32767" attributes="0"/>
+                          <EmptySpace min="-2" pref="35" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Group type="103" alignment="0" groupAlignment="0" max="-2" attributes="0">
+                                  <Component id="tpTypeWeightingCB" max="32767" attributes="0"/>
+                                  <Component id="tpRivalCarriesStarterCB" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="tpPowerLevelsCB" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="tpNoLegendariesCB" alignment="0" max="32767" attributes="0"/>
+                              </Group>
+                              <Component id="tpNoEarlyShedinjaCB" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="tpRivalCarriesTeamCB" alignment="0" max="32767" attributes="0"/>
+                          </Group>
+                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="tnRandomizeCB" min="-2" max="-2" attributes="0"/>
+                              <Component id="tcnRandomizeCB" min="-2" max="-2" attributes="0"/>
+                              <Component id="tpForceFullyEvolvedCB" min="-2" max="-2" attributes="0"/>
+                              <Component id="tpForceFullyEvolvedSlider" min="-2" max="-2" attributes="0"/>
+                              <Component id="tpLevelModifierCB" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="tpLevelModifierSlider" alignment="0" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace pref="145" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -2248,30 +2245,33 @@
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="tpRivalCarriesTeamCB" alignment="3" max="-2" attributes="0"/>
                               <Component id="tpRandomRB" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="tpPowerLevelsCB" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="tcnRandomizeCB" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="tpPowerLevelsCB" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="tpTypeThemedRB" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="tpTypeWeightingCB" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="tpForceFullyEvolvedCB" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" attributes="0">
-                                  <Component id="tpNoLegendariesCB" min="-2" max="-2" attributes="0"/>
+                                  <Component id="tpTypeWeightingCB" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                  <Component id="tpNoEarlyShedinjaCB" min="-2" max="-2" attributes="0"/>
+                                  <Component id="tpNoLegendariesCB" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <Component id="tpForceFullyEvolvedSlider" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Component id="tpLevelModifierCB" min="-2" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="tpNoEarlyShedinjaCB" min="-2" max="-2" attributes="0"/>
+                              <Component id="tpLevelModifierCB" alignment="0" min="-2" max="-2" attributes="0"/>
+                          </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Component id="tpLevelModifierSlider" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="32767" attributes="0"/>
+                          <EmptySpace pref="42" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -2358,6 +2358,9 @@
                     </Property>
                     <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="tpRivalCarriesStarterCBActionPerformed"/>
+                  </Events>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="tpNoLegendariesCB">
                   <Properties>
@@ -2450,6 +2453,17 @@
                       <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.tpLevelModifierSlider.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
                     <Property name="value" type="int" value="0"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="tpRivalCarriesTeamCB">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.tpRivalCarriesTeamCB.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.tpRivalCarriesTeamCB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                 </Component>
               </SubComponents>

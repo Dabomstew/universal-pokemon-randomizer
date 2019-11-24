@@ -39,8 +39,11 @@ public class TrainerPokemon {
     
     public boolean resetMoves = false;
 
+    public int getLevel() {
+        return level;
+    }
+
     public String toString() {
         return pokemon.name + " Lv" + level;
     }
-
 }

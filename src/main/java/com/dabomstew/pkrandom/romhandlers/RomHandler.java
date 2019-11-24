@@ -197,7 +197,9 @@ public interface RomHandler {
     public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
             boolean noEarlyWonderGuard, int levelModifier);
 
-    public void rivalCarriesStarter();
+    public void rivalCarriesStarter(boolean noLegendaries);
+
+    public void rivalCarriesTeam();
 
     public void forceFullyEvolvedTrainerPokes(int minLevel);
 
@@ -425,6 +427,8 @@ public interface RomHandler {
 
     // Misc
     public boolean isYellow();
+
+    public boolean isGen1();
 
     public String getROMName();
 

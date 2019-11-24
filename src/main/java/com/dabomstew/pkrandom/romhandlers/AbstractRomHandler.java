@@ -1331,11 +1331,24 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
     @Override
-    public void rivalCarriesStarter() {
+    public void rivalCarriesStarter(boolean noLegendaries) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
+        if(cachedAllList == null) {
+            cachedAllList = noLegendaries ? new ArrayList<Pokemon>(noLegendaryList)
+            : new ArrayList<Pokemon>(mainPokemonList);
+        }
         rivalCarriesStarterUpdate(currentTrainers, "RIVAL", 1);
         rivalCarriesStarterUpdate(currentTrainers, "FRIEND", 2);
+        this.setTrainers(currentTrainers);
+    }
+
+    @Override
+    public void rivalCarriesTeam() {
+        checkPokemonRestrictions();
+        List<Trainer> currentTrainers = this.getTrainers();
+        rivalCarriesTeamUpdate(currentTrainers, "RIVAL", 1);
+        rivalCarriesTeamUpdate(currentTrainers, "FRIEND", 2);
         this.setTrainers(currentTrainers);
     }
 
@@ -3578,8 +3591,8 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (t.tag != null && t.tag.startsWith(prefix)) {
                 highestRivalNum = Math.max(highestRivalNum,
                         Integer.parseInt(t.tag.substring(prefix.length(), t.tag.indexOf('-'))));
-                }
             }
+        }
 
         if (highestRivalNum == 0) {
             // This rival type not used in this game
@@ -3675,12 +3688,115 @@ public abstract class AbstractRomHandler implements RomHandler {
                     thisStarter = pickRandomEvolutionOf(thisStarter, false);
                     for (; j <= highestRivalNum; j++) {
                         changeStarterWithTag(currentTrainers, prefix + j + "-" + i, thisStarter);
-                        }
                     }
                 }
             }
-
         }
+    }
+    
+    private void rivalCarriesTeamUpdate(List<Trainer> currentTrainers, String prefix, int pokemonOffset) {
+        HashMap<String, ArrayList<Trainer>> rivalTrainer = new HashMap<String, ArrayList<Trainer>>();
+        int highestRivalNum = 0;
+        for (Trainer t : currentTrainers) {
+            if (t.tag != null && t.tag.startsWith(prefix)) {
+                if(!rivalTrainer.containsKey(t.tag)) {
+                    rivalTrainer.put(t.tag, new ArrayList<Trainer>());
+                }
+                rivalTrainer.get(t.tag).add(t);
+                highestRivalNum = Math.max(highestRivalNum,
+                    Integer.parseInt(t.tag.substring(prefix.length(), t.tag.indexOf('-'))));
+            }
+        }
+
+        if (rivalTrainer.size() == 0) {
+            // This rival type not used in this game
+            return;
+        }
+
+        // Loop through each rival version
+        for (int i = 0; i < 3; i++) {
+            //Loop through each team
+            for (int j = 1; j < highestRivalNum; j++) {
+                ArrayList<Trainer> currList = rivalTrainer.get(prefix+j+"-"+i);
+                if (currList == null) {
+                    if(!isYellow() || j != 3) {
+                        continue;
+                    } else {
+                        currList = rivalTrainer.get(prefix+j+"-0");
+                    }
+                }
+                for (int t = 0; t < currList.size(); t++) {
+                    // Last modified team - first round is lowest team
+                    List<TrainerPokemon> tpkList = currList.get(t).pokemon;
+                    tpkList.sort(Comparator.comparing(TrainerPokemon::getLevel));
+    
+                    // Get the team that comes after the last modified team
+                    List<TrainerPokemon> tpkNextList = rivalTrainer.get(prefix+(j+1)+"-"+i).get(t).pokemon;
+                    tpkNextList.sort(Comparator.comparing(TrainerPokemon::getLevel));
+                    
+                    // Skip replacing for team size 1
+                    if (tpkList.size() < 2) {
+                        continue;
+                    }
+    
+                    // Special Gen 1 - Rival losest weakest pokemon after 4th fight
+                    if (isGen1() && prefix == "RIVAL") {
+                        if ((isYellow() && j == 3) || (!isYellow() && j == 4)) {
+                            tpkList = tpkList.subList(1, tpkList.size());
+                        }
+                    }
+
+                    // Special Tag Battles
+                    if (currList.get(t).isDoubleBattle) {
+                        tpkList = rivalTrainer.get(prefix+(j-1)+"-"+i).get(t).pokemon;
+                    }
+                                        
+                    // Skip the weakest mons of the next team
+                    int listOffset = 0;
+                    while (tpkNextList.size() > tpkList.size() + listOffset) {
+                        listOffset++;
+                    }
+                    
+                    for (int k = 0; k < tpkList.size(); k++) {
+                        if(k >= tpkNextList.size()) {
+                            break;
+                        }
+                        int timesEvolves = numEvolutions(tpkList.get(k).pokemon, 2);
+                        if (timesEvolves == 0) {
+                            tpkNextList.get(k+listOffset).pokemon = tpkList.get(k).pokemon;
+                        } else {
+                            // If greater or equal to evolution level, try to make it the next evo
+                            int target = tpkList.get(k).pokemon.nearestEvoTarget(tpkNextList.get(k+listOffset).level);
+                            if (target > -1) {
+                                tpkNextList.get(k+listOffset).pokemon = pickRandomEvolutionOf(tpkList.get(k).pokemon, false);
+                            } else {
+                                tpkNextList.get(k+listOffset).pokemon = tpkList.get(k).pokemon;
+                            }
+                        }
+                        tpkNextList.get(k+listOffset).resetMoves = true;
+                    }
+                    
+                    // Shuffle after finished
+                    Collections.shuffle(currList.get(t).pokemon, random);
+                }
+            }
+            // Shuffle and alter the last rival fight
+            ArrayList<Trainer> trainerList = rivalTrainer.get(prefix+highestRivalNum+"-"+i);
+            if(trainerList == null) {
+                continue;
+            }
+            for (Trainer trainer : trainerList) {
+                if (this instanceof Gen3RomHandler && isGen1()) {
+                    // Randomize two pokemon
+                    trainer.pokemon.sort(Comparator.comparing(TrainerPokemon::getLevel));
+                    trainer.pokemon.get(0).pokemon = randomPokemon();
+                    trainer.pokemon.get(1).pokemon = randomPokemon();
+                    noRepeatTaggedTeam(trainer, null);
+                }
+                Collections.shuffle(trainer.pokemon, random);                
+            }
+        }               
+    }
 
     private Pokemon pickRandomEvolutionOf(Pokemon base, boolean mustEvolveItself) {
         // Used for "rival carries starter"
@@ -3748,7 +3864,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private void noRepeatTaggedTeam(Trainer trainer, Pokemon starter) {
         int tries = 0;
-        Pokemon fullyEvolved = fullyEvolve(starter);
+        Pokemon fullyEvolved = starter == null ? null : fullyEvolve(starter);
         // Loop over entire team.
         for(int i = 0; i < trainer.pokemon.size(); i++) {
             if(tries > 100) {
@@ -3757,7 +3873,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             // Current suspect pokemon based on 'i'
             TrainerPokemon tp = trainer.pokemon.get(i);
-            // Check if suspect pokemon matches the starter or it's full evolution
+            // Check if suspect pokemon matches the starter or its full evolution
             if(tp.pokemon == starter || tp.pokemon == fullyEvolved) {
                 // Randomize this pokemon
                 tp.pokemon = pickReplacement(tp.pokemon, true, null, true, true);
@@ -4069,6 +4185,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     public boolean isYellow() {
         return false;
         }
+
+    @Override
+    public boolean isGen1() {
+        return false;
+    }
 
     @Override
     public boolean isROMHack() {
