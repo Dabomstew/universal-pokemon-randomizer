@@ -48,6 +48,7 @@ public class Randomizer {
 
     private final Settings settings;
     private final RomHandler romHandler;
+    private List<Trainer> originalTrainers = new ArrayList<Trainer>();
 
     public Randomizer(Settings settings, RomHandler romHandler) {
         this.settings = settings;
@@ -76,6 +77,11 @@ public class Randomizer {
         InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream("com/dabomstew/pkrandom/gui/log.css");
         Scanner scanner = new Scanner(is);
         
+        // Cache original trainers
+        for(Trainer t : romHandler.getTrainers()) {
+            originalTrainers.add(new Trainer(t));
+        }
+
         //Stream contents of css style guide into String
         while(scanner.hasNextLine()) {
             cssContent += scanner.nextLine() + "\n";
@@ -915,7 +921,11 @@ public class Randomizer {
                 if (t.offset != idx && t.offset != 0) {
                     log.printf("<em>@%X</em>", t.offset);
                 }
-                log.print("</div><ul class=\"trainer-pk\">");
+                log.print("</div><em>Old Team</em><ul class=\"old-trainer-pk\">");
+                for(TrainerPokemon tpk : originalTrainers.get(idx-1).pokemon) {
+                    log.print(String.format("<li>%s <em>Lv%d</em></li>", tpk.pokemon.name, tpk.level));
+                }
+                log.print("</ul><em>New Team</em><ul class=\"new-trainer-pk\">");
                 for (TrainerPokemon tpk : t.pokemon) {
                     log.print(String.format("<li>%s <em>Lv%d</em></li>", tpk.pokemon.name, tpk.level));
                 }

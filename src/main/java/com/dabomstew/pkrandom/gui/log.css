@@ -384,7 +384,7 @@ li {
 .trainer {
   background-color: #ffc379;
   padding: 10px 18px;
-  border-radius: 10px 10px 0 0;
+  border-radius: 10px;
 }
 
 .trainer > em {
@@ -405,16 +405,38 @@ li {
   margin-right: 2px;
 }
 
-.trainer-pk {
+.old-trainer-pk {
+  background-color: #e2d2ab;
+  height: 250px;
+  list-style-type: none;
+  margin: 0;
+  padding: 10px 42px;
+  border-radius: 10px;
+}
+
+.old-trainer-pk > li {
+  margin: 5px 0;
+  background-color: #dac281;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 2px solid #e7a45b;
+}
+
+.old-trainer-pk > li > em {
+  float: right;
+  font-size: 0.8em;
+}
+
+.new-trainer-pk {
   background-color: #f1e1b7;
   height: 250px;
   list-style-type: none;
   margin: 0;
   padding: 10px 42px;
-  border-radius: 0 0 10px 10px;
+  border-radius: 10px;
 }
 
-.trainer-pk > li {
+.new-trainer-pk > li {
   margin: 5px 0;
   background-color: #f5da8e;
   padding: 6px 14px;
@@ -422,7 +444,7 @@ li {
   border: 2px solid #ffb262;
 }
 
-.trainer-pk > li > em {
+.new-trainer-pk > li > em {
   float: right;
   font-size: 0.8em;
 }
