@@ -521,18 +521,21 @@ public class Randomizer {
 
         if (!(settings.getInGameTradesMod() == Settings.InGameTradesMod.UNCHANGED)) {
             log.println("<h2>In-Game Trades</h2>");
-            log.println("<ul>");
+            log.println("<p>Trades are shown in pairs. New trades in <strong>bold</strong> on top, " + 
+                "old trades below in <em>italics</em>.</p>");
+            log.println("<table class=\"trades-table\">");
+            log.println("<tr><th>Requested</th><th>Given</th><th>Held Item</th></tr>");
             List<IngameTrade> newTrades = romHandler.getIngameTrades();
             int size = oldTrades.size();
             for (int i = 0; i < size; i++) {
                 IngameTrade oldT = oldTrades.get(i);
                 IngameTrade newT = newTrades.get(i);
-                log.printf("<li>Trading <strong>%s</strong> for <em><strong>%s</strong> the <strong>%s</strong></em> "
-                        + "has become trading <strong>%s</strong> for <em><strong>%s</strong> the <strong>%s</strong></em></li>",
-                        oldT.requestedPokemon.name, oldT.nickname, oldT.givenPokemon.name, newT.requestedPokemon.name,
-                        newT.nickname, newT.givenPokemon.name);
+                log.printf("<tr><td>%s</td><td>%s (%s)</td><td>%d</td></tr>",
+                newT.requestedPokemon.name, newT.givenPokemon.name, newT.nickname, newT.item);
+                log.printf("<tr class=\"alt\"><td>%s</td><td>%s (%s)</td><td>%d</td></tr>",
+                oldT.requestedPokemon.name, oldT.givenPokemon.name, oldT.nickname, oldT.item);
             }
-            log.println("</ul>");
+            log.println("</table>");
         }
 
         // Field Items

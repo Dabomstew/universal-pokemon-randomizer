@@ -89,6 +89,36 @@ li {
   border-color: inherit;
 }
 
+.trades-table {
+  border-color: #0f630f;
+}
+
+.trades-table th {
+  background-color: #33ac33;
+  color: #eee;
+  border-color: inherit;
+}
+
+.trades-table tr {
+  background-color: #c3f9c3;
+}
+
+.trades-table tr.alt {
+  background-color: #e0ffe0;
+}
+
+.trades-table td {
+  border-color: inherit;
+  font-weight: bold;
+}
+
+.trades-table tr.alt td {
+  border-color: inherit;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
 .left {
   text-align: left;
 }
