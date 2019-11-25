@@ -664,10 +664,14 @@ public class Randomizer {
 
             log.println("<h2>Randomized Evolutions</h2>\n<ul>");
             List<Pokemon> allPokes = romHandler.getPokemon();
+            List<Pokemon> basePokes = new ArrayList<Pokemon>();
             for (Pokemon pk : allPokes) {
                 if (pk != null) {
                     int numEvos = pk.evolutionsFrom.size();
                     if (numEvos > 0) {
+                        if (pk.evolutionsTo.size() == 0) {
+                            basePokes.add(pk);
+                        }
                         StringBuilder evoStr = new StringBuilder(pk.evolutionsFrom.get(0).to.name);
                         for (int i = 1; i < numEvos; i++) {
                             if (i == numEvos - 1) {
@@ -680,7 +684,28 @@ public class Randomizer {
                     }
                 }
             }
-            log.println("</ul>");
+            // Limited to 3 columns due to complexity of algining paths
+            log.println("</ul><h2>New Evolution Paths</h2><table class=\"pk-table\">");
+            for (Pokemon pk : basePokes) {
+                log.println("<tr>");
+                log.println("<td><div class=\"pk-chain-element\">" + pk.name + "</div></td><td>");
+                for(Evolution e : pk.evolutionsFrom) {
+                    log.println("<div class=\"pk-chain-element\">" + e.to.name + "</div>");
+                }
+                log.println("</td>");
+                log.println("<td>");
+                for(Evolution e: pk.evolutionsFrom) {
+                    log.println("<div style=\"min-height:34px;margin:5px 0;\">");
+                    for(Evolution ev: e.to.evolutionsFrom) {
+                        log.println("<div class=\"pk-chain-element\">" + ev.to.name + "</div>");
+                    }
+                    log.println("</div>");
+                }
+                log.println("</td>");
+                log.println("</tr>");
+
+            }
+            log.println("</table>");
         }        
     }
 

@@ -478,3 +478,11 @@ li {
   float: right;
   font-size: 0.8em;
 }
+
+.pk-chain-element {
+  background-color: #f5da8e;
+  margin: 5px 0;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 2px solid #ffb262;
+} 
