@@ -43,6 +43,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import com.dabomstew.pkrandom.CustomNamesSet;
+import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
@@ -176,7 +177,8 @@ public class PresetLoadDialog extends javax.swing.JDialog {
         // so what version number was it?
         if (presetVN > Settings.VERSION) {
             // it's for a newer version
-            JOptionPane.showMessageDialog(this, bundle.getString("PresetLoadDialog.newerVersionRequired"));
+            JOptionPane.showMessageDialog(this,
+            String.format(bundle.getString("PresetLoadDialog.newerVersionRequired"), presetVN));
         } else {
             // tell them which older version to use to load this preset
             // this should be the newest version that used that value
@@ -208,7 +210,11 @@ public class PresetLoadDialog extends javax.swing.JDialog {
                 versionWanted = "1.7.0b";
             } else if (presetVN == 171) {
                 versionWanted = "1.7.1";
-            }
+            } else if (presetVN == 172) {
+                versionWanted = "1.7.2";
+            } else if (presetVN == 180) {
+                versionWanted = "1.8.0";
+            } 
             JOptionPane.showMessageDialog(this,
                     String.format(bundle.getString("PresetLoadDialog.olderVersionRequired"), versionWanted));
         }
@@ -253,6 +259,13 @@ public class PresetLoadDialog extends javax.swing.JDialog {
     }
 
     public CustomNamesSet getCustomNames() {
+        if(customNames==null) {
+            try {
+                customNames = FileFunctions.getCustomNames();
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, bundle.getString("PresetLoadDialog.loadingCustomNamesFailed"));
+            }
+        }
         return customNames;
     }
 

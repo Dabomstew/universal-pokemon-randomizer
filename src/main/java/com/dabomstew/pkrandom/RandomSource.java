@@ -31,6 +31,7 @@ import java.util.Random;
 public class RandomSource {
 
     private static Random source = new Random();
+    private static long seed = 0;
     private static int calls = 0;
     private static Random instance = new RandomSourceInstance();
 
@@ -41,6 +42,7 @@ public class RandomSource {
 
     public static void seed(long seed) {
         source.setSeed(seed);
+        RandomSource.seed = seed;
         calls = 0;
     }
 
@@ -104,6 +106,10 @@ public class RandomSource {
 
     public static int callsSinceSeed() {
         return calls;
+    }
+
+    public static long getSeed() {
+        return seed;
     }
 
     private static class RandomSourceInstance extends Random {

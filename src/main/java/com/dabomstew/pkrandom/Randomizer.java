@@ -559,6 +559,8 @@ public class Randomizer {
         log.println(String.format("<p>Randomization of <strong>%s</strong> completed.</p>", romHandler.getROMName()));
         log.println(String.format("<p>Time elapsed: %dms<p>", (System.currentTimeMillis() - startTime)));
         log.println(String.format("<p>RNG Calls: %d<p>", RandomSource.callsSinceSeed()));
+        log.println(String.format("<p>RNG Seed: %d<p>", RandomSource.getSeed()));
+        log.println(String.format("<p>Settings: %s<p>", settings.VERSION + settings.toString()));
         log.println("</body></html>");
         
         return checkValue;
