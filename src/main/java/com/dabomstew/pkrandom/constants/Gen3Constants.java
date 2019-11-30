@@ -7,6 +7,29 @@ import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
 
+/*----------------------------------------------------------------------------*/
+/*--  Gen3Constants.java - hold values for games based on gen3.             --*/
+/*--                                                                        --*/
+/*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
+/*--  Pokemon and any associated names and the like are                     --*/
+/*--  trademark and (C) Nintendo 1996-2012.                                 --*/
+/*--                                                                        --*/
+/*--  The custom code written here is licensed under the terms of the GPL:  --*/
+/*--                                                                        --*/
+/*--  This program is free software: you can redistribute it and/or modify  --*/
+/*--  it under the terms of the GNU General Public License as published by  --*/
+/*--  the Free Software Foundation, either version 3 of the License, or     --*/
+/*--  (at your option) any later version.                                   --*/
+/*--                                                                        --*/
+/*--  This program is distributed in the hope that it will be useful,       --*/
+/*--  but WITHOUT ANY WARRANTY; without even the implied warranty of        --*/
+/*--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          --*/
+/*--  GNU General Public License for more details.                          --*/
+/*--                                                                        --*/
+/*--  You should have received a copy of the GNU General Public License     --*/
+/*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
+/*----------------------------------------------------------------------------*/
+
 public class Gen3Constants {
 
     public static final int RomType_Ruby = 0;
@@ -322,6 +345,15 @@ public class Gen3Constants {
         tag(trs, 0x299, "RIVAL4-0");
         tag(trs, 0x29A, "RIVAL4-1");
 
+        // Wally
+        tag(trs, 0x290, "FRIEND1-0");
+        tag(trs, 0x207, "FRIEND2-0");
+        tag(trs, 0x291, "FRIEND3-0");
+        tag(trs, 0x292, "FRIEND4-0");
+        tag(trs, 0x293, "FRIEND5-0");
+        tag(trs, 0x294, "FRIEND6-0");
+
+
         if (romType == RomType_Ruby) {
             tag(trs, "THEMED:MAXIE", 0x259, 0x25A);
             tag(trs, "THEMED:COURTNEY", 0x257, 0x258);
@@ -403,6 +435,15 @@ public class Gen3Constants {
         tag(trs, 0x298, "RIVAL5-2");
         tag(trs, 0x299, "RIVAL5-0");
         tag(trs, 0x29A, "RIVAL5-1");
+
+        // Wally
+        tag(trs, 0x290, "FRIEND1-0");
+        tag(trs, 0x207, "FRIEND2-0");
+        tag(trs, 0x291, "FRIEND3-0");
+        tag(trs, 0x292, "FRIEND4-0");
+        tag(trs, 0x293, "FRIEND5-0");
+        tag(trs, 0x294, "FRIEND6-0");
+
 
         // Themed
         tag(trs, "THEMED:MAXIE", 0x259, 0x25A, 0x2DE);

@@ -242,8 +242,43 @@ public class SettingsUpdater {
         }
 
         if(oldVersion < 180) {
+            // set typesRandomizeFirst to true to match previous functionality
+            dataBlock[2] |= (1 << 6);
+            
+            // update guaranteed moves to 4 to match previous functionality
+            dataBlock[11] |= (1 << 7);
+            
             // add wild pokemon match typing distribution, shift catch rate level
             dataBlock[16] = (byte)((dataBlock[16] & 0x1F) | ((dataBlock[16] & 0x60) << 1));
+            
+            // Initialize byte 36 with true to match prior functionality
+            insertExtraByte(36, (byte) 1);
+            
+            // Initialize byte 37 with false
+            insertExtraByte(37, (byte) 0);
+        }
+        
+        if(oldVersion < 181) {
+            //fix modifications made to type selection
+            if ((dataBlock[2] & 1) != 0) {
+                dataBlock[2] ^= 0x03;
+                dataBlock[36] |= (1 << 3);
+            }
+            
+            // Bugfix byte 16 due to improper bit setting
+            // This will set match typing distribution to false
+            if (oldVersion == 180) {
+                if (((dataBlock[16] >> 5) & 1) != 0) {
+                    dataBlock[16] ^= 0xA0; 
+                } else if (((dataBlock[16] >> 6) & 1) != 0) {
+                    dataBlock[16] ^= 0x80;
+                }
+            }
+            
+            // Initialize bytes 38-40
+            insertExtraByte(38, (byte) 0);
+            insertExtraByte(39, (byte) 0);
+            insertExtraByte(40, (byte) 0);
         }
 
         // fix checksum

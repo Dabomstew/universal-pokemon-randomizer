@@ -332,6 +332,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private List<Integer> itemOffs;
     private String[][] mapNames;
     private boolean isRomHack;
+    private boolean isGen1;
     private int[] internalToPokedex, pokedexToInternal;
     private int pokedexCount;
     private String[] pokeNames;
@@ -455,6 +456,13 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
         allowedItems = Gen3Constants.allowedItems.copy();
         nonBadItems = Gen3Constants.nonBadItems.copy();
+
+        // Mark as FRLG
+        if (romEntry.romType == Gen3Constants.RomType_FRLG) {
+            isGen1 = true;
+        } else {
+            isGen1 = false;
+        }
     }
 
     private int findPointerPrefixAndSuffix(String prefix, String suffix) {
@@ -3074,6 +3082,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     @Override
     public boolean isROMHack() {
         return this.isRomHack;
+    }
+
+    @Override
+    public boolean isGen1() {
+        return isGen1;
     }
 
     @Override

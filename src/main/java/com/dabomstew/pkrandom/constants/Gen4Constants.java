@@ -8,6 +8,29 @@ import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
 
+/*----------------------------------------------------------------------------*/
+/*--  Gen4Constants.java - hold values for games based on gen4.             --*/
+/*--                                                                        --*/
+/*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
+/*--  Pokemon and any associated names and the like are                     --*/
+/*--  trademark and (C) Nintendo 1996-2012.                                 --*/
+/*--                                                                        --*/
+/*--  The custom code written here is licensed under the terms of the GPL:  --*/
+/*--                                                                        --*/
+/*--  This program is free software: you can redistribute it and/or modify  --*/
+/*--  it under the terms of the GNU General Public License as published by  --*/
+/*--  the Free Software Foundation, either version 3 of the License, or     --*/
+/*--  (at your option) any later version.                                   --*/
+/*--                                                                        --*/
+/*--  This program is distributed in the hope that it will be useful,       --*/
+/*--  but WITHOUT ANY WARRANTY; without even the implied warranty of        --*/
+/*--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          --*/
+/*--  GNU General Public License for more details.                          --*/
+/*--                                                                        --*/
+/*--  You should have received a copy of the GNU General Public License     --*/
+/*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
+/*----------------------------------------------------------------------------*/
+
 public class Gen4Constants {
 
     public static final int Type_DP = 0;
@@ -453,8 +476,11 @@ public class Gen4Constants {
         tag(trs, 0x108, "RIVAL5-2");
 
         tagRivalConsecutive(trs, "RIVAL6", 0x11e);
+        tagAsDoubleRivalConsecutive(trs, 0x11e);
         tagRivalConsecutive(trs, "RIVAL7", 0x2e0); // dragons den tag battle
+        tagAsDoubleRivalConsecutive(trs, 0x2e0);
         tagRivalConsecutive(trs, "RIVAL8", 0x1EA);
+        tagAsDoubleRivalConsecutive(trs, 0x1EA);
 
         // Clair & Lance match in Dragons Den
         tag(trs, 0x2DE, "GYM8");
@@ -499,4 +525,10 @@ public class Gen4Constants {
 
     }
 
+    private static void tagAsDoubleRivalConsecutive(List<Trainer> allTrainers, int offsetFire) {
+        allTrainers.get(offsetFire - 1).isDoubleBattle = true;
+        allTrainers.get(offsetFire).isDoubleBattle = true;
+        allTrainers.get(offsetFire - 2).isDoubleBattle = true;
+
+    }
 }

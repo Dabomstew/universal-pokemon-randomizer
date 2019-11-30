@@ -55,6 +55,7 @@ public class Pokemon implements Comparable<Pokemon> {
     public List<Evolution> evolutionsTo = new ArrayList<Evolution>();
 
     public List<Integer> shuffledStatsOrder = null;
+    public int typeChanged;
     
     private static final double GENERAL_MEDIAN = 411.5;
     private static final double GENERAL_SD = 108.5;
@@ -81,6 +82,10 @@ public class Pokemon implements Comparable<Pokemon> {
     // A flag to use for things like recursive stats copying.
     // Must not rely on the state of this flag being preserved between calls.
     public boolean temporaryFlag;
+
+    private static final List<Integer> legendaries = Arrays.asList(144, 145, 146, 150, 151, 243, 244, 245, 249, 250,
+    251, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488,
+    489, 490, 491, 492, 493, 494, 638, 639, 640, 641, 642, 643, 644, 645, 646, 647, 648, 649);
 
     public Pokemon() {
         shuffledStatsOrder = Arrays.asList(0, 1, 2, 3, 4, 5);
@@ -118,6 +123,38 @@ public class Pokemon implements Comparable<Pokemon> {
             }
         }
         return min;
+    }
+
+    public int nearestEvoTarget(int level) {
+        int target = -1;
+        int evoMin = -1;
+        for(int i = 0; i < evolutionsFrom.size(); i++) {
+            if(evolutionsFrom.get(i).type.usesLevel()) {
+                    evoMin = evolutionsFrom.get(i).extraInfo;
+            } else {
+                switch (evolutionsFrom.get(i).type) {
+                    case STONE:
+                    case STONE_FEMALE_ONLY:
+                    case STONE_MALE_ONLY:
+                        evoMin = 24;
+                        break;
+    
+                    case TRADE:
+                    case TRADE_ITEM:
+                    case TRADE_SPECIAL:
+                        evoMin = 37;
+                        break;
+    
+                    default:
+                        evoMin = 33;
+                        break;
+                }
+            }
+
+            // Target represents the evolution index
+            target = evoMin <= level ? i : target;
+        }
+        return target;
     }
 
     public void shuffleStats(Random random) {
@@ -167,8 +204,8 @@ public class Pokemon implements Comparable<Pokemon> {
             special = (int) Math.ceil((spatk + spdef) / 2.0f);
 
         } else {
-            // Minimum 20 HP, 10 everything else
-            int bst = bst() - 70;
+            // Minimum 10 everything not including HP
+            int bst = bst() - 50;
 
             // Make weightings
             double hpW = random.nextDouble(), atkW = random.nextDouble(), defW = random.nextDouble();
@@ -176,7 +213,13 @@ public class Pokemon implements Comparable<Pokemon> {
 
             double totW = hpW + atkW + defW + spaW + spdW + speW;
 
-            hp = (int) Math.max(1, Math.round(hpW / totW * bst)) + 20;
+            // Handle HP specially to avoid skewing
+            float suggestedHP = Math.round(hpW / totW * bst);
+            hp = suggestedHP < 35 ? 35 : (int) suggestedHP;
+            // Remove any added stats from the remaining bst
+            bst -= suggestedHP < 35 ? (35-suggestedHP) : 0;
+            
+            // Handle the rest normally
             attack = (int) Math.max(1, Math.round(atkW / totW * bst)) + 10;
             defense = (int) Math.max(1, Math.round(defW / totW * bst)) + 10;
             spatk = (int) Math.max(1, Math.round(spaW / totW * bst)) + 10;
@@ -195,18 +238,34 @@ public class Pokemon implements Comparable<Pokemon> {
 
     }
 
-    public void copyRandomizedStatsUpEvolution(Pokemon evolvesFrom) {
+    public void copyRandomizedStatsUpEvolution(Pokemon evolvesFrom, Random random) {
         double ourBST = bst();
         double theirBST = evolvesFrom.bst();
 
         double bstRatio = ourBST / theirBST;
-
-        hp = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.hp * bstRatio)));
-        attack = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.attack * bstRatio)));
-        defense = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.defense * bstRatio)));
-        speed = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.speed * bstRatio)));
-        spatk = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.spatk * bstRatio)));
-        spdef = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.spdef * bstRatio)));
+        
+        // Lower HP growth by 10% to allow other stats a chance to grow (except when growth is already under 10%)
+        hp = (int) Math.min(283, Math.max(1, Math.round(evolvesFrom.hp * bstRatio)));
+        int hpDiff = 1.1f < bstRatio ? Math.round(hp * 0.1f) : 0;
+        hp -= hpDiff;
+        
+        // Convert HPDiff into series of ints
+        int hpInt = hpDiff/5;
+        int hpRem = hpDiff % 5;
+        int[] hpArray = new int[] {hpInt, hpInt, hpInt, hpInt, hpInt};
+        
+        //Add remainder to random spots in hpArray
+        for (int i = 0; i < hpRem; i++) {
+            hpArray[Math.abs(random.nextInt()%5)]++;
+        }
+        
+        
+        // Add HPDiff to remaining stats
+        attack = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.attack * bstRatio))) + hpArray[0];
+        defense = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.defense * bstRatio))) + hpArray[1];
+        speed = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.speed * bstRatio))) + hpArray[2];
+        spatk = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.spatk * bstRatio))) + hpArray[3];
+        spdef = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.spdef * bstRatio))) + hpArray[4];
 
         special = (int) Math.ceil((spatk + spdef) / 2.0f);
     }
@@ -242,7 +301,7 @@ public class Pokemon implements Comparable<Pokemon> {
             // Fix up special too
             special = (int) Math.ceil((spatk + spdef) / 2.0f);
         } else {            
-            // Minimum 20 HP, 10 everything else
+            // Minimum 10 everything not including HP
             int bst;
             if(evolutionSanity) {
                 if(evolutionsFrom.size() > 0) {
@@ -259,23 +318,23 @@ public class Pokemon implements Comparable<Pokemon> {
                     
                     if(pk2Evos) {
                         // First evo of 3 stages
-                        bst = (int) (EVO1_2EVOS_MEDIAN + skewedGaussian(random.nextGaussian(), EVO1_2EVOS_SKEW) * EVO1_2EVOS_SD - 70);
+                        bst = (int) (EVO1_2EVOS_MEDIAN + skewedGaussian(random.nextGaussian(), EVO1_2EVOS_SKEW) * EVO1_2EVOS_SD - 50);
                     } else {
                         // First evo of 2 stages
-                        bst = (int) (EVO1_1EVO_MEDIAN + skewedGaussian(random.nextGaussian(), EVO1_1EVO_SKEW) * EVO1_1EVO_SD - 70);
+                        bst = (int) (EVO1_1EVO_MEDIAN + skewedGaussian(random.nextGaussian(), EVO1_1EVO_SKEW) * EVO1_1EVO_SD - 50);
                     }
                 } else {
                     if(evolutionsTo.size() > 0) {
                         // Last evo, doesn't carry stats
-                        bst = (int) (MAX_EVO_MEDIAN + skewedGaussian(random.nextGaussian(), MAX_EVO_SKEW) * MAX_EVO_SD - 70);
+                        bst = (int) (MAX_EVO_MEDIAN + skewedGaussian(random.nextGaussian(), MAX_EVO_SKEW) * MAX_EVO_SD - 50);
                     } else {
                         // No evolutions, no pre-evolutions
-                        bst = (int) (NO_EVO_MEDIAN + skewedGaussian(random.nextGaussian(), NO_EVO_SKEW) * NO_EVO_SD - 70);                    
+                        bst = (int) (NO_EVO_MEDIAN + skewedGaussian(random.nextGaussian(), NO_EVO_SKEW) * NO_EVO_SD - 50);                    
                     }
                 }
             } else {
                 // No 'Follow evolutions'
-                bst = (int) (GENERAL_MEDIAN + skewedGaussian(random.nextGaussian(), GENERAL_SKEW) * GENERAL_SD - 70);
+                bst = (int) (GENERAL_MEDIAN + skewedGaussian(random.nextGaussian(), GENERAL_SKEW) * GENERAL_SD - 50);
             }
             
             // Make weightings
@@ -288,7 +347,13 @@ public class Pokemon implements Comparable<Pokemon> {
 
             double totW = hpW + atkW + defW + spaW + spdW + speW;
 
-            hp = (int) Math.max(1, Math.round(hpW / totW * bst)) + 20;
+            // Handle HP specially to avoid skewing
+            float suggestedHP = Math.round(hpW / totW * bst);
+            hp = suggestedHP < 35 ? 35 : (int) suggestedHP;
+            // Remove any added stats from the remaining bst
+            bst -= suggestedHP < 35 ? (35-suggestedHP) : 0;
+            
+            // Handle the rest normally
             attack = (int) Math.max(1, Math.round(atkW / totW * bst)) + 10;
             defense = (int) Math.max(1, Math.round(defW / totW * bst)) + 10;
             spatk = (int) Math.max(1, Math.round(spaW / totW * bst)) + 10;
@@ -386,6 +451,10 @@ public class Pokemon implements Comparable<Pokemon> {
         special = (int) Math.ceil((spatk + spdef) / 2.0f);
     }
 
+    public boolean isLegendary() {
+        return legendaries.contains(this.number);
+    }
+
     public int bst() {
         return hp + attack + defense + spatk + spdef + speed;
     }
@@ -438,39 +507,4 @@ public class Pokemon implements Comparable<Pokemon> {
     public int compareTo(Pokemon o) {
         return number - o.number;
     }
-
-    public static void swapStatsRandom(Pokemon swapTo, Pokemon swapFrom, Random random) {
-        List<Integer> toStats = Arrays.asList(swapTo.hp, swapTo.attack, swapTo.defense, swapTo.speed, swapTo.spatk, swapTo.spdef, swapTo.special);
-        List<Integer> fromStats = Arrays.asList(swapFrom.hp, swapFrom.attack, swapFrom.defense, swapFrom.speed, swapFrom.spatk, swapFrom.spdef, swapFrom.special);
-        
-        // Add slight variance, up to +- 10%
-        double modifier =  0.9 + (random.nextDouble() / 5);
-        
-        swapFrom.hp = (int) (toStats.get(0) * modifier);
-        swapFrom.attack = (int) (toStats.get(1) * modifier);
-        swapFrom.defense = (int) (toStats.get(2) * modifier);
-        swapFrom.speed = (int) (toStats.get(3) * modifier);
-        swapFrom.spatk = (int) (toStats.get(4) * modifier);
-        swapFrom.spdef = (int) (toStats.get(5) * modifier);
-        swapFrom.special = (int) (toStats.get(6) * modifier);
-        
-        modifier =  0.9 + (random.nextDouble() / 5);
-        
-        swapTo.hp = (int) (fromStats.get(0) * modifier);
-        swapTo.attack = (int) (fromStats.get(1) * modifier);
-        swapTo.defense = (int) (fromStats.get(2) * modifier);
-        swapTo.speed = (int) (fromStats.get(3) * modifier);
-        swapTo.spatk = (int) (fromStats.get(4) * modifier);
-        swapTo.spdef = (int)  (fromStats.get(5) * modifier);
-        swapTo.special = (int) (fromStats.get(6) * modifier);
-    }
-    
-    private static final List<Integer> legendaries = Arrays.asList(144, 145, 146, 150, 151, 243, 244, 245, 249, 250,
-            251, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488,
-            489, 490, 491, 492, 493, 494, 638, 639, 640, 641, 642, 643, 644, 645, 646, 647, 648, 649);
-
-    public boolean isLegendary() {
-        return legendaries.contains(this.number);
-    }
-
 }

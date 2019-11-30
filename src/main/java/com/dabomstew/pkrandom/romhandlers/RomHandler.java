@@ -93,7 +93,7 @@ public interface RomHandler {
     public void shufflePokemonStats(boolean evolutionSanity);
     
     // Shuffle all pokemon base stat totals.
-    public void shuffleAllPokemonBSTs();
+    public void shuffleAllPokemonBSTs(boolean evolutionSanity, boolean randomVariance);
 
     // Randomise stats following evolutions for proportions or not (see
     // tooltips)
@@ -124,18 +124,26 @@ public interface RomHandler {
     // Useful for starter evolution length
     public int evolutionChainSize(Pokemon pk);
 
+    // Give a random Pokemon who is eligible as a starter
+    public Pokemon randomStarterPokemon(boolean noSplitEvos, boolean uniqueTypes, boolean baseOnly,
+        int bstLimit);
+
     // Give a random Pokemon who has 1 or two evolution stages
     // Might make a good starter Pokemon
-    public Pokemon random1or2EvosPokemon(boolean b);
+    public Pokemon random1or2EvosPokemon(boolean noSplitEvos, boolean uniqueTypes, boolean baseOnly,
+        int bstLimit);
     
     // Give a random Pokemon who has 2 evolution stages
     // Should make a good starter Pokemon
-    public Pokemon random2EvosPokemon(boolean noSplitEvos);
+    public Pokemon random2EvosPokemon(boolean noSplitEvos, boolean uniqueTypes, boolean baseOnly,
+        int bstLimit);
 
     // Randomizer: types
     // return a random type valid in this game.
     // straightforward except for gen1 where dark&steel are excluded.
     public Type randomType();
+
+    public int getTypeSize();
 
     public boolean typeInGame(Type type);
 
@@ -143,6 +151,10 @@ public interface RomHandler {
     // should follow the same types or not.
     // some evolutions dont anyway, e.g. Eeveelutions, Hitmons
     public void randomizePokemonTypes(boolean evolutionSanity);
+
+    public void shufflePokemonTypes();
+    
+    public void randomizeRetainPokemonTypes(boolean evolutionSanity);
 
     // Randomizer: pokemon abilities
     public int abilitiesPerPokemon();
@@ -185,7 +197,9 @@ public interface RomHandler {
     public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
             boolean noEarlyWonderGuard, int levelModifier);
 
-    public void rivalCarriesStarter();
+    public void rivalCarriesStarter(boolean noLegendaries);
+
+    public void rivalCarriesTeam();
 
     public void forceFullyEvolvedTrainerPokes(int minLevel);
 
@@ -414,6 +428,8 @@ public interface RomHandler {
     // Misc
     public boolean isYellow();
 
+    public boolean isGen1();
+
     public String getROMName();
 
     public String getROMCode();
@@ -438,5 +454,4 @@ public interface RomHandler {
     public int miscTweaksAvailable();
 
     public void applyMiscTweak(MiscTweak tweak);
-
 }

@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.pokemon;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -11,11 +12,35 @@ import java.util.function.Predicate;
 
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 
+/*----------------------------------------------------------------------------*/
+/*--  PokemonSet.java - represents a list of pokemon grouped by type        --*/
+/*--                                                                        --*/
+/*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
+/*--  Pokemon and any associated names and the like are                     --*/
+/*--  trademark and (C) Nintendo 1996-2012.                                 --*/
+/*--                                                                        --*/
+/*--  The custom code written here is licensed under the terms of the GPL:  --*/
+/*--                                                                        --*/
+/*--  This program is free software: you can redistribute it and/or modify  --*/
+/*--  it under the terms of the GNU General Public License as published by  --*/
+/*--  the Free Software Foundation, either version 3 of the License, or     --*/
+/*--  (at your option) any later version.                                   --*/
+/*--                                                                        --*/
+/*--  This program is distributed in the hope that it will be useful,       --*/
+/*--  but WITHOUT ANY WARRANTY; without even the implied warranty of        --*/
+/*--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          --*/
+/*--  GNU General Public License for more details.                          --*/
+/*--                                                                        --*/
+/*--  You should have received a copy of the GNU General Public License     --*/
+/*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
+/*----------------------------------------------------------------------------*/
+
 public class PokemonSet {
     
     private ArrayList<Pokemon> pokes;
     private Map<Type, ArrayList<Pokemon>> pokesByType;
     private int typeCount;
+    private int uniquePokeCount;
 
     public PokemonSet() {
         pokes = new ArrayList<Pokemon>();
@@ -72,6 +97,10 @@ public class PokemonSet {
         return list.size();
     }
 
+    public int uniquePokes() {
+        return uniquePokeCount;
+    }
+
     // Filtering
     public PokemonSet filterLegendaries() {
         filter(p -> p.isLegendary());
@@ -101,6 +130,30 @@ public class PokemonSet {
     public PokemonSet remove(Pokemon poke) {
         filter(p -> p.equals(poke));
         return this;
+    }
+
+    public PokemonSet add(Pokemon poke) {
+        if (poke != null) {
+            pokes.add(poke);
+
+            ArrayList<Pokemon> set = pokesByType.get(poke.primaryType);
+            if (set == null) {
+                set = new ArrayList<Pokemon>();
+                pokesByType.put(poke.primaryType, set);
+            }
+            set.add(poke);
+
+            if (poke.secondaryType != null) {
+                set = pokesByType.get(poke.secondaryType);
+                if (set == null) {
+                    set = new ArrayList<Pokemon>();
+                    pokesByType.put(poke.secondaryType, set);
+                }
+                set.add(poke);
+            }
+        }  
+        updateTypeCount();
+        return this;      
     }
 
     public PokemonSet filter(Predicate<Pokemon> pred) {
@@ -185,8 +238,16 @@ public class PokemonSet {
     // Internal
     private void updateTypeCount() {
         typeCount = 0;
+        uniquePokeCount = 0;
+        HashSet<Pokemon> uniquePokes = null;
         for (Map.Entry<Type, ArrayList<Pokemon>> entry : pokesByType.entrySet()) {
             typeCount += entry.getValue().size();
+            if(uniquePokes == null) {
+                uniquePokes = new HashSet<Pokemon>(entry.getValue());
+            } else {
+                uniquePokes.addAll(entry.getValue());
+            }
         }
+        uniquePokeCount = uniquePokes.size();
     }
 }

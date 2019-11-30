@@ -1,8 +1,9 @@
-Universal Pokemon Randomizer 1.7.2
+Universal Pokemon Randomizer 1.8.1
 by Dabomstew, 2012-16
+by brentspector, 2019
 
 Homepage: http://pokehacks.dabomstew.com/randomizer/index.php
-Source: https://github.com/Dabomstew/universal-pokemon-randomizer
+Source: https://github.com/brentspector/universal-pokemon-randomizer
 
 Contents
 --------
@@ -11,9 +12,9 @@ Contents
 3. Libraries Used
 4. Features
 5. How To Use
-6. Games/ROMs supported
-7. License
-8. Known Issues
+6. How to Share Settings and Custom Names
+7. Games/ROMs supported
+8. License
 9. Useful/Interesting Links
 
 Introduction
@@ -89,7 +90,7 @@ How To Use
 ----------
 Extract this ZIP file before doing anything else!!!
 
-Make sure you have Java 1.6 or later installed, then run the included EXE or JAR file.
+Make sure you have Java 1.8 or later installed, then run the included EXE or JAR file.
 
 If you open the EXE file without Java installed, it should prompt you to
 install it. Follow the prompts and then re-open it once you have Java installed.
@@ -103,6 +104,30 @@ java -jar randomizer.jar
 
 From there you can open a ROM (legally acquired), customize what you want to be
 randomized, then save the randomized ROM.
+
+Additionally, since this project has been archived by the original author, auto updating
+has been set to "false" by default. If you wish to enable this, you can either change the
+settings.ini file next to your jar/exe, or run "java -jar randomizer.jar --checkupdate"
+
+How to Share Settings and Custom Names
+--------------------------------------
+
+Once you have selected all the settings that you want, select "Save Settings" in
+the top-middle of the interface. This file can be shared independently of anything
+else. Importing is done via the "Load Settings" button in the top-middle of the 
+interface.
+
+When using a premade seed and settings string, the "CustomNames.rncn" file must be
+stored in the same directory/folder as the JAR or EXE. Failure to do so will result 
+in default custom names being used, which may lead to unexpected consequences. 
+
+NOTE: When importing settings from 1.8.0 into 1.8.1 (current version)
+In Version 1.8.0, there is a bug that caused the values for "minimum catch rate"
+and "allow low level wilds" to be saved incorrectly. In an effort to remedy this,
+the button for "Weight types by # of pokemon" has been set to false. Additionally,
+the values for "minimum catch rate" and "allow low level wilds" may be set 
+incorrectly. 
+
 
 Games/ROMs supported
 --------------------

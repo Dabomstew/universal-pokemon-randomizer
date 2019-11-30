@@ -30,11 +30,29 @@ public class Trainer implements Comparable<Trainer> {
     public int offset;
     public List<TrainerPokemon> pokemon = new ArrayList<TrainerPokemon>();
     public String tag;
+    public boolean isDoubleBattle;
     public boolean importantTrainer;
     public int poketype;
     public String name;
     public int trainerclass;
     public String fullDisplayName;
+
+    public Trainer(){};
+
+    public Trainer(Trainer t) {
+        this.offset = t.offset;
+        this.tag = t.tag;
+        this.isDoubleBattle = t.isDoubleBattle;
+        this.importantTrainer = t.importantTrainer;
+        this.poketype = t.poketype;
+        this.name = t.name;
+        this.trainerclass = t.trainerclass;
+        this.fullDisplayName = t.fullDisplayName;
+
+        for(TrainerPokemon tpk : t.pokemon) {
+            pokemon.add(new TrainerPokemon(tpk));
+        }
+    }
 
     public String toString() {
         StringBuilder sb = new StringBuilder("[");

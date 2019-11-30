@@ -48,6 +48,7 @@ public class Randomizer {
 
     private final Settings settings;
     private final RomHandler romHandler;
+    private List<Trainer> originalTrainers = new ArrayList<Trainer>();
 
     public Randomizer(Settings settings, RomHandler romHandler) {
         this.settings = settings;
@@ -76,6 +77,11 @@ public class Randomizer {
         InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream("com/dabomstew/pkrandom/gui/log.css");
         Scanner scanner = new Scanner(is);
         
+        // Cache original trainers
+        for(Trainer t : romHandler.getTrainers()) {
+            originalTrainers.add(new Trainer(t));
+        }
+
         //Stream contents of css style guide into String
         while(scanner.hasNextLine()) {
             cssContent += scanner.nextLine() + "\n";
@@ -314,7 +320,12 @@ public class Randomizer {
 
         if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)
                 && settings.isRivalCarriesStarterThroughout()) {
-            romHandler.rivalCarriesStarter();
+                    // First randomize the starter
+                    romHandler.rivalCarriesStarter(settings.isTrainersBlockLegendaries());
+                    // Then randomize the team
+                    if (settings.isRivalCarriesTeamThroughout()) {
+                        romHandler.rivalCarriesTeam();
+                    }
         }
 
         if (settings.isTrainersForceFullyEvolved()) {
@@ -510,18 +521,21 @@ public class Randomizer {
 
         if (!(settings.getInGameTradesMod() == Settings.InGameTradesMod.UNCHANGED)) {
             log.println("<h2>In-Game Trades</h2>");
-            log.println("<ul>");
+            log.println("<p>Trades are shown in pairs. New trades in <strong>bold</strong> on top, " + 
+                "old trades below in <em>italics</em>.</p>");
+            log.println("<table class=\"trades-table\">");
+            log.println("<tr><th>Requested</th><th>Given</th><th>Held Item</th></tr>");
             List<IngameTrade> newTrades = romHandler.getIngameTrades();
             int size = oldTrades.size();
             for (int i = 0; i < size; i++) {
                 IngameTrade oldT = oldTrades.get(i);
                 IngameTrade newT = newTrades.get(i);
-                log.printf("<li>Trading <strong>%s</strong> for <em><strong>%s</strong> the <strong>%s</strong></em> "
-                        + "has become trading <strong>%s</strong> for <em><strong>%s</strong> the <strong>%s</strong></em></li>",
-                        oldT.requestedPokemon.name, oldT.nickname, oldT.givenPokemon.name, newT.requestedPokemon.name,
-                        newT.nickname, newT.givenPokemon.name);
+                log.printf("<tr><td>%s</td><td>%s (%s)</td><td>%d</td></tr>",
+                newT.requestedPokemon.name, newT.givenPokemon.name, newT.nickname, newT.item);
+                log.printf("<tr class=\"alt\"><td>%s</td><td>%s (%s)</td><td>%d</td></tr>",
+                oldT.requestedPokemon.name, oldT.givenPokemon.name, oldT.nickname, oldT.item);
             }
-            log.println("</ul>");
+            log.println("</table>");
         }
 
         // Field Items
@@ -545,6 +559,8 @@ public class Randomizer {
         log.println(String.format("<p>Randomization of <strong>%s</strong> completed.</p>", romHandler.getROMName()));
         log.println(String.format("<p>Time elapsed: %dms<p>", (System.currentTimeMillis() - startTime)));
         log.println(String.format("<p>RNG Calls: %d<p>", RandomSource.callsSinceSeed()));
+        log.println(String.format("<p>RNG Seed: %d<p>", RandomSource.getSeed()));
+        log.println(String.format("<p>Settings: %s<p>", settings.VERSION + settings.toString()));
         log.println("</body></html>");
         
         return checkValue;
@@ -564,7 +580,7 @@ public class Randomizer {
             log.println("<h2>Pokemon Base Stats & Types</h2>");
             log.println("<table class=\"pk-table\">");
             if (romHandler instanceof Gen1RomHandler) {
-                log.println("<tr><th>NUM</th><th>NAME</th><th>TYPE</th><th>HP</th><th>ATK</th><th>DEF</th><th>SPE</th><th>SPEC</th><th>TOTAL</th></tr>");
+                log.println("<tr><th>NUM</th><th>NAME</th><th>TYPE</th><th>HP</th><th>ATK</th><th>DEF</th><th>SPE</th><th>SPEC</th><th>TOTAL</th><th>BIG</th></tr>");
                 for (Pokemon pkmn : allPokes) {
                     if (pkmn != null) {
                         String pkmnType1 = pkmn.primaryType == null ? "???" : pkmn.primaryType.toString();
@@ -574,11 +590,12 @@ public class Randomizer {
                             pkmnType2 = pkmn.secondaryType.toString();
                             pkmnType2 = String.format("<span class=\"pk-type %s\">%s</span>", pkmnType2.toLowerCase(), pkmnType2);
                         }
-                        int total = pkmn.hp + pkmn.attack + pkmn.defense + pkmn.speed + pkmn.special;                        
-                        log.printf("<tr%s><td>%3d</td><td class=\"left\">%s</td><td>%s%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td></tr>",
-                                pkmn.number % 2 == 0 ? " class=\"alt\"" : "", pkmn.number, pkmn.name, pkmnType1, pkmnType2, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.special, total);
+                        int total = pkmn.hp + pkmn.attack + pkmn.defense + pkmn.speed + pkmn.special;
+                        boolean topPoke = total > 590 || Collections.max(Arrays.asList(pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.special)) > 190;                        
+                        log.printf("<tr%s><td>%3d</td><td class=\"left\">%s</td><td>%s%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%s</td></tr>",
+                                pkmn.number % 2 == 0 ? " class=\"alt\"" : "", pkmn.number, pkmn.name, pkmnType1, pkmnType2, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.special, total, 
+                                    topPoke ? "YES" : "");
                     }
-
                 }
             } else {
                 log.print("<tr><th>NUM</th><th>NAME</th><th>TYPE</th><th>HP</th><th>ATK</th><th>DEF</th><th>SPE</th><th>SATK</th><th>SDEF</th><th>TOTAL</th>");
@@ -586,7 +603,7 @@ public class Randomizer {
                 for (int i = 0; i < abils; i++) {
                     log.printf("<th>ABILITY%d</th>", (i + 1));
                 }
-                log.print("<th>ITEM</th>");
+                log.print("<th>ITEM</th><th>BIG</th>");
                 log.println("</tr>");
                 for (Pokemon pkmn : allPokes) {
                     if (pkmn != null) {
@@ -598,6 +615,7 @@ public class Randomizer {
                             pkmnType2 = String.format("<span class=\"pk-type %s\">%s</span>", pkmnType2.toLowerCase(), pkmnType2);
                         }
                         int total = pkmn.hp + pkmn.attack + pkmn.defense + pkmn.speed + pkmn.spatk + pkmn.spdef;
+                        boolean topPoke = total > 590 || Collections.max(Arrays.asList(pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef)) > 190;             
                         log.printf("<tr%s><td>%3d</td><td class=\"left\">%s</td><td>%s%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td>",
                                 pkmn.number % 2 == 0 ? " class=\"alt\"" : "", pkmn.number, pkmn.name, pkmnType1, pkmnType2, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef, total);
                         if (abils > 0) {
@@ -631,9 +649,9 @@ public class Randomizer {
                                 log.print(itemNames[pkmn.darkGrassHeldItem] + " (dark grass only)");
                             }
                         }
-                        log.println("</td></tr>");
+                        log.printf("</td><td>%s</td>", topPoke ? "YES" : "");
+                        log.println("</tr>");
                     }
-
                 }
             }
             log.println("</table>");
@@ -648,10 +666,14 @@ public class Randomizer {
 
             log.println("<h2>Randomized Evolutions</h2>\n<ul>");
             List<Pokemon> allPokes = romHandler.getPokemon();
+            List<Pokemon> basePokes = new ArrayList<Pokemon>();
             for (Pokemon pk : allPokes) {
                 if (pk != null) {
                     int numEvos = pk.evolutionsFrom.size();
                     if (numEvos > 0) {
+                        if (pk.evolutionsTo.size() == 0) {
+                            basePokes.add(pk);
+                        }
                         StringBuilder evoStr = new StringBuilder(pk.evolutionsFrom.get(0).to.name);
                         for (int i = 1; i < numEvos; i++) {
                             if (i == numEvos - 1) {
@@ -664,14 +686,42 @@ public class Randomizer {
                     }
                 }
             }
-            log.println("</ul>");
+            // Limited to 3 columns due to complexity of algining paths
+            log.println("</ul><h2>New Evolution Paths</h2><table class=\"pk-table\">");
+            for (Pokemon pk : basePokes) {
+                log.println("<tr>");
+                log.println("<td><div class=\"pk-chain-element\">" + pk.name + "</div></td><td>");
+                for(Evolution e : pk.evolutionsFrom) {
+                    log.println("<div class=\"pk-chain-element\">" + e.to.name + "</div>");
+                }
+                log.println("</td>");
+                log.println("<td>");
+                for(Evolution e: pk.evolutionsFrom) {
+                    log.println("<div style=\"min-height:34px;margin:5px 0;\">");
+                    for(Evolution ev: e.to.evolutionsFrom) {
+                        log.println("<div class=\"pk-chain-element\">" + ev.to.name + "</div>");
+                    }
+                    log.println("</div>");
+                }
+                log.println("</td>");
+                log.println("</tr>");
+
+            }
+            log.println("</table>");
         }        
     }
 
     private void maybeChangeStats(final PrintStream log, final RomHandler romHandler) {
         switch (settings.getBaseStatisticsMod()) {
-        case SHUFFLE:
+        case SHUFFLE_ORDER:
             romHandler.shufflePokemonStats(settings.isBaseStatsFollowEvolutions());
+            break;
+        case SHUFFLE_BST:
+            romHandler.shuffleAllPokemonBSTs(settings.isBaseStatsFollowEvolutions(), false);
+            break;
+        case SHUFFLE_ALL:
+            romHandler.shufflePokemonStats(settings.isBaseStatsFollowEvolutions());
+            romHandler.shuffleAllPokemonBSTs(settings.isBaseStatsFollowEvolutions(), false);
             break;
         case RANDOM_WITHIN_BST:
             romHandler.randomizePokemonStatsWithinBST(settings.isBaseStatsFollowEvolutions());
@@ -689,11 +739,29 @@ public class Randomizer {
 
     private void maybeChangeTypes(final PrintStream log, final RomHandler romHandler) {
         switch (settings.getTypesMod()) {
-        case RANDOM_FOLLOW_EVOLUTIONS:
-            romHandler.randomizePokemonTypes(true);
+        case SHUFFLE:
+            romHandler.shufflePokemonTypes();
+            log.println("<h2>Shuffled Types</h2>");
+            log.println("<table class=\"pk-table\">");
+            log.println("<tr><th>Old Type</th><th>New Type</th></tr>");
+            for(Type t: Type.getTypes(romHandler.getTypeSize())) {
+                log.println("<tr><td>");
+                log.println(String.format("<span class=\"pk-type %s\">%s</span> ", 
+                    t.toString().toLowerCase(), 
+                    t.toString()));
+                log.println("</td><td>");
+                log.println(String.format("<span class=\"pk-type %s\">%s</span> ", 
+                    Type.getShuffledList().get(t.ordinal()).toString().toLowerCase(), 
+                    Type.getShuffledList().get(t.ordinal()).toString()));
+                log.println("</td></tr>");
+            }
+            log.println("</table>");
+            break;
+        case RANDOM_RETAIN:
+            romHandler.randomizeRetainPokemonTypes(settings.isTypesFollowEvolutions());
             break;
         case COMPLETELY_RANDOM:
-            romHandler.randomizePokemonTypes(false);
+            romHandler.randomizePokemonTypes(settings.isTypesFollowEvolutions());
             break;
         default:
             break;
@@ -729,7 +797,10 @@ public class Randomizer {
                 }
                 
                 List<Pokemon> starters = new ArrayList<Pokemon>();
-                selectRandomStarter(starterCount, starters, log, () -> romHandler.randomPokemon());
+                selectRandomStarter(starterCount, starters, log, () -> romHandler.randomStarterPokemon(
+                    settings.isStartersNoSplit(), settings.isStartersUniqueTypes(), 
+                    settings.isStartersBaseEvoOnly(),
+                    settings.isStartersLimitBST() ? settings.getStartersBSTLimitModifier() : 9999));
 
                 romHandler.setStarters(starters);
                 log.println("</ul>");
@@ -744,7 +815,9 @@ public class Randomizer {
 
                 List<Pokemon> starters = new ArrayList<Pokemon>();
                 selectRandomStarter(starterCount, starters, log, () -> 
-                    romHandler.random1or2EvosPokemon(settings.isStartersNoSplit()));
+                    romHandler.random1or2EvosPokemon(settings.isStartersNoSplit(), 
+                    settings.isStartersUniqueTypes(), settings.isStartersBaseEvoOnly(),
+                    settings.isStartersLimitBST() ? settings.getStartersBSTLimitModifier() : 9999));
 
                 romHandler.setStarters(starters);
                 log.println("</ul>");
@@ -759,7 +832,9 @@ public class Randomizer {
 
                 List<Pokemon> starters = new ArrayList<Pokemon>();
                 selectRandomStarter(starterCount, starters, log, () -> 
-                    romHandler.random2EvosPokemon(settings.isStartersNoSplit()));
+                    romHandler.random2EvosPokemon(settings.isStartersNoSplit(), 
+                    settings.isStartersUniqueTypes(), settings.isStartersBaseEvoOnly(),
+                    settings.isStartersLimitBST() ? settings.getStartersBSTLimitModifier() : 9999));
 
                 romHandler.setStarters(starters);
                 log.println("</ul>");
@@ -876,7 +951,11 @@ public class Randomizer {
                 if (t.offset != idx && t.offset != 0) {
                     log.printf("<em>@%X</em>", t.offset);
                 }
-                log.print("</div><ul class=\"trainer-pk\">");
+                log.print("</div><em>Old Team</em><ul class=\"old-trainer-pk\">");
+                for(TrainerPokemon tpk : originalTrainers.get(idx-1).pokemon) {
+                    log.print(String.format("<li>%s <em>Lv%d</em></li>", tpk.pokemon.name, tpk.level));
+                }
+                log.print("</ul><em>New Team</em><ul class=\"new-trainer-pk\">");
                 for (TrainerPokemon tpk : t.pokemon) {
                     log.print(String.format("<li>%s <em>Lv%d</em></li>", tpk.pokemon.name, tpk.level));
                 }
@@ -936,17 +1015,19 @@ public class Randomizer {
             if (romHandler.hasPhysicalSpecialSplit()) {
                 log.print("<th>CATEGORY</th>");
             }
-            log.println("</tr>");
+            log.println("<th>BIG</th></tr>");
             List<Move> allMoves = romHandler.getMoves();
             for (Move mv : allMoves) {
                 if (mv != null) {
                     String mvType = (mv.type == null) ? "???" : mv.type.toString();
+                    boolean topMove = mv.power > 95;
                     mvType = String.format("<span class=\"pk-type %s\">%s</span>", mvType.toLowerCase(), mvType);
                     log.printf("<tr%s><td>%d</td><td class=\"left\">%s</td><td>%s</td><td>%d</td><td>%d</td><td>%d</td>",
                             mv.internalId % 2 == 0 ? " class=\"alt\"" : "", mv.internalId, mv.name, mvType, mv.power, (int) mv.hitratio, mv.pp);
                     if (romHandler.hasPhysicalSpecialSplit()) {
                         log.printf("<td>%s</td>", mv.category.toString());
                     }
+                    log.printf("<td>%s</td>", topMove ? "YES" : "");
                     log.println("</tr>");
                 }
             }

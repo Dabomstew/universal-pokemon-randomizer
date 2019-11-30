@@ -28,6 +28,7 @@ public class Evolution implements Comparable<Evolution> {
     public Pokemon from;
     public Pokemon to;
     public boolean carryStats;
+    public int typesDiffer;
     public EvolutionType type;
     public int extraInfo;
 
@@ -37,6 +38,27 @@ public class Evolution implements Comparable<Evolution> {
         this.carryStats = carryStats;
         this.type = type;
         this.extraInfo = extra;
+        this.typesDiffer = 0;
+        // 1 == 1
+        if(from.primaryType != to.primaryType) {
+            this.typesDiffer = 1;
+        } 
+        // 2 == 2
+        if(from.secondaryType != to.secondaryType) {
+            this.typesDiffer = 2;
+        } 
+        // 1 == 2
+        if (from.primaryType == to.secondaryType && from.secondaryType != to.primaryType) {
+            this.typesDiffer = 3;
+        } 
+        // 2 == 1
+        if (from.secondaryType == to.primaryType && from.primaryType != to.secondaryType) {
+            this.typesDiffer = 4;
+        } 
+        // 1 == 2 && 2 == 1 (Grass/Bug vs Bug/Grass)
+        if (from.primaryType == to.secondaryType && from.secondaryType == to.primaryType) {
+            this.typesDiffer = 0;
+        }
     }
 
     @Override

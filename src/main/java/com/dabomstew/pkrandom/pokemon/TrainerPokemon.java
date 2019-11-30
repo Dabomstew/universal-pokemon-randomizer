@@ -39,8 +39,25 @@ public class TrainerPokemon {
     
     public boolean resetMoves = false;
 
+    public TrainerPokemon(){};
+
+    public TrainerPokemon(TrainerPokemon tp) {
+        this.pokemon = tp.pokemon;
+        this.level = tp.level;
+        this.move1 = tp.move1;
+        this.move2 = tp.move2;
+        this.move3 = tp.move3;
+        this.move4 = tp.move4;
+        this.AILevel = tp.AILevel;
+        this.heldItem = tp.heldItem;
+        this.ability = tp.ability;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
     public String toString() {
         return pokemon.name + " Lv" + level;
     }
-
 }

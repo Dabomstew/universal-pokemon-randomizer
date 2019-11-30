@@ -31,8 +31,7 @@ public class SysConstants {
 
     public static final String AUTOUPDATE_URL = "http://pokehacks.dabomstew.com/randomizer/autoupdate/";
     public static final String WEBSITE_URL = "http://pokehacks.dabomstew.com/randomizer/";
-    public static final String WEBSITE_URL_ZX = "https://github.com/Ajarmar/universal-pokemon-randomizer-zx/releases";
-    public static final int UPDATE_VERSION = 1721;
+    public static final int UPDATE_VERSION = 1811;
     public static final String ROOT_PATH = getRootPath();
     public static final String LINE_SEP = System.getProperty("line.separator");
     public static final String customNamesFile = "customnames.rncn";

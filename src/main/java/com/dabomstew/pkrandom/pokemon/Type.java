@@ -47,6 +47,7 @@ public enum Type {
 
     private static final List<Type> VALUES = Collections.unmodifiableList(Arrays.asList(values()));
     private static final int SIZE = VALUES.size();
+    private static List<Type> shuffledList;
 
     public static Type randomType(Random random) {
         return VALUES.get(random.nextInt(SIZE));
@@ -54,6 +55,18 @@ public enum Type {
 
     public String camelCase() {
         return RomFunctions.camelCase(this.toString());
+    }
+
+    public static List<Type> getTypes(int size) {
+        return VALUES.subList(0, size);
+    }
+
+    public static void setShuffledList(List<Type> list) {
+        shuffledList = list;
+    }
+
+    public static List<Type> getShuffledList() {
+        return shuffledList;
     }
 
 }
