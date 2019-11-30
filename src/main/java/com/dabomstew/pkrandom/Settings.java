@@ -325,9 +325,8 @@ public class Settings {
         // bugfix 161
         out.write(makeByteSelected(useMinimumCatchRate, blockWildLegendaries,
                 wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_STRENGTH, randomizeWildPokemonHeldItems,
-                banBadRandomWildPokemonHeldItems, wildPokemonRestrictionMod == WildPokemonRestrictionMod.MATCH_TYPING_DISTRIBUTION,
-                allowLowLevelEvolvedTypes)
-                | ((minimumCatchRateLevel - 1) << 5));
+                banBadRandomWildPokemonHeldItems, wildPokemonRestrictionMod == WildPokemonRestrictionMod.MATCH_TYPING_DISTRIBUTION)
+                | ((minimumCatchRateLevel - 1) << 6));
 
         // 17 static pokemon
         out.write(makeByteSelected(staticPokemonMod == StaticPokemonMod.UNCHANGED,
@@ -411,8 +410,8 @@ public class Settings {
         // @ 38 Starter Pokemon BST Modifier
         write2ByteInt(out, starterBSTModifier - 1);
         
-        // @ 40 Trainer Pokemon Overflow
-        out.write(makeByteSelected(rivalCarriesTeamThroughout));
+        // @ 40 Trainer and Wild Pokemon Overflow
+        out.write(makeByteSelected(rivalCarriesTeamThroughout, allowLowLevelEvolvedTypes));
 
         // @ 41 Rom Title Name (update LENGTH_OF_SETTINGS_DATA if this changes)
         try {
@@ -542,8 +541,7 @@ public class Settings {
         settings.setBlockWildLegendaries(restoreState(data[16], 1));
         settings.setRandomizeWildPokemonHeldItems(restoreState(data[16], 3));
         settings.setBanBadRandomWildPokemonHeldItems(restoreState(data[16], 4));
-        settings.setAllowLowLevelEvolvedTypes(restoreState(data[16], 6));
-        settings.setMinimumCatchRateLevel(((data[16] & 0x60) >> 5) + 1);
+        settings.setMinimumCatchRateLevel(((data[16] & 0xC0) >> 6) + 1);
 
         settings.setStaticPokemonMod(restoreEnum(StaticPokemonMod.class, data[17], 0, // UNCHANGED
                 1, // RANDOM_MATCHING
@@ -638,6 +636,7 @@ public class Settings {
         settings.setStartersBSTLimitModifier(FileFunctions.read2ByteInt(data, 38) + 1);
 
         settings.setRivalCarriesTeamThroughout(restoreState(data[40], 0));
+        settings.setAllowLowLevelEvolvedTypes(restoreState(data[40], 1));
         
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");

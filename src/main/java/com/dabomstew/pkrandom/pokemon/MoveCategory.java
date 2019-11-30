@@ -1,7 +1,7 @@
 package com.dabomstew.pkrandom.pokemon;
 
 /*----------------------------------------------------------------------------*/
-/*--  DamageType.java - represents a move's Physical/Special split value.   --*/
+/*--  MoveCategory.java - represents a move's Physical/Special split value. --*/
 /*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
 /*--  Pokemon and any associated names and the like are                     --*/

@@ -22,7 +22,7 @@ Forks used -
 # For Program Users
 If you're looking to actually *use* the randomizer as opposed to looking at the 
 source code, you're reading the wrong readme file. This file shouldn't be 
-included in official releases, but if it is, head on over to README.txt instead.
+included in official releases, but if it is, head on over to UserGuide.txt instead.
 
 I would advise you to read this file, especially the "Fair Warning" and 
 "Compiling the Program" parts. However, there is also another file detailing the
@@ -36,25 +36,22 @@ chance that the functionality in here will break and/or be removed.
 
 # Compiling the Program
 
-I do not plan to host any binaries (readymade programs that do not need to be 
-compiled before being used) for this fork. This means that if you by chance want 
-to try it out you will have to compile it by yourself. You do this by downloading 
-a Java interpreter (such as Eclipse https://www.eclipse.org/downloads/),
-which you will then have to learn to use. 
+Binaries are hosted at `https://github.com/brentspector/universal-pokemon-randomizer/releases`
 
 As this is a Maven project, you will need to create a build/run configuration which
-accomplishes the equivalent of "mvn clean package", or just run it from the command
-line.
+accomplishes the equivalent of `mvn clean package`, or just run it from the command
+line. This will build a jar for you under the `target` folder which contains any
+modifications to the code you have made.
 
 This is subject to change. Make sure you're paying attention to which version of Java
-(currently this project is set to use Java 8) and Maven you're using.
+(currently this project is set to use Java 8) and Maven (3.6) you're using.
 
 # Adding Options to Interface
 
 This project has a number of files that need to be updated correctly in order to
 support any new options. 
 
-It is strongly recommended that you download NetBeans to take advantage of their
+It is strongly recommended that you download `NetBeans` to take advantage of their
 Java Swing editor, since this project was built using it. NetBeans should be able
 to import the project as Eclipse (you will need a plug-in for this). Once you open
 `RandomizerGUI.java` in NetBeans, it should automatically switch over to a design
@@ -64,8 +61,8 @@ automatically update the `RandomizerGUI.form`, `RandomizerGUI.java`, and
 
 **NOTE: NetBeans does make a number of temp/lock files to keep you from editing
 other files while making design changes. It is best to have another editor like
-Eclipse or VS Code to work around NetBean's locks. Also note that you should not
-commit any temp or lock files to git. **
+`Eclipse` or `VS Code` to work around NetBean's locks. Also note that you should 
+not commit any temp or lock files to git. **
 
 When working with NetBeans, I recommend first editing the variable name (under Code tab)
 for any new GUI elements added. This will allow all new functions to be named correctly
@@ -153,31 +150,3 @@ discretion and may not be responded to in a timely manner if I'm busy.
 This fork was made to compile the changes from other forks into a single fork. This
 repository includes a number of changes, and the resulting fixes that were implemented
 for conflicts and oversights. 
-
-Future work will include more features that I wanted to create, such as shuffling types
-and a list of Pokemon/moves with high stats.
-
-## Differences between this Fork and Dabomstew's Original Version
- * Converted project into Maven and brought minimum java version to 8.
- * Added an option to randomize the stats and types before or after any evolution
- randomization is applied. With this, you can get more natural evolutionary lines,
- or maintain the old method of randomization. 
- * Added an option to prevent random evolutionary lines from converging (2 pokemon
- evolve into the same thing).
- * Added an option to prevent pokémon from evolving into another with a lower BST.
- * Added an option to forbid lines with split evolutions from being used when
- randomizing starters.
- * Added an option for randomizing outside of any BST cap.
- * Added an option for fast text.
- * Refactored "Guaranteed Four Moves" to work on a slider of 2-4.
- * Eevee now evolves into different typed pokemon instead of sharing types (when
- evolutions are randomized).
- * Tweaked moveset randomization to better balance types in movesets.
- * Added an option to shuffle base stats between pokemon.
- * Enabled "No Broken Moves" to be used in non-random builds.
- * Refactored "Modify Levels" to work on non-random trainers.
- * Refactored "Force Fully Evolved" to work on non-random trainers.
- * Added an option to randomize starters with 1 or 2 evolutions.
- * Added an option to balance wild type frequency.
- * Added an option to have unique starter types when randomized.
- * Added an option for evolved pokemon to appear at lower levels.

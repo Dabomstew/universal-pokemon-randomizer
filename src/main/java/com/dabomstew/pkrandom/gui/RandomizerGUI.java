@@ -118,10 +118,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
      *            the command line arguments
      */
     public static void main(String args[]) {
-        boolean autoupdate = true;
+        boolean autoupdate = false;
         for (String arg : args) {
-            if (arg.equalsIgnoreCase("--noupdate")) {
-                autoupdate = false;
+            if (arg.equalsIgnoreCase("--checkupdate")) {
+                autoupdate = true;
                 break;
             }
         }
@@ -170,13 +170,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
         testForRequiredConfigs();
         checkHandlers = new RomHandler.Factory[] { new Gen1RomHandler.Factory(), new Gen2RomHandler.Factory(),
                 new Gen3RomHandler.Factory(), new Gen4RomHandler.Factory(), new Gen5RomHandler.Factory() };
-        autoUpdateEnabled = true;
+        autoUpdateEnabled = false;
         haveCheckedCustomNames = false;
         useScrollPaneMode = !onWindowsLAF;
         attemptReadConfig();
-        if (!autoupdate) {
+        if (autoupdate) {
             // override autoupdate
-            autoUpdateEnabled = false;
+            autoUpdateEnabled = true;
         }
         initComponents();
         initTweaksPanel();
