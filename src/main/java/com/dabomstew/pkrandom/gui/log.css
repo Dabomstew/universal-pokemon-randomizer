@@ -1,0 +1,511 @@
+/*----------------------------------------------------------------------------*/
+/*--  log.css - Contains stylesheet for log produced at end of              --*/ 
+/*--  randomization.                                                        --*/
+/*--                                                                        --*/
+/*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
+/*--  Pokemon and any associated names and the like are                     --*/
+/*--  trademark and (C) Nintendo 1996-2012.                                 --*/
+/*--                                                                        --*/
+/*--  The custom code written here is licensed under the terms of the GPL:  --*/
+/*--                                                                        --*/
+/*--  This program is free software: you can redistribute it and/or modify  --*/
+/*--  it under the terms of the GNU General Public License as published by  --*/
+/*--  the Free Software Foundation, either version 3 of the License, or     --*/
+/*--  (at your option) any later version.                                   --*/
+/*--                                                                        --*/
+/*--  This program is distributed in the hope that it will be useful,       --*/
+/*--  but WITHOUT ANY WARRANTY; without even the implied warranty of        --*/
+/*--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          --*/
+/*--  GNU General Public License for more details.                          --*/
+/*--                                                                        --*/
+/*--  You should have received a copy of the GNU General Public License     --*/
+/*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
+/*----------------------------------------------------------------------------*/
+body {
+  background-color: #eee;
+  color: #444;
+  font-family: Arial, Helvetica, sans-serif;
+  padding: 20px 60px;
+}
+
+h2 {
+  font-size: 1.8em;
+}
+
+h3 {
+  font-size: 1.3em;
+}
+
+table {
+  border: 2px solid #444;
+  border-collapse: collapse;
+  empty-cells: show;
+}
+
+th, td {
+  padding: 6px 8px;
+  border-right: 1px solid #444;
+  border-left: 1px solid #444;
+}
+
+th {
+  position: -webkit-sticky;
+  position: sticky;
+  top: -1px;
+  z-index: 1;
+}
+
+td {
+  text-align: center;
+}
+
+li {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.clear {
+  clear: both;
+}
+
+.pk-table {
+  border-color: #244073;
+}
+
+.pk-table th {
+  background-color: #1b7df7;
+  color: #eee;
+  border-color: inherit;
+}
+
+.pk-table tr {
+  background-color: #dff0ff;
+}
+
+.pk-table tr.alt {
+  background-color: #c5e1f9;
+}
+
+.pk-table td {
+  border-color: inherit;
+}
+
+.moves-table {
+  border-color: #881a15;
+}
+
+.moves-table th {
+  background-color: #ff5746;
+  color: #eee;
+  border-color: inherit;
+}
+
+.moves-table tr {
+  background-color: #ffecdf;
+}
+
+.moves-table tr.alt {
+  background-color: #f9dbc5;
+}
+
+.moves-table td {
+  border-color: inherit;
+}
+
+.trades-table {
+  border-color: #0f630f;
+}
+
+.trades-table th {
+  background-color: #33ac33;
+  color: #eee;
+  border-color: inherit;
+}
+
+.trades-table tr {
+  background-color: #c3f9c3;
+}
+
+.trades-table tr.alt {
+  background-color: #e0ffe0;
+}
+
+.trades-table td {
+  border-color: inherit;
+  font-weight: bold;
+}
+
+.trades-table tr.alt td {
+  border-color: inherit;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+.left {
+  text-align: left;
+}
+
+.error {
+  color:red;
+  padding: 3px 10px;
+  border: solid 1px red;
+  font-style: italic;
+  background-color: #ffcbcb;
+  border-radius: 4px;
+}
+
+.pk-type {
+  font-family: "Lucida Console", Monaco, monospace;
+  font-weight: bold;
+  border-radius: 4px;
+  color: #eee;
+  padding: 4px 10px;
+  margin: 2px;
+  font-size: 0.9em;
+  text-shadow: 0px 1px 2px #333;
+  text-transform: uppercase;
+  background-color: #333;
+  display: inline-block;
+}
+
+.normal {
+  background-color: #7f7f7f;
+}
+
+.grass {
+  background-color: #19ad30;
+}
+
+.fire {
+  background-color: #ff690f;
+}
+
+.water {
+  background-color: #2d94ff
+}
+
+.electric {
+  background-color: #ffce00;
+}
+
+.rock {
+  background-color: #6f6155;
+}
+
+.ground {
+  background-color: #d2a96a;
+}
+
+.poison {
+  background-color: #782fff;
+}
+
+.flying {
+  background-color: #c1c0fa;
+}
+
+.ice {
+  background-color:   #95d0fd;
+}
+
+.psychic {
+  background-color: #ff6aaf;
+}
+
+.ghost {
+  background-color: #6860a9;
+}
+
+.bug {
+  background-color: #a8d02d;
+}
+
+.fighting {
+  background-color: #bf533b
+}
+
+.dragon {
+  background-color: #00c7be;
+}
+
+.dark {
+  background-color: #5133ad;
+}
+
+.steel {
+  background-color: #93a8c1;
+}
+
+.fairy {
+  background-color: #ff9ddd;
+}
+
+.moveset {
+  padding-left: 20px;
+}
+
+.moveset > li {
+  min-width: 90px;
+  border-radius: 3px;
+  display: inline-block;
+  background-color: #acd;
+  border: 2px solid #80b2f5;
+  padding: 3px 12px;
+  margin: 4px;
+  color: #358;
+}
+
+.moveset > li > strong {
+  display: block;
+}
+
+.moveset > li > em {
+  display: block;
+  font-size: 0.8em;
+  text-align: right;
+}
+
+.tm-list {
+  list-style: none;
+  padding-left: 20px
+}
+
+.tm-list > li {
+  margin: 8px 0;
+}      
+
+.tm-list > li > strong {
+  border-radius: 3px;
+  font-size: 1.2em;
+  display: inline-block;
+  color: #eee;
+  background-color: #5290ec;
+  padding: 5px 10px;
+  margin-right: 10px;
+}
+
+.wild-pk-set {
+  padding: 10px 20px;
+  border-radius: 6px 6px 0 6px;
+}
+
+.pk-set-list {
+  list-style: none;
+  border-radius: 0 0 10px 10px;
+  margin: 0 0 40px 20px;
+  padding: 10px 20px;
+}
+
+.pk-set-list > li {
+  display: inline-block;
+  border-radius: 5px;
+  padding: 8px 18px;
+  margin: 4px;
+}
+
+.pk-set-list > li em {
+  font-size: 0.8em;
+}
+
+.pk-set-grass {
+  background-color: #319634;
+  color: #eee;
+}
+
+.pk-list-grass {
+  background-color: #63d066;
+}
+
+.pk-list-grass > li {
+  background-color: #94e49e;
+}
+
+.pk-set-surfing {
+  background-color: #6edde8;
+  color: #333;
+}
+
+.pk-list-surfing {
+  background-color: #48b9da;
+}
+
+.pk-list-surfing > li {
+  background-color: #7ad7ec;
+}
+
+.pk-set-fishing {
+  background-color: #3773e2;
+  color: #eee;
+}
+
+.pk-list-fishing {
+  background-color: #2b4e8e;
+}
+
+.pk-list-fishing > li {
+  background-color: #296fd7;
+  color: #eee;
+}
+
+.pk-set-rock-smash {
+  background-color: #96764e;
+  color: #eee;
+}
+
+.pk-list-rock-smash {
+  background-color: #b7a070;
+}
+
+.pk-list-rock-smash > li {
+  background-color: #e4d0a0;
+}
+
+.pk-set-poke-radar {
+  background-color: #7c51c3;
+  color: #eee;
+}
+
+.pk-list-poke-radar {
+  background-color: #af79ea;
+}
+
+.pk-list-poke-radar > li {
+  background-color: #d8ade6;
+}
+
+.pk-set-doubles-grass {
+  background-color: #346b3b;
+  color: #eee;
+}
+
+.pk-list-doubles-grass {
+  background-color: #69b985;
+}
+
+.pk-list-doubles-grass > li {
+  background-color: #399255;
+  color: #eee;
+}
+
+.pk-set-shaking-spot {
+  background-color: #5f697b;
+  color: #eee;
+}
+
+.pk-list-shaking-spot {
+  background-color: #8da1b9;
+}
+
+.pk-list-shaking-spot > li {
+  background-color: #b0bccc;
+}
+
+.pk-set-headbutt-trees {
+  background-color: #557d37;
+  color: #eee;
+}
+
+.pk-list-headbutt-trees {
+  background-color: #86b34b;
+}
+
+.pk-list-headbutt-trees > li {
+  background-color: #c0d66a;
+}
+
+
+.pk-set-bug-catching-contest {
+  background-color: #a7822e;
+  color: #eee;
+}
+
+.pk-list-bug-catching-contest {
+  background-color: #deb84d;
+}
+
+.pk-list-bug-catching-contest > li {
+  background-color: #ecd375;
+}
+
+.trainer-box {
+  float: left;
+  width: 340px;
+  margin: 10px 10px;
+}
+
+.trainer {
+  background-color: #ffc379;
+  padding: 10px 18px;
+  border-radius: 10px;
+}
+
+.trainer > em {
+  display: block;
+  font-size: 0.8em;
+  margin-left: 60px;
+}
+
+.trainer-name {
+  display: block;
+}
+
+.trainer-name > em {
+  font-size: 0.8em;
+  background-color: #ffde93;
+  padding: 5px 8px;
+  border-radius: 12px;
+  margin-right: 2px;
+}
+
+.old-trainer-pk {
+  background-color: #e2d2ab;
+  height: 250px;
+  list-style-type: none;
+  margin: 0;
+  padding: 10px 42px;
+  border-radius: 10px;
+}
+
+.old-trainer-pk > li {
+  margin: 5px 0;
+  background-color: #dac281;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 2px solid #e7a45b;
+}
+
+.old-trainer-pk > li > em {
+  float: right;
+  font-size: 0.8em;
+}
+
+.new-trainer-pk {
+  background-color: #f1e1b7;
+  height: 250px;
+  list-style-type: none;
+  margin: 0;
+  padding: 10px 42px;
+  border-radius: 10px;
+}
+
+.new-trainer-pk > li {
+  margin: 5px 0;
+  background-color: #f5da8e;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 2px solid #ffb262;
+}
+
+.new-trainer-pk > li > em {
+  float: right;
+  font-size: 0.8em;
+}
+
+.pk-chain-element {
+  background-color: #f5da8e;
+  margin: 5px 0;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 2px solid #ffb262;
+} 

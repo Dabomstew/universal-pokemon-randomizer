@@ -34,3 +34,8 @@ manifest.mf
 *.dsv
 build_eclipse.xml
 /customnames.rncn
+
+# Maven
+.idea
+/target
+/dist/
