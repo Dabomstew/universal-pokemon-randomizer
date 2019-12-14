@@ -239,14 +239,10 @@ public class PokemonSet {
     private void updateTypeCount() {
         typeCount = 0;
         uniquePokeCount = 0;
-        HashSet<Pokemon> uniquePokes = null;
+        HashSet<Pokemon> uniquePokes = new HashSet<Pokemon>();
         for (Map.Entry<Type, ArrayList<Pokemon>> entry : pokesByType.entrySet()) {
             typeCount += entry.getValue().size();
-            if(uniquePokes == null) {
-                uniquePokes = new HashSet<Pokemon>(entry.getValue());
-            } else {
-                uniquePokes.addAll(entry.getValue());
-            }
+            uniquePokes.addAll(entry.getValue());
         }
         uniquePokeCount = uniquePokes.size();
     }
