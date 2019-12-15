@@ -68,11 +68,14 @@ public class Randomizer {
 
     public int randomize(final String filename, final PrintStream log) {
         long seed = RandomSource.pickSeed();
+        // long seed = 123456789;    // TESTING
         return randomize(filename, log, seed);
     }
 
     public int randomize(final String filename, final PrintStream log, long seed) {
         final long startTime = System.currentTimeMillis();
+        // long seed2 = 123456789;    // TESTING
+        // RandomSource.seed(seed2);    // TESTING
         RandomSource.seed(seed);
         final boolean raceMode = settings.isRaceMode();
 

@@ -38,3 +38,4 @@ gen5r_race.rnqs
 .classpath
 .settings/org.eclipse.jdt.core.prefs
 util/files
+util/log

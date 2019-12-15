@@ -3668,6 +3668,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         if (type != null) {
             if (!cachedReplacementLists.containsKey(type)) {
+                System.out.println(current.name + " using cachedReplacementLists");
                 cachedReplacementLists.put(type, pokemonOfType(type, noLegendaries));
             }
             pickFrom = cachedReplacementLists.get(type);
@@ -3676,7 +3677,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (usePowerLevels && limitBST) {
             // start with pokemon BST, and only extend downwards
             int currentBST = current.bstForPowerLevels();
-            int minTarget = currentBST - currentBST / 10;
+            int minTarget = currentBST - currentBST / 5;
             int maxTarget = currentBST;
             List<Pokemon> canPick = new ArrayList<Pokemon>();
             int expandRounds = 0;
@@ -3689,10 +3690,25 @@ public abstract class AbstractRomHandler implements RomHandler {
                         canPick.add(pk);
                     }
                 }
-                minTarget -= currentBST / 20;
+                minTarget -= currentBST / 10;
                 expandRounds++;
             }
-            return canPick.get(this.random.nextInt(canPick.size()));
+            Pokemon chosenPokemon = canPick.get(this.random.nextInt(canPick.size()));
+            
+            // If usePlacementHistory is True, then we need to do some
+            // extra checking to make sure the randomly chosen pokemon
+            // is actually below the current average placement
+            // if not, re-roll
+            
+            if (usePlacementHistory) {
+             // System.out.println("Pokemon: "+ chosenPokemon.name + " placement history: " + getPlacementHistory(chosenPokemon) + " current average: " + getPlacementAverage());
+                while (getPlacementHistory(chosenPokemon) > getPlacementAverage()) {
+                 // System.out.println(">> Pokemon: "+ chosenPokemon.name + " exceed threshold, rerolling");
+                    chosenPokemon = canPick.get(this.random.nextInt(canPick.size()));
+                 // System.out.println(">> NEW Pokemon: "+ chosenPokemon.name + " placement history: " + getPlacementHistory(chosenPokemon) + " current average: " + getPlacementAverage());
+                }
+            }
+            return chosenPokemon;
         }    
         else if (usePowerLevels) {
             // start with within 10% and add 5% either direction till we find
@@ -3715,7 +3731,21 @@ public abstract class AbstractRomHandler implements RomHandler {
                 maxTarget += currentBST / 20;
                 expandRounds++;
             }
-            return canPick.get(this.random.nextInt(canPick.size()));
+            // If usePlacementHistory is True, then we need to do some
+            // extra checking to make sure the randomly chosen pokemon
+            // is actually below the current average placement
+            // if not, re-roll
+
+            Pokemon chosenPokemon = canPick.get(this.random.nextInt(canPick.size()));
+            if (usePlacementHistory) {
+                // System.out.println("Pokemon: "+ chosenPokemon.name + " placement history: " + getPlacementHistory(chosenPokemon) + " current average: " + getPlacementAverage());
+                while (getPlacementHistory(chosenPokemon) > getPlacementAverage()) {
+                 // System.out.println(">> Pokemon: "+ chosenPokemon.name + " exceed threshold, rerolling");
+                    chosenPokemon = canPick.get(this.random.nextInt(canPick.size()));
+                 // System.out.println(">> NEW Pokemon: "+ chosenPokemon.name + " placement history: " + getPlacementHistory(chosenPokemon) + " current average: " + getPlacementAverage());
+                }
+            }
+            return chosenPokemon;
         } else {
             if (wonderGuardAllowed) {
                 return pickFrom.get(this.random.nextInt(pickFrom.size()));
@@ -3791,7 +3821,23 @@ public abstract class AbstractRomHandler implements RomHandler {
             return 0;
         }        
     }
-    
+
+    private float getPlacementAverage() {
+        // This method will return true if the number of times a pokemon has been
+        // placed is less than average of all placed pokemon's appearances
+        // E.g., Charmander's been placed once, but the average for all pokemon is 2.2
+        // So add to list and return 
+        
+        List<Pokemon> placedPK = new ArrayList<Pokemon>(placementHistory.keySet());
+        int placedPKNum = 0;
+        for (Pokemon p : placedPK) {
+            placedPKNum += placementHistory.get(p); 
+        }
+        float placedAverage = (float)placedPKNum / (float)placedPK.size();
+        return placedAverage;
+        }
+
+        
     private List<Pokemon> getBelowAveragePlacements() {
         // This method will return true if the number of times a pokemon has been
         // placed is less than average of all placed pokemon's appearances
