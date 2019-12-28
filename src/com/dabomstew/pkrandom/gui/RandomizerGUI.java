@@ -1218,14 +1218,24 @@ public class RandomizerGUI extends javax.swing.JFrame {
             }
             this.wpShakingGrassCB.setSelected(false);
             this.wpShakingGrassCB.setEnabled(false);
-            this.wpShakingGrassCB.setVisible(true);
+            if (romHandler.generationOfPokemon() < 5) {
+                this.wpShakingGrassCB.setVisible(false);
+            } else {
+                this.wpShakingGrassCB.setVisible(true);
+            }
 
             this.stpUnchangedRB.setEnabled(true);
             if (this.romHandler.canChangeStaticPokemon()) {
                 this.stpRandomL4LRB.setEnabled(true);
                 this.stpRandomTotalRB.setEnabled(true);
                 this.stpRandomPower.setEnabled(true);
-                this.stpLimitMusketeers.setEnabled(true);
+                if (romHandler.generationOfPokemon() < 5) {
+                    this.stpLimitMusketeers.setVisible(false);
+                    this.stpLimitMusketeers.setEnabled(false);
+                } else {
+                    this.stpLimitMusketeers.setVisible(true);
+                    this.stpLimitMusketeers.setEnabled(true);
+                }
                 this.stpLimit600.setEnabled(true);
 
             }
@@ -1269,6 +1279,12 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
             this.fiBanBadCB.setEnabled(false);
             this.fiBanBadCB.setSelected(false);
+
+            if (romHandler.generationOfPokemon() < 5) {
+                this.shopItemsPanel.setVisible(false);
+            } else {
+                this.shopItemsPanel.setVisible(true);
+            }
 
             this.shUnchangedRB.setEnabled(true);
             this.shShuffleRB.setEnabled(true);
