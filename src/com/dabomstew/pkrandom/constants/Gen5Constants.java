@@ -294,6 +294,7 @@ public class Gen5Constants {
         // "Money items" etc
         opShopItems.add(0x2A);
         opShopItems.add(0x2B);
+        opShopItems.add(0x32);
         opShopItems.add(0x36);
         opShopItems.addAll(IntStream.rangeClosed(0x41,0x47).boxed().collect(Collectors.toList()));
         opShopItems.addAll(IntStream.rangeClosed(0x56,0x5C).boxed().collect(Collectors.toList()));
