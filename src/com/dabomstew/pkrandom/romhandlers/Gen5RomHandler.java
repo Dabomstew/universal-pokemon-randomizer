@@ -1328,7 +1328,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             available |= MiscTweak.FASTEST_TEXT.getValue();
         }
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
-            available |= MiscTweak.NO_FREE_LUCKY_EGG.getValue();
+        available |= MiscTweak.NO_FREE_LUCKY_EGG.getValue();
+        available |= MiscTweak.BAN_BIG_MANIAC_ITEMS.getValue();
         return available;
     }
 
@@ -1343,6 +1344,18 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             nonBadItems.banSingles(Gen5Constants.luckyEggIndex);
         } else if (tweak == MiscTweak.NO_FREE_LUCKY_EGG) {
             removeFreeLuckyEgg();
+        } else if (tweak == MiscTweak.BAN_BIG_MANIAC_ITEMS) {
+            // BalmMushroom, Big Nugget, Pearl String, Comet Shard
+            allowedItems.banRange(0x244, 4);
+            nonBadItems.banRange(0x244, 4);
+
+            // Relics
+            allowedItems.banRange(0x24B, 4);
+            nonBadItems.banRange(0x24B, 4);
+
+            // Rare berries
+            allowedItems.banRange(0xCE, 7);
+            nonBadItems.banRange(0xCE, 7);
         }
     }
 
