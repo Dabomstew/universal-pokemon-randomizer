@@ -1402,6 +1402,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public boolean hasShopRandomization() {
+        return false;
+    }
+
+    @Override
     public List<Integer> getShopItems() {
         return null; // Not implemented
     }

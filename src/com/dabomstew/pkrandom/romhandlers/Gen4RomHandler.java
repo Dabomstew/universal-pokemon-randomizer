@@ -2110,6 +2110,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public boolean hasShopRandomization() {
+        return false;
+    }
+
+    @Override
     public List<Integer> getShopItems() {
         return null; // Not implemented
     }

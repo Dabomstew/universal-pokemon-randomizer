@@ -1280,7 +1280,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.fiBanBadCB.setEnabled(false);
             this.fiBanBadCB.setSelected(false);
 
-            if (romHandler.generationOfPokemon() < 5) {
+            if (!romHandler.hasShopRandomization()) {
                 this.shopItemsPanel.setVisible(false);
             } else {
                 this.shopItemsPanel.setVisible(true);

@@ -402,6 +402,8 @@ public interface RomHandler {
     public void randomizeEvolutions(boolean similarStrength, boolean sameType, boolean limitToThreeStages,
             boolean forceChange);
 
+    public boolean hasShopRandomization();
+
     public void shuffleShopItems();
 
     public void randomizeShopItems(boolean banBadItems, boolean banRegularShopItems, boolean banOPShopItems, boolean balancePrices);

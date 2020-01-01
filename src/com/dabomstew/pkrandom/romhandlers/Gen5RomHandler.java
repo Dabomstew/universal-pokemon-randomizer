@@ -1891,6 +1891,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public boolean hasShopRandomization() {
+        return true;
+    }
+
+    @Override
     public boolean canChangeTrainerText() {
         return true;
     }
