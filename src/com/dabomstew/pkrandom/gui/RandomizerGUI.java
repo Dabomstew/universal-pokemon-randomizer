@@ -2214,6 +2214,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 this.restoreStateFromSettings(settings);
             } catch (UnsupportedEncodingException e) {
                 // settings load failed
+                e.printStackTrace();
                 this.romHandler = null;
                 initialFormState();
             }
@@ -2389,10 +2390,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this,
                         String.format(bundle.getString("RandomizerGUI.settingsLoaded"), fh.getName()));
             } catch (UnsupportedOperationException ex) {
+                ex.printStackTrace();
                 JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.settingsFileNewer"));
             } catch (IllegalArgumentException ex) {
+                ex.printStackTrace();
                 JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.invalidSettingsFile"));
             } catch (IOException ex) {
+                ex.printStackTrace();
                 JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.settingsLoadFailed"));
             }
         }
