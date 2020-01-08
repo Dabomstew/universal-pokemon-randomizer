@@ -3702,10 +3702,12 @@ public abstract class AbstractRomHandler implements RomHandler {
             
             if (usePlacementHistory) {
              // System.out.println("Pokemon: "+ chosenPokemon.name + " placement history: " + getPlacementHistory(chosenPokemon) + " current average: " + getPlacementAverage());
-                while (getPlacementHistory(chosenPokemon) > getPlacementAverage()) {
-                 // System.out.println(">> Pokemon: "+ chosenPokemon.name + " exceed threshold, rerolling");
+                int breaknum = 0;
+                while (getPlacementHistory(chosenPokemon) > getPlacementAverage() && breaknum < 100) {
+                    System.out.println(">> Pokemon: "+ chosenPokemon.name + " exceed threshold, rerolling");
                     chosenPokemon = canPick.get(this.random.nextInt(canPick.size()));
-                 // System.out.println(">> NEW Pokemon: "+ chosenPokemon.name + " placement history: " + getPlacementHistory(chosenPokemon) + " current average: " + getPlacementAverage());
+                    System.out.println(">> NEW Pokemon: "+ chosenPokemon.name + " placement history: " + getPlacementHistory(chosenPokemon) + " current average: " + getPlacementAverage());
+                    breaknum += 1;
                 }
             }
             return chosenPokemon;
@@ -3738,12 +3740,14 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             Pokemon chosenPokemon = canPick.get(this.random.nextInt(canPick.size()));
             if (usePlacementHistory) {
-                // System.out.println("Pokemon: "+ chosenPokemon.name + " placement history: " + getPlacementHistory(chosenPokemon) + " current average: " + getPlacementAverage());
-                while (getPlacementHistory(chosenPokemon) > getPlacementAverage()) {
-                 // System.out.println(">> Pokemon: "+ chosenPokemon.name + " exceed threshold, rerolling");
-                    chosenPokemon = canPick.get(this.random.nextInt(canPick.size()));
-                 // System.out.println(">> NEW Pokemon: "+ chosenPokemon.name + " placement history: " + getPlacementHistory(chosenPokemon) + " current average: " + getPlacementAverage());
-                }
+                   System.out.println("Pokemon: "+ chosenPokemon.name + " placement history: " + getPlacementHistory(chosenPokemon) + " current average: " + getPlacementAverage());
+               int breaknum = 0;
+               while (getPlacementHistory(chosenPokemon) > getPlacementAverage() && breaknum < 100) {
+                   System.out.println(">> Pokemon: "+ chosenPokemon.name + " exceed threshold, rerolling");
+                   chosenPokemon = canPick.get(this.random.nextInt(canPick.size()));
+                   System.out.println(">> NEW Pokemon: "+ chosenPokemon.name + " placement history: " + getPlacementHistory(chosenPokemon) + " current average: " + getPlacementAverage());
+                   breaknum += 1;
+               }
             }
             return chosenPokemon;
         } else {
