@@ -389,19 +389,19 @@ public class Randomizer {
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL,
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS,
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
-                    settings.isBlockWildLegendaries(), settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SAME_EVO_STAGE);
+                    settings.isBlockWildLegendaries(), settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SAME_EVO_STAGE, settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_EVO_STAGE_AND_TYPING);
             break;
         case AREA_MAPPING:
             romHandler.area1to1Encounters(settings.isUseTimeBasedEncounters(),
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL,
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS,
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
-                    settings.isBlockWildLegendaries(), settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SAME_EVO_STAGE);
+                    settings.isBlockWildLegendaries(), settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SAME_EVO_STAGE, settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_EVO_STAGE_AND_TYPING);
             break;
         case GLOBAL_MAPPING:
             romHandler.game1to1Encounters(settings.isUseTimeBasedEncounters(),
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
-                    settings.isBlockWildLegendaries(), settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SAME_EVO_STAGE);
+                    settings.isBlockWildLegendaries(), settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SAME_EVO_STAGE, settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_EVO_STAGE_AND_TYPING);
             break;
         default:
             break;

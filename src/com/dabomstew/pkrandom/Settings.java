@@ -158,7 +158,7 @@ public class Settings {
     }
 
     public enum WildPokemonRestrictionMod {
-        NONE, SIMILAR_STRENGTH, CATCH_EM_ALL, TYPE_THEME_AREAS, SAME_EVO_STAGE
+        NONE, SIMILAR_STRENGTH, CATCH_EM_ALL, TYPE_THEME_AREAS, SAME_EVO_STAGE, SIMILAR_EVO_STAGE_AND_TYPING
     }
 
     private WildPokemonMod wildPokemonMod = WildPokemonMod.UNCHANGED;
@@ -394,7 +394,7 @@ public class Settings {
         out.write(baseStatRange);
 
         // 37 trainer pokemon extended settings and misc? (couldn't fit this in existing entries)
-        out.write(makeByteSelected(trainersUseSameEvoStages, shouldPatchSpecialSplit));
+        out.write(makeByteSelected(trainersUseSameEvoStages, shouldPatchSpecialSplit, wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_EVO_STAGE_AND_TYPING));
         
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -501,7 +501,8 @@ public class Settings {
                 restoreState(data[16], 2), // SIMILAR_STRENGTH
                 restoreState(data[15], 0), // CATCH_EM_ALL
                 restoreState(data[15], 3), // TYPE_THEME_AREAS
-                restoreState(data[16], 5) // SAME_EVO_STAGE
+                restoreState(data[16], 5), // SAME_EVO_STAGE
+                restoreState(data[37], 2) // SIMILAR_EVO_STAGE_AND_TYPING 
         ));
         settings.setUseTimeBasedEncounters(restoreState(data[15], 7));
 

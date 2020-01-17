@@ -702,7 +702,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-            boolean noLegendaries, boolean useSameEvoStage) {
+            boolean noLegendaries, boolean useSameEvoStage, boolean useSameEvoStageAndTyping) {
         checkPokemonRestrictions();
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
 
@@ -818,6 +818,20 @@ public abstract class AbstractRomHandler implements RomHandler {
                     enc.pokemon = pickWildSameEvoStageReplacement(localAllowed, enc.pokemon, false, null);
                 }
             }
+        } else if (useSameEvoStageAndTyping) {
+            List<Pokemon> allowedPokes = noLegendaries ? new ArrayList<Pokemon>(noLegendaryList)
+                    : new ArrayList<Pokemon>(mainPokemonList);
+            allowedPokes.removeAll(banned);
+            for (EncounterSet area : scrambledEncounters) {
+                List<Pokemon> localAllowed = allowedPokes;
+                if (area.bannedPokemon.size() > 0) {
+                    localAllowed = new ArrayList<Pokemon>(allowedPokes);
+                    localAllowed.removeAll(area.bannedPokemon);
+                }
+                for (Encounter enc : area.encounters) {
+                    enc.pokemon = pickWildSameEvoAndTypeReplacement(localAllowed, enc.pokemon, false, null);
+                }
+            }
         } else {
             // Entirely random
             for (EncounterSet area : scrambledEncounters) {
@@ -835,7 +849,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
-            boolean usePowerLevels, boolean noLegendaries, boolean useSameEvoStage) {
+            boolean usePowerLevels, boolean noLegendaries, boolean useSameEvoStage, boolean useSameEvoStageAndTyping) {
         checkPokemonRestrictions();
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
         List<Pokemon> banned = this.bannedForWildEncounters();
@@ -989,6 +1003,31 @@ public abstract class AbstractRomHandler implements RomHandler {
                     enc.pokemon = areaMap.get(enc.pokemon);
                 }
             }
+        } else if(useSameEvoStageAndTyping) {
+            List<Pokemon> allowedPokes = noLegendaries ? new ArrayList<Pokemon>(noLegendaryList)
+                    : new ArrayList<Pokemon>(mainPokemonList);
+            allowedPokes.removeAll(banned);
+            for (EncounterSet area : scrambledEncounters) {
+                // Poke-set
+                Set<Pokemon> inArea = pokemonInArea(area);
+                // Build area map using randoms
+                Map<Pokemon, Pokemon> areaMap = new TreeMap<Pokemon, Pokemon>();
+                List<Pokemon> usedPks = new ArrayList<Pokemon>();
+                List<Pokemon> localAllowed = allowedPokes;
+                if (area.bannedPokemon.size() > 0) {
+                    localAllowed = new ArrayList<Pokemon>(allowedPokes);
+                    localAllowed.removeAll(area.bannedPokemon);
+                }
+                for (Pokemon areaPk : inArea) {
+                    Pokemon picked = pickWildSameEvoAndTypeReplacement(localAllowed, areaPk, false, usedPks);
+                    areaMap.put(areaPk, picked);
+                    usedPks.add(picked);
+                }
+                for (Encounter enc : area.encounters) {
+                    // Apply the map
+                    enc.pokemon = areaMap.get(enc.pokemon);
+                }
+            }
         }
         else {
             // Entirely random
@@ -1017,7 +1056,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries, boolean useSameEvoStage) {
+    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries, boolean useSameEvoStage, boolean useSameEvoStageAndTyping) {
         checkPokemonRestrictions();
         // Build the full 1-to-1 map
         Map<Pokemon, Pokemon> translateMap = new TreeMap<Pokemon, Pokemon>();
@@ -1055,6 +1094,19 @@ public abstract class AbstractRomHandler implements RomHandler {
                 } else {
                     // pick on power level with the current one blocked
                     pickedRightP = pickWildSameEvoStageReplacement(remainingRight, pickedLeftP, true, null);
+                }
+                remainingRight.remove(pickedRightP);
+                translateMap.put(pickedLeftP, pickedRightP);
+            } else if (useSameEvoStageAndTyping) {
+                int pickedLeft = this.random.nextInt(remainingLeft.size());
+                Pokemon pickedLeftP = remainingLeft.remove(pickedLeft);
+                Pokemon pickedRightP = null;
+                if (remainingRight.size() == 1) {
+                    // pick this (it may or may not be the same poke)
+                    pickedRightP = remainingRight.get(0);
+                } else {
+                    // pick on power level with the current one blocked
+                    pickedRightP = pickWildSameEvoAndTypeReplacement(remainingRight, pickedLeftP, true, null);
                 }
                 remainingRight.remove(pickedRightP);
                 translateMap.put(pickedLeftP, pickedRightP);
@@ -3902,15 +3954,148 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             
         } else {
+
             for (Pokemon pk : pokemonPool) {
-                if (pk.evosFromDepth() == fromDepth && pk.evosToDepth() == toDepth
-                        && (!banSamePokemon || pk != current) && (usedUp == null || !usedUp.contains(pk))
-                        && !canPick.contains(pk)) {
-                    canPick.add(pk);
+                if ((!banSamePokemon || pk != current) && (usedUp == null || !usedUp.contains(pk))
+                        && !canPick.contains(pk)) 
+                {
+                    //careAboutFromDepth?
+                    //no evo pokemon can appear for the 2nd stage of 3 stage evolutions and vice versa (if it isnt a legendary)
+                    if((toDepth == 1 && fromDepth == 1 && pk.evosFromDepth() == 0 && pk.evosToDepth() == 0) || (toDepth == 0 && fromDepth == 0 && pk.evosFromDepth() == 1 && pk.evosToDepth() == 1)
+                            && !current.isLegendary() && !pk.isLegendary())
+                    {
+                        canPick.add(pk);
+                    }
+                    //first evolution for 2 stages only appear with other unevolved pokemon, ignoring ones that dont evolve in their line
+                    else if(toDepth == 0 && pk.evosToDepth() == 0 && !(fromDepth == 0 || pk.evosFromDepth() == 0))
+                    {
+                        canPick.add(pk);
+                    }
+                    else if(pk.evosFromDepth() == fromDepth)
+                    {
+                        canPick.add(pk);
+                    }
                 }
             }
         }
         
+        if(canPick.isEmpty()) {
+            int fromDepthMinusLoops = fromDepth;
+            while(canPick.isEmpty() && fromDepthMinusLoops >= 0)
+            {
+                for (Pokemon pk : pokemonPool) {
+                    if (pk.evosFromDepth() == fromDepthMinusLoops
+                            && (!banSamePokemon || pk != current) && (usedUp == null || !usedUp.contains(pk))
+                            && !canPick.contains(pk)) {
+                        canPick.add(pk);
+                    }
+                }
+                fromDepthMinusLoops--;
+            }
+        }
+        if(canPick.isEmpty()) {
+            int toDepthMinusLoops = toDepth;
+            while(canPick.isEmpty() && toDepthMinusLoops >= 0)
+            {
+                for (Pokemon pk : pokemonPool) {
+                    if (pk.evosToDepth() == toDepthMinusLoops
+                            && (!banSamePokemon || pk != current) && (usedUp == null || !usedUp.contains(pk))
+                            && !canPick.contains(pk)) {
+                        canPick.add(pk);
+                    }
+                }
+                toDepthMinusLoops--;
+            }
+        }
+        
+        return canPick.get(this.random.nextInt(canPick.size()));
+    }
+
+    private Pokemon pickWildSameEvoAndTypeReplacement(List<Pokemon> pokemonPool, Pokemon current, boolean banSamePokemon,
+            List<Pokemon> usedUp) {
+        //fromDepth and toDepth = 0, no evolutions; fromDepth and toDepth = 1, 1 stage; fromDepth and toDepth = 2, 2 stages; fromDepth and toDepth = 3+, 3+ stages (not seen without evo randomization)
+        int fromDepth = current.evosFromDepth();
+        int toDepth = current.evosToDepth();
+        boolean highStageCount = (fromDepth+toDepth >= 3);
+        boolean careAboutFromDepth = false;
+        List<Pokemon> canPick = new ArrayList<Pokemon>();
+        //high stage count pokemon follow more strict evo depth
+        if(highStageCount)
+        {
+            boolean isMiddle = fromDepth != 0 && toDepth !=0;
+            if(isMiddle)
+            {
+                for (Pokemon pk : pokemonPool) {
+                    if (pk.evosFromDepth() + pk.evosToDepth() >= 3 && pk.evosFromDepth() != 0 && pk.evosToDepth() != 0
+                            && (current.primaryType == pk.primaryType || (pk.secondaryType != null && current.primaryType == pk.secondaryType) || (current.secondaryType != null && (current.secondaryType == pk.primaryType || (pk.secondaryType != null && current.secondaryType == pk.secondaryType))))
+                            && (!banSamePokemon || pk != current) && (usedUp == null || !usedUp.contains(pk))
+                            && !canPick.contains(pk)) {
+                        canPick.add(pk);
+                    }
+                }
+            } else
+            {
+                boolean isLeft = fromDepth == 0;
+                if(isLeft)
+                {
+                    for (Pokemon pk : pokemonPool) {
+                        if (pk.evosFromDepth() + pk.evosToDepth() >= 3 && (pk.evosFromDepth() == 0)
+                                && (current.primaryType == pk.primaryType || (pk.secondaryType != null && current.primaryType == pk.secondaryType) || (current.secondaryType != null && (current.secondaryType == pk.primaryType || (pk.secondaryType != null && current.secondaryType == pk.secondaryType))))
+                                && (!banSamePokemon || pk != current) && (usedUp == null || !usedUp.contains(pk))
+                                && !canPick.contains(pk)) {
+                            canPick.add(pk);
+                        }
+                    }
+                } else {
+                    for (Pokemon pk : pokemonPool) {
+                        if (pk.evosFromDepth() + pk.evosToDepth() >= 3 && (pk.evosToDepth() == 0)
+                                && (current.primaryType == pk.primaryType || (pk.secondaryType != null && current.primaryType == pk.secondaryType) || (current.secondaryType != null && (current.secondaryType == pk.primaryType || (pk.secondaryType != null && current.secondaryType == pk.secondaryType))))
+                                && (!banSamePokemon || pk != current) && (usedUp == null || !usedUp.contains(pk))
+                                && !canPick.contains(pk)) {
+                            canPick.add(pk);
+                        }
+                    }
+                    if(canPick.isEmpty() || canPick.size() < 3) {
+                        for (Pokemon pk : pokemonPool) {
+                            if (pk.evosToDepth() == 0
+                                    && (current.primaryType == pk.primaryType || (pk.secondaryType != null && current.primaryType == pk.secondaryType) || (current.secondaryType != null && (current.secondaryType == pk.primaryType || (pk.secondaryType != null && current.secondaryType == pk.secondaryType))))
+                                    && (!banSamePokemon || pk != current) && (usedUp == null || !usedUp.contains(pk))
+                                    && !canPick.contains(pk)) {
+                                canPick.add(pk);
+                            }
+                        }
+                    }
+                }
+                
+            }
+            
+        } else {
+            for (Pokemon pk : pokemonPool) {
+                if ((current.primaryType == pk.primaryType || (pk.secondaryType != null && current.primaryType == pk.secondaryType) || (current.secondaryType != null && (current.secondaryType == pk.primaryType || (pk.secondaryType != null && current.secondaryType == pk.secondaryType)))) 
+                        && (!banSamePokemon || pk != current) && (usedUp == null || !usedUp.contains(pk))
+                        && !canPick.contains(pk)) 
+                {
+                    //careAboutFromDepth?
+                    //no evo pokemon can appear for the 2nd stage of 3 stage evolutions and vice versa (if it isnt a legendary)
+                    if((toDepth == 1 && fromDepth == 1 && pk.evosFromDepth() == 0 && pk.evosToDepth() == 0) || (toDepth == 0 && fromDepth == 0 && pk.evosFromDepth() == 1 && pk.evosToDepth() == 1)
+                            && !current.isLegendary() && !pk.isLegendary())
+                    {
+                        canPick.add(pk);
+                    }
+                    //first evolution for 2 stages only appear with other unevolved pokemon, ignoring ones that dont evolve in their line
+                    else if(toDepth == 0 && pk.evosToDepth() == 0 && !(fromDepth == 0 || pk.evosFromDepth() == 0))
+                    {
+                        canPick.add(pk);
+                    }
+                    else if(pk.evosFromDepth() == fromDepth)
+                    {
+                        canPick.add(pk);
+                    }
+                }
+            }
+        }
+        
+        //ignore types if no matches found
         if(canPick.isEmpty()) {
             int fromDepthMinusLoops = fromDepth;
             while(canPick.isEmpty() && fromDepthMinusLoops >= 0)

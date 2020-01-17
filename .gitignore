@@ -34,3 +34,4 @@ manifest.mf
 *.dsv
 build_eclipse.xml
 /customnames.rncn
+settings/temp.rnqs

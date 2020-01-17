@@ -851,6 +851,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.wpARTypeThemedRB.setEnabled(false);
         this.wpARSimilarStrengthRB.setEnabled(false);
         this.wpARSameEvoStageRB.setEnabled(false);
+        this.wpAREvoAndTypeRB.setEnabled(false);
         this.wpARNoneRB.setSelected(true);
 
         this.wpUseTimeCB.setEnabled(false);
@@ -1491,6 +1492,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.wpARCatchEmAllRB.setEnabled(true);
             this.wpARTypeThemedRB.setEnabled(true);
             this.wpARSameEvoStageRB.setEnabled(true);
+            this.wpAREvoAndTypeRB.setEnabled(true);
         } else if (this.wpGlobalRB.isSelected()) {
             if (this.wpARCatchEmAllRB.isSelected() || this.wpARTypeThemedRB.isSelected()) {
                 this.wpARNoneRB.setSelected(true);
@@ -1498,6 +1500,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.wpARNoneRB.setEnabled(true);
             this.wpARSimilarStrengthRB.setEnabled(true);
             this.wpARSameEvoStageRB.setEnabled(true);
+            this.wpAREvoAndTypeRB.setEnabled(true);
             this.wpARCatchEmAllRB.setEnabled(false);
             this.wpARTypeThemedRB.setEnabled(false);
         } else {
@@ -1506,6 +1509,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.wpARCatchEmAllRB.setEnabled(false);
             this.wpARTypeThemedRB.setEnabled(false);
             this.wpARSameEvoStageRB.setEnabled(false);
+            this.wpAREvoAndTypeRB.setEnabled(false);
             this.wpARNoneRB.setSelected(true);
         }
 
@@ -1851,6 +1855,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH);
         this.wpARSameEvoStageRB
                 .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SAME_EVO_STAGE);
+        this.wpAREvoAndTypeRB
+                .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_EVO_STAGE_AND_TYPING);
         this.wpHeldItemsCB.setSelected(settings.isRandomizeWildPokemonHeldItems());
         this.wpHeldItemsBanBadCB.setSelected(settings.isBanBadRandomWildPokemonHeldItems());
 
@@ -2000,7 +2006,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setWildPokemonMod(wpUnchangedRB.isSelected(), wpRandomRB.isSelected(), wpArea11RB.isSelected(),
                 wpGlobalRB.isSelected());
         settings.setWildPokemonRestrictionMod(wpARNoneRB.isSelected(), wpARSimilarStrengthRB.isSelected(),
-                wpARCatchEmAllRB.isSelected(), wpARTypeThemedRB.isSelected(), wpARSameEvoStageRB.isSelected());
+                wpARCatchEmAllRB.isSelected(), wpARTypeThemedRB.isSelected(), wpARSameEvoStageRB.isSelected(), wpAREvoAndTypeRB.isSelected());
         settings.setUseTimeBasedEncounters(wpUseTimeCB.isSelected());
         settings.setUseMinimumCatchRate(wpCatchRateCB.isSelected());
         settings.setMinimumCatchRateLevel(wpCatchRateSlider.getValue());
@@ -2444,6 +2450,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private void wpARSameEvoStageRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpARSameEvoStageRBActionPerformed
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_wpARSameEvoStageRBActionPerformed
+    
+    private void wpAREvoAndTypeRBActionPerformed(java.awt.event.ActionEvent evt) {
+        this.enableOrDisableSubControls();
+    }
 
     
     private void wpARCatchEmAllRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpARCatchEmAllRBActionPerformed
@@ -2886,6 +2896,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         wpARTypeThemedRB = new javax.swing.JRadioButton();
         wpARSimilarStrengthRB = new javax.swing.JRadioButton();
         wpARSameEvoStageRB = new javax.swing.JRadioButton();
+        wpAREvoAndTypeRB = new javax.swing.JRadioButton();
         wpUseTimeCB = new javax.swing.JCheckBox();
         wpNoLegendariesCB = new javax.swing.JCheckBox();
         wpCatchRateCB = new javax.swing.JCheckBox();
@@ -4266,6 +4277,16 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 wpARSameEvoStageRBActionPerformed(evt);
             }
         });
+        
+        wildPokesARuleButtonGroup.add(wpAREvoAndTypeRB);
+        wpAREvoAndTypeRB.setText(bundle.getString("RandomizerGUI.wpAREvoAndTypeRB.text")); // NOI18N
+        wpAREvoAndTypeRB.setToolTipText(bundle.getString("RandomizerGUI.wpAREvoAndTypeRB.toolTipText")); // NOI18N
+        wpAREvoAndTypeRB.setEnabled(false);
+        wpAREvoAndTypeRB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                wpAREvoAndTypeRBActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout wildPokemonARulePanelLayout = new javax.swing.GroupLayout(wildPokemonARulePanel);
         wildPokemonARulePanel.setLayout(wildPokemonARulePanelLayout);
@@ -4282,7 +4303,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                             .addComponent(wpARSimilarStrengthRB)
                             .addComponent(wpARNoneRB)
                             .addComponent(wpARCatchEmAllRB)
-                            .addComponent(wpARSameEvoStageRB))
+                            .addComponent(wpARSameEvoStageRB)
+                            .addComponent(wpAREvoAndTypeRB))
                         .addContainerGap(58, Short.MAX_VALUE))))
         );
         wildPokemonARulePanelLayout.setVerticalGroup(
@@ -4293,6 +4315,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addComponent(wpARSimilarStrengthRB)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(wpARSameEvoStageRB)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(wpAREvoAndTypeRB)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(wpARCatchEmAllRB)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 3, Short.MAX_VALUE)
@@ -5162,6 +5186,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JRadioButton wpARNoneRB;
     private javax.swing.JRadioButton wpARSimilarStrengthRB;
     private javax.swing.JRadioButton wpARSameEvoStageRB;
+    private javax.swing.JRadioButton wpAREvoAndTypeRB;
     private javax.swing.JRadioButton wpARTypeThemedRB;
     private javax.swing.JRadioButton wpArea11RB;
     private javax.swing.JCheckBox wpCatchRateCB;
