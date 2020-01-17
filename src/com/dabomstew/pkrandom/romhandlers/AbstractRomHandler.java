@@ -1324,6 +1324,49 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public void retainTypeTrainerPokes(boolean usePowerLevels, boolean noLegendaries,
+            boolean noEarlyWonderGuard, int levelModifier, boolean useSameEvoStage) {
+        checkPokemonRestrictions();
+        List<Trainer> currentTrainers = this.getTrainers();
+
+        // New: randomize the order trainers are randomized in.
+        // Leads to less predictable results for various modifiers.
+        // Need to keep the original ordering around for saving though.
+        List<Trainer> scrambledTrainers = new ArrayList<Trainer>(currentTrainers);
+        Collections.shuffle(scrambledTrainers, this.random);
+
+        cachedReplacementLists = new TreeMap<Type, List<Pokemon>>();
+        cachedAllList = noLegendaries ? new ArrayList<Pokemon>(noLegendaryList) : new ArrayList<Pokemon>(
+                mainPokemonList);
+
+        // Fully random is easy enough - randomize then worry about rival
+        // carrying starter at the end
+        for (Trainer t : scrambledTrainers) {
+            if (t.tag != null && t.tag.equals("IRIVAL")) {
+                continue; // skip
+            }
+            for (TrainerPokemon tp : t.pokemon) {
+                boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
+                try 
+                {
+                    tp.pokemon = pickReplacementRetainedType(tp.pokemon, usePowerLevels, noLegendaries, wgAllowed, useSameEvoStage);
+                } catch (Exception e)
+                {
+                    System.err.println(e.getMessage());
+                    //if exception is thrown dont change pokemon
+                }
+                tp.resetMoves = true;
+                if (levelModifier != 0) {
+                    tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
+                }
+            }
+        }
+
+        // Save it all up
+        this.setTrainers(currentTrainers);
+    }
+
+    @Override
     public void rivalCarriesStarter() {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
@@ -3839,11 +3882,25 @@ public abstract class AbstractRomHandler implements RomHandler {
             int fromDepth = current.evosFromDepth();
             int toDepth = current.evosToDepth();
             for (Pokemon pk : pickFrom) {
-                if (pk.evosFromDepth() == fromDepth 
-                        && pk.evosToDepth() <= toDepth
-                        && (wonderGuardAllowed || (pk.ability1 != GlobalConstants.WONDER_GUARD_INDEX
-                                && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX))) {
-                    canPick.add(pk);
+                if (!canPick.contains(pk) && (wonderGuardAllowed || (pk.ability1 != GlobalConstants.WONDER_GUARD_INDEX
+                        && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX))) 
+                {
+                    //careAboutFromDepth?
+                    //no evo pokemon can appear for the 2nd stage of 3 stage evolutions and vice versa (if it isnt a legendary)
+                    if((toDepth == 1 && fromDepth == 1 && pk.evosFromDepth() == 0 && pk.evosToDepth() == 0) || (toDepth == 0 && fromDepth == 0 && pk.evosFromDepth() == 1 && pk.evosToDepth() == 1)
+                            && !current.isLegendary() && !pk.isLegendary())
+                    {
+                        canPick.add(pk);
+                    }
+                    //first evolution for 2 stages only appear with other unevolved pokemon, ignoring ones that dont evolve in their line
+                    else if(toDepth == 0 && pk.evosToDepth() == 0 && !(fromDepth == 0 || pk.evosFromDepth() == 0))
+                    {
+                        canPick.add(pk);
+                    }
+                    else if(pk.evosFromDepth() == fromDepth)
+                    {
+                        canPick.add(pk);
+                    }
                 }
             }
             if(canPick.isEmpty() || canPick.size() < 3) {
@@ -3871,6 +3928,170 @@ public abstract class AbstractRomHandler implements RomHandler {
                         || pk.ability2 == GlobalConstants.WONDER_GUARD_INDEX
                         || pk.ability3 == GlobalConstants.WONDER_GUARD_INDEX) {
                     pk = pickFrom.get(this.random.nextInt(pickFrom.size()));
+                }
+                return pk;
+            }
+        }
+    }
+
+
+    private Pokemon pickReplacementRetainedType(Pokemon current, boolean usePowerLevels, boolean noLegendaries,
+            boolean wonderGuardAllowed, boolean useSameEvoStage) {
+
+        if (!cachedReplacementLists.containsKey(current.primaryType)) {
+            cachedReplacementLists.put(current.primaryType, pokemonOfType(current.primaryType, noLegendaries));
+        }
+        List<Pokemon> pickFromPrimary = cachedReplacementLists.get(current.primaryType);
+        List<Pokemon> pickFromSecondary = null;
+        if (current.secondaryType != null) {
+            if (!cachedReplacementLists.containsKey(current.secondaryType)) {
+                cachedReplacementLists.put(current.secondaryType, pokemonOfType(current.secondaryType, noLegendaries));
+            }
+            pickFromSecondary = cachedReplacementLists.get(current.secondaryType);
+        }
+
+        if (usePowerLevels) {
+            // start with within 10% and add 5% either direction till we find
+            // something
+            int currentBST = current.bstForPowerLevels();
+            int minTarget = currentBST - currentBST / 10;
+            int maxTarget = currentBST + currentBST / 10;
+            List<Pokemon> canPick = new ArrayList<Pokemon>();
+            int expandRounds = 0;
+            while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 2)) {
+                for (Pokemon pk : pickFromPrimary) {
+                    if (pk.bstForPowerLevels() >= minTarget
+                            && pk.bstForPowerLevels() <= maxTarget
+                            && (wonderGuardAllowed || (pk.ability1 != GlobalConstants.WONDER_GUARD_INDEX
+                                    && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX))) {
+                        canPick.add(pk);
+                    }
+                }
+                if(pickFromSecondary != null)
+                {
+                    for (Pokemon pk : pickFromSecondary) {
+                        if (pk.bstForPowerLevels() >= minTarget
+                                && pk.bstForPowerLevels() <= maxTarget
+                                && !canPick.contains(pk)
+                                && (wonderGuardAllowed || (pk.ability1 != GlobalConstants.WONDER_GUARD_INDEX
+                                        && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX))) {
+                            canPick.add(pk);
+                        }
+                    }
+                }
+                minTarget -= currentBST / 20;
+                maxTarget += currentBST / 20;
+                expandRounds++;
+            }
+            return canPick.get(this.random.nextInt(canPick.size()));
+        } else if (useSameEvoStage) {
+            List<Pokemon> canPick = new ArrayList<Pokemon>();
+            int fromDepth = current.evosFromDepth();
+            int toDepth = current.evosToDepth();
+            for (Pokemon pk : pickFromPrimary) {
+                if (!canPick.contains(pk) && (wonderGuardAllowed || (pk.ability1 != GlobalConstants.WONDER_GUARD_INDEX
+                        && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX))) 
+                {
+                    //careAboutFromDepth?
+                    //no evo pokemon can appear for the 2nd stage of 3 stage evolutions and vice versa (if it isnt a legendary)
+                    if((toDepth == 1 && fromDepth == 1 && pk.evosFromDepth() == 0 && pk.evosToDepth() == 0) || (toDepth == 0 && fromDepth == 0 && pk.evosFromDepth() == 1 && pk.evosToDepth() == 1)
+                            && !current.isLegendary() && !pk.isLegendary())
+                    {
+                        canPick.add(pk);
+                    }
+                    //first evolution for 2 stages only appear with other unevolved pokemon, ignoring ones that dont evolve in their line
+                    else if(toDepth == 0 && pk.evosToDepth() == 0 && !(fromDepth == 0 || pk.evosFromDepth() == 0))
+                    {
+                        canPick.add(pk);
+                    }
+                    else if(pk.evosFromDepth() == fromDepth)
+                    {
+                        canPick.add(pk);
+                    }
+                }
+            }
+            if(pickFromSecondary != null)
+            {
+                for (Pokemon pk : pickFromSecondary) {
+                    if (!canPick.contains(pk) && (wonderGuardAllowed || (pk.ability1 != GlobalConstants.WONDER_GUARD_INDEX
+                            && !canPick.contains(pk)
+                            && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX))) 
+                    {
+                        //careAboutFromDepth?
+                        //no evo pokemon can appear for the 2nd stage of 3 stage evolutions and vice versa (if it isnt a legendary)
+                        if((toDepth == 1 && fromDepth == 1 && pk.evosFromDepth() == 0 && pk.evosToDepth() == 0) || (toDepth == 0 && fromDepth == 0 && pk.evosFromDepth() == 1 && pk.evosToDepth() == 1)
+                                && !current.isLegendary() && !pk.isLegendary())
+                        {
+                            canPick.add(pk);
+                        }
+                        //first evolution for 2 stages only appear with other unevolved pokemon, ignoring ones that dont evolve in their line
+                        else if(toDepth == 0 && pk.evosToDepth() == 0 && !(fromDepth == 0 || pk.evosFromDepth() == 0))
+                        {
+                            canPick.add(pk);
+                        }
+                        else if(pk.evosFromDepth() == fromDepth)
+                        {
+                            canPick.add(pk);
+                        }
+                    }
+                }
+            }
+            if(canPick.isEmpty() || canPick.size() < 3) {
+                int loops = 0;
+                while(canPick.isEmpty() || canPick.size() < 3) {
+                    for (Pokemon pk : pickFromPrimary) {
+                        if (pk.evosFromDepth() == fromDepth - loops
+                                && (wonderGuardAllowed || (pk.ability1 != GlobalConstants.WONDER_GUARD_INDEX
+                                        && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX))) {
+                            canPick.add(pk);
+                        }
+                    }
+                    if(pickFromSecondary != null)
+                    {
+                        for (Pokemon pk : pickFromSecondary) {
+                            if (pk.evosFromDepth() == fromDepth - loops
+                                    && (wonderGuardAllowed || (pk.ability1 != GlobalConstants.WONDER_GUARD_INDEX
+                                    && !canPick.contains(pk)        
+                                    && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX))) {
+                                canPick.add(pk);
+                            }
+                        }
+                    }
+                    loops++;
+                }
+            }
+            
+            return canPick.get(this.random.nextInt(canPick.size()));
+        }
+        else {
+            if (wonderGuardAllowed) {
+                if(pickFromSecondary == null || pickFromSecondary.isEmpty() || this.random.nextBoolean())
+                {
+                    return pickFromPrimary.get(this.random.nextInt(pickFromPrimary.size()));
+                }
+                else
+                {
+                    return pickFromSecondary.get(this.random.nextInt(pickFromPrimary.size()));
+                }
+            } else {
+                Pokemon pk;
+                if(pickFromSecondary == null || pickFromSecondary.isEmpty() || this.random.nextBoolean())
+                {
+                    pk = pickFromPrimary.get(this.random.nextInt(pickFromPrimary.size()));
+                    while (pk.ability1 == GlobalConstants.WONDER_GUARD_INDEX
+                            || pk.ability2 == GlobalConstants.WONDER_GUARD_INDEX
+                            || pk.ability3 == GlobalConstants.WONDER_GUARD_INDEX) {
+                        pk = pickFromPrimary.get(this.random.nextInt(pickFromPrimary.size()));
+                    }
+                }
+                else
+                {
+                    pk = pickFromSecondary.get(this.random.nextInt(pickFromPrimary.size()));
+                    while (pk.ability1 == GlobalConstants.WONDER_GUARD_INDEX
+                            || pk.ability2 == GlobalConstants.WONDER_GUARD_INDEX
+                            || pk.ability3 == GlobalConstants.WONDER_GUARD_INDEX) {
+                        pk = pickFromSecondary.get(this.random.nextInt(pickFromSecondary.size()));
+                    }
                 }
                 return pk;
             }

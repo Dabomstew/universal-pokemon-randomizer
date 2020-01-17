@@ -136,7 +136,7 @@ public class Settings {
     private int movesetsGoodDamagingPercent = 0;
 
     public enum TrainersMod {
-        UNCHANGED, RANDOM, TYPE_THEMED
+        UNCHANGED, RANDOM, TYPE_THEMED, RETAIN_TYPE
     }
 
     private TrainersMod trainersMod = TrainersMod.UNCHANGED;
@@ -394,7 +394,7 @@ public class Settings {
         out.write(baseStatRange);
 
         // 37 trainer pokemon extended settings and misc? (couldn't fit this in existing entries)
-        out.write(makeByteSelected(trainersUseSameEvoStages, shouldPatchSpecialSplit, wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_EVO_STAGE_AND_TYPING));
+        out.write(makeByteSelected(trainersUseSameEvoStages, shouldPatchSpecialSplit, wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_EVO_STAGE_AND_TYPING, trainersMod == TrainersMod.RETAIN_TYPE));
         
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -477,9 +477,10 @@ public class Settings {
         settings.setMovesetsGoodDamagingPercent(data[12] & 0x7F);
 
         // changed 160
-        settings.setTrainersMod(restoreEnum(TrainersMod.class, data[13], 5, // UNCHANGED
-                1, // RANDOM
-                3 // TYPE_THEMED
+        settings.setTrainersMod(getEnum(TrainersMod.class, restoreState(data[13], 5), // UNCHANGED
+                restoreState(data[13], 1), // RANDOM
+                restoreState(data[13], 3), // TYPE_THEMED
+                restoreState(data[37], 3) //RETAIN_TYPE
         ));
         settings.setTrainersUsePokemonOfSimilarStrength(restoreState(data[13], 0));
         settings.setRivalCarriesStarterThroughout(restoreState(data[13], 2));

@@ -808,6 +808,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpRandomRB.setEnabled(false);
         this.tpRivalCarriesStarterCB.setEnabled(false);
         this.tpTypeThemedRB.setEnabled(false);
+        this.tpRetainTypeRB.setEnabled(false);
         this.tpTypeWeightingCB.setEnabled(false);
         this.tpNoLegendariesCB.setEnabled(false);
         this.tpNoEarlyShedinjaCB.setEnabled(false);
@@ -1160,6 +1161,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
             this.tpRandomRB.setEnabled(true);
             this.tpTypeThemedRB.setEnabled(true);
+            this.tpRetainTypeRB.setEnabled(true);
             this.tpUnchangedRB.setEnabled(true);
             this.tpUnchangedRB.setSelected(true);
             this.tnRandomizeCB.setEnabled(romHandler.canChangeTrainerText());
@@ -1827,6 +1829,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpRandomRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.RANDOM);
         this.tpRivalCarriesStarterCB.setSelected(settings.isRivalCarriesStarterThroughout());
         this.tpTypeThemedRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED);
+        this.tpRetainTypeRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.RETAIN_TYPE);
         this.tpTypeWeightingCB.setSelected(settings.isTrainersMatchTypingDistribution());
         this.tpUnchangedRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED);
         this.tpNoLegendariesCB.setSelected(settings.isTrainersBlockLegendaries());
@@ -1991,7 +1994,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setMovesetsForceGoodDamaging(pmsForceGoodDamagingCB.isSelected());
         settings.setMovesetsGoodDamagingPercent(pmsForceGoodDamagingSlider.getValue());
 
-        settings.setTrainersMod(tpUnchangedRB.isSelected(), tpRandomRB.isSelected(), tpTypeThemedRB.isSelected());
+        settings.setTrainersMod(tpUnchangedRB.isSelected(), tpRandomRB.isSelected(), tpTypeThemedRB.isSelected(), tpRetainTypeRB.isSelected());
         settings.setTrainersUsePokemonOfSimilarStrength(tpPowerLevelsCB.isSelected());
         settings.setRivalCarriesStarterThroughout(tpRivalCarriesStarterCB.isSelected());
         settings.setTrainersMatchTypingDistribution(tpTypeWeightingCB.isSelected());
@@ -2516,6 +2519,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_tpTypeThemedRBActionPerformed
 
+    private void tpRetainTypeRBActionPerformed(java.awt.event.ActionEvent evt) {
+        this.enableOrDisableSubControls();
+    }
+    
     private void tpPowerLevelsCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tpPowerLevelsCBActionPerformed
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_tpPowerLevelsCBActionPerformed
@@ -2872,6 +2879,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         tpUnchangedRB = new javax.swing.JRadioButton();
         tpRandomRB = new javax.swing.JRadioButton();
         tpTypeThemedRB = new javax.swing.JRadioButton();
+        tpRetainTypeRB = new javax.swing.JRadioButton();
         tpPowerLevelsCB = new javax.swing.JCheckBox();
         tpSameEvoStageCB = new javax.swing.JCheckBox();
         tpTypeWeightingCB = new javax.swing.JCheckBox();
@@ -4030,6 +4038,15 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 tpTypeThemedRBActionPerformed(evt);
             }
         });
+        
+        trainerPokesButtonGroup.add(tpRetainTypeRB);
+        tpRetainTypeRB.setText(bundle.getString("RandomizerGUI.tpRetainTypeRB.text")); // NOI18N
+        tpRetainTypeRB.setToolTipText(bundle.getString("RandomizerGUI.tpRetainTypeRB.toolTipText")); // NOI18N
+        tpRetainTypeRB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tpRetainTypeRBActionPerformed(evt);
+            }
+        });
 
         tpPowerLevelsCB.setText(bundle.getString("RandomizerGUI.tpPowerLevelsCB.text")); // NOI18N
         tpPowerLevelsCB.setToolTipText(bundle.getString("RandomizerGUI.tpPowerLevelsCB.toolTipText")); // NOI18N
@@ -4111,6 +4128,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(tpTypeThemedRB)
+                    .addComponent(tpRetainTypeRB)
                     .addGroup(trainersPokemonPanelLayout.createSequentialGroup()
                         .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(tpUnchangedRB)
@@ -4153,6 +4171,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(tpForceFullyEvolvedCB))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(tpRetainTypeRB)
                     .addGroup(trainersPokemonPanelLayout.createSequentialGroup()
                         .addComponent(tpNoLegendariesCB)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -5168,6 +5187,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JRadioButton tpRandomRB;
     private javax.swing.JCheckBox tpRivalCarriesStarterCB;
     private javax.swing.JRadioButton tpTypeThemedRB;
+    private javax.swing.JRadioButton tpRetainTypeRB;
     private javax.swing.JCheckBox tpTypeWeightingCB;
     private javax.swing.JRadioButton tpUnchangedRB;
     private javax.swing.ButtonGroup trainerPokesButtonGroup;

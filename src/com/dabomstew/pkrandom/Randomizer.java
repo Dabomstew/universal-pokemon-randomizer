@@ -316,6 +316,10 @@ public class Randomizer {
                     settings.isTrainersMatchTypingDistribution(), settings.isTrainersBlockLegendaries(),
                     settings.isTrainersBlockEarlyWonderGuard(),
                     settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, settings.isTrainersUseSameEvoStages());
+        } else if (settings.getTrainersMod() == Settings.TrainersMod.RETAIN_TYPE) {
+            romHandler.retainTypeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(), settings.isTrainersBlockLegendaries(),
+                    settings.isTrainersBlockEarlyWonderGuard(),
+                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, settings.isTrainersUseSameEvoStages());
         }
 
         if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED

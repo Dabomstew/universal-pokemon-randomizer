@@ -190,6 +190,9 @@ public interface RomHandler {
 
     public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
             boolean noEarlyWonderGuard, int levelModifier, boolean useSameEvoStage);
+    
+    public void retainTypeTrainerPokes(boolean usePowerLevels, boolean noLegendaries,
+            boolean noEarlyWonderGuard, int levelModifier, boolean useSameEvoStage);
 
     public void rivalCarriesStarter();
 
