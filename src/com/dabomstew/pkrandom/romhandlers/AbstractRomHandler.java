@@ -3893,9 +3893,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                         canPick.add(pk);
                     }
                     //first evolution for 2 stages only appear with other unevolved pokemon, ignoring ones that dont evolve in their line
-                    else if(toDepth == 0 && pk.evosToDepth() == 0 && !(fromDepth == 0 || pk.evosFromDepth() == 0))
+                    else if(toDepth == 0 && !(fromDepth == 0))
                     {
-                        canPick.add(pk);
+                        if(pk.evosToDepth() == 0 && !(pk.evosToDepth() == 0))
+                        {
+                            canPick.add(pk);
+                        }
                     }
                     else if(pk.evosFromDepth() == fromDepth)
                     {
@@ -4000,9 +4003,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                         canPick.add(pk);
                     }
                     //first evolution for 2 stages only appear with other unevolved pokemon, ignoring ones that dont evolve in their line
-                    else if(toDepth == 0 && pk.evosToDepth() == 0 && !(fromDepth == 0 || pk.evosFromDepth() == 0))
+                    else if(toDepth == 0 && !(fromDepth == 0))
                     {
-                        canPick.add(pk);
+                        if(pk.evosToDepth() == 0 && !(pk.evosToDepth() == 0))
+                        {
+                            canPick.add(pk);
+                        }
                     }
                     else if(pk.evosFromDepth() == fromDepth)
                     {
@@ -4014,7 +4020,6 @@ public abstract class AbstractRomHandler implements RomHandler {
             {
                 for (Pokemon pk : pickFromSecondary) {
                     if (!canPick.contains(pk) && (wonderGuardAllowed || (pk.ability1 != GlobalConstants.WONDER_GUARD_INDEX
-                            && !canPick.contains(pk)
                             && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX))) 
                     {
                         //careAboutFromDepth?
@@ -4025,9 +4030,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                             canPick.add(pk);
                         }
                         //first evolution for 2 stages only appear with other unevolved pokemon, ignoring ones that dont evolve in their line
-                        else if(toDepth == 0 && pk.evosToDepth() == 0 && !(fromDepth == 0 || pk.evosFromDepth() == 0))
+                        else if(toDepth == 0 && !(fromDepth == 0))
                         {
-                            canPick.add(pk);
+                            if(pk.evosToDepth() == 0 && !(pk.evosToDepth() == 0))
+                            {
+                                canPick.add(pk);
+                            }
                         }
                         else if(pk.evosFromDepth() == fromDepth)
                         {
@@ -4188,9 +4196,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                         canPick.add(pk);
                     }
                     //first evolution for 2 stages only appear with other unevolved pokemon, ignoring ones that dont evolve in their line
-                    else if(toDepth == 0 && pk.evosToDepth() == 0 && !(fromDepth == 0 || pk.evosFromDepth() == 0))
+                    else if(toDepth == 0 && !(fromDepth == 0))
                     {
-                        canPick.add(pk);
+                        if(pk.evosToDepth() == 0 && !(pk.evosToDepth() == 0))
+                        {
+                            canPick.add(pk);
+                        }
                     }
                     else if(pk.evosFromDepth() == fromDepth)
                     {
@@ -4238,7 +4249,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         int fromDepth = current.evosFromDepth();
         int toDepth = current.evosToDepth();
         boolean highStageCount = (fromDepth+toDepth >= 3);
-        boolean careAboutFromDepth = false;
         List<Pokemon> canPick = new ArrayList<Pokemon>();
         //high stage count pokemon follow more strict evo depth
         if(highStageCount)
@@ -4304,9 +4314,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                         canPick.add(pk);
                     }
                     //first evolution for 2 stages only appear with other unevolved pokemon, ignoring ones that dont evolve in their line
-                    else if(toDepth == 0 && pk.evosToDepth() == 0 && !(fromDepth == 0 || pk.evosFromDepth() == 0))
+                    else if(toDepth == 0 && !(fromDepth == 0))
                     {
-                        canPick.add(pk);
+                        if(pk.evosToDepth() == 0 && !(pk.evosToDepth() == 0))
+                        {
+                            canPick.add(pk);
+                        }
                     }
                     else if(pk.evosFromDepth() == fromDepth)
                     {
