@@ -197,6 +197,10 @@ public interface RomHandler {
     public void rivalCarriesStarter();
 
     public void forceFullyEvolvedTrainerPokes(int minLevel);
+    
+    public void randomizeTrainerMoves();
+    
+    public void tryTrainerMoveDiversity();
 
     // Randomizer: moves
 

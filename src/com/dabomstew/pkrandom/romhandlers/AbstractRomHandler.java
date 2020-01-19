@@ -1393,6 +1393,47 @@ public abstract class AbstractRomHandler implements RomHandler {
         this.setTrainers(currentTrainers);
     }
 
+    @Override
+    public void randomizeTrainerMoves() {
+        List<Trainer> currentTrainers = this.getTrainers();
+
+        // New: randomize the order trainers are randomized in.
+        // Leads to less predictable results for various modifiers.
+        // Need to keep the original ordering around for saving though.
+        List<Trainer> scrambledTrainers = new ArrayList<Trainer>(currentTrainers);
+        Collections.shuffle(scrambledTrainers, this.random);
+        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+        
+        for (Trainer t : scrambledTrainers) {
+            if(t.poketype == 0)
+            {
+                t.poketype = 1;
+            }
+            else if(t.poketype == 2)
+            {
+                t.poketype = 3;
+            }
+            for (TrainerPokemon tp : t.pokemon) {
+                int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon, movesets, tp.level);
+                //defualt move selection is based on previously implemented solution
+                tp.move1 = pokeMoves[0];
+                tp.move2 = pokeMoves[1];
+                tp.move3 = pokeMoves[2];
+                tp.move4 = pokeMoves[3];
+                tp.resetMoves = false;
+            }
+        }
+        
+        this.setTrainers(currentTrainers);
+    }
+    
+    @Override
+    public void tryTrainerMoveDiversity() {
+        System.err.println("Try Trainer Move Diversity is not implemented yet.");
+        //regular randomization until this is implemented
+        randomizeTrainerMoves();
+    }
+    
     // MOVE DATA
     // All randomizers don't touch move ID 165 (Struggle)
     // They also have other exclusions where necessary to stop things glitching.

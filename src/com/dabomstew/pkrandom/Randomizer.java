@@ -344,9 +344,7 @@ public class Randomizer {
                 romHandler.randomizeTrainerNames(settings.getCustomNames());
             }
         }
-
-        maybeLogTrainerChanges(log, romHandler);
-
+        
         // Apply metronome only mode now that trainers have been dealt with
         if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
             romHandler.metronomeOnlyMode();
@@ -503,6 +501,18 @@ public class Randomizer {
                 romHandler.ensureMoveTutorCompatSanity();
             }
         }
+        
+        // Do trainer move changes and log the new moves of those trainers
+
+        if(settings.isTrainersTryMoveDiversity()) {
+            romHandler.tryTrainerMoveDiversity();
+        }
+        else
+        {
+            romHandler.randomizeTrainerMoves();
+        }
+        
+        maybeLogTrainerChanges(log, romHandler, settings.isLogTrainerMoves());
 
         // In-game trades
         List<IngameTrade> oldTrades = romHandler.getIngameTrades();
@@ -786,12 +796,27 @@ public class Randomizer {
         }
     }
 
-    private void maybeLogTrainerChanges(final PrintStream log, final RomHandler romHandler) {
+    private void maybeLogTrainerChanges(final PrintStream log, final RomHandler romHandler, boolean logMoves) {
         if (settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED
                 && !settings.isRivalCarriesStarterThroughout()) {
             log.println("Trainers: Unchanged." + NEWLINE);
         } else {
-            log.println("--Trainers Pokemon--");
+            if(logMoves)
+            {
+                if(settings.isTrainersTryMoveDiversity())
+                {
+                    log.println("--Trainers Pokemon and Moves-- (Try Move Diversity Enabled[InDev])");
+                }
+                else
+                {
+                    log.println("--Trainers Pokemon and Moves--");
+                }
+            }
+            else
+            {
+                log.println("--Trainers Pokemon--");
+            }
+            List<Move> allMoves = romHandler.getMoves();
             List<Trainer> trainers = romHandler.getTrainers();
             int idx = 0;
             for (Trainer t : trainers) {
@@ -806,12 +831,64 @@ public class Randomizer {
                     log.printf("@%X", t.offset);
                 }
                 log.print(" - ");
+                //DEBUG
+                //log.print("poketype: " + t.poketype);
                 boolean first = true;
                 for (TrainerPokemon tpk : t.pokemon) {
-                    if (!first) {
+                    if (!first && !logMoves) {
                         log.print(", ");
                     }
+                    if(logMoves)
+                    {
+                        log.print("\n       ");
+                    }
                     log.print(tpk.pokemon.name + " Lv" + tpk.level);
+                    if(logMoves)
+                    {
+                        String moves[] = new String[4];
+                        moves[0] = "null";
+                        moves[1] = "null";
+                        moves[2] = "null";
+                        moves[3] = "null";
+                        for(Move m: allMoves)
+                        {
+                            if(m != null)
+                            {
+                                if(m.internalId == tpk.move1)
+                                {
+                                    moves[0] = m.name;
+                                }
+                                else if(m.internalId == tpk.move2)
+                                {
+                                    moves[1] = m.name;
+                                }
+                                else if(m.internalId == tpk.move3)
+                                {
+                                    moves[2] = m.name;
+                                }
+                                else if(m.internalId == tpk.move4)
+                                {
+                                    moves[3] = m.name;
+                                }
+                            }
+                        }
+                        //DEBUG
+                        //System.out.println("move ids: " + tpk.move1 + " " + tpk.move2 + " " + tpk.move3 + " " + tpk.move4);
+                        log.print(" Moves: ");
+                        String temp = "";
+                        for(int i = 0; i < 4; i++)
+                        {
+                            if(!moves[i].equals("null"))
+                            {
+                                temp += i+1+"."+moves[i]+" ";
+                            }
+                        }
+                        if(temp.equals(""))
+                        {
+                            temp = "ERROR";
+                        }
+                        log.print(temp);
+                    }
                     first = false;
                 }
                 log.println();

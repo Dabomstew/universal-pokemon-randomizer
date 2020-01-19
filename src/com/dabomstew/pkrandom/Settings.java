@@ -152,6 +152,8 @@ public class Settings {
     private boolean trainersLevelModified;
     private int trainersLevelModifier = 0; // -50 ~ 50
     private boolean trainersUseSameEvoStages;
+    private boolean trainersTryMoveDiversity;
+    private boolean logTrainerMoves;
 
     public enum WildPokemonMod {
         UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING
@@ -364,7 +366,7 @@ public class Settings {
         // new 170
         // 25 move randomizers
         out.write(makeByteSelected(randomizeMovePowers, randomizeMoveAccuracies, randomizeMovePPs, randomizeMoveTypes,
-                randomizeMoveCategory));
+                randomizeMoveCategory, trainersTryMoveDiversity));
 
         // 26 evolutions
         out.write(makeByteSelected(evolutionsMod == EvolutionsMod.UNCHANGED, evolutionsMod == EvolutionsMod.RANDOM,
@@ -394,7 +396,7 @@ public class Settings {
         out.write(baseStatRange);
 
         // 37 trainer pokemon extended settings and misc? (couldn't fit this in existing entries)
-        out.write(makeByteSelected(trainersUseSameEvoStages, shouldPatchSpecialSplit, wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_EVO_STAGE_AND_TYPING, trainersMod == TrainersMod.RETAIN_TYPE));
+        out.write(makeByteSelected(trainersUseSameEvoStages, shouldPatchSpecialSplit, wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_EVO_STAGE_AND_TYPING, trainersMod == TrainersMod.RETAIN_TYPE, logTrainerMoves));
         
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -492,6 +494,10 @@ public class Settings {
         settings.setTrainersForceFullyEvolvedLevel(data[14] & 0x7F);
 
         settings.setTrainersUseSameEvoStages(restoreState(data[37], 0));
+        
+        settings.setTrainersTryMoveDiversity(restoreState(data[25], 5));
+        
+        settings.setLogTrainerMoves(restoreState(data[37], 4));
         
         settings.setWildPokemonMod(restoreEnum(WildPokemonMod.class, data[15], 6, // UNCHANGED
                 5, // RANDOM
@@ -1267,6 +1273,24 @@ public class Settings {
 
     public Settings setTrainersForceFullyEvolved(boolean trainersForceFullyEvolved) {
         this.trainersForceFullyEvolved = trainersForceFullyEvolved;
+        return this;
+    }
+    
+    public boolean isTrainersTryMoveDiversity() {
+        return trainersTryMoveDiversity;
+    }
+    
+    public Settings setTrainersTryMoveDiversity(boolean trainersTryMoveDiversity) {
+        this.trainersTryMoveDiversity = trainersTryMoveDiversity;
+        return this;
+    }
+    
+    public boolean isLogTrainerMoves() {
+        return logTrainerMoves;
+    }
+    
+    public Settings setLogTrainerMoves(boolean logTrainerMoves) {
+        this.logTrainerMoves = logTrainerMoves;
         return this;
     }
 

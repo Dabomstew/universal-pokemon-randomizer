@@ -819,6 +819,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpLevelModifierCB.setEnabled(false);
         this.tpLevelModifierSlider.setEnabled(false);
         this.tpSameEvoStageCB.setEnabled(false);
+        this.tpTryMoveDiversityCB.setEnabled(false);
+        this.tpLogTrainerMovesCB.setEnabled(false);
 
         this.tpUnchangedRB.setSelected(true);
         this.tpPowerLevelsCB.setSelected(false);
@@ -831,6 +833,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpLevelModifierCB.setSelected(false);
         this.tpLevelModifierSlider.setValue(0);
         this.tpSameEvoStageCB.setSelected(false);
+        this.tpTryMoveDiversityCB.setSelected(false);
+        this.tpLogTrainerMovesCB.setSelected(false);
 
         this.tnRandomizeCB.setEnabled(false);
         this.tcnRandomizeCB.setEnabled(false);
@@ -1440,11 +1444,17 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.tpForceFullyEvolvedCB.setSelected(false);
             this.tpLevelModifierCB.setEnabled(false);
             this.tpLevelModifierCB.setSelected(false);
+            this.tpTryMoveDiversityCB.setEnabled(false);
+            this.tpTryMoveDiversityCB.setSelected(false);
+            this.tpLogTrainerMovesCB.setEnabled(false);
+            this.tpLogTrainerMovesCB.setSelected(false);
         } else {
             this.tpNoLegendariesCB.setEnabled(true);
             this.tpNoEarlyShedinjaCB.setEnabled(true);
             this.tpForceFullyEvolvedCB.setEnabled(true);
             this.tpLevelModifierCB.setEnabled(true);
+            this.tpTryMoveDiversityCB.setEnabled(true);
+            this.tpLogTrainerMovesCB.setEnabled(true);
         }
         
         if(this.tpPowerLevelsCB.isSelected() || this.tpUnchangedRB.isSelected()) {
@@ -1839,6 +1849,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpLevelModifierCB.setSelected(settings.isTrainersLevelModified());
         this.tpLevelModifierSlider.setValue(settings.getTrainersLevelModifier());
         this.tpSameEvoStageCB.setSelected(settings.isTrainersUseSameEvoStages());
+        this.tpTryMoveDiversityCB.setSelected(settings.isTrainersTryMoveDiversity());
+        this.tpLogTrainerMovesCB.setSelected(settings.isLogTrainerMoves());
 
         this.wpARCatchEmAllRB
                 .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL);
@@ -2005,6 +2017,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setTrainersLevelModified(tpLevelModifierCB.isSelected());
         settings.setTrainersLevelModifier(tpLevelModifierSlider.getValue());
         settings.setTrainersUseSameEvoStages(tpSameEvoStageCB.isSelected());
+        settings.setTrainersTryMoveDiversity(tpTryMoveDiversityCB.isSelected());
+        settings.setLogTrainerMoves(tpLogTrainerMovesCB.isSelected());
 
         settings.setWildPokemonMod(wpUnchangedRB.isSelected(), wpRandomRB.isSelected(), wpArea11RB.isSelected(),
                 wpGlobalRB.isSelected());
@@ -2884,6 +2898,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         tpSameEvoStageCB = new javax.swing.JCheckBox();
         tpTypeWeightingCB = new javax.swing.JCheckBox();
         tpRivalCarriesStarterCB = new javax.swing.JCheckBox();
+        tpTryMoveDiversityCB = new javax.swing.JCheckBox();
         tpNoLegendariesCB = new javax.swing.JCheckBox();
         tnRandomizeCB = new javax.swing.JCheckBox();
         tcnRandomizeCB = new javax.swing.JCheckBox();
@@ -2892,6 +2907,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         tpForceFullyEvolvedSlider = new javax.swing.JSlider();
         tpLevelModifierCB = new javax.swing.JCheckBox();
         tpLevelModifierSlider = new javax.swing.JSlider();
+        tpLogTrainerMovesCB = new javax.swing.JCheckBox();
         wildsInnerPanel = new javax.swing.JPanel();
         wildPokemonPanel = new javax.swing.JPanel();
         wpUnchangedRB = new javax.swing.JRadioButton();
@@ -4073,6 +4089,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
         tpRivalCarriesStarterCB.setText(bundle.getString("RandomizerGUI.tpRivalCarriesStarterCB.text")); // NOI18N
         tpRivalCarriesStarterCB.setToolTipText(bundle.getString("RandomizerGUI.tpRivalCarriesStarterCB.toolTipText")); // NOI18N
         tpRivalCarriesStarterCB.setEnabled(false);
+        
+        tpTryMoveDiversityCB.setText(bundle.getString("RandomizerGUI.tpTryMoveDiversityCB.text")); // NOI18N
+        tpTryMoveDiversityCB.setToolTipText(bundle.getString("RandomizerGUI.tpTryMoveDiversityCB.toolTipText")); // NOI18N
+        tpTryMoveDiversityCB.setEnabled(false);
 
         tpNoLegendariesCB.setText(bundle.getString("RandomizerGUI.tpNoLegendariesCB.text")); // NOI18N
         tpNoLegendariesCB.setEnabled(false);
@@ -4119,6 +4139,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
         tpLevelModifierSlider.setPaintTicks(true);
         tpLevelModifierSlider.setToolTipText(bundle.getString("RandomizerGUI.tpLevelModifierSlider.toolTipText")); // NOI18N
         tpLevelModifierSlider.setValue(0);
+        
+        tpLogTrainerMovesCB.setText(bundle.getString("RandomizerGUI.tpLogTrainerMovesCB.text")); // NOI18N
+        tpLogTrainerMovesCB.setToolTipText(bundle.getString("RandomizerGUI.tpLogTrainerMovesCB.toolTipText")); // NOI18N
 
         javax.swing.GroupLayout trainersPokemonPanelLayout = new javax.swing.GroupLayout(trainersPokemonPanel);
         trainersPokemonPanel.setLayout(trainersPokemonPanelLayout);
@@ -4141,7 +4164,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                                 .addComponent(tpPowerLevelsCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(tpSameEvoStageCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(tpNoLegendariesCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addComponent(tpNoEarlyShedinjaCB))
+                            .addComponent(tpNoEarlyShedinjaCB)
+                            .addComponent(tpTryMoveDiversityCB))
                         .addGap(18, 18, 18)
                         .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(tnRandomizeCB)
@@ -4149,7 +4173,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                             .addComponent(tpForceFullyEvolvedCB)
                             .addComponent(tpForceFullyEvolvedSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(tpLevelModifierCB)
-                            .addComponent(tpLevelModifierSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(tpLevelModifierSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(tpLogTrainerMovesCB))))
                 .addContainerGap(143, Short.MAX_VALUE))
         );
         trainersPokemonPanelLayout.setVerticalGroup(
@@ -4177,12 +4202,17 @@ public class RandomizerGUI extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(tpSameEvoStageCB)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(tpNoEarlyShedinjaCB))
-                    .addComponent(tpForceFullyEvolvedSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(tpLevelModifierCB)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(tpLevelModifierSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(tpNoEarlyShedinjaCB)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(tpTryMoveDiversityCB))
+                    .addGroup(trainersPokemonPanelLayout.createSequentialGroup()
+                            .addComponent(tpForceFullyEvolvedSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(tpLevelModifierCB)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(tpLevelModifierSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(tpLogTrainerMovesCB)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -5184,8 +5214,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox tpNoLegendariesCB;
     private javax.swing.JCheckBox tpPowerLevelsCB;
     private javax.swing.JCheckBox tpSameEvoStageCB;
+    private javax.swing.JCheckBox tpLogTrainerMovesCB;
     private javax.swing.JRadioButton tpRandomRB;
     private javax.swing.JCheckBox tpRivalCarriesStarterCB;
+    private javax.swing.JCheckBox tpTryMoveDiversityCB;
     private javax.swing.JRadioButton tpTypeThemedRB;
     private javax.swing.JRadioButton tpRetainTypeRB;
     private javax.swing.JCheckBox tpTypeWeightingCB;
