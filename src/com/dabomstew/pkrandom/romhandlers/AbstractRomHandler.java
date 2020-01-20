@@ -416,10 +416,11 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public Pokemon random2EvosPokemon() {
+        checkPokemonRestrictions();
         if (twoEvoPokes == null) {
             // Prepare the list
             twoEvoPokes = new ArrayList<Pokemon>();
-            List<Pokemon> allPokes = this.getPokemon();
+            List<Pokemon> allPokes = mainPokemonList;
             for (Pokemon pk : allPokes) {
                 if (pk != null && pk.evolutionsTo.size() == 0 && pk.evolutionsFrom.size() > 0) {
                     // Potential candidate
@@ -439,10 +440,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     
     @Override
     public Pokemon random1EvosPokemon() {
+        checkPokemonRestrictions();
         if (oneEvoPokes == null) {
             // Prepare the list
             oneEvoPokes = new ArrayList<Pokemon>();
-            List<Pokemon> allPokes = this.getPokemon();
+            List<Pokemon> allPokes = mainPokemonList;
             for (Pokemon pk : allPokes) {
                 if (pk != null && pk.evolutionsTo.size() == 0 && pk.evolutionsFrom.size() > 0) {
                     // Potential candidate
@@ -462,10 +464,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     
     @Override
     public Pokemon random0EvosPokemon(boolean banLegend, boolean onlyLegend) {
+        checkPokemonRestrictions();
         if (noEvoPokes == null) {
             // Prepare the list
             noEvoPokes = new ArrayList<Pokemon>();
-            List<Pokemon> allPokes = this.getPokemon();
+            List<Pokemon> allPokes = mainPokemonList;
             for (Pokemon pk : allPokes) {
                 if (pk != null && pk.evolutionsTo.size() == 0 && pk.evolutionsFrom.size() == 0) {
                 	if(banLegend || onlyLegend){
@@ -485,10 +488,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     
     @Override
     public Pokemon randomBaseEvoPokemon(boolean banLegend, boolean onlyLegend) {
+        checkPokemonRestrictions();
         if (baseEvoPokes == null) {
             // Prepare the list
             baseEvoPokes = new ArrayList<Pokemon>();
-            List<Pokemon> allPokes = this.getPokemon();
+            List<Pokemon> allPokes = mainPokemonList;
             for (Pokemon pk : allPokes) {
                 if (pk != null && pk.evosToDepth() == 0) {
                     if(banLegend || onlyLegend){
@@ -1558,7 +1562,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 atkSpecializationWeight = maximumWeight;
             }
             
-            System.out.println("spWeight: " + spSpecializationWeight + " phWeight: " + phSpecializationWeight + " defWeight: " + defSpecializationWeight +  " atkWeight: " + atkSpecializationWeight);
+            //System.out.println("spWeight: " + spSpecializationWeight + " phWeight: " + phSpecializationWeight + " defWeight: " + defSpecializationWeight +  " atkWeight: " + atkSpecializationWeight);
             
             //self destruct, explosion
             int[] suicideMoves = new int[] {120, 153};
@@ -1576,7 +1580,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             //
             //quiver dance, spikes, stealth rock, toxic, toxic spikes
             int[] sTierStatusMoves = new int[] {483, 191, 446, 92, 390};
-            float sTierStatusWeight = 10f;
+            float sTierStatusWeight = 8f;
             
             //paralysis and other inflictors / healing; harsh debuff or buff; may include weather
             //Acid Armor, Agility, Amnesia, Aqua Ring, attract, autotomize, barrier, bulk up, calm mind, captivate, charm, coil, cosmic power
@@ -1639,6 +1643,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 
                 //do weighting here
                 //----------------------------------------------------
+                
                 
                 //prioritizes move category depending on pokemon stat specialty
                 if(m.category == MoveCategory.SPECIAL)
@@ -2004,14 +2009,17 @@ public abstract class AbstractRomHandler implements RomHandler {
                 Set<Pokemon> recStack = new HashSet<Pokemon>();
                 if(skipCyclicCheck || !isCyclic(p, visited, recStack))
                 {
-                    int previousLevel = level - 1;
+                    int previousLevel = 1;
                     if(selectedChain.type == EvolutionType.LEVEL || 
-                            selectedChain.type == EvolutionType.LEVEL_ELECTRIFIED_AREA ||
+                            selectedChain.type == EvolutionType.LEVEL_ELECTRIFIED_AREA || selectedChain.type == EvolutionType.LEVEL_LOW_PV ||
                             selectedChain.type == EvolutionType.LEVEL_FEMALE_ONLY || selectedChain.type == EvolutionType.LEVEL_HIGH_BEAUTY || 
                             selectedChain.type == EvolutionType.LEVEL_ICY_ROCK || selectedChain.type == EvolutionType.LEVEL_ITEM_DAY ||
-                            selectedChain.type == EvolutionType.LEVEL_ITEM_NIGHT || 
+                            selectedChain.type == EvolutionType.LEVEL_ITEM_NIGHT || selectedChain.type == EvolutionType.LEVEL_HIGH_PV ||
+                            selectedChain.type == EvolutionType.LEVEL_IS_EXTRA || selectedChain.type == EvolutionType.LEVEL_CREATE_EXTRA ||
                             selectedChain.type == EvolutionType.LEVEL_MALE_ONLY || selectedChain.type == EvolutionType.LEVEL_MOSS_ROCK || 
-                            selectedChain.type == EvolutionType.LEVEL_WITH_MOVE || selectedChain.type == EvolutionType.LEVEL_WITH_OTHER)
+                            selectedChain.type == EvolutionType.LEVEL_WITH_MOVE || selectedChain.type == EvolutionType.LEVEL_WITH_OTHER ||
+                            selectedChain.type == EvolutionType.LEVEL_DEFENSE_HIGHER || selectedChain.type == EvolutionType.LEVEL_ATTACK_HIGHER ||
+                            selectedChain.type == EvolutionType.LEVEL_ATK_DEF_SAME)
                     {
                         if(selectedChain.carryStats)
                         {
