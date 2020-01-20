@@ -38,6 +38,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
@@ -1482,17 +1483,176 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         else
         {
-            //temporary usage of just picking a random move
+            Map<Move, Float> moveWeightings = new HashMap<Move, Float>();
+            float currentWeightTotal = 0f;
+
+            float tmWeight = .6f;
+            float hmWeight = .9f;
+            float mtWeight = .8f;
+            
+            float statusWeight = .9f;
+            float specialWeight = 1f;
+            float physicalWeight = 1f;
+            
+            float accuracyWeight = 2f;
+            float neverMissWeight = 1.4f;
+            
+            float expectedMovePower = 60;
+            float powerWeight = 1.8f;
+            
+            float stabWeight = 1.3f;
+            
+            
+            //modify weights based on pokemon here
+            //------------------------------------------
+            
+            
+            
+            
+            
+            List<Integer> tmMoves = getTMMoves();
+            List<Integer> hmMoves = getHMMoves();
+            List<Integer> mtMoves = getMoveTutorMoves();
+            for(Move m : moves)
+            {
+                //starting weight value
+                float weight = 1f;
+                
+                //do weighting here
+                //----------------------------------------------------
+                
+                boolean isATMHMMT = false;
+                
+                //if is tm lower it's weighting
+                for(Integer i : tmMoves)
+                {
+                    //if this move is a tm
+                    if(i.intValue() == m.internalId)
+                    {
+                        weight *= tmWeight;
+                        isATMHMMT = true;
+                    }
+                }
+                //if is hm lower it's weighting
+                if(!isATMHMMT)
+                {
+                    for(Integer i : hmMoves)
+                    {
+                        //if this move is an hm
+                        if(i.intValue() == m.internalId)
+                        {
+                            weight *= hmWeight;
+                            isATMHMMT = true;
+                        }
+                    }
+                }
+                //if is mt lower it's weighting
+                if(!isATMHMMT)
+                {
+                    for(Integer i : mtMoves)
+                    {
+                        //if this move is an hm
+                        if(i.intValue() == m.internalId)
+                        {
+                            weight *= mtWeight;
+                            isATMHMMT = true;
+                        }
+                    }
+                }
+                
+                if(m.category == MoveCategory.STATUS)
+                {
+                    weight *= statusWeight;
+                    
+                    //do status specific weighting here
+                    
+                    
+                } else if(m.category == MoveCategory.PHYSICAL)
+                {
+                    weight *= physicalWeight;
+                    
+                    //if move has chance to inflict status, give bonus
+                    
+                } else if(m.category == MoveCategory.SPECIAL)
+                {
+                    weight *= specialWeight;
+
+                    //if move has chance to inflict status, give bonus
+                    
+                }
+                
+                
+                float accuracy = (float)m.hitratio;
+                if(accuracy == 0)
+                {
+                    //bonus for never hitting
+                    weight *= neverMissWeight * accuracyWeight;
+                }
+                else
+                {
+                    weight *= ((float)m.hitratio * accuracyWeight)/(100);
+                }
+                
+                //STAB bonus
+                if(m.type == p.primaryType || (p.secondaryType != null && m.type == p.secondaryType))
+                {
+                    weight *= stabWeight;
+                }
+                
+                //move power bonus
+                if(m.power != 0)
+                {
+                    weight *= ((m.power * m.hitCount) * powerWeight)/expectedMovePower;
+                }
+                
+                
+                //TODO: find a way to implement type coverage
+                //choose moves based on weighting here
+                
+                //status moves buff/debuff based on def to atk ratio?
+                
+                
+                
+                
+                //record weightings to move
+                currentWeightTotal += weight;
+                moveWeightings.put(m, new Float(weight));
+                
+            }
+
+            //randomly select moves from the weighted pool
             while(currentmove < 4)
+            {
+                Iterator<Entry<Move, Float>> i = moveWeightings.entrySet().iterator();
+                int moveid = 0;
+                Entry<Move, Float> temp;
+                float moveToSelect = this.random.nextFloat() * currentWeightTotal;
+                if(!i.hasNext())
+                {
+                    System.err.println("iterator lacking next");
+                }
+                while(moveToSelect > 0.000001 && i.hasNext())
+                {
+                    temp = (Entry<Move, Float>) i.next();
+                    moveToSelect -= temp.getValue().floatValue();
+                    moveid = temp.getKey().internalId;
+                }
+                chosenMoves[currentmove] = moveid;
+                currentmove++;
+                i.remove();
+            }
+            
+            //temporary usage of just picking a random move
+            /*while(currentmove < 4)
             {
                 int nextMove = this.random.nextInt(moves.size());
                 chosenMoves[currentmove] = moves.get(nextMove).internalId;
                 moves.remove(nextMove);
                 currentmove++;
-            }
+            }*/
             
-            //choose moves based on weighting here
-            //determine which moves to use
+            
+            
         }
         
         return chosenMoves;
@@ -1500,15 +1660,26 @@ public abstract class AbstractRomHandler implements RomHandler {
     
     @Override
     public List<Move> getDiverseMoves(Pokemon p, Map<Pokemon, List<MoveLearnt>> moveset, int level, List<Move> allMoves) {
+        return getDiverseMoves(p, moveset, level, allMoves, false);
+    }
+    
+    @Override
+    public List<Move> getDiverseMoves(Pokemon p, Map<Pokemon, List<MoveLearnt>> moveset, int level, List<Move> allMoves, boolean skipCyclicCheck) {
         List<Move> validMoves = new ArrayList<Move>();
 
-        System.out.println(p.name);
+        int minimumLevelForTMs = 40;
+        int minimumLevelForHMs = 30;
+        int minimumLevelForMTs = 35;
+        
+        
+        //System.out.println(p.name);
         List<Integer> tmMoves = getTMMoves();
         List<Integer> hmMoves = getHMMoves();
         List<Integer> tmsLearned = new ArrayList<Integer>();
         List<Integer> hmsLearned = new ArrayList<Integer>();
         boolean[] tmCompat = getTMHMCompatibility().get(p);
         int tmLength = getTMCount() + 1;
+        //only have hms or tms after a certain pokemon level
         for(int i = 0; i < tmCompat.length; i++)
         {
             //System.out.println("tmCompat list: " + tmCompat.length + " tms: " +getTMCount() + " hms: " + getHMCount());
@@ -1520,11 +1691,17 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 else if(i >= tmLength)
                 {
-                    hmsLearned.add(hmMoves.get(i - tmLength));
+                    if(level >= minimumLevelForHMs)
+                    {
+                        hmsLearned.add(hmMoves.get(i - tmLength));
+                    }
                 }
                 else
                 {
-                    tmsLearned.add(tmMoves.get(i-1));
+                    if(level >= minimumLevelForTMs)
+                    {
+                        tmsLearned.add(tmMoves.get(i-1));
+                    }
                 }
             }
         }
@@ -1551,17 +1728,21 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Integer> mtMoves = this.getMoveTutorMoves();
         List<Integer> moveTutorsLearned = new ArrayList<Integer>();
         boolean[] moveTutorCompat = getMoveTutorCompatibility().get(p);
-        for(int i = 0; i < moveTutorCompat.length; i++)
+        //only have move tutors after a certain pokemon level
+        if(level >= minimumLevelForMTs)
         {
-            if(moveTutorCompat[i] == true)
+            for(int i = 0; i < moveTutorCompat.length; i++)
             {
-                if(i == 0)
+                if(moveTutorCompat[i] == true)
                 {
-                    System.err.println("0 is supposed to be a blank spot and not compatible");
-                }
-                else
-                {
-                    moveTutorsLearned.add(mtMoves.get(i-1));
+                    if(i == 0)
+                    {
+                        System.err.println("0 is supposed to be a blank spot and not compatible");
+                    }
+                    else
+                    {
+                        moveTutorsLearned.add(mtMoves.get(i-1));
+                    }
                 }
             }
         }
@@ -1587,8 +1768,39 @@ public abstract class AbstractRomHandler implements RomHandler {
             {
                 //if isnt cyclic
                 //get leveltoevolvetocurrent
-                int evoChain = this.random.nextInt(p.evolutionsTo.size());
-                System.out.println("\nevo to; from: " + p.evolutionsTo.get(evoChain).from + " to: " + p.evolutionsTo.get(evoChain).to);
+                Evolution selectedChain = p.evolutionsTo.get(this.random.nextInt(p.evolutionsTo.size()));
+                //System.out.println("\nevo to; from: " + selectedChain.from + " to: " + selectedChain.to);
+                Set<Pokemon> visited = new HashSet<Pokemon>();
+                Set<Pokemon> recStack = new HashSet<Pokemon>();
+                if(skipCyclicCheck || !isCyclic(p, visited, recStack))
+                {
+                    int previousLevel = level - 1;
+                    if(selectedChain.type == EvolutionType.LEVEL || 
+                            selectedChain.type == EvolutionType.LEVEL_ELECTRIFIED_AREA ||
+                            selectedChain.type == EvolutionType.LEVEL_FEMALE_ONLY || selectedChain.type == EvolutionType.LEVEL_HIGH_BEAUTY || 
+                            selectedChain.type == EvolutionType.LEVEL_ICY_ROCK || selectedChain.type == EvolutionType.LEVEL_ITEM_DAY ||
+                            selectedChain.type == EvolutionType.LEVEL_ITEM_NIGHT || 
+                            selectedChain.type == EvolutionType.LEVEL_MALE_ONLY || selectedChain.type == EvolutionType.LEVEL_MOSS_ROCK || 
+                            selectedChain.type == EvolutionType.LEVEL_WITH_MOVE || selectedChain.type == EvolutionType.LEVEL_WITH_OTHER)
+                    {
+                        if(selectedChain.carryStats)
+                        {
+                            levelToEvolveToCurrent = selectedChain.extraInfo;
+                           // System.out.println(selectedChain.from.name + " "+ p.name + " level to evolve: " + levelToEvolveToCurrent);
+                            previousLevel = levelToEvolveToCurrent;
+                        }
+                        else
+                        {
+                            //types that threw error: LEVEL_LOW_PV (wurmple) LEVEL_HIGH_PV (wurmple) LEVEL_DEFENSE_HIGHER (tyrogue) LEVEL_ATTACK_HIGHER (tyrogue) LEVEL_ATK_DEF_SAME (tyrogue), LEVEL_IS_EXTRA (shedingja), LEVEL_CREATE_EXTRA (ninjask), LEVEL??? (slowbro)
+                            //System.err.println(selectedChain.from.name + " " + p.name + " Expected chain of type: " + selectedChain.type + " to carry stats.");
+                        }
+                    }
+                    if(previousLevel < 1)
+                    {
+                        previousLevel = 1;
+                    }
+                    validMoves = getDiverseMoves(selectedChain.from,  moveset, previousLevel, allMoves, true);
+                }
                 //validMoves = getDiverseMoves(p.evolutionsTo.get(evoChain).from);
             }
             //find and add the moves the previous evolution had at the lower level of whatever was needed for it to evolve

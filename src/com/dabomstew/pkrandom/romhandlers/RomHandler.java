@@ -203,6 +203,8 @@ public interface RomHandler {
     public void randomizeTrainerMoves(boolean useTrainerMoveDiversity);
     
     public int[] getTrainerMoveDiversity(Pokemon p, Map<Pokemon, List<MoveLearnt>> moveset, int level, List<Move> allMoves);
+
+    public List<Move> getDiverseMoves(Pokemon p, Map<Pokemon, List<MoveLearnt>> moveset, int level, List<Move> allMoves, boolean skipCyclicCheck);
     
     public List<Move> getDiverseMoves(Pokemon p, Map<Pokemon, List<MoveLearnt>> moveset, int level, List<Move> allMoves);
 
