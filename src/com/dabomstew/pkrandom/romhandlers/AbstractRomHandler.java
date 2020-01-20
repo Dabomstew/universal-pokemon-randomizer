@@ -1451,7 +1451,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 //enable this once move diversity is functional
                 if(useTrainerMoveDiversity)
                 {
-                    pokeMoves = getTrainerMoveDiversity(tp.pokemon, movesets, tp.level, allMoves);
+                    pokeMoves = getTrainerMoveDiversity(tp, movesets, tp.level, allMoves);
                 }
                 else
                 {
@@ -1469,9 +1469,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         this.setTrainers(currentTrainers);
     }
     
-    public int[] getTrainerMoveDiversity(Pokemon p, Map<Pokemon, List<MoveLearnt>> moveset, int level, List<Move> allMoves) {
+    public int[] getTrainerMoveDiversity(TrainerPokemon p, Map<Pokemon, List<MoveLearnt>> moveset, int level, List<Move> allMoves) {
         int[] chosenMoves = new int[4];
-        List<Move> moves = getDiverseMoves(p, moveset, level, allMoves);
+        List<Move> moves = getDiverseMoves(p.pokemon, moveset, level, allMoves);
         Iterator<Move> iterator = moves.iterator();
         
         //System.out.println(p.name + " Move pool: " + moves.size());
@@ -1498,6 +1498,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             float specialWeight = 1f;
             float physicalWeight = 1f;
             
+            //multiplier in how quickly bad accuracy drops the weighting
+            float accuracyGapWeight = 2f;
+            //multiplier of how much accuracy is weighted
             float accuracyWeight = 2f;
             float neverMissWeight = 1.4f;
             
@@ -1512,8 +1515,8 @@ public abstract class AbstractRomHandler implements RomHandler {
             float ppBonusCap = 20;
             
             //weights atk categories that match the pokemon's stats more
-            float spSpecializationWeight = (p.spatk)/(float)((p.spatk + p.attack)/2f);
-            float phSpecializationWeight = (p.attack)/(float)((p.spatk + p.attack)/2f);
+            float spSpecializationWeight = (p.pokemon.spatk)/(float)((p.pokemon.spatk + p.pokemon.attack)/2f);
+            float phSpecializationWeight = (p.pokemon.attack)/(float)((p.pokemon.spatk + p.pokemon.attack)/2f);
             //edit this modifier to change how drastically the weighting changes per stat change
             float spphModifier = 2.75f;
             
@@ -1522,8 +1525,8 @@ public abstract class AbstractRomHandler implements RomHandler {
             
             float averageHP = 68;
             //weights atks or status moves based on whether the pokemon is more defensive or offensive
-            float defSpecializationWeight = (p.defense + p.spdef + p.hp)/(float)((p.defense + p.spdef + p.attack + p.spatk + p.hp + averageHP)/2f);
-            float atkSpecializationWeight = (p.attack + p.spatk + averageHP)/(float)((p.defense + p.spdef + p.attack + p.spatk + p.hp + averageHP)/2f);
+            float defSpecializationWeight = (p.pokemon.defense + p.pokemon.spdef + p.pokemon.hp)/(float)((p.pokemon.defense + p.pokemon.spdef + p.pokemon.attack + p.pokemon.spatk + p.pokemon.hp + averageHP)/2f);
+            float atkSpecializationWeight = (p.pokemon.attack + p.pokemon.spatk + averageHP)/(float)((p.pokemon.defense + p.pokemon.spdef + p.pokemon.attack + p.pokemon.spatk + p.pokemon.hp + averageHP)/2f);
             //edit this modifier to change how drastically the weighting changes per stat change
             float defatkModifier = 3f;
             
@@ -1626,6 +1629,32 @@ public abstract class AbstractRomHandler implements RomHandler {
             float cTierStatusWeight = .15f;
             
             
+            //Sunny Day, Rain Dance, Sandstorm, Hail
+            int[] weatherMoves = new int[] {241, 240, 201, 258};
+            //Forecast, Chlorophyll, Flower Gift, Leaf Guard, Solar Power
+            int[] sunlightAbilities = new int[] {59, 34, 122, 102, 94};
+            //Dry Skin
+            int[] negSunlightAbilities = new int[] {87};
+            //Forecast, Dry Skin, Hydration, Rain Dish, Swift Swim
+            int[] rainAbilities = new int[] {59, 87, 93, 44, 33};
+            //Sand Veil, Sand Rush, Sand Force
+            int[] sandstormAbilities = new int[] {8, 146, 159};
+            //Forecast, Ice body, Snow Cloak, Slush Rush
+            int[] hailAbilities = new int[] {59, 115, 81, 202};
+            //Air Lock, Cloud Nine, Drought, Drizzle, Snow Warning, Sand Stream
+            int[] negWeatherAbilities = new int[] {76, 13, 70, 2, 117, 45};
+            float posWeatherAbilityModifier = 4f;
+            float negWeatherAbilityModifier = 0.1f;
+            
+            float posWeatherTypingModifier = 2.0f;
+            float negWeatherTypingModifier = 0.5f;
+            
+            //Attract, Captivate
+            int[] genderBasedMoves = new int[] {213, 445};
+            float goodGenderModifier = 1.1f;
+            float badGenderModifier = 0.001f;
+            
+            
             //modify weights based on pokemon here
             //------------------------------------------
             
@@ -1643,6 +1672,118 @@ public abstract class AbstractRomHandler implements RomHandler {
                 
                 //do weighting here
                 //----------------------------------------------------
+                
+                for(int gm : genderBasedMoves)
+                {
+                    if(m.internalId == gm)
+                    {
+                        if(p.pokemon.isGenderless())
+                        {
+                            weight *= badGenderModifier;
+                        }
+                        else
+                        {
+                            weight *= goodGenderModifier;
+                        }
+                    }
+                }
+                
+                for(int w : weatherMoves)
+                {
+                    if(m.internalId == w)
+                    {
+                        for(int a : negWeatherAbilities)
+                        {
+                            if(p.ability == a)
+                            {
+                                weight *= negWeatherAbilityModifier;
+                            }
+                        }
+                        //sandstorm
+                        if (w == 201)
+                        {
+                            if(p.pokemon.primaryType == Type.ROCK || p.pokemon.secondaryType == Type.ROCK || p.pokemon.primaryType == Type.STEEL || p.pokemon.secondaryType == Type.STEEL || p.pokemon.primaryType == Type.GROUND || p.pokemon.secondaryType == Type.GROUND)
+                            {
+                                weight *= posWeatherTypingModifier;
+                            }
+                            else
+                            {
+                                weight *= negWeatherTypingModifier;
+                            }
+                            for(int a : sandstormAbilities)
+                            {
+                                if(p.ability == a)
+                                {
+                                    weight *= posWeatherAbilityModifier;
+                                }
+                            }
+                        } else 
+                        //Rain Dance    
+                        if (w == 240)
+                        {
+                            if(p.pokemon.primaryType == Type.WATER || p.pokemon.secondaryType == Type.WATER)
+                            {
+                                weight *= posWeatherTypingModifier;
+                            }
+                            if(p.pokemon.primaryType == Type.FIRE || p.pokemon.secondaryType == Type.FIRE)
+                            {
+                                weight *= negWeatherTypingModifier;
+                            }
+                            for(int a : rainAbilities)
+                            {
+                                if(p.ability == a)
+                                {
+                                    weight *= posWeatherAbilityModifier;
+                                }
+                            }
+                        } else 
+                        //Sunny Day
+                        if (w == 241)
+                        {
+                            if(p.pokemon.primaryType == Type.FIRE || p.pokemon.secondaryType == Type.FIRE)
+                            {
+                                weight *= posWeatherTypingModifier;
+                            }
+                            if(p.pokemon.primaryType == Type.WATER || p.pokemon.secondaryType == Type.WATER)
+                            {
+                                weight *= negWeatherTypingModifier;
+                            }
+                            for(int a : sunlightAbilities)
+                            {
+                                if(p.ability == a)
+                                {
+                                    weight *= posWeatherAbilityModifier;
+                                }
+                            }
+                            for(int a : negSunlightAbilities)
+                            {
+                                if(p.ability == a)
+                                {
+                                    weight *= negWeatherAbilityModifier;
+                                }
+                            }
+                        } else 
+                        //Hail    
+                        if (w == 258)
+                        {
+                            if(p.pokemon.primaryType == Type.ICE || p.pokemon.secondaryType == Type.ICE)
+                            {
+                                weight *= posWeatherTypingModifier;
+                            }
+                            else
+                            {
+                                weight *= negWeatherTypingModifier;
+                            }
+                            for(int a : hailAbilities)
+                            {
+                                if(p.ability == a)
+                                {
+                                    weight *= posWeatherAbilityModifier;
+                                }
+                            }
+                        }
+                    }
+                }
                 
                 
                 //prioritizes move category depending on pokemon stat specialty
@@ -1807,11 +1948,18 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 else
                 {
-                    weight *= ((float)m.hitratio * accuracyWeight)/(100);
+                    float accuracygap = (float) (m.hitratio) / accuracyGapWeight;
+                    float inaccuracyGap = (float) (1 - accuracygap);
+                    float lowestModifier = .1f;
+                    if(1 - inaccuracyGap < lowestModifier)
+                    {
+                        inaccuracyGap = 1 - lowestModifier;
+                    }
+                    weight *= ((float)(1 - inaccuracyGap) * accuracyWeight)/(100);
                 }
                 
                 //STAB bonus
-                if(m.type == p.primaryType || (p.secondaryType != null && m.type == p.secondaryType))
+                if(m.type == p.pokemon.primaryType || (p.pokemon.secondaryType != null && m.type == p.pokemon.secondaryType))
                 {
                     weight *= stabWeight;
                 }

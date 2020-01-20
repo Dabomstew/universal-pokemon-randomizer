@@ -30,6 +30,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import com.dabomstew.pkrandom.constants.GlobalConstants;
+
 public class Pokemon implements Comparable<Pokemon> {
 
     public String name;
@@ -342,6 +344,17 @@ public class Pokemon implements Comparable<Pokemon> {
         }
     }
 
+    public boolean isGenderless() {
+        if(GlobalConstants.genderlessPokemon.contains(this.number))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
     @Override
     public String toString() {
         return "Pokemon [name=" + name + ", number=" + number + ", primaryType=" + primaryType + ", secondaryType="

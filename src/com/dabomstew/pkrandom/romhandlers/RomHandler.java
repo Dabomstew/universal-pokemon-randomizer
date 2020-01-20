@@ -42,6 +42,7 @@ import com.dabomstew.pkrandom.pokemon.Move;
 import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
+import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 
 public interface RomHandler {
@@ -202,7 +203,7 @@ public interface RomHandler {
     
     public void randomizeTrainerMoves(boolean useTrainerMoveDiversity);
     
-    public int[] getTrainerMoveDiversity(Pokemon p, Map<Pokemon, List<MoveLearnt>> moveset, int level, List<Move> allMoves);
+    public int[] getTrainerMoveDiversity(TrainerPokemon p, Map<Pokemon, List<MoveLearnt>> moveset, int level, List<Move> allMoves);
 
     public List<Move> getDiverseMoves(Pokemon p, Map<Pokemon, List<MoveLearnt>> moveset, int level, List<Move> allMoves, boolean skipCyclicCheck);
     
