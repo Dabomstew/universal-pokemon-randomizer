@@ -198,9 +198,13 @@ public interface RomHandler {
 
     public void forceFullyEvolvedTrainerPokes(int minLevel);
     
-    public void randomizeTrainerMoves();
+    public void giveImportantTrainersAFullTeam();
     
-    public void tryTrainerMoveDiversity();
+    public void randomizeTrainerMoves(boolean useTrainerMoveDiversity);
+    
+    public int[] getTrainerMoveDiversity(Pokemon p, Map<Pokemon, List<MoveLearnt>> moveset, int level, List<Move> allMoves);
+    
+    public List<Move> getDiverseMoves(Pokemon p, Map<Pokemon, List<MoveLearnt>> moveset, int level, List<Move> allMoves);
 
     // Randomizer: moves
 

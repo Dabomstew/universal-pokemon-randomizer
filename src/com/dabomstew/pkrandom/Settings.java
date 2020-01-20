@@ -46,7 +46,7 @@ public class Settings {
 
     public static final int VERSION = 173;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 37;
+    public static final int LENGTH_OF_SETTINGS_DATA = 38;
 
     private CustomNamesSet customNames;
 
@@ -154,6 +154,7 @@ public class Settings {
     private boolean trainersUseSameEvoStages;
     private boolean trainersTryMoveDiversity;
     private boolean logTrainerMoves;
+    private boolean giveImportantTrainersAFullTeam;
 
     public enum WildPokemonMod {
         UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING
@@ -396,7 +397,7 @@ public class Settings {
         out.write(baseStatRange);
 
         // 37 trainer pokemon extended settings and misc? (couldn't fit this in existing entries)
-        out.write(makeByteSelected(trainersUseSameEvoStages, shouldPatchSpecialSplit, wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_EVO_STAGE_AND_TYPING, trainersMod == TrainersMod.RETAIN_TYPE, logTrainerMoves));
+        out.write(makeByteSelected(trainersUseSameEvoStages, shouldPatchSpecialSplit, wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_EVO_STAGE_AND_TYPING, trainersMod == TrainersMod.RETAIN_TYPE, logTrainerMoves, giveImportantTrainersAFullTeam));
         
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -498,6 +499,8 @@ public class Settings {
         settings.setTrainersTryMoveDiversity(restoreState(data[25], 5));
         
         settings.setLogTrainerMoves(restoreState(data[37], 4));
+        
+        settings.setGiveImportantTrainersAFullTeam(restoreState(data[37], 5));
         
         settings.setWildPokemonMod(restoreEnum(WildPokemonMod.class, data[15], 6, // UNCHANGED
                 5, // RANDOM
@@ -1294,6 +1297,15 @@ public class Settings {
         return this;
     }
 
+    public boolean isGiveImportantTrainersAFullTeam() {
+        return giveImportantTrainersAFullTeam;
+    }
+    
+    public Settings setGiveImportantTrainersAFullTeam(boolean giveImportantTrainersAFullTeam) {
+        this.giveImportantTrainersAFullTeam = giveImportantTrainersAFullTeam;
+        return this;
+    }
+    
     public int getTrainersForceFullyEvolvedLevel() {
         return trainersForceFullyEvolvedLevel;
     }

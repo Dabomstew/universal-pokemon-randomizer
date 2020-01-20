@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,7 @@ import java.util.TreeSet;
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.Encounter;
@@ -1394,7 +1396,32 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizeTrainerMoves() {
+    public void giveImportantTrainersAFullTeam() {
+        List<Trainer> currentTrainers = this.getTrainers();
+
+        // New: randomize the order trainers are randomized in.
+        // Leads to less predictable results for various modifiers.
+        // Need to keep the original ordering around for saving though.
+        List<Trainer> scrambledTrainers = new ArrayList<Trainer>(currentTrainers);
+        Collections.shuffle(scrambledTrainers, this.random);
+        for (Trainer t : scrambledTrainers) {
+            if(t.importantTrainer)
+            {
+                System.out.println("Important Trainer Found: " + t.fullDisplayName + " " +t.offset);
+                while(t.pokemon.size() < 6)
+                {
+                    TrainerPokemon filler;
+                    filler = t.pokemon.get(this.random.nextInt(t.pokemon.size() - 1));
+                    t.pokemon.add(filler);
+                }
+            }
+        }
+        
+        this.setTrainers(currentTrainers);
+    }
+    
+    @Override
+    public void randomizeTrainerMoves(boolean useTrainerMoveDiversity) {
         List<Trainer> currentTrainers = this.getTrainers();
 
         // New: randomize the order trainers are randomized in.
@@ -1403,6 +1430,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Trainer> scrambledTrainers = new ArrayList<Trainer>(currentTrainers);
         Collections.shuffle(scrambledTrainers, this.random);
         Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+        List<Move> allMoves = this.getMoves();
         
         for (Trainer t : scrambledTrainers) {
             if(t.poketype == 0)
@@ -1414,7 +1442,16 @@ public abstract class AbstractRomHandler implements RomHandler {
                 t.poketype = 3;
             }
             for (TrainerPokemon tp : t.pokemon) {
-                int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon, movesets, tp.level);
+                int[] pokeMoves;
+                //enable this once move diversity is functional
+                if(useTrainerMoveDiversity)
+                {
+                    pokeMoves = getTrainerMoveDiversity(tp.pokemon, movesets, tp.level, allMoves);
+                }
+                else
+                {
+                    pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon, movesets, tp.level);
+                }
                 //defualt move selection is based on previously implemented solution
                 tp.move1 = pokeMoves[0];
                 tp.move2 = pokeMoves[1];
@@ -1427,11 +1464,230 @@ public abstract class AbstractRomHandler implements RomHandler {
         this.setTrainers(currentTrainers);
     }
     
+    public int[] getTrainerMoveDiversity(Pokemon p, Map<Pokemon, List<MoveLearnt>> moveset, int level, List<Move> allMoves) {
+        int[] chosenMoves = new int[4];
+        List<Move> moves = getDiverseMoves(p, moveset, level, allMoves);
+        Iterator<Move> iterator = moves.iterator();
+        
+        //System.out.println(p.name + " Move pool: " + moves.size());
+
+        int currentmove = 0;
+        if(moves.size() <= 4)
+        {
+            while(iterator.hasNext() && currentmove < 4)
+            {
+                chosenMoves[currentmove] = iterator.next().internalId;
+                currentmove++;
+            }
+        }
+        else
+        {
+            //temporary usage of just picking a random move
+            while(currentmove < 4)
+            {
+                int nextMove = this.random.nextInt(moves.size());
+                chosenMoves[currentmove] = moves.get(nextMove).internalId;
+                moves.remove(nextMove);
+                currentmove++;
+            }
+            
+            //choose moves based on weighting here
+            //determine which moves to use
+        }
+        
+        return chosenMoves;
+    }
+    
     @Override
-    public void tryTrainerMoveDiversity() {
-        System.err.println("Try Trainer Move Diversity is not implemented yet.");
-        //regular randomization until this is implemented
-        randomizeTrainerMoves();
+    public List<Move> getDiverseMoves(Pokemon p, Map<Pokemon, List<MoveLearnt>> moveset, int level, List<Move> allMoves) {
+        List<Move> validMoves = new ArrayList<Move>();
+
+        System.out.println(p.name);
+        List<Integer> tmMoves = getTMMoves();
+        List<Integer> hmMoves = getHMMoves();
+        List<Integer> tmsLearned = new ArrayList<Integer>();
+        List<Integer> hmsLearned = new ArrayList<Integer>();
+        boolean[] tmCompat = getTMHMCompatibility().get(p);
+        int tmLength = getTMCount() + 1;
+        for(int i = 0; i < tmCompat.length; i++)
+        {
+            //System.out.println("tmCompat list: " + tmCompat.length + " tms: " +getTMCount() + " hms: " + getHMCount());
+            if(tmCompat[i] == true)
+            {
+                if(i == 0)
+                {
+                    System.err.println("0 is supposed to be a blank spot and not compatible");
+                }
+                else if(i >= tmLength)
+                {
+                    hmsLearned.add(hmMoves.get(i - tmLength));
+                }
+                else
+                {
+                    tmsLearned.add(tmMoves.get(i-1));
+                }
+            }
+        }
+
+        /**for(Integer i : tmsLearned)
+        {
+            if(i == 0)
+            {
+                System.err.println("0 is supposed to be a blank spot and not compatible");
+            }
+            else
+            {
+                //i = new Integer(tmMoves.get(i-1).intValue());
+                System.out.print(" tm id of "+(i) + " found|");
+            }
+        }
+        
+        for(Integer i : hmsLearned)
+        {
+            //i = new Integer(hmMoves.get(i).intValue());
+            System.out.print(" hm id of "+(i) + " found|");
+        }*/
+        
+        List<Integer> mtMoves = this.getMoveTutorMoves();
+        List<Integer> moveTutorsLearned = new ArrayList<Integer>();
+        boolean[] moveTutorCompat = getMoveTutorCompatibility().get(p);
+        for(int i = 0; i < moveTutorCompat.length; i++)
+        {
+            if(moveTutorCompat[i] == true)
+            {
+                if(i == 0)
+                {
+                    System.err.println("0 is supposed to be a blank spot and not compatible");
+                }
+                else
+                {
+                    moveTutorsLearned.add(mtMoves.get(i-1));
+                }
+            }
+        }
+        
+        /**for(Integer i : moveTutorsLearned)
+        {
+            if(i == 0)
+            {
+                System.err.println("0 is supposed to be a blank spot and not compatible");
+            }
+            else
+            {
+                //i = new Integer(mtMoves.get(i-1).intValue());
+                System.out.print(" mt id of "+(i) + " found|");
+            }
+        }*/
+        
+        int levelToEvolveToCurrent = 0;
+        //previous evos
+        if(p.evosToDepth() != 0)
+        {
+            if(!p.evolutionsTo.isEmpty())
+            {
+                //if isnt cyclic
+                //get leveltoevolvetocurrent
+                int evoChain = this.random.nextInt(p.evolutionsTo.size());
+                System.out.println("\nevo to; from: " + p.evolutionsTo.get(evoChain).from + " to: " + p.evolutionsTo.get(evoChain).to);
+                //validMoves = getDiverseMoves(p.evolutionsTo.get(evoChain).from);
+            }
+            //find and add the moves the previous evolution had at the lower level of whatever was needed for it to evolve
+        }
+        
+        List<MoveLearnt> learnset = moveset.get(p);
+        //System.out.println("learnset length: " + learnset.size());
+        for(Move m : allMoves)
+        {
+            if(m != null)
+            {
+                /**for(Integer i : tmMoves)
+                {
+                    if(m.internalId == i.intValue())
+                    {
+                        System.out.print("\nTM Found: " + m.name);
+                    }
+                }
+                for(Integer i : hmMoves)
+                {
+                    if(m.internalId == i.intValue())
+                    {
+                        System.out.print("\nHM Found: " + m.name);
+                    }
+                }
+                for(Integer i : mtMoves)
+                {
+                    if(m.internalId == i.intValue())
+                    {
+                        System.out.print("\nMT Found: " + m.name);
+                    }
+                }*/
+                
+                if(!validMoves.contains(m))
+                {
+                    //tms
+                    if(!tmsLearned.isEmpty())
+                    {
+                        for(Integer tm : tmsLearned)
+                        {
+                            if(tm.intValue() == m.internalId)
+                            {
+                                //System.out.print(" TM of id:" + m.name +", id:" + m.internalId);
+                                validMoves.add(m);
+                            }
+                        }
+                    }
+
+                    if(!validMoves.contains(m))
+                    {
+                        //hms
+                        if(!hmsLearned.isEmpty())
+                        {
+                            for(Integer hm : hmsLearned)
+                            {
+                                if(hm.intValue() == m.internalId)
+                                {
+                                    //System.out.print(" HM of id:" + m.name +", id:" + m.internalId);
+                                    validMoves.add(m);
+                                }
+                            }
+                        }
+
+                        if(!validMoves.contains(m))
+                        {
+                            //move tutor
+                            if(!moveTutorsLearned.isEmpty())
+                            {
+                                for(Integer tutor : moveTutorsLearned)
+                                {
+                                    if(tutor.intValue() == m.internalId)
+                                    {
+                                        //System.out.print(" MT of id:" + m.name +", id:" + m.internalId);
+                                        validMoves.add(m);
+                                    }
+                                }
+                            }
+                            
+                            if(!validMoves.contains(m))
+                            {
+                                //level up
+                                for(MoveLearnt ml : learnset)
+                                {
+                                    //and above the level required for evolving to that pokemon (if it evolves)
+                                    if(ml.level <= level && ml.level > levelToEvolveToCurrent && ml.move == m.internalId)
+                                    {
+                                        validMoves.add(m);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+        }
+        //System.out.println("Moves checked: " + count + " Moves found: " + allMoves.size());
+        
+        return validMoves;
     }
     
     // MOVE DATA

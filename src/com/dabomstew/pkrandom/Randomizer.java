@@ -306,6 +306,11 @@ public class Randomizer {
             log.println();
         }
 
+        if(settings.isGiveImportantTrainersAFullTeam())
+        {
+            romHandler.giveImportantTrainersAFullTeam();
+        }
+        
         // Trainer Pokemon
         if (settings.getTrainersMod() == Settings.TrainersMod.RANDOM) {
             romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
@@ -504,13 +509,7 @@ public class Randomizer {
         
         // Do trainer move changes and log the new moves of those trainers
 
-        if(settings.isTrainersTryMoveDiversity()) {
-            romHandler.tryTrainerMoveDiversity();
-        }
-        else
-        {
-            romHandler.randomizeTrainerMoves();
-        }
+        romHandler.randomizeTrainerMoves(settings.isTrainersTryMoveDiversity());
         
         maybeLogTrainerChanges(log, romHandler, settings.isLogTrainerMoves());
 
