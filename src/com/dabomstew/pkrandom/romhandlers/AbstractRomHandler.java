@@ -1490,7 +1490,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             float hmWeight = .9f;
             float mtWeight = .8f;
             
-            float statusWeight = .9f;
+            float statusWeight = .7f;
             float specialWeight = 1f;
             float physicalWeight = 1f;
             
@@ -1501,6 +1501,125 @@ public abstract class AbstractRomHandler implements RomHandler {
             float powerWeight = 1.8f;
             
             float stabWeight = 1.3f;
+            
+            boolean enabledPPWeighting= false;
+            float ppWeight = 1f;
+            float expectedPP = 20;
+            float ppBonusCap = 20;
+            
+            //weights atk categories that match the pokemon's stats more
+            float spSpecializationWeight = (p.spatk)/(float)((p.spatk + p.attack)/2f);
+            float phSpecializationWeight = (p.attack)/(float)((p.spatk + p.attack)/2f);
+            //edit this modifier to change how drastically the weighting changes per stat change
+            float spphModifier = 2.75f;
+            
+            spSpecializationWeight = 1 + (spSpecializationWeight - 1) * spphModifier;
+            phSpecializationWeight = 1 + (phSpecializationWeight - 1) * spphModifier;
+            
+            float averageHP = 68;
+            //weights atks or status moves based on whether the pokemon is more defensive or offensive
+            float defSpecializationWeight = (p.defense + p.spdef + p.hp)/(float)((p.defense + p.spdef + p.attack + p.spatk + p.hp + averageHP)/2f);
+            float atkSpecializationWeight = (p.attack + p.spatk + averageHP)/(float)((p.defense + p.spdef + p.attack + p.spatk + p.hp + averageHP)/2f);
+            //edit this modifier to change how drastically the weighting changes per stat change
+            float defatkModifier = 3f;
+            
+            defSpecializationWeight = 1 + (defSpecializationWeight - 1) * defatkModifier;
+            atkSpecializationWeight = 1 + (atkSpecializationWeight - 1) * defatkModifier;
+            
+            float minimumWeight = 0.01f;
+            float maximumWeight = 1.99f;
+            
+            if(spSpecializationWeight < minimumWeight)
+            {
+                spSpecializationWeight = minimumWeight;
+            } else if(spSpecializationWeight > maximumWeight)
+            {
+                spSpecializationWeight = maximumWeight;
+            }
+            if(phSpecializationWeight < minimumWeight)
+            {
+                phSpecializationWeight = minimumWeight;
+            } else if(phSpecializationWeight > maximumWeight)
+            {
+                phSpecializationWeight = maximumWeight;
+            }
+            if(defSpecializationWeight < minimumWeight)
+            {
+                defSpecializationWeight = minimumWeight;
+            } else if(defSpecializationWeight > maximumWeight)
+            {
+                defSpecializationWeight = maximumWeight;
+            }
+            if(atkSpecializationWeight < minimumWeight)
+            {
+                atkSpecializationWeight = minimumWeight;
+            } else if(atkSpecializationWeight > maximumWeight)
+            {
+                atkSpecializationWeight = maximumWeight;
+            }
+            
+            System.out.println("spWeight: " + spSpecializationWeight + " phWeight: " + phSpecializationWeight + " defWeight: " + defSpecializationWeight +  " atkWeight: " + atkSpecializationWeight);
+            
+            //self destruct, explosion
+            int[] suicideMoves = new int[] {120, 153};
+            float suicideWeight = 0.8f;
+            
+            List<Type> offensiveTypes = new ArrayList<Type>();
+            boolean forceOffensiveMoveDiversity = false;
+            float extraStatusWeightIfOn = .5f;
+            
+            
+            
+            //tiers should not care about accuracy but instead the raw effect caused by the move as accuracy is already accounted for
+            boolean doStatusTiers = true;
+            
+            //
+            //quiver dance, spikes, stealth rock, toxic, toxic spikes
+            int[] sTierStatusMoves = new int[] {483, 191, 446, 92, 390};
+            float sTierStatusWeight = 10f;
+            
+            //paralysis and other inflictors / healing; harsh debuff or buff; may include weather
+            //Acid Armor, Agility, Amnesia, Aqua Ring, attract, autotomize, barrier, bulk up, calm mind, captivate, charm, coil, cosmic power
+            //cotton guard, cotton spore, dark void, defend order, destiny bond, detect, disable, dragon dance, encore, fake tears, feather dance,
+            //glare, grass whistle, growth, hail, haze, heal bell, heal block, heal order, hone claws, hypnosis, ingrain, iron defense, leech seed,
+            //magic coat, metronome, milk drink, minimize, miracle eye, mirror move, mist, moonlight, morning sun, nasty plot, nature power
+            //perish song, protect, rain dance, recover, roar, rock polish, role play, roost, sandstorm, scary face, shell smash, sing, sketch,
+            //slack off, sleep powder, soak, soft boiled, spore, stockpile, stun spore, substitue, sunny day, swords dance, synthesis, tail glow,
+            //teeter dance, thunder wave, tickle, torment, transform, will o wisp, wish, wonder room, work up
+            int[] aTierStatusMoves = new int[] {151, 97, 133, 392, 213, 475, 112, 339, 347, 445, 204, 489, 322, 
+                    538, 178, 464, 455, 194, 197, 50, 349, 227, 313, 297,
+                    137, 320, 74, 258, 114, 215, 377, 456, 468, 95, 275, 334, 73,
+                    277, 118, 208, 107, 357, 119, 54, 236, 234, 417, 267,
+                    195, 182, 240, 105, 46, 397, 272, 355, 201, 184, 504, 47, 166,
+                    303, 79, 487, 135, 147, 254, 78, 164, 241, 14, 235, 294,
+                    298, 86, 32, 259, 144, 261, 273, 472, 526};
+            float aTierStatusWeight = 1.3f;
+            
+            //one stage buffs / debuffs; may include weather
+            //Acupressure, Aromatheraphy, Assist, baton pass, belly drum, block, camoflauge, charge, confuse ray, copycat, curse, defense curl
+            //defog, double team, embargo, flash, flatter, focus energy, gastro acid, growl, guard split, guard swap, harden, healing wish,
+            //heart swap, howl, kinesis, leer, light screen, lockon, lovely kiss, lucky chant, lunar dance, magic room, magnet rise, me first,
+            //mean look, meditate, memento, metal sound, mimic, mind reader, nightmare, odor sleuth, pain split, poison gas, poison powder,
+            //power split, power swap, power trick, psych up, psycho shift, quick guard, recycle, reflect, reflect type, refresh, rest,
+            //safeguard, sand attack, screech, sharpen, shift gear, simple beam, skill swap, sleep talk, smokescreen, snatch, speed swap,
+            //spider web, stringshot, supersonic, swagger, swallow, sweet kiss, sweet scent, switcheroo, tail whip, tail wind, taunt, telekinesis,
+            //trick, trick room, whirlwind, wide guard, withdraw, worry seed, yawn
+            int[] bTierStatusMoves = new int[] {367, 312, 274, 226, 187, 335, 293, 268, 109, 383, 174, 111,
+                    432, 104, 373, 149, 260, 116, 380, 45, 470, 385, 106, 361,
+                    391, 336, 134, 43, 113, 199, 142, 381, 461, 478, 393, 382,
+                    212, 96, 262, 319, 102, 170, 171, 316, 220, 139, 77,
+                    471, 384, 379, 244, 375, 501, 278, 115, 513, 287, 156,
+                    219, 28, 103, 159, 508, 493, 285, 214, 108, 289, 683,
+                    169, 81, 48, 207, 256, 186, 230, 415, 39, 366, 269, 477,
+                    271, 433, 18, 469, 110, 388, 281};
+            float bTierStatusWeight = 1f;
+            
+            //extremely situational moves like double battle only moves
+            //After you, Ally switch, bestow, conversion, conversion 2, endure, entrainment, follow me, foresight, gravity, grudge, heal pulse
+            //helping hand, imprison, mud sport, quash, rage powder, spite, splash, teleport, water sport
+            int[] cTierStatusMoves = new int[] {469, 502, 516, 160, 176, 203, 494, 266, 193, 356, 288, 505,
+                    270, 286, 300, 511, 476, 180, 150, 100, 346};
+            float cTierStatusWeight = .15f;
             
             
             //modify weights based on pokemon here
@@ -1520,6 +1639,25 @@ public abstract class AbstractRomHandler implements RomHandler {
                 
                 //do weighting here
                 //----------------------------------------------------
+                
+                //prioritizes move category depending on pokemon stat specialty
+                if(m.category == MoveCategory.SPECIAL)
+                {
+                    weight *= spSpecializationWeight;
+                } else if(m.category == MoveCategory.PHYSICAL)
+                {
+                    weight *= phSpecializationWeight;
+                }
+                
+                //prioritize move category depending on pokemon stat specialty
+                if(m.category == MoveCategory.STATUS)
+                {
+                    weight *= defSpecializationWeight;
+                } else
+                {
+                    weight *= atkSpecializationWeight;
+                }
+                
                 
                 boolean isATMHMMT = false;
                 
@@ -1560,27 +1698,101 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                 }
                 
+                for(int i : suicideMoves)
+                {
+                    if(m.internalId == i)
+                    {
+                        weight *= suicideWeight;
+                    }
+                }
+                
                 if(m.category == MoveCategory.STATUS)
                 {
                     weight *= statusWeight;
+                    if(forceOffensiveMoveDiversity)
+                    {
+                        weight *= extraStatusWeightIfOn;
+                    }
                     
                     //do status specific weighting here
-                    
+                    if(doStatusTiers)
+                    {
+                        boolean foundMatch = false;
+                        for(int s : sTierStatusMoves)
+                        {
+                            if(m.internalId == s)
+                            {
+                                foundMatch = true;
+                                weight *= sTierStatusWeight;
+                            }
+                        }
+                        if(!foundMatch)
+                        {
+                            for(int a : aTierStatusMoves)
+                            {
+                                if(m.internalId == a)
+                                {
+                                    foundMatch = true;
+                                    weight *= aTierStatusWeight;
+                                }
+                            }
+                            if(!foundMatch)
+                            {
+                                for(int b : bTierStatusMoves)
+                                {
+                                    if(m.internalId == b)
+                                    {
+                                        foundMatch = true;
+                                        weight *= bTierStatusWeight;
+                                    }
+                                }
+                                if(!foundMatch)
+                                {
+                                    for(int c : cTierStatusMoves)
+                                    {
+                                        if(m.internalId == c)
+                                        {
+                                            foundMatch = true;
+                                            weight *= cTierStatusWeight;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                     
                 } else if(m.category == MoveCategory.PHYSICAL)
                 {
                     weight *= physicalWeight;
+                    if(!offensiveTypes.contains(m.type))
+                    {
+                        offensiveTypes.add(m.type);
+                    }
                     
                     //if move has chance to inflict status, give bonus
                     
                 } else if(m.category == MoveCategory.SPECIAL)
                 {
                     weight *= specialWeight;
+                    if(!offensiveTypes.contains(m.type))
+                    {
+                        offensiveTypes.add(m.type);
+                    }
 
                     //if move has chance to inflict status, give bonus
                     
                 }
                 
+                //weighting for pp with a cap on when the pp bonus falls off
+                if(enabledPPWeighting)
+                {
+                    float pp = m.pp;
+                    if(pp > ppBonusCap)
+                    {
+                        pp = ppBonusCap;
+                    }
+                    weight *= ppWeight * pp / expectedPP;
+                }
                 
                 float accuracy = (float)m.hitratio;
                 if(accuracy == 0)
@@ -1625,11 +1837,13 @@ public abstract class AbstractRomHandler implements RomHandler {
             {
                 Iterator<Entry<Move, Float>> i = moveWeightings.entrySet().iterator();
                 int moveid = 0;
-                Entry<Move, Float> temp;
+                Entry<Move, Float> temp = null;
                 float moveToSelect = this.random.nextFloat() * currentWeightTotal;
+                boolean deadi = false;
                 if(!i.hasNext())
                 {
                     System.err.println("iterator lacking next");
+                    deadi = true;
                 }
                 while(moveToSelect > 0.000001 && i.hasNext())
                 {
@@ -1637,9 +1851,25 @@ public abstract class AbstractRomHandler implements RomHandler {
                     moveToSelect -= temp.getValue().floatValue();
                     moveid = temp.getKey().internalId;
                 }
-                chosenMoves[currentmove] = moveid;
-                currentmove++;
-                i.remove();
+                if(forceOffensiveMoveDiversity && temp.getKey().category != MoveCategory.STATUS && !offensiveTypes.isEmpty() && offensiveTypes.contains(temp.getKey().type))
+                {
+                    offensiveTypes.remove(temp.getKey().type);
+                    chosenMoves[currentmove] = moveid;
+                    currentmove++;
+                    if(!deadi)
+                    {
+                        i.remove();
+                    }
+                }
+                else
+                {
+                    chosenMoves[currentmove] = moveid;
+                    currentmove++;
+                    if(!deadi)
+                    {
+                        i.remove();
+                    }
+                }
             }
             
             //temporary usage of just picking a random move
@@ -1667,9 +1897,9 @@ public abstract class AbstractRomHandler implements RomHandler {
     public List<Move> getDiverseMoves(Pokemon p, Map<Pokemon, List<MoveLearnt>> moveset, int level, List<Move> allMoves, boolean skipCyclicCheck) {
         List<Move> validMoves = new ArrayList<Move>();
 
-        int minimumLevelForTMs = 40;
-        int minimumLevelForHMs = 30;
-        int minimumLevelForMTs = 35;
+        int minimumLevelForTMs = 30;
+        int minimumLevelForHMs = 25;
+        int minimumLevelForMTs = 25;
         
         
         //System.out.println(p.name);
@@ -1785,9 +2015,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                     {
                         if(selectedChain.carryStats)
                         {
-                            levelToEvolveToCurrent = selectedChain.extraInfo;
-                           // System.out.println(selectedChain.from.name + " "+ p.name + " level to evolve: " + levelToEvolveToCurrent);
-                            previousLevel = levelToEvolveToCurrent;
+                            if(selectedChain.extraInfo <= level)
+                            {
+                                levelToEvolveToCurrent = selectedChain.extraInfo;
+                               // System.out.println(selectedChain.from.name + " "+ p.name + " level to evolve: " + levelToEvolveToCurrent);
+                                previousLevel = levelToEvolveToCurrent - 1;
+                            }
                         }
                         else
                         {
@@ -1885,7 +2118,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 for(MoveLearnt ml : learnset)
                                 {
                                     //and above the level required for evolving to that pokemon (if it evolves)
-                                    if(ml.level <= level && ml.level > levelToEvolveToCurrent && ml.move == m.internalId)
+                                    if(ml.level <= level && ml.level >= levelToEvolveToCurrent && ml.move == m.internalId)
                                     {
                                         validMoves.add(m);
                                     }
