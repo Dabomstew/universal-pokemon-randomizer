@@ -2204,13 +2204,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 
                 
-                //TODO: find a way to implement type coverage
-                //choose moves based on weighting here
-                
-                //status moves buff/debuff based on def to atk ratio?
-                
-                
-                
+                if(weight < 0)
+                {
+                    weight = 0;
+                }
                 
                 //record weightings to move
                 currentWeightTotal += weight;
