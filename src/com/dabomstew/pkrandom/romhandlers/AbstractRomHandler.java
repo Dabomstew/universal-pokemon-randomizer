@@ -1583,7 +1583,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             //
             //quiver dance, spikes, stealth rock, toxic, toxic spikes
             int[] sTierStatusMoves = new int[] {483, 191, 446, 92, 390};
-            float sTierStatusWeight = 8f;
+            float sTierStatusWeight = 3f;
             
             //paralysis and other inflictors / healing; harsh debuff or buff; may include weather
             //Acid Armor, Agility, Amnesia, Aqua Ring, attract, autotomize, barrier, bulk up, calm mind, captivate, charm, coil, cosmic power
@@ -1655,6 +1655,154 @@ public abstract class AbstractRomHandler implements RomHandler {
             float badGenderModifier = 0.001f;
             
             
+            //Insomnia, Vital Spirit
+            int[] sleepImmuneAbilities = new int[] {15, 72};
+            //Rest
+            int[] selfSleepInducingMoves = new int[] {156};
+            //Sleep Talk, Snore
+            int[] selfSleepingMoves = new int[] {214, 173};
+            //only one sleep self inducing move will have the modifier applied;
+            List<Move> ssiMoves = new ArrayList<Move>();
+            //later check if it has moves that rely on being able to put itself to sleep
+            boolean hasSSleepingMoves = false;
+            boolean hasBadSSAbility = false;
+            float chanceToEnforceSleep = .06f;
+            float badSSAbilityModifier = .05f;
+            boolean ssChanceSucceeded = false;
+            //instead guarentee one sleep inducing move gets picked
+            //float ssleepInducingMoveModifier = 500f;
+            float ssleepingMoveModifier = 10f;
+            float negSSleepingMoveModifier = .005f;
+            
+            float selfInducingFailedModifier = .45f;
+            
+            float ssBonusChance = defSpecializationWeight;
+            
+            //Bad Dreams
+            int[] sleepOffensiveAbilities = new int[] {123};
+            //Dark Void, Grass Whistle, Hypnosis, Lovely Kiss, Relic Song, Sing, Sleep Powder, Spore, Yawn
+            int[] sleepInducingMoves = new int[] {464, 320, 95, 142, 547, 47, 79, 147, 281};
+            //Dream Eater, Nightmare
+            int[] sleepingMoves = new int[] {138, 171};
+            List<Move> siMoves = new ArrayList<Move>();
+            //later check if it has moves or abilities that rely on being able to put a pokemon to sleep
+            boolean hasSleepingMoves = false;
+            boolean hasSleepingAbility = false;
+            float chanceToEnforceOSleep = .40f;
+            boolean osChanceSucceeded = false;
+            float positiveAbilityChanceBuff = 2.25f;
+            //instead guarentee one sleep inducing move gets picked
+            //float sleepingInducingMoveModifier = 500f;
+            float sleepingMoveModifier = 100f;
+            float negSleepingMoveModifier = .05f;
+            
+            float offensiveSleepFailedmodifier = .95f;
+
+            float sBonusChance = defSpecializationWeight;
+            
+            for(int a : sleepImmuneAbilities)
+            {
+                if(p.ability == a)
+                {
+                    hasBadSSAbility = true;
+                }
+            }
+            for(int a : sleepOffensiveAbilities)
+            {
+                if(p.ability == a)
+                {
+                    hasSleepingAbility = true;
+                }
+            }
+            
+            //Check sleeping moves
+            for(Move m : moves)
+            {
+                for(int ssim : selfSleepInducingMoves)
+                {
+                    if(ssim == m.internalId)
+                    {
+                        ssiMoves.add(m);
+                    }
+                }
+                for(int ssm : selfSleepingMoves)
+                {
+                    if(ssm == m.internalId)
+                    {
+                        hasSSleepingMoves = true;
+                    }
+                }
+                for(int sim : sleepInducingMoves)
+                {
+                    if(sim == m.internalId)
+                    {
+                        siMoves.add(m);
+                    }
+                }
+                for(int sm : sleepingMoves)
+                {
+                    if(sm == m.internalId)
+                    {
+                        hasSleepingMoves = true;
+                    }
+                }
+            }
+            
+            //run a check to force a self induced sleeping move
+            if(hasSSleepingMoves && !ssiMoves.isEmpty())
+            {
+                if(hasBadSSAbility)
+                {
+                    chanceToEnforceSleep *= badSSAbilityModifier;
+                }
+                chanceToEnforceSleep *= ssBonusChance;
+                if(this.random.nextFloat() <= chanceToEnforceSleep)
+                {
+                    ssChanceSucceeded = true;
+                    int index = this.random.nextInt(ssiMoves.size());
+                    Move ssMoveForced = ssiMoves.get(index);
+                    moves.remove(ssMoveForced);
+                    chosenMoves[currentmove] = ssMoveForced.internalId;
+                    currentmove++;
+                }
+            }
+            
+          //run a check to force an induced sleeping move
+            if((hasSleepingMoves || hasSleepingAbility) && !siMoves.isEmpty())
+            {
+                if(hasSleepingAbility)
+                {
+                    chanceToEnforceOSleep *= positiveAbilityChanceBuff;
+                }
+                chanceToEnforceOSleep *= sBonusChance;
+                if(this.random.nextFloat() <= chanceToEnforceOSleep)
+                {
+                    osChanceSucceeded = true;
+                    int index = this.random.nextInt(siMoves.size());
+                    Move sMoveForced = siMoves.get(index);
+                    moves.remove(sMoveForced);
+                    chosenMoves[currentmove] = sMoveForced.internalId;
+                    currentmove++;
+                }
+            }
+            
+            
+            
+            //truant equivalent abilities
+            //truant
+            int[] truantLikeAbilities = new int[] {54};
+            //moves with a charge turn (break with truant)
+            //Bounce, Dig, Dive, Fly, Freeze Shock, Ice Burn, Razor Wind, Shadow Force, Skull Bash, Sky Attack, Sky Drop, Solar Beam
+            int[] chargeTurnMoves = new int[] {340, 91, 291, 19, 553, 554, 13, 467, 130, 143, 507, 76};
+            float chargeMoveModifier = .60f;
+            float chargeMoveTruantModifier = .01f;
+            //moves that require recharging (synergized with truant)
+            //Blast Burn, Frenzy Plant, Giga Impact, Hydro Cannon, Hyper Beam, Roar of Time, Rock Wrecker
+            int[] rechargeTurnMoves = new int[] {307, 338, 416, 308, 63, 459, 439};
+            float rechargeMoveModifier = .65f;
+            float rechargeMoveTruantModifier = 1.1f;
+            
+            
             //modify weights based on pokemon here
             //------------------------------------------
             
@@ -1673,6 +1821,90 @@ public abstract class AbstractRomHandler implements RomHandler {
                 //do weighting here
                 //----------------------------------------------------
                 
+                boolean isTruant = false;
+                for(int t : truantLikeAbilities)
+                {
+                    if(p.ability == t)
+                    {
+                        isTruant = true;
+                    }
+                }
+                for(int ctm : chargeTurnMoves)
+                {
+                    if(ctm == m.internalId)
+                    {
+                        if(isTruant)
+                        {
+                            weight *= chargeMoveTruantModifier;
+                        }
+                        else
+                        {
+                            weight *= chargeMoveModifier;
+                        }
+                    }
+                }
+                for(int rm : rechargeTurnMoves)
+                {
+                    if(rm == m.internalId)
+                    {
+                        if(isTruant)
+                        {
+                            weight *= rechargeMoveTruantModifier;
+                        }
+                        else
+                        {
+                            weight *= rechargeMoveModifier;
+                        }
+                    }
+                }
+                
+                //buff or nerf self sleeping moves depending on if the pokemon got forced a move to induce sleep on self
+                for(int ssm : selfSleepingMoves)
+                {
+                    if(ssm == m.internalId)
+                    {
+                        if(ssChanceSucceeded)
+                        {
+                            weight *= ssleepingMoveModifier;
+                        }
+                        else
+                        {
+                            weight *= negSSleepingMoveModifier;
+                        }
+                    }
+                }
+                for( int ssim : selfSleepInducingMoves)
+                {
+                    if(ssim == m.internalId)
+                    {
+                        weight *= selfInducingFailedModifier;
+                    }
+                }
+                
+                //buff or nerf moves used on sleeping enemy pokemon depending on if the trainer's pokemon got forced a move to induce sleep
+                for(int sm : sleepingMoves)
+                {
+                    if(sm == m.internalId)
+                    {
+                        if(osChanceSucceeded)
+                        {
+                            weight *= sleepingMoveModifier;
+                        }
+                        else
+                        {
+                            weight *= negSleepingMoveModifier;
+                        }
+                    }
+                }
+                for( int sim : sleepInducingMoves)
+                {
+                    if(sim == m.internalId)
+                    {
+                        weight *= offensiveSleepFailedmodifier;
+                    }
+                }
+                
+                //nerf or buff gender based moves depending on whether the pokemon can have a gender or not
                 for(int gm : genderBasedMoves)
                 {
                     if(m.internalId == gm)
@@ -1688,6 +1920,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                 }
                 
+                //buff or nerf weather chance depending on abilities and typing
                 for(int w : weatherMoves)
                 {
                     if(m.internalId == w)
@@ -1998,7 +2231,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     System.err.println("iterator lacking next");
                     deadi = true;
                 }
-                while(moveToSelect > 0.000001 && i.hasNext())
+                while(moveToSelect > 0.000000001 && i.hasNext())
                 {
                     temp = (Entry<Move, Float>) i.next();
                     moveToSelect -= temp.getValue().floatValue();
