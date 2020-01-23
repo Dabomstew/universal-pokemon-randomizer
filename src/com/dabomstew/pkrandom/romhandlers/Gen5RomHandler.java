@@ -54,6 +54,7 @@ import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.EvolutionType;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.FieldTM;
+import com.dabomstew.pkrandom.pokemon.HoldItem;
 import com.dabomstew.pkrandom.pokemon.IngameTrade;
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.ItemLocation;
@@ -62,6 +63,7 @@ import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
+import com.dabomstew.pkrandom.pokemon.Type;
 
 import compressors.DSDecmp;
 import pptxt.PPTxtHandler;
@@ -2408,4 +2410,308 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             throw new RandomizerIOException(e);
         }
     }
+
+    @Override
+    public List<Type> getVanillaTrainerTyping(Trainer trainer) {
+        List<Type> typing = new ArrayList<Type>();
+
+        //types added multiple times for weighting
+        if((getROMCode().contains("IRA") || getROMCode().contains("IRB")) && trainer.tag != null)
+        {
+            if(trainer.tag.equals("GYM1")) { //Chilan
+                typing.add(Type.GRASS);
+                typing.add(Type.GRASS);
+                typing.add(Type.NORMAL);
+            } else if(trainer.tag.equals("GYM9")) { //Chili
+                typing.add(Type.FIRE);
+                typing.add(Type.FIRE);
+                typing.add(Type.NORMAL);
+            }else if(trainer.tag.equals("GYM10")) { //Cress
+                typing.add(Type.WATER);
+                typing.add(Type.WATER);
+                typing.add(Type.NORMAL);
+            }else if(trainer.tag.equals("GYM2")) {
+                typing.add(Type.NORMAL);
+            } else if(trainer.tag.equals("GYM3")) {
+                typing.add(Type.BUG);
+            } else if(trainer.tag.equals("GYM4")) {
+                typing.add(Type.ELECTRIC);
+            } else if(trainer.tag.equals("GYM5")) {
+                typing.add(Type.GROUND);
+            } else if(trainer.tag.equals("GYM6")) {
+                typing.add(Type.FLYING);
+            } else if(trainer.tag.equals("GYM7")) {
+                typing.add(Type.ICE);
+            } else if(trainer.tag.equals("GYM8")) {
+                typing.add(Type.DRAGON);
+            } else if(trainer.tag.contains("ELITE1")) {
+                typing.add(Type.GHOST);
+            } else if(trainer.tag.contains("ELITE2")) {
+                typing.add(Type.FIGHTING);
+            } else if(trainer.tag.contains("ELITE3")) {
+                typing.add(Type.DARK);
+            } else if(trainer.tag.contains("ELITE4")) {
+                typing.add(Type.PSYCHIC);
+            }
+        } else if(trainer.tag != null) //if is B2W2
+        {
+            if(trainer.tag.equals("GYM1")) {
+                typing.add(Type.NORMAL);
+            } else if(trainer.tag.equals("GYM2")) {
+                typing.add(Type.POISON);
+            } else if(trainer.tag.equals("GYM3")) {
+                typing.add(Type.BUG);
+            } else if(trainer.tag.equals("GYM4")) {
+                typing.add(Type.ELECTRIC);
+            } else if(trainer.tag.equals("GYM5")) {
+                typing.add(Type.GROUND);
+            } else if(trainer.tag.equals("GYM6")) {
+                typing.add(Type.FLYING);
+            } else if(trainer.tag.equals("GYM7")) {
+                typing.add(Type.DRAGON);
+            } else if(trainer.tag.equals("GYM8")) {
+                typing.add(Type.WATER);
+            } else if(trainer.tag.equals("ELITE1")) {
+                typing.add(Type.GHOST);
+            } else if(trainer.tag.equals("ELITE2")) {
+                typing.add(Type.FIGHTING);
+            } else if(trainer.tag.equals("ELITE3")) {
+                typing.add(Type.DARK);
+            } else if(trainer.tag.equals("ELITE4")) {
+                typing.add(Type.PSYCHIC);
+            } 
+        }
+        
+        return typing;
+    }
+
+    @Override
+    public int getRandomHoldItem(TrainerPokemon tpk) {
+        //Sitrus Berry, Bright Powder, Quick Claw, Zoom lens, Destiny Knot, Razor Fang, Red Card, Lum Berry
+        int[] competitiveHeldItemIndexesInitArray = new int[] {158, 213, 217, 276, 280, 327, 542, 157};
+        List<Integer> competitiveHeldItemIndexes = new ArrayList<Integer>();
+        for(int i : competitiveHeldItemIndexesInitArray)
+        {
+            competitiveHeldItemIndexes.add(new Integer(i));
+        }
+        List<HoldItem> competitiveHeldItems = new ArrayList<HoldItem>();
+        if((tpk.pokemon.attack + tpk.pokemon.spatk) > (tpk.pokemon.defense + tpk.pokemon.spdef))
+        {
+            //offensive
+            competitiveHeldItemIndexes.add(new Integer(230)); //Focus band
+            competitiveHeldItemIndexes.add(new Integer(275)); //Focus Sash
+            competitiveHeldItemIndexes.add(new Integer(232)); //scope lens
+            competitiveHeldItemIndexes.add(new Integer(326)); //Razor Claw
+            competitiveHeldItemIndexes.add(new Integer(270)); //Life Orb
+            competitiveHeldItemIndexes.add(new Integer(268)); //Expert Belt
+            competitiveHeldItemIndexes.add(new Integer(221)); //King's Rock
+            competitiveHeldItemIndexes.add(new Integer(253)); //Shell Bell
+            competitiveHeldItemIndexes.add(new Integer(277)); //Metronome
+            competitiveHeldItemIndexes.add(new Integer(547)); //Eject Button
+            if(tpk.pokemon.attack > tpk.pokemon.spatk)
+            {
+                //phy
+                competitiveHeldItemIndexes.add(new Integer(220)); //choice band
+                competitiveHeldItemIndexes.add(new Integer(266)); //muscle band
+                if(tpk.pokemon.primaryType != Type.ELECTRIC && tpk.pokemon.secondaryType != Type.ELECTRIC)
+                {
+                    competitiveHeldItemIndexes.add(new Integer(266)); //cell battery (hit by electric type, tpye matchups may be randomized?)
+                }
+            }
+            else
+            {
+                //spec
+                competitiveHeldItemIndexes.add(new Integer(297)); //choice specs
+                competitiveHeldItemIndexes.add(new Integer(267)); //wise glasses
+                if(tpk.pokemon.primaryType != Type.WATER && tpk.pokemon.secondaryType != Type.WATER)
+                {
+                    competitiveHeldItemIndexes.add(new Integer(545)); //absorb bulb (hit by water type, type matchups may be randomized?)
+                }
+            }
+            if(tpk.pokemon.attack > tpk.pokemon.speed || tpk.pokemon.spatk > tpk.pokemon.speed)
+            {
+                //slower than it's attack
+                competitiveHeldItemIndexes.add(new Integer(287)); //choice scarf
+            }
+            //if not flying or has levitate
+            if(tpk.pokemon.primaryType != Type.FLYING && tpk.pokemon.secondaryType != Type.FLYING && tpk.ability != 26)
+            {
+                competitiveHeldItemIndexes.add(new Integer(541)); //air balloon
+            }
+        }
+        else
+        {
+            //defensive
+            competitiveHeldItemIndexes.add(new Integer(200)); //Leftovers
+            competitiveHeldItemIndexes.add(new Integer(539)); //Float Stone
+            competitiveHeldItemIndexes.add(new Integer(540)); //Rocky Helmet
+        }
+        if(tpk.pokemon.spatk > tpk.pokemon.attack)
+        {
+            competitiveHeldItemIndexes.add(new Integer(288)); //Sticky Barb
+        }
+        if(tpk.pokemon.evosFromDepth() > 0)
+        {
+            //if can evolve
+            competitiveHeldItemIndexes.add(new Integer(538)); //Eviolite
+        }
+        //rain dance
+        if(tpHasMove(tpk, 240))
+        {
+            competitiveHeldItemIndexes.add(new Integer(285)); //Damp Rock
+        }
+        //sunny day
+        if(tpHasMove(tpk, 241))
+        {
+            competitiveHeldItemIndexes.add(new Integer(284)); //Heat Rock
+        }
+        //sandstorm
+        if(tpHasMove(tpk, 201))
+        {
+            competitiveHeldItemIndexes.add(new Integer(283)); //Smooth Rock
+        }
+        //hail
+        if(tpHasMove(tpk, 258))
+        {
+            competitiveHeldItemIndexes.add(new Integer(282)); //Icy Rock
+        }
+        
+        //has fling, trick, switcheroo
+        if(tpHasMove(tpk, 374, 271, 415))
+        {
+            competitiveHeldItemIndexes.add(new Integer(278)); //Iron ball
+            competitiveHeldItemIndexes.add(new Integer(543)); //Ring Target
+        }
+        
+        //has bounce, dig, dive, fly, freeze shock, ice burn, razorwind, shadow force, skull bash, sky attack, sky drop, solar beam
+        if(tpHasMove(tpk, 340, 91, 291, 19, 553, 554, 13, 467, 130, 143, 507, 76))
+        {
+            competitiveHeldItemIndexes.add(new Integer(271)); //Power Herb
+        }
+        
+        //bind, clamp, fire spin, magma storm, sand tomb, whirlpool, wrap
+        if(tpHasMove(tpk, 20, 128, 83, 463, 328, 250, 35))
+        {
+            competitiveHeldItemIndexes.add(new Integer(286)); //Grip Claw
+            competitiveHeldItemIndexes.add(new Integer(544)); //Binding Band
+        }
+        
+        //ingrain, aqua ring, absorb, drain punch, dream eater, giga drain, horn leech, leech life, leech seed, mega drain
+        if(tpHasMove(tpk, 275, 392, 71, 409, 138, 202, 532, 141, 73, 72))
+        {
+            competitiveHeldItemIndexes.add(new Integer(296)); //Big Root
+        }
+        
+        //light screen, reflect
+        if(tpHasMove(tpk, 113, 115))
+        {
+            competitiveHeldItemIndexes.add(new Integer(269)); //Light Clay
+        }
+        
+        for(Integer i : competitiveHeldItemIndexes)
+        {
+            competitiveHeldItems.add(new HoldItem(i.intValue()));
+        }
+        
+        List<HoldItem> restrictedHeldItems = new ArrayList<HoldItem>();
+        
+        restrictedHeldItems.add(new HoldItem(241, Type.FIGHTING)); //Blackbelt
+        restrictedHeldItems.add(new HoldItem(240, Type.DARK)); //Blackglasses
+        restrictedHeldItems.add(new HoldItem(249, Type.FIRE)); //Charcoal
+        restrictedHeldItems.add(new HoldItem(250, Type.DRAGON)); //Dragon Fang
+        restrictedHeldItems.add(new HoldItem(238, Type.ROCK)); //Hard Stone
+        restrictedHeldItems.add(new HoldItem(242, Type.ELECTRIC)); //Magnet
+        restrictedHeldItems.add(new HoldItem(233, Type.STEEL)); //Metal Coat
+        restrictedHeldItems.add(new HoldItem(239, Type.GRASS)); //Miracle Seed
+        restrictedHeldItems.add(new HoldItem(243, Type.WATER)); //Mystic Water
+        restrictedHeldItems.add(new HoldItem(246, Type.ICE)); //Nevermeltice
+        restrictedHeldItems.add(new HoldItem(251, Type.NORMAL)); //Silk Scarf
+        restrictedHeldItems.add(new HoldItem(245, Type.POISON)); //Poison Barb
+        restrictedHeldItems.add(new HoldItem(244, Type.FLYING)); //Sharp Beak
+        restrictedHeldItems.add(new HoldItem(222, Type.BUG)); //Silver Powder
+        restrictedHeldItems.add(new HoldItem(247, Type.GROUND)); //Soft Sand
+        restrictedHeldItems.add(new HoldItem(247, Type.GHOST)); //Spell Tag
+        restrictedHeldItems.add(new HoldItem(248, Type.PSYCHIC)); //Twisted Spoon
+        restrictedHeldItems.add(new HoldItem(318, Type.GRASS)); //Rose Incense
+        restrictedHeldItems.add(new HoldItem(317, Type.WATER)); //Wave Incense
+        restrictedHeldItems.add(new HoldItem(314, Type.ROCK)); //Odd Incense
+        restrictedHeldItems.add(new HoldItem(281, Type.POISON)); //Black Sludge
+        restrictedHeldItems.add(new HoldItem(272, Type.POISON)); //Toxic Orb
+        restrictedHeldItems.add(new HoldItem(272, Type.STEEL)); //Toxic Orb
+        restrictedHeldItems.add(new HoldItem(273, Type.FIRE)); //Flame Orb
+        
+        //plates
+        restrictedHeldItems.add(new HoldItem(298, Type.FIRE));
+        restrictedHeldItems.add(new HoldItem(299, Type.WATER));
+        restrictedHeldItems.add(new HoldItem(300, Type.ELECTRIC));
+        restrictedHeldItems.add(new HoldItem(301, Type.GRASS));
+        restrictedHeldItems.add(new HoldItem(302, Type.ICE));
+        restrictedHeldItems.add(new HoldItem(303, Type.FIGHTING));
+        restrictedHeldItems.add(new HoldItem(304, Type.POISON));
+        restrictedHeldItems.add(new HoldItem(305, Type.GROUND));
+        restrictedHeldItems.add(new HoldItem(306, Type.FLYING));
+        restrictedHeldItems.add(new HoldItem(307, Type.PSYCHIC));
+        restrictedHeldItems.add(new HoldItem(308, Type.BUG));
+        restrictedHeldItems.add(new HoldItem(309, Type.ROCK));
+        restrictedHeldItems.add(new HoldItem(310, Type.GHOST));
+        restrictedHeldItems.add(new HoldItem(311, Type.DRAGON));
+        restrictedHeldItems.add(new HoldItem(312, Type.DARK));
+        restrictedHeldItems.add(new HoldItem(313, Type.STEEL));
+
+        //gems
+        restrictedHeldItems.add(new HoldItem(548, Type.FIRE));
+        restrictedHeldItems.add(new HoldItem(549, Type.WATER));
+        restrictedHeldItems.add(new HoldItem(550, Type.ELECTRIC));
+        restrictedHeldItems.add(new HoldItem(551, Type.GRASS));
+        restrictedHeldItems.add(new HoldItem(552, Type.ICE));
+        restrictedHeldItems.add(new HoldItem(553, Type.FIGHTING));
+        restrictedHeldItems.add(new HoldItem(554, Type.POISON));
+        restrictedHeldItems.add(new HoldItem(555, Type.GROUND));
+        restrictedHeldItems.add(new HoldItem(556, Type.FLYING));
+        restrictedHeldItems.add(new HoldItem(557, Type.PSYCHIC));
+        restrictedHeldItems.add(new HoldItem(558, Type.BUG));
+        restrictedHeldItems.add(new HoldItem(559, Type.ROCK));
+        restrictedHeldItems.add(new HoldItem(560, Type.GHOST));
+        restrictedHeldItems.add(new HoldItem(561, Type.DRAGON));
+        restrictedHeldItems.add(new HoldItem(562, Type.DARK));
+        restrictedHeldItems.add(new HoldItem(563, Type.STEEL));
+        restrictedHeldItems.add(new HoldItem(564, Type.NORMAL));
+        
+        restrictedHeldItems.add(new HoldItem(236, 25)); //Light Ball, Pikachu
+        restrictedHeldItems.add(new HoldItem(256, 113)); //Lucky Punch, Chansey
+        restrictedHeldItems.add(new HoldItem(257, 132)); //Metal Powder, Ditto
+        restrictedHeldItems.add(new HoldItem(274, 132)); //Quick Powder, Ditto
+        restrictedHeldItems.add(new HoldItem(259, 83)); //Leek, Farfetchd
+        restrictedHeldItems.add(new HoldItem(258, 104)); //Thick Club, Cubone
+        restrictedHeldItems.add(new HoldItem(258, 105)); //Thick Club, Marowak
+        restrictedHeldItems.add(new HoldItem(225, 380)); //Soul Dew, Latias
+        restrictedHeldItems.add(new HoldItem(225, 381)); //Soul Dew, Latios
+        restrictedHeldItems.add(new HoldItem(135, 483)); //Adamant Orb, Dialgia
+        restrictedHeldItems.add(new HoldItem(136, 484)); //Lustrous Orb, Palkia
+        
+        if(getROMCode().contains("IPK") || getROMCode().contains("IPG") || getROMCode().contains("CPU") || getROMCode().equals("PUW1"))
+        {
+
+            restrictedHeldItems.add(new HoldItem(112, 487)); //Griseous Orb, Giratina
+        }
+        
+        for(HoldItem hi : restrictedHeldItems)
+        {
+            if(hi.restrictedType != null && (tpk.pokemon.primaryType == hi.restrictedType || tpk.pokemon.secondaryType == hi.restrictedType))
+            {
+                if((hi.restrictedpokemon != 0 && tpk.pokemon.number == hi.restrictedpokemon) || hi.restrictedpokemon == 0)
+                {
+                    competitiveHeldItems.add(hi);
+                }
+            }
+            else if(hi.restrictedpokemon != 0 && tpk.pokemon.number == hi.restrictedpokemon)
+            {
+                competitiveHeldItems.add(hi);
+            }
+        }
+        
+        int item = competitiveHeldItems.get(this.random.nextInt(competitiveHeldItems.size())).itemIndex;
+        return item;
+    }
+    
 }

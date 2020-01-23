@@ -1332,7 +1332,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void retainTypeTrainerPokes(boolean usePowerLevels, boolean noLegendaries,
-            boolean noEarlyWonderGuard, int levelModifier, boolean useSameEvoStage) {
+            boolean noEarlyWonderGuard, int levelModifier, boolean useSameEvoStage, boolean useStrictTyping) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
 
@@ -1352,11 +1352,25 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (t.tag != null && t.tag.equals("IRIVAL")) {
                 continue; // skip
             }
+            List<Type> trainerStrictType = null;
+            //if strict typing is enabled check if trainer has an already determined typing
+            if(useStrictTyping)
+            {
+                trainerStrictType = getVanillaTrainerTyping(t);
+            }
             for (TrainerPokemon tp : t.pokemon) {
                 boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
                 try 
                 {
-                    tp.pokemon = pickReplacementRetainedType(tp.pokemon, usePowerLevels, noLegendaries, wgAllowed, useSameEvoStage);
+                    if(trainerStrictType == null || trainerStrictType.isEmpty())
+                    {
+                        tp.pokemon = pickReplacementRetainedType(tp.pokemon, usePowerLevels, noLegendaries, wgAllowed, useSameEvoStage);
+                    }
+                    else
+                    {
+                        Type chosenType = trainerStrictType.get(this.random.nextInt(trainerStrictType.size()));
+                        tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, chosenType, noLegendaries, wgAllowed, useSameEvoStage);
+                    }
                 } catch (Exception e)
                 {
                     System.err.println(e.getMessage());
@@ -1400,6 +1414,41 @@ public abstract class AbstractRomHandler implements RomHandler {
         this.setTrainers(currentTrainers);
     }
 
+    @Override
+    public void giveImportantTrainersHoldItems() {
+
+        List<Trainer> currentTrainers = this.getTrainers();
+
+        // randomize the order trainers are randomized in.
+        // Leads to less predictable results for various modifiers.
+        // Need to keep the original ordering around for saving though.
+        List<Trainer> scrambledTrainers = new ArrayList<Trainer>(currentTrainers);
+        Collections.shuffle(scrambledTrainers, this.random);
+        
+        //TODO: add an option for higher item density (every uber, elite 4, champion has 6 items; gym leaders get 2 sitrus berries except GYM1 gets an oran and GYM2 gets an oran and a sitrus)[add isGymLeader() function]
+        for (Trainer t : scrambledTrainers) {
+            if(t.getAmountOfHoldItems() > t.pokemon.size())
+            {
+                t.setAmountOfHoldItems(t.pokemon.size());
+            }
+            if(t.getAmountOfHoldItems() > 0)
+            {
+                List<TrainerPokemon> tempList = new ArrayList<TrainerPokemon>(t.pokemon);
+                for(TrainerPokemon tp : tempList) {
+                    //wipe items on pokemon trainers that will have their pokemon held items re-randomized
+                    tp.heldItem = 0;
+                }
+                for(int i = 0; i < t.getAmountOfHoldItems(); i++) {
+                    int pokemonIndex = this.random.nextInt(tempList.size());
+                    tempList.get(pokemonIndex).heldItem = this.getRandomHoldItem(tempList.get(pokemonIndex));
+                    tempList.remove(pokemonIndex);
+                }
+            }
+            
+        }
+
+        this.setTrainers(currentTrainers);
+    }
     
     @Override
     public void giveImportantTrainersAFullTeam() {
@@ -1413,8 +1462,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (Trainer t : scrambledTrainers) {
             if(t.giveFullTeam && this.generationOfPokemon() > 2)
             {
-                //TODO: mark trainers as important and ensure they have the space for new pokemon
-                System.out.println("Important Trainer Found: " + t.fullDisplayName + " " +t.offset);
+                //System.out.println("Important Trainer Found: " + t.fullDisplayName + " " +t.offset);
                 if(t.doubleBattle)
                 {
                     System.out.println("is double battle");
@@ -2233,7 +2281,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 boolean deadi = false;
                 if(!i.hasNext())
                 {
-                    System.err.println("iterator lacking next");
+                    System.err.println("iterator lacking next; Pokemon has run out of moves.");
                     deadi = true;
                 }
                 while(moveToSelect > 0.000000001 && i.hasNext())
@@ -2318,7 +2366,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Integer> moveTutorsLearned = new ArrayList<Integer>();
         boolean[] moveTutorCompat = getMoveTutorCompatibility().get(p);
         //only have move tutors after a certain pokemon level
-        if(level >= minimumLevelForMTs)
+        if(hasMoveTutors() && level >= minimumLevelForMTs)
         {
             for(int i = 0; i < moveTutorCompat.length; i++)
             {
@@ -5351,6 +5399,30 @@ public abstract class AbstractRomHandler implements RomHandler {
         return canPick.get(this.random.nextInt(canPick.size()));
     }
 
+    @Override
+    public boolean tpHasMove(TrainerPokemon tp, int move)
+    {
+        boolean hasmove = false;
+        if(tp.move1 == move || tp.move2 == move || tp.move3 == move || tp.move4 == move) {
+            hasmove = true;
+        }
+        return hasmove;
+    }
+    
+    @Override
+    public boolean tpHasMove(TrainerPokemon tp, int... move)
+    {
+        boolean hasmove = false;
+        for(int i : move)
+        {
+            if(!hasmove)
+            {
+                hasmove = tpHasMove(tp, i);
+            }
+        }
+        return hasmove;
+    }
+    
     /* Helper methods used by subclasses and/or this class */
 
     protected void checkPokemonRestrictions() {

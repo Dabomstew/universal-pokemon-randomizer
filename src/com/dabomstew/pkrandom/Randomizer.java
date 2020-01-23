@@ -321,10 +321,10 @@ public class Randomizer {
                     settings.isTrainersMatchTypingDistribution(), settings.isTrainersBlockLegendaries(),
                     settings.isTrainersBlockEarlyWonderGuard(),
                     settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, settings.isTrainersUseSameEvoStages());
-        } else if (settings.getTrainersMod() == Settings.TrainersMod.RETAIN_TYPE) {
+        } else if (settings.getTrainersMod() == Settings.TrainersMod.RETAIN_TYPE || settings.getTrainersMod() == Settings.TrainersMod.RETAIN_TYPE_STRICT) {
             romHandler.retainTypeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(), settings.isTrainersBlockLegendaries(),
                     settings.isTrainersBlockEarlyWonderGuard(),
-                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, settings.isTrainersUseSameEvoStages());
+                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, settings.isTrainersUseSameEvoStages(), settings.getTrainersMod() == Settings.TrainersMod.RETAIN_TYPE_STRICT);
         }
 
         if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED
@@ -514,7 +514,12 @@ public class Randomizer {
             romHandler.randomizeTrainerMoves(settings.isTrainersTryMoveDiversity());
         }
         
-        maybeLogTrainerChanges(log, romHandler, settings.isLogTrainerMoves());
+        if(settings.isGiveElitesHoldItems())
+        {
+            romHandler.giveImportantTrainersHoldItems();
+        }
+        
+        maybeLogTrainerChanges(log, romHandler);
 
         // In-game trades
         List<IngameTrade> oldTrades = romHandler.getIngameTrades();
@@ -798,16 +803,16 @@ public class Randomizer {
         }
     }
 
-    private void maybeLogTrainerChanges(final PrintStream log, final RomHandler romHandler, boolean logMoves) {
+    private void maybeLogTrainerChanges(final PrintStream log, final RomHandler romHandler) {
         if (settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED
                 && !settings.isRivalCarriesStarterThroughout()) {
             log.println("Trainers: Unchanged." + NEWLINE);
         } else {
-            if(logMoves && romHandler.generationOfPokemon() > 2)
+            if(romHandler.generationOfPokemon() > 2)
             {
                 if(settings.isTrainersTryMoveDiversity())
                 {
-                    log.println("--Trainers Pokemon and Moves-- (Try Move Diversity Enabled[InDev])");
+                    log.println("--Trainers Pokemon and Moves-- (Move Diversity Enabled)");
                 }
                 else
                 {
@@ -837,15 +842,16 @@ public class Randomizer {
                 //log.print("poketype: " + t.poketype);
                 boolean first = true;
                 for (TrainerPokemon tpk : t.pokemon) {
-                    if (!first && !logMoves) {
+                    if (!first) {
                         log.print(", ");
                     }
-                    if(logMoves)
-                    {
-                        log.print("\n       ");
-                    }
+                    log.print("\n       ");
                     log.print(tpk.pokemon.name + " Lv" + tpk.level);
-                    if(logMoves && romHandler.generationOfPokemon() > 2)
+                    if(tpk.heldItem != 0)
+                    {
+                        log.print(" | Held Item: " + romHandler.getItemNames()[tpk.heldItem] + " |");
+                    }
+                    if(romHandler.generationOfPokemon() > 2)
                     {
                         String moves[] = new String[4];
                         moves[0] = "null";

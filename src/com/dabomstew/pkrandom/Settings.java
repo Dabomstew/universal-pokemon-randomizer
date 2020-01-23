@@ -136,7 +136,7 @@ public class Settings {
     private int movesetsGoodDamagingPercent = 0;
 
     public enum TrainersMod {
-        UNCHANGED, RANDOM, TYPE_THEMED, RETAIN_TYPE
+        UNCHANGED, RANDOM, TYPE_THEMED, RETAIN_TYPE, RETAIN_TYPE_STRICT
     }
 
     private TrainersMod trainersMod = TrainersMod.UNCHANGED;
@@ -153,8 +153,8 @@ public class Settings {
     private int trainersLevelModifier = 0; // -50 ~ 50
     private boolean trainersUseSameEvoStages;
     private boolean trainersTryMoveDiversity;
-    private boolean logTrainerMoves;
     private boolean giveImportantTrainersAFullTeam;
+    private boolean giveElitesHoldItems;
 
     public enum WildPokemonMod {
         UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING
@@ -396,8 +396,9 @@ public class Settings {
         // @ 36 base stats range slider value
         out.write(baseStatRange);
 
+        //TODO put something in 37[4]
         // 37 trainer pokemon extended settings and misc? (couldn't fit this in existing entries)
-        out.write(makeByteSelected(trainersUseSameEvoStages, shouldPatchSpecialSplit, wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_EVO_STAGE_AND_TYPING, trainersMod == TrainersMod.RETAIN_TYPE, logTrainerMoves, giveImportantTrainersAFullTeam));
+        out.write(makeByteSelected(trainersUseSameEvoStages, shouldPatchSpecialSplit, wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_EVO_STAGE_AND_TYPING, trainersMod == TrainersMod.RETAIN_TYPE, giveElitesHoldItems, giveImportantTrainersAFullTeam, trainersMod == TrainersMod.RETAIN_TYPE_STRICT));
         
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -483,7 +484,8 @@ public class Settings {
         settings.setTrainersMod(getEnum(TrainersMod.class, restoreState(data[13], 5), // UNCHANGED
                 restoreState(data[13], 1), // RANDOM
                 restoreState(data[13], 3), // TYPE_THEMED
-                restoreState(data[37], 3) //RETAIN_TYPE
+                restoreState(data[37], 3), // RETAIN_TYPE
+                restoreState(data[37], 6) // RETAIN_TYPE_STRICT
         ));
         settings.setTrainersUsePokemonOfSimilarStrength(restoreState(data[13], 0));
         settings.setRivalCarriesStarterThroughout(restoreState(data[13], 2));
@@ -498,9 +500,9 @@ public class Settings {
         
         settings.setTrainersTryMoveDiversity(restoreState(data[25], 5));
         
-        settings.setLogTrainerMoves(restoreState(data[37], 4));
-        
         settings.setGiveImportantTrainersAFullTeam(restoreState(data[37], 5));
+        
+        settings.setGiveElitesHoldItems(restoreState(data[37], 4));
         
         settings.setWildPokemonMod(restoreEnum(WildPokemonMod.class, data[15], 6, // UNCHANGED
                 5, // RANDOM
@@ -1287,15 +1289,6 @@ public class Settings {
         this.trainersTryMoveDiversity = trainersTryMoveDiversity;
         return this;
     }
-    
-    public boolean isLogTrainerMoves() {
-        return logTrainerMoves;
-    }
-    
-    public Settings setLogTrainerMoves(boolean logTrainerMoves) {
-        this.logTrainerMoves = logTrainerMoves;
-        return this;
-    }
 
     public boolean isGiveImportantTrainersAFullTeam() {
         return giveImportantTrainersAFullTeam;
@@ -1303,6 +1296,15 @@ public class Settings {
     
     public Settings setGiveImportantTrainersAFullTeam(boolean giveImportantTrainersAFullTeam) {
         this.giveImportantTrainersAFullTeam = giveImportantTrainersAFullTeam;
+        return this;
+    }
+    
+    public boolean isGiveElitesHoldItems() {
+        return giveElitesHoldItems;
+    }
+    
+    public Settings setGiveElitesHoldItems(boolean giveElitesHoldItems) {
+        this.giveElitesHoldItems = giveElitesHoldItems;
         return this;
     }
     

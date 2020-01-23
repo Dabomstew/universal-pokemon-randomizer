@@ -193,13 +193,20 @@ public interface RomHandler {
             boolean noEarlyWonderGuard, int levelModifier, boolean useSameEvoStage);
     
     public void retainTypeTrainerPokes(boolean usePowerLevels, boolean noLegendaries,
-            boolean noEarlyWonderGuard, int levelModifier, boolean useSameEvoStage);
+            boolean noEarlyWonderGuard, int levelModifier, boolean useSameEvoStage, boolean useStrictTyping);
+    
+    //get the typing of the trainer's team found in an unmodified game; return null if trainer has no typing limitation
+    public List<Type> getVanillaTrainerTyping(Trainer trainer);
 
     public void rivalCarriesStarter();
 
     public void forceFullyEvolvedTrainerPokes(int minLevel);
     
     public void giveImportantTrainersAFullTeam();
+    
+    public void giveImportantTrainersHoldItems();
+    
+    public int getRandomHoldItem(TrainerPokemon tpk);
     
     public void randomizeTrainerMoves(boolean useTrainerMoveDiversity);
     
@@ -209,6 +216,9 @@ public interface RomHandler {
     
     public List<Move> getDiverseMoves(Pokemon p, Map<Pokemon, List<MoveLearnt>> moveset, int level, List<Move> allMoves);
 
+    public boolean tpHasMove(TrainerPokemon tp, int move);
+    public boolean tpHasMove(TrainerPokemon tp, int... move);
+    
     // Randomizer: moves
 
     public void randomizeMovePowers();

@@ -375,24 +375,24 @@ public class Gen5Constants {
         tagAndMark(trs, 0x85, "GYM8"); // Iris or Drayden
 
         // Elite 4
-        tagAndMark(trs, 0xE4, "ELITE1"); // Shauntal
-        tagAndMark(trs, 0xE6, "ELITE2"); // Grimsley
-        tagAndMark(trs, 0xE7, "ELITE3"); // Caitlin
-        tagAndMark(trs, 0xE5, "ELITE4"); // Marshal
+        tagAndMark(trs, 1, 0xE4, "ELITE1"); // Shauntal
+        tagAndMark(trs, 1, 0xE6, "ELITE2"); // Grimsley
+        tagAndMark(trs, 1, 0xE7, "ELITE3"); // Caitlin
+        tagAndMark(trs, 1, 0xE5, "ELITE4"); // Marshal
 
         // Elite 4 R2
-        tagAndMark(trs, 0x233, "ELITE1"); // Shauntal
-        tagAndMark(trs, 0x235, "ELITE2"); // Grimsley
-        tagAndMark(trs, 0x236, "ELITE3"); // Caitlin
-        tagAndMark(trs, 0x234, "ELITE4"); // Marshal
-        tagAndMark(trs, 0x197, "CHAMPION"); // Alder
+        tagAndMark(trs, 2, 0x233, "ELITE1"); // Shauntal
+        tagAndMark(trs, 2, 0x235, "ELITE2"); // Grimsley
+        tagAndMark(trs, 2, 0x236, "ELITE3"); // Caitlin
+        tagAndMark(trs, 2, 0x234, "ELITE4"); // Marshal
+        tagAndMark(trs, 4, 0x197, "CHAMPION"); // Alder
 
         // Ubers?
-        tagAndMark(trs, 0x21E, "UBER"); // Game Freak Guy
-        tagAndMark(trs, 0x237, "UBER"); // Cynthia
-        tagAndMark(trs, 0xE8, "UBER"); // Ghetsis
-        tagAndMark(trs, 0x24A, "UBER"); // N-White
-        tagAndMark(trs, 0x24B, "UBER"); // N-Black
+        tagAndMark(trs, 2, 0x21E, "UBER"); // Game Freak Guy
+        tagAndMark(trs, 4, 0x237, "UBER"); // Cynthia
+        tagAndMark(trs, 1, 0xE8, "UBER"); // Ghetsis
+        tagAndMark(trs, 2, 0x24A, "UBER"); // N-White
+        tagAndMark(trs, 2, 0x24B, "UBER"); // N-Black
 
         // Rival - Cheren
         tagRivalBW(trs, "RIVAL1", 0x35);
@@ -449,11 +449,11 @@ public class Gen5Constants {
 
         // Elite 4 / Champion
         // Order: Normal, Challenge Mode, Rematch, Rematch Challenge Mode
-        tagAndMark(trs, "ELITE1", 0x26, 0x304, 0x8f, 0x309);
-        tagAndMark(trs, "ELITE2", 0x28, 0x305, 0x91, 0x30a);
-        tagAndMark(trs, "ELITE3", 0x29, 0x307, 0x92, 0x30c);
-        tagAndMark(trs, "ELITE4", 0x27, 0x306, 0x90, 0x30b);
-        tagAndMark(trs, "CHAMPION", 0x155, 0x308, 0x218, 0x30d);
+        tagAndMark(trs, 1, "ELITE1", 0x26, 0x304, 0x8f, 0x309);
+        tagAndMark(trs, 1, "ELITE2", 0x28, 0x305, 0x91, 0x30a);
+        tagAndMark(trs, 1, "ELITE3", 0x29, 0x307, 0x92, 0x30c);
+        tagAndMark(trs, 1, "ELITE4", 0x27, 0x306, 0x90, 0x30b);
+        tagAndMark(trs, 2, "CHAMPION", 0x155, 0x308, 0x218, 0x30d);
 
         // Rival - Hugh
         tagRivalBW(trs, "RIVAL1", 0xa1); // Start
@@ -489,19 +489,19 @@ public class Gen5Constants {
         // Uber-Trainers
         // There are *fourteen* ubers of 17 allowed (incl. the champion)
         // It's a rather stacked game...
-        tagAndMark(trs, 0x246, "UBER"); // Alder
-        tagAndMark(trs, 0x1c8, "UBER"); // Cynthia
-        tagAndMark(trs, 0xca, "UBER"); // Benga/BlackTower
-        tagAndMark(trs, 0xc9, "UBER"); // Benga/WhiteTreehollow
-        tagAndMark(trs, 0x5, "UBER"); // N/Zekrom
-        tagAndMark(trs, 0x6, "UBER"); // N/Reshiram
-        tagAndMark(trs, 0x30e, "UBER"); // N/Spring
-        tagAndMark(trs, 0x30f, "UBER"); // N/Summer
-        tagAndMark(trs, 0x310, "UBER"); // N/Autumn
-        tagAndMark(trs, 0x311, "UBER"); // N/Winter
-        tagAndMark(trs, 0x159, "UBER"); // Ghetsis
-        tagAndMark(trs, 0x8c, "UBER"); // Game Freak Guy
-        tagAndMark(trs, 0x24f, "UBER"); // Game Freak Leftovers Guy
+        tagAndMark(trs, 1, 0x246, "UBER"); // Alder
+        tagAndMark(trs, 2, 0x1c8, "UBER"); // Cynthia
+        tagAndMark(trs, 2, 0xca, "UBER"); // Benga/BlackTower
+        tagAndMark(trs, 2, 0xc9, "UBER"); // Benga/WhiteTreehollow
+        tagAndMark(trs, 1, 0x5, "UBER"); // N/Zekrom
+        tagAndMark(trs, 1, 0x6, "UBER"); // N/Reshiram
+        tagAndMark(trs, 1, 0x30e, "UBER"); // N/Spring
+        tagAndMark(trs, 1, 0x30f, "UBER"); // N/Summer
+        tagAndMark(trs, 1, 0x310, "UBER"); // N/Autumn
+        tagAndMark(trs, 1, 0x311, "UBER"); // N/Winter
+        tagAndMark(trs, 1, 0x159, "UBER"); // Ghetsis
+        tagAndMark(trs, 2, 0x8c, "UBER"); // Game Freak Guy
+        tagAndMark(trs, 2, 0x24f, "UBER"); // Game Freak Leftovers Guy
 
     }
     
@@ -536,16 +536,42 @@ public class Gen5Constants {
         }
     }
     
-    private static void tag(List<Trainer> allTrainers, int number, String tag) {
+    private static void tagAndMark(List<Trainer> allTrainers, int holdAmount, int number, String tag) {
+        tag(allTrainers, holdAmount, number, tag);
         if (allTrainers.size() > (number - 1)) {
-            allTrainers.get(number - 1).tag = tag;
+            allTrainers.get(number - 1).giveFullTeam = true;
         }
     }
 
+    private static void tagAndMark(List<Trainer> allTrainers, int holdAmount, String tag, int... numbers) {
+        tag(allTrainers, holdAmount, tag, numbers);
+        for (int num : numbers) {
+            if (allTrainers.size() > (num - 1)) {
+                allTrainers.get(num - 1).giveFullTeam = true;
+            }
+        }
+    }
+    
+    private static void tag(List<Trainer> allTrainers, int number, String tag) {
+        tag(allTrainers, 0, number, tag);
+    }
+
     private static void tag(List<Trainer> allTrainers, String tag, int... numbers) {
+        tag(allTrainers, 0, tag, numbers);
+    }
+    
+    private static void tag(List<Trainer> allTrainers, int holdAmount, int number, String tag) {
+        if (allTrainers.size() > (number - 1)) {
+            allTrainers.get(number - 1).tag = tag;
+            allTrainers.get(number - 1).setAmountOfHoldItems(holdAmount);
+        }
+    }
+
+    private static void tag(List<Trainer> allTrainers, int holdAmount, String tag, int... numbers) {
         for (int num : numbers) {
             if (allTrainers.size() > (num - 1)) {
                 allTrainers.get(num - 1).tag = tag;
+                allTrainers.get(num - 1).setAmountOfHoldItems(holdAmount);
             }
         }
     }

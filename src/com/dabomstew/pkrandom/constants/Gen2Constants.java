@@ -187,12 +187,12 @@ public class Gen2Constants {
         tbcAndMark(allTrainers, 64, 0, "GYM16");
 
         // Elite 4 & Red
-        tbcAndMark(allTrainers, 11, 0, "ELITE1");
-        tbcAndMark(allTrainers, 15, 0, "ELITE2");
-        tbcAndMark(allTrainers, 13, 0, "ELITE3");
-        tbcAndMark(allTrainers, 14, 0, "ELITE4");
-        tbcAndMark(allTrainers, 16, 0, "CHAMPION");
-        tbcAndMark(allTrainers, 63, 0, "UBER");
+        tbcAndMark(allTrainers, 1, 11, 0, "ELITE1");
+        tbcAndMark(allTrainers, 1, 15, 0, "ELITE2");
+        tbcAndMark(allTrainers, 1, 13, 0, "ELITE3");
+        tbcAndMark(allTrainers, 1, 14, 0, "ELITE4");
+        tbcAndMark(allTrainers, 2, 16, 0, "CHAMPION");
+        tbcAndMark(allTrainers, 4, 63, 0, "UBER");
 
         // Silver
         // Order in rom is BAYLEEF, QUILAVA, CROCONAW teams
@@ -350,8 +350,12 @@ public class Gen2Constants {
         tbc(allTrainers, 52, 1, "GYM14");
         tbc(allTrainers, 52, 10, "GYM14");
     }
-
+    
     private static void tbcAndMark(List<Trainer> allTrainers, int classNum, int number, String tag) {
+        tbcAndMark(allTrainers, 0, classNum, number, tag);
+    }
+    
+    private static void tbcAndMark(List<Trainer> allTrainers, int holdAmount, int classNum, int number, String tag) {
         tbc(allTrainers, classNum, number, tag);
         int currnum = -1;
         for (Trainer t : allTrainers) {
@@ -360,12 +364,26 @@ public class Gen2Constants {
                 currnum++;
                 if (currnum == number) {
                     t.giveFullTeam = true;
+                    t.setAmountOfHoldItems(holdAmount);
                     return;
                 }
             }
         }
     }
-    
+    private static void tbc(List<Trainer> allTrainers, int holdAmount, int classNum, int number, String tag) {
+        tbc(allTrainers, classNum, number, tag);
+        int currnum = -1;
+        for (Trainer t : allTrainers) {
+            // adjusted to not change the above but use 0-indexing properly
+            if (t.trainerclass == classNum - 1) {
+                currnum++;
+                if (currnum == number) {
+                    t.setAmountOfHoldItems(holdAmount);
+                    return;
+                }
+            }
+        }
+    }
     private static void tbc(List<Trainer> allTrainers, int classNum, int number, String tag) {
         int currnum = -1;
         for (Trainer t : allTrainers) {

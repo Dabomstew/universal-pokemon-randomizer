@@ -1738,7 +1738,64 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         // just cut
         return Gen1Constants.earlyRequiredHMs;
     }
+    
+    @Override
+    public List<Type> getVanillaTrainerTyping(Trainer trainer) {
+        List<Type> typing = new ArrayList<Type>();
+        //in gen 1 certain trainers like agatha need an extra type because there isnt enough pokemon of their primary type
+        //types added multiple times for weighting
+        if(trainer.tag != null)
+        {
+            if(trainer.tag.equals("GYM1")) {
+                typing.add(Type.ROCK);
+                typing.add(Type.ROCK);
+                typing.add(Type.GROUND);
+            } else if(trainer.tag.equals("GYM2")) {
+                typing.add(Type.WATER);
+            } else if(trainer.tag.equals("GYM3")) {
+                typing.add(Type.ELECTRIC);
+            } else if(trainer.tag.equals("GYM4")) {
+                typing.add(Type.GRASS);
+            } else if(trainer.tag.equals("GYM5")) {
+                typing.add(Type.POISON);
+            } else if(trainer.tag.equals("GYM6")) {
+                typing.add(Type.PSYCHIC);
+            } else if(trainer.tag.equals("GYM7")) {
+                typing.add(Type.FIRE);
+            } else if(trainer.tag.equals("GYM8") || trainer.tag.equals("GIO1") || trainer.tag.equals("GIO2")) {
+                typing.add(Type.GROUND);
+                typing.add(Type.GROUND);
+                typing.add(Type.GROUND);
+                typing.add(Type.GROUND);
+                typing.add(Type.NORMAL);
+            } else if(trainer.tag.equals("ELITE1")) {
+                typing.add(Type.ICE);
+                typing.add(Type.ICE);
+                typing.add(Type.WATER);
+            } else if(trainer.tag.equals("ELITE2")) {
+                typing.add(Type.FIGHTING);
+                typing.add(Type.FIGHTING);
+                typing.add(Type.GROUND);
+            } else if(trainer.tag.equals("ELITE3")) {
+                typing.add(Type.GHOST);
+                typing.add(Type.GHOST);
+                typing.add(Type.POISON);
+            } else if(trainer.tag.equals("ELITE4")) {
+                typing.add(Type.DRAGON);
+                typing.add(Type.DRAGON);
+                typing.add(Type.DRAGON);
+                typing.add(Type.FLYING);
+            }
+        }
+        return typing;
+    }
 
+    @Override
+    public int getRandomHoldItem(TrainerPokemon tpk) {
+        //gen 1 doesnt have held items
+        return 0;
+    }
+    
     @Override
     public void applySignature() {
         // First off, intro Pokemon
