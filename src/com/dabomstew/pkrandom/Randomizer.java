@@ -321,10 +321,11 @@ public class Randomizer {
                     settings.isTrainersMatchTypingDistribution(), settings.isTrainersBlockLegendaries(),
                     settings.isTrainersBlockEarlyWonderGuard(),
                     settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, settings.isTrainersUseSameEvoStages());
-        } else if (settings.getTrainersMod() == Settings.TrainersMod.RETAIN_TYPE || settings.getTrainersMod() == Settings.TrainersMod.RETAIN_TYPE_STRICT) {
+        } else if (settings.getTrainersMod() == Settings.TrainersMod.RETAIN_TYPE || settings.getTrainersMod() == Settings.TrainersMod.RETAIN_TYPE_STRICT || settings.getTrainersMod() == Settings.TrainersMod.RETAIN_TYPE_GYM) {
             romHandler.retainTypeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(), settings.isTrainersBlockLegendaries(),
                     settings.isTrainersBlockEarlyWonderGuard(),
-                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, settings.isTrainersUseSameEvoStages(), settings.getTrainersMod() == Settings.TrainersMod.RETAIN_TYPE_STRICT);
+                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, settings.isTrainersUseSameEvoStages(), settings.getTrainersMod() == Settings.TrainersMod.RETAIN_TYPE_STRICT,
+                    settings.getTrainersMod() == Settings.TrainersMod.RETAIN_TYPE_GYM);
         }
 
         if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED

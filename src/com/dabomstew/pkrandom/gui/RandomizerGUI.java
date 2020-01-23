@@ -810,6 +810,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpTypeThemedRB.setEnabled(false);
         this.tpRetainTypeRB.setEnabled(false);
         this.tpRetainTypeStrictRB.setEnabled(false);
+        this.tpRetainTypeGymRB.setEnabled(false);
         this.tpTypeWeightingCB.setEnabled(false);
         this.tpNoLegendariesCB.setEnabled(false);
         this.tpNoEarlyShedinjaCB.setEnabled(false);
@@ -1171,6 +1172,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.tpTypeThemedRB.setEnabled(true);
             this.tpRetainTypeRB.setEnabled(true);
             this.tpRetainTypeStrictRB.setEnabled(true);
+            this.tpRetainTypeGymRB.setEnabled(true);
             this.tpUnchangedRB.setEnabled(true);
             this.tpUnchangedRB.setSelected(true);
             this.tnRandomizeCB.setEnabled(romHandler.canChangeTrainerText());
@@ -1853,6 +1855,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpTypeThemedRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED);
         this.tpRetainTypeRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.RETAIN_TYPE);
         this.tpRetainTypeStrictRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.RETAIN_TYPE_STRICT);
+        this.tpRetainTypeGymRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.RETAIN_TYPE_GYM);
         this.tpTypeWeightingCB.setSelected(settings.isTrainersMatchTypingDistribution());
         this.tpUnchangedRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED);
         this.tpNoLegendariesCB.setSelected(settings.isTrainersBlockLegendaries());
@@ -2020,7 +2023,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setMovesetsForceGoodDamaging(pmsForceGoodDamagingCB.isSelected());
         settings.setMovesetsGoodDamagingPercent(pmsForceGoodDamagingSlider.getValue());
 
-        settings.setTrainersMod(tpUnchangedRB.isSelected(), tpRandomRB.isSelected(), tpTypeThemedRB.isSelected(), tpRetainTypeRB.isSelected(), tpRetainTypeStrictRB.isSelected());
+        settings.setTrainersMod(tpUnchangedRB.isSelected(), tpRandomRB.isSelected(), tpTypeThemedRB.isSelected(), tpRetainTypeRB.isSelected(), tpRetainTypeStrictRB.isSelected(), tpRetainTypeGymRB.isSelected());
         settings.setTrainersUsePokemonOfSimilarStrength(tpPowerLevelsCB.isSelected());
         settings.setRivalCarriesStarterThroughout(tpRivalCarriesStarterCB.isSelected());
         settings.setTrainersMatchTypingDistribution(tpTypeWeightingCB.isSelected());
@@ -2556,6 +2559,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.enableOrDisableSubControls();
     }
     
+    private void tpRetainTypeGymRBActionPerformed(java.awt.event.ActionEvent evt) {
+        this.enableOrDisableSubControls();
+    }
+    
     private void tpPowerLevelsCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tpPowerLevelsCBActionPerformed
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_tpPowerLevelsCBActionPerformed
@@ -2914,6 +2921,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         tpTypeThemedRB = new javax.swing.JRadioButton();
         tpRetainTypeRB = new javax.swing.JRadioButton();
         tpRetainTypeStrictRB = new javax.swing.JRadioButton();
+        tpRetainTypeGymRB = new javax.swing.JRadioButton();
         tpPowerLevelsCB = new javax.swing.JCheckBox();
         tpSameEvoStageCB = new javax.swing.JCheckBox();
         tpTypeWeightingCB = new javax.swing.JCheckBox();
@@ -4093,6 +4101,15 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 tpRetainTypeStrictRBActionPerformed(evt);
             }
         });
+        
+        trainerPokesButtonGroup.add(tpRetainTypeGymRB);
+        tpRetainTypeGymRB.setText(bundle.getString("RandomizerGUI.tpRetainTypeGymRB.text")); // NOI18N
+        tpRetainTypeGymRB.setToolTipText(bundle.getString("RandomizerGUI.tpRetainTypeGymRB.toolTipText")); // NOI18N
+        tpRetainTypeGymRB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tpRetainTypeGymRBActionPerformed(evt);
+            }
+        });
 
         tpPowerLevelsCB.setText(bundle.getString("RandomizerGUI.tpPowerLevelsCB.text")); // NOI18N
         tpPowerLevelsCB.setToolTipText(bundle.getString("RandomizerGUI.tpPowerLevelsCB.toolTipText")); // NOI18N
@@ -4189,6 +4206,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(tpTypeThemedRB)
                     .addComponent(tpRetainTypeRB)
                     .addComponent(tpRetainTypeStrictRB)
+                    .addComponent(tpRetainTypeGymRB)
                     .addGroup(trainersPokemonPanelLayout.createSequentialGroup()
                         .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(tpUnchangedRB)
@@ -4228,7 +4246,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                             .addComponent(tpRetainTypeRB)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                            .addComponent(tpRetainTypeStrictRB))
+                            .addComponent(tpRetainTypeStrictRB)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(tpRetainTypeGymRB))
                     .addGroup(trainersPokemonPanelLayout.createSequentialGroup()
                             .addComponent(tpRivalCarriesStarterCB)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -5268,6 +5288,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JRadioButton tpTypeThemedRB;
     private javax.swing.JRadioButton tpRetainTypeRB;
     private javax.swing.JRadioButton tpRetainTypeStrictRB;
+    private javax.swing.JRadioButton tpRetainTypeGymRB;
     private javax.swing.JCheckBox tpTypeWeightingCB;
     private javax.swing.JRadioButton tpUnchangedRB;
     private javax.swing.ButtonGroup trainerPokesButtonGroup;

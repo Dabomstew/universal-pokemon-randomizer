@@ -193,7 +193,7 @@ public interface RomHandler {
             boolean noEarlyWonderGuard, int levelModifier, boolean useSameEvoStage);
     
     public void retainTypeTrainerPokes(boolean usePowerLevels, boolean noLegendaries,
-            boolean noEarlyWonderGuard, int levelModifier, boolean useSameEvoStage, boolean useStrictTyping);
+            boolean noEarlyWonderGuard, int levelModifier, boolean useSameEvoStage, boolean useStrictTyping, boolean useGymsOnly);
     
     //get the typing of the trainer's team found in an unmodified game; return null if trainer has no typing limitation
     public List<Type> getVanillaTrainerTyping(Trainer trainer);

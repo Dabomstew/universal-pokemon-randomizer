@@ -1332,7 +1332,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void retainTypeTrainerPokes(boolean usePowerLevels, boolean noLegendaries,
-            boolean noEarlyWonderGuard, int levelModifier, boolean useSameEvoStage, boolean useStrictTyping) {
+            boolean noEarlyWonderGuard, int levelModifier, boolean useSameEvoStage, boolean useStrictTyping, boolean useGymOnly) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
 
@@ -1354,7 +1354,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             List<Type> trainerStrictType = null;
             //if strict typing is enabled check if trainer has an already determined typing
-            if(useStrictTyping)
+            if(useStrictTyping || useGymOnly)
             {
                 trainerStrictType = getVanillaTrainerTyping(t);
             }
@@ -1364,7 +1364,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                 {
                     if(trainerStrictType == null || trainerStrictType.isEmpty())
                     {
-                        tp.pokemon = pickReplacementRetainedType(tp.pokemon, usePowerLevels, noLegendaries, wgAllowed, useSameEvoStage);
+                        if(!useGymOnly)
+                        {
+                            tp.pokemon = pickReplacementRetainedType(tp.pokemon, usePowerLevels, noLegendaries, wgAllowed, useSameEvoStage);
+                        }
+                        else
+                        {
+                            tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, null, noLegendaries, wgAllowed, useSameEvoStage);
+                        }
                     }
                     else
                     {

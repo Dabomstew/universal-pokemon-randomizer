@@ -136,7 +136,7 @@ public class Settings {
     private int movesetsGoodDamagingPercent = 0;
 
     public enum TrainersMod {
-        UNCHANGED, RANDOM, TYPE_THEMED, RETAIN_TYPE, RETAIN_TYPE_STRICT
+        UNCHANGED, RANDOM, TYPE_THEMED, RETAIN_TYPE, RETAIN_TYPE_STRICT, RETAIN_TYPE_GYM
     }
 
     private TrainersMod trainersMod = TrainersMod.UNCHANGED;
@@ -396,9 +396,8 @@ public class Settings {
         // @ 36 base stats range slider value
         out.write(baseStatRange);
 
-        //TODO put something in 37[4]
         // 37 trainer pokemon extended settings and misc? (couldn't fit this in existing entries)
-        out.write(makeByteSelected(trainersUseSameEvoStages, shouldPatchSpecialSplit, wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_EVO_STAGE_AND_TYPING, trainersMod == TrainersMod.RETAIN_TYPE, giveElitesHoldItems, giveImportantTrainersAFullTeam, trainersMod == TrainersMod.RETAIN_TYPE_STRICT));
+        out.write(makeByteSelected(trainersUseSameEvoStages, shouldPatchSpecialSplit, wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_EVO_STAGE_AND_TYPING, trainersMod == TrainersMod.RETAIN_TYPE, giveElitesHoldItems, giveImportantTrainersAFullTeam, trainersMod == TrainersMod.RETAIN_TYPE_STRICT, trainersMod == TrainersMod.RETAIN_TYPE_GYM));
         
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -485,7 +484,8 @@ public class Settings {
                 restoreState(data[13], 1), // RANDOM
                 restoreState(data[13], 3), // TYPE_THEMED
                 restoreState(data[37], 3), // RETAIN_TYPE
-                restoreState(data[37], 6) // RETAIN_TYPE_STRICT
+                restoreState(data[37], 6), // RETAIN_TYPE_STRICT
+                restoreState(data[37], 7) // RETAIN_TYPE_GYM
         ));
         settings.setTrainersUsePokemonOfSimilarStrength(restoreState(data[13], 0));
         settings.setRivalCarriesStarterThroughout(restoreState(data[13], 2));
