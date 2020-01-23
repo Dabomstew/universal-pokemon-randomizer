@@ -42,5 +42,18 @@ public class TrainerPokemon {
     public String toString() {
         return pokemon.name + " Lv" + level;
     }
+    
+    public static void copy(TrainerPokemon from, TrainerPokemon to)
+    {
+        to.ability = from.ability;
+        to.AILevel = from.AILevel;
+        to.heldItem = from.heldItem;
+        to.level = from.level;
+        to.move1 = from.move2;
+        to.move3 = from.move3;
+        to.move4 = from.move4;
+        to.pokemon = from.pokemon;
+        to.resetMoves = from.resetMoves;
+    }
 
 }

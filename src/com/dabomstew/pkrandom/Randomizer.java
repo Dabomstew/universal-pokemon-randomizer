@@ -509,7 +509,10 @@ public class Randomizer {
         
         // Do trainer move changes and log the new moves of those trainers
 
-        romHandler.randomizeTrainerMoves(settings.isTrainersTryMoveDiversity());
+        if(romHandler.generationOfPokemon() > 2)
+        {
+            romHandler.randomizeTrainerMoves(settings.isTrainersTryMoveDiversity());
+        }
         
         maybeLogTrainerChanges(log, romHandler, settings.isLogTrainerMoves());
 
@@ -800,7 +803,7 @@ public class Randomizer {
                 && !settings.isRivalCarriesStarterThroughout()) {
             log.println("Trainers: Unchanged." + NEWLINE);
         } else {
-            if(logMoves)
+            if(logMoves && romHandler.generationOfPokemon() > 2)
             {
                 if(settings.isTrainersTryMoveDiversity())
                 {
@@ -842,7 +845,7 @@ public class Randomizer {
                         log.print("\n       ");
                     }
                     log.print(tpk.pokemon.name + " Lv" + tpk.level);
-                    if(logMoves)
+                    if(logMoves && romHandler.generationOfPokemon() > 2)
                     {
                         String moves[] = new String[4];
                         moves[0] = "null";

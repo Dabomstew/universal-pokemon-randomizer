@@ -362,55 +362,55 @@ public class Gen5Constants {
         tag(trs, "GYM8", 0x109, 0x10A, 0x10F, 0x10E, 0x110, 0x10B, 0x113, 0x112);
 
         // Gym Leaders
-        tag(trs, 0x0C, "GYM1"); // Cilan
-        tag(trs, 0x0B, "GYM9"); // Chili
-        tag(trs, 0x0D, "GYM10"); // Cress
-        tag(trs, 0x15, "GYM2"); // Lenora
-        tag(trs, 0x16, "GYM3"); // Burgh
-        tag(trs, 0x17, "GYM4"); // Elesa
-        tag(trs, 0x18, "GYM5"); // Clay
-        tag(trs, 0x19, "GYM6"); // Skyla
-        tag(trs, 0x83, "GYM7"); // Brycen
-        tag(trs, 0x84, "GYM8"); // Iris or Drayden
-        tag(trs, 0x85, "GYM8"); // Iris or Drayden
+        tagAndMark(trs, 0x0C, "GYM1"); // Cilan
+        tagAndMark(trs, 0x0B, "GYM9"); // Chili
+        tagAndMark(trs, 0x0D, "GYM10"); // Cress
+        tagAndMark(trs, 0x15, "GYM2"); // Lenora
+        tagAndMark(trs, 0x16, "GYM3"); // Burgh
+        tagAndMark(trs, 0x17, "GYM4"); // Elesa
+        tagAndMark(trs, 0x18, "GYM5"); // Clay
+        tagAndMark(trs, 0x19, "GYM6"); // Skyla
+        tagAndMark(trs, 0x83, "GYM7"); // Brycen
+        tagAndMark(trs, 0x84, "GYM8"); // Iris or Drayden
+        tagAndMark(trs, 0x85, "GYM8"); // Iris or Drayden
 
         // Elite 4
-        tag(trs, 0xE4, "ELITE1"); // Shauntal
-        tag(trs, 0xE6, "ELITE2"); // Grimsley
-        tag(trs, 0xE7, "ELITE3"); // Caitlin
-        tag(trs, 0xE5, "ELITE4"); // Marshal
+        tagAndMark(trs, 0xE4, "ELITE1"); // Shauntal
+        tagAndMark(trs, 0xE6, "ELITE2"); // Grimsley
+        tagAndMark(trs, 0xE7, "ELITE3"); // Caitlin
+        tagAndMark(trs, 0xE5, "ELITE4"); // Marshal
 
         // Elite 4 R2
-        tag(trs, 0x233, "ELITE1"); // Shauntal
-        tag(trs, 0x235, "ELITE2"); // Grimsley
-        tag(trs, 0x236, "ELITE3"); // Caitlin
-        tag(trs, 0x234, "ELITE4"); // Marshal
-        tag(trs, 0x197, "CHAMPION"); // Alder
+        tagAndMark(trs, 0x233, "ELITE1"); // Shauntal
+        tagAndMark(trs, 0x235, "ELITE2"); // Grimsley
+        tagAndMark(trs, 0x236, "ELITE3"); // Caitlin
+        tagAndMark(trs, 0x234, "ELITE4"); // Marshal
+        tagAndMark(trs, 0x197, "CHAMPION"); // Alder
 
         // Ubers?
-        tag(trs, 0x21E, "UBER"); // Game Freak Guy
-        tag(trs, 0x237, "UBER"); // Cynthia
-        tag(trs, 0xE8, "UBER"); // Ghetsis
-        tag(trs, 0x24A, "UBER"); // N-White
-        tag(trs, 0x24B, "UBER"); // N-Black
+        tagAndMark(trs, 0x21E, "UBER"); // Game Freak Guy
+        tagAndMark(trs, 0x237, "UBER"); // Cynthia
+        tagAndMark(trs, 0xE8, "UBER"); // Ghetsis
+        tagAndMark(trs, 0x24A, "UBER"); // N-White
+        tagAndMark(trs, 0x24B, "UBER"); // N-Black
 
         // Rival - Cheren
         tagRivalBW(trs, "RIVAL1", 0x35);
         tagRivalBW(trs, "RIVAL2", 0x11F);
         tagRivalBW(trs, "RIVAL3", 0x38); // used for 3rd battle AND tag battle
-        tagRivalBW(trs, "RIVAL4", 0x193);
-        tagRivalBW(trs, "RIVAL5", 0x5A); // 5th battle & 2nd tag battle
-        tagRivalBW(trs, "RIVAL6", 0x21B);
-        tagRivalBW(trs, "RIVAL7", 0x24C);
-        tagRivalBW(trs, "RIVAL8", 0x24F);
+        tagAndMarkRivalBW(trs, "RIVAL4", 0x193);
+        tagAndMarkRivalBW(trs, "RIVAL5", 0x5A); // 5th battle & 2nd tag battle
+        tagAndMarkRivalBW(trs, "RIVAL6", 0x21B);
+        tagAndMarkRivalBW(trs, "RIVAL7", 0x24C);
+        tagAndMarkRivalBW(trs, "RIVAL8", 0x24F);
 
         // Rival - Bianca
         tagRivalBW(trs, "FRIEND1", 0x3B);
         tagRivalBW(trs, "FRIEND2", 0x1F2);
-        tagRivalBW(trs, "FRIEND3", 0x1FB);
-        tagRivalBW(trs, "FRIEND4", 0x1EB);
-        tagRivalBW(trs, "FRIEND5", 0x1EE);
-        tagRivalBW(trs, "FRIEND6", 0x252);
+        tagAndMarkRivalBW(trs, "FRIEND3", 0x1FB);
+        tagAndMarkRivalBW(trs, "FRIEND4", 0x1EB);
+        tagAndMarkRivalBW(trs, "FRIEND5", 0x1EE);
+        tagAndMarkRivalBW(trs, "FRIEND6", 0x252);
     }
 
     public static void tagTrainersBW2(List<Trainer> trs) {
@@ -438,80 +438,104 @@ public class Gen5Constants {
         // Order: Normal, Challenge Mode
         // All the challenge mode teams are near the end of the ROM
         // which makes things a bit easier.
-        tag(trs, "GYM1", 0x9c, 0x2fc); // Cheren
-        tag(trs, "GYM2", 0x9d, 0x2fd); // Roxie
-        tag(trs, "GYM3", 0x9a, 0x2fe); // Burgh
-        tag(trs, "GYM4", 0x99, 0x2ff); // Elesa
-        tag(trs, "GYM5", 0x9e, 0x300); // Clay
-        tag(trs, "GYM6", 0x9b, 0x301); // Skyla
-        tag(trs, "GYM7", 0x9f, 0x302); // Drayden
-        tag(trs, "GYM8", 0xa0, 0x303); // Marlon
+        tagAndMark(trs, "GYM1", 0x9c, 0x2fc); // Cheren
+        tagAndMark(trs, "GYM2", 0x9d, 0x2fd); // Roxie
+        tagAndMark(trs, "GYM3", 0x9a, 0x2fe); // Burgh
+        tagAndMark(trs, "GYM4", 0x99, 0x2ff); // Elesa
+        tagAndMark(trs, "GYM5", 0x9e, 0x300); // Clay
+        tagAndMark(trs, "GYM6", 0x9b, 0x301); // Skyla
+        tagAndMark(trs, "GYM7", 0x9f, 0x302); // Drayden
+        tagAndMark(trs, "GYM8", 0xa0, 0x303); // Marlon
 
         // Elite 4 / Champion
         // Order: Normal, Challenge Mode, Rematch, Rematch Challenge Mode
-        tag(trs, "ELITE1", 0x26, 0x304, 0x8f, 0x309);
-        tag(trs, "ELITE2", 0x28, 0x305, 0x91, 0x30a);
-        tag(trs, "ELITE3", 0x29, 0x307, 0x92, 0x30c);
-        tag(trs, "ELITE4", 0x27, 0x306, 0x90, 0x30b);
-        tag(trs, "CHAMPION", 0x155, 0x308, 0x218, 0x30d);
+        tagAndMark(trs, "ELITE1", 0x26, 0x304, 0x8f, 0x309);
+        tagAndMark(trs, "ELITE2", 0x28, 0x305, 0x91, 0x30a);
+        tagAndMark(trs, "ELITE3", 0x29, 0x307, 0x92, 0x30c);
+        tagAndMark(trs, "ELITE4", 0x27, 0x306, 0x90, 0x30b);
+        tagAndMark(trs, "CHAMPION", 0x155, 0x308, 0x218, 0x30d);
 
         // Rival - Hugh
         tagRivalBW(trs, "RIVAL1", 0xa1); // Start
         tagRivalBW(trs, "RIVAL2", 0xa6); // Floccessy Ranch
         tagRivalBW(trs, "RIVAL3", 0x24c); // Tag Battles in the sewers
         tagRivalBW(trs, "RIVAL4", 0x170); // Tag Battle on the Plasma Frigate
-        tagRivalBW(trs, "RIVAL5", 0x17a); // Undella Town 1st visit
-        tagRivalBW(trs, "RIVAL6", 0x2bd); // Lacunosa Town Tag Battle
-        tagRivalBW(trs, "RIVAL7", 0x31a); // 2nd Plasma Frigate Tag Battle
-        tagRivalBW(trs, "RIVAL8", 0x2ac); // Victory Road
-        tagRivalBW(trs, "RIVAL9", 0x2b5); // Undella Town Post-E4
-        tagRivalBW(trs, "RIVAL10", 0x2b8); // Driftveil Post-Undella-Battle
+        tagAndMarkRivalBW(trs, "RIVAL5", 0x17a); // Undella Town 1st visit
+        tagAndMarkRivalBW(trs, "RIVAL6", 0x2bd); // Lacunosa Town Tag Battle
+        tagAndMarkRivalBW(trs, "RIVAL7", 0x31a); // 2nd Plasma Frigate Tag Battle
+        tagAndMarkRivalBW(trs, "RIVAL8", 0x2ac); // Victory Road
+        tagAndMarkRivalBW(trs, "RIVAL9", 0x2b5); // Undella Town Post-E4
+        tagAndMarkRivalBW(trs, "RIVAL10", 0x2b8); // Driftveil Post-Undella-Battle
 
         // Tag Battle with Opposite Gender Hero
         tagRivalBW(trs, "FRIEND1", 0x168);
         tagRivalBW(trs, "FRIEND1", 0x16b);
 
         // Tag/PWT Battles with Cheren
-        tag(trs, "GYM1", 0x173, 0x278, 0x32E);
+        tagAndMark(trs, "GYM1", 0x173, 0x278, 0x32E);
 
         // The Restaurant Brothers
-        tag(trs, "GYM9", 0x1f0); // Cilan
-        tag(trs, "GYM10", 0x1ee); // Chili
-        tag(trs, "GYM11", 0x1ef); // Cress
+        tagAndMark(trs, "GYM9", 0x1f0); // Cilan
+        tagAndMark(trs, "GYM10", 0x1ee); // Chili
+        tagAndMark(trs, "GYM11", 0x1ef); // Cress
 
         // Themed Trainers
-        tag(trs, "THEMED:ZINZOLIN", 0x2c0, 0x248, 0x15b);
-        tag(trs, "THEMED:COLRESS", 0x166, 0x158, 0x32d, 0x32f);
-        tag(trs, "THEMED:SHADOW1", 0x247, 0x15c, 0x2af);
-        tag(trs, "THEMED:SHADOW2", 0x1f2, 0x2b0);
-        tag(trs, "THEMED:SHADOW3", 0x1f3, 0x2b1);
+        tag(trs, "THEMED:ZINZOLIN", 0x2c0, 0x248, 0x15b); //one of zinzolin's encounters isnt marked?
+        tagAndMark(trs, "THEMED:COLRESS", 0x166, 0x158, 0x32d, 0x32f);
+        tagAndMark(trs, "THEMED:SHADOW1", 0x247, 0x15c, 0x2af);
+        tagAndMark(trs, "THEMED:SHADOW2", 0x1f2, 0x2b0);
+        tagAndMark(trs, "THEMED:SHADOW3", 0x1f3, 0x2b1);
 
         // Uber-Trainers
         // There are *fourteen* ubers of 17 allowed (incl. the champion)
         // It's a rather stacked game...
-        tag(trs, 0x246, "UBER"); // Alder
-        tag(trs, 0x1c8, "UBER"); // Cynthia
-        tag(trs, 0xca, "UBER"); // Benga/BlackTower
-        tag(trs, 0xc9, "UBER"); // Benga/WhiteTreehollow
-        tag(trs, 0x5, "UBER"); // N/Zekrom
-        tag(trs, 0x6, "UBER"); // N/Reshiram
-        tag(trs, 0x30e, "UBER"); // N/Spring
-        tag(trs, 0x30f, "UBER"); // N/Summer
-        tag(trs, 0x310, "UBER"); // N/Autumn
-        tag(trs, 0x311, "UBER"); // N/Winter
-        tag(trs, 0x159, "UBER"); // Ghetsis
-        tag(trs, 0x8c, "UBER"); // Game Freak Guy
-        tag(trs, 0x24f, "UBER"); // Game Freak Leftovers Guy
+        tagAndMark(trs, 0x246, "UBER"); // Alder
+        tagAndMark(trs, 0x1c8, "UBER"); // Cynthia
+        tagAndMark(trs, 0xca, "UBER"); // Benga/BlackTower
+        tagAndMark(trs, 0xc9, "UBER"); // Benga/WhiteTreehollow
+        tagAndMark(trs, 0x5, "UBER"); // N/Zekrom
+        tagAndMark(trs, 0x6, "UBER"); // N/Reshiram
+        tagAndMark(trs, 0x30e, "UBER"); // N/Spring
+        tagAndMark(trs, 0x30f, "UBER"); // N/Summer
+        tagAndMark(trs, 0x310, "UBER"); // N/Autumn
+        tagAndMark(trs, 0x311, "UBER"); // N/Winter
+        tagAndMark(trs, 0x159, "UBER"); // Ghetsis
+        tagAndMark(trs, 0x8c, "UBER"); // Game Freak Guy
+        tagAndMark(trs, 0x24f, "UBER"); // Game Freak Leftovers Guy
 
     }
+    
+    private static void tagAndMarkRivalBW(List<Trainer> allTrainers, String tag, int offset) {
+        tagRivalBW(allTrainers, tag, offset);
+        allTrainers.get(offset - 1).giveFullTeam = true;
+        allTrainers.get(offset).giveFullTeam = true;
+        allTrainers.get(offset + 1).giveFullTeam = true;
 
+    }
+    
     private static void tagRivalBW(List<Trainer> allTrainers, String tag, int offset) {
         allTrainers.get(offset - 1).tag = tag + "-0";
         allTrainers.get(offset).tag = tag + "-1";
         allTrainers.get(offset + 1).tag = tag + "-2";
 
     }
+    
+    private static void tagAndMark(List<Trainer> allTrainers, int number, String tag) {
+        tag(allTrainers, number, tag);
+        if (allTrainers.size() > (number - 1)) {
+            allTrainers.get(number - 1).giveFullTeam = true;
+        }
+    }
 
+    private static void tagAndMark(List<Trainer> allTrainers, String tag, int... numbers) {
+        tag(allTrainers, tag, numbers);
+        for (int num : numbers) {
+            if (allTrainers.size() > (num - 1)) {
+                allTrainers.get(num - 1).giveFullTeam = true;
+            }
+        }
+    }
+    
     private static void tag(List<Trainer> allTrainers, int number, String tag) {
         if (allTrainers.size() > (number - 1)) {
             allTrainers.get(number - 1).tag = tag;

@@ -169,30 +169,30 @@ public class Gen2Constants {
 
     public static void universalTrainerTags(List<Trainer> allTrainers) {
         // Gym Leaders
-        tbc(allTrainers, 1, 0, "GYM1");
-        tbc(allTrainers, 3, 0, "GYM2");
-        tbc(allTrainers, 2, 0, "GYM3");
-        tbc(allTrainers, 4, 0, "GYM4");
-        tbc(allTrainers, 7, 0, "GYM5");
-        tbc(allTrainers, 6, 0, "GYM6");
-        tbc(allTrainers, 5, 0, "GYM7");
-        tbc(allTrainers, 8, 0, "GYM8");
-        tbc(allTrainers, 17, 0, "GYM9");
-        tbc(allTrainers, 18, 0, "GYM10");
-        tbc(allTrainers, 19, 0, "GYM11");
-        tbc(allTrainers, 21, 0, "GYM12");
-        tbc(allTrainers, 26, 0, "GYM13");
-        tbc(allTrainers, 35, 0, "GYM14");
-        tbc(allTrainers, 46, 0, "GYM15");
-        tbc(allTrainers, 64, 0, "GYM16");
+        tbcAndMark(allTrainers, 1, 0, "GYM1");
+        tbcAndMark(allTrainers, 3, 0, "GYM2");
+        tbcAndMark(allTrainers, 2, 0, "GYM3");
+        tbcAndMark(allTrainers, 4, 0, "GYM4");
+        tbcAndMark(allTrainers, 7, 0, "GYM5");
+        tbcAndMark(allTrainers, 6, 0, "GYM6");
+        tbcAndMark(allTrainers, 5, 0, "GYM7");
+        tbcAndMark(allTrainers, 8, 0, "GYM8");
+        tbcAndMark(allTrainers, 17, 0, "GYM9");
+        tbcAndMark(allTrainers, 18, 0, "GYM10");
+        tbcAndMark(allTrainers, 19, 0, "GYM11");
+        tbcAndMark(allTrainers, 21, 0, "GYM12");
+        tbcAndMark(allTrainers, 26, 0, "GYM13");
+        tbcAndMark(allTrainers, 35, 0, "GYM14");
+        tbcAndMark(allTrainers, 46, 0, "GYM15");
+        tbcAndMark(allTrainers, 64, 0, "GYM16");
 
         // Elite 4 & Red
-        tbc(allTrainers, 11, 0, "ELITE1");
-        tbc(allTrainers, 15, 0, "ELITE2");
-        tbc(allTrainers, 13, 0, "ELITE3");
-        tbc(allTrainers, 14, 0, "ELITE4");
-        tbc(allTrainers, 16, 0, "CHAMPION");
-        tbc(allTrainers, 63, 0, "UBER");
+        tbcAndMark(allTrainers, 11, 0, "ELITE1");
+        tbcAndMark(allTrainers, 15, 0, "ELITE2");
+        tbcAndMark(allTrainers, 13, 0, "ELITE3");
+        tbcAndMark(allTrainers, 14, 0, "ELITE4");
+        tbcAndMark(allTrainers, 16, 0, "CHAMPION");
+        tbcAndMark(allTrainers, 63, 0, "UBER");
 
         // Silver
         // Order in rom is BAYLEEF, QUILAVA, CROCONAW teams
@@ -202,37 +202,37 @@ public class Gen2Constants {
         tbc(allTrainers, 9, 1, "RIVAL1-2");
         tbc(allTrainers, 9, 2, "RIVAL1-0");
 
-        tbc(allTrainers, 9, 3, "RIVAL2-1");
-        tbc(allTrainers, 9, 4, "RIVAL2-2");
-        tbc(allTrainers, 9, 5, "RIVAL2-0");
+        tbcAndMark(allTrainers, 9, 3, "RIVAL2-1");
+        tbcAndMark(allTrainers, 9, 4, "RIVAL2-2");
+        tbcAndMark(allTrainers, 9, 5, "RIVAL2-0");
 
-        tbc(allTrainers, 9, 6, "RIVAL3-1");
-        tbc(allTrainers, 9, 7, "RIVAL3-2");
-        tbc(allTrainers, 9, 8, "RIVAL3-0");
+        tbcAndMark(allTrainers, 9, 6, "RIVAL3-1");
+        tbcAndMark(allTrainers, 9, 7, "RIVAL3-2");
+        tbcAndMark(allTrainers, 9, 8, "RIVAL3-0");
 
-        tbc(allTrainers, 9, 9, "RIVAL4-1");
-        tbc(allTrainers, 9, 10, "RIVAL4-2");
-        tbc(allTrainers, 9, 11, "RIVAL4-0");
+        tbcAndMark(allTrainers, 9, 9, "RIVAL4-1");
+        tbcAndMark(allTrainers, 9, 10, "RIVAL4-2");
+        tbcAndMark(allTrainers, 9, 11, "RIVAL4-0");
 
-        tbc(allTrainers, 9, 12, "RIVAL5-1");
-        tbc(allTrainers, 9, 13, "RIVAL5-2");
-        tbc(allTrainers, 9, 14, "RIVAL5-0");
+        tbcAndMark(allTrainers, 9, 12, "RIVAL5-1");
+        tbcAndMark(allTrainers, 9, 13, "RIVAL5-2");
+        tbcAndMark(allTrainers, 9, 14, "RIVAL5-0");
 
-        tbc(allTrainers, 42, 0, "RIVAL6-1");
-        tbc(allTrainers, 42, 1, "RIVAL6-2");
-        tbc(allTrainers, 42, 2, "RIVAL6-0");
+        tbcAndMark(allTrainers, 42, 0, "RIVAL6-1");
+        tbcAndMark(allTrainers, 42, 1, "RIVAL6-2");
+        tbcAndMark(allTrainers, 42, 2, "RIVAL6-0");
 
-        tbc(allTrainers, 42, 3, "RIVAL7-1");
-        tbc(allTrainers, 42, 4, "RIVAL7-2");
-        tbc(allTrainers, 42, 5, "RIVAL7-0");
+        tbcAndMark(allTrainers, 42, 3, "RIVAL7-1");
+        tbcAndMark(allTrainers, 42, 4, "RIVAL7-2");
+        tbcAndMark(allTrainers, 42, 5, "RIVAL7-0");
 
         // Female Rocket Executive (Ariana)
-        tbc(allTrainers, 55, 0, "THEMED:ARIANA");
-        tbc(allTrainers, 55, 1, "THEMED:ARIANA");
+        tbcAndMark(allTrainers, 55, 0, "THEMED:ARIANA");
+        tbcAndMark(allTrainers, 55, 1, "THEMED:ARIANA");
 
         // others (unlabeled in this game, using HGSS names)
-        tbc(allTrainers, 51, 2, "THEMED:PETREL");
-        tbc(allTrainers, 51, 3, "THEMED:PETREL");
+        tbcAndMark(allTrainers, 51, 2, "THEMED:PETREL");
+        tbcAndMark(allTrainers, 51, 3, "THEMED:PETREL");
 
         tbc(allTrainers, 51, 1, "THEMED:PROTON");
         tbc(allTrainers, 31, 0, "THEMED:PROTON");
@@ -244,7 +244,7 @@ public class Gen2Constants {
         tbc(allTrainers, 56, 3, "THEMED:SPROUTTOWER");
         tbc(allTrainers, 56, 6, "THEMED:SPROUTTOWER");
         tbc(allTrainers, 56, 7, "THEMED:SPROUTTOWER");
-        tbc(allTrainers, 56, 8, "THEMED:SPROUTTOWER");
+        tbcAndMark(allTrainers, 56, 8, "THEMED:SPROUTTOWER");
     }
 
     public static void goldSilverTags(List<Trainer> allTrainers) {
@@ -351,6 +351,21 @@ public class Gen2Constants {
         tbc(allTrainers, 52, 10, "GYM14");
     }
 
+    private static void tbcAndMark(List<Trainer> allTrainers, int classNum, int number, String tag) {
+        tbc(allTrainers, classNum, number, tag);
+        int currnum = -1;
+        for (Trainer t : allTrainers) {
+            // adjusted to not change the above but use 0-indexing properly
+            if (t.trainerclass == classNum - 1) {
+                currnum++;
+                if (currnum == number) {
+                    t.giveFullTeam = true;
+                    return;
+                }
+            }
+        }
+    }
+    
     private static void tbc(List<Trainer> allTrainers, int classNum, int number, String tag) {
         int currnum = -1;
         for (Trainer t : allTrainers) {

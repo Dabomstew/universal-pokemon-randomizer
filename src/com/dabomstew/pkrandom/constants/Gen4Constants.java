@@ -320,41 +320,42 @@ public class Gen4Constants {
         tag(trs, "GYM8", 0x158, 0x155, 0x12d, 0x12e, 0x12f, 0x11d, 0x119);
 
         // Gym Leaders
-        tag(trs, 0xf6, "GYM1");
-        tag(trs, 0x13b, "GYM2");
-        tag(trs, 0x13d, "GYM3"); // Maylene
-        tag(trs, 0x13c, "GYM4"); // Wake
-        tag(trs, 0x13e, "GYM5"); // Fantina
-        tag(trs, 0xfa, "GYM6"); // Byron
-        tag(trs, 0x13f, "GYM7"); // Candice
-        tag(trs, 0x140, "GYM8"); // Volkner
+        tagAndMark(trs, 0xf6, "GYM1");
+        tagAndMark(trs, 0x13b, "GYM2");
+        tagAndMark(trs, 0x13d, "GYM3"); // Maylene
+        tagAndMark(trs, 0x13c, "GYM4"); // Wake
+        tagAndMark(trs, 0x13e, "GYM5"); // Fantina
+        tagAndMark(trs, 0xfa, "GYM6"); // Byron
+        tagAndMark(trs, 0x13f, "GYM7"); // Candice
+        tagAndMark(trs, 0x140, "GYM8"); // Volkner
 
         // Elite 4
-        tag(trs, 0x105, "ELITE1");
-        tag(trs, 0x106, "ELITE2");
-        tag(trs, 0x107, "ELITE3");
-        tag(trs, 0x108, "ELITE4");
-        tag(trs, 0x10b, "CHAMPION");
+        tagAndMark(trs, 0x105, "ELITE1");
+        tagAndMark(trs, 0x106, "ELITE2");
+        tagAndMark(trs, 0x107, "ELITE3");
+        tagAndMark(trs, 0x108, "ELITE4");
+        tagAndMark(trs, 0x10b, "CHAMPION");
 
         // Rival battles (8)
         tagRivalConsecutive(trs, "RIVAL1", 0xf8);
-        tagRivalConsecutive(trs, "RIVAL2", 0x1d7);
-        tagRivalConsecutive(trs, "RIVAL3", 0x1da);
-        tagRivalConsecutive(trs, "RIVAL4", 0x1dd);
+        tagAndMarkRivalConsecutive(trs, "RIVAL2", 0x1d7);
+        tagAndMarkRivalConsecutive(trs, "RIVAL3", 0x1da);
+        tagAndMarkRivalConsecutive(trs, "RIVAL4", 0x1dd);
         // Tag battle is not following ze usual format
         tag(trs, 0x26b, "RIVAL5-0");
         tag(trs, 0x26c, "RIVAL5-1");
         tag(trs, 0x25f, "RIVAL5-2");
         // Back to normal
-        tagRivalConsecutive(trs, "RIVAL6", 0x1e0);
-        tagRivalConsecutive(trs, "RIVAL7", 0x346);
-        tagRivalConsecutive(trs, "RIVAL8", 0x349);
+        tagAndMarkRivalConsecutive(trs, "RIVAL6", 0x1e0);
+        tagAndMarkRivalConsecutive(trs, "RIVAL7", 0x346);
+        tagAndMarkRivalConsecutive(trs, "RIVAL8", 0x349);
 
         // Themed
-        tag(trs, "THEMED:CYRUS", 0x193, 0x194);
-        tag(trs, "THEMED:MARS", 0x127, 0x195, 0x210);
+        tagAndMark(trs, "THEMED:CYRUS", 0x193, 0x194);
+        tag(trs, "THEMED:MARS", 0x127, 0x210); //early mars encounter and tag battle
+        tagAndMark(trs, 0x195, "THEMED:MARS");
         tag(trs, "THEMED:JUPITER", 0x196, 0x197);
-        tag(trs, "THEMED:SATURN", 0x198, 0x199);
+        tagAndMark(trs, "THEMED:SATURN", 0x198, 0x199);
 
         // Lucas & Dawn tag battles
         tagFriendConsecutive(trs, "FRIEND1", 0x265);
@@ -376,64 +377,66 @@ public class Gen4Constants {
         tag(trs, "GYM8", 0x158, 0x155, 0x12d, 0x12e, 0x12f, 0x11d, 0x119, 0x14b);
 
         // Gym Leaders
-        tag(trs, 0xf6, "GYM1");
-        tag(trs, 0x13b, "GYM2");
-        tag(trs, 0x13e, "GYM3"); // Fantina
-        tag(trs, 0x13d, "GYM4"); // Maylene
-        tag(trs, 0x13c, "GYM5"); // Wake
-        tag(trs, 0xfa, "GYM6"); // Byron
-        tag(trs, 0x13f, "GYM7"); // Candice
-        tag(trs, 0x140, "GYM8"); // Volkner
+        tagAndMark(trs, 0xf6, "GYM1");
+        tagAndMark(trs, 0x13b, "GYM2");
+        tagAndMark(trs, 0x13e, "GYM3"); // Fantina
+        tagAndMark(trs, 0x13d, "GYM4"); // Maylene
+        tagAndMark(trs, 0x13c, "GYM5"); // Wake
+        tagAndMark(trs, 0xfa, "GYM6"); // Byron
+        tagAndMark(trs, 0x13f, "GYM7"); // Candice
+        tagAndMark(trs, 0x140, "GYM8"); // Volkner
 
         // Elite 4
-        tag(trs, 0x105, "ELITE1");
-        tag(trs, 0x106, "ELITE2");
-        tag(trs, 0x107, "ELITE3");
-        tag(trs, 0x108, "ELITE4");
-        tag(trs, 0x10b, "CHAMPION");
+        tagAndMark(trs, 0x105, "ELITE1");
+        tagAndMark(trs, 0x106, "ELITE2");
+        tagAndMark(trs, 0x107, "ELITE3");
+        tagAndMark(trs, 0x108, "ELITE4");
+        tagAndMark(trs, 0x10b, "CHAMPION");
 
         // Rival battles (10)
         tagRivalConsecutive(trs, "RIVAL1", 0x353);
         tagRivalConsecutive(trs, "RIVAL2", 0xf8);
-        tagRivalConsecutive(trs, "RIVAL3", 0x1d7);
-        tagRivalConsecutive(trs, "RIVAL4", 0x1da);
-        tagRivalConsecutive(trs, "RIVAL5", 0x1dd);
+        tagAndMarkRivalConsecutive(trs, "RIVAL3", 0x1d7);
+        tagAndMarkRivalConsecutive(trs, "RIVAL4", 0x1da);
+        tagAndMarkRivalConsecutive(trs, "RIVAL5", 0x1dd);
         // Tag battle is not following ze usual format
         tag(trs, 0x26b, "RIVAL6-0");
         tag(trs, 0x26c, "RIVAL6-1");
         tag(trs, 0x25f, "RIVAL6-2");
         // Back to normal
-        tagRivalConsecutive(trs, "RIVAL7", 0x1e0);
-        tagRivalConsecutive(trs, "RIVAL8", 0x346);
-        tagRivalConsecutive(trs, "RIVAL9", 0x349);
-        tagRivalConsecutive(trs, "RIVAL10", 0x368);
+        tagAndMarkRivalConsecutive(trs, "RIVAL7", 0x1e0);
+        tagAndMarkRivalConsecutive(trs, "RIVAL8", 0x346);
+        tagAndMarkRivalConsecutive(trs, "RIVAL9", 0x349);
+        tagAndMarkRivalConsecutive(trs, "RIVAL10", 0x368);
 
         // Battleground Gym Leaders
-        tag(trs, 0x35A, "GYM1");
-        tag(trs, 0x359, "GYM2");
-        tag(trs, 0x35C, "GYM3");
-        tag(trs, 0x356, "GYM4");
-        tag(trs, 0x35B, "GYM5");
-        tag(trs, 0x358, "GYM6");
-        tag(trs, 0x355, "GYM7");
-        tag(trs, 0x357, "GYM8");
+        tagAndMark(trs, 0x35A, "GYM1");
+        tagAndMark(trs, 0x359, "GYM2");
+        tagAndMark(trs, 0x35C, "GYM3");
+        tagAndMark(trs, 0x356, "GYM4");
+        tagAndMark(trs, 0x35B, "GYM5");
+        tagAndMark(trs, 0x358, "GYM6");
+        tagAndMark(trs, 0x355, "GYM7");
+        tagAndMark(trs, 0x357, "GYM8");
 
         // Match vs Volkner and Flint in Battle Frontier
-        tag(trs, 0x399, "GYM8");
-        tag(trs, 0x39A, "ELITE3");
+        tagAndMark(trs, 0x399, "GYM8");
+        tagAndMark(trs, 0x39A, "ELITE3");
 
         // E4 rematch
-        tag(trs, 0x362, "ELITE1");
-        tag(trs, 0x363, "ELITE2");
-        tag(trs, 0x364, "ELITE3");
-        tag(trs, 0x365, "ELITE4");
-        tag(trs, 0x366, "CHAMPION");
+        tagAndMark(trs, 0x362, "ELITE1");
+        tagAndMark(trs, 0x363, "ELITE2");
+        tagAndMark(trs, 0x364, "ELITE3");
+        tagAndMark(trs, 0x365, "ELITE4");
+        tagAndMark(trs, 0x366, "CHAMPION");
 
         // Themed
-        tag(trs, "THEMED:CYRUS", 0x391, 0x193, 0x194);
-        tag(trs, "THEMED:MARS", 0x127, 0x195, 0x210, 0x39e);
-        tag(trs, "THEMED:JUPITER", 0x196, 0x197, 0x39f);
-        tag(trs, "THEMED:SATURN", 0x198, 0x199);
+        tagAndMark(trs, "THEMED:CYRUS", 0x391, 0x193, 0x194);
+        tag(trs, "THEMED:MARS", 0x127, 0x210); //original encounter and tag battle
+        tagAndMark(trs, "THEMED:MARS", 0x195, 0x39e);
+        tag(trs, "THEMED:JUPITER", 0x196, 0x197);
+        tagAndMark(trs, 0x39f, "THEMED:JUPITER");
+        tagAndMark(trs, "THEMED:SATURN", 0x198, 0x199);
 
         // Lucas & Dawn tag battles
         tagFriendConsecutive(trs, "FRIEND1", 0x265);
@@ -463,95 +466,109 @@ public class Gen4Constants {
         tag(trs, "GYM16", 0x2a9, 0x2aa, 0x2ab, 0x2ac);
 
         // Gym Leaders
-        tag(trs, 0x14, "GYM1");
-        tag(trs, 0x15, "GYM2");
-        tag(trs, 0x1e, "GYM3");
-        tag(trs, 0x1f, "GYM4");
-        tag(trs, 0x22, "GYM5");
-        tag(trs, 0x21, "GYM6");
-        tag(trs, 0x20, "GYM7");
-        tag(trs, 0x23, "GYM8");
+        tagAndMark(trs, 0x14, "GYM1");
+        tagAndMark(trs, 0x15, "GYM2");
+        tagAndMark(trs, 0x1e, "GYM3");
+        tagAndMark(trs, 0x1f, "GYM4");
+        tagAndMark(trs, 0x22, "GYM5");
+        tagAndMark(trs, 0x21, "GYM6");
+        tagAndMark(trs, 0x20, "GYM7");
+        tagAndMark(trs, 0x23, "GYM8");
 
-        tag(trs, 0xFD, "GYM9");
-        tag(trs, 0xFE, "GYM10");
-        tag(trs, 0xFF, "GYM11");
-        tag(trs, 0x100, "GYM12");
-        tag(trs, 0x101, "GYM13");
-        tag(trs, 0x102, "GYM14");
-        tag(trs, 0x103, "GYM15");
-        tag(trs, 0x105, "GYM16");
+        tagAndMark(trs, 0xFD, "GYM9");
+        tagAndMark(trs, 0xFE, "GYM10");
+        tagAndMark(trs, 0xFF, "GYM11");
+        tagAndMark(trs, 0x100, "GYM12");
+        tagAndMark(trs, 0x101, "GYM13");
+        tagAndMark(trs, 0x102, "GYM14");
+        tagAndMark(trs, 0x103, "GYM15");
+        tagAndMark(trs, 0x105, "GYM16");
 
         // Elite 4
-        tag(trs, 0xf5, "ELITE1");
-        tag(trs, 0xf7, "ELITE2");
-        tag(trs, 0x1a2, "ELITE3");
-        tag(trs, 0xf6, "ELITE4");
-        tag(trs, 0xf4, "CHAMPION");
+        tagAndMark(trs, 0xf5, "ELITE1");
+        tagAndMark(trs, 0xf7, "ELITE2");
+        tagAndMark(trs, 0x1a2, "ELITE3");
+        tagAndMark(trs, 0xf6, "ELITE4");
+        tagAndMark(trs, 0xf4, "CHAMPION");
 
         // Red
-        tag(trs, 0x104, "UBER");
+        tagAndMark(trs, 0x104, "UBER");
 
         // Gym Rematches
-        tag(trs, 0x2c8, "GYM1");
-        tag(trs, 0x2c9, "GYM2");
-        tag(trs, 0x2ca, "GYM3");
-        tag(trs, 0x2cb, "GYM4");
-        tag(trs, 0x2ce, "GYM5");
-        tag(trs, 0x2cd, "GYM6");
-        tag(trs, 0x2cc, "GYM7");
-        tag(trs, 0x2cf, "GYM8");
+        tagAndMark(trs, 0x2c8, "GYM1");
+        tagAndMark(trs, 0x2c9, "GYM2");
+        tagAndMark(trs, 0x2ca, "GYM3");
+        tagAndMark(trs, 0x2cb, "GYM4");
+        tagAndMark(trs, 0x2ce, "GYM5");
+        tagAndMark(trs, 0x2cd, "GYM6");
+        tagAndMark(trs, 0x2cc, "GYM7");
+        tagAndMark(trs, 0x2cf, "GYM8");
 
-        tag(trs, 0x2d0, "GYM9");
-        tag(trs, 0x2d1, "GYM10");
-        tag(trs, 0x2d2, "GYM11");
-        tag(trs, 0x2d3, "GYM12");
-        tag(trs, 0x2d4, "GYM13");
-        tag(trs, 0x2d5, "GYM14");
-        tag(trs, 0x2d6, "GYM15");
-        tag(trs, 0x2d7, "GYM16");
+        tagAndMark(trs, 0x2d0, "GYM9");
+        tagAndMark(trs, 0x2d1, "GYM10");
+        tagAndMark(trs, 0x2d2, "GYM11");
+        tagAndMark(trs, 0x2d3, "GYM12");
+        tagAndMark(trs, 0x2d4, "GYM13");
+        tagAndMark(trs, 0x2d5, "GYM14");
+        tagAndMark(trs, 0x2d6, "GYM15");
+        tagAndMark(trs, 0x2d7, "GYM16");
 
         // Elite 4 Rematch
-        tag(trs, 0x2be, "ELITE1");
-        tag(trs, 0x2bf, "ELITE2");
-        tag(trs, 0x2c0, "ELITE3");
-        tag(trs, 0x2c1, "ELITE4");
-        tag(trs, 0x2bd, "CHAMPION");
+        tagAndMark(trs, 0x2be, "ELITE1");
+        tagAndMark(trs, 0x2bf, "ELITE2");
+        tagAndMark(trs, 0x2c0, "ELITE3");
+        tagAndMark(trs, 0x2c1, "ELITE4");
+        tagAndMark(trs, 0x2bd, "CHAMPION");
 
         // Rival Battles
         tagRivalConsecutive(trs, "RIVAL1", 0x1F0);
 
-        tag(trs, 0x10a, "RIVAL2-0");
-        tag(trs, 0x10d, "RIVAL2-1");
-        tag(trs, 0x1, "RIVAL2-2");
+        tagAndMark(trs, 0x10a, "RIVAL2-0");
+        tagAndMark(trs, 0x10d, "RIVAL2-1");
+        tagAndMark(trs, 0x1, "RIVAL2-2");
 
-        tag(trs, 0x10B, "RIVAL3-0");
-        tag(trs, 0x10E, "RIVAL3-1");
-        tag(trs, 0x107, "RIVAL3-2");
+        tagAndMark(trs, 0x10B, "RIVAL3-0");
+        tagAndMark(trs, 0x10E, "RIVAL3-1");
+        tagAndMark(trs, 0x107, "RIVAL3-2");
 
-        tag(trs, 0x121, "RIVAL4-0");
-        tag(trs, 0x10f, "RIVAL4-1");
-        tag(trs, 0x120, "RIVAL4-2");
+        tagAndMark(trs, 0x121, "RIVAL4-0");
+        tagAndMark(trs, 0x10f, "RIVAL4-1");
+        tagAndMark(trs, 0x120, "RIVAL4-2");
 
-        tag(trs, 0x10C, "RIVAL5-0");
-        tag(trs, 0x110, "RIVAL5-1");
-        tag(trs, 0x108, "RIVAL5-2");
+        tagAndMark(trs, 0x10C, "RIVAL5-0");
+        tagAndMark(trs, 0x110, "RIVAL5-1");
+        tagAndMark(trs, 0x108, "RIVAL5-2");
 
-        tagRivalConsecutive(trs, "RIVAL6", 0x11e);
+        tagAndMarkRivalConsecutive(trs, "RIVAL6", 0x11e);
         tagRivalConsecutive(trs, "RIVAL7", 0x2e0); // dragons den tag battle
-        tagRivalConsecutive(trs, "RIVAL8", 0x1EA);
+        tagAndMarkRivalConsecutive(trs, "RIVAL8", 0x1EA);
 
-        // Clair & Lance match in Dragons Den
+        // Clair & Lance match in Dragons Den; is a tag battle
         tag(trs, 0x2DE, "GYM8");
         tag(trs, 0x2DD, "CHAMPION");
 
         // Themed
-        tag(trs, "THEMED:ARIANA", 0x1df, 0x1de);
-        tag(trs, "THEMED:PETREL", 0x1e8, 0x1e7);
+        tag(trs, 0x1df, "THEMED:ARIANA"); //is a tag battle
+        tagAndMark(trs, 0x1de, "THEMED:ARIANA");
+        tagAndMark(trs, "THEMED:PETREL", 0x1e8, 0x1e7);
         tag(trs, "THEMED:PROTON", 0x1e6, 0x2c2);
-        tag(trs, "THEMED:SPROUTTOWER", 0x2b, 0x33, 0x34, 0x35, 0x36, 0x37, 0x122);
+        tag(trs, "THEMED:SPROUTTOWER", 0x2b, 0x33, 0x34, 0x35, 0x36, 0x37);
+        tagAndMark(trs, "THEMED:SPROUTTOWER", 0x122); //Elder Li
 
     }
+    
+    private static void tagAndMark(List<Trainer> allTrainers, int number, String tag) {
+        tag(allTrainers, number, tag);
+        allTrainers.get(number - 1).giveFullTeam = true;
+    }
 
+    private static void tagAndMark(List<Trainer> allTrainers, String tag, int... numbers) {
+        tag(allTrainers, tag, numbers);
+        for (int num : numbers) {
+            allTrainers.get(num - 1).giveFullTeam = true;
+        }
+    }
+    
     private static void tag(List<Trainer> allTrainers, int number, String tag) {
         allTrainers.get(number - 1).tag = tag;
     }
@@ -561,7 +578,31 @@ public class Gen4Constants {
             allTrainers.get(num - 1).tag = tag;
         }
     }
+    
+    private static void tagAndMarkRivalConsecutive(List<Trainer> allTrainers, String tag, int offsetFire) {
+        tagRivalConsecutive(allTrainers, tag, offsetFire);
+        allTrainers.get(offsetFire - 1).giveFullTeam = true;
+        allTrainers.get(offsetFire).giveFullTeam = true;
+        allTrainers.get(offsetFire - 2).giveFullTeam = true;
 
+    }
+
+    private static void tagAndMarkFriendConsecutive(List<Trainer> allTrainers, String tag, int offsetGrass) {
+        tagFriendConsecutive(allTrainers, tag, offsetGrass);
+        allTrainers.get(offsetGrass - 1).giveFullTeam = true;
+        allTrainers.get(offsetGrass).giveFullTeam = true;
+        allTrainers.get(offsetGrass + 1).giveFullTeam = true;
+
+    }
+
+    private static void tagAndMarkFriendConsecutive2(List<Trainer> allTrainers, String tag, int offsetWater) {
+        tagFriendConsecutive2(allTrainers, tag, offsetWater);
+        allTrainers.get(offsetWater - 1).giveFullTeam = true;
+        allTrainers.get(offsetWater).giveFullTeam = true;
+        allTrainers.get(offsetWater + 1).giveFullTeam = true;
+
+    }
+    
     private static void tagRivalConsecutive(List<Trainer> allTrainers, String tag, int offsetFire) {
         allTrainers.get(offsetFire - 1).tag = tag + "-0";
         allTrainers.get(offsetFire).tag = tag + "-1";

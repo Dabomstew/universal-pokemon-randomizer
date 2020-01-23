@@ -1400,23 +1400,42 @@ public abstract class AbstractRomHandler implements RomHandler {
         this.setTrainers(currentTrainers);
     }
 
+    
     @Override
     public void giveImportantTrainersAFullTeam() {
         List<Trainer> currentTrainers = this.getTrainers();
 
-        // New: randomize the order trainers are randomized in.
+        // randomize the order trainers are randomized in.
         // Leads to less predictable results for various modifiers.
         // Need to keep the original ordering around for saving though.
         List<Trainer> scrambledTrainers = new ArrayList<Trainer>(currentTrainers);
         Collections.shuffle(scrambledTrainers, this.random);
         for (Trainer t : scrambledTrainers) {
-            if(t.importantTrainer)
+            if(t.giveFullTeam && this.generationOfPokemon() > 2)
             {
+                //TODO: mark trainers as important and ensure they have the space for new pokemon
                 System.out.println("Important Trainer Found: " + t.fullDisplayName + " " +t.offset);
-                while(t.pokemon.size() < 6)
+                if(t.doubleBattle)
+                {
+                    System.out.println("is double battle");
+                }
+                while(t.pokemon.size() < 6 && t.pokemon.size() > 0)
                 {
                     TrainerPokemon filler;
-                    filler = t.pokemon.get(this.random.nextInt(t.pokemon.size() - 1));
+                    int index = 0;
+                    if(t.pokemon.size() > 1)
+                    {
+                        index = this.random.nextInt(t.pokemon.size() - 1);
+                    }
+                    filler = new TrainerPokemon();
+                    TrainerPokemon.copy(t.pokemon.get(index), filler);
+                    if(filler.pokemon == null)
+                    {
+                        System.err.println("filler pokemon is null");
+                    }
+                    //to prevent certain trainers having a full team of the same exact levels. range [3 below copied level to 1 above copied level]
+                    filler.level = filler.level + (this.random.nextInt(5)) - 3;
+                    System.out.println("filler: " + filler);
                     t.pokemon.add(filler);
                 }
             }
@@ -1429,7 +1448,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void randomizeTrainerMoves(boolean useTrainerMoveDiversity) {
         List<Trainer> currentTrainers = this.getTrainers();
 
-        // New: randomize the order trainers are randomized in.
+        // randomize the order trainers are randomized in.
         // Leads to less predictable results for various modifiers.
         // Need to keep the original ordering around for saving though.
         List<Trainer> scrambledTrainers = new ArrayList<Trainer>(currentTrainers);
@@ -1448,7 +1467,6 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             for (TrainerPokemon tp : t.pokemon) {
                 int[] pokeMoves;
-                //enable this once move diversity is functional
                 if(useTrainerMoveDiversity)
                 {
                     pokeMoves = getTrainerMoveDiversity(tp, movesets, tp.level, allMoves);
@@ -1457,7 +1475,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 {
                     pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon, movesets, tp.level);
                 }
-                //defualt move selection is based on previously implemented solution
                 tp.move1 = pokeMoves[0];
                 tp.move2 = pokeMoves[1];
                 tp.move3 = pokeMoves[2];
@@ -1473,8 +1490,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         int[] chosenMoves = new int[4];
         List<Move> moves = getDiverseMoves(p.pokemon, moveset, level, allMoves);
         Iterator<Move> iterator = moves.iterator();
-        
-        //System.out.println(p.name + " Move pool: " + moves.size());
 
         int currentmove = 0;
         if(moves.size() <= 4)
@@ -1564,8 +1579,6 @@ public abstract class AbstractRomHandler implements RomHandler {
             {
                 atkSpecializationWeight = maximumWeight;
             }
-            
-            //System.out.println("spWeight: " + spSpecializationWeight + " phWeight: " + phSpecializationWeight + " defWeight: " + defSpecializationWeight +  " atkWeight: " + atkSpecializationWeight);
             
             //self destruct, explosion
             int[] suicideMoves = new int[] {120, 153};
@@ -1663,14 +1676,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             int[] selfSleepingMoves = new int[] {214, 173};
             //only one sleep self inducing move will have the modifier applied;
             List<Move> ssiMoves = new ArrayList<Move>();
-            //later check if it has moves that rely on being able to put itself to sleep
             boolean hasSSleepingMoves = false;
             boolean hasBadSSAbility = false;
             float chanceToEnforceSleep = .06f;
             float badSSAbilityModifier = .05f;
             boolean ssChanceSucceeded = false;
-            //instead guarentee one sleep inducing move gets picked
-            //float ssleepInducingMoveModifier = 500f;
             float ssleepingMoveModifier = 10f;
             float negSSleepingMoveModifier = .005f;
             
@@ -1684,15 +1694,13 @@ public abstract class AbstractRomHandler implements RomHandler {
             int[] sleepInducingMoves = new int[] {464, 320, 95, 142, 547, 47, 79, 147, 281};
             //Dream Eater, Nightmare
             int[] sleepingMoves = new int[] {138, 171};
+            //only one sleep inducing move will have the modifier applied;
             List<Move> siMoves = new ArrayList<Move>();
-            //later check if it has moves or abilities that rely on being able to put a pokemon to sleep
             boolean hasSleepingMoves = false;
             boolean hasSleepingAbility = false;
             float chanceToEnforceOSleep = .40f;
             boolean osChanceSucceeded = false;
             float positiveAbilityChanceBuff = 2.25f;
-            //instead guarentee one sleep inducing move gets picked
-            //float sleepingInducingMoveModifier = 500f;
             float sleepingMoveModifier = 100f;
             float negSleepingMoveModifier = .05f;
             
@@ -2148,7 +2156,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         offensiveTypes.add(m.type);
                     }
                     
-                    //if move has chance to inflict status, give bonus
+                    //TODO: if move has chance to inflict status, give bonus
                     
                 } else if(m.category == MoveCategory.SPECIAL)
                 {
@@ -2158,7 +2166,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         offensiveTypes.add(m.type);
                     }
 
-                    //if move has chance to inflict status, give bonus
+                    //TODO: if move has chance to inflict status, give bonus
                     
                 }
                 
@@ -2255,17 +2263,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
             
-            //temporary usage of just picking a random move
-            /*while(currentmove < 4)
-            {
-                int nextMove = this.random.nextInt(moves.size());
-                chosenMoves[currentmove] = moves.get(nextMove).internalId;
-                moves.remove(nextMove);
-                currentmove++;
-            }*/
-            
-            
-            
         }
         
         return chosenMoves;
@@ -2285,7 +2282,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         int minimumLevelForMTs = 25;
         
         
-        //System.out.println(p.name);
         List<Integer> tmMoves = getTMMoves();
         List<Integer> hmMoves = getHMMoves();
         List<Integer> tmsLearned = new ArrayList<Integer>();
@@ -2295,7 +2291,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         //only have hms or tms after a certain pokemon level
         for(int i = 0; i < tmCompat.length; i++)
         {
-            //System.out.println("tmCompat list: " + tmCompat.length + " tms: " +getTMCount() + " hms: " + getHMCount());
             if(tmCompat[i] == true)
             {
                 if(i == 0)
@@ -2319,25 +2314,6 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        /**for(Integer i : tmsLearned)
-        {
-            if(i == 0)
-            {
-                System.err.println("0 is supposed to be a blank spot and not compatible");
-            }
-            else
-            {
-                //i = new Integer(tmMoves.get(i-1).intValue());
-                System.out.print(" tm id of "+(i) + " found|");
-            }
-        }
-        
-        for(Integer i : hmsLearned)
-        {
-            //i = new Integer(hmMoves.get(i).intValue());
-            System.out.print(" hm id of "+(i) + " found|");
-        }*/
-        
         List<Integer> mtMoves = this.getMoveTutorMoves();
         List<Integer> moveTutorsLearned = new ArrayList<Integer>();
         boolean[] moveTutorCompat = getMoveTutorCompatibility().get(p);
@@ -2360,19 +2336,6 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
         
-        /**for(Integer i : moveTutorsLearned)
-        {
-            if(i == 0)
-            {
-                System.err.println("0 is supposed to be a blank spot and not compatible");
-            }
-            else
-            {
-                //i = new Integer(mtMoves.get(i-1).intValue());
-                System.out.print(" mt id of "+(i) + " found|");
-            }
-        }*/
-        
         int levelToEvolveToCurrent = 0;
         //previous evos
         if(p.evosToDepth() != 0)
@@ -2382,7 +2345,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 //if isnt cyclic
                 //get leveltoevolvetocurrent
                 Evolution selectedChain = p.evolutionsTo.get(this.random.nextInt(p.evolutionsTo.size()));
-                //System.out.println("\nevo to; from: " + selectedChain.from + " to: " + selectedChain.to);
                 Set<Pokemon> visited = new HashSet<Pokemon>();
                 Set<Pokemon> recStack = new HashSet<Pokemon>();
                 if(skipCyclicCheck || !isCyclic(p, visited, recStack))
@@ -2404,7 +2366,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                             if(selectedChain.extraInfo <= level)
                             {
                                 levelToEvolveToCurrent = selectedChain.extraInfo;
-                               // System.out.println(selectedChain.from.name + " "+ p.name + " level to evolve: " + levelToEvolveToCurrent);
                                 previousLevel = levelToEvolveToCurrent - 1;
                             }
                         }
@@ -2420,39 +2381,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                     validMoves = getDiverseMoves(selectedChain.from,  moveset, previousLevel, allMoves, true);
                 }
-                //validMoves = getDiverseMoves(p.evolutionsTo.get(evoChain).from);
             }
-            //find and add the moves the previous evolution had at the lower level of whatever was needed for it to evolve
         }
         
         List<MoveLearnt> learnset = moveset.get(p);
-        //System.out.println("learnset length: " + learnset.size());
         for(Move m : allMoves)
         {
             if(m != null)
             {
-                /**for(Integer i : tmMoves)
-                {
-                    if(m.internalId == i.intValue())
-                    {
-                        System.out.print("\nTM Found: " + m.name);
-                    }
-                }
-                for(Integer i : hmMoves)
-                {
-                    if(m.internalId == i.intValue())
-                    {
-                        System.out.print("\nHM Found: " + m.name);
-                    }
-                }
-                for(Integer i : mtMoves)
-                {
-                    if(m.internalId == i.intValue())
-                    {
-                        System.out.print("\nMT Found: " + m.name);
-                    }
-                }*/
-                
                 if(!validMoves.contains(m))
                 {
                     //tms
@@ -2462,7 +2398,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                         {
                             if(tm.intValue() == m.internalId)
                             {
-                                //System.out.print(" TM of id:" + m.name +", id:" + m.internalId);
                                 validMoves.add(m);
                             }
                         }
@@ -2477,7 +2412,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                             {
                                 if(hm.intValue() == m.internalId)
                                 {
-                                    //System.out.print(" HM of id:" + m.name +", id:" + m.internalId);
                                     validMoves.add(m);
                                 }
                             }
@@ -2492,7 +2426,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 {
                                     if(tutor.intValue() == m.internalId)
                                     {
-                                        //System.out.print(" MT of id:" + m.name +", id:" + m.internalId);
                                         validMoves.add(m);
                                     }
                                 }
@@ -2516,7 +2449,6 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             
         }
-        //System.out.println("Moves checked: " + count + " Moves found: " + allMoves.size());
         
         return validMoves;
     }
@@ -5013,7 +4945,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (!canPick.contains(pk) && (wonderGuardAllowed || (pk.ability1 != GlobalConstants.WONDER_GUARD_INDEX
                         && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX))) 
                 {
-                    //careAboutFromDepth?
                     //no evo pokemon can appear for the 2nd stage of 3 stage evolutions and vice versa (if it isnt a legendary)
                     if((toDepth == 1 && fromDepth == 1 && pk.evosFromDepth() == 0 && pk.evosToDepth() == 0) || (toDepth == 0 && fromDepth == 0 && pk.evosFromDepth() == 1 && pk.evosToDepth() == 1)
                             && !current.isLegendary() && !pk.isLegendary())

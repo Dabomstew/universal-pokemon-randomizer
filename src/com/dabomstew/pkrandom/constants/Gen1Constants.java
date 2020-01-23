@@ -105,24 +105,24 @@ public class Gen1Constants {
 
     public static void tagTrainersUniversal(List<Trainer> trs) {
         // Gym Leaders
-        tbc(trs, 34, 0, "GYM1");
-        tbc(trs, 35, 0, "GYM2");
-        tbc(trs, 36, 0, "GYM3");
-        tbc(trs, 37, 0, "GYM4");
-        tbc(trs, 38, 0, "GYM5");
-        tbc(trs, 40, 0, "GYM6");
-        tbc(trs, 39, 0, "GYM7");
-        tbc(trs, 29, 2, "GYM8");
+        tbcAndMark(trs, 34, 0, "GYM1");
+        tbcAndMark(trs, 35, 0, "GYM2");
+        tbcAndMark(trs, 36, 0, "GYM3");
+        tbcAndMark(trs, 37, 0, "GYM4");
+        tbcAndMark(trs, 38, 0, "GYM5");
+        tbcAndMark(trs, 40, 0, "GYM6");
+        tbcAndMark(trs, 39, 0, "GYM7");
+        tbcAndMark(trs, 29, 2, "GYM8");
 
         // Other giovanni teams
-        tbc(trs, 29, 0, "GIO1");
-        tbc(trs, 29, 1, "GIO2");
+        tbcAndMark(trs, 29, 0, "GIO1");
+        tbcAndMark(trs, 29, 1, "GIO2");
 
         // Elite 4
-        tbc(trs, 44, 0, "ELITE1");
-        tbc(trs, 33, 0, "ELITE2");
-        tbc(trs, 46, 0, "ELITE3");
-        tbc(trs, 47, 0, "ELITE4");
+        tbcAndMark(trs, 44, 0, "ELITE1");
+        tbcAndMark(trs, 33, 0, "ELITE2");
+        tbcAndMark(trs, 46, 0, "ELITE3");
+        tbcAndMark(trs, 47, 0, "ELITE4");
     }
 
     public static void tagTrainersRB(List<Trainer> trs) {
@@ -135,29 +135,29 @@ public class Gen1Constants {
         tbc(trs, 25, 4, "RIVAL2-1");
         tbc(trs, 25, 5, "RIVAL2-2");
 
-        tbc(trs, 25, 6, "RIVAL3-0");
-        tbc(trs, 25, 7, "RIVAL3-1");
-        tbc(trs, 25, 8, "RIVAL3-2");
+        tbcAndMark(trs, 25, 6, "RIVAL3-0");
+        tbcAndMark(trs, 25, 7, "RIVAL3-1");
+        tbcAndMark(trs, 25, 8, "RIVAL3-2");
 
-        tbc(trs, 42, 0, "RIVAL4-0");
-        tbc(trs, 42, 1, "RIVAL4-1");
-        tbc(trs, 42, 2, "RIVAL4-2");
+        tbcAndMark(trs, 42, 0, "RIVAL4-0");
+        tbcAndMark(trs, 42, 1, "RIVAL4-1");
+        tbcAndMark(trs, 42, 2, "RIVAL4-2");
 
-        tbc(trs, 42, 3, "RIVAL5-0");
-        tbc(trs, 42, 4, "RIVAL5-1");
-        tbc(trs, 42, 5, "RIVAL5-2");
+        tbcAndMark(trs, 42, 3, "RIVAL5-0");
+        tbcAndMark(trs, 42, 4, "RIVAL5-1");
+        tbcAndMark(trs, 42, 5, "RIVAL5-2");
 
-        tbc(trs, 42, 6, "RIVAL6-0");
-        tbc(trs, 42, 7, "RIVAL6-1");
-        tbc(trs, 42, 8, "RIVAL6-2");
+        tbcAndMark(trs, 42, 6, "RIVAL6-0");
+        tbcAndMark(trs, 42, 7, "RIVAL6-1");
+        tbcAndMark(trs, 42, 8, "RIVAL6-2");
 
-        tbc(trs, 42, 9, "RIVAL7-0");
-        tbc(trs, 42, 10, "RIVAL7-1");
-        tbc(trs, 42, 11, "RIVAL7-2");
+        tbcAndMark(trs, 42, 9, "RIVAL7-0");
+        tbcAndMark(trs, 42, 10, "RIVAL7-1");
+        tbcAndMark(trs, 42, 11, "RIVAL7-2");
 
-        tbc(trs, 43, 0, "RIVAL8-0");
-        tbc(trs, 43, 1, "RIVAL8-1");
-        tbc(trs, 43, 2, "RIVAL8-2");
+        tbcAndMark(trs, 43, 0, "RIVAL8-0");
+        tbcAndMark(trs, 43, 1, "RIVAL8-1");
+        tbcAndMark(trs, 43, 2, "RIVAL8-2");
 
         // Gym Trainers
         tbc(trs, 5, 0, "GYM1");
@@ -216,31 +216,31 @@ public class Gen1Constants {
 
         tbc(trs, 25, 1, "RIVAL1-0");
 
-        tbc(trs, 25, 2, "RIVAL2-0");
+        tbcAndMark(trs, 25, 2, "RIVAL2-0");
 
-        tbc(trs, 42, 0, "RIVAL3-0");
+        tbcAndMark(trs, 42, 0, "RIVAL3-0");
 
-        tbc(trs, 42, 1, "RIVAL4-0");
-        tbc(trs, 42, 2, "RIVAL4-1");
-        tbc(trs, 42, 3, "RIVAL4-2");
+        tbcAndMark(trs, 42, 1, "RIVAL4-0");
+        tbcAndMark(trs, 42, 2, "RIVAL4-1");
+        tbcAndMark(trs, 42, 3, "RIVAL4-2");
 
-        tbc(trs, 42, 4, "RIVAL5-0");
-        tbc(trs, 42, 5, "RIVAL5-1");
-        tbc(trs, 42, 6, "RIVAL5-2");
+        tbcAndMark(trs, 42, 4, "RIVAL5-0");
+        tbcAndMark(trs, 42, 5, "RIVAL5-1");
+        tbcAndMark(trs, 42, 6, "RIVAL5-2");
 
-        tbc(trs, 42, 7, "RIVAL6-0");
-        tbc(trs, 42, 8, "RIVAL6-1");
-        tbc(trs, 42, 9, "RIVAL6-2");
+        tbcAndMark(trs, 42, 7, "RIVAL6-0");
+        tbcAndMark(trs, 42, 8, "RIVAL6-1");
+        tbcAndMark(trs, 42, 9, "RIVAL6-2");
 
-        tbc(trs, 43, 0, "RIVAL7-0");
-        tbc(trs, 43, 1, "RIVAL7-1");
-        tbc(trs, 43, 2, "RIVAL7-2");
+        tbcAndMark(trs, 43, 0, "RIVAL7-0");
+        tbcAndMark(trs, 43, 1, "RIVAL7-1");
+        tbcAndMark(trs, 43, 2, "RIVAL7-2");
 
         // Rocket Jessie & James
-        tbc(trs, 30, 41, "THEMED:JESSIE&JAMES");
-        tbc(trs, 30, 42, "THEMED:JESSIE&JAMES");
-        tbc(trs, 30, 43, "THEMED:JESSIE&JAMES");
-        tbc(trs, 30, 44, "THEMED:JESSIE&JAMES");
+        tbcAndMark(trs, 30, 41, "THEMED:JESSIE&JAMES");
+        tbcAndMark(trs, 30, 42, "THEMED:JESSIE&JAMES");
+        tbcAndMark(trs, 30, 43, "THEMED:JESSIE&JAMES");
+        tbcAndMark(trs, 30, 44, "THEMED:JESSIE&JAMES");
 
         // Gym Trainers
         tbc(trs, 5, 0, "GYM1");
@@ -293,6 +293,20 @@ public class Gen1Constants {
         tbc(trs, 31, 9, "GYM8");
     }
 
+    private static void tbcAndMark(List<Trainer> allTrainers, int classNum, int number, String tag) {
+        tbc(allTrainers, classNum, number, tag);
+        int currnum = -1;
+        for (Trainer t : allTrainers) {
+            if (t.trainerclass == classNum) {
+                currnum++;
+                if (currnum == number) {
+                    t.giveFullTeam = true;
+                    return;
+                }
+            }
+        }
+    }
+    
     private static void tbc(List<Trainer> allTrainers, int classNum, int number, String tag) {
         int currnum = -1;
         for (Trainer t : allTrainers) {
