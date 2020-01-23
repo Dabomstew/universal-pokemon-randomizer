@@ -882,7 +882,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public boolean canPatchPhysicalSpecialSplit() {
-        if(romEntry.romType == Gen3Constants.RomType_Em || romEntry.romType == Gen3Constants.RomType_FRLG)
+        //only emerald and fire red can be patched
+        if(romEntry.romType == Gen3Constants.RomType_Em || this.getROMCode().contains("BPR"))
         {
             return true;
         }
