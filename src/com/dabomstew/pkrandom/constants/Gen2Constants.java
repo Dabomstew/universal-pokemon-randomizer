@@ -169,30 +169,30 @@ public class Gen2Constants {
 
     public static void universalTrainerTags(List<Trainer> allTrainers) {
         // Gym Leaders
-        tbcAndMark(allTrainers, 1, 0, "GYM1");
-        tbcAndMark(allTrainers, 3, 0, "GYM2");
-        tbcAndMark(allTrainers, 2, 0, "GYM3");
-        tbcAndMark(allTrainers, 4, 0, "GYM4");
-        tbcAndMark(allTrainers, 7, 0, "GYM5");
-        tbcAndMark(allTrainers, 6, 0, "GYM6");
-        tbcAndMark(allTrainers, 5, 0, "GYM7");
-        tbcAndMark(allTrainers, 8, 0, "GYM8");
-        tbcAndMark(allTrainers, 17, 0, "GYM9");
-        tbcAndMark(allTrainers, 18, 0, "GYM10");
-        tbcAndMark(allTrainers, 19, 0, "GYM11");
-        tbcAndMark(allTrainers, 21, 0, "GYM12");
-        tbcAndMark(allTrainers, 26, 0, "GYM13");
-        tbcAndMark(allTrainers, 35, 0, "GYM14");
-        tbcAndMark(allTrainers, 46, 0, "GYM15");
-        tbcAndMark(allTrainers, 64, 0, "GYM16");
+        tbcAndMark(allTrainers, true, 1, 0, "GYM1");
+        tbcAndMark(allTrainers, true, 3, 0, "GYM2");
+        tbcAndMark(allTrainers, true, 2, 0, "GYM3");
+        tbcAndMark(allTrainers, true, 4, 0, "GYM4");
+        tbcAndMark(allTrainers, true, 7, 0, "GYM5");
+        tbcAndMark(allTrainers, true, 6, 0, "GYM6");
+        tbcAndMark(allTrainers, true, 5, 0, "GYM7");
+        tbcAndMark(allTrainers, true, 8, 0, "GYM8");
+        tbcAndMark(allTrainers, true, 17, 0, "GYM9");
+        tbcAndMark(allTrainers, true, 18, 0, "GYM10");
+        tbcAndMark(allTrainers, true, 19, 0, "GYM11");
+        tbcAndMark(allTrainers, true, 21, 0, "GYM12");
+        tbcAndMark(allTrainers, true, 26, 0, "GYM13");
+        tbcAndMark(allTrainers, true, 35, 0, "GYM14");
+        tbcAndMark(allTrainers, true, 46, 0, "GYM15");
+        tbcAndMark(allTrainers, true, 64, 0, "GYM16");
 
         // Elite 4 & Red
-        tbcAndMark(allTrainers, 1, 11, 0, "ELITE1");
-        tbcAndMark(allTrainers, 1, 15, 0, "ELITE2");
-        tbcAndMark(allTrainers, 1, 13, 0, "ELITE3");
-        tbcAndMark(allTrainers, 1, 14, 0, "ELITE4");
-        tbcAndMark(allTrainers, 2, 16, 0, "CHAMPION");
-        tbcAndMark(allTrainers, 4, 63, 0, "UBER");
+        tbcAndMark(allTrainers, 11, 0, "ELITE1");
+        tbcAndMark(allTrainers, 15, 0, "ELITE2");
+        tbcAndMark(allTrainers, 13, 0, "ELITE3");
+        tbcAndMark(allTrainers, 14, 0, "ELITE4");
+        tbcAndMark(allTrainers, 16, 0, "CHAMPION");
+        tbcAndMark(allTrainers, 63, 0, "UBER");
 
         // Silver
         // Order in rom is BAYLEEF, QUILAVA, CROCONAW teams
@@ -352,10 +352,11 @@ public class Gen2Constants {
     }
     
     private static void tbcAndMark(List<Trainer> allTrainers, int classNum, int number, String tag) {
-        tbcAndMark(allTrainers, 0, classNum, number, tag);
+        tbcAndMark(allTrainers, false, classNum, number, tag);
     }
     
-    private static void tbcAndMark(List<Trainer> allTrainers, int holdAmount, int classNum, int number, String tag) {
+    
+    private static void tbcAndMark(List<Trainer> allTrainers, boolean isGymLeader, int classNum, int number, String tag) {
         tbc(allTrainers, classNum, number, tag);
         int currnum = -1;
         for (Trainer t : allTrainers) {
@@ -364,26 +365,15 @@ public class Gen2Constants {
                 currnum++;
                 if (currnum == number) {
                     t.giveFullTeam = true;
-                    t.setAmountOfHoldItems(holdAmount);
+                    if(isGymLeader) {
+                        t.isGymLeader = true;
+                    }
                     return;
                 }
             }
         }
     }
-    private static void tbc(List<Trainer> allTrainers, int holdAmount, int classNum, int number, String tag) {
-        tbc(allTrainers, classNum, number, tag);
-        int currnum = -1;
-        for (Trainer t : allTrainers) {
-            // adjusted to not change the above but use 0-indexing properly
-            if (t.trainerclass == classNum - 1) {
-                currnum++;
-                if (currnum == number) {
-                    t.setAmountOfHoldItems(holdAmount);
-                    return;
-                }
-            }
-        }
-    }
+    
     private static void tbc(List<Trainer> allTrainers, int classNum, int number, String tag) {
         int currnum = -1;
         for (Trainer t : allTrainers) {

@@ -105,14 +105,14 @@ public class Gen1Constants {
 
     public static void tagTrainersUniversal(List<Trainer> trs) {
         // Gym Leaders
-        tbcAndMark(trs, 34, 0, "GYM1");
-        tbcAndMark(trs, 35, 0, "GYM2");
-        tbcAndMark(trs, 36, 0, "GYM3");
-        tbcAndMark(trs, 37, 0, "GYM4");
-        tbcAndMark(trs, 38, 0, "GYM5");
-        tbcAndMark(trs, 40, 0, "GYM6");
-        tbcAndMark(trs, 39, 0, "GYM7");
-        tbcAndMark(trs, 29, 2, "GYM8");
+        tbcAndMark(trs, true, 34, 0, "GYM1");
+        tbcAndMark(trs, true, 35, 0, "GYM2");
+        tbcAndMark(trs, true, 36, 0, "GYM3");
+        tbcAndMark(trs, true, 37, 0, "GYM4");
+        tbcAndMark(trs, true, 38, 0, "GYM5");
+        tbcAndMark(trs, true, 40, 0, "GYM6");
+        tbcAndMark(trs, true, 39, 0, "GYM7");
+        tbcAndMark(trs, true, 29, 2, "GYM8");
 
         // Other giovanni teams
         tbcAndMark(trs, 29, 0, "GIO1");
@@ -293,6 +293,21 @@ public class Gen1Constants {
         tbc(trs, 31, 9, "GYM8");
     }
 
+    private static void tbcAndMark(List<Trainer> allTrainers, boolean isGymLeader, int classNum, int number, String tag) {
+        tbc(allTrainers, classNum, number, tag);
+        int currnum = -1;
+        for (Trainer t : allTrainers) {
+            if (t.trainerclass == classNum) {
+                currnum++;
+                if (currnum == number) {
+                    t.giveFullTeam = true;
+                    t.isGymLeader = true;
+                    return;
+                }
+            }
+        }
+    }
+    
     private static void tbcAndMark(List<Trainer> allTrainers, int classNum, int number, String tag) {
         tbc(allTrainers, classNum, number, tag);
         int currnum = -1;

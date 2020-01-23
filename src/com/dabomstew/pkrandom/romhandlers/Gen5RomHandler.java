@@ -2471,6 +2471,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 typing.add(Type.DRAGON);
             } else if(trainer.tag.equals("GYM8")) {
                 typing.add(Type.WATER);
+            } else if(trainer.tag.equals("GYM9")) { //Chilan
+                typing.add(Type.WATER);
+            } else if(trainer.tag.equals("GYM10")) { //Chili
+                typing.add(Type.FIRE);
+            } else if(trainer.tag.equals("GYM11")) { //Cress
+                typing.add(Type.GRASS);
             } else if(trainer.tag.equals("ELITE1")) {
                 typing.add(Type.GHOST);
             } else if(trainer.tag.equals("ELITE2")) {
@@ -2485,6 +2491,16 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         return typing;
     }
 
+    @Override
+    public int getOranIndex() {
+        return 155;
+    }
+    
+    @Override
+    public int getSitrusIndex() {
+        return 158;
+    }
+    
     @Override
     public int getRandomHoldItem(TrainerPokemon tpk) {
         //Sitrus Berry, Bright Powder, Quick Claw, Zoom lens, Destiny Knot, Razor Fang, Red Card, Lum Berry
@@ -2542,7 +2558,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         else
         {
             //defensive
-            competitiveHeldItemIndexes.add(new Integer(200)); //Leftovers
+            competitiveHeldItemIndexes.add(new Integer(234)); //Leftovers
             competitiveHeldItemIndexes.add(new Integer(539)); //Float Stone
             competitiveHeldItemIndexes.add(new Integer(540)); //Rocky Helmet
         }

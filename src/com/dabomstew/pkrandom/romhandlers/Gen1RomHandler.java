@@ -1791,6 +1791,18 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public int getOranIndex() {
+        //no equivalent, return no item
+        return 0;
+    }
+    
+    @Override
+    public int getSitrusIndex() {
+        //no equivalent, return no item
+        return 0;
+    }
+    
+    @Override
     public int getRandomHoldItem(TrainerPokemon tpk) {
         //gen 1 doesnt have held items
         return 0;

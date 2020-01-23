@@ -823,6 +823,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpTryMoveDiversityCB.setEnabled(false);
         this.tpFullTeamImportantTrainersCB.setEnabled(false);
         this.tpGiveHoldItemsCB.setEnabled(false);
+        this.tpGiveHoldItemsCB.setVisible(true);
 
         this.tpUnchangedRB.setSelected(true);
         this.tpPowerLevelsCB.setSelected(false);
@@ -1186,6 +1187,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             }
             this.tpNoEarlyShedinjaCB.setSelected(false);
             this.tpTryMoveDiversityCB.setVisible(romHandler.generationOfPokemon() > 2);
+            this.tpGiveHoldItemsCB.setVisible(romHandler.generationOfPokemon() > 1);
 
             this.wpArea11RB.setEnabled(true);
             this.wpGlobalRB.setEnabled(true);

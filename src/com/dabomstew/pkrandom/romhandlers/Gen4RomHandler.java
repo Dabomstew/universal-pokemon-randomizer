@@ -3218,9 +3218,23 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public int getOranIndex() {
+        return 155;
+    }
+    
+    @Override
+    public int getSitrusIndex() {
+        return 158;
+    }
+    
+    @Override
     public int getRandomHoldItem(TrainerPokemon tpk) {
         //Sitrus Berry, Bright Powder, Quick Claw, Zoom lens, Destiny Knot, Razor Fang, Lum Berry
-        List<Integer> competitiveHeldItemIndexes = Arrays.asList(158, 213, 217, 276, 280, 327, 157);
+        int[] competitiveHeldItemIndexesPreInit = new int[] {158, 213, 217, 276, 280, 327, 157};
+        List<Integer> competitiveHeldItemIndexes = new ArrayList<Integer>();
+        for(int i : competitiveHeldItemIndexesPreInit) {
+            competitiveHeldItemIndexes.add(new Integer(i));
+        }
         List<HoldItem> competitiveHeldItems = new ArrayList<HoldItem>();
         if((tpk.pokemon.attack + tpk.pokemon.spatk) > (tpk.pokemon.defense + tpk.pokemon.spdef))
         {
@@ -3255,7 +3269,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         else
         {
             //defensive
-            competitiveHeldItemIndexes.add(new Integer(200)); //Leftovers
+            competitiveHeldItemIndexes.add(new Integer(234)); //Leftovers
         }
         if(tpk.pokemon.spatk > tpk.pokemon.attack)
         {

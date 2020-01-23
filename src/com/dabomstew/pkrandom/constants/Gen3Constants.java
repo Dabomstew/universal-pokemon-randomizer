@@ -357,20 +357,20 @@ public class Gen3Constants {
         tag(trs, "GYM8", 0x82, 0x266, 0x83, 0x12D, 0x81, 0x74, 0x80, 0x265);
 
         // Gym Leaders
-        tagAndMark(trs, 0x109, "GYM1");
-        tagAndMark(trs, 0x10A, "GYM2");
-        tagAndMark(trs, 0x10B, "GYM3");
-        tagAndMark(trs, 0x10C, "GYM4");
-        tagAndMark(trs, 0x10D, "GYM5");
-        tagAndMark(trs, 0x10E, "GYM6");
-        tagAndMark(trs, 0x10F, "GYM7");
-        tagAndMark(trs, 0x110, "GYM8");
+        tagAndMark(trs, true, 0x109, "GYM1");
+        tagAndMark(trs, true, 0x10A, "GYM2");
+        tagAndMark(trs, true, 0x10B, "GYM3");
+        tagAndMark(trs, true, 0x10C, "GYM4");
+        tagAndMark(trs, true, 0x10D, "GYM5");
+        tagAndMark(trs, true, 0x10E, "GYM6");
+        tagAndMark(trs, true, 0x10F, "GYM7");
+        tagAndMark(trs, true, 0x110, "GYM8");
         // Elite 4
-        tagAndMark(trs, 1, 0x105, "ELITE1");
-        tagAndMark(trs, 1, 0x106, "ELITE2");
-        tagAndMark(trs, 1, 0x107, "ELITE3");
-        tagAndMark(trs, 1, 0x108, "ELITE4");
-        tagAndMark(trs, 2, 0x14F, "CHAMPION");
+        tagAndMark(trs, 0x105, "ELITE1");
+        tagAndMark(trs, 0x106, "ELITE2");
+        tagAndMark(trs, 0x107, "ELITE3");
+        tagAndMark(trs, 0x108, "ELITE4");
+        tagAndMark(trs, 0x14F, "CHAMPION");
         // Brendan
         tag(trs, 0x208, "RIVAL1-2");
         tag(trs, 0x20B, "RIVAL1-0");
@@ -429,30 +429,30 @@ public class Gen3Constants {
         tag(trs, "GYM8", 0x265, 0x80, 0x1F6, 0x73, 0x81, 0x76, 0x82, 0x12D, 0x83, 0x266);
 
         // Gym Leaders + Emerald Rematches!
-        tagAndMark(trs, "GYM1", 0x109);
-        tagAndMark(trs, "GYM2", 0x10A);
-        tagAndMark(trs, "GYM3", 0x10B);
-        tagAndMark(trs, "GYM4", 0x10C);
-        tagAndMark(trs, "GYM5", 0x10D);
-        tagAndMark(trs, "GYM6", 0x10E);
-        tagAndMark(trs, "GYM7", 0x10F);
-        tagAndMark(trs, "GYM8", 0x110);
+        tagAndMark(trs, true, "GYM1", 0x109);
+        tagAndMark(trs, true, "GYM2", 0x10A);
+        tagAndMark(trs, true, "GYM3", 0x10B);
+        tagAndMark(trs, true, "GYM4", 0x10C);
+        tagAndMark(trs, true, "GYM5", 0x10D);
+        tagAndMark(trs, true, "GYM6", 0x10E);
+        tagAndMark(trs, true, "GYM7", 0x10F);
+        tagAndMark(trs, true, "GYM8", 0x110);
         //the rematches
-        tagAndMark(trs, 1, "GYM1", 0x302, 0x303, 0x304, 0x305);
-        tagAndMark(trs, 1, "GYM2", 0x306, 0x307, 0x308, 0x309);
-        tagAndMark(trs, 1, "GYM3", 0x30A, 0x30B, 0x30C, 0x30D);
-        tagAndMark(trs, 1, "GYM4", 0x30E, 0x30F, 0x310, 0x311);
-        tagAndMark(trs, 1, "GYM5", 0x312, 0x313, 0x314, 0x315);
-        tagAndMark(trs, 1, "GYM6", 0x316, 0x317, 0x318, 0x319);
-        tagAndMark(trs, 1, "GYM7", 0x31A, 0x31B, 0x31C, 0x31D);
-        tagAndMark(trs, 1, "GYM8", 0x31E, 0x31F, 0x320, 0x321);
+        tagAndMark(trs, true, "GYM1", 0x302, 0x303, 0x304, 0x305);
+        tagAndMark(trs, true, "GYM2", 0x306, 0x307, 0x308, 0x309);
+        tagAndMark(trs, true, "GYM3", 0x30A, 0x30B, 0x30C, 0x30D);
+        tagAndMark(trs, true, "GYM4", 0x30E, 0x30F, 0x310, 0x311);
+        tagAndMark(trs, true, "GYM5", 0x312, 0x313, 0x314, 0x315);
+        tagAndMark(trs, true, "GYM6", 0x316, 0x317, 0x318, 0x319);
+        tagAndMark(trs, true, "GYM7", 0x31A, 0x31B, 0x31C, 0x31D);
+        tagAndMark(trs, true, "GYM8", 0x31E, 0x31F, 0x320, 0x321);
 
         // Elite 4
-        tagAndMark(trs, 1, 0x105, "ELITE1");
-        tagAndMark(trs, 1, 0x106, "ELITE2");
-        tagAndMark(trs, 1, 0x107, "ELITE3");
-        tagAndMark(trs, 1, 0x108, "ELITE4");
-        tagAndMark(trs, 2, 0x14F, "CHAMPION");
+        tagAndMark(trs, 0x105, "ELITE1");
+        tagAndMark(trs, 0x106, "ELITE2");
+        tagAndMark(trs, 0x107, "ELITE3");
+        tagAndMark(trs, 0x108, "ELITE4");
+        tagAndMark(trs, 0x14F, "CHAMPION");
 
         // Brendan
         tag(trs, 0x208, "RIVAL1-2");
@@ -504,7 +504,7 @@ public class Gen3Constants {
         tagAndMark(trs, "THEMED:SHELLY", 0x20, 0x21);
 
         // Steven
-        tagAndMark(trs, 4, 0x324, "UBER");
+        tagAndMark(trs, 0x324, "UBER");
 
     }
 
@@ -521,30 +521,30 @@ public class Gen3Constants {
         tag(trs, "GYM8", 0x129, 0x143, 0x188, 0x190, 0x142, 0x128, 0x191, 0x144);
 
         // Gym Leaders
-        tagAndMark(trs, 0x19E, "GYM1");
-        tagAndMark(trs, 0x19F, "GYM2");
-        tagAndMark(trs, 0x1A0, "GYM3");
-        tagAndMark(trs, 0x1A1, "GYM4");
-        tagAndMark(trs, 0x1A2, "GYM5");
-        tagAndMark(trs, 0x1A4, "GYM6");
-        tagAndMark(trs, 0x1A3, "GYM7");
-        tagAndMark(trs, 1, 0x15E, "GYM8");
+        tagAndMark(trs, true, 0x19E, "GYM1");
+        tagAndMark(trs, true, 0x19F, "GYM2");
+        tagAndMark(trs, true, 0x1A0, "GYM3");
+        tagAndMark(trs, true, 0x1A1, "GYM4");
+        tagAndMark(trs, true, 0x1A2, "GYM5");
+        tagAndMark(trs, true, 0x1A4, "GYM6");
+        tagAndMark(trs, true, 0x1A3, "GYM7");
+        tagAndMark(trs, true, 0x15E, "GYM8");
 
         // Giovanni
         tagAndMark(trs, 0x15C, "GIO1");
         tagAndMark(trs, 0x15D, "GIO2");
 
         // E4 Round 1
-        tagAndMark(trs, 1, 0x19A, "ELITE1-1");
-        tagAndMark(trs, 1, 0x19B, "ELITE2-1");
-        tagAndMark(trs, 1, 0x19C, "ELITE3-1");
-        tagAndMark(trs, 1, 0x19D, "ELITE4-1");
+        tagAndMark(trs, 0x19A, "ELITE1-1");
+        tagAndMark(trs, 0x19B, "ELITE2-1");
+        tagAndMark(trs, 0x19C, "ELITE3-1");
+        tagAndMark(trs, 0x19D, "ELITE4-1");
 
         // E4 Round 2
-        tagAndMark(trs, 2, 0x2DF, "ELITE1-2");
-        tagAndMark(trs, 2, 0x2E0, "ELITE2-2");
-        tagAndMark(trs, 2, 0x2E1, "ELITE3-2");
-        tagAndMark(trs, 2, 0x2E2, "ELITE4-2");
+        tagAndMark(trs, 0x2DF, "ELITE1-2");
+        tagAndMark(trs, 0x2E0, "ELITE2-2");
+        tagAndMark(trs, 0x2E1, "ELITE3-2");
+        tagAndMark(trs, 0x2E2, "ELITE4-2");
 
         // Rival Battles
 
@@ -584,58 +584,51 @@ public class Gen3Constants {
         tagAndMark(trs, 0x1B4, "RIVAL7-2");
 
         // E4 Round 1
-        tagAndMark(trs, 2, 0x1B8, "RIVAL8-0");
-        tagAndMark(trs, 2, 0x1B6, "RIVAL8-1");
-        tagAndMark(trs, 2, 0x1B7, "RIVAL8-2");
+        tagAndMark(trs, 0x1B8, "RIVAL8-0");
+        tagAndMark(trs, 0x1B6, "RIVAL8-1");
+        tagAndMark(trs, 0x1B7, "RIVAL8-2");
 
         // E4 Round 2
-        tagAndMark(trs, 4, 0x2E5, "RIVAL9-0");
-        tagAndMark(trs, 4, 0x2E3, "RIVAL9-1");
-        tagAndMark(trs, 4, 0x2E4, "RIVAL9-2");
+        tagAndMark(trs, 0x2E5, "RIVAL9-0");
+        tagAndMark(trs, 0x2E3, "RIVAL9-1");
+        tagAndMark(trs, 0x2E4, "RIVAL9-2");
 
     }
 
-    private static void tagAndMark(List<Trainer> allTrainers, int holdAmount, String tag, int... numbers) {
-        tag(allTrainers, holdAmount, tag, numbers);
+    private static void tagAndMark(List<Trainer> allTrainers, boolean isGymLeader, String tag, int... numbers) {
+        tag(allTrainers, tag, numbers);
         for(int num : numbers) {
             allTrainers.get(num - 1).giveFullTeam = true;
+            allTrainers.get(num - 1).isGymLeader = isGymLeader;
         }
     }
     
-    private static void tagAndMark(List<Trainer> trainers, int holdAmount, int trainerNum, String tag) {
-        tag(trainers, holdAmount, trainerNum, tag);
+    private static void tagAndMark(List<Trainer> trainers, boolean isGymLeader, int trainerNum, String tag) {
+        tag(trainers, trainerNum, tag);
         trainers.get(trainerNum - 1).giveFullTeam = true;
+        trainers.get(trainerNum - 1).isGymLeader = isGymLeader;
     }
 
-    private static void tagAndMark(List<Trainer> trainers, int trainerNum, String tag) {
-        tag(trainers, 0, trainerNum, tag);
-        trainers.get(trainerNum - 1).giveFullTeam = true;
-    }
-    
     private static void tagAndMark(List<Trainer> allTrainers, String tag, int... numbers) {
-        tag(allTrainers, 0, tag, numbers);
+        tag(allTrainers, tag, numbers);
         for(int num : numbers) {
             allTrainers.get(num - 1).giveFullTeam = true;
         }
     }
+    
+    private static void tagAndMark(List<Trainer> trainers, int trainerNum, String tag) {
+        tag(trainers, trainerNum, tag);
+        trainers.get(trainerNum - 1).giveFullTeam = true;
+    }
+    
     
     private static void tag(List<Trainer> trainers, int trainerNum, String tag) {
-        tag(trainers, 0, trainerNum, tag);
+        trainers.get(trainerNum - 1).tag = tag;
     }
 
     private static void tag(List<Trainer> allTrainers, String tag, int... numbers) {
-        tag(allTrainers, 0, tag, numbers);
-    }
-    
-    private static void tag(List<Trainer> trainers, int holdAmount, int trainerNum, String tag) {
-        trainers.get(trainerNum - 1).tag = tag;
-        trainers.get(trainerNum - 1).setAmountOfHoldItems(holdAmount);
-    }
-
-    private static void tag(List<Trainer> allTrainers, int holdAmount, String tag, int... numbers) {
         for (int num : numbers) {
             allTrainers.get(num - 1).tag = tag;
-            allTrainers.get(num - 1).setAmountOfHoldItems(holdAmount);
         }
     }
 

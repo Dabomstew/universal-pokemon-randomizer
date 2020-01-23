@@ -1425,26 +1425,79 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Trainer> scrambledTrainers = new ArrayList<Trainer>(currentTrainers);
         Collections.shuffle(scrambledTrainers, this.random);
         
-        //TODO: add an option for higher item density (every uber, elite 4, champion has 6 items; gym leaders get 2 sitrus berries except GYM1 gets an oran and GYM2 gets an oran and a sitrus)[add isGymLeader() function]
         for (Trainer t : scrambledTrainers) {
-            if(t.getAmountOfHoldItems() > t.pokemon.size())
+            if(t.isGymLeader)
             {
-                t.setAmountOfHoldItems(t.pokemon.size());
-            }
-            if(t.getAmountOfHoldItems() > 0)
-            {
+                int sitrusAmount;
+                if(t.tag.contains("GYM1")) {
+                    //give an oran
+                    sitrusAmount = 0;
+                } else if(t.tag.contains("GYM2")) {
+                    //give an oran and a sitrus
+                    sitrusAmount = 1;
+                } else {
+                    //give two sitrus
+                    sitrusAmount = 2;
+                }
                 List<TrainerPokemon> tempList = new ArrayList<TrainerPokemon>(t.pokemon);
-                for(TrainerPokemon tp : tempList) {
+                int indexOfHighestLevel = t.pokemon.size() - 1;
+                for(int tpIndex = 0; tpIndex < tempList.size(); tpIndex++) {
                     //wipe items on pokemon trainers that will have their pokemon held items re-randomized
-                    tp.heldItem = 0;
+                    tempList.get(tpIndex).heldItem = 0;
+                    if(tempList.get(tpIndex).level > t.pokemon.get(indexOfHighestLevel).level)
+                    {
+                        indexOfHighestLevel = tpIndex;
+                    }
                 }
-                for(int i = 0; i < t.getAmountOfHoldItems(); i++) {
-                    int pokemonIndex = this.random.nextInt(tempList.size());
-                    tempList.get(pokemonIndex).heldItem = this.getRandomHoldItem(tempList.get(pokemonIndex));
-                    tempList.remove(pokemonIndex);
+                if(sitrusAmount == 0) {
+                    tempList.get(indexOfHighestLevel).heldItem = this.getOranIndex();
+                    tempList.remove(indexOfHighestLevel);
+                } else if(sitrusAmount == 1) {
+                    tempList.get(indexOfHighestLevel).heldItem = this.getSitrusIndex();
+                    tempList.remove(indexOfHighestLevel);
+                    
+                    int oran = this.random.nextInt(tempList.size());
+                    tempList.get(oran).heldItem = this.getOranIndex();
+                    tempList.remove(oran);
+                } else if(sitrusAmount == 2) {
+                    tempList.get(indexOfHighestLevel).heldItem = this.getSitrusIndex();
+                    tempList.remove(indexOfHighestLevel);
+
+                    int sitrus2 = this.random.nextInt(tempList.size());
+                    tempList.get(sitrus2).heldItem = this.getSitrusIndex();
+                    tempList.remove(sitrus2);
                 }
             }
-            
+            else
+            {
+                int holdItemAmount = 0;
+                if(t.tag != null && (t.tag.contains("ELITE1") || t.tag.contains("ELITE2") || t.tag.contains("ELITE3") || t.tag.contains("ELITE4") ||
+                        t.tag.contains("CHAMPION") || t.tag.contains("UBER") || t.tag.contains("MAXIE") || t.tag.contains("ARCHIE"))) {
+                    holdItemAmount = 6;
+                }
+                //if fire red or leaf green and if one of the rival champion battles
+                if(t.tag != null && (this.getROMCode().contains("BPR") || this.getROMCode().contains("BPG")) && (t.tag.contains("RIVAL8") || t.tag.contains("RIVAL9")))
+                {
+                    holdItemAmount = 6;
+                }
+                if(holdItemAmount > t.pokemon.size())
+                {
+                    holdItemAmount = t.pokemon.size();
+                }
+                if(holdItemAmount > 0)
+                {
+                    List<TrainerPokemon> tempList = new ArrayList<TrainerPokemon>(t.pokemon);
+                    for(TrainerPokemon tp : tempList) {
+                        //wipe items on pokemon trainers that will have their pokemon held items re-randomized
+                        tp.heldItem = 0;
+                    }
+                    for(int i = 0; i < holdItemAmount; i++) {
+                        int pokemonIndex = this.random.nextInt(tempList.size());
+                        tempList.get(pokemonIndex).heldItem = this.getRandomHoldItem(tempList.get(pokemonIndex));
+                        tempList.remove(pokemonIndex);
+                    }
+                }
+            }
         }
 
         this.setTrainers(currentTrainers);
@@ -1460,15 +1513,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Trainer> scrambledTrainers = new ArrayList<Trainer>(currentTrainers);
         Collections.shuffle(scrambledTrainers, this.random);
         for (Trainer t : scrambledTrainers) {
-            if(t.giveFullTeam && this.generationOfPokemon() > 2)
-            {
+            if(t.giveFullTeam && this.generationOfPokemon() > 2) {
                 //System.out.println("Important Trainer Found: " + t.fullDisplayName + " " +t.offset);
-                if(t.doubleBattle)
+                /*if(t.doubleBattle)
                 {
                     System.out.println("is double battle");
-                }
-                while(t.pokemon.size() < 6 && t.pokemon.size() > 0)
-                {
+                }*/
+                while(t.pokemon.size() < 6 && t.pokemon.size() > 0) {
                     TrainerPokemon filler;
                     int index = 0;
                     if(t.pokemon.size() > 1)
@@ -1483,8 +1534,22 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                     //to prevent certain trainers having a full team of the same exact levels. range [3 below copied level to 1 above copied level]
                     filler.level = filler.level + (this.random.nextInt(5)) - 3;
-                    System.out.println("filler: " + filler);
+                    //System.out.println("filler: " + filler);
                     t.pokemon.add(filler);
+                }
+                
+                //sort trainer team from weakest to strongest
+                for(int i = 0; i < t.pokemon.size(); i++) {
+                    int weakestPokemon = i;
+                    for(int j = i; j < t.pokemon.size(); j++) {
+                        if(t.pokemon.get(j).level < t.pokemon.get(weakestPokemon).level) {
+                            weakestPokemon = j;
+                        }
+                    }
+                    //swap weakest pokemon with current index
+                    TrainerPokemon oldPokemon = t.pokemon.get(i);
+                    t.pokemon.set(i, t.pokemon.get(weakestPokemon));
+                    t.pokemon.set(weakestPokemon, oldPokemon);
                 }
             }
         }

@@ -2351,9 +2351,25 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public int getOranIndex() {
+        //no oran berry, return equivalent: berry instead
+        return 173;
+    }
+    
+    @Override
+    public int getSitrusIndex() {
+        //no sitrus berry, return equivalent: gold berry instead
+        return 174;
+    }
+    
+    @Override
     public int getRandomHoldItem(TrainerPokemon tpk) {
         //Quick Claw, King's Rock, Focus Band, Scope Lens, Leftovers, Berserk Gene, Gold Berry, Bright Powder, Miracle Berry
-        List<Integer> competitiveHeldItemsIndexes = Arrays.asList(73, 82, 119, 140, 146, 152, 174, 3, 109);
+        int[] competitiveHeldItemsIndexesPreInit = new int[] {73, 82, 119, 140, 146, 152, 174, 3, 109};
+        List<Integer> competitiveHeldItemsIndexes = new ArrayList<Integer>();
+        for(int i : competitiveHeldItemsIndexesPreInit) {
+            competitiveHeldItemsIndexes.add(new Integer(i));
+        }
         List<HoldItem> competitiveHeldItems = new ArrayList<HoldItem>();
         for(Integer i : competitiveHeldItemsIndexes)
         {

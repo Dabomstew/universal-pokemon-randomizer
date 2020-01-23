@@ -219,6 +219,9 @@ public interface RomHandler {
     public boolean tpHasMove(TrainerPokemon tp, int move);
     public boolean tpHasMove(TrainerPokemon tp, int... move);
     
+    public int getOranIndex();
+    public int getSitrusIndex();
+    
     // Randomizer: moves
 
     public void randomizeMovePowers();

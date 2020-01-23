@@ -37,17 +37,8 @@ public class Trainer implements Comparable<Trainer> {
     public String fullDisplayName;
     public boolean doubleBattle;
     public boolean female;
+    public boolean isGymLeader;
     public boolean giveFullTeam;
-    
-    private int amountOfHoldItems;
-    
-    public int getAmountOfHoldItems() {
-        return amountOfHoldItems;
-    }
-    
-    public void setAmountOfHoldItems(int amount) {
-        amountOfHoldItems = amount;
-    }
     
     public String toString() {
         StringBuilder sb = new StringBuilder("[");

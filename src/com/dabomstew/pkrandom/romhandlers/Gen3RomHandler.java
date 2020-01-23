@@ -3413,9 +3413,23 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    public int getOranIndex() {
+        return 139;
+    }
+    
+    @Override
+    public int getSitrusIndex() {
+        return 142;
+    }
+    
+    @Override
     public int getRandomHoldItem(TrainerPokemon tpk) {
         //Bright Powder, Quick Claw, King's Rock, Shell Bell, Lum Berry, Sitrus Berry
-        List<Integer> competitiveHeldItemIndexes = Arrays.asList(179, 183, 187, 219, 141, 142);
+        int[] competitiveHeldItemIndexesPreInit = new int[] {179, 183, 187, 219, 141, 142};
+        List<Integer> competitiveHeldItemIndexes = new ArrayList<Integer>();
+        for(int i : competitiveHeldItemIndexesPreInit) {
+            competitiveHeldItemIndexes.add(new Integer(i));
+        }
         List<HoldItem> competitiveHeldItems = new ArrayList<HoldItem>();
         if((tpk.pokemon.attack + tpk.pokemon.spatk) > (tpk.pokemon.defense + tpk.pokemon.spdef))
         {
