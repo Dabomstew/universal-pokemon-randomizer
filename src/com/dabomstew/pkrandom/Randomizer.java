@@ -520,6 +520,15 @@ public class Randomizer {
             romHandler.giveImportantTrainersHoldItems();
         }
         
+        //if trainers have been randomized then randomize which ability they use;
+        //this allows all abilities to be logged and prevents trainers from consistently using their
+        //or second ability of a pokemon. (when that's set)
+        if(settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED && romHandler.generationOfPokemon() >= 5)
+        {
+            romHandler.randomizeTrainerAbilities();
+        }
+        
+        romHandler.fixTrainerAbilities();
         maybeLogTrainerChanges(log, romHandler);
 
         // In-game trades
@@ -848,9 +857,17 @@ public class Randomizer {
                     }
                     log.print("\n       ");
                     log.print(tpk.pokemon.name + " Lv" + tpk.level);
+                    int ability = romHandler.checkAbility(tpk);
+                    if(ability != 0 || tpk.heldItem != 0) {
+                        log.print(" |");
+                    }
+                    if(ability != 0)
+                    {
+                        log.print(" Ability: " + romHandler.abilityName(ability) + " |");
+                    }
                     if(tpk.heldItem != 0)
                     {
-                        log.print(" | Held Item: " + romHandler.getItemNames()[tpk.heldItem] + " |");
+                        log.print(" Hold Item: " + romHandler.getItemNames()[tpk.heldItem] + " |");
                     }
                     if(romHandler.generationOfPokemon() > 2)
                     {

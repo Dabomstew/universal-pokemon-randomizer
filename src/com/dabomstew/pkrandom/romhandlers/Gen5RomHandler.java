@@ -1022,7 +1022,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     // this allows fixed teams with mixed genders.
 
                     int ailevel = trpoke[pokeOffs] & 0xFF;
-                    // int secondbyte = trpoke[pokeOffs + 1] & 0xFF;
+                    int secondbyte = trpoke[pokeOffs + 1] & 0xFF; //value divided by 16 is the ability; remainder is force gender tags
                     int level = readWord(trpoke, pokeOffs + 2);
                     int species = readWord(trpoke, pokeOffs + 4);
                     // int formnum = readWord(trpoke, pokeOffs + 6);
@@ -1030,7 +1030,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     tpk.level = level;
                     tpk.pokemon = pokes[species];
                     tpk.AILevel = ailevel;
-                    tpk.ability = trpoke[pokeOffs + 1] & 0xFF;
+                    tpk.ability = (int)(secondbyte / 16);
+                    //System.out.println((int)(trpoke[pokeOffs + 1] & 0xFF)); 
                     pokeOffs += 8;
                     if ((tr.poketype & 2) == 2) {
                         int heldItem = readWord(trpoke, pokeOffs);
@@ -1118,7 +1119,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 for (int poke = 0; poke < numPokes; poke++) {
                     TrainerPokemon tp = tpokes.next();
                     trpoke[pokeOffs] = (byte) tp.AILevel;
-                    // no gender or ability info, so no byte 1
+                    trpoke[pokeOffs + 1] = (byte) (tp.ability * 16); // + gender value if that was saved
                     writeWord(trpoke, pokeOffs + 2, tp.level);
                     writeWord(trpoke, pokeOffs + 4, tp.pokemon.number);
                     // no form info, so no byte 6/7

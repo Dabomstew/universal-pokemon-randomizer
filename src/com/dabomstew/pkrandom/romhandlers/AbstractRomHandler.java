@@ -1565,6 +1565,95 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
     
     @Override
+    public void randomizeTrainerAbilities() {
+        List<Trainer> currentTrainers = this.getTrainers();
+        List<Trainer> scrambledTrainers = new ArrayList<Trainer>(currentTrainers);
+        Collections.shuffle(scrambledTrainers, this.random);
+        
+        for(Trainer t : scrambledTrainers) {
+            for(TrainerPokemon tp : t.pokemon) {
+                List<Integer> validindexes = new ArrayList<Integer>();
+                if(tp.pokemon.ability1 != 0) {
+                    validindexes.add(new Integer(1));
+                } else if (tp.pokemon.ability2 != 0) {
+                    validindexes.add(new Integer(2));
+                } else if (tp.pokemon.ability3 != 0) {
+                    validindexes.add(new Integer(3));
+                }
+                
+                if(validindexes.isEmpty()) {
+                    System.err.println("Trainer pokemon lacks valid ability.");
+                } else {
+                    tp.ability = validindexes.get(this.random.nextInt(validindexes.size())).intValue();
+                }
+            }
+        }
+
+        this.setTrainers(currentTrainers);
+    }
+    
+    @Override
+    public void fixTrainerAbilities() {
+        List<Trainer> currentTrainers = this.getTrainers();
+        List<Trainer> scrambledTrainers = new ArrayList<Trainer>(currentTrainers);
+        Collections.shuffle(scrambledTrainers, this.random);
+        
+        for(Trainer t : scrambledTrainers) {
+            for(TrainerPokemon tp : t.pokemon) {
+                if(tp.ability != 0) {
+                    boolean hasAbility = true;
+                    if(tp.ability == 1) {
+                        hasAbility = tp.pokemon.ability1 != 0;
+                    } else if (tp.ability == 2) {
+                        hasAbility = tp.pokemon.ability2 != 0;
+                    } else if (tp.ability == 3) {
+                        hasAbility = tp.pokemon.ability3 != 0;
+                    }
+                    
+                    if(!hasAbility) {
+                        List<Integer> validindexes = new ArrayList<Integer>();
+                        if(tp.pokemon.ability1 != 0) {
+                            validindexes.add(new Integer(1));
+                        } else if (tp.pokemon.ability2 != 0) {
+                            validindexes.add(new Integer(2));
+                        } else if (tp.pokemon.ability3 != 0) {
+                            validindexes.add(new Integer(3));
+                        }
+                        
+                        if(validindexes.isEmpty()) {
+                            System.err.println("Trainer pokemon lacks valid ability.");
+                        } else {
+                            tp.ability = validindexes.get(this.random.nextInt(validindexes.size())).intValue();
+                        }
+                    }
+                }
+            }
+        }
+
+        this.setTrainers(currentTrainers);
+    }
+    
+    @Override
+    public int checkAbility(TrainerPokemon p) {
+        if(this.generationOfPokemon() >= 5)
+        {
+            if(p.ability == 1) {
+                return p.pokemon.ability1;
+            } else if (p.ability == 2) {
+                return p.pokemon.ability2;
+            } else if (p.ability == 3) {
+                return p.pokemon.ability3;
+            }
+            
+        } else if(this.generationOfPokemon() == 3 || this.generationOfPokemon() == 4) 
+        {
+            return p.pokemon.ability1;
+        }
+        //no ability found
+        return 0;
+    }
+    
+    @Override
     public void randomizeTrainerMoves(boolean useTrainerMoveDiversity) {
         List<Trainer> currentTrainers = this.getTrainers();
 
@@ -1607,6 +1696,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
     
     public int[] getTrainerMoveDiversity(TrainerPokemon p, Map<Pokemon, List<MoveLearnt>> moveset, int level, List<Move> allMoves) {
+        int ability = checkAbility(p);
         int[] chosenMoves = new int[4];
         List<Move> moves = getDiverseMoves(p.pokemon, moveset, level, allMoves);
         Iterator<Move> iterator = moves.iterator();
@@ -1830,14 +1920,14 @@ public abstract class AbstractRomHandler implements RomHandler {
             
             for(int a : sleepImmuneAbilities)
             {
-                if(p.ability == a)
+                if(ability == a)
                 {
                     hasBadSSAbility = true;
                 }
             }
             for(int a : sleepOffensiveAbilities)
             {
-                if(p.ability == a)
+                if(ability == a)
                 {
                     hasSleepingAbility = true;
                 }
@@ -1952,7 +2042,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 boolean isTruant = false;
                 for(int t : truantLikeAbilities)
                 {
-                    if(p.ability == t)
+                    if(ability == t)
                     {
                         isTruant = true;
                     }
@@ -2055,7 +2145,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     {
                         for(int a : negWeatherAbilities)
                         {
-                            if(p.ability == a)
+                            if(ability == a)
                             {
                                 weight *= negWeatherAbilityModifier;
                             }
@@ -2073,7 +2163,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                             }
                             for(int a : sandstormAbilities)
                             {
-                                if(p.ability == a)
+                                if(ability == a)
                                 {
                                     weight *= posWeatherAbilityModifier;
                                 }
@@ -2092,7 +2182,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                             }
                             for(int a : rainAbilities)
                             {
-                                if(p.ability == a)
+                                if(ability == a)
                                 {
                                     weight *= posWeatherAbilityModifier;
                                 }
@@ -2111,14 +2201,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                             }
                             for(int a : sunlightAbilities)
                             {
-                                if(p.ability == a)
+                                if(ability == a)
                                 {
                                     weight *= posWeatherAbilityModifier;
                                 }
                             }
                             for(int a : negSunlightAbilities)
                             {
-                                if(p.ability == a)
+                                if(ability == a)
                                 {
                                     weight *= negWeatherAbilityModifier;
                                 }
@@ -2137,7 +2227,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                             }
                             for(int a : hailAbilities)
                             {
-                                if(p.ability == a)
+                                if(ability == a)
                                 {
                                     weight *= posWeatherAbilityModifier;
                                 }

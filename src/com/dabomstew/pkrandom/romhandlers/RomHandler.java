@@ -219,6 +219,12 @@ public interface RomHandler {
     public boolean tpHasMove(TrainerPokemon tp, int move);
     public boolean tpHasMove(TrainerPokemon tp, int... move);
     
+    public void randomizeTrainerAbilities();
+    //if a trainer pokemon's ability type points to an ability that pokemon doesnt have then it rerolls that ability
+    public void fixTrainerAbilities();
+    //returns ability index of the pokemon
+    public int checkAbility(TrainerPokemon tp);
+    
     public int getOranIndex();
     public int getSitrusIndex();
     
