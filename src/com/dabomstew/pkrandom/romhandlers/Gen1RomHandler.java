@@ -768,7 +768,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
+    public List<EncounterSet> getEncounters(boolean useTimeOfDay, boolean condenseSlots) {
         List<EncounterSet> encounters = new ArrayList<EncounterSet>();
 
         Pokemon ghostMarowak = pokes[Gen1Constants.marowakIndex];
@@ -903,7 +903,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters) {
+    public void setEncounters(boolean useTimeOfDay, boolean condenseSlots, List<EncounterSet> encounters) {
         Iterator<EncounterSet> encsetit = encounters.iterator();
 
         // grass & water

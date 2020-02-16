@@ -44,9 +44,9 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 public class Settings {
 
-    public static final int VERSION = 173;
+    public static final int VERSION = 174;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 37;
+    public static final int LENGTH_OF_SETTINGS_DATA = 38;
 
     private CustomNamesSet customNames;
 
@@ -166,6 +166,8 @@ public class Settings {
     private int minimumCatchRateLevel = 1;
     private boolean randomizeWildPokemonHeldItems;
     private boolean banBadRandomWildPokemonHeldItems;
+    private boolean condenseEncounterSlots;
+    private boolean catchEmAllReasonableSlotsOnly;
 
     public enum StaticPokemonMod {
         UNCHANGED, RANDOM_MATCHING, COMPLETELY_RANDOM
@@ -389,6 +391,10 @@ public class Settings {
         
         // @ 36 base stats range slider value
         out.write(baseStatRange);
+        
+        // @ 37 wild pokemon 3
+        // new in 174
+        out.write(makeByteSelected(condenseEncounterSlots, catchEmAllReasonableSlotsOnly));
 
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -584,6 +590,9 @@ public class Settings {
         settings.setTrainersLevelModifier((data[35] & 0x7F) - 50);
         
         settings.setBaseStatRange(data[36] & 0xFF);
+        
+        settings.setCondenseEncounterSlots(restoreState(data[37], 0));
+        settings.setCatchEmAllReasonableSlotsOnly(restoreState(data[37], 1));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1557,6 +1566,24 @@ public class Settings {
 
     public Settings setBanBadRandomFieldItems(boolean banBadRandomFieldItems) {
         this.banBadRandomFieldItems = banBadRandomFieldItems;
+        return this;
+    }
+
+    public boolean isCondenseEncounterSlots() {
+        return condenseEncounterSlots;
+    }
+
+    public Settings setCondenseEncounterSlots(boolean condenseEncounterSlots) {
+        this.condenseEncounterSlots = condenseEncounterSlots;
+        return this;
+    }
+
+    public boolean isCatchEmAllReasonableSlotsOnly() {
+        return catchEmAllReasonableSlotsOnly;
+    }
+
+    public Settings setCatchEmAllReasonableSlotsOnly(boolean catchEmAllReasonableSlotsOnly) {
+        this.catchEmAllReasonableSlotsOnly = catchEmAllReasonableSlotsOnly;
         return this;
     }
 

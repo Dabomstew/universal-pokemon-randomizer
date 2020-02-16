@@ -161,14 +161,14 @@ public interface RomHandler {
             boolean banNegativeAbilities);
 
     // Randomizer: wild pokemon
-    public List<EncounterSet> getEncounters(boolean useTimeOfDay);
+    public List<EncounterSet> getEncounters(boolean useTimeOfDay, boolean condenseSlots);
 
-    public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters);
+    public void setEncounters(boolean useTimeOfDay, boolean condenseSlots, List<EncounterSet> encounters);
 
-    public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-            boolean noLegendaries);
+    public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean ceaReasonableOnly, boolean typeThemed, boolean usePowerLevels,
+            boolean noLegendaries, boolean condenseSlots);
 
-    public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
+    public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean ceaReasonableOnly, boolean typeThemed,
             boolean usePowerLevels, boolean noLegendaries);
 
     public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries);
@@ -176,6 +176,8 @@ public interface RomHandler {
     public boolean hasTimeBasedEncounters();
 
     public List<Pokemon> bannedForWildEncounters();
+    
+    public boolean canCondenseEncounterSlots();
 
     // Randomizer: trainer pokemon
     public List<Trainer> getTrainers();

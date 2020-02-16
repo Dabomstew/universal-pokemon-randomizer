@@ -677,10 +677,10 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-            boolean noLegendaries) {
+    public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean ceaReasonableOnly, boolean typeThemed, boolean usePowerLevels,
+            boolean noLegendaries, boolean condenseSlots) {
         checkPokemonRestrictions();
-        List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
+        List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay, condenseSlots);
 
         // New: randomize the order encounter sets are randomized in.
         // Leads to less predictable results for various modifiers.
@@ -695,6 +695,23 @@ public abstract class AbstractRomHandler implements RomHandler {
             List<Pokemon> allPokes = noLegendaries ? new ArrayList<Pokemon>(noLegendaryList) : new ArrayList<Pokemon>(
                     mainPokemonList);
             allPokes.removeAll(banned);
+            if(ceaReasonableOnly) {
+                // put all reasonable sets first so they get at least one loop of pokemon
+                // (provided there are enough of them)
+                Collections.sort(scrambledEncounters, new Comparator<EncounterSet>() {
+                    @Override
+                    public int compare(EncounterSet o1, EncounterSet o2) {
+                        if(o1.reasonable == o2.reasonable) {
+                            return 0;
+                        }
+                        else if(o1.reasonable) {
+                            return -1;
+                        }
+                        else {
+                            return 1;
+                        }
+                }});
+            }
             for (EncounterSet area : scrambledEncounters) {
                 List<Pokemon> pickablePokemon = allPokes;
                 if (area.bannedPokemon.size() > 0) {
@@ -792,14 +809,14 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        setEncounters(useTimeOfDay, currentEncounters);
+        setEncounters(useTimeOfDay, condenseSlots, currentEncounters);
     }
 
     @Override
-    public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
+    public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean ceaReasonableOnly, boolean typeThemed,
             boolean usePowerLevels, boolean noLegendaries) {
         checkPokemonRestrictions();
-        List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
+        List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay, false);
         List<Pokemon> banned = this.bannedForWildEncounters();
 
         // New: randomize the order encounter sets are randomized in.
@@ -813,6 +830,23 @@ public abstract class AbstractRomHandler implements RomHandler {
             List<Pokemon> allPokes = noLegendaries ? new ArrayList<Pokemon>(noLegendaryList) : new ArrayList<Pokemon>(
                     mainPokemonList);
             allPokes.removeAll(banned);
+            if(ceaReasonableOnly) {
+                // put all reasonable sets first so they get at least one loop of pokemon
+                // (provided there are enough of them)
+                Collections.sort(scrambledEncounters, new Comparator<EncounterSet>() {
+                    @Override
+                    public int compare(EncounterSet o1, EncounterSet o2) {
+                        if(o1.reasonable == o2.reasonable) {
+                            return 0;
+                        }
+                        else if(o1.reasonable) {
+                            return -1;
+                        }
+                        else {
+                            return 1;
+                        }
+                }});
+            }
             for (EncounterSet area : scrambledEncounters) {
                 // Poke-set
                 Set<Pokemon> inArea = pokemonInArea(area);
@@ -948,7 +982,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        setEncounters(useTimeOfDay, currentEncounters);
+        setEncounters(useTimeOfDay, false, currentEncounters);
 
     }
 
@@ -1009,7 +1043,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
+        List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay, false);
 
         for (EncounterSet area : currentEncounters) {
             for (Encounter enc : area.encounters) {
@@ -1034,7 +1068,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        setEncounters(useTimeOfDay, currentEncounters);
+        setEncounters(useTimeOfDay, false, currentEncounters);
 
     }
 
@@ -3905,5 +3939,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void applyMiscTweak(MiscTweak tweak) {
         // default: do nothing
+    }
+    
+    @Override
+    public boolean canCondenseEncounterSlots() {
+        // default: no
+        return false;
     }
 }

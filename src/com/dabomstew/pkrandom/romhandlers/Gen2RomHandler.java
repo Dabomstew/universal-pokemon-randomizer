@@ -576,7 +576,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
+    public List<EncounterSet> getEncounters(boolean useTimeOfDay, boolean condenseSlots) {
         int offset = romEntry.getValue("WildPokemonOffset");
         List<EncounterSet> areas = new ArrayList<EncounterSet>();
         offset = readLandEncounters(offset, areas, useTimeOfDay); // Johto
@@ -732,7 +732,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters) {
+    public void setEncounters(boolean useTimeOfDay, boolean condenseSlots, List<EncounterSet> encounters) {
         if (!havePatchedFleeing) {
             patchFleeing();
         }
@@ -1017,6 +1017,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public List<Integer> getMovesBannedFromLevelup() {
         // ban thief because trainers are broken with it
+        // new feb 2020: ban beat up because of the glitch
         return Gen2Constants.bannedLevelupMoves;
     }
 

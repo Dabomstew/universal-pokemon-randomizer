@@ -274,6 +274,11 @@ public class SettingsUpdater {
             // add the extra base stat slider byte
             insertExtraByte(36, (byte) 0);
         }
+        
+        if(oldVersion < 174) {
+            // add the extra wild pokemon byte, turn cea reasonable slots only on if cea on
+            insertExtraByte(37, (byte) ((dataBlock[15] & 1) << 1));
+        }
 
         // fix checksum
         CRC32 checksum = new CRC32();

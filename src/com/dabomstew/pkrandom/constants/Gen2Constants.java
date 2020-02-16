@@ -56,8 +56,8 @@ public class Gen2Constants {
 
     public static final List<Integer> earlyRequiredHMMoves = Arrays.asList(15);
 
-    // ban thief from levelup moves
-    public static final List<Integer> bannedLevelupMoves = Arrays.asList(168);
+    // ban thief and beat up from levelup moves
+    public static final List<Integer> bannedLevelupMoves = Arrays.asList(168, 251);
 
     public static final List<Integer> brokenMoves = Arrays.asList(49, 82, 32, 90, 12);
 

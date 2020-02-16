@@ -383,13 +383,16 @@ public class Randomizer {
         case RANDOM:
             romHandler.randomEncounters(settings.isUseTimeBasedEncounters(),
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL,
+                    settings.isCatchEmAllReasonableSlotsOnly(),
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS,
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
-                    settings.isBlockWildLegendaries());
+                    settings.isBlockWildLegendaries(),
+                    settings.isCondenseEncounterSlots());
             break;
         case AREA_MAPPING:
             romHandler.area1to1Encounters(settings.isUseTimeBasedEncounters(),
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL,
+                    settings.isCatchEmAllReasonableSlotsOnly(),
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS,
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
                     settings.isBlockWildLegendaries());
@@ -404,7 +407,7 @@ public class Randomizer {
         }
 
         maybeLogWildPokemonChanges(log, romHandler);
-        List<EncounterSet> encounters = romHandler.getEncounters(settings.isUseTimeBasedEncounters());
+        List<EncounterSet> encounters = romHandler.getEncounters(settings.isUseTimeBasedEncounters(), settings.isCondenseEncounterSlots());
         for (EncounterSet es : encounters) {
             for (Encounter e : es.encounters) {
                 checkValue = addToCV(checkValue, e.level, e.pokemon.number);
@@ -729,7 +732,7 @@ public class Randomizer {
             log.println("Wild Pokemon: Unchanged." + NEWLINE);
         } else {
             log.println("--Wild Pokemon--");
-            List<EncounterSet> encounters = romHandler.getEncounters(settings.isUseTimeBasedEncounters());
+            List<EncounterSet> encounters = romHandler.getEncounters(settings.isUseTimeBasedEncounters(), settings.isCondenseEncounterSlots());
             int idx = 0;
             for (EncounterSet es : encounters) {
                 idx++;
