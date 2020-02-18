@@ -163,7 +163,7 @@ public class NARCArchive {
             int frame_size = readLong(data, offset + 4);
             // Patch for BB/VW and other DS hacks which don't update
             // the size of their expanded NARCs correctly
-            if (i == frameCount - 1 && offset + frame_size < data.length) {
+            if (i == frameCount - 1) {
                 frame_size = data.length - offset;
             }
             byte[] frame = new byte[frame_size - 8];
