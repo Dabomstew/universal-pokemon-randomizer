@@ -1996,14 +1996,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                 Pokemon old = currentStaticPokemon.get(i);
                 Pokemon newPK;
                 Integer oldBST = old.hp + old.attack + old.defense + old.spatk + old.spdef + old.speed;
-                if (oldBST >= 600 && limit600) {
+                if (old.number == 487 && ptGiratina) {
+                    newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
+                    pokemonLeft.remove(newPK);
+                } else if (oldBST >= 600 && limit600) {
                     // System.out.println(old.name + " " + old.number + ": Over 600 BST, pure random");
                     newPK = pickReplacement(old, false, null, true, false, false, false); // Pure random setup
                 }
-                else if (old.number == 487 && ptGiratina) {
-                    newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
-                    pokemonLeft.remove(newPK);
-                } else {
+                else {
                     
                     if ((old.number == 638 || old.number == 639 || old.number == 640) && limitMusketeers) {
                      // System.out.println(old.name + " " + old.number + ": triggered limit on replacement");
