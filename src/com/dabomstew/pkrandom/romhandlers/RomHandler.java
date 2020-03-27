@@ -162,6 +162,8 @@ public interface RomHandler {
     public List<Trainer> getTrainers();
 
     public List<Integer> getMainPlaythroughTrainers();
+    
+    public List<Integer> getEvolutionItems();
 
     public void setTrainers(List<Trainer> trainerData);
 
@@ -204,6 +206,8 @@ public interface RomHandler {
 
     // return all the moves valid in this game.
     public List<Move> getMoves();
+    
+    public Map<Integer, List<Integer>> getShopItemsRandomized();
 
     // Randomizer: moves learnt
 
@@ -349,6 +353,8 @@ public interface RomHandler {
     public void randomizeWildHeldItems(boolean banBadItems);
 
     public String[] getItemNames();
+    
+    public String[] getShopNames();
 
     public List<Integer> getStarterHeldItems();
 
@@ -376,7 +382,7 @@ public interface RomHandler {
 
     public void shuffleFieldItems();
 
-    public void randomizeFieldItems(boolean banBadItems);
+    public void randomizeFieldItems(boolean banBadItems, boolean distributeItemsControl);
 
     // Trades
 
@@ -406,7 +412,7 @@ public interface RomHandler {
 
     public void shuffleShopItems();
 
-    public void randomizeShopItems(boolean banBadItems, boolean banRegularShopItems, boolean banOPShopItems, boolean balancePrices);
+    public void randomizeShopItems(boolean banBadItems, boolean banRegularShopItems, boolean banOPShopItems, boolean balancePrices, boolean placeEvolutionItems);
 
     public List<Integer> getShopItems();
 
@@ -462,6 +468,7 @@ public interface RomHandler {
     public void applyMiscTweak(MiscTweak tweak);
 
     public void renderPlacementHistory();
+
 
 
 }

@@ -166,6 +166,77 @@ public class Gen5Constants {
         789, 797, 798, 799, 800, 801, 802, 803, 804, 805, 806, 
         807, 808, 809, 810, 811, 812});
     
+//    public static final Map<Integer, String> bw1ShopIndex = new HashMap<Integer, String>() {1:"Check"};
+    
+    public static final List<String> bw1ShopNames = Arrays.asList(new String[] {
+            "Primary 0 badges",
+            "Mall 9 TMs",
+            "Icirrus Secondary (TMs)",
+            "Driftveil Medicines",
+            "Mistralton Secondary (TMs)",
+            "Mall 9 F3 Left",
+            "Accumula Secondary",
+            "Nimbasa Secondary (TMs)",
+            "Striaton Secondary",
+            "League Secondary",
+            "Lacunosa Secondary",
+            "Black City/White Forest Secondary",
+            "Nacrene X/Mall 9 F3 Right",
+            "Incense Salesman",
+            "Nacrene Secondary",
+            "Undella Secondary",
+            "Primary 2 badges",
+            "Castelia Secondary",
+            "Driftveil Secondary",
+            "Opelucid Secondary",
+            "Primary 3 badges",
+            "Mall 9 F1",
+            "Mall 9 F2",
+            "Primary 5 badges",
+            "Primary 7 badges",
+            "Primary 8 badges",
+        });  
+    
+    public static final List<String> bw2ShopNames = Arrays.asList(new String[] {
+            "Regular 0",
+            "Regular 1",
+            "Regular 3",
+            "Regular 5",
+            "Regular 7",
+            "Regular 8",
+            "Accumula Secondary",
+            "Striaton TMs",
+            "Nacrene Secondary",
+            "Castelia Secondary",
+            "Nimbasa TMs",
+            "Driftveil Secondary",
+            "Mistralton TMs",
+            "Icirrus Secondary",
+            "Opelucid Secondary",
+            "Victory Road Secondary",
+            "Pokemon League Secondary",
+            "Lacunosa TMs",
+            "Undella Secondary",
+            "Black City/White Forest Secondary",
+            "X items",
+            "Herbs Salesman",
+            "Incense Salesman",
+            "Mall9 F1",
+            "Mall9 TMs",
+            "Mall9 F2",
+            "Mall9 F3 left",
+            "Aspertia / Floccesy Secondary",
+            "Virbank Secondary",
+            "Humilau Secondary",
+            "Floccesy / Aspertia Secondary",
+            "Lentimas Secondary",
+        });  
+
+
+    public static final List<Integer> evolutionItems = Arrays.asList(new Integer[] { 80,81,82,83,84,85,107,108,109,
+            110,221,226,227,233,235,252,321,322,323,324,325,326,327});
+
+    
     public static final List<Integer> bw1RequiredFieldTMs = Arrays.asList(new Integer[] { 2, 3, 5, 6, 9, 12, 13, 19,
             22, 24, 26, 29, 30, 35, 36, 39, 41, 46, 47, 50, 52, 53, 55, 58, 61, 63, 65, 66, 71, 80, 81, 84, 85, 86, 90,
             91, 92, 93 });

@@ -1343,7 +1343,18 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     public List<Integer> getMainPlaythroughTrainers() {
         return new ArrayList<>(); // Not implemented
     }
-
+    @Override
+    public Map<Integer, List<Integer>> getShopItemsRandomized() {
+        return null;
+    }
+    @Override
+    public String[] getShopNames() {
+        return null;
+    }
+    @Override
+    public List<Integer> getEvolutionItems() {
+        return null;
+    }
     @Override
     public void setTrainers(List<Trainer> trainerData) {
         Iterator<Trainer> allTrainers = trainerData.iterator();

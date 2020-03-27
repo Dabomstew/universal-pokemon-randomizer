@@ -76,6 +76,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<Pokemon> alreadyPicked = new ArrayList<>();
     private List<Pokemon> giratinaPicks;
     private Map<Pokemon, Integer> placementHistory = new HashMap<Pokemon, Integer>();
+    private Map<Integer, Integer> itemPlacementHistory = new HashMap<Integer, Integer>();
     protected boolean ptGiratina = false;
 
     /* Constructor */
@@ -2686,11 +2687,12 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizeFieldItems(boolean banBadItems) {
+    public void randomizeFieldItems(boolean banBadItems, boolean distributeItemsControl) {
         ItemList possibleItems = banBadItems ? this.getNonBadItems() : this.getAllowedItems();
         List<Integer> currentItems = this.getRegularFieldItems();
         List<Integer> currentTMs = this.getCurrentFieldTMs();
         List<Integer> requiredTMs = this.getRequiredFieldTMs();
+        // System.out.println("distributeItemsControl: "+ distributeItemsControl);
 
         int fieldItemCount = currentItems.size();
         int fieldTMCount = currentTMs.size();
@@ -2700,10 +2702,32 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Integer> newItems = new ArrayList<Integer>();
         List<Integer> newTMs = new ArrayList<Integer>();
 
-        for (int i = 0; i < fieldItemCount; i++) {
-            newItems.add(possibleItems.randomNonTM(this.random));
+        // List<Integer> chosenItems = new ArrayList<Integer>(); // collecting chosenItems for later process
+        
+        if (distributeItemsControl == true) {
+            System.out.println("Controlled random item placement...");
+            int currentNum = 1;
+            for (int i = 0; i < fieldItemCount; i++) {
+                int chosenItem = possibleItems.randomNonTM(this.random);
+                // System.out.println("Chosen item " +chosenItem+ " " + this.getItemPlacementHistory(chosenItem) + " vs. " + this.getItemPlacementAverage());
+                int iterNum = 0;
+                while ((this.getItemPlacementHistory(chosenItem) > this.getItemPlacementAverage()) && iterNum < 100) {
+                    chosenItem = possibleItems.randomNonTM(this.random);
+                    iterNum +=1;
+                 // System.out.println("  >> Rerolling chosen item " +chosenItem+ " " + this.getItemPlacementHistory(chosenItem) + " vs. " + this.getItemPlacementAverage());
+                    }
+                newItems.add(chosenItem);
+                this.setItemPlacementHistory(chosenItem);
+                currentNum++;
+             // System.out.println(" > Placed item #" +currentNum+ " -> " + chosenItem);
+            }
         }
-
+        else {
+            System.out.println("Pure random item placement...");
+            for (int i = 0; i < fieldItemCount; i++) {
+                newItems.add(possibleItems.randomNonTM(this.random));
+            }
+        }
         newTMs.addAll(requiredTMs);
 
         for (int i = reqTMCount; i < fieldTMCount; i++) {
@@ -2715,6 +2739,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
+
 
         Collections.shuffle(newItems, this.random);
         Collections.shuffle(newTMs, this.random);
@@ -3055,7 +3080,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     // Note: If you use this on a game where the amount of randomizable shop items is greater than the amount of
     // possible items, you will get owned by the while loop
     @Override
-    public void randomizeShopItems(boolean banBadItems, boolean banRegularShopItems, boolean banOPShopItems, boolean balancePrices) {
+    public void randomizeShopItems(boolean banBadItems, boolean banRegularShopItems, boolean banOPShopItems, boolean balancePrices, boolean placeEvolutionItems) {
         if (this.getShopItems() == null) return;
         ItemList possibleItems = banBadItems ? this.getNonBadItems() : this.getAllowedItems();
         if (banRegularShopItems) {
@@ -3070,12 +3095,25 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         List<Integer> newItems = new ArrayList<Integer>();
         int newItem;
+        System.out.println("Placing evolution items: " + placeEvolutionItems);
+        if (placeEvolutionItems == true) {
+            List<Integer> evolutionItems = getEvolutionItems();
+                for (int ev : evolutionItems) {
+                    newItems.add(ev);
+                }
+                shopItemCount = shopItemCount - newItems.size();
+                for (int i = 0; i < shopItemCount; i++) {
+                    while (newItems.contains(newItem = possibleItems.randomNonTM(this.random)));
+                    newItems.add(newItem);
+                }
+            }            
 
-        for (int i = 0; i < shopItemCount; i++) {
-            while (newItems.contains(newItem = possibleItems.randomNonTM(this.random)));
-            newItems.add(newItem);
+        else {
+            for (int i = 0; i < shopItemCount; i++) {
+                while (newItems.contains(newItem = possibleItems.randomNonTM(this.random)));
+                newItems.add(newItem);
+            }
         }
-
         Collections.shuffle(newItems, this.random);
 
         this.setShopItems(newItems);
@@ -3704,9 +3742,9 @@ public abstract class AbstractRomHandler implements RomHandler {
              // System.out.println("Pokemon: "+ chosenPokemon.name + " placement history: " + getPlacementHistory(chosenPokemon) + " current average: " + getPlacementAverage());
                 int breaknum = 0;
                 while (getPlacementHistory(chosenPokemon) > getPlacementAverage() && breaknum < 100) {
-                    System.out.println(">> Pokemon: "+ chosenPokemon.name + " exceed threshold, rerolling");
+                 // System.out.println(">> Pokemon: "+ chosenPokemon.name + " exceed threshold, rerolling");
                     chosenPokemon = canPick.get(this.random.nextInt(canPick.size()));
-                    System.out.println(">> NEW Pokemon: "+ chosenPokemon.name + " placement history: " + getPlacementHistory(chosenPokemon) + " current average: " + getPlacementAverage());
+                 // System.out.println(">> NEW Pokemon: "+ chosenPokemon.name + " placement history: " + getPlacementHistory(chosenPokemon) + " current average: " + getPlacementAverage());
                     breaknum += 1;
                 }
             }
@@ -3740,12 +3778,12 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             Pokemon chosenPokemon = canPick.get(this.random.nextInt(canPick.size()));
             if (usePlacementHistory) {
-                   System.out.println("Pokemon: "+ chosenPokemon.name + " placement history: " + getPlacementHistory(chosenPokemon) + " current average: " + getPlacementAverage());
+//                   System.out.println("Pokemon: "+ chosenPokemon.name + " placement history: " + getPlacementHistory(chosenPokemon) + " current average: " + getPlacementAverage());
                int breaknum = 0;
                while (getPlacementHistory(chosenPokemon) > getPlacementAverage() && breaknum < 100) {
-                   System.out.println(">> Pokemon: "+ chosenPokemon.name + " exceed threshold, rerolling");
+//                   System.out.println(">> Pokemon: "+ chosenPokemon.name + " exceed threshold, rerolling");
                    chosenPokemon = canPick.get(this.random.nextInt(canPick.size()));
-                   System.out.println(">> NEW Pokemon: "+ chosenPokemon.name + " placement history: " + getPlacementHistory(chosenPokemon) + " current average: " + getPlacementAverage());
+//                   System.out.println(">> NEW Pokemon: "+ chosenPokemon.name + " placement history: " + getPlacementHistory(chosenPokemon) + " current average: " + getPlacementAverage());
                    breaknum += 1;
                }
             }
@@ -3827,11 +3865,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private float getPlacementAverage() {
-        // This method will return true if the number of times a pokemon has been
-        // placed is less than average of all placed pokemon's appearances
-        // E.g., Charmander's been placed once, but the average for all pokemon is 2.2
-        // So add to list and return 
-        
         List<Pokemon> placedPK = new ArrayList<Pokemon>(placementHistory.keySet());
         int placedPKNum = 0;
         for (Pokemon p : placedPK) {
@@ -3843,7 +3876,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         
     private List<Pokemon> getBelowAveragePlacements() {
-        // This method will return true if the number of times a pokemon has been
+        // This method will return a PK if the number of times a pokemon has been
         // placed is less than average of all placed pokemon's appearances
         // E.g., Charmander's been placed once, but the average for all pokemon is 2.2
         // So add to list and return 
@@ -3896,6 +3929,50 @@ public abstract class AbstractRomHandler implements RomHandler {
         
         
     }
+    
+    
+    ///// Item functions
+    private void setItemPlacementHistory(int newItem) {
+        Integer history = getItemPlacementHistory(newItem);
+        // System.out.println("Current history: " + newPK.name + " : " + history);
+        itemPlacementHistory.put(newItem, history + 1);        
+    }
+
+    private int getItemPlacementHistory(int newItem) {
+        List<Integer> placedItem = new ArrayList<Integer>(itemPlacementHistory.keySet());
+        if (placedItem.contains(newItem)) {
+            return itemPlacementHistory.get(newItem);
+        }
+        else {
+            return 0;
+        }        
+    }
+    
+    private float getItemPlacementAverage() {
+        // This method will return an integer of average for itemPlacementHistory
+        // placed is less than average of all placed pokemon's appearances
+        // E.g., Charmander's been placed once, but the average for all pokemon is 2.2
+        // So add to list and return 
+        
+        List<Integer> placedPK = new ArrayList<Integer>(itemPlacementHistory.keySet());
+        int placedPKNum = 0;
+        for (Integer p : placedPK) {
+            placedPKNum += itemPlacementHistory.get(p); 
+        }
+        float placedAverage = (float)placedPKNum / (float)placedPK.size();
+        return placedAverage;
+        }
+    
+    private void reportItemHistory() {
+        String[] itemNames = this.getItemNames();
+        List<Integer> placedItem = new ArrayList<Integer>(itemPlacementHistory.keySet());
+        for (Integer p : placedItem) {
+            System.out.println(itemNames[p]+": "+ itemPlacementHistory.get(p)); 
+        }
+    }
+    
+    
+
     
     protected void log(String log) {
         if (logStream != null) {

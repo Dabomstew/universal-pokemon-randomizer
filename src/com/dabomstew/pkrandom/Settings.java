@@ -220,7 +220,7 @@ public class Settings {
     private boolean randomizeInGameTradesItems;
 
     public enum FieldItemsMod {
-        UNCHANGED, SHUFFLE, RANDOM
+        UNCHANGED, SHUFFLE, RANDOM, RANDOM_EVEN
     }
 
     private FieldItemsMod fieldItemsMod = FieldItemsMod.UNCHANGED;
@@ -235,6 +235,7 @@ public class Settings {
     private boolean banRegularShopItems;
     private boolean banOPShopItems;
     private boolean balanceShopPrices;
+    private boolean guaranteeEvolutionItems;
 
     // to and from strings etc
     public void write(FileOutputStream out) throws IOException {
@@ -374,7 +375,7 @@ public class Settings {
 
         // 24 field items
         out.write(makeByteSelected(fieldItemsMod == FieldItemsMod.RANDOM, fieldItemsMod == FieldItemsMod.SHUFFLE,
-                fieldItemsMod == FieldItemsMod.UNCHANGED, banBadRandomFieldItems));
+                fieldItemsMod == FieldItemsMod.UNCHANGED, banBadRandomFieldItems, fieldItemsMod == FieldItemsMod.RANDOM_EVEN));
 
         // new 170
         // 25 move randomizers
@@ -417,7 +418,7 @@ public class Settings {
         out.write((trainersLevelModified ? 0x80 : 0) | (trainersLevelModifier+50));
 
         out.write(makeByteSelected(shopItemsMod == ShopItemsMod.RANDOM, shopItemsMod == ShopItemsMod.SHUFFLE,
-                shopItemsMod == ShopItemsMod.UNCHANGED, banBadRandomShopItems, banRegularShopItems, banOPShopItems, balanceShopPrices));
+                shopItemsMod == ShopItemsMod.UNCHANGED, banBadRandomShopItems, banRegularShopItems, banOPShopItems, balanceShopPrices, guaranteeEvolutionItems));
         
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -582,9 +583,11 @@ public class Settings {
         settings.setRandomizeInGameTradesNicknames(restoreState(data[23], 4));
         settings.setRandomizeInGameTradesOTs(restoreState(data[23], 5));
 
-        settings.setFieldItemsMod(restoreEnum(FieldItemsMod.class, data[24], 2, // UNCHANGED
-                1, // SHUFFLE
-                0 // RANDOM
+        settings.setFieldItemsMod(restoreEnum(FieldItemsMod.class, data[24],  
+                2,  // UNCHANGED
+                1,  // SHUFFLE
+                0,  // RANDOM
+                4   // RANDOM_EVEN
         ));
         settings.setBanBadRandomFieldItems(restoreState(data[24], 3));
 
@@ -634,6 +637,7 @@ public class Settings {
         settings.setBanRegularShopItems(restoreState(data[37],4));
         settings.setBanOPShopItems(restoreState(data[37],5));
         settings.setBalanceShopPrices(restoreState(data[37],6));
+        settings.setGuaranteeEvolutionItems(restoreState(data[37],7));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1612,6 +1616,7 @@ public class Settings {
         return banBadRandomFieldItems;
     }
 
+
     public Settings setBanBadRandomFieldItems(boolean banBadRandomFieldItems) {
         this.banBadRandomFieldItems = banBadRandomFieldItems;
         return this;
@@ -1663,6 +1668,14 @@ public class Settings {
 
     public Settings setBalanceShopPrices(boolean balanceShopPrices) {
         this.balanceShopPrices = balanceShopPrices;
+        return this;
+    }
+   
+    public boolean isGuaranteeEvolutionItems() {
+        return guaranteeEvolutionItems;
+    }
+    public Settings setGuaranteeEvolutionItems(boolean guaranteeEvolutionItems) {
+        this.guaranteeEvolutionItems = guaranteeEvolutionItems;
         return this;
     }
 

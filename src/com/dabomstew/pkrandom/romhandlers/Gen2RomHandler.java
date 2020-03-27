@@ -1580,7 +1580,18 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
         return trainerClassNames;
     }
-
+    @Override
+    public Map<Integer, List<Integer>> getShopItemsRandomized() {
+        return null;
+    }
+    @Override
+    public String[] getShopNames() {
+        return null;
+    }
+    @Override
+    public List<Integer> getEvolutionItems() {
+        return null;
+    }
     @Override
     public void setTrainerClassNames(List<String> trainerClassNames) {
         if (romEntry.getValue("CanChangeTrainerText") != 0) {

@@ -1428,7 +1428,18 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
         return theTrainers;
     }
-
+    @Override
+    public Map<Integer, List<Integer>> getShopItemsRandomized() {
+        return null;
+    }
+    @Override
+    public String[] getShopNames() {
+        return null;
+    }
+    @Override
+    public List<Integer> getEvolutionItems() {
+        return null;
+    }
     @Override
     public List<Integer> getMainPlaythroughTrainers() {
         return new ArrayList<>(); // Not implemented

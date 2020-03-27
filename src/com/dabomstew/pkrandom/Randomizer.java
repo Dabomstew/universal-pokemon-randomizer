@@ -29,6 +29,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -537,16 +538,22 @@ public class Randomizer {
         if (settings.getFieldItemsMod() == Settings.FieldItemsMod.SHUFFLE) {
             romHandler.shuffleFieldItems();
         } else if (settings.getFieldItemsMod() == Settings.FieldItemsMod.RANDOM) {
-            romHandler.randomizeFieldItems(settings.isBanBadRandomFieldItems());
+            romHandler.randomizeFieldItems(settings.isBanBadRandomFieldItems(), false);
+        } else if (settings.getFieldItemsMod() == Settings.FieldItemsMod.RANDOM_EVEN) {
+            romHandler.randomizeFieldItems(settings.isBanBadRandomFieldItems(), true);
         }
 
         if (settings.getShopItemsMod() == Settings.ShopItemsMod.SHUFFLE) {
             romHandler.shuffleShopItems();
         } else if (settings.getShopItemsMod() == Settings.ShopItemsMod.RANDOM) {
-            romHandler.randomizeShopItems(settings.isBanBadRandomShopItems(),settings.isBanRegularShopItems(),settings.isBanOPShopItems(),settings.isBalanceShopPrices());
+            romHandler.randomizeShopItems(settings.isBanBadRandomShopItems(),settings.isBanRegularShopItems(),settings.isBanOPShopItems(),settings.isBalanceShopPrices(), settings.isGuaranteeEvolutionItems());
         }
 
-
+        
+        // Shops
+        if (settings.getShopItemsMod() == Settings.ShopItemsMod.RANDOM && this.romHandler.generationOfPokemon() == 5) {
+            maybeLogShops(log, romHandler);
+        }
         // Test output for placement history
         // romHandler.renderPlacementHistory();
 
@@ -857,6 +864,26 @@ public class Randomizer {
         }
     }
 
+    private void maybeLogShops(final PrintStream log, final RomHandler romHandler) {
+        String[] shopNames = romHandler.getShopNames();
+        String[] itemNames = romHandler.getItemNames();
+        log.println("--Shops--");
+        Map<Integer, List<Integer>> shopsDict = romHandler.getShopItemsRandomized();
+        for (int shopID : shopsDict.keySet()) {
+            log.printf("%s", shopNames[shopID]);
+            log.println();
+            List<Integer> shopItems = shopsDict.get(shopID);
+            for (int shopItemID : shopItems) {
+                log.printf("- %5s", itemNames[shopItemID]);
+                log.println();
+            }
+            
+            log.println();
+        }
+        log.println();
+    }
+
+    
     private static int addToCV(int checkValue, int... values) {
         for (int value : values) {
             checkValue = Integer.rotateLeft(checkValue, 3);

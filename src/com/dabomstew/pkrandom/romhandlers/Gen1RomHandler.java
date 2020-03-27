@@ -740,6 +740,20 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     public void setStarterHeldItems(List<Integer> items) {
         // do nothing
     }
+    
+    @Override
+    public Map<Integer, List<Integer>> getShopItemsRandomized() {
+        return null;
+    }
+    @Override
+    public String[] getShopNames() {
+        return null;
+    }
+    @Override
+    public List<Integer> getEvolutionItems() {
+        return null;
+    }
+    
 
     @Override
     public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
