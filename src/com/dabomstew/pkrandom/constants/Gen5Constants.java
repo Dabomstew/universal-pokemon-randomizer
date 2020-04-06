@@ -328,7 +328,8 @@ public class Gen5Constants {
     private static void setupAllowedItems() {
         allowedItems = new ItemList(638);
         // Key items + version exclusives
-        allowedItems.banRange(428, 109);
+        allowedItems.banRange(428, 76);
+        allowedItems.banRange(505,32);
         allowedItems.banRange(621, 18);
         allowedItems.banSingles(574, 578, 579, 616, 617);
         // Unknown blank items or version exclusives
@@ -372,6 +373,7 @@ public class Gen5Constants {
         opShopItems.add(0x6A);
         opShopItems.addAll(IntStream.rangeClosed(0xCE,0xD4).boxed().collect(Collectors.toList()));
         opShopItems.add(0xE7);
+        opShopItems.add(0x1F8);
         opShopItems.add(0x23B);
         opShopItems.addAll(IntStream.rangeClosed(0x244,0x24F).boxed().collect(Collectors.toList()));
     }
