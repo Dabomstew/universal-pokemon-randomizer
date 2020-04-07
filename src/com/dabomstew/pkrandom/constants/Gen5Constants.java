@@ -373,7 +373,6 @@ public class Gen5Constants {
         opShopItems.add(0x6A);
         opShopItems.addAll(IntStream.rangeClosed(0xCE,0xD4).boxed().collect(Collectors.toList()));
         opShopItems.add(0xE7);
-        opShopItems.add(0x1F8);
         opShopItems.add(0x23B);
         opShopItems.addAll(IntStream.rangeClosed(0x244,0x24F).boxed().collect(Collectors.toList()));
     }
@@ -883,7 +882,7 @@ public class Gen5Constants {
             {501, 0}, // Photo Album
             {502, 0}, // GB Sounds
             {503, 0}, // Tidal Bell
-            {504, 30}, // RageCandyBar
+            {504, 1500}, // RageCandyBar
             {505, 0}, // Data Card 01
             {506, 0}, // Data Card 02
             {507, 0}, // Data Card 03
