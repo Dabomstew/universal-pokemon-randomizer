@@ -1791,6 +1791,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     int species = readWord(evoEntry, evo * 6 + 4);
                     if (method >= 1 && method <= Gen5Constants.evolutionMethodCount && species >= 1) {
                         EvolutionType et = EvolutionType.fromIndex(5, method);
+                        if (et.equals(EvolutionType.LEVEL_HIGH_BEAUTY)) continue; // Remove Feebas "split" evolution
                         int extraInfo = readWord(evoEntry, evo * 6 + 2);
                         Evolution evol = new Evolution(pk, pokes[species], true, et, extraInfo);
                         if (!pk.evolutionsFrom.contains(evol)) {
