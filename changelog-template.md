@@ -4,9 +4,11 @@
 ## General
 
 - Change
+
 Description of change
 
 - **NEW:** New feature
+
 Description of new feature
 
 ---
@@ -15,33 +17,41 @@ Description of new feature
 ### Pokemon Base Statistics
 
 - Setting
+
 Description of what has been changed for setting
 
 - **NEW:** New setting
+
 Description of new setting
 
 ### Pokemon Types
 
 - Setting
+
 Description of what has been changed for setting
 
 - **NEW:** New setting
+
 Description of new setting
 
 ### Pokemon Abilities
 
 - Setting
+
 Description of what has been changed for setting
 
 - **NEW:** New setting
+
 Description of new setting
 
 ### Pokemon Evolutions
 
 - Setting
+
 Description of what has been changed for setting
 
 - **NEW:** New setting
+
 Description of new setting
 
 ---
@@ -50,25 +60,31 @@ Description of new setting
 ### Starter Pokemon
 
 - Setting
+
 Description of what has been changed for setting
 
 - **NEW:** New setting
+
 Description of new setting
 
 ### Static Pokemon
 
 - Setting
+
 Description of what has been changed for setting
 
 - **NEW:** New setting
+
 Description of new setting
 
 ### In-Game Trades
 
 - Setting
+
 Description of what has been changed for setting
 
 - **NEW:** New setting
+
 Description of new setting
 
 ---
@@ -77,17 +93,21 @@ Description of new setting
 ### Move Data
 
 - Setting
+
 Description of what has been changed for setting
 
 - **NEW:** New setting
+
 Description of new setting
 
 ### Pokemon Movesets
 
 - Setting
+
 Description of what has been changed for setting
 
 - **NEW:** New setting
+
 Description of new setting
 
 ---
@@ -96,9 +116,11 @@ Description of new setting
 ### Trainers Pokemon
 
 - Setting
+
 Description of what has been changed for setting
 
 - **NEW:** New setting
+
 Description of new setting
 
 ---
@@ -107,9 +129,11 @@ Description of new setting
 ### Wild Pokemon
 
 - Setting
+
 Description of what has been changed for setting
 
 - **NEW:** New setting
+
 Description of new setting
 
 ---
@@ -118,17 +142,21 @@ Description of new setting
 ### TMs & HMs
 
 - Setting
+
 Description of what has been changed for setting
 
 - **NEW:** New setting
+
 Description of new setting
 
 ### Move Tutors
 
 - Setting
+
 Description of what has been changed for setting
 
 - **NEW:** New setting
+
 Description of new setting
 
 ---
@@ -137,26 +165,32 @@ Description of new setting
 ### Field Items
 
 - Setting
+
 Description of what has been changed for setting
 
 - **NEW:** New setting
+
 Description of new setting
 
 ### Non-Main Shop Items
 
 - Setting
+
 Description of what has been changed for setting
 
 - **NEW:** New setting
+
 Description of new setting
 
 ---
 ## Misc Tweaks
 
 - Setting
+
 Description of what has been changed for setting
 
 - **NEW:** New setting
+
 Description of new setting
 
 ---
@@ -165,4 +199,5 @@ Description of new setting
 ### **NEW:** New panel
 
 - **NEW:** New setting
+
 Description of new setting
