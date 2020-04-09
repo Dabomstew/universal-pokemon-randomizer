@@ -725,11 +725,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.paFollowEvolutionsCB.setEnabled(false);
         this.paBanTrappingCB.setEnabled(false);
         this.paBanNegativeCB.setEnabled(false);
+        this.paBanBadCB.setEnabled(false);
         this.paUnchangedRB.setSelected(true);
         this.paWonderGuardCB.setSelected(false);
         this.paFollowEvolutionsCB.setSelected(false);
         this.paBanTrappingCB.setSelected(false);
         this.paBanNegativeCB.setSelected(false);
+        this.paBanBadCB.setSelected(false);
 
         this.spCustomPoke1Chooser.setEnabled(false);
         this.spCustomPoke2Chooser.setEnabled(false);
@@ -1429,6 +1431,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.paFollowEvolutionsCB.setEnabled(true);
             this.paBanTrappingCB.setEnabled(true);
             this.paBanNegativeCB.setEnabled(true);
+            this.paBanBadCB.setEnabled(true);
         } else {
             this.paWonderGuardCB.setEnabled(false);
             this.paWonderGuardCB.setSelected(false);
@@ -1438,6 +1441,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.paBanTrappingCB.setSelected(false);
             this.paBanNegativeCB.setEnabled(false);
             this.paBanNegativeCB.setSelected(false);
+            this.paBanBadCB.setEnabled(false);
+            this.paBanBadCB.setSelected(false);
         }
 
         if (this.tpUnchangedRB.isSelected()) {
@@ -1799,6 +1804,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.paFollowEvolutionsCB.setSelected(settings.isAbilitiesFollowEvolutions());
         this.paBanTrappingCB.setSelected(settings.isBanTrappingAbilities());
         this.paBanNegativeCB.setSelected(settings.isBanNegativeAbilities());
+        this.paBanBadCB.setSelected(settings.isBanBadAbilities());
 
         this.ptRandomFollowEvosRB.setSelected(settings.getTypesMod() == Settings.TypesMod.RANDOM_FOLLOW_EVOLUTIONS);
         this.ptRandomTotalRB.setSelected(settings.getTypesMod() == Settings.TypesMod.COMPLETELY_RANDOM);
@@ -1979,6 +1985,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setAbilitiesFollowEvolutions(paFollowEvolutionsCB.isSelected());
         settings.setBanTrappingAbilities(paBanTrappingCB.isSelected());
         settings.setBanNegativeAbilities(paBanNegativeCB.isSelected());
+        settings.setBanBadAbilities(paBanBadCB.isSelected());
 
         settings.setTypesMod(ptUnchangedRB.isSelected(), ptRandomFollowEvosRB.isSelected(),
                 ptRandomTotalRB.isSelected());
@@ -2823,6 +2830,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         paBansLabel = new javax.swing.JLabel();
         paBanTrappingCB = new javax.swing.JCheckBox();
         paBanNegativeCB = new javax.swing.JCheckBox();
+        paBanBadCB = new javax.swing.JCheckBox();
         pokemonEvolutionsPanel = new javax.swing.JPanel();
         peUnchangedRB = new javax.swing.JRadioButton();
         peRandomRB = new javax.swing.JRadioButton();
@@ -3287,6 +3295,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
         paBanNegativeCB.setText(bundle.getString("RandomizerGUI.paBanNegativeCB.text")); // NOI18N
         paBanNegativeCB.setToolTipText(bundle.getString("RandomizerGUI.paBanNegativeCB.toolTipText")); // NOI18N
 
+        paBanBadCB.setText(bundle.getString("RandomizerGUI.paBanBadCB.text"));
+        paBanBadCB.setToolTipText(bundle.getString("RandomizerGUI.paBanBadCB.toolTipText"));
+
         javax.swing.GroupLayout abilitiesPanelLayout = new javax.swing.GroupLayout(abilitiesPanel);
         abilitiesPanel.setLayout(abilitiesPanelLayout);
         abilitiesPanelLayout.setHorizontalGroup(
@@ -3309,7 +3320,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
                             .addComponent(paFollowEvolutionsCB)
                             .addComponent(paBanTrappingCB))
                         .addGap(18, 18, 18)
-                        .addComponent(paBanNegativeCB)))
+                        .addComponent(paBanNegativeCB)
+                        .addGap(18, 18, 18)
+                        .addComponent(paBanBadCB)))
                 .addContainerGap(25, Short.MAX_VALUE))
         );
         abilitiesPanelLayout.setVerticalGroup(
@@ -3327,7 +3340,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addGroup(abilitiesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(paBansLabel)
                     .addComponent(paBanTrappingCB)
-                    .addComponent(paBanNegativeCB))
+                    .addComponent(paBanNegativeCB)
+                    .addComponent(paBanBadCB))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -3425,11 +3439,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
             .addGroup(pokeTraitsPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pokeTraitsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(baseStatsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pokeTraitsPanelLayout.createSequentialGroup()
-                        .addComponent(baseStatsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(pokemonTypesPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(abilitiesPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(pokemonTypesPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(abilitiesPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(pokemonEvolutionsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -3437,11 +3451,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
             pokeTraitsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pokeTraitsPanelLayout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(baseStatsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pokeTraitsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(baseStatsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(abilitiesPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
-                .addComponent(pokemonTypesPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(pokemonTypesPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(abilitiesPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(pokemonEvolutionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -5119,6 +5133,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JRadioButton mtmUnchangedRB;
     private javax.swing.JButton openROMButton;
     private javax.swing.JCheckBox paBanNegativeCB;
+    private javax.swing.JCheckBox paBanBadCB;
     private javax.swing.JCheckBox paBanTrappingCB;
     private javax.swing.JLabel paBansLabel;
     private javax.swing.JCheckBox paFollowEvolutionsCB;

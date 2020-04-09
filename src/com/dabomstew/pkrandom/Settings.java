@@ -81,6 +81,7 @@ public class Settings {
     private boolean abilitiesFollowEvolutions;
     private boolean banTrappingAbilities;
     private boolean banNegativeAbilities;
+    private boolean banBadAbilities;
 
     public enum StartersMod {
         UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS
@@ -286,7 +287,7 @@ public class Settings {
         // 3: v171: changed to the abilities byte
 
         out.write(makeByteSelected(abilitiesMod == AbilitiesMod.UNCHANGED, abilitiesMod == AbilitiesMod.RANDOMIZE,
-                allowWonderGuard, abilitiesFollowEvolutions, banTrappingAbilities, banNegativeAbilities));
+                allowWonderGuard, abilitiesFollowEvolutions, banTrappingAbilities, banNegativeAbilities, banBadAbilities));
 
         // 4: starter pokemon stuff
         out.write(makeByteSelected(startersMod == StartersMod.CUSTOM, startersMod == StartersMod.COMPLETELY_RANDOM,
@@ -480,6 +481,7 @@ public class Settings {
         settings.setAbilitiesFollowEvolutions(restoreState(data[3], 3));
         settings.setBanTrappingAbilities(restoreState(data[3], 4));
         settings.setBanNegativeAbilities(restoreState(data[3], 5));
+        settings.setBanBadAbilities(restoreState(data[3], 6));
 
         settings.setStartersMod(restoreEnum(StartersMod.class, data[4], 2, // UNCHANGED
                 0, // CUSTOM
@@ -961,6 +963,15 @@ public class Settings {
 
     public Settings setBanNegativeAbilities(boolean banNegativeAbilities) {
         this.banNegativeAbilities = banNegativeAbilities;
+        return this;
+    }
+
+    public boolean isBanBadAbilities() {
+        return banBadAbilities;
+    }
+
+    public Settings setBanBadAbilities(boolean banBadAbilities) {
+        this.banBadAbilities = banBadAbilities;
         return this;
     }
 

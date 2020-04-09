@@ -435,7 +435,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeAbilities(boolean evolutionSanity, boolean allowWonderGuard, boolean banTrappingAbilities,
-            boolean banNegativeAbilities) {
+            boolean banNegativeAbilities, boolean banBadAbilities) {
         // Abilities don't exist in some games...
         if (this.abilitiesPerPokemon() == 0) {
             return;
@@ -455,6 +455,10 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         if (banNegativeAbilities) {
             bannedAbilities.addAll(GlobalConstants.negativeAbilities);
+        }
+
+        if (banBadAbilities) {
+            bannedAbilities.addAll(GlobalConstants.badAbilities);
         }
 
         final int maxAbility = this.highestAbilityIndex();

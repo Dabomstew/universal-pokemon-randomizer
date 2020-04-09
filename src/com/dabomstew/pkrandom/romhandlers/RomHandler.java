@@ -139,7 +139,7 @@ public interface RomHandler {
     public String abilityName(int number);
 
     public void randomizeAbilities(boolean evolutionSanity, boolean allowWonderGuard, boolean banTrappingAbilities,
-            boolean banNegativeAbilities);
+            boolean banNegativeAbilities, boolean banBadAbilities);
 
     // Randomizer: wild pokemon
     public List<EncounterSet> getEncounters(boolean useTimeOfDay);
@@ -147,7 +147,7 @@ public interface RomHandler {
     public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters);
 
     public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-            boolean noLegendaries, boolean balanceShakingGrass);
+                                 boolean noLegendaries, boolean balanceShakingGrass);
 
     public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
                                    boolean usePowerLevels, boolean noLegendaries);
