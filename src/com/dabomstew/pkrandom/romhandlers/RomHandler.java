@@ -405,6 +405,8 @@ public interface RomHandler {
 
     public void condenseLevelEvolutions(int maxLevel, int maxIntermediateLevel);
 
+    public void removePartyEvolutions();
+
     public void randomizeEvolutions(boolean similarStrength, boolean sameType, boolean limitToThreeStages,
             boolean forceChange);
 

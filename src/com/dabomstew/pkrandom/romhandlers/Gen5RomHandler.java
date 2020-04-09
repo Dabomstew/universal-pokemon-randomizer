@@ -1924,6 +1924,25 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public void removePartyEvolutions() {
+        for (Pokemon pkmn : pokes) {
+            if (pkmn != null) {
+                for (Evolution evo : pkmn.evolutionsFrom) {
+                    if (evo.type == EvolutionType.LEVEL_WITH_OTHER) {
+                        // Replace w/ level 35
+                        evo.type = EvolutionType.LEVEL;
+                        int evoLevel = 35;
+                        evo.extraInfo = evoLevel;
+                        log(String.format("%s now evolves into %s at minimum level %d", evo.from.name, evo.to.name,
+                                evo.extraInfo));
+                    }
+                }
+            }
+        }
+        logBlankLine();
+    }
+
+    @Override
     public boolean hasShopRandomization() {
         return true;
     }

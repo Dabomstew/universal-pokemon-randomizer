@@ -1402,6 +1402,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public void removePartyEvolutions() {
+        // No such thing
+    }
+
+    @Override
     public boolean hasShopRandomization() {
         return false;
     }

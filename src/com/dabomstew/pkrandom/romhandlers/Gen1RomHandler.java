@@ -1443,6 +1443,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public void removePartyEvolutions() {
+        // No such thing
+    }
+
+    @Override
     public boolean hasShopRandomization() {
         return false;
     }

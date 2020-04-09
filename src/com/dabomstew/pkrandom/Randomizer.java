@@ -234,6 +234,9 @@ public class Randomizer {
         // Easier evolutions
         if (settings.isMakeEvolutionsEasier()) {
             romHandler.condenseLevelEvolutions(40, 30);
+            if (!settings.getWildPokemonMod().equals(Settings.WildPokemonMod.UNCHANGED)) {
+                romHandler.removePartyEvolutions();
+            }
         }
 
         // Starter Pokemon

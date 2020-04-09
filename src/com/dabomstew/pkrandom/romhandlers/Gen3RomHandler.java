@@ -2354,13 +2354,18 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                             // Onix, Scyther or Porygon: Lv30
                             evo.type = EvolutionType.LEVEL;
                             evo.extraInfo = 30;
-                            logEvoChangeLevel(evo.from.name, evo.to.name, 30);
+               logEvoChangeLevel(evo.from.name, evo.to.name, 30);
                         }
                     }
                 }
             }
         }
         logBlankLine();
+    }
+
+    @Override
+    public void removePartyEvolutions() {
+        // No such thing
     }
 
     @Override
