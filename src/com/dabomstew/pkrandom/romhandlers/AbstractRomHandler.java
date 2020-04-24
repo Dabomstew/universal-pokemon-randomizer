@@ -565,7 +565,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-            boolean noLegendaries, boolean balanceShakingGrass) {
+            boolean noLegendaries, boolean balanceShakingGrass, int levelModifier) {
         checkPokemonRestrictions();
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
 
@@ -686,13 +686,21 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
+        if (levelModifier != 0) {
+            for (EncounterSet area : currentEncounters) {
+                for (Encounter enc : area.encounters) {
+                    enc.level = Math.min(100, (int) Math.round(enc.level * (1 + levelModifier / 100.0)));
+                    enc.maxLevel = Math.min(100, (int) Math.round(enc.maxLevel * (1 + levelModifier / 100.0)));
+                }
+            }
+        }
 
         setEncounters(useTimeOfDay, currentEncounters);
     }
 
     @Override
     public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
-            boolean usePowerLevels, boolean noLegendaries) {
+            boolean usePowerLevels, boolean noLegendaries, int levelModifier) {
         checkPokemonRestrictions();
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
         List<Pokemon> banned = this.bannedForWildEncounters();
@@ -843,12 +851,20 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
+        if (levelModifier != 0) {
+            for (EncounterSet area : currentEncounters) {
+                for (Encounter enc : area.encounters) {
+                    enc.level = Math.min(100, (int) Math.round(enc.level * (1 + levelModifier / 100.0)));
+                    enc.maxLevel = Math.min(100, (int) Math.round(enc.maxLevel * (1 + levelModifier / 100.0)));
+                }
+            }
+        }
         setEncounters(useTimeOfDay, currentEncounters);
 
     }
 
     @Override
-    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries) {
+    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries, int levelModifier) {
         checkPokemonRestrictions();
         // Build the full 1-to-1 map
         Map<Pokemon, Pokemon> translateMap = new TreeMap<Pokemon, Pokemon>();
@@ -925,6 +941,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                         int picked = this.random.nextInt(tempPickable.size());
                         enc.pokemon = tempPickable.get(picked);
                     }
+                }
+            }
+        }
+        if (levelModifier != 0) {
+            for (EncounterSet area : currentEncounters) {
+                for (Encounter enc : area.encounters) {
+                    enc.level = Math.min(100, (int) Math.round(enc.level * (1 + levelModifier / 100.0)));
+                    enc.maxLevel = Math.min(100, (int) Math.round(enc.maxLevel * (1 + levelModifier / 100.0)));
                 }
             }
         }

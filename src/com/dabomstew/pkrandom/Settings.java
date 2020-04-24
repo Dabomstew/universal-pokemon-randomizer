@@ -48,7 +48,7 @@ public class Settings {
 
     public static final int VERSION = 172;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 38;
+    public static final int LENGTH_OF_SETTINGS_DATA = 39;
 
     private CustomNamesSet customNames;
 
@@ -170,6 +170,8 @@ public class Settings {
     private boolean randomizeWildPokemonHeldItems;
     private boolean banBadRandomWildPokemonHeldItems;
     private boolean balanceShakingGrass;
+    private boolean wildLevelsModified;
+    private int wildLevelModifier = 0;
 
     public enum StaticPokemonMod {
         UNCHANGED, RANDOM_MATCHING, COMPLETELY_RANDOM, SIMILAR_STRENGTH
@@ -420,6 +422,8 @@ public class Settings {
 
         out.write(makeByteSelected(shopItemsMod == ShopItemsMod.RANDOM, shopItemsMod == ShopItemsMod.SHUFFLE,
                 shopItemsMod == ShopItemsMod.UNCHANGED, banBadRandomShopItems, banRegularShopItems, banOPShopItems, balanceShopPrices, guaranteeEvolutionItems));
+
+        out.write((wildLevelsModified ? 0x80 : 0) | (wildLevelModifier+50));
         
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -640,6 +644,9 @@ public class Settings {
         settings.setBanOPShopItems(restoreState(data[37],5));
         settings.setBalanceShopPrices(restoreState(data[37],6));
         settings.setGuaranteeEvolutionItems(restoreState(data[37],7));
+
+        settings.setWildLevelsModified(restoreState(data[38],7));
+        settings.setWildLevelModifier((data[38] & 0x7F) - 50);
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1412,6 +1419,24 @@ public class Settings {
 
     public Settings setBalanceShakingGrass(boolean balanceShakingGrass) {
         this.balanceShakingGrass = balanceShakingGrass;
+        return this;
+    }
+
+    public boolean isWildLevelsModified() {
+        return wildLevelsModified;
+    }
+
+    public Settings setWildLevelsModified(boolean wildLevelsModified) {
+        this.wildLevelsModified = wildLevelsModified;
+        return this;
+    }
+
+    public int getWildLevelModifier() {
+        return wildLevelModifier;
+    }
+
+    public Settings setWildLevelModifier(int wildLevelModifier) {
+        this.wildLevelModifier = wildLevelModifier;
         return this;
     }
 
