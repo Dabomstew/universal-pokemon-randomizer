@@ -47,6 +47,7 @@ import java.util.TreeSet;
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.Encounter;
@@ -3164,13 +3165,30 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void standardizeEXPCurves() {
+    public void standardizeEXPCurves(Settings.ExpCurveMod mod) {
         List<Pokemon> pokes = getPokemon();
-        for (Pokemon pkmn : pokes) {
-            if (pkmn == null) {
-                continue;
-            }
-            pkmn.growthCurve = pkmn.isLegendary() ? ExpCurve.SLOW : ExpCurve.MEDIUM_FAST;
+        switch (mod) {
+            case LEGENDARIES:
+                for (Pokemon pkmn : pokes) {
+                    if (pkmn == null) {
+                        continue;
+                    }
+                    pkmn.growthCurve = pkmn.isLegendary() ? ExpCurve.SLOW : ExpCurve.MEDIUM_FAST;
+                }
+            case STRONG_LEGENDARIES:
+                for (Pokemon pkmn : pokes) {
+                    if (pkmn == null) {
+                        continue;
+                    }
+                    pkmn.growthCurve = pkmn.isStrongLegendary() ? ExpCurve.SLOW : ExpCurve.MEDIUM_FAST;
+                }
+            case ALL:
+                for (Pokemon pkmn : pokes) {
+                    if (pkmn == null) {
+                        continue;
+                    }
+                    pkmn.growthCurve = ExpCurve.MEDIUM_FAST;
+                }
         }
     }
 

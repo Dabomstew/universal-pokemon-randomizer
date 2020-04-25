@@ -150,7 +150,7 @@ public class Randomizer {
         }
 
         if (settings.isStandardizeEXPCurves()) {
-            romHandler.standardizeEXPCurves();
+            romHandler.standardizeEXPCurves(settings.getExpCurveMod());
         }
 
 

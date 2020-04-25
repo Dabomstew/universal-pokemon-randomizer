@@ -33,6 +33,7 @@ import java.util.Set;
 
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
+import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.IngameTrade;
@@ -425,7 +426,7 @@ public interface RomHandler {
     // stats stuff
     public void minimumCatchRate(int rateNonLegendary, int rateLegendary);
 
-    public void standardizeEXPCurves();
+    public void standardizeEXPCurves(Settings.ExpCurveMod mod);
 
     // (Mostly) unchanging lists of moves
 

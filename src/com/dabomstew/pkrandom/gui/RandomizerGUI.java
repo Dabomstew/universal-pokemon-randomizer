@@ -711,12 +711,16 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.pbsChangesRandomRB.setEnabled(false);
         this.pbsChangesShuffleRB.setEnabled(false);
         this.pbsChangesUnchangedRB.setSelected(true);
-        this.pbsStandardEXPCurvesCB.setEnabled(false);
-        this.pbsStandardEXPCurvesCB.setSelected(false);
         this.pbsFollowEvolutionsCB.setEnabled(false);
         this.pbsFollowEvolutionsCB.setSelected(false);
         this.pbsUpdateStatsCB.setEnabled(false);
         this.pbsUpdateStatsCB.setSelected(false);
+        this.pbsStandardEXPCurvesCB.setEnabled(false);
+        this.pbsStandardEXPCurvesCB.setSelected(false);
+        this.pbsEXPCurvesLegendaryRB.setEnabled(false);
+        this.pbsEXPCurvesLegendaryRB.setSelected(true);
+        this.pbsEXPCurvesStrongLegendaryRB.setEnabled(false);
+        this.pbsEXPCurvesAllRB.setEnabled(false);
 
         this.abilitiesPanel.setVisible(true);
         this.paUnchangedRB.setEnabled(false);
@@ -1120,6 +1124,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.pbsStandardEXPCurvesCB.setEnabled(true);
             this.pbsStandardEXPCurvesCB.setSelected(false);
 
+            this.pbsEXPCurvesLegendaryRB.setEnabled(false);
+            this.pbsEXPCurvesLegendaryRB.setSelected(true);
+            this.pbsEXPCurvesStrongLegendaryRB.setEnabled(false);
+            this.pbsEXPCurvesAllRB.setEnabled(false);
+
             this.pbsUpdateStatsCB.setEnabled(romHandler.generationOfPokemon() < 6);
             this.pbsUpdateStatsCB.setSelected(false);
 
@@ -1423,6 +1432,16 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.pbsFollowEvolutionsCB.setSelected(false);
         } else {
             this.pbsFollowEvolutionsCB.setEnabled(true);
+        }
+
+        if (this.pbsStandardEXPCurvesCB.isSelected()) {
+            this.pbsEXPCurvesLegendaryRB.setEnabled(true);
+            this.pbsEXPCurvesStrongLegendaryRB.setEnabled(true);
+            this.pbsEXPCurvesAllRB.setEnabled(true);
+        } else {
+            this.pbsEXPCurvesLegendaryRB.setEnabled(false);
+            this.pbsEXPCurvesStrongLegendaryRB.setEnabled(false);
+            this.pbsEXPCurvesAllRB.setEnabled(false);
         }
 
         if (this.spHeldItemsCB.isSelected() && this.spHeldItemsCB.isVisible() && this.spHeldItemsCB.isEnabled()) {
@@ -1810,9 +1829,12 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.pbsChangesRandomRB.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.RANDOM);
         this.pbsChangesShuffleRB.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.SHUFFLE);
         this.pbsChangesUnchangedRB.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.UNCHANGED);
-        this.pbsStandardEXPCurvesCB.setSelected(settings.isStandardizeEXPCurves());
         this.pbsFollowEvolutionsCB.setSelected(settings.isBaseStatsFollowEvolutions());
         this.pbsUpdateStatsCB.setSelected(settings.isUpdateBaseStats());
+        this.pbsStandardEXPCurvesCB.setSelected(settings.isStandardizeEXPCurves());
+        this.pbsEXPCurvesLegendaryRB.setSelected(settings.getExpCurveMod() == Settings.ExpCurveMod.LEGENDARIES);
+        this.pbsEXPCurvesStrongLegendaryRB.setSelected(settings.getExpCurveMod() == Settings.ExpCurveMod.STRONG_LEGENDARIES);
+        this.pbsEXPCurvesAllRB.setSelected(settings.getExpCurveMod() == Settings.ExpCurveMod.ALL);
 
         this.paUnchangedRB.setSelected(settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED);
         this.paRandomizeRB.setSelected(settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
@@ -1994,9 +2016,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         settings.setBaseStatisticsMod(pbsChangesUnchangedRB.isSelected(), pbsChangesShuffleRB.isSelected(),
                 pbsChangesRandomRB.isSelected());
-        settings.setStandardizeEXPCurves(pbsStandardEXPCurvesCB.isSelected());
         settings.setBaseStatsFollowEvolutions(pbsFollowEvolutionsCB.isSelected());
         settings.setUpdateBaseStats(pbsUpdateStatsCB.isSelected());
+        settings.setStandardizeEXPCurves(pbsStandardEXPCurvesCB.isSelected());
+        settings.setExpCurveMod(pbsEXPCurvesLegendaryRB.isSelected(), pbsEXPCurvesStrongLegendaryRB.isSelected(),
+                pbsEXPCurvesAllRB.isSelected());
 
         settings.setAbilitiesMod(paUnchangedRB.isSelected(), paRandomizeRB.isSelected());
         settings.setAllowWonderGuard(paWonderGuardCB.isSelected());
@@ -2729,6 +2753,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_pbsChangesRandomRBActionPerformed
 
+    private void pbsStandardEXPCurvesCBActionPerformed(java.awt.event.ActionEvent evt) {
+        this.enableOrDisableSubControls();
+    }
+
     private void tpForceFullyEvolvedCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tpForceFullyEvolvedCBActionPerformed
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_tpForceFullyEvolvedCBActionPerformed
@@ -2767,6 +2795,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private void initComponents() {
 
         pokeStatChangesButtonGroup = new javax.swing.ButtonGroup();
+        expCurveButtonGroup = new javax.swing.ButtonGroup();
         pokeTypesButtonGroup = new javax.swing.ButtonGroup();
         pokeMovesetsButtonGroup = new javax.swing.ButtonGroup();
         trainerPokesButtonGroup = new javax.swing.ButtonGroup();
@@ -2843,9 +2872,12 @@ public class RandomizerGUI extends javax.swing.JFrame {
         pbsChangesUnchangedRB = new javax.swing.JRadioButton();
         pbsChangesShuffleRB = new javax.swing.JRadioButton();
         pbsChangesRandomRB = new javax.swing.JRadioButton();
-        pbsStandardEXPCurvesCB = new javax.swing.JCheckBox();
         pbsFollowEvolutionsCB = new javax.swing.JCheckBox();
         pbsUpdateStatsCB = new javax.swing.JCheckBox();
+        pbsStandardEXPCurvesCB = new javax.swing.JCheckBox();
+        pbsEXPCurvesLegendaryRB = new javax.swing.JRadioButton();
+        pbsEXPCurvesStrongLegendaryRB = new javax.swing.JRadioButton();
+        pbsEXPCurvesAllRB = new javax.swing.JRadioButton();
         abilitiesPanel = new javax.swing.JPanel();
         paUnchangedRB = new javax.swing.JRadioButton();
         paRandomizeRB = new javax.swing.JRadioButton();
@@ -3242,14 +3274,32 @@ public class RandomizerGUI extends javax.swing.JFrame {
             }
         });
 
-        pbsStandardEXPCurvesCB.setText(bundle.getString("RandomizerGUI.pbsStandardEXPCurvesCB.text")); // NOI18N
-        pbsStandardEXPCurvesCB.setToolTipText(bundle.getString("RandomizerGUI.pbsStandardEXPCurvesCB.toolTipText")); // NOI18N
-
         pbsFollowEvolutionsCB.setText(bundle.getString("RandomizerGUI.pbsFollowEvolutionsCB.text")); // NOI18N
         pbsFollowEvolutionsCB.setToolTipText(bundle.getString("RandomizerGUI.pbsFollowEvolutionsCB.toolTipText")); // NOI18N
 
         pbsUpdateStatsCB.setText(bundle.getString("RandomizerGUI.pbsUpdateStatsCB.text")); // NOI18N
         pbsUpdateStatsCB.setToolTipText(bundle.getString("RandomizerGUI.pbsUpdateStatsCB.toolTipText")); // NOI18N
+
+        pbsStandardEXPCurvesCB.setText(bundle.getString("RandomizerGUI.pbsStandardEXPCurvesCB.text")); // NOI18N
+        pbsStandardEXPCurvesCB.setToolTipText(bundle.getString("RandomizerGUI.pbsStandardEXPCurvesCB.toolTipText")); // NOI18N
+        pbsStandardEXPCurvesCB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pbsStandardEXPCurvesCBActionPerformed(evt);
+            }
+        });
+
+        expCurveButtonGroup.add(pbsEXPCurvesLegendaryRB);
+        pbsEXPCurvesLegendaryRB.setSelected(true);
+        pbsEXPCurvesLegendaryRB.setText(bundle.getString("RandomizerGUI.pbsEXPCurvesLegendaryRB.text")); // NOI18N
+        pbsEXPCurvesLegendaryRB.setToolTipText(bundle.getString("RandomizerGUI.pbsEXPCurvesLegendaryRB.toolTipText")); // NOI18N
+
+        expCurveButtonGroup.add(pbsEXPCurvesStrongLegendaryRB);
+        pbsEXPCurvesStrongLegendaryRB.setText(bundle.getString("RandomizerGUI.pbsEXPCurvesStrongLegendaryRB.text")); // NOI18N
+        pbsEXPCurvesStrongLegendaryRB.setToolTipText(bundle.getString("RandomizerGUI.pbsEXPCurvesStrongLegendaryRB.toolTipText")); // NOI18N
+
+        expCurveButtonGroup.add(pbsEXPCurvesAllRB);
+        pbsEXPCurvesAllRB.setText(bundle.getString("RandomizerGUI.pbsEXPCurvesAllRB.text")); // NOI18N
+        pbsEXPCurvesAllRB.setToolTipText(bundle.getString("RandomizerGUI.pbsEXPCurvesAllRB.toolTipText")); // NOI18N
 
         javax.swing.GroupLayout baseStatsPanelLayout = new javax.swing.GroupLayout(baseStatsPanel);
         baseStatsPanel.setLayout(baseStatsPanelLayout);
@@ -3266,6 +3316,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(pbsStandardEXPCurvesCB)
                     .addComponent(pbsFollowEvolutionsCB)
                     .addComponent(pbsUpdateStatsCB))
+                .addGroup(baseStatsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pbsEXPCurvesLegendaryRB)
+                    .addComponent(pbsEXPCurvesStrongLegendaryRB)
+                    .addComponent(pbsEXPCurvesAllRB))
                 .addGap(38, 38, 38))
         );
         baseStatsPanelLayout.setVerticalGroup(
@@ -3274,15 +3328,18 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(baseStatsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(pbsChangesUnchangedRB)
-                    .addComponent(pbsStandardEXPCurvesCB))
+                    .addComponent(pbsStandardEXPCurvesCB)
+                    .addComponent(pbsEXPCurvesLegendaryRB))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(baseStatsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(pbsChangesShuffleRB)
-                    .addComponent(pbsFollowEvolutionsCB))
+                    .addComponent(pbsFollowEvolutionsCB)
+                    .addComponent(pbsEXPCurvesStrongLegendaryRB))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(baseStatsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(pbsChangesRandomRB)
-                    .addComponent(pbsUpdateStatsCB))
+                    .addComponent(pbsUpdateStatsCB)
+                    .addComponent(pbsEXPCurvesAllRB))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -5194,8 +5251,12 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JRadioButton pbsChangesShuffleRB;
     private javax.swing.JRadioButton pbsChangesUnchangedRB;
     private javax.swing.JCheckBox pbsFollowEvolutionsCB;
-    private javax.swing.JCheckBox pbsStandardEXPCurvesCB;
     private javax.swing.JCheckBox pbsUpdateStatsCB;
+    private javax.swing.JCheckBox pbsStandardEXPCurvesCB;
+    private javax.swing.JRadioButton pbsEXPCurvesLegendaryRB;
+    private javax.swing.JRadioButton pbsEXPCurvesStrongLegendaryRB;
+    private javax.swing.JRadioButton pbsEXPCurvesAllRB;
+    private javax.swing.ButtonGroup expCurveButtonGroup;
     private javax.swing.JCheckBox peForceChangeCB;
     private javax.swing.JRadioButton peRandomRB;
     private javax.swing.JCheckBox peSameTypeCB;

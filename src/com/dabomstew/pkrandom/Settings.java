@@ -46,9 +46,9 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 public class Settings {
 
-    public static final int VERSION = 172;
+    public static final int VERSION = 300;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 39;
+    public static final int LENGTH_OF_SETTINGS_DATA = 40;
 
     private CustomNamesSet customNames;
 
@@ -67,10 +67,15 @@ public class Settings {
         UNCHANGED, SHUFFLE, RANDOM,
     }
 
+    public enum ExpCurveMod {
+        LEGENDARIES, STRONG_LEGENDARIES, ALL
+    }
+
     private BaseStatisticsMod baseStatisticsMod = BaseStatisticsMod.UNCHANGED;
-    private boolean standardizeEXPCurves;
     private boolean baseStatsFollowEvolutions;
     private boolean updateBaseStats;
+    private boolean standardizeEXPCurves;
+    private ExpCurveMod expCurveMod = ExpCurveMod.LEGENDARIES;
 
     public enum AbilitiesMod {
         UNCHANGED, RANDOMIZE
@@ -424,6 +429,11 @@ public class Settings {
                 shopItemsMod == ShopItemsMod.UNCHANGED, banBadRandomShopItems, banRegularShopItems, banOPShopItems, balanceShopPrices, guaranteeEvolutionItems));
 
         out.write((wildLevelsModified ? 0x80 : 0) | (wildLevelModifier+50));
+
+        out.write(makeByteSelected(
+                expCurveMod == ExpCurveMod.LEGENDARIES,
+                expCurveMod == ExpCurveMod.STRONG_LEGENDARIES,
+                expCurveMod == ExpCurveMod.ALL));
         
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -647,6 +657,8 @@ public class Settings {
 
         settings.setWildLevelsModified(restoreState(data[38],7));
         settings.setWildLevelModifier((data[38] & 0x7F) - 50);
+
+        settings.setExpCurveMod(restoreEnum(ExpCurveMod.class,data[39],0,1,2));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -913,6 +925,19 @@ public class Settings {
     public Settings setStandardizeEXPCurves(boolean standardizeEXPCurves) {
         this.standardizeEXPCurves = standardizeEXPCurves;
         return this;
+    }
+
+    public ExpCurveMod getExpCurveMod() {
+        return expCurveMod;
+    }
+
+    public Settings setExpCurveMod(ExpCurveMod expCurveMod) {
+        this.expCurveMod = expCurveMod;
+        return this;
+    }
+
+    public Settings setExpCurveMod(boolean... bools) {
+        return setExpCurveMod(getEnum(ExpCurveMod.class, bools));
     }
 
     public boolean isUpdateBaseStats() {
