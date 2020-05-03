@@ -3175,6 +3175,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                     pkmn.growthCurve = pkmn.isLegendary() ? ExpCurve.SLOW : ExpCurve.MEDIUM_FAST;
                 }
+                break;
             case STRONG_LEGENDARIES:
                 for (Pokemon pkmn : pokes) {
                     if (pkmn == null) {
@@ -3182,6 +3183,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                     pkmn.growthCurve = pkmn.isStrongLegendary() ? ExpCurve.SLOW : ExpCurve.MEDIUM_FAST;
                 }
+                break;
             case ALL:
                 for (Pokemon pkmn : pokes) {
                     if (pkmn == null) {
@@ -3189,6 +3191,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                     pkmn.growthCurve = ExpCurve.MEDIUM_FAST;
                 }
+                break;
         }
     }
 
