@@ -40,6 +40,7 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -670,9 +671,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
         if (new File(SysConstants.ROOT_PATH + "settings/").exists()) {
             this.qsOpenChooser.setCurrentDirectory(new File(SysConstants.ROOT_PATH + "settings/"));
             this.qsSaveChooser.setCurrentDirectory(new File(SysConstants.ROOT_PATH + "settings/"));
+            this.qsUpdateChooser.setCurrentDirectory(new File(SysConstants.ROOT_PATH + "settings/"));
         } else {
             this.qsOpenChooser.setCurrentDirectory(new File(SysConstants.ROOT_PATH));
             this.qsSaveChooser.setCurrentDirectory(new File(SysConstants.ROOT_PATH));
+            this.qsUpdateChooser.setCurrentDirectory(new File(SysConstants.ROOT_PATH));
         }
     }
 
@@ -2417,6 +2420,43 @@ public class RandomizerGUI extends javax.swing.JFrame {
         attemptWriteConfig();
     }// GEN-LAST:event_toggleAutoUpdatesMenuItemActionPerformed
 
+    private void updateOldSettingsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
+
+        qsUpdateChooser.setSelectedFile(null);
+        int returnVal = qsUpdateChooser.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File fh = qsUpdateChooser.getSelectedFile();
+            try {
+                FileInputStream in = new FileInputStream(fh);
+                int version = in.read();
+                if (version == 0 || version > 172) {
+                    JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.oldSettingsFileInvalid"));
+                    in.close();
+                    return;
+                }
+                int length = in.read();
+                byte[] buffer = FileFunctions.readFullyIntoBuffer(in, length);
+                in.close();
+
+                ByteBuffer buf = ByteBuffer.allocate(length + 8);
+                buf.putInt(version);
+                buf.putInt(length);
+                buf.put(buffer);
+
+                FileOutputStream out = new FileOutputStream(fh);
+                out.write(buf.array());
+                out.close();
+                JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.oldSettingsFileUpdated"));
+            } catch (IllegalArgumentException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.invalidSettingsFile"));
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.settingsLoadFailed"));
+            }
+        }
+    }
+
     private void manualUpdateMenuItemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_manualUpdateMenuItemActionPerformed
         //new UpdateCheckThread(this, true).start();
     }// GEN-LAST:event_manualUpdateMenuItemActionPerformed
@@ -2832,6 +2872,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         };
         qsOpenChooser = new javax.swing.JFileChooser();
         qsSaveChooser = new javax.swing.JFileChooser();
+        qsUpdateChooser = new javax.swing.JFileChooser();
         staticPokemonButtonGroup = new javax.swing.ButtonGroup();
         tmMovesButtonGroup = new javax.swing.ButtonGroup();
         tmHmCompatibilityButtonGroup = new javax.swing.ButtonGroup();
@@ -2846,6 +2887,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         manualUpdateMenuItem = new javax.swing.JMenuItem();
         toggleScrollPaneMenuItem = new javax.swing.JMenuItem();
         customNamesEditorMenuItem = new javax.swing.JMenuItem();
+        updateOldSettingsMenuItem = new javax.swing.JMenuItem();
         pokeEvolutionsButtonGroup = new javax.swing.ButtonGroup();
         generalOptionsPanel = new javax.swing.JPanel();
         pokeLimitCB = new javax.swing.JCheckBox();
@@ -3041,6 +3083,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         qsSaveChooser.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
         qsSaveChooser.setFileFilter(new QSFileFilter());
 
+        qsUpdateChooser.setFileFilter(new QSFileFilter());
+
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle"); // NOI18N
         toggleAutoUpdatesMenuItem.setText(bundle.getString("RandomizerGUI.toggleAutoUpdatesMenuItem.text")); // NOI18N
         toggleAutoUpdatesMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -3073,6 +3117,14 @@ public class RandomizerGUI extends javax.swing.JFrame {
             }
         });
         updateSettingsMenu.add(customNamesEditorMenuItem);
+
+        updateOldSettingsMenuItem.setText(bundle.getString("RandomizerGUI.updateOldSettingsMenuItem.text"));
+        updateOldSettingsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                updateOldSettingsMenuItemActionPerformed(evt);
+            }
+        });
+        updateSettingsMenu.add(updateOldSettingsMenuItem);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle(bundle.getString("RandomizerGUI.title")); // NOI18N
@@ -5288,6 +5340,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JRadioButton ptUnchangedRB;
     private javax.swing.JFileChooser qsOpenChooser;
     private javax.swing.JFileChooser qsSaveChooser;
+    private javax.swing.JFileChooser qsUpdateChooser;
     private javax.swing.JCheckBox raceModeCB;
     private javax.swing.JTabbedPane randomizerOptionsPane;
     private javax.swing.JLabel riRomCodeLabel;
@@ -5367,6 +5420,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.ButtonGroup trainerPokesButtonGroup;
     private javax.swing.JPanel trainersInnerPanel;
     private javax.swing.JPanel trainersPokemonPanel;
+    private javax.swing.JMenuItem updateOldSettingsMenuItem;
     private javax.swing.JPopupMenu updateSettingsMenu;
     private javax.swing.JButton usePresetsButton;
     private javax.swing.JLabel versionLabel;

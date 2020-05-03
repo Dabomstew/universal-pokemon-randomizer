@@ -31,6 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.List;
 import java.util.zip.CRC32;
 
@@ -247,18 +248,30 @@ public class Settings {
 
     // to and from strings etc
     public void write(FileOutputStream out) throws IOException {
-        out.write(VERSION);
         byte[] settings = toString().getBytes("UTF-8");
-        out.write(settings.length);
-        out.write(settings);
+        ByteBuffer buf = ByteBuffer.allocate(settings.length + 8);
+        buf.putInt(VERSION);
+        buf.putInt(settings.length);
+        buf.put(settings);
+        out.write(buf.array());
     }
 
     public static Settings read(FileInputStream in) throws IOException, UnsupportedOperationException {
-        int version = in.read();
+        byte[] versionBytes = new byte[4];
+        byte[] lengthBytes = new byte[4];
+        int nread = in.read(versionBytes);
+        if (nread < 4) {
+            throw new UnsupportedOperationException("Error reading version number from settings string.");
+        }
+        int version = ByteBuffer.wrap(versionBytes).getInt();
         if (version > VERSION) {
             throw new UnsupportedOperationException("Cannot read settings from a newer version of the randomizer.");
         }
-        int length = in.read();
+        nread = in.read(lengthBytes);
+        if (nread < 4) {
+            throw new UnsupportedOperationException("Error reading settings length from settings string.");
+        }
+        int length = ByteBuffer.wrap(lengthBytes).getInt();
         byte[] buffer = FileFunctions.readFullyIntoBuffer(in, length);
         String settings = new String(buffer, "UTF-8");
         boolean oldUpdate = false;
