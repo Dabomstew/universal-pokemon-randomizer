@@ -2508,7 +2508,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                         String.format(bundle.getString("RandomizerGUI.settingsLoaded"), fh.getName()));
             } catch (UnsupportedOperationException ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.settingsFileNewer"));
+                JOptionPane.showMessageDialog(this, ex.getMessage());
             } catch (IllegalArgumentException ex) {
                 ex.printStackTrace();
                 JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.invalidSettingsFile"));

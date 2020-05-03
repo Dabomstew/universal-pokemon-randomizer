@@ -264,6 +264,9 @@ public class Settings {
             throw new UnsupportedOperationException("Error reading version number from settings string.");
         }
         int version = ByteBuffer.wrap(versionBytes).getInt();
+        if (((version >> 24) & 0xFF) > 0 && ((version >> 24) & 0xFF) <= 172) {
+            throw new UnsupportedOperationException("The settings file is old and must be updated. Press Settings -> \"Update Pre-3.0.0 Settings File\" to update.");
+        }
         if (version > VERSION) {
             throw new UnsupportedOperationException("Cannot read settings from a newer version of the randomizer.");
         }
