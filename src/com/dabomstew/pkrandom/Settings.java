@@ -47,7 +47,7 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 public class Settings {
 
-    public static final int VERSION = 300;
+    public static final int VERSION = 301;
 
     public static final int LENGTH_OF_SETTINGS_DATA = 40;
 
