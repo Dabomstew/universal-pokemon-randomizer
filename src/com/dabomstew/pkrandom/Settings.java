@@ -32,10 +32,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Base64;
 import java.util.List;
 import java.util.zip.CRC32;
-
-import javax.xml.bind.DatatypeConverter;
 
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
@@ -471,11 +470,11 @@ public class Settings {
         } catch (IOException e) {
         }
 
-        return DatatypeConverter.printBase64Binary(out.toByteArray());
+        return Base64.getEncoder().encodeToString(out.toByteArray());
     }
 
     public static Settings fromString(String settingsString) throws UnsupportedEncodingException {
-        byte[] data = DatatypeConverter.parseBase64Binary(settingsString);
+        byte[] data = Base64.getDecoder().decode(settingsString);
         checkChecksum(data);
 
         Settings settings = new Settings();
