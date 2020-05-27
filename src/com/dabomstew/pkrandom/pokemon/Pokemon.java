@@ -35,6 +35,10 @@ public class Pokemon implements Comparable<Pokemon> {
     public String name;
     public int number;
 
+    public String formeSuffix = "";
+    public int baseForme = 0;
+    public int formeNumber = 0;
+
     public Type primaryType, secondaryType;
 
     public int hp, attack, defense, spatk, spdef, speed, special;
@@ -168,11 +172,15 @@ public class Pokemon implements Comparable<Pokemon> {
         }
     }
 
+    public String fullName() {
+        return name + formeSuffix;
+    }
+
     @Override
     public String toString() {
-        return "Pokemon [name=" + name + ", number=" + number + ", primaryType=" + primaryType + ", secondaryType="
-                + secondaryType + ", hp=" + hp + ", attack=" + attack + ", defense=" + defense + ", spatk=" + spatk
-                + ", spdef=" + spdef + ", speed=" + speed + "]";
+        return "Pokemon [name=" + name + formeSuffix + ", number=" + number + ", primaryType=" + primaryType
+                + ", secondaryType=" + secondaryType + ", hp=" + hp + ", attack=" + attack + ", defense=" + defense
+                + ", spatk=" + spatk + ", spdef=" + spdef + ", speed=" + speed + "]";
     }
 
     public String toStringRBY() {
@@ -216,11 +224,11 @@ public class Pokemon implements Comparable<Pokemon> {
             487, 493, 643, 644, 646);
 
     public boolean isLegendary() {
-        return legendaries.contains(this.number);
+        return formeNumber == 0 ? legendaries.contains(this.number) : legendaries.contains(this.baseForme);
     }
 
     public boolean isStrongLegendary() {
-        return strongLegendaries.contains(this.number);
+        return formeNumber == 0 ? strongLegendaries.contains(this.number) : strongLegendaries.contains(this.baseForme);
     }
 
 }

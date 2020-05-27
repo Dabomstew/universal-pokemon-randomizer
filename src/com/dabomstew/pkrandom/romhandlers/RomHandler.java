@@ -72,6 +72,10 @@ public interface RomHandler {
     // 0 = null 1-whatever = the Pokemon.
     public List<Pokemon> getPokemon();
 
+    public List<Pokemon> getPokemonInclFormes();
+
+    public List<Pokemon> getAltFormes();
+
     // Setup Gen Restrictions.
     public void setPokemonPool(GenRestrictions restrictions);
 
@@ -212,9 +216,9 @@ public interface RomHandler {
 
     // Randomizer: moves learnt
 
-    public Map<Pokemon, List<MoveLearnt>> getMovesLearnt();
+    public Map<Integer, List<MoveLearnt>> getMovesLearnt();
 
-    public void setMovesLearnt(Map<Pokemon, List<MoveLearnt>> movesets);
+    public void setMovesLearnt(Map<Integer, List<MoveLearnt>> movesets);
 
     public List<Integer> getMovesBannedFromLevelup();
 

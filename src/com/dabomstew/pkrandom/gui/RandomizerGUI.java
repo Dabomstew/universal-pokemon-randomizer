@@ -1392,7 +1392,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         List<Pokemon> allPokes = romHandler.getPokemon();
         String[] pokeNames = new String[allPokes.size() - 1];
         for (int i = 1; i < allPokes.size(); i++) {
-            pokeNames[i - 1] = allPokes.get(i).name;
+            pokeNames[i - 1] = allPokes.get(i).fullName();
         }
         this.spCustomPoke1Chooser.setModel(new DefaultComboBoxModel(pokeNames));
         this.spCustomPoke1Chooser.setSelectedIndex(allPokes.indexOf(currentStarters.get(0)) - 1);

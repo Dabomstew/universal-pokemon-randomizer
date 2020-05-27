@@ -36,11 +36,14 @@ public class TrainerPokemon {
     public int AILevel;
     public int heldItem;
     public int ability;
+    public int forme;
+    public String formeSuffix = "";
+    public int absolutePokeNumber = 0;
     
     public boolean resetMoves = false;
 
     public String toString() {
-        return pokemon.name + " Lv" + level;
+        return pokemon.name + formeSuffix + " Lv" + level;
     }
 
 }

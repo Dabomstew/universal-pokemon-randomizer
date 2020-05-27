@@ -975,6 +975,16 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return pokemonList;
     }
 
+    @Override
+    public List<Pokemon> getPokemonInclFormes() {
+        return pokemonList;
+    }
+
+    @Override
+    public List<Pokemon> getAltFormes() {
+        return new ArrayList<>();
+    }
+
     public List<Trainer> getTrainers() {
         int traineroffset = romEntry.getValue("TrainerDataTableOffset");
         int traineramount = Gen1Constants.trainerClassCount;
@@ -1140,8 +1150,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public Map<Pokemon, List<MoveLearnt>> getMovesLearnt() {
-        Map<Pokemon, List<MoveLearnt>> movesets = new TreeMap<Pokemon, List<MoveLearnt>>();
+    public Map<Integer, List<MoveLearnt>> getMovesLearnt() {
+        Map<Integer, List<MoveLearnt>> movesets = new TreeMap<>();
         int pointersOffset = romEntry.getValue("PokemonMovesetsTableOffset");
         int pokeStatsOffset = romEntry.getValue("PokemonStatsOffset");
         int pkmnCount = romEntry.getValue("InternalPokemonCount");
@@ -1184,14 +1194,14 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                     ourMoves.add(learnt);
                     realPointer += 2;
                 }
-                movesets.put(pkmn, ourMoves);
+                movesets.put(pkmn.number, ourMoves);
             }
         }
         return movesets;
     }
 
     @Override
-    public void setMovesLearnt(Map<Pokemon, List<MoveLearnt>> movesets) {
+    public void setMovesLearnt(Map<Integer, List<MoveLearnt>> movesets) {
         // new method for moves learnt
         writeEvosAndMovesLearnt(false, movesets);
     }
@@ -2167,7 +2177,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return true;
     }
 
-    private void writeEvosAndMovesLearnt(boolean writeEvos, Map<Pokemon, List<MoveLearnt>> movesets) {
+    private void writeEvosAndMovesLearnt(boolean writeEvos, Map<Integer, List<MoveLearnt>> movesets) {
         // we assume a few things here:
         // 1) evos & moves learnt are stored directly after their pointer table
         // 2) PokemonMovesetsExtraSpaceOffset is in the same bank, and
@@ -2267,7 +2277,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                         dataStream.write(rom[movesOffset++] & 0xFF);
                     }
                 } else {
-                    List<MoveLearnt> ourMoves = movesets.get(pkmn);
+                    List<MoveLearnt> ourMoves = movesets.get(pkmn.number);
                     int statsOffset = 0;
                     if (pokeNum == Gen1Constants.mewIndex && !romEntry.isYellow) {
                         // Mewww

@@ -38,7 +38,7 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 public class RomFunctions {
 
     public static Set<Pokemon> getBasicOrNoCopyPokemon(RomHandler baseRom) {
-        List<Pokemon> allPokes = baseRom.getPokemon();
+        List<Pokemon> allPokes = baseRom.getPokemonInclFormes();
         Set<Pokemon> dontCopyPokes = new TreeSet<Pokemon>();
         for (Pokemon pkmn : allPokes) {
             if (pkmn != null) {
@@ -95,11 +95,11 @@ public class RomFunctions {
      * @param level
      * @return
      */
-    public static int[] getMovesAtLevel(Pokemon pkmn, Map<Pokemon, List<MoveLearnt>> movesets, int level) {
+    public static int[] getMovesAtLevel(int pkmn, Map<Integer, List<MoveLearnt>> movesets, int level) {
         return getMovesAtLevel(pkmn, movesets, level, 0);
     }
 
-    public static int[] getMovesAtLevel(Pokemon pkmn, Map<Pokemon, List<MoveLearnt>> movesets, int level, int emptyValue) {
+    public static int[] getMovesAtLevel(int pkmn, Map<Integer, List<MoveLearnt>> movesets, int level, int emptyValue) {
         int[] curMoves = new int[4];
 
         if (emptyValue != 0) {

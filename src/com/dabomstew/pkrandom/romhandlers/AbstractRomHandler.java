@@ -71,7 +71,10 @@ public abstract class AbstractRomHandler implements RomHandler {
     private static final boolean True = false;
     private boolean restrictionsSet;
     protected List<Pokemon> mainPokemonList;
+    protected List<Pokemon> mainPokemonListInclFormes;
+    protected List<Pokemon> altFormesList;
     protected List<Pokemon> noLegendaryList, onlyLegendaryList;
+    protected List<Pokemon> noLegendaryAltsList, onlyLegendaryAltsList;
     protected final Random random;
     protected PrintStream logStream;
     private List<Pokemon> alreadyPicked = new ArrayList<>();
@@ -98,9 +101,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void setPokemonPool(GenRestrictions restrictions) {
         restrictionsSet = true;
         mainPokemonList = this.allPokemonWithoutNull();
+        mainPokemonListInclFormes = this.allPokemonInclFormesWithoutNull();
+        altFormesList = this.getAltFormes();
         if (restrictions != null) {
-            mainPokemonList = new ArrayList<Pokemon>();
-            List<Pokemon> allPokemon = this.getPokemon();
+            mainPokemonList = new ArrayList<>();
+            List<Pokemon> allPokemon = this.getPokemonInclFormes();
 
             if (restrictions.allow_gen1) {
                 addPokesFromRange(mainPokemonList, allPokemon, 1, 151);
@@ -153,8 +158,10 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        noLegendaryList = new ArrayList<Pokemon>();
-        onlyLegendaryList = new ArrayList<Pokemon>();
+        noLegendaryList = new ArrayList<>();
+        onlyLegendaryList = new ArrayList<>();
+        noLegendaryAltsList = new ArrayList<>();
+        onlyLegendaryAltsList = new ArrayList<>();
         giratinaPicks = new ArrayList<>();
 
         for (Pokemon p : mainPokemonList) {
@@ -168,6 +175,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                     giratinaPicks.add(p);
                     break;
                 }
+            }
+        }
+        for (Pokemon f : altFormesList) {
+            if (f.isLegendary()) {
+                onlyLegendaryAltsList.add(f);
+            } else {
+                noLegendaryAltsList.add(f);
             }
         }
     }
@@ -242,7 +256,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             });
         } else {
-            List<Pokemon> allPokes = this.getPokemon();
+            List<Pokemon> allPokes = this.getPokemonInclFormes();
             for (Pokemon pk : allPokes) {
                 if (pk != null) {
                     pk.randomizeStatsWithinBST(this.random);
@@ -868,10 +882,10 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries, int levelModifier) {
         checkPokemonRestrictions();
         // Build the full 1-to-1 map
-        Map<Pokemon, Pokemon> translateMap = new TreeMap<Pokemon, Pokemon>();
+        Map<Pokemon, Pokemon> translateMap = new TreeMap<>();
         List<Pokemon> remainingLeft = allPokemonWithoutNull();
-        List<Pokemon> remainingRight = noLegendaries ? new ArrayList<Pokemon>(noLegendaryList)
-                : new ArrayList<Pokemon>(mainPokemonList);
+        List<Pokemon> remainingRight = noLegendaries ? new ArrayList<>(noLegendaryList)
+                : new ArrayList<>(mainPokemonList);
         List<Pokemon> banned = this.bannedForWildEncounters();
         // Banned pokemon should be mapped to themselves
         for (Pokemon bannedPK : banned) {
@@ -883,7 +897,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (usePowerLevels) {
                 int pickedLeft = this.random.nextInt(remainingLeft.size());
                 Pokemon pickedLeftP = remainingLeft.remove(pickedLeft);
-                Pokemon pickedRightP = null;
+                Pokemon pickedRightP;
                 if (remainingRight.size() == 1) {
                     // pick this (it may or may not be the same poke)
                     pickedRightP = remainingRight.get(0);
@@ -929,8 +943,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 enc.pokemon = translateMap.get(enc.pokemon);
                 if (area.bannedPokemon.contains(enc.pokemon)) {
                     // Ignore the map and put a random non-banned poke
-                    List<Pokemon> tempPickable = noLegendaries ? new ArrayList<Pokemon>(noLegendaryList)
-                            : new ArrayList<Pokemon>(mainPokemonList);
+                    List<Pokemon> tempPickable = noLegendaries ? new ArrayList<>(noLegendaryList)
+                            : new ArrayList<>(mainPokemonList);
                     tempPickable.removeAll(banned);
                     tempPickable.removeAll(area.bannedPokemon);
                     if (tempPickable.size() == 0) {
@@ -963,16 +977,23 @@ public abstract class AbstractRomHandler implements RomHandler {
             int levelModifier, boolean distributionSetting, boolean mainPlaythroughSetting) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
-
+        boolean includeFormes = true; // TODO change this to be a real setting
         // New: randomize the order trainers are randomized in.
         // Leads to less predictable results for various modifiers.
         // Need to keep the original ordering around for saving though.
-        List<Trainer> scrambledTrainers = new ArrayList<Trainer>(currentTrainers);
+        List<Trainer> scrambledTrainers = new ArrayList<>(currentTrainers);
         Collections.shuffle(scrambledTrainers, this.random);
 
-        cachedReplacementLists = new TreeMap<Type, List<Pokemon>>();
-        cachedAllList = noLegendaries ? new ArrayList<Pokemon>(noLegendaryList) : new ArrayList<Pokemon>(
+        cachedReplacementLists = new TreeMap<>();
+        cachedAllList = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
                 mainPokemonList);
+        if (includeFormes) {
+            if (noLegendaries) {
+                cachedAllList.addAll(noLegendaryAltsList);
+            } else {
+                cachedAllList.addAll(altFormesList);
+            }
+        }
         List<Integer> mainPlaythroughTrainers = getMainPlaythroughTrainers();
 
         // Fully random is easy enough - randomize then worry about rival
@@ -992,12 +1013,24 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (mainPlaythroughTrainers.contains((int)t.offset)) { // this determines if this trainer is in the pool of main playthrough
                         //System.out.println(">>>> IN POOL: "+t.fullDisplayName);
                         Pokemon newPK = pickReplacement(tp.pokemon, usePowerLevels, null, noLegendaries, wgAllowed, false, true); // final argument sets usePlacementHistory
-                        tp.pokemon = newPK;
-                        setPlacementHistory(newPK);                        
+                        setPlacementHistory(newPK);
+                        tp.absolutePokeNumber = newPK.number;
+                        if (newPK.formeNumber > 0) {
+                            tp.forme = newPK.formeNumber;
+                            tp.formeSuffix = newPK.formeSuffix;
+                            newPK = mainPokemonList.get(newPK.baseForme - 1);
                         }
+                        tp.pokemon = newPK;
+                    }
                     else { // pure random when trainer not in pool
                         // System.out.println(">>>> NOT IN POOL: "+t.fullDisplayName);
                         Pokemon newPK = pickReplacement(tp.pokemon, usePowerLevels, null, noLegendaries, wgAllowed, false, false);
+                        tp.absolutePokeNumber = newPK.number;
+                        if (newPK.formeNumber > 0) {
+                            tp.forme = newPK.formeNumber;
+                            tp.formeSuffix = newPK.formeSuffix;
+                            newPK = mainPokemonList.get(newPK.baseForme - 1);
+                        }
                         tp.pokemon = newPK;
                     }
                 }
@@ -1007,8 +1040,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                     // new code for distribution, no main playthrough (all trainers equally distributed)
                     // always adds to placement history
                     Pokemon newPK = pickReplacement(tp.pokemon, usePowerLevels, null, noLegendaries, wgAllowed, false, true); // final argument sets usePlacementHistory
+                    setPlacementHistory(newPK);
+                    tp.absolutePokeNumber = newPK.number;
+                    if (newPK.formeNumber > 0) {
+                        tp.forme = newPK.formeNumber;
+                        tp.formeSuffix = newPK.formeSuffix;
+                        newPK = mainPokemonList.get(newPK.baseForme - 1);
+                    }
                     tp.pokemon = newPK;
-                    setPlacementHistory(newPK);     
                             
                 }
                 
@@ -1016,6 +1055,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                     // System.out.println("*** Pure Random Distribution ***");
                     // pure random, no settings applied
                     Pokemon newPK = pickReplacement(tp.pokemon, usePowerLevels, null, noLegendaries, wgAllowed, false, false);
+                    tp.absolutePokeNumber = newPK.number;
+                    if (newPK.formeNumber > 0) {
+                        tp.forme = newPK.formeNumber;
+                        tp.formeSuffix = newPK.formeSuffix;
+                        newPK = mainPokemonList.get(newPK.baseForme - 1);
+                    }
                     tp.pokemon = newPK;
                 }
                 
@@ -1034,17 +1079,25 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
             boolean noEarlyWonderGuard, int levelModifier) {
         checkPokemonRestrictions();
+        boolean includeFormes = true;
         List<Trainer> currentTrainers = this.getTrainers();
-        cachedReplacementLists = new TreeMap<Type, List<Pokemon>>();
-        cachedAllList = noLegendaries ? new ArrayList<Pokemon>(noLegendaryList) : new ArrayList<Pokemon>(
+        cachedReplacementLists = new TreeMap<>();
+        cachedAllList = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
                 mainPokemonList);
-        typeWeightings = new TreeMap<Type, Integer>();
+        if (includeFormes) {
+            if (noLegendaries) {
+                cachedAllList.addAll(noLegendaryAltsList);
+            } else {
+                cachedAllList.addAll(altFormesList);
+            }
+        }
+        typeWeightings = new TreeMap<>();
         totalTypeWeighting = 0;
 
         // Construct groupings for types
         // Anything starting with GYM or ELITE or CHAMPION is a group
-        Set<Trainer> assignedTrainers = new TreeSet<Trainer>();
-        Map<String, List<Trainer>> groups = new TreeMap<String, List<Trainer>>();
+        Set<Trainer> assignedTrainers = new TreeSet<>();
+        Map<String, List<Trainer>> groups = new TreeMap<>();
         for (Trainer t : currentTrainers) {
             if (t.tag != null && t.tag.equals("IRIVAL")) {
                 continue; // skip
@@ -1057,14 +1110,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                     || group.startsWith("THEMED")) {
                 // Yep this is a group
                 if (!groups.containsKey(group)) {
-                    groups.put(group, new ArrayList<Trainer>());
+                    groups.put(group, new ArrayList<>());
                 }
                 groups.get(group).add(t);
                 assignedTrainers.add(t);
             } else if (group.startsWith("GIO")) {
                 // Giovanni has same grouping as his gym, gym 8
                 if (!groups.containsKey("GYM8")) {
-                    groups.put("GYM8", new ArrayList<Trainer>());
+                    groups.put("GYM8", new ArrayList<>());
                 }
                 groups.get("GYM8").add(t);
                 assignedTrainers.add(t);
@@ -1074,9 +1127,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Give a type to each group
         // Gym & elite types have to be unique
         // So do uber types, including the type we pick for champion
-        Set<Type> usedGymTypes = new TreeSet<Type>();
-        Set<Type> usedEliteTypes = new TreeSet<Type>();
-        Set<Type> usedUberTypes = new TreeSet<Type>();
+        Set<Type> usedGymTypes = new TreeSet<>();
+        Set<Type> usedEliteTypes = new TreeSet<>();
+        Set<Type> usedUberTypes = new TreeSet<>();
         for (String group : groups.keySet()) {
             List<Trainer> trainersInGroup = groups.get(group);
             // Shuffle ordering within group to promote randomness
@@ -1101,7 +1154,14 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (Trainer t : trainersInGroup) {
                 for (TrainerPokemon tp : t.pokemon) {
                     boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
-                    tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForGroup, noLegendaries, wgAllowed, false, false);
+                    Pokemon newPK = pickReplacement(tp.pokemon, usePowerLevels, typeForGroup, noLegendaries, wgAllowed, false, false);
+                    tp.absolutePokeNumber = newPK.number;
+                    if (newPK.formeNumber > 0) {
+                        tp.forme = newPK.formeNumber;
+                        tp.formeSuffix = newPK.formeSuffix;
+                        newPK = mainPokemonList.get(newPK.baseForme - 1);
+                    }
+                    tp.pokemon = newPK;
                     tp.resetMoves = true;
                     if (levelModifier != 0) {
                         tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
@@ -1133,7 +1193,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 for (TrainerPokemon tp : t.pokemon) {
                     boolean shedAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
-                    tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForTrainer, noLegendaries, shedAllowed, false, true);
+                    Pokemon newPK = pickReplacement(tp.pokemon, usePowerLevels, typeForTrainer, noLegendaries, shedAllowed, false, true);
+                    tp.absolutePokeNumber = newPK.number;
+                    if (newPK.formeNumber > 0) {
+                        tp.forme = newPK.formeNumber;
+                        tp.formeSuffix = newPK.formeSuffix;
+                        newPK = mainPokemonList.get(newPK.baseForme - 1);
+                    }
+                    tp.pokemon = newPK;
                     tp.resetMoves = true;
                     if (levelModifier != 0) {
                         tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
@@ -1165,6 +1232,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     Pokemon newPokemon = fullyEvolve(tp.pokemon);
                     if (newPokemon != tp.pokemon) {
                         tp.pokemon = newPokemon;
+                        tp.absolutePokeNumber = newPokemon.number;
                         tp.resetMoves = true;
                     }
                 }
@@ -1716,7 +1784,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void randomizeMovesLearnt(boolean typeThemed, boolean noBroken, boolean forceStartingMoves,
                                      int forceStartingMoveCount, double goodDamagingProbability) {
         // Get current sets
-        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+        Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
         List<Integer> hms = this.getHMMoves();
         List<Move> allMoves = this.getMoves();
 
@@ -1726,17 +1794,17 @@ public abstract class AbstractRomHandler implements RomHandler {
         allBanned.addAll(this.getMovesBannedFromLevelup());
 
         // Build sets of moves
-        List<Move> validMoves = new ArrayList<Move>();
-        List<Move> validDamagingMoves = new ArrayList<Move>();
-        Map<Type, List<Move>> validTypeMoves = new HashMap<Type, List<Move>>();
-        Map<Type, List<Move>> validTypeDamagingMoves = new HashMap<Type, List<Move>>();
+        List<Move> validMoves = new ArrayList<>();
+        List<Move> validDamagingMoves = new ArrayList<>();
+        Map<Type, List<Move>> validTypeMoves = new HashMap<>();
+        Map<Type, List<Move>> validTypeDamagingMoves = new HashMap<>();
 
         for (Move mv : allMoves) {
             if (mv != null && !GlobalConstants.bannedRandomMoves[mv.number] && !allBanned.contains(mv.number)) {
                 validMoves.add(mv);
                 if (mv.type != null) {
                     if (!validTypeMoves.containsKey(mv.type)) {
-                        validTypeMoves.put(mv.type, new ArrayList<Move>());
+                        validTypeMoves.put(mv.type, new ArrayList<>());
                     }
                     validTypeMoves.get(mv.type).add(mv);
                 }
@@ -1756,9 +1824,10 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        for (Pokemon pkmn : movesets.keySet()) {
-            Set<Integer> learnt = new TreeSet<Integer>();
-            List<MoveLearnt> moves = movesets.get(pkmn);
+        for (Integer pkmnNum : movesets.keySet()) {
+            Set<Integer> learnt = new TreeSet<>();
+            List<MoveLearnt> moves = movesets.get(pkmnNum);
+            Pokemon pkmn = mainPokemonListInclFormes.get(pkmnNum - 1);
 
             // 4 starting moves?
             if (forceStartingMoves) {
@@ -1868,9 +1937,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void orderDamagingMovesByDamage() {
-        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+        Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
         List<Move> allMoves = this.getMoves();
-        for (Pokemon pkmn : movesets.keySet()) {
+        for (Integer pkmn : movesets.keySet()) {
             List<MoveLearnt> moves = movesets.get(pkmn);
 
             // Build up a list of damaging moves and their positions
@@ -1918,7 +1987,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void metronomeOnlyMode() {
 
         // movesets
-        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+        Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
 
         MoveLearnt metronomeML = new MoveLearnt();
         metronomeML.level = 1;
@@ -2208,10 +2277,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         // and there is a TM of that move, make sure
         // that TM can be learned.
         Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
-        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+        Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
         List<Integer> tmMoves = this.getTMMoves();
         for (Pokemon pkmn : compat.keySet()) {
-            List<MoveLearnt> moveset = movesets.get(pkmn);
+            List<MoveLearnt> moveset = movesets.get(pkmn.number);
             boolean[] pkmnCompat = compat.get(pkmn);
             for (MoveLearnt ml : moveset) {
                 if (tmMoves.contains(ml.move)) {
@@ -2376,10 +2445,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         // and there is a tutor of that move, make sure
         // that tutor can be learned.
         Map<Pokemon, boolean[]> compat = this.getMoveTutorCompatibility();
-        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+        Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
         List<Integer> mtMoves = this.getMoveTutorMoves();
         for (Pokemon pkmn : compat.keySet()) {
-            List<MoveLearnt> moveset = movesets.get(pkmn);
+            List<MoveLearnt> moveset = movesets.get(pkmn.number);
             boolean[] pkmnCompat = compat.get(pkmn);
             for (MoveLearnt ml : moveset) {
                 if (mtMoves.contains(ml.move)) {
@@ -3362,7 +3431,7 @@ public abstract class AbstractRomHandler implements RomHandler {
      *            single evolutions.
      */
     private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction) {
-        List<Pokemon> allPokes = this.getPokemon();
+        List<Pokemon> allPokes = this.getPokemonInclFormes();
         for (Pokemon pk : allPokes) {
             if (pk != null) {
                 pk.temporaryFlag = false;
@@ -3427,13 +3496,19 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private List<Pokemon> allPokemonWithoutNull() {
-        List<Pokemon> allPokes = new ArrayList<Pokemon>(this.getPokemon());
+        List<Pokemon> allPokes = new ArrayList<>(this.getPokemon());
+        allPokes.remove(0);
+        return allPokes;
+    }
+
+    private List<Pokemon> allPokemonInclFormesWithoutNull() {
+        List<Pokemon> allPokes = new ArrayList<>(this.getPokemonInclFormes());
         allPokes.remove(0);
         return allPokes;
     }
 
     private Set<Pokemon> pokemonInArea(EncounterSet area) {
-        Set<Pokemon> inArea = new TreeSet<Pokemon>();
+        Set<Pokemon> inArea = new TreeSet<>();
         for (Encounter enc : area.encounters) {
             inArea.add(enc.pokemon);
         }
@@ -3639,6 +3714,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                 }
                 bestPoke.pokemon = starter;
+                bestPoke.absolutePokeNumber = starter.number;
                 bestPoke.resetMoves = true;
             }
         }
@@ -3766,7 +3842,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             int currentBST = current.bstForPowerLevels();
             int minTarget = currentBST - currentBST / 5;
             int maxTarget = currentBST;
-            List<Pokemon> canPick = new ArrayList<Pokemon>();
+            List<Pokemon> canPick = new ArrayList<>();
             int expandRounds = 0;
             while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 2)) {
                 for (Pokemon pk : pickFrom) {

@@ -1,12 +1,8 @@
 package com.dabomstew.pkrandom.constants;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
-import com.dabomstew.pkrandom.pokemon.ItemList;
-import com.dabomstew.pkrandom.pokemon.MoveCategory;
-import com.dabomstew.pkrandom.pokemon.Trainer;
-import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.pokemon.*;
 
 public class Gen4Constants {
 
@@ -15,6 +11,8 @@ public class Gen4Constants {
     public static final int Type_HGSS = 2;
 
     public static final int pokemonCount = 493, moveCount = 467;
+    public static final int dpFormeCount = 5, platHgSsFormeCount = 12;
+    public static final int formeOffset = 2;
 
     public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3,
             bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7,
@@ -76,6 +74,23 @@ public class Gen4Constants {
     public static final int itemScriptVariable = 0x8008;
     
     public static final int luckyEggIndex = 0xE7;
+
+    public static final Map<Integer,String> formeSuffixes = setupFormeSuffixes();
+    public static final Map<Integer,FormeInfo> formeMappings = setupFormeMappings();
+
+    private static final Map<Integer,Map<Integer,String>> formeSuffixesByBaseForme = setupFormeSuffixesByBaseForme();
+    private static final Map<Integer,String> dummyFormeSuffixes = setupDummyFormeSuffixes();
+
+    private static final Map<Integer,Map<Integer,Integer>> absolutePokeNumsByBaseForme = setupAbsolutePokeNumsByBaseForme();
+    private static final Map<Integer,Integer> dummyAbsolutePokeNums = setupDummyAbsolutePokeNums();
+
+    public static String getFormeSuffixByBaseForme(int baseForme, int formNum) {
+        return formeSuffixesByBaseForme.getOrDefault(baseForme,dummyFormeSuffixes).getOrDefault(formNum,"");
+    }
+
+    public static Integer getAbsolutePokeNumByBaseForme(int baseForme, int formNum) {
+        return absolutePokeNumsByBaseForme.getOrDefault(baseForme,dummyAbsolutePokeNums).getOrDefault(formNum,0);
+    }
 
     // The original slot each of the 20 "alternate" slots is mapped to
     // swarmx2, dayx2, nightx2, pokeradarx4, GBAx10
@@ -222,6 +237,129 @@ public class Gen4Constants {
         default:
             return 0; // normal by default
         }
+    }
+
+    public static int getFormeCount(int romType) {
+        if (romType == Type_DP) {
+            return dpFormeCount;
+        } else if (romType == Type_Plat || romType == Type_HGSS) {
+            return platHgSsFormeCount;
+        }
+        return 0;
+    }
+
+    private static Map<Integer,String> setupFormeSuffixes() {
+        Map<Integer,String> formeSuffixes = new HashMap<>();
+        formeSuffixes.put(496,"-A"); // Deoxys-A
+        formeSuffixes.put(497,"-D"); // Deoxys-D
+        formeSuffixes.put(498,"-S"); // Deoxys-S
+        formeSuffixes.put(499,"-S"); // Wormadam-S
+        formeSuffixes.put(500,"-T"); // Wormadam-T
+        formeSuffixes.put(501,"-O"); // Giratina-O
+        formeSuffixes.put(502,"-S"); // Shaymin-S
+        formeSuffixes.put(503,"-H"); // Rotom-H
+        formeSuffixes.put(504,"-W"); // Rotom-W
+        formeSuffixes.put(505,"-Fr"); // Rotom-Fr
+        formeSuffixes.put(506,"-Fa"); // Rotom-Fa
+        formeSuffixes.put(507,"-M"); // Rotom-M
+        return formeSuffixes;
+    }
+
+    private static Map<Integer,FormeInfo> setupFormeMappings() {
+        Map<Integer,FormeInfo> formeMappings = new TreeMap<>();
+
+        formeMappings.put(496,new FormeInfo(386,1));
+        formeMappings.put(497,new FormeInfo(386,2));
+        formeMappings.put(498,new FormeInfo(386,3));
+        formeMappings.put(499,new FormeInfo(413,1));
+        formeMappings.put(500,new FormeInfo(413,2));
+        formeMappings.put(501,new FormeInfo(487,1));
+        formeMappings.put(502,new FormeInfo(492,1));
+        formeMappings.put(503,new FormeInfo(479,1));
+        formeMappings.put(504,new FormeInfo(479,2));
+        formeMappings.put(505,new FormeInfo(479,3));
+        formeMappings.put(506,new FormeInfo(479,4));
+        formeMappings.put(507,new FormeInfo(479,5));
+
+        return formeMappings;
+    }
+
+    private static Map<Integer,Map<Integer,String>> setupFormeSuffixesByBaseForme() {
+        Map<Integer,Map<Integer,String>> map = new HashMap<>();
+
+        Map<Integer,String> deoxysMap = new HashMap<>();
+        deoxysMap.put(1,"-A");
+        deoxysMap.put(2,"-D");
+        deoxysMap.put(3,"-S");
+        map.put(386,deoxysMap);
+
+        Map<Integer,String> wormadamMap = new HashMap<>();
+        wormadamMap.put(1,"-S");
+        wormadamMap.put(2,"-T");
+        map.put(413,wormadamMap);
+
+        Map<Integer,String> shayminMap = new HashMap<>();
+        shayminMap.put(1,"-S");
+        map.put(492,shayminMap);
+
+        Map<Integer,String> giratinaMap = new HashMap<>();
+        giratinaMap.put(1,"-O");
+        map.put(487,giratinaMap);
+
+        Map<Integer,String> rotomMap = new HashMap<>();
+        rotomMap.put(1,"-H");
+        rotomMap.put(2,"-W");
+        rotomMap.put(3,"-Fr");
+        rotomMap.put(4,"-Fa");
+        rotomMap.put(5,"-M");
+        map.put(479,rotomMap);
+
+        return map;
+    }
+
+    private static Map<Integer,String> setupDummyFormeSuffixes() {
+        Map<Integer,String> m = new HashMap<>();
+        m.put(0,"");
+        return m;
+    }
+
+    private static Map<Integer,Map<Integer,Integer>> setupAbsolutePokeNumsByBaseForme() {
+        Map<Integer,Map<Integer,Integer>> map = new HashMap<>();
+
+        Map<Integer,Integer> deoxysMap = new HashMap<>();
+        deoxysMap.put(1,494);
+        deoxysMap.put(2,495);
+        deoxysMap.put(3,496);
+        map.put(386,deoxysMap);
+
+        Map<Integer,Integer> wormadamMap = new HashMap<>();
+        wormadamMap.put(1,497);
+        wormadamMap.put(2,498);
+        map.put(413,wormadamMap);
+
+        Map<Integer,Integer> giratinaMap = new HashMap<>();
+        giratinaMap.put(1,499);
+        map.put(487,giratinaMap);
+
+        Map<Integer,Integer> shayminMap = new HashMap<>();
+        shayminMap.put(1,500);
+        map.put(492,shayminMap);
+
+        Map<Integer,Integer> rotomMap = new HashMap<>();
+        rotomMap.put(1,501);
+        rotomMap.put(2,502);
+        rotomMap.put(3,503);
+        rotomMap.put(4,504);
+        rotomMap.put(5,505);
+        map.put(479,rotomMap);
+
+        return map;
+    }
+
+    private static Map<Integer,Integer> setupDummyAbsolutePokeNums() {
+        Map<Integer,Integer> m = new HashMap<>();
+        m.put(0,0);
+        return m;
     }
 
     public static void tagTrainersDP(List<Trainer> trs) {

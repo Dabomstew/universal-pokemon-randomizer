@@ -183,16 +183,16 @@ public class Randomizer {
                 if (pk != null) {
                     int numEvos = pk.evolutionsFrom.size();
                     if (numEvos > 0) {
-                        StringBuilder evoStr = new StringBuilder(pk.evolutionsFrom.get(0).to.name);
+                        StringBuilder evoStr = new StringBuilder(pk.evolutionsFrom.get(0).to.fullName());
                         for (int i = 1; i < numEvos; i++) {
                             if (i == numEvos - 1) {
-                                evoStr.append(" and " + pk.evolutionsFrom.get(i).to.name);
+                                evoStr.append(" and " + pk.evolutionsFrom.get(i).to.fullName());
                             } else {
-                                evoStr.append(", " + pk.evolutionsFrom.get(i).to.name);
+                                evoStr.append(", " + pk.evolutionsFrom.get(i).to.fullName());
                             }
                         }
-                        // log.println(pk.name + " now evolves into " + evoStr.toString());
-                        log.printf("%-15s -> %-15s" + NEWLINE, pk.name, evoStr.toString());
+                        // log.println(pk.fullName() + " now evolves into " + evoStr.toString());
+                        log.printf("%-15s -> %-15s" + NEWLINE, pk.fullName(), evoStr.toString());
                     }
                 }
             }
@@ -270,25 +270,29 @@ public class Randomizer {
             log.println("Pokemon Movesets: Metronome Only." + NEWLINE);
         } else {
             log.println("--Pokemon Movesets--");
-            List<String> movesets = new ArrayList<String>();
-            Map<Pokemon, List<MoveLearnt>> moveData = romHandler.getMovesLearnt();
-            for (Pokemon pkmn : moveData.keySet()) {
+            List<String> movesets = new ArrayList<>();
+            Map<Integer, List<MoveLearnt>> moveData = romHandler.getMovesLearnt();
+            List<Pokemon> pkmnList = romHandler.getPokemonInclFormes();
+            for (Pokemon pkmn : pkmnList) {
 
+                if (pkmn == null) {
+                    continue;
+                }
                 StringBuilder evoStr = new StringBuilder(); 
                 try {
-                    evoStr.append(" -> ").append(pkmn.evolutionsFrom.get(0).to.name);
+                    evoStr.append(" -> ").append(pkmn.evolutionsFrom.get(0).to.fullName());
                 } catch (Exception e) {
                     evoStr.append(" (no evolution)");
                 }
 
                 StringBuilder sb = new StringBuilder();
 
-                // sb.append(String.format("%03d %s", pkmn.number, pkmn.name)).append(System.getProperty("line.separator")).append(String.format("HP %-3d ATK %-3d DEF %-3d SPATK %-3d SPDEF %-3d SPD %-3d", pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef)).append(System.getProperty("line.separator"));
+                // sb.append(String.format("%03d %s", pkmn.number, pkmn.fullName())).append(System.getProperty("line.separator")).append(String.format("HP %-3d ATK %-3d DEF %-3d SPATK %-3d SPDEF %-3d SPD %-3d", pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef)).append(System.getProperty("line.separator"));
 
-                sb.append(String.format("%03d %s", pkmn.number, pkmn.name)).append(evoStr).append(System.getProperty("line.separator")).append(String.format("HP  %-3d", pkmn.hp)).append(System.getProperty("line.separator")).append(String.format("ATK %-3d", pkmn.attack)).append(System.getProperty("line.separator")).append(String.format("DEF %-3d", pkmn.defense)).append(System.getProperty("line.separator")).append(String.format("SPA %-3d", pkmn.spatk)).append(System.getProperty("line.separator")).append(String.format("SPD %-3d", pkmn.spdef)).append(System.getProperty("line.separator")).append(String.format("SPE %-3d", pkmn.speed)).append(System.getProperty("line.separator"));
+                sb.append(String.format("%03d %s", pkmn.number, pkmn.fullName())).append(evoStr).append(System.getProperty("line.separator")).append(String.format("HP  %-3d", pkmn.hp)).append(System.getProperty("line.separator")).append(String.format("ATK %-3d", pkmn.attack)).append(System.getProperty("line.separator")).append(String.format("DEF %-3d", pkmn.defense)).append(System.getProperty("line.separator")).append(String.format("SPA %-3d", pkmn.spatk)).append(System.getProperty("line.separator")).append(String.format("SPD %-3d", pkmn.spdef)).append(System.getProperty("line.separator")).append(String.format("SPE %-3d", pkmn.speed)).append(System.getProperty("line.separator"));
 
 
-                List<MoveLearnt> data = moveData.get(pkmn);
+                List<MoveLearnt> data = moveData.get(pkmn.number);
                 boolean first = true;
                 for (MoveLearnt ml : data) {
                     // if (!first) {
@@ -534,8 +538,8 @@ public class Randomizer {
                 IngameTrade oldT = oldTrades.get(i);
                 IngameTrade newT = newTrades.get(i);
                 log.printf("Trade %-11s -> %-11s the %-11s        ->      %-11s -> %-15s the %s" + NEWLINE,
-                        oldT.requestedPokemon.name, oldT.nickname, oldT.givenPokemon.name, newT.requestedPokemon.name,
-                        newT.nickname, newT.givenPokemon.name);
+                        oldT.requestedPokemon.fullName(), oldT.nickname, oldT.givenPokemon.fullName(), newT.requestedPokemon.fullName(),
+                        newT.nickname, newT.givenPokemon.fullName());
             }
             log.println();
         }
@@ -583,7 +587,7 @@ public class Randomizer {
     }
 
     private void maybeLogBaseStatAndTypeChanges(final PrintStream log, final RomHandler romHandler) {
-        List<Pokemon> allPokes = romHandler.getPokemon();
+        List<Pokemon> allPokes = romHandler.getPokemonInclFormes();
         String[] itemNames = romHandler.getItemNames();
         // Log base stats & types if changed at all
         if (settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.UNCHANGED
@@ -594,14 +598,14 @@ public class Randomizer {
         } else {
             log.println("--Pokemon Base Stats & Types--");
             if (romHandler instanceof Gen1RomHandler) {
-                log.println("NUM|NAME      |TYPE             |  HP| ATK| DEF| SPE|SPEC");
+                log.println("NUM|NAME         |TYPE             |  HP| ATK| DEF| SPE|SPEC");
                 for (Pokemon pkmn : allPokes) {
                     if (pkmn != null) {
                         String typeString = pkmn.primaryType == null ? "???" : pkmn.primaryType.toString();
                         if (pkmn.secondaryType != null) {
                             typeString += "/" + pkmn.secondaryType.toString();
                         }
-                        log.printf("%3d|%-10s|%-17s|%4d|%4d|%4d|%4d|%4d" + NEWLINE, pkmn.number, pkmn.name, typeString,
+                        log.printf("%3d|%-10s|%-17s|%4d|%4d|%4d|%4d|%4d" + NEWLINE, pkmn.number, pkmn.fullName(), typeString,
                                 pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef );
                     }
 
@@ -620,7 +624,7 @@ public class Randomizer {
                         if (pkmn.secondaryType != null) {
                             typeString += "/" + pkmn.secondaryType.toString();
                         }
-                        log.printf("%3d|%-10s|%-17s|%4d|%4d|%4d|%4d|%4d|%4d", pkmn.number, pkmn.name, typeString,
+                        log.printf("%3d|%-13s|%-17s|%4d|%4d|%4d|%4d|%4d|%4d", pkmn.number, pkmn.fullName(), typeString,
                                 pkmn.hp, pkmn.attack, pkmn.defense, pkmn.spatk, pkmn.spdef, pkmn.speed);
                         if (abils > 0) {
                             log.printf("|%-12s|%-12s", romHandler.abilityName(pkmn.ability1),
@@ -669,14 +673,14 @@ public class Randomizer {
                 List<Pokemon> romPokemon = romHandler.getPokemon();
                 int[] customStarters = settings.getCustomStarters();
                 Pokemon pkmn1 = romPokemon.get(customStarters[0]);
-                log.println("Set starter 1 to " + pkmn1.name);
+                log.println("Set starter 1 to " + pkmn1.fullName());
                 Pokemon pkmn2 = romPokemon.get(customStarters[1]);
-                log.println("Set starter 2 to " + pkmn2.name);
+                log.println("Set starter 2 to " + pkmn2.fullName());
                 if (romHandler.isYellow()) {
                     romHandler.setStarters(Arrays.asList(pkmn1, pkmn2));
                 } else {
                     Pokemon pkmn3 = romPokemon.get(customStarters[2]);
-                    log.println("Set starter 3 to " + pkmn3.name);
+                    log.println("Set starter 3 to " + pkmn3.fullName());
                     romHandler.setStarters(Arrays.asList(pkmn1, pkmn2, pkmn3));
                 }
                 log.println();
@@ -694,7 +698,7 @@ public class Randomizer {
                     while (starters.contains(pkmn)) {
                         pkmn = romHandler.randomPokemon();
                     }
-                    log.println("Set starter " + (i + 1) + " to " + pkmn.name);
+                    log.println("Set starter " + (i + 1) + " to " + pkmn.fullName());
                     starters.add(pkmn);
                 }
                 romHandler.setStarters(starters);
@@ -712,7 +716,7 @@ public class Randomizer {
                     while (starters.contains(pkmn)) {
                         pkmn = romHandler.random2EvosPokemon();
                     }
-                    log.println("Set starter " + (i + 1) + " to " + pkmn.name);
+                    log.println("Set starter " + (i + 1) + " to " + pkmn.fullName());
                     starters.add(pkmn);
                 }
                 romHandler.setStarters(starters);
@@ -746,9 +750,9 @@ public class Randomizer {
                     // }
 
                 
-                // sb.append(String.format("%03d %s", pkmn.number, pkmn.name)).append(System.getProperty("line.separator")).append(String.format("HP %d ATK %-3d DEF %-3d SPATK %-3d SPDEF %-3d SPD %-3d", pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef)).append(System.getProperty("line.separator"));
+                // sb.append(String.format("%03d %s", pkmn.number, pkmn.fullName())).append(System.getProperty("line.separator")).append(String.format("HP %d ATK %-3d DEF %-3d SPATK %-3d SPDEF %-3d SPD %-3d", pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef)).append(System.getProperty("line.separator"));
                     StringBuilder sb = new StringBuilder();
-                    sb.append(e.pokemon.name + " Lv");
+                    sb.append(e.pokemon.fullName() + " Lv");
                     if (e.maxLevel > 0 && e.maxLevel != e.level) {
                         sb.append("s " + e.level + "-" + e.maxLevel);
                     } else {
@@ -791,7 +795,7 @@ public class Randomizer {
                     if (!first) {
                         log.print(", ");
                     }
-                    log.print(tpk.pokemon.name + " Lv" + tpk.level);
+                    log.print(tpk.toString());
                     first = false;
                 }
                 log.println();
@@ -824,7 +828,7 @@ public class Randomizer {
                     Pokemon oldP = oldStatics.get(i);
                     Pokemon newP = newStatics.get(i);
                     checkValue = addToCV(checkValue, newP.number);
-                    log.print(oldP.name);
+                    log.print(oldP.fullName());
                     if (seenPokemon.containsKey(oldP)) {
                         int amount = seenPokemon.get(oldP);
                         log.print("(" + (++amount) + ")");
@@ -832,7 +836,7 @@ public class Randomizer {
                     } else {
                         seenPokemon.put(oldP, 1);
                     }
-                    log.println(" => " + newP.name);
+                    log.println(" => " + newP.fullName());
                 }
                 log.println();
             }

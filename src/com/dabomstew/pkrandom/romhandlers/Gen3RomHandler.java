@@ -1455,7 +1455,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
         // Get current movesets in case we need to reset them for certain
         // trainer mons.
-        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+        Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
 
         for (int i = 1; i < amount; i++) {
             int trOffset = baseOffset + i * entryLen;
@@ -1503,7 +1503,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         writeWord(pointerToPokes + poke * 16 + 14, 0);
                     }
                     if (tp.resetMoves) {
-                        int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon, movesets, tp.level);
+                        int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon.number, movesets, tp.level);
                         for (int m = 0; m < 4; m++) {
                             writeWord(pointerToPokes + poke * 16 + movesStart + m * 2, pokeMoves[m]);
                         }
@@ -1549,8 +1549,18 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public Map<Pokemon, List<MoveLearnt>> getMovesLearnt() {
-        Map<Pokemon, List<MoveLearnt>> movesets = new TreeMap<Pokemon, List<MoveLearnt>>();
+    public List<Pokemon> getPokemonInclFormes() {
+        return pokemonList; // No alt formes for now, should include Deoxys formes in the future
+    }
+
+    @Override
+    public List<Pokemon> getAltFormes() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public Map<Integer, List<MoveLearnt>> getMovesLearnt() {
+        Map<Integer, List<MoveLearnt>> movesets = new TreeMap<>();
         int baseOffset = romEntry.getValue("PokemonMovesets");
         for (int i = 1; i <= numRealPokemon; i++) {
             Pokemon pkmn = pokemonList.get(i);
@@ -1580,20 +1590,20 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     moveDataLoc += 2;
                 }
             }
-            movesets.put(pkmn, moves);
+            movesets.put(pkmn.number, moves);
         }
         return movesets;
     }
 
     @Override
-    public void setMovesLearnt(Map<Pokemon, List<MoveLearnt>> movesets) {
+    public void setMovesLearnt(Map<Integer, List<MoveLearnt>> movesets) {
         int baseOffset = romEntry.getValue("PokemonMovesets");
         int fso = romEntry.getValue("FreeSpace");
         for (int i = 1; i <= numRealPokemon; i++) {
             Pokemon pkmn = pokemonList.get(i);
             int offsToPtr = baseOffset + (pokedexToInternal[pkmn.number]) * 4;
             int moveDataLoc = readPointer(offsToPtr);
-            List<MoveLearnt> moves = movesets.get(pkmn);
+            List<MoveLearnt> moves = movesets.get(pkmn.number);
             int newMoveCount = moves.size();
             int mloc = moveDataLoc;
             int entrySize;

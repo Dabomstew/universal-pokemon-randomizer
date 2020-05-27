@@ -906,7 +906,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
         // Get current movesets in case we need to reset them for certain
         // trainer mons.
-        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+        Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
 
         Iterator<Trainer> allTrainers = trainerData.iterator();
         for (int i = 0; i < traineramount; i++) {
@@ -935,7 +935,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                     }
                     if ((tr.poketype & 1) == 1) {
                         if (tp.resetMoves) {
-                            int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon, movesets, tp.level);
+                            int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon.number, movesets, tp.level);
                             for (int m = 0; m < 4; m++) {
                                 rom[offs + m] = (byte) pokeMoves[m];
                             }
@@ -961,8 +961,18 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public Map<Pokemon, List<MoveLearnt>> getMovesLearnt() {
-        Map<Pokemon, List<MoveLearnt>> movesets = new TreeMap<Pokemon, List<MoveLearnt>>();
+    public List<Pokemon> getPokemonInclFormes() {
+        return pokemonList;
+    }
+
+    @Override
+    public List<Pokemon> getAltFormes() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public Map<Integer, List<MoveLearnt>> getMovesLearnt() {
+        Map<Integer, List<MoveLearnt>> movesets = new TreeMap<>();
         int pointersOffset = romEntry.getValue("PokemonMovesetsTableOffset");
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
             int pointer = readWord(pointersOffset + (i - 1) * 2);
@@ -985,13 +995,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 ourMoves.add(learnt);
                 realPointer += 2;
             }
-            movesets.put(pkmn, ourMoves);
+            movesets.put(pkmn.number, ourMoves);
         }
         return movesets;
     }
 
     @Override
-    public void setMovesLearnt(Map<Pokemon, List<MoveLearnt>> movesets) {
+    public void setMovesLearnt(Map<Integer, List<MoveLearnt>> movesets) {
         writeEvosAndMovesLearnt(false, movesets);
     }
 
@@ -2094,7 +2104,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
     }
 
-    private void writeEvosAndMovesLearnt(boolean writeEvos, Map<Pokemon, List<MoveLearnt>> movesets) {
+    private void writeEvosAndMovesLearnt(boolean writeEvos, Map<Integer, List<MoveLearnt>> movesets) {
         // this assumes that the evo/attack pointers & data
         // are at the end of the bank
         // which, in every clean G/S/C rom supported, they are
@@ -2184,7 +2194,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                     dataBlock[offsetInData++] = rom[movesOffset++];
                 }
             } else {
-                List<MoveLearnt> moves = movesets.get(pokes[i]);
+                List<MoveLearnt> moves = movesets.get(pokes[i].number);
                 for (MoveLearnt ml : moves) {
                     dataBlock[offsetInData++] = (byte) ml.level;
                     dataBlock[offsetInData++] = (byte) ml.move;

@@ -16,12 +16,14 @@ public class Gen5Constants {
     public static final int Type_BW2 = 1;
 
     public static final int pokemonCount = 649, moveCount = 559, nonUnovaPokemonCount = 493;
+    private static final int bw1FormeCount = 18, bw2FormeCount = 24;
+    private static final int bw1formeOffset = 0, bw2formeOffset = 15;
 
     public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3,
             bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7,
             bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14,
             bsDarkGrassHeldItemOffset = 16, bsGrowthCurveOffset = 21, bsAbility1Offset = 24, bsAbility2Offset = 25,
-            bsAbility3Offset = 26, bsTMHMCompatOffset = 40, bsMTCompatOffset = 60;
+            bsAbility3Offset = 26, bsFormeOffset = 28, bsFormeCountOffset = 32, bsTMHMCompatOffset = 40, bsMTCompatOffset = 60;
 
     public static final byte[] bw1NewStarterScript = { 0x24, 0x00, (byte) 0xA7, 0x02, (byte) 0xE7, 0x00, 0x00, 0x00,
             (byte) 0xDE, 0x00, 0x00, 0x00, (byte) 0xF8, 0x01, 0x05, 0x00 };
@@ -102,6 +104,24 @@ public class Gen5Constants {
     }
 
     public static final Type[] typeTable = constructTypeTable();
+
+    private static final Map<Integer,String> bw1FormeSuffixes = setupFormeSuffixes(Gen5Constants.Type_BW);
+
+    private static final Map<Integer,String> bw2FormeSuffixes = setupFormeSuffixes(Gen5Constants.Type_BW2);
+
+    public static final Map<Integer,Map<Integer,String>> formeSuffixesByBaseForme = setupFormeSuffixesByBaseForme();
+    private static final Map<Integer,String> dummyFormeSuffixes = setupDummyFormeSuffixes();
+
+    private static final Map<Integer,Map<Integer,Integer>> absolutePokeNumsByBaseForme = setupAbsolutePokeNumsByBaseForme();
+    private static final Map<Integer,Integer> dummyAbsolutePokeNums = setupDummyAbsolutePokeNums();
+
+    public static String getFormeSuffixByBaseForme(int baseForme, int formNum) {
+        return formeSuffixesByBaseForme.getOrDefault(baseForme,dummyFormeSuffixes).getOrDefault(formNum,"");
+    }
+
+    public static Integer getAbsolutePokeNumByBaseForme(int baseForme, int formNum) {
+        return absolutePokeNumsByBaseForme.getOrDefault(baseForme,dummyAbsolutePokeNums).getOrDefault(formNum,0);
+    }
 
     public static final List<Integer> emptyPlaythroughTrainers = Arrays.asList(new Integer[] { });
     
@@ -316,6 +336,242 @@ public class Gen5Constants {
         default:
             return 0; // normal by default
         }
+    }
+
+    public static int getFormeCount(int romType) {
+        if (romType == Type_BW) {
+            return bw1FormeCount;
+        } else if (romType == Type_BW2) {
+            return bw2FormeCount;
+        }
+        return 0;
+    }
+
+    public static int getFormeOffset(int romType) {
+        if (romType == Type_BW) {
+            return bw1formeOffset;
+        } else if (romType == Type_BW2) {
+            return bw2formeOffset;
+        }
+        return 0;
+    }
+
+    public static String getFormeSuffix(int internalIndex, int romType) {
+        if (romType == Type_BW) {
+            return bw1FormeSuffixes.getOrDefault(internalIndex,"");
+        } else if (romType == Type_BW2) {
+            return bw2FormeSuffixes.getOrDefault(internalIndex,"");
+        } else {
+            return "";
+        }
+    }
+
+    private static Map<Integer,String> setupFormeSuffixes(int gameVersion) {
+        Map<Integer,String> formeSuffixes = new HashMap<>();
+        if (gameVersion == Gen5Constants.Type_BW) {
+            formeSuffixes.put(650,"-A"); // Deoxys-A
+            formeSuffixes.put(651,"-D"); // Deoxys-D
+            formeSuffixes.put(652,"-S"); // Deoxys-S
+            formeSuffixes.put(653,"-S"); // Wormadam-S
+            formeSuffixes.put(654,"-T"); // Wormadam-T
+            formeSuffixes.put(655,"-S"); // Shaymin-S
+            formeSuffixes.put(656,"-O"); // Giratina-O
+            formeSuffixes.put(657,"-H"); // Rotom-H
+            formeSuffixes.put(658,"-W"); // Rotom-W
+            formeSuffixes.put(659,"-Fr"); // Rotom-Fr
+            formeSuffixes.put(660,"-Fa"); // Rotom-Fa
+            formeSuffixes.put(661,"-M"); // Rotom-M
+            formeSuffixes.put(662,"-F"); // Castform-F
+            formeSuffixes.put(663,"-W"); // Castform-W
+            formeSuffixes.put(664,"-I"); // Castform-I
+            formeSuffixes.put(665,"-B"); // Basculin-B
+            formeSuffixes.put(666,"-Z"); // Darmanitan-Z
+            formeSuffixes.put(667,"-P"); // Meloetta-P
+        } else if (gameVersion == Gen5Constants.Type_BW2) {
+            formeSuffixes.put(685,"-A"); // Deoxys-A
+            formeSuffixes.put(686,"-D"); // Deoxys-D
+            formeSuffixes.put(687,"-S"); // Deoxys-S
+            formeSuffixes.put(688,"-S"); // Wormadam-S
+            formeSuffixes.put(689,"-T"); // Wormadam-T
+            formeSuffixes.put(690,"-S"); // Shaymin-S
+            formeSuffixes.put(691,"-O"); // Giratina-O
+            formeSuffixes.put(692,"-H"); // Rotom-H
+            formeSuffixes.put(693,"-W"); // Rotom-W
+            formeSuffixes.put(694,"-Fr"); // Rotom-Fr
+            formeSuffixes.put(695,"-Fa"); // Rotom-Fa
+            formeSuffixes.put(696,"-M"); // Rotom-M
+            formeSuffixes.put(697,"-F"); // Castform-F
+            formeSuffixes.put(698,"-W"); // Castform-W
+            formeSuffixes.put(699,"-I"); // Castform-I
+            formeSuffixes.put(700,"-B"); // Basculin-B
+            formeSuffixes.put(701,"-Z"); // Darmanitan-Z
+            formeSuffixes.put(702,"-P"); // Meloetta-P
+            formeSuffixes.put(703,"-W"); // Kyurem-W
+            formeSuffixes.put(704,"-B"); // Kyurem-B
+            formeSuffixes.put(705,"-R"); // Keldeo-R
+            formeSuffixes.put(706,"-T"); // Tornadus-T
+            formeSuffixes.put(707,"-T"); // Thundurus-T
+            formeSuffixes.put(708,"-T"); // Landorus-T
+        }
+
+        return formeSuffixes;
+    }
+
+    private static Map<Integer,Map<Integer,String>> setupFormeSuffixesByBaseForme() {
+        Map<Integer,Map<Integer,String>> map = new HashMap<>();
+
+        Map<Integer,String> deoxysMap = new HashMap<>();
+        deoxysMap.put(1,"-A");
+        deoxysMap.put(2,"-D");
+        deoxysMap.put(3,"-S");
+        map.put(386,deoxysMap);
+
+        Map<Integer,String> wormadamMap = new HashMap<>();
+        wormadamMap.put(1,"-S");
+        wormadamMap.put(2,"-T");
+        map.put(413,wormadamMap);
+
+        Map<Integer,String> shayminMap = new HashMap<>();
+        shayminMap.put(1,"-S");
+        map.put(492,shayminMap);
+
+        Map<Integer,String> giratinaMap = new HashMap<>();
+        giratinaMap.put(1,"-O");
+        map.put(487,giratinaMap);
+
+        Map<Integer,String> rotomMap = new HashMap<>();
+        rotomMap.put(1,"-H");
+        rotomMap.put(2,"-W");
+        rotomMap.put(3,"-Fr");
+        rotomMap.put(4,"-Fa");
+        rotomMap.put(5,"-M");
+        map.put(479,rotomMap);
+
+        Map<Integer,String> castformMap = new HashMap<>();
+        castformMap.put(1,"-F");
+        castformMap.put(2,"-W");
+        castformMap.put(3,"-I");
+        map.put(351,castformMap);
+
+        Map<Integer,String> basculinMap = new HashMap<>();
+        basculinMap.put(1,"-B");
+        map.put(550,basculinMap);
+
+        Map<Integer,String> darmanitanMap = new HashMap<>();
+        darmanitanMap.put(1,"-Z");
+        map.put(555,darmanitanMap);
+
+        Map<Integer,String> meloettaMap = new HashMap<>();
+        meloettaMap.put(1,"-P");
+        map.put(648,meloettaMap);
+
+        Map<Integer,String> kyuremMap = new HashMap<>();
+        kyuremMap.put(1,"-W");
+        kyuremMap.put(2,"-B");
+        map.put(646,kyuremMap);
+
+        Map<Integer,String> keldeoMap = new HashMap<>();
+        keldeoMap.put(1,"-R");
+        map.put(647,keldeoMap);
+
+        Map<Integer,String> tornadusMap = new HashMap<>();
+        tornadusMap.put(1,"-T");
+        map.put(641,tornadusMap);
+
+        Map<Integer,String> thundurusMap = new HashMap<>();
+        thundurusMap.put(1,"-T");
+        map.put(642,thundurusMap);
+
+        Map<Integer,String> landorusMap = new HashMap<>();
+        landorusMap.put(1,"-T");
+        map.put(645,landorusMap);
+
+        return map;
+    }
+
+    private static Map<Integer,String> setupDummyFormeSuffixes() {
+        Map<Integer,String> m = new HashMap<>();
+        m.put(0,"");
+        return m;
+    }
+
+    private static Map<Integer,Map<Integer,Integer>> setupAbsolutePokeNumsByBaseForme() {
+
+        Map<Integer,Map<Integer,Integer>> map = new HashMap<>();
+
+        Map<Integer,Integer> deoxysMap = new HashMap<>();
+        deoxysMap.put(1,650);
+        deoxysMap.put(2,651);
+        deoxysMap.put(3,652);
+        map.put(386,deoxysMap);
+
+        Map<Integer,Integer> wormadamMap = new HashMap<>();
+        wormadamMap.put(1,653);
+        wormadamMap.put(2,654);
+        map.put(413,wormadamMap);
+
+        Map<Integer,Integer> shayminMap = new HashMap<>();
+        shayminMap.put(1,655);
+        map.put(492,shayminMap);
+
+        Map<Integer,Integer> giratinaMap = new HashMap<>();
+        giratinaMap.put(1,656);
+        map.put(487,giratinaMap);
+
+        Map<Integer,Integer> rotomMap = new HashMap<>();
+        rotomMap.put(1,657);
+        rotomMap.put(2,658);
+        rotomMap.put(3,659);
+        rotomMap.put(4,660);
+        rotomMap.put(5,661);
+        map.put(479,rotomMap);
+
+        Map<Integer,Integer> castformMap = new HashMap<>();
+        castformMap.put(1,662);
+        castformMap.put(2,663);
+        castformMap.put(3,664);
+        map.put(351,castformMap);
+
+        Map<Integer,Integer> basculinMap = new HashMap<>();
+        basculinMap.put(1,665);
+        map.put(550,basculinMap);
+
+        Map<Integer,Integer> darmanitanMap = new HashMap<>();
+        darmanitanMap.put(1,666);
+        map.put(555,darmanitanMap);
+
+        Map<Integer,Integer> meloettaMap = new HashMap<>();
+        meloettaMap.put(1,667);
+        map.put(648,meloettaMap);
+
+        Map<Integer,Integer> kyuremMap = new HashMap<>();
+        kyuremMap.put(1,668);
+        kyuremMap.put(2,669);
+        map.put(646,kyuremMap);
+
+        Map<Integer,Integer> keldeoMap = new HashMap<>();
+        keldeoMap.put(1,670);
+        map.put(647,keldeoMap);
+
+        Map<Integer,Integer> tornadusMap = new HashMap<>();
+        tornadusMap.put(1,671);
+        map.put(641,tornadusMap);
+
+        Map<Integer,Integer> thundurusMap = new HashMap<>();
+        thundurusMap.put(1,672);
+        map.put(642,thundurusMap);
+
+        Map<Integer,Integer> landorusMap = new HashMap<>();
+        landorusMap.put(1,673);
+        map.put(645,landorusMap);
+
+        return map;
+    }
+
+    private static Map<Integer,Integer> setupDummyAbsolutePokeNums() {
+        Map<Integer,Integer> m = new HashMap<>();
+        m.put(0,0);
+        return m;
     }
 
     public static ItemList allowedItems, nonBadItems;

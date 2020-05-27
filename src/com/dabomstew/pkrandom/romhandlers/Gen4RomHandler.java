@@ -39,6 +39,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
 
+import com.dabomstew.pkrandom.pokemon.*;
 import thenewpoketext.PokeTextData;
 import thenewpoketext.TextToPoke;
 
@@ -50,18 +51,6 @@ import com.dabomstew.pkrandom.constants.Gen4Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
-import com.dabomstew.pkrandom.pokemon.Encounter;
-import com.dabomstew.pkrandom.pokemon.EncounterSet;
-import com.dabomstew.pkrandom.pokemon.Evolution;
-import com.dabomstew.pkrandom.pokemon.EvolutionType;
-import com.dabomstew.pkrandom.pokemon.ExpCurve;
-import com.dabomstew.pkrandom.pokemon.IngameTrade;
-import com.dabomstew.pkrandom.pokemon.ItemList;
-import com.dabomstew.pkrandom.pokemon.Move;
-import com.dabomstew.pkrandom.pokemon.MoveLearnt;
-import com.dabomstew.pkrandom.pokemon.Pokemon;
-import com.dabomstew.pkrandom.pokemon.Trainer;
-import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 
 public class Gen4RomHandler extends AbstractDSRomHandler {
 
@@ -249,6 +238,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     // This rom
     private Pokemon[] pokes;
+    private List<Pokemon> pokemonListInclFormes;
     private List<Pokemon> pokemonList;
     private Move[] moves;
     private NARCArchive pokeNarc, moveNarc;
@@ -306,7 +296,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             throw new RandomizerIOException(e);
         }
         loadPokemonStats();
-        pokemonList = Arrays.asList(pokes);
+        pokemonListInclFormes = Arrays.asList(pokes);
+        pokemonList = Arrays.asList(Arrays.copyOfRange(pokes,0,Gen4Constants.pokemonCount + 1));
         loadMoves();
         abilityNames = getStrings(romEntry.getInt("AbilityNamesTextOffset"));
         itemNames = getStrings(romEntry.getInt("ItemNamesTextOffset"));
@@ -357,7 +348,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             String pstatsnarc = romEntry.getString("PokemonStats");
             pokeNarc = this.readNARC(pstatsnarc);
             String[] pokeNames = readPokemonNames();
-            pokes = new Pokemon[Gen4Constants.pokemonCount + 1];
+            int formeCount = Gen4Constants.getFormeCount(romEntry.romType);
+            pokes = new Pokemon[Gen4Constants.pokemonCount + formeCount + 1];
             for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
                 pokes[i] = new Pokemon();
                 pokes[i].number = i;
@@ -365,6 +357,22 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 // Name?
                 pokes[i].name = pokeNames[i];
             }
+
+            int i = Gen4Constants.pokemonCount + 1;
+            for (int k: Gen4Constants.formeMappings.keySet()) {
+                if (i >= pokes.length) {
+                    break;
+                }
+                pokes[i] = new Pokemon();
+                pokes[i].number = i;
+                loadBasicPokeStats(pokes[i], pokeNarc.files.get(k));
+                pokes[i].name = pokeNames[Gen4Constants.formeMappings.get(k).baseForme];
+                pokes[i].baseForme = Gen4Constants.formeMappings.get(k).baseForme;
+                pokes[i].formeNumber = Gen4Constants.formeMappings.get(k).formeNumber;
+                pokes[i].formeSuffix = Gen4Constants.formeSuffixes.get(k);
+                i = i + 1;
+            }
+
             populateEvolutions();
         } catch (IOException e) {
             throw new RandomizerIOException(e);
@@ -474,9 +482,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     private void savePokemonStats() {
         // Update the "a/an X" list too, if it exists
         List<String> namesList = getStrings(romEntry.getInt("PokemonNamesTextOffset"));
+        int formeCount = Gen4Constants.getFormeCount(romEntry.romType);
         if (romEntry.getString("HasExtraPokemonNames").equalsIgnoreCase("Yes")) {
             List<String> namesList2 = getStrings(romEntry.getInt("PokemonNamesTextOffset") + 1);
-            for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
+            for (int i = 1; i <= Gen4Constants.pokemonCount + formeCount; i++) {
+                if (i > Gen4Constants.pokemonCount) {
+                    saveBasicPokeStats(pokes[i], pokeNarc.files.get(i + Gen4Constants.formeOffset));
+                    continue;
+                }
                 saveBasicPokeStats(pokes[i], pokeNarc.files.get(i));
                 String oldName = namesList.get(i);
                 namesList.set(i, pokes[i].name);
@@ -484,7 +497,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             }
             setStrings(romEntry.getInt("PokemonNamesTextOffset") + 1, namesList2, false);
         } else {
-            for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
+            for (int i = 1; i <= Gen4Constants.pokemonCount + formeCount; i++) {
+                if (i > Gen4Constants.pokemonCount) {
+                    saveBasicPokeStats(pokes[i], pokeNarc.files.get(i + Gen4Constants.formeOffset));
+                    continue;
+                }
                 saveBasicPokeStats(pokes[i], pokeNarc.files.get(i));
                 namesList.set(i, pokes[i].name);
             }
@@ -534,6 +551,17 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     @Override
     public List<Pokemon> getPokemon() {
         return pokemonList;
+    }
+
+    @Override
+    public List<Pokemon> getPokemonInclFormes() {
+        return pokemonListInclFormes; // No formes for now
+    }
+
+    @Override
+    public List<Pokemon> getAltFormes() {
+        int formeCount = Gen4Constants.getFormeCount(romEntry.romType);
+        return pokemonListInclFormes.subList(Gen4Constants.pokemonCount + 1, Gen4Constants.pokemonCount + formeCount + 1);
     }
 
     @Override
@@ -1295,12 +1323,15 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     int ailevel = trpoke[pokeOffs] & 0xFF;
                     int level = trpoke[pokeOffs + 2] & 0xFF;
                     int species = (trpoke[pokeOffs + 4] & 0xFF) + ((trpoke[pokeOffs + 5] & 0x01) << 8);
-                    // int formnum = (trpoke[pokeOffs + 5] >> 2);
+                    int formnum = (trpoke[pokeOffs + 5] >> 2);
                     TrainerPokemon tpk = new TrainerPokemon();
                     tpk.level = level;
                     tpk.pokemon = pokes[species];
                     tpk.AILevel = ailevel;
                     tpk.ability = trpoke[pokeOffs + 1] & 0xFF;
+                    tpk.forme = formnum;
+                    tpk.formeSuffix = Gen4Constants.getFormeSuffixByBaseForme(species,formnum);
+                    tpk.absolutePokeNumber = Gen4Constants.getAbsolutePokeNumByBaseForme(species,formnum);
                     pokeOffs += 6;
                     if ((tr.poketype & 2) == 2) {
                         int heldItem = readWord(trpoke, pokeOffs);
@@ -1364,7 +1395,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
             // Get current movesets in case we need to reset them for certain
             // trainer mons.
-            Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+            Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
 
             // empty entry
             trpokes.files.add(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 });
@@ -1395,6 +1426,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     writeWord(trpoke, pokeOffs, tp.AILevel);
                     writeWord(trpoke, pokeOffs + 2, tp.level);
                     writeWord(trpoke, pokeOffs + 4, tp.pokemon.number);
+                    trpoke[pokeOffs + 5] |= (tp.forme << 2);
                     pokeOffs += 6;
                     if ((tr.poketype & 2) == 2) {
                         writeWord(trpoke, pokeOffs, tp.heldItem);
@@ -1402,7 +1434,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     }
                     if ((tr.poketype & 1) == 1) {
                         if (tp.resetMoves) {
-                            int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon, movesets, tp.level);
+                            int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.absolutePokeNumber, movesets, tp.level);
                             for (int m = 0; m < 4; m++) {
                                 writeWord(trpoke, pokeOffs + m * 2, pokeMoves[m]);
                             }
@@ -1430,15 +1462,21 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public Map<Pokemon, List<MoveLearnt>> getMovesLearnt() {
-        Map<Pokemon, List<MoveLearnt>> movesets = new TreeMap<Pokemon, List<MoveLearnt>>();
+    public Map<Integer, List<MoveLearnt>> getMovesLearnt() {
+        Map<Integer, List<MoveLearnt>> movesets = new TreeMap<>();
         try {
             NARCArchive movesLearnt = this.readNARC(romEntry.getString("PokemonMovesets"));
-            for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
+            int formeCount = Gen4Constants.getFormeCount(romEntry.romType);
+            for (int i = 1; i <= Gen4Constants.pokemonCount + formeCount; i++) {
                 Pokemon pkmn = pokes[i];
-                byte[] rom = movesLearnt.files.get(i);
+                byte[] rom;
+                if (i > Gen4Constants.pokemonCount) {
+                    rom = movesLearnt.files.get(i + Gen4Constants.formeOffset);
+                } else {
+                    rom = movesLearnt.files.get(i);
+                }
                 int moveDataLoc = 0;
-                List<MoveLearnt> learnt = new ArrayList<MoveLearnt>();
+                List<MoveLearnt> learnt = new ArrayList<>();
                 while ((rom[moveDataLoc] & 0xFF) != 0xFF || (rom[moveDataLoc + 1] & 0xFF) != 0xFF) {
                     int move = (rom[moveDataLoc] & 0xFF);
                     int level = (rom[moveDataLoc + 1] & 0xFE) >> 1;
@@ -1451,7 +1489,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     learnt.add(ml);
                     moveDataLoc += 2;
                 }
-                movesets.put(pkmn, learnt);
+                movesets.put(pkmn.number, learnt);
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
@@ -1460,16 +1498,22 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public void setMovesLearnt(Map<Pokemon, List<MoveLearnt>> movesets) {
-        int[] extraLearnSets = new int[] { 7, 13, 13 };
+    public void setMovesLearnt(Map<Integer, List<MoveLearnt>> movesets) {
+        // int[] extraLearnSets = new int[] { 7, 13, 13 };
         // Build up a new NARC
         NARCArchive movesLearnt = new NARCArchive();
         // The blank moveset
         byte[] blankSet = new byte[] { (byte) 0xFF, (byte) 0xFF, 0, 0 };
         movesLearnt.files.add(blankSet);
-        for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
+        int formeCount = Gen4Constants.getFormeCount(romEntry.romType);
+        for (int i = 1; i <= Gen4Constants.pokemonCount + formeCount; i++) {
+            if (i == Gen4Constants.pokemonCount + 1) {
+                for (int j = 0; j < Gen4Constants.formeOffset; j++) {
+                    movesLearnt.files.add(blankSet);
+                }
+            }
             Pokemon pkmn = pokes[i];
-            List<MoveLearnt> learnt = movesets.get(pkmn);
+            List<MoveLearnt> learnt = movesets.get(pkmn.number);
             int sizeNeeded = learnt.size() * 2 + 2;
             if ((sizeNeeded % 4) != 0) {
                 sizeNeeded += 2;
@@ -1489,9 +1533,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             moveset[j * 2 + 1] = (byte) 0xFF;
             movesLearnt.files.add(moveset);
         }
-        for (int j = 0; j < extraLearnSets[romEntry.romType]; j++) {
-            movesLearnt.files.add(blankSet);
-        }
+        //for (int j = 0; j < extraLearnSets[romEntry.romType]; j++) {
+        //    movesLearnt.files.add(blankSet);
+        //}
         // Save
         try {
             this.writeNARC(romEntry.getString("PokemonMovesets"), movesLearnt);
@@ -1731,9 +1775,15 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     @Override
     public Map<Pokemon, boolean[]> getTMHMCompatibility() {
-        Map<Pokemon, boolean[]> compat = new TreeMap<Pokemon, boolean[]>();
-        for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
-            byte[] data = pokeNarc.files.get(i);
+        Map<Pokemon, boolean[]> compat = new TreeMap<>();
+        int formeCount = Gen4Constants.getFormeCount(romEntry.romType);
+        for (int i = 1; i <= Gen4Constants.pokemonCount + formeCount; i++) {
+            byte[] data;
+            if (i > Gen4Constants.pokemonCount) {
+                data = pokeNarc.files.get(i + Gen4Constants.formeOffset);
+            } else {
+                data = pokeNarc.files.get(i);
+            }
             Pokemon pkmn = pokes[i];
             boolean[] flags = new boolean[Gen4Constants.tmCount + Gen4Constants.hmCount + 1];
             for (int j = 0; j < 13; j++) {
@@ -1806,9 +1856,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     @Override
     public Map<Pokemon, boolean[]> getMoveTutorCompatibility() {
         if (!hasMoveTutors()) {
-            return new TreeMap<Pokemon, boolean[]>();
+            return new TreeMap<>();
         }
-        Map<Pokemon, boolean[]> compat = new TreeMap<Pokemon, boolean[]>();
+        Map<Pokemon, boolean[]> compat = new TreeMap<>();
         int amount = romEntry.getInt("MoveTutorCount");
         int baseOffset = romEntry.getInt("MoveTutorCompatOffset");
         int bytesPer = romEntry.getInt("MoveTutorCompatBytesCount");
@@ -1819,11 +1869,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             } else {
                 mtcFile = readOverlay(romEntry.getInt("MoveTutorCompatOvlNumber"));
             }
-            for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
+            int formeCount = Gen4Constants.getFormeCount(romEntry.romType);
+            for (int i = 1; i <= Gen4Constants.pokemonCount + formeCount; i++) {
                 Pokemon pkmn = pokes[i];
                 boolean[] flags = new boolean[amount + 1];
                 for (int j = 0; j < bytesPer; j++) {
-                    readByteIntoFlags(mtcFile, flags, j * 8 + 1, baseOffset + (i - 1) * bytesPer + j);
+                    if (i > Gen4Constants.pokemonCount) {
+                        readByteIntoFlags(mtcFile, flags, j * 8 + 1, baseOffset + (i - 1) * bytesPer + j);
+                    } else {
+                        readByteIntoFlags(mtcFile, flags, j * 8 + 1, baseOffset + (i - 1) * bytesPer + j);
+                    }
                 }
                 compat.put(pkmn, flags);
             }
@@ -2019,7 +2074,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     @Override
     public void removeTradeEvolutions(boolean changeMoveEvos) {
-        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
+        Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
         log("--Removing Trade Evolutions--");
         Set<Evolution> extraEvolutions = new HashSet<Evolution>();
         for (Pokemon pkmn : pokes) {
@@ -2063,7 +2118,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                         // read move
                         int move = evo.extraInfo;
                         int levelLearntAt = 1;
-                        for (MoveLearnt ml : movesets.get(evo.from)) {
+                        for (MoveLearnt ml : movesets.get(evo.from.number)) {
                             if (ml.move == move) {
                                 levelLearntAt = ml.level;
                                 break;
