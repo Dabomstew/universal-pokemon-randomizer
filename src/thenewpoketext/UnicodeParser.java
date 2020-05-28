@@ -16,7 +16,7 @@ import com.dabomstew.pkrandom.FileFunctions;
 public class UnicodeParser {
 
     public static String[] tb = new String[65536];
-    public static Map<String, Integer> d = new HashMap<String, Integer>();
+    public static Map<String, Integer> d = new HashMap<>();
 
     static {
         try {
@@ -34,6 +34,7 @@ public class UnicodeParser {
             }
             sc.close();
         } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
     }
 

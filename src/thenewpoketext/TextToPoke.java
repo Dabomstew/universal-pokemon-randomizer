@@ -14,10 +14,10 @@ public class TextToPoke {
 
     public static byte[] MakeFile(List<String> textarr, boolean compressed) {
         int base = textarr.size() * 8 + 4;
-        List<PointerEntry> ptrtable = new ArrayList<PointerEntry>();
-        List<List<Integer>> rawdata = new ArrayList<List<Integer>>();
-        for (int i = 0; i < textarr.size(); i++) {
-            List<Integer> data = ToCode(textarr.get(i), compressed);
+        List<PointerEntry> ptrtable = new ArrayList<>();
+        List<List<Integer>> rawdata = new ArrayList<>();
+        for (String aTextarr : textarr) {
+            List<Integer> data = ToCode(aTextarr, compressed);
             int l = data.size();
             ptrtable.add(new PointerEntry(base, l));
             rawdata.add(data);
@@ -30,7 +30,7 @@ public class TextToPoke {
     }
 
     private static List<Integer> ToCode(String text, boolean compressed) {
-        List<Integer> data = new ArrayList<Integer>();
+        List<Integer> data = new ArrayList<>();
         while (text.length() != 0) {
             int i = Math.max(0, 6 - text.length());
             if (text.charAt(0) == '\\') {
@@ -42,7 +42,7 @@ public class TextToPoke {
                     data.add(Integer.parseInt(text.substring(2, 6), 16));
                     text = text.substring(6);
                 } else if (text.charAt(1) == 'z') {
-                    List<Integer> var = new ArrayList<Integer>();
+                    List<Integer> var = new ArrayList<>();
                     int w = 0;
                     while (text.length() != 0) {
                         if (text.charAt(0) == '\\' && text.charAt(1) == 'z') {
@@ -90,9 +90,9 @@ public class TextToPoke {
             }
             byte[] bits = new byte[data.size() * 9];
             int bc = 0;
-            for (int i = 0; i < data.size(); i++) {
+            for (Integer aData : data) {
                 for (int j = 0; j < 9; j++) {
-                    bits[bc++] = (byte) ((data.get(i) >> j) & 1);
+                    bits[bc++] = (byte) ((aData >> j) & 1);
                 }
             }
             int tmp_uint16 = 0;
@@ -160,13 +160,10 @@ public class TextToPoke {
         }
         byte[] barr = new byte[tlen];
         int offs = 0;
-        int l1 = list.size();
-        for (int j = 0; j < l1; j++) {
-            List<Integer> slist = list.get(j);
-            int l2 = slist.size();
-            for (int i = 0; i < l2; i++) {
-                barr[offs] = (byte) (slist.get(i) & 0xFF);
-                barr[offs + 1] = (byte) ((slist.get(i) >> 8) & 0xFF);
+        for (List<Integer> slist : list) {
+            for (Integer aSlist : slist) {
+                barr[offs] = (byte) (aSlist & 0xFF);
+                barr[offs + 1] = (byte) ((aSlist >> 8) & 0xFF);
                 offs += 2;
             }
         }

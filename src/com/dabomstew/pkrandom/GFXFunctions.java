@@ -38,8 +38,8 @@ public class GFXFunctions {
         return drawTiledImage(data, palette, offset, width, height, 8, 8, bpp);
     }
 
-    public static BufferedImage drawTiledImage(byte[] data, int[] palette, int offset, int width, int height,
-            int tileWidth, int tileHeight, int bpp) {
+    private static BufferedImage drawTiledImage(byte[] data, int[] palette, int offset, int width, int height,
+                                                int tileWidth, int tileHeight, int bpp) {
         if (bpp != 1 && bpp != 2 && bpp != 4 && bpp != 8) {
             throw new IllegalArgumentException("Bits per pixel must be a multiple of 2.");
         }
@@ -81,7 +81,7 @@ public class GFXFunctions {
     public static void pseudoTransparency(BufferedImage img, int transColor) {
         int width = img.getWidth();
         int height = img.getHeight();
-        Queue<Integer> visitPixels = new LinkedList<Integer>();
+        Queue<Integer> visitPixels = new LinkedList<>();
         boolean[][] queued = new boolean[width][height];
 
         for (int x = 0; x < width; x++) {

@@ -38,11 +38,11 @@ public class CustomNamesSet {
     // Alternate constructor: blank all lists
     // Used for importing old names and on the editor dialog.
     public CustomNamesSet() {
-        trainerNames = new ArrayList<String>();
-        trainerClasses = new ArrayList<String>();
-        doublesTrainerNames = new ArrayList<String>();
-        doublesTrainerClasses = new ArrayList<String>();
-        pokemonNicknames = new ArrayList<String>();
+        trainerNames = new ArrayList<>();
+        trainerClasses = new ArrayList<>();
+        doublesTrainerNames = new ArrayList<>();
+        doublesTrainerClasses = new ArrayList<>();
+        pokemonNicknames = new ArrayList<>();
     }
 
     private List<String> readNamesBlock(InputStream in) throws IOException {
@@ -55,7 +55,7 @@ public class CustomNamesSet {
 
         // Read the block and translate it into a list of names.
         byte[] namesData = FileFunctions.readFullyIntoBuffer(in, size);
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         Scanner sc = new Scanner(new ByteArrayInputStream(namesData), "UTF-8");
         while (sc.hasNextLine()) {
             String name = sc.nextLine().trim();
@@ -84,7 +84,7 @@ public class CustomNamesSet {
 
     private void writeNamesBlock(OutputStream out, List<String> names) throws IOException {
         String newln = SysConstants.LINE_SEP;
-        StringBuffer outNames = new StringBuffer();
+        StringBuilder outNames = new StringBuilder();
         boolean first = true;
         for (String name : names) {
             if (!first) {

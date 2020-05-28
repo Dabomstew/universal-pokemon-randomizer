@@ -39,7 +39,7 @@ public class RomFunctions {
 
     public static Set<Pokemon> getBasicOrNoCopyPokemon(RomHandler baseRom) {
         List<Pokemon> allPokes = baseRom.getPokemonInclFormes();
-        Set<Pokemon> dontCopyPokes = new TreeSet<Pokemon>();
+        Set<Pokemon> dontCopyPokes = new TreeSet<>();
         for (Pokemon pkmn : allPokes) {
             if (pkmn != null) {
                 if (pkmn.evolutionsTo.size() < 1) {
@@ -57,7 +57,7 @@ public class RomFunctions {
 
     public static Set<Pokemon> getMiddleEvolutions(RomHandler baseRom) {
         List<Pokemon> allPokes = baseRom.getPokemon();
-        Set<Pokemon> middleEvolutions = new TreeSet<Pokemon>();
+        Set<Pokemon> middleEvolutions = new TreeSet<>();
         for (Pokemon pkmn : allPokes) {
             if (pkmn != null) {
                 if (pkmn.evolutionsTo.size() == 1 && pkmn.evolutionsFrom.size() > 0) {
@@ -73,7 +73,7 @@ public class RomFunctions {
 
     public static Set<Pokemon> getFinalEvolutions(RomHandler baseRom) {
         List<Pokemon> allPokes = baseRom.getPokemon();
-        Set<Pokemon> finalEvolutions = new TreeSet<Pokemon>();
+        Set<Pokemon> finalEvolutions = new TreeSet<>();
         for (Pokemon pkmn : allPokes) {
             if (pkmn != null) {
                 if (pkmn.evolutionsTo.size() == 1 && pkmn.evolutionsFrom.size() == 0) {
@@ -90,10 +90,10 @@ public class RomFunctions {
     /**
      * Get the 4 moves known by a Pokemon at a particular level.
      * 
-     * @param pkmn
-     * @param movesets
-     * @param level
-     * @return
+     * @param pkmn Pokemon index to get moves for.
+     * @param movesets Map of Pokemon indices mapped to movesets.
+     * @param level Level to get at.
+     * @return Array with move indices.
      */
     public static int[] getMovesAtLevel(int pkmn, Map<Integer, List<MoveLearnt>> movesets, int level) {
         return getMovesAtLevel(pkmn, movesets, level, 0);
@@ -126,9 +126,7 @@ public class RomFunctions {
                 // add this move to the moveset
                 if (moveCount == 4) {
                     // shift moves up and add to last slot
-                    for (int i = 0; i < 3; i++) {
-                        curMoves[i] = curMoves[i + 1];
-                    }
+                    System.arraycopy(curMoves, 1, curMoves, 0, 3);
                     curMoves[3] = ml.move;
                 } else {
                     // add to next available slot
@@ -197,13 +195,12 @@ public class RomFunctions {
         int currentMatchStart = beginOffset;
         int currentCharacterPosition = 0;
 
-        int docSize = endOffset;
         int needleSize = needle.length;
 
         int[] toFillTable = buildKMPSearchTable(needle);
-        List<Integer> results = new ArrayList<Integer>();
+        List<Integer> results = new ArrayList<>();
 
-        while ((currentMatchStart + currentCharacterPosition) < docSize) {
+        while ((currentMatchStart + currentCharacterPosition) < endOffset) {
 
             if (needle[currentCharacterPosition] == (haystack[currentCharacterPosition + currentMatchStart])) {
                 currentCharacterPosition = currentCharacterPosition + 1;
@@ -233,7 +230,7 @@ public class RomFunctions {
         return results;
     }
 
-    public static int searchForFirst(byte[] haystack, int beginOffset, byte[] needle) {
+    private static int searchForFirst(byte[] haystack, int beginOffset, byte[] needle) {
         int currentMatchStart = beginOffset;
         int currentCharacterPosition = 0;
 
@@ -345,7 +342,6 @@ public class RomFunctions {
                 fullDesc.append(newline);
             }
             fullDesc.append(thisLine.toString());
-            linesWritten++;
         }
 
         return fullDesc.toString();
@@ -387,14 +383,14 @@ public class RomFunctions {
             int currLineCC = 0;
             int linesWritten = 0;
             char currLineLastChar = 0;
-            for (int i = 0; i < words.length; i++) {
-                int reqLength = ssd.lengthFor(words[i]);
+            for (String word : words) {
+                int reqLength = ssd.lengthFor(word);
                 if (currLineWC > 0) {
                     reqLength++;
                 }
                 if ((currLineCC + reqLength > maxLineLength)
                         || (currLineCC >= sentenceNewLineSize && (currLineLastChar == '.' || currLineLastChar == '?'
-                                || currLineLastChar == '!' || currLineLastChar == '…' || currLineLastChar == ','))) {
+                        || currLineLastChar == '!' || currLineLastChar == '…' || currLineLastChar == ','))) {
                     // new line
                     // Save current line, if applicable
                     if (currLineWC > 0) {
@@ -408,26 +404,26 @@ public class RomFunctions {
                         thisLine = new StringBuilder();
                     }
                     // Start the new line
-                    thisLine.append(words[i]);
+                    thisLine.append(word);
                     currLineWC = 1;
-                    currLineCC = ssd.lengthFor(words[i]);
-                    if (words[i].length() == 0) {
+                    currLineCC = ssd.lengthFor(word);
+                    if (word.length() == 0) {
                         currLineLastChar = 0;
                     } else {
-                        currLineLastChar = words[i].charAt(words[i].length() - 1);
+                        currLineLastChar = word.charAt(word.length() - 1);
                     }
                 } else {
                     // add to current line
                     if (currLineWC > 0) {
                         thisLine.append(' ');
                     }
-                    thisLine.append(words[i]);
+                    thisLine.append(word);
                     currLineWC++;
                     currLineCC += reqLength;
-                    if (words[i].length() == 0) {
+                    if (word.length() == 0) {
                         currLineLastChar = 0;
                     } else {
-                        currLineLastChar = words[i].charAt(words[i].length() - 1);
+                        currLineLastChar = word.charAt(word.length() - 1);
                     }
                 }
             }
@@ -440,7 +436,6 @@ public class RomFunctions {
                     fullPara.append(newline);
                 }
                 fullPara.append(thisLine.toString());
-                linesWritten++;
             }
             if (para > 0) {
                 finalResult.append(newpara);
@@ -454,7 +449,7 @@ public class RomFunctions {
     }
 
     public interface StringSizeDeterminer {
-        public int lengthFor(String encodedText);
+        int lengthFor(String encodedText);
     }
 
     public static class StringLengthSD implements StringSizeDeterminer {

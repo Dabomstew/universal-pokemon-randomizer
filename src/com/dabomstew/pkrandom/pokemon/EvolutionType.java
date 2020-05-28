@@ -45,7 +45,7 @@ public enum EvolutionType {
         }
     }
 
-    private EvolutionType(int... indexes) {
+    EvolutionType(int... indexes) {
         this.indexNumbers = indexes;
     }
 

@@ -19,10 +19,10 @@ import com.dabomstew.pkrandom.FileFunctions;
 
 public class PPTxtHandler {
 
-    public static Map<String, String> pokeToText = new HashMap<String, String>();
-    public static Map<String, String> textToPoke = new HashMap<String, String>();
+    private static Map<String, String> pokeToText = new HashMap<>();
+    private static Map<String, String> textToPoke = new HashMap<>();
 
-    public static Pattern pokeToTextPattern, textToPokePattern;
+    private static Pattern pokeToTextPattern, textToPokePattern;
 
     static {
         try {
@@ -43,17 +43,18 @@ public class PPTxtHandler {
             pokeToTextPattern = makePattern(pokeToText.keySet());
             textToPokePattern = makePattern(textToPoke.keySet());
         } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
     }
 
-    public static Pattern makePattern(Iterable<String> tokens) {
+    private static Pattern makePattern(Iterable<String> tokens) {
         String patternStr = "("
                 + implode(tokens, "|").replace("\\", "\\\\").replace("[", "\\[").replace("]", "\\]")
                         .replace("(", "\\(").replace(")", "\\)") + ")";
         return Pattern.compile(patternStr);
     }
 
-    public static String implode(Iterable<String> tokens, String sep) {
+    private static String implode(Iterable<String> tokens, String sep) {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
         for (String token : tokens) {
@@ -76,7 +77,7 @@ public class PPTxtHandler {
      * @return Decompressed list of integers corresponding to characters
      */
     private static List<Integer> decompress(List<Integer> chars) {
-        List<Integer> uncomp = new ArrayList<Integer>();
+        List<Integer> uncomp = new ArrayList<>();
         int j = 1;
         int shift1 = 0;
         int trans = 0;
@@ -129,19 +130,19 @@ public class PPTxtHandler {
     public static List<String> readTexts(byte[] ds) {
         int pos = 0;
         int i = 0;
-        lastKeys = new ArrayList<Integer>();
-        lastUnknowns = new ArrayList<Integer>();
-        List<String> strings = new ArrayList<String>();
+        lastKeys = new ArrayList<>();
+        lastUnknowns = new ArrayList<>();
+        List<String> strings = new ArrayList<>();
         int numSections, numEntries, tmpCharCount, tmpUnknown, tmpChar;
         int tmpOffset;
         int[] sizeSections = new int[] { 0, 0, 0 };
         int[] sectionOffset = new int[] { 0, 0, 0 };
-        Map<Integer, List<Integer>> tableOffsets = new HashMap<Integer, List<Integer>>();
-        Map<Integer, List<Integer>> characterCount = new HashMap<Integer, List<Integer>>();
-        Map<Integer, List<Integer>> unknown = new HashMap<Integer, List<Integer>>();
-        Map<Integer, List<List<Integer>>> encText = new HashMap<Integer, List<List<Integer>>>();
-        Map<Integer, List<List<String>>> decText = new HashMap<Integer, List<List<String>>>();
-        String string = "";
+        Map<Integer, List<Integer>> tableOffsets = new HashMap<>();
+        Map<Integer, List<Integer>> characterCount = new HashMap<>();
+        Map<Integer, List<Integer>> unknown = new HashMap<>();
+        Map<Integer, List<List<Integer>>> encText = new HashMap<>();
+        Map<Integer, List<List<String>>> decText = new HashMap<>();
+        StringBuilder sb;
         int key;
 
         numSections = readWord(ds, 0);
@@ -157,11 +158,11 @@ public class PPTxtHandler {
             pos = sectionOffset[i];
             sizeSections[i] = readLong(ds, pos);
             pos += 4;
-            tableOffsets.put(i, new ArrayList<Integer>());
-            characterCount.put(i, new ArrayList<Integer>());
-            unknown.put(i, new ArrayList<Integer>());
-            encText.put(i, new ArrayList<List<Integer>>());
-            decText.put(i, new ArrayList<List<String>>());
+            tableOffsets.put(i, new ArrayList<>());
+            characterCount.put(i, new ArrayList<>());
+            unknown.put(i, new ArrayList<>());
+            encText.put(i, new ArrayList<>());
+            decText.put(i, new ArrayList<>());
             for (int j = 0; j < numEntries; j++) {
                 tmpOffset = readLong(ds, pos);
                 pos += 4;
@@ -175,7 +176,7 @@ public class PPTxtHandler {
                 lastUnknowns.add(tmpUnknown);
             }
             for (int j = 0; j < numEntries; j++) {
-                List<Integer> tmpEncChars = new ArrayList<Integer>();
+                List<Integer> tmpEncChars = new ArrayList<>();
                 pos = sectionOffset[i] + tableOffsets.get(i).get(j);
                 for (int k = 0; k < characterCount.get(i).get(j); k++) {
                     tmpChar = readWord(ds, pos);
@@ -185,7 +186,7 @@ public class PPTxtHandler {
                 encText.get(i).add(tmpEncChars);
                 key = encText.get(i).get(j).get(characterCount.get(i).get(j) - 1) ^ 0xFFFF;
                 for (int k = characterCount.get(i).get(j) - 1; k >= 0; k--) {
-                    encText.get(i).get(j).set(k, (encText.get(i).get(j).get(k).intValue()) ^ key);
+                    encText.get(i).get(j).set(k, (encText.get(i).get(j).get(k)) ^ key);
                     if (k == 0) {
                         lastKeys.add(key);
                     }
@@ -195,8 +196,8 @@ public class PPTxtHandler {
                     encText.get(i).set(j, decompress(encText.get(i).get(j)));
                     characterCount.get(i).set(j, encText.get(i).get(j).size());
                 }
-                List<String> chars = new ArrayList<String>();
-                string = "";
+                List<String> chars = new ArrayList<>();
+                sb = new StringBuilder();
                 for (int k = 0; k < characterCount.get(i).get(j); k++) {
                     if (encText.get(i).get(j).get(k) == 0xFFFF) {
                         chars.add("\\xFFFF");
@@ -208,10 +209,10 @@ public class PPTxtHandler {
                             String num = String.format("%04X", encText.get(i).get(j).get(k));
                             chars.add("\\x" + num);
                         }
-                        string += chars.get(k);
+                        sb.append(chars.get(k));
                     }
                 }
-                strings.add(string);
+                strings.add(sb.toString());
                 decText.get(i).add(chars);
             }
         }
@@ -265,12 +266,11 @@ public class PPTxtHandler {
         int[] newsectionOffset = new int[] { 0, 0, 0 };
 
         // Data-Stream
-        byte[] ds = originalData;
         int pos = 0;
 
-        numSections = readWord(ds, 0);
-        numEntries = readWord(ds, 2);
-        sizeSections[0] = readLong(ds, 4);
+        numSections = readWord(originalData, 0);
+        numEntries = readWord(originalData, 2);
+        sizeSections[0] = readLong(originalData, 4);
         // unk1 readLong(ds, 8);
         pos += 12;
 
@@ -280,18 +280,17 @@ public class PPTxtHandler {
         } else {
             byte[] newEntry = makeSection(text, numEntries);
             for (int z = 0; z < numSections; z++) {
-                sectionOffset[z] = readLong(ds, pos);
+                sectionOffset[z] = readLong(originalData, pos);
                 pos += 4;
             }
             for (int z = 0; z < numSections; z++) {
                 pos = sectionOffset[z];
-                sizeSections[z] = readLong(ds, pos);
-                pos += 4;
+                sizeSections[z] = readLong(originalData, pos);
             }
             newsizeSections[0] = newEntry.length;
 
-            byte[] newData = new byte[ds.length - sizeSections[0] + newsizeSections[0]];
-            System.arraycopy(ds, 0, newData, 0, Math.min(ds.length, newData.length));
+            byte[] newData = new byte[originalData.length - sizeSections[0] + newsizeSections[0]];
+            System.arraycopy(originalData, 0, newData, 0, Math.min(originalData.length, newData.length));
             writeLong(newData, 4, newsizeSections[0]);
             if (numSections == 2) {
                 newsectionOffset[1] = newsizeSections[0] + sectionOffset[0];
@@ -299,14 +298,14 @@ public class PPTxtHandler {
             }
             System.arraycopy(newEntry, 0, newData, sectionOffset[0], newEntry.length);
             if (numSections == 2) {
-                System.arraycopy(ds, sectionOffset[1], newData, newsectionOffset[1], sizeSections[1]);
+                System.arraycopy(originalData, sectionOffset[1], newData, newsectionOffset[1], sizeSections[1]);
             }
             return newData;
         }
     }
 
     private static byte[] makeSection(List<String> strings, int numEntries) {
-        List<List<Integer>> data = new ArrayList<List<Integer>>();
+        List<List<Integer>> data = new ArrayList<>();
         int size = 0;
         int offset = 4 + 8 * numEntries;
         int charCount;
@@ -347,7 +346,7 @@ public class PPTxtHandler {
     }
 
     private static List<Integer> parseString(String string, int entry_id) {
-        List<Integer> chars = new ArrayList<Integer>();
+        List<Integer> chars = new ArrayList<>();
         for (int i = 0; i < string.length(); i++) {
             if (string.charAt(i) != '\\') {
                 chars.add((int) string.charAt(i));
@@ -383,7 +382,7 @@ public class PPTxtHandler {
         data[offset + 1] = (byte) ((value >> 8) & 0xFF);
     }
 
-    protected static void writeLong(byte[] data, int offset, int value) {
+    private static void writeLong(byte[] data, int offset, int value) {
         data[offset] = (byte) (value & 0xFF);
         data[offset + 1] = (byte) ((value >> 8) & 0xFF);
         data[offset + 2] = (byte) ((value >> 16) & 0xFF);

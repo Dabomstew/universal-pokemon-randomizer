@@ -8,10 +8,10 @@ import java.util.TreeMap;
 
 public class NARCArchive {
 
-    public List<String> filenames = new ArrayList<String>();
-    public List<byte[]> files = new ArrayList<byte[]>();
+    private List<String> filenames = new ArrayList<>();
+    public List<byte[]> files = new ArrayList<>();
 
-    public boolean hasFilenames = false;
+    private boolean hasFilenames = false;
 
     public NARCArchive() {
         // creates a new empty NARC with no filenames by default
@@ -155,7 +155,7 @@ public class NARCArchive {
 
         // each frame
         int offset = 0x10;
-        Map<String, byte[]> frames = new TreeMap<String, byte[]>();
+        Map<String, byte[]> frames = new TreeMap<>();
         for (int i = 0; i < frameCount; i++) {
             byte[] magic = new byte[] { data[offset + 3], data[offset + 2], data[offset + 1], data[offset] };
             String magicS = new String(magic, "US-ASCII");

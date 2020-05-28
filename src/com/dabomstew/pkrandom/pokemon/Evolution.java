@@ -58,13 +58,7 @@ public class Evolution implements Comparable<Evolution> {
         if (getClass() != obj.getClass())
             return false;
         Evolution other = (Evolution) obj;
-        if (from != other.from)
-            return false;
-        if (to != other.to)
-            return false;
-        if (type != other.type)
-            return false;
-        return true;
+        return from == other.from && to == other.to && type == other.type;
     }
 
     @Override
@@ -77,13 +71,7 @@ public class Evolution implements Comparable<Evolution> {
             return -1;
         } else if (this.to.number > o.to.number) {
             return 1;
-        } else if (this.type.ordinal() < o.type.ordinal()) {
-            return -1;
-        } else if (this.type.ordinal() > o.type.ordinal()) {
-            return 1;
-        } else {
-            return 0;
-        }
+        } else return Integer.compare(this.type.ordinal(), o.type.ordinal());
     }
 
 }

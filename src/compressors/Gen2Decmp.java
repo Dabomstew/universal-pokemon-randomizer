@@ -13,7 +13,7 @@ public class Gen2Decmp {
     private static final int INITIAL_BUF_SIZE = 0x1000;
 
     public byte[] data;
-    public int address;
+    private int address;
     private byte[] output;
     private int out_idx;
     private int cmd;
@@ -159,7 +159,7 @@ public class Gen2Decmp {
         output = newOut;
     }
 
-    public int peek() {
+    private int peek() {
         return data[address] & 0xFF;
     }
 

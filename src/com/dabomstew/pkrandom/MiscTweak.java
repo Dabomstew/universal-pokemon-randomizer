@@ -32,25 +32,25 @@ public class MiscTweak implements Comparable<MiscTweak> {
 
     private static final ResourceBundle bundle = ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle");
 
-    public static List<MiscTweak> allTweaks = new ArrayList<MiscTweak>();
+    public static List<MiscTweak> allTweaks = new ArrayList<>();
 
     /* @formatter:off */
     // Higher priority value (third argument) = run first
     public static final MiscTweak BW_EXP_PATCH = new MiscTweak(1, "bwPatch", 0);
-    public static final MiscTweak NERF_X_ACCURACY = new MiscTweak(2, "nerfXAcc", 0);
-    public static final MiscTweak FIX_CRIT_RATE = new MiscTweak(4, "critRateFix", 0);
-    public static final MiscTweak FASTEST_TEXT = new MiscTweak(8, "fastestText", 0);
-    public static final MiscTweak RUNNING_SHOES_INDOORS = new MiscTweak(16, "runningShoes", 0);
-    public static final MiscTweak RANDOMIZE_PC_POTION = new MiscTweak(32, "pcPotion", 0);
-    public static final MiscTweak ALLOW_PIKACHU_EVOLUTION = new MiscTweak(64, "pikachuEvo", 0);
-    public static final MiscTweak NATIONAL_DEX_AT_START = new MiscTweak(128, "nationalDex", 0);
-    public static final MiscTweak UPDATE_TYPE_EFFECTIVENESS = new MiscTweak(256, "typeEffectiveness", 0);
-    public static final MiscTweak RANDOMIZE_HIDDEN_HOLLOWS = new MiscTweak(512, "hiddenHollows", 0);
-    public static final MiscTweak LOWER_CASE_POKEMON_NAMES = new MiscTweak(1024, "lowerCaseNames", 0);
-    public static final MiscTweak RANDOMIZE_CATCHING_TUTORIAL = new MiscTweak(2048, "catchingTutorial", 0);
-    public static final MiscTweak BAN_LUCKY_EGG = new MiscTweak(4096, "luckyEgg", 1);
-    public static final MiscTweak NO_FREE_LUCKY_EGG = new MiscTweak(8192,"freeLuckyEgg",0);
-    public static final MiscTweak BAN_BIG_MANIAC_ITEMS = new MiscTweak(16384, "maniacItems",1);
+    public static final MiscTweak NERF_X_ACCURACY = new MiscTweak(1 << 1, "nerfXAcc", 0);
+    public static final MiscTweak FIX_CRIT_RATE = new MiscTweak(1 << 2, "critRateFix", 0);
+    public static final MiscTweak FASTEST_TEXT = new MiscTweak(1 << 3, "fastestText", 0);
+    public static final MiscTweak RUNNING_SHOES_INDOORS = new MiscTweak(1 << 4, "runningShoes", 0);
+    public static final MiscTweak RANDOMIZE_PC_POTION = new MiscTweak(1 << 5, "pcPotion", 0);
+    public static final MiscTweak ALLOW_PIKACHU_EVOLUTION = new MiscTweak(1 << 6, "pikachuEvo", 0);
+    public static final MiscTweak NATIONAL_DEX_AT_START = new MiscTweak(1 << 7, "nationalDex", 0);
+    public static final MiscTweak UPDATE_TYPE_EFFECTIVENESS = new MiscTweak(1 << 8, "typeEffectiveness", 0);
+    public static final MiscTweak RANDOMIZE_HIDDEN_HOLLOWS = new MiscTweak(1 << 9, "hiddenHollows", 0);
+    public static final MiscTweak LOWER_CASE_POKEMON_NAMES = new MiscTweak(1 << 10, "lowerCaseNames", 0);
+    public static final MiscTweak RANDOMIZE_CATCHING_TUTORIAL = new MiscTweak(1 << 11, "catchingTutorial", 0);
+    public static final MiscTweak BAN_LUCKY_EGG = new MiscTweak(1 << 12, "luckyEgg", 1);
+    public static final MiscTweak NO_FREE_LUCKY_EGG = new MiscTweak(1 << 13,"freeLuckyEgg",0);
+    public static final MiscTweak BAN_BIG_MANIAC_ITEMS = new MiscTweak(1 << 14, "maniacItems",1);
     /* @formatter:on */
 
     private final int value;

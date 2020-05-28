@@ -12,7 +12,7 @@ import java.util.List;
 
 public class PokeTextData {
     private byte[] data;
-    public List<PointerEntry> ptrlist;
+    private List<PointerEntry> ptrlist;
     public List<String> strlist;
     public boolean compressFlag;
 
@@ -49,7 +49,7 @@ public class PokeTextData {
         DecyptPtrs(read16(0), read16(2), 4);
         this.ptrlist = CreatePtrList(read16(0), 4);
 
-        this.strlist = new ArrayList<String>();
+        this.strlist = new ArrayList<>();
 
         int num = read16(0);
 
@@ -85,7 +85,7 @@ public class PokeTextData {
     }
 
     private List<PointerEntry> CreatePtrList(int count, int sdidx) {
-        List<PointerEntry> ptrlist = new ArrayList<PointerEntry>();
+        List<PointerEntry> ptrlist = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             ptrlist.add(new PointerEntry(read32(sdidx), read32(sdidx + 4)));
             sdidx += 8;
@@ -106,8 +106,8 @@ public class PokeTextData {
 
     private String MakeString(int count, int idx) {
         StringBuilder string = new StringBuilder();
-        List<Integer> chars = new ArrayList<Integer>();
-        List<Integer> uncomp = new ArrayList<Integer>();
+        List<Integer> chars = new ArrayList<>();
+        List<Integer> uncomp = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             chars.add(read16(idx));
             idx += 2;
@@ -155,17 +155,17 @@ public class PokeTextData {
             } else {
                 if (currChar == 0xFFFE) {
                     i++;
-                    string.append("\\v" + String.format("%04X", chars.get(i)));
+                    string.append("\\v").append(String.format("%04X", chars.get(i)));
                     i++;
                     int total = chars.get(i);
                     for (int z = 0; z < total; z++) {
                         i++;
-                        string.append("\\z" + String.format("%04X", chars.get(i)));
+                        string.append("\\z").append(String.format("%04X", chars.get(i)));
                     }
                 } else if (currChar == 0xFFFF) {
                     break;
                 } else {
-                    string.append("\\x" + String.format("%04X", chars.get(i)));
+                    string.append("\\x").append(String.format("%04X", chars.get(i)));
                 }
             }
             i++;

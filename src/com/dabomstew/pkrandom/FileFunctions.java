@@ -67,8 +67,8 @@ public class FileFunctions {
         return new File(original.getAbsolutePath().replace(original.getName(), "") + filename);
     }
 
-    private static List<String> overrideFiles = Arrays.asList(new String[] { SysConstants.customNamesFile,
-            SysConstants.tclassesFile, SysConstants.tnamesFile, SysConstants.nnamesFile });
+    private static List<String> overrideFiles = Arrays.asList(SysConstants.customNamesFile,
+            SysConstants.tclassesFile, SysConstants.tnamesFile, SysConstants.nnamesFile);
 
     public static boolean configExists(String filename) {
         if (overrideFiles.contains(filename)) {
@@ -141,8 +141,8 @@ public class FileFunctions {
         return buf;
     }
 
-    public static void readFully(InputStream in, byte[] buf, int offset, int length) throws IOException {
-        int offs = 0, read = 0;
+    private static void readFully(InputStream in, byte[] buf, int offset, int length) throws IOException {
+        int offs = 0, read;
         while (offs < length && (read = in.read(buf, offs + offset, length - offs)) != -1) {
             offs += read;
         }
@@ -169,7 +169,7 @@ public class FileFunctions {
         }
     }
 
-    public static int getFileChecksum(InputStream stream) {
+    private static int getFileChecksum(InputStream stream) {
         try {
             Scanner sc = new Scanner(stream, "UTF-8");
             CRC32 checksum = new CRC32();
@@ -197,14 +197,12 @@ public class FileFunctions {
             // have to check the CRC
             int crc = readFullInt(data, offsetInData);
 
-            if (getFileChecksum(filename) != crc) {
-                return false;
-            }
+            return getFileChecksum(filename) == crc;
         }
         return true;
     }
 
-    public static byte[] getCodeTweakFile(String filename) throws IOException {
+    private static byte[] getCodeTweakFile(String filename) throws IOException {
         InputStream is = FileFunctions.class.getResourceAsStream("/com/dabomstew/pkrandom/patches/" + filename);
         byte[] buf = readFullyIntoBuffer(is, is.available());
         is.close();
@@ -220,8 +218,7 @@ public class FileFunctions {
             out.write(buf, 0, count);
         }
         in.close();
-        byte[] output = out.toByteArray();
-        return output;
+        return out.toByteArray();
     }
 
     public static void applyPatch(byte[] rom, String patchName) throws IOException {

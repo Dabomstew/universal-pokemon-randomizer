@@ -29,7 +29,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -78,7 +77,6 @@ public class Randomizer {
         // long seed2 = 123456789;    // TESTING
         // RandomSource.seed(seed2);    // TESTING
         RandomSource.seed(seed);
-        final boolean raceMode = settings.isRaceMode();
 
         int checkValue = 0;
 
@@ -128,7 +126,7 @@ public class Randomizer {
         int currentMiscTweaks = settings.getCurrentMiscTweaks();
         if (romHandler.miscTweaksAvailable() != 0) {
             int codeTweaksAvailable = romHandler.miscTweaksAvailable();
-            List<MiscTweak> tweaksToApply = new ArrayList<MiscTweak>();
+            List<MiscTweak> tweaksToApply = new ArrayList<>();
 
             for (MiscTweak mt : MiscTweak.allTweaks) {
                 if ((codeTweaksAvailable & mt.getValue()) > 0 && (currentMiscTweaks & mt.getValue()) > 0) {
@@ -186,9 +184,9 @@ public class Randomizer {
                         StringBuilder evoStr = new StringBuilder(pk.evolutionsFrom.get(0).to.fullName());
                         for (int i = 1; i < numEvos; i++) {
                             if (i == numEvos - 1) {
-                                evoStr.append(" and " + pk.evolutionsFrom.get(i).to.fullName());
+                                evoStr.append(" and ").append(pk.evolutionsFrom.get(i).to.fullName());
                             } else {
-                                evoStr.append(", " + pk.evolutionsFrom.get(i).to.fullName());
+                                evoStr.append(", ").append(pk.evolutionsFrom.get(i).to.fullName());
                             }
                         }
                         // log.println(pk.fullName() + " now evolves into " + evoStr.toString());
@@ -293,17 +291,12 @@ public class Randomizer {
 
 
                 List<MoveLearnt> data = moveData.get(pkmn.number);
-                boolean first = true;
                 for (MoveLearnt ml : data) {
-                    // if (!first) {
-                        // sb.append(", ");
-                    // }
                     try {
                         sb.append("Level ").append(String.format("%-2d", ml.level)).append(": ").append(moves.get(ml.move).name).append(System.getProperty("line.separator"));
                     } catch (NullPointerException ex) {
-                        sb.append("invalid move at level" + ml.level);
+                        sb.append("invalid move at level").append(ml.level);
                     }
-                    first = false;
                 }
                 movesets.add(sb.toString());
             }
@@ -371,7 +364,7 @@ public class Randomizer {
         }
 
         // Static Pokemon
-        checkValue = maybeChangeAndLogStaticPokemon(log, romHandler, raceMode, checkValue);
+        checkValue = maybeChangeAndLogStaticPokemon(log, romHandler, checkValue);
 
         // Wild Pokemon
         if (settings.isUseMinimumCatchRate()) {
@@ -653,7 +646,6 @@ public class Randomizer {
                                 if (itemCount > 0) {
                                     log.print(", ");
                                 }
-                                itemCount++;
                                 log.print(itemNames[pkmn.darkGrassHeldItem] + " (dark grass only)");
                             }
                         }
@@ -692,7 +684,7 @@ public class Randomizer {
                 if (romHandler.isYellow()) {
                     starterCount = 2;
                 }
-                List<Pokemon> starters = new ArrayList<Pokemon>();
+                List<Pokemon> starters = new ArrayList<>();
                 for (int i = 0; i < starterCount; i++) {
                     Pokemon pkmn = romHandler.randomPokemon();
                     while (starters.contains(pkmn)) {
@@ -710,7 +702,7 @@ public class Randomizer {
                 if (romHandler.isYellow()) {
                     starterCount = 2;
                 }
-                List<Pokemon> starters = new ArrayList<Pokemon>();
+                List<Pokemon> starters = new ArrayList<>();
                 for (int i = 0; i < starterCount; i++) {
                     Pokemon pkmn = romHandler.random2EvosPokemon();
                     while (starters.contains(pkmn)) {
@@ -743,18 +735,13 @@ public class Randomizer {
                 }
                 log.print("(rate=" + es.rate + ")");
                 log.println();
-                boolean first = true;
                 for (Encounter e : es.encounters) {
-                    // if (!first) {
-                        // log.print(", ");
-                    // }
-
                 
                 // sb.append(String.format("%03d %s", pkmn.number, pkmn.fullName())).append(System.getProperty("line.separator")).append(String.format("HP %d ATK %-3d DEF %-3d SPATK %-3d SPDEF %-3d SPD %-3d", pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef)).append(System.getProperty("line.separator"));
                     StringBuilder sb = new StringBuilder();
-                    sb.append(e.pokemon.fullName() + " Lv");
+                    sb.append(e.pokemon.fullName()).append(" Lv");
                     if (e.maxLevel > 0 && e.maxLevel != e.level) {
-                        sb.append("s " + e.level + "-" + e.maxLevel);
+                        sb.append("s ").append(e.level).append("-").append(e.maxLevel);
                     } else {
                         sb.append(e.level);
                     }
@@ -762,7 +749,6 @@ public class Randomizer {
                     StringBuilder sb2 = new StringBuilder();
                     sb2.append(String.format("HP %-3d ATK %-3d DEF %-3d SPATK %-3d SPDEF %-3d SPEED %-3d", e.pokemon.hp, e.pokemon.attack, e.pokemon.defense, e.pokemon.spatk, e.pokemon.spdef, e.pokemon.speed));
                     log.print(sb2);
-                    first = false;
                     log.println();
                 }
                 log.println();
@@ -804,8 +790,7 @@ public class Randomizer {
         }
     }
 
-    private int maybeChangeAndLogStaticPokemon(final PrintStream log, final RomHandler romHandler, boolean raceMode,
-            int checkValue) {
+    private int maybeChangeAndLogStaticPokemon(final PrintStream log, final RomHandler romHandler, int checkValue) {
         if (romHandler.canChangeStaticPokemon()) {
             List<Pokemon> oldStatics = romHandler.getStaticPokemon();
             if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING) { // Legendary for L
@@ -823,7 +808,7 @@ public class Randomizer {
                 log.println("Static Pokemon: Unchanged." + NEWLINE);
             } else {
                 log.println("--Static Pokemon--");
-                Map<Pokemon, Integer> seenPokemon = new TreeMap<Pokemon, Integer>();
+                Map<Pokemon, Integer> seenPokemon = new TreeMap<>();
                 for (int i = 0; i < oldStatics.size(); i++) {
                     Pokemon oldP = oldStatics.get(i);
                     Pokemon newP = newStatics.get(i);

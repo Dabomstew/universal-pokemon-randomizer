@@ -9,7 +9,7 @@ package compressors;
  */
 public class Gen1Decmp {
 
-    public static int bitflip(int x, int n) {
+    private static int bitflip(int x, int n) {
         int r = 0;
         while (n > 0) {
             r = (r << 1) | (x & 1);
@@ -19,8 +19,8 @@ public class Gen1Decmp {
         return r;
     }
 
-    static int[] table1, table3;
-    static int[][] table2 = { { 0x0, 0x1, 0x3, 0x2, 0x7, 0x6, 0x4, 0x5, 0xf, 0xe, 0xc, 0xd, 0x8, 0x9, 0xb, 0xa },
+    private static int[] table1, table3;
+    private static int[][] table2 = { { 0x0, 0x1, 0x3, 0x2, 0x7, 0x6, 0x4, 0x5, 0xf, 0xe, 0xc, 0xd, 0x8, 0x9, 0xb, 0xa },
             { 0xf, 0xe, 0xc, 0xd, 0x8, 0x9, 0xb, 0xa, 0x0, 0x1, 0x3, 0x2, 0x7, 0x6, 0x4, 0x5 },
             { 0x0, 0x8, 0xc, 0x4, 0xe, 0x6, 0x2, 0xa, 0xf, 0x7, 0x3, 0xb, 0x1, 0x9, 0xd, 0x5 },
             { 0xf, 0x7, 0x3, 0xb, 0x1, 0x9, 0xd, 0x5, 0x0, 0x8, 0xc, 0x4, 0xe, 0x6, 0x2, 0xa }, };
@@ -35,7 +35,7 @@ public class Gen1Decmp {
         }
     }
 
-    static int tilesize = 8;
+    private static int tilesize = 8;
 
     private BitStream bs;
     private boolean mirror, planar;
@@ -47,7 +47,7 @@ public class Gen1Decmp {
         this(input, baseOffset, false, true);
     }
 
-    public Gen1Decmp(byte[] input, int baseOffset, boolean mirror, boolean planar) {
+    private Gen1Decmp(byte[] input, int baseOffset, boolean mirror, boolean planar) {
         this.bs = new BitStream(input, baseOffset);
         this.mirror = mirror;
         this.planar = planar;
@@ -228,7 +228,7 @@ public class Gen1Decmp {
         int limiter = bits.length - 3;
         byte[] ret = new byte[bits.length / 4];
         for (int i = 0; i < limiter; i += 4) {
-            int n = ((bits[i + 0] << 6) | (bits[i + 1] << 4) | (bits[i + 2] << 2) | (bits[i + 3] << 0));
+            int n = ((bits[i] << 6) | (bits[i + 1] << 4) | (bits[i + 2] << 2) | (bits[i + 3]));
             ret[i / 4] = (byte) n;
         }
         return ret;

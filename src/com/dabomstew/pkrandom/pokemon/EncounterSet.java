@@ -31,8 +31,8 @@ import java.util.Set;
 public class EncounterSet {
 
     public int rate;
-    public List<Encounter> encounters = new ArrayList<Encounter>();
-    public Set<Pokemon> bannedPokemon = new HashSet<Pokemon>();
+    public List<Encounter> encounters = new ArrayList<>();
+    public Set<Pokemon> bannedPokemon = new HashSet<>();
     public String displayName;
     public int offset;
 

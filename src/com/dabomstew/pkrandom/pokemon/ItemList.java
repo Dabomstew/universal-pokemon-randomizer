@@ -16,17 +16,11 @@ public class ItemList {
     }
 
     public boolean isTM(int index) {
-        if (index < 0 || index >= tms.length) {
-            return false;
-        }
-        return tms[index];
+        return index >= 0 && index < tms.length && tms[index];
     }
 
     public boolean isAllowed(int index) {
-        if (index < 0 || index >= tms.length) {
-            return false;
-        }
-        return items[index];
+        return index >= 0 && index < tms.length && items[index];
     }
 
     public void banSingles(int... indexes) {

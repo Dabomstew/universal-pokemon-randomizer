@@ -27,9 +27,6 @@ import com.dabomstew.pkrandom.FileFunctions;
 
 public class BLZCoder {
 
-    /**
-     * @param args
-     */
     public static void main(String[] args) {
         new BLZCoder(args);
     }
@@ -118,7 +115,7 @@ public class BLZCoder {
         System.out.print("\n");
     }
 
-    public void EXIT(String text) {
+    private void EXIT(String text) {
         System.out.print(text);
         System.exit(0);
     }
@@ -160,7 +157,6 @@ public class BLZCoder {
             for (int i = 0; i < result.length; i++) {
                 retbuf[i] = (byte) result.buffer[i];
             }
-            result = null;
             return retbuf;
         } else {
             return null;
@@ -178,7 +174,7 @@ public class BLZCoder {
 
         inc_len = readUnsigned(pak_buffer, pak_len - 4);
         if (inc_len < 1) {
-            System.out.printf(", WARNING: not coded file!");
+            System.out.print(", WARNING: not coded file!");
             enc_len = 0;
             dec_len = pak_len;
             pak_len = 0;
@@ -318,7 +314,6 @@ public class BLZCoder {
             for (int i = 0; i < result.length; i++) {
                 retbuf[i] = (byte) result.buffer[i];
             }
-            result = null;
             return retbuf;
         } else {
             return null;
@@ -464,7 +459,6 @@ public class BLZCoder {
                 tmp[raw_tmp + len] = pak_buffer[len + pak_len - pak_tmp];
             }
 
-            pak = 0;
             pak_buffer = tmp;
 
             pak = raw_tmp + pak_tmp;

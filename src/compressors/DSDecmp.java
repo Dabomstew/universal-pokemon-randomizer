@@ -61,7 +61,6 @@ public class DSDecmp {
             for (int i = 0; i < 8; i++) {
                 flag = (flags & (0x80 >> i)) > 0;
                 if (flag) {
-                    disp = 0;
                     b = data[offset++] & 0xFF;
                     n = b >> 4;
                     disp = (b & 0x0F) << 8;

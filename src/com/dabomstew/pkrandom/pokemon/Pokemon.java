@@ -55,10 +55,10 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public ExpCurve growthCurve;
 
-    public List<Evolution> evolutionsFrom = new ArrayList<Evolution>();
-    public List<Evolution> evolutionsTo = new ArrayList<Evolution>();
+    public List<Evolution> evolutionsFrom = new ArrayList<>();
+    public List<Evolution> evolutionsTo = new ArrayList<>();
 
-    public List<Integer> shuffledStatsOrder = null;
+    private List<Integer> shuffledStatsOrder;
 
     // A flag to use for things like recursive stats copying.
     // Must not rely on the state of this flag being preserved between calls.
@@ -159,7 +159,7 @@ public class Pokemon implements Comparable<Pokemon> {
         special = (int) Math.ceil((spatk + spdef) / 2.0f);
     }
 
-    public int bst() {
+    private int bst() {
         return hp + attack + defense + spatk + spdef + speed;
     }
 
@@ -206,9 +206,7 @@ public class Pokemon implements Comparable<Pokemon> {
         if (getClass() != obj.getClass())
             return false;
         Pokemon other = (Pokemon) obj;
-        if (number != other.number)
-            return false;
-        return true;
+        return number == other.number;
     }
 
     @Override

@@ -37,11 +37,11 @@ public enum Type {
 
     public boolean isHackOnly;
 
-    private Type() {
+    Type() {
         this.isHackOnly = false;
     }
 
-    private Type(boolean isHackOnly) {
+    Type(boolean isHackOnly) {
         this.isHackOnly = isHackOnly;
     }
 

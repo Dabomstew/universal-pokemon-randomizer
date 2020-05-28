@@ -425,6 +425,7 @@ public class Settings {
                 writeFullInt(out, 0);
             }
         } catch (IOException e) {
+            e.printStackTrace(); // better than nothing
         }
         
 
@@ -433,7 +434,7 @@ public class Settings {
         try {
             writeFullInt(out, currentMiscTweaks);
         } catch (IOException e) {
-
+            e.printStackTrace(); // better than nothing
         }
 
         // @ 35 trainer pokemon level modifier
@@ -453,8 +454,6 @@ public class Settings {
             byte[] romName = this.romName.getBytes("US-ASCII");
             out.write(romName.length);
             out.write(romName);
-        } catch (UnsupportedEncodingException e) {
-            out.write(0);
         } catch (IOException e) {
             out.write(0);
         }
@@ -467,6 +466,7 @@ public class Settings {
             writeFullInt(out, (int) checksum.getValue());
             writeFullInt(out, FileFunctions.getFileChecksum(SysConstants.customNamesFile));
         } catch (IOException e) {
+            e.printStackTrace(); // better than nothing
         }
 
         return Base64.getEncoder().encodeToString(out.toByteArray());
@@ -815,479 +815,432 @@ public class Settings {
         return romName;
     }
 
-    public Settings setRomName(String romName) {
+    public void setRomName(String romName) {
         this.romName = romName;
-        return this;
     }
 
     public boolean isUpdatedFromOldVersion() {
         return updatedFromOldVersion;
     }
 
-    public Settings setUpdatedFromOldVersion(boolean updatedFromOldVersion) {
+    private void setUpdatedFromOldVersion(boolean updatedFromOldVersion) {
         this.updatedFromOldVersion = updatedFromOldVersion;
-        return this;
     }
 
     public GenRestrictions getCurrentRestrictions() {
         return currentRestrictions;
     }
 
-    public Settings setCurrentRestrictions(GenRestrictions currentRestrictions) {
+    public void setCurrentRestrictions(GenRestrictions currentRestrictions) {
         this.currentRestrictions = currentRestrictions;
-        return this;
     }
 
     public int getCurrentMiscTweaks() {
         return currentMiscTweaks;
     }
 
-    public Settings setCurrentMiscTweaks(int currentMiscTweaks) {
+    public void setCurrentMiscTweaks(int currentMiscTweaks) {
         this.currentMiscTweaks = currentMiscTweaks;
-        return this;
     }
 
     public boolean isUpdateMoves() {
         return updateMoves;
     }
 
-    public Settings setUpdateMoves(boolean updateMoves) {
+    public void setUpdateMoves(boolean updateMoves) {
         this.updateMoves = updateMoves;
-        return this;
     }
 
     public boolean isUpdateMovesLegacy() {
         return updateMovesLegacy;
     }
 
-    public Settings setUpdateMovesLegacy(boolean updateMovesLegacy) {
+    public void setUpdateMovesLegacy(boolean updateMovesLegacy) {
         this.updateMovesLegacy = updateMovesLegacy;
-        return this;
     }
 
     public boolean isChangeImpossibleEvolutions() {
         return changeImpossibleEvolutions;
     }
 
-    public Settings setChangeImpossibleEvolutions(boolean changeImpossibleEvolutions) {
+    public void setChangeImpossibleEvolutions(boolean changeImpossibleEvolutions) {
         this.changeImpossibleEvolutions = changeImpossibleEvolutions;
-        return this;
     }
 
     public boolean isMakeEvolutionsEasier() {
         return makeEvolutionsEasier;
     }
 
-    public Settings setMakeEvolutionsEasier(boolean makeEvolutionsEasier) {
+    public void setMakeEvolutionsEasier(boolean makeEvolutionsEasier) {
         this.makeEvolutionsEasier = makeEvolutionsEasier;
-        return this;
     }
 
     public boolean isRaceMode() {
         return raceMode;
     }
 
-    public Settings setRaceMode(boolean raceMode) {
+    public void setRaceMode(boolean raceMode) {
         this.raceMode = raceMode;
-        return this;
     }
 
     public boolean doBlockBrokenMoves() {
         return blockBrokenMoves;
     }
 
-    public Settings setBlockBrokenMoves(boolean blockBrokenMoves) {
+    public void setBlockBrokenMoves(boolean blockBrokenMoves) {
         this.blockBrokenMoves = blockBrokenMoves;
-        return this;
     }
 
     public boolean isLimitPokemon() {
         return limitPokemon;
     }
 
-    public Settings setLimitPokemon(boolean limitPokemon) {
+    public void setLimitPokemon(boolean limitPokemon) {
         this.limitPokemon = limitPokemon;
-        return this;
     }
 
     public BaseStatisticsMod getBaseStatisticsMod() {
         return baseStatisticsMod;
     }
 
-    public Settings setBaseStatisticsMod(BaseStatisticsMod baseStatisticsMod) {
-        this.baseStatisticsMod = baseStatisticsMod;
-        return this;
+    public void setBaseStatisticsMod(boolean... bools) {
+        setBaseStatisticsMod(getEnum(BaseStatisticsMod.class, bools));
     }
 
-    public Settings setBaseStatisticsMod(boolean... bools) {
-        return setBaseStatisticsMod(getEnum(BaseStatisticsMod.class, bools));
+    private void setBaseStatisticsMod(BaseStatisticsMod baseStatisticsMod) {
+        this.baseStatisticsMod = baseStatisticsMod;
     }
 
     public boolean isBaseStatsFollowEvolutions() {
         return baseStatsFollowEvolutions;
     }
 
-    public Settings setBaseStatsFollowEvolutions(boolean baseStatsFollowEvolutions) {
+    public void setBaseStatsFollowEvolutions(boolean baseStatsFollowEvolutions) {
         this.baseStatsFollowEvolutions = baseStatsFollowEvolutions;
-        return this;
     }
 
     public boolean isStandardizeEXPCurves() {
         return standardizeEXPCurves;
     }
 
-    public Settings setStandardizeEXPCurves(boolean standardizeEXPCurves) {
+    public void setStandardizeEXPCurves(boolean standardizeEXPCurves) {
         this.standardizeEXPCurves = standardizeEXPCurves;
-        return this;
     }
 
     public ExpCurveMod getExpCurveMod() {
         return expCurveMod;
     }
 
-    public Settings setExpCurveMod(ExpCurveMod expCurveMod) {
-        this.expCurveMod = expCurveMod;
-        return this;
+    public void setExpCurveMod(boolean... bools) {
+        setExpCurveMod(getEnum(ExpCurveMod.class, bools));
     }
 
-    public Settings setExpCurveMod(boolean... bools) {
-        return setExpCurveMod(getEnum(ExpCurveMod.class, bools));
+    private void setExpCurveMod(ExpCurveMod expCurveMod) {
+        this.expCurveMod = expCurveMod;
     }
 
     public boolean isUpdateBaseStats() {
         return updateBaseStats;
     }
 
-    public Settings setUpdateBaseStats(boolean updateBaseStats) {
+    public void setUpdateBaseStats(boolean updateBaseStats) {
         this.updateBaseStats = updateBaseStats;
-        return this;
     }
 
     public AbilitiesMod getAbilitiesMod() {
         return abilitiesMod;
     }
 
-    public Settings setAbilitiesMod(AbilitiesMod abilitiesMod) {
-        this.abilitiesMod = abilitiesMod;
-        return this;
+    public void setAbilitiesMod(boolean... bools) {
+        setAbilitiesMod(getEnum(AbilitiesMod.class, bools));
     }
 
-    public Settings setAbilitiesMod(boolean... bools) {
-        return setAbilitiesMod(getEnum(AbilitiesMod.class, bools));
+    private void setAbilitiesMod(AbilitiesMod abilitiesMod) {
+        this.abilitiesMod = abilitiesMod;
     }
 
     public boolean isAllowWonderGuard() {
         return allowWonderGuard;
     }
 
-    public Settings setAllowWonderGuard(boolean allowWonderGuard) {
+    public void setAllowWonderGuard(boolean allowWonderGuard) {
         this.allowWonderGuard = allowWonderGuard;
-        return this;
     }
 
     public boolean isAbilitiesFollowEvolutions() {
         return abilitiesFollowEvolutions;
     }
 
-    public Settings setAbilitiesFollowEvolutions(boolean abilitiesFollowEvolutions) {
+    public void setAbilitiesFollowEvolutions(boolean abilitiesFollowEvolutions) {
         this.abilitiesFollowEvolutions = abilitiesFollowEvolutions;
-        return this;
     }
 
     public boolean isBanTrappingAbilities() {
         return banTrappingAbilities;
     }
 
-    public Settings setBanTrappingAbilities(boolean banTrappingAbilities) {
+    public void setBanTrappingAbilities(boolean banTrappingAbilities) {
         this.banTrappingAbilities = banTrappingAbilities;
-        return this;
     }
 
     public boolean isBanNegativeAbilities() {
         return banNegativeAbilities;
     }
 
-    public Settings setBanNegativeAbilities(boolean banNegativeAbilities) {
+    public void setBanNegativeAbilities(boolean banNegativeAbilities) {
         this.banNegativeAbilities = banNegativeAbilities;
-        return this;
     }
 
     public boolean isBanBadAbilities() {
         return banBadAbilities;
     }
 
-    public Settings setBanBadAbilities(boolean banBadAbilities) {
+    public void setBanBadAbilities(boolean banBadAbilities) {
         this.banBadAbilities = banBadAbilities;
-        return this;
     }
 
     public StartersMod getStartersMod() {
         return startersMod;
     }
 
-    public Settings setStartersMod(StartersMod startersMod) {
-        this.startersMod = startersMod;
-        return this;
+    public void setStartersMod(boolean... bools) {
+        setStartersMod(getEnum(StartersMod.class, bools));
     }
 
-    public Settings setStartersMod(boolean... bools) {
-        return setStartersMod(getEnum(StartersMod.class, bools));
+    private void setStartersMod(StartersMod startersMod) {
+        this.startersMod = startersMod;
     }
 
     public int[] getCustomStarters() {
         return customStarters;
     }
 
-    public Settings setCustomStarters(int[] customStarters) {
+    public void setCustomStarters(int[] customStarters) {
         this.customStarters = customStarters;
-        return this;
     }
 
     public boolean isRandomizeStartersHeldItems() {
         return randomizeStartersHeldItems;
     }
 
-    public Settings setRandomizeStartersHeldItems(boolean randomizeStartersHeldItems) {
+    public void setRandomizeStartersHeldItems(boolean randomizeStartersHeldItems) {
         this.randomizeStartersHeldItems = randomizeStartersHeldItems;
-        return this;
     }
 
     public boolean isBanBadRandomStarterHeldItems() {
         return banBadRandomStarterHeldItems;
     }
 
-    public Settings setBanBadRandomStarterHeldItems(boolean banBadRandomStarterHeldItems) {
+    public void setBanBadRandomStarterHeldItems(boolean banBadRandomStarterHeldItems) {
         this.banBadRandomStarterHeldItems = banBadRandomStarterHeldItems;
-        return this;
     }
 
     public boolean isLimitMusketeers() {
         return limitMusketeers;
     }
-    public Settings setLimitMusketeers(boolean limitMusketeers) {
+
+    public void setLimitMusketeers(boolean limitMusketeers) {
         this.limitMusketeers = limitMusketeers;
-        return this;
     }
 
     public boolean isLimit600() {
         return limit600;
     }
-    public Settings setLimit600(boolean limit600) {
+
+    public void setLimit600(boolean limit600) {
         this.limit600 = limit600;
-        return this;
     }
     
     public TypesMod getTypesMod() {
         return typesMod;
     }
 
-    public Settings setTypesMod(TypesMod typesMod) {
-        this.typesMod = typesMod;
-        return this;
+    public void setTypesMod(boolean... bools) {
+        setTypesMod(getEnum(TypesMod.class, bools));
     }
 
-    public Settings setTypesMod(boolean... bools) {
-        return setTypesMod(getEnum(TypesMod.class, bools));
+    private void setTypesMod(TypesMod typesMod) {
+        this.typesMod = typesMod;
     }
 
     public EvolutionsMod getEvolutionsMod() {
         return evolutionsMod;
     }
 
-    public Settings setEvolutionsMod(EvolutionsMod evolutionsMod) {
-        this.evolutionsMod = evolutionsMod;
-        return this;
+    public void setEvolutionsMod(boolean... bools) {
+        setEvolutionsMod(getEnum(EvolutionsMod.class, bools));
     }
 
-    public Settings setEvolutionsMod(boolean... bools) {
-        return setEvolutionsMod(getEnum(EvolutionsMod.class, bools));
+    private void setEvolutionsMod(EvolutionsMod evolutionsMod) {
+        this.evolutionsMod = evolutionsMod;
     }
 
     public boolean isEvosSimilarStrength() {
         return evosSimilarStrength;
     }
 
-    public Settings setEvosSimilarStrength(boolean evosSimilarStrength) {
+    public void setEvosSimilarStrength(boolean evosSimilarStrength) {
         this.evosSimilarStrength = evosSimilarStrength;
-        return this;
     }
 
     public boolean isEvosSameTyping() {
         return evosSameTyping;
     }
 
-    public Settings setEvosSameTyping(boolean evosSameTyping) {
+    public void setEvosSameTyping(boolean evosSameTyping) {
         this.evosSameTyping = evosSameTyping;
-        return this;
     }
 
     public boolean isEvosMaxThreeStages() {
         return evosMaxThreeStages;
     }
 
-    public Settings setEvosMaxThreeStages(boolean evosMaxThreeStages) {
+    public void setEvosMaxThreeStages(boolean evosMaxThreeStages) {
         this.evosMaxThreeStages = evosMaxThreeStages;
-        return this;
     }
 
     public boolean isEvosForceChange() {
         return evosForceChange;
     }
 
-    public Settings setEvosForceChange(boolean evosForceChange) {
+    public void setEvosForceChange(boolean evosForceChange) {
         this.evosForceChange = evosForceChange;
-        return this;
     }
 
     public boolean isRandomizeMovePowers() {
         return randomizeMovePowers;
     }
 
-    public Settings setRandomizeMovePowers(boolean randomizeMovePowers) {
+    public void setRandomizeMovePowers(boolean randomizeMovePowers) {
         this.randomizeMovePowers = randomizeMovePowers;
-        return this;
     }
 
     public boolean isRandomizeMoveAccuracies() {
         return randomizeMoveAccuracies;
     }
 
-    public Settings setRandomizeMoveAccuracies(boolean randomizeMoveAccuracies) {
+    public void setRandomizeMoveAccuracies(boolean randomizeMoveAccuracies) {
         this.randomizeMoveAccuracies = randomizeMoveAccuracies;
-        return this;
     }
 
     public boolean isRandomizeMovePPs() {
         return randomizeMovePPs;
     }
 
-    public Settings setRandomizeMovePPs(boolean randomizeMovePPs) {
+    public void setRandomizeMovePPs(boolean randomizeMovePPs) {
         this.randomizeMovePPs = randomizeMovePPs;
-        return this;
     }
 
     public boolean isRandomizeMoveTypes() {
         return randomizeMoveTypes;
     }
 
-    public Settings setRandomizeMoveTypes(boolean randomizeMoveTypes) {
+    public void setRandomizeMoveTypes(boolean randomizeMoveTypes) {
         this.randomizeMoveTypes = randomizeMoveTypes;
-        return this;
     }
 
     public boolean isRandomizeMoveCategory() {
         return randomizeMoveCategory;
     }
 
-    public Settings setRandomizeMoveCategory(boolean randomizeMoveCategory) {
+    public void setRandomizeMoveCategory(boolean randomizeMoveCategory) {
         this.randomizeMoveCategory = randomizeMoveCategory;
-        return this;
     }
 
     public MovesetsMod getMovesetsMod() {
         return movesetsMod;
     }
 
-    public Settings setMovesetsMod(MovesetsMod movesetsMod) {
-        this.movesetsMod = movesetsMod;
-        return this;
+    public void setMovesetsMod(boolean... bools) {
+        setMovesetsMod(getEnum(MovesetsMod.class, bools));
     }
 
-    public Settings setMovesetsMod(boolean... bools) {
-        return setMovesetsMod(getEnum(MovesetsMod.class, bools));
+    private void setMovesetsMod(MovesetsMod movesetsMod) {
+        this.movesetsMod = movesetsMod;
     }
 
     public boolean isStartWithGuaranteedMoves() {
         return startWithGuaranteedMoves;
     }
 
-    public Settings setStartWithGuaranteedMoves(boolean startWithGuaranteedMoves) {
+    public void setStartWithGuaranteedMoves(boolean startWithGuaranteedMoves) {
         this.startWithGuaranteedMoves = startWithGuaranteedMoves;
-        return this;
     }
 
     public int getGuaranteedMoveCount() {
         return guaranteedMoveCount;
     }
-    public Settings setGuaranteedMoveCount(int guaranteedMoveCount) {
+
+    public void setGuaranteedMoveCount(int guaranteedMoveCount) {
         this.guaranteedMoveCount = guaranteedMoveCount;
-        return this;
     }
 
     public boolean isReorderDamagingMoves() {
         return reorderDamagingMoves;
     }
 
-    public Settings setReorderDamagingMoves(boolean reorderDamagingMoves) {
+    public void setReorderDamagingMoves(boolean reorderDamagingMoves) {
         this.reorderDamagingMoves = reorderDamagingMoves;
-        return this;
     }
 
     public boolean isMovesetsForceGoodDamaging() {
         return movesetsForceGoodDamaging;
     }
 
-    public Settings setMovesetsForceGoodDamaging(boolean movesetsForceGoodDamaging) {
+    public void setMovesetsForceGoodDamaging(boolean movesetsForceGoodDamaging) {
         this.movesetsForceGoodDamaging = movesetsForceGoodDamaging;
-        return this;
     }
 
     public int getMovesetsGoodDamagingPercent() {
         return movesetsGoodDamagingPercent;
     }
 
-    public Settings setMovesetsGoodDamagingPercent(int movesetsGoodDamagingPercent) {
+    public void setMovesetsGoodDamagingPercent(int movesetsGoodDamagingPercent) {
         this.movesetsGoodDamagingPercent = movesetsGoodDamagingPercent;
-        return this;
     }
 
     public TrainersMod getTrainersMod() {
         return trainersMod;
     }
 
-    public Settings setTrainersMod(TrainersMod trainersMod) {
-        this.trainersMod = trainersMod;
-        return this;
+    public void setTrainersMod(boolean... bools) {
+        setTrainersMod(getEnum(TrainersMod.class, bools));
     }
 
-    public Settings setTrainersMod(boolean... bools) {
-        return setTrainersMod(getEnum(TrainersMod.class, bools));
+    private void setTrainersMod(TrainersMod trainersMod) {
+        this.trainersMod = trainersMod;
     }
 
     public boolean isRivalCarriesStarterThroughout() {
         return rivalCarriesStarterThroughout;
     }
 
-    public Settings setRivalCarriesStarterThroughout(boolean rivalCarriesStarterThroughout) {
+    public void setRivalCarriesStarterThroughout(boolean rivalCarriesStarterThroughout) {
         this.rivalCarriesStarterThroughout = rivalCarriesStarterThroughout;
-        return this;
     }
 
     public boolean isTrainersUsePokemonOfSimilarStrength() {
         return trainersUsePokemonOfSimilarStrength;
     }
 
-    public Settings setTrainersUsePokemonOfSimilarStrength(boolean trainersUsePokemonOfSimilarStrength) {
+    public void setTrainersUsePokemonOfSimilarStrength(boolean trainersUsePokemonOfSimilarStrength) {
         this.trainersUsePokemonOfSimilarStrength = trainersUsePokemonOfSimilarStrength;
-        return this;
     }
 
     public boolean isTrainersMatchTypingDistribution() {
         return trainersMatchTypingDistribution;
     }
 
-    public Settings setTrainersMatchTypingDistribution(boolean trainersMatchTypingDistribution) {
+    public void setTrainersMatchTypingDistribution(boolean trainersMatchTypingDistribution) {
         this.trainersMatchTypingDistribution = trainersMatchTypingDistribution;
-        return this;
     }
 
     public boolean isTrainersBlockLegendaries() {
         return trainersBlockLegendaries;
     }
 
-    public Settings setTrainersBlockLegendaries(boolean trainersBlockLegendaries) {
+    public void setTrainersBlockLegendaries(boolean trainersBlockLegendaries) {
         this.trainersBlockLegendaries = trainersBlockLegendaries;
-        return this;
     }
 
     public boolean isTrainersEnforceDistribution() {
@@ -1313,378 +1266,340 @@ public class Settings {
         return trainersBlockEarlyWonderGuard;
     }
 
-    public Settings setTrainersBlockEarlyWonderGuard(boolean trainersBlockEarlyWonderGuard) {
+    public void setTrainersBlockEarlyWonderGuard(boolean trainersBlockEarlyWonderGuard) {
         this.trainersBlockEarlyWonderGuard = trainersBlockEarlyWonderGuard;
-        return this;
     }
 
     public boolean isRandomizeTrainerNames() {
         return randomizeTrainerNames;
     }
 
-    public Settings setRandomizeTrainerNames(boolean randomizeTrainerNames) {
+    public void setRandomizeTrainerNames(boolean randomizeTrainerNames) {
         this.randomizeTrainerNames = randomizeTrainerNames;
-        return this;
     }
 
     public boolean isRandomizeTrainerClassNames() {
         return randomizeTrainerClassNames;
     }
 
-    public Settings setRandomizeTrainerClassNames(boolean randomizeTrainerClassNames) {
+    public void setRandomizeTrainerClassNames(boolean randomizeTrainerClassNames) {
         this.randomizeTrainerClassNames = randomizeTrainerClassNames;
-        return this;
     }
 
     public boolean isTrainersForceFullyEvolved() {
         return trainersForceFullyEvolved;
     }
 
-    public Settings setTrainersForceFullyEvolved(boolean trainersForceFullyEvolved) {
+    public void setTrainersForceFullyEvolved(boolean trainersForceFullyEvolved) {
         this.trainersForceFullyEvolved = trainersForceFullyEvolved;
-        return this;
     }
 
     public int getTrainersForceFullyEvolvedLevel() {
         return trainersForceFullyEvolvedLevel;
     }
 
-    public Settings setTrainersForceFullyEvolvedLevel(int trainersForceFullyEvolvedLevel) {
+    public void setTrainersForceFullyEvolvedLevel(int trainersForceFullyEvolvedLevel) {
         this.trainersForceFullyEvolvedLevel = trainersForceFullyEvolvedLevel;
-        return this;
     }
 
     public boolean isTrainersLevelModified() {
         return trainersLevelModified;
     }
 
-    public Settings setTrainersLevelModified(boolean trainersLevelModified) {
+    public void setTrainersLevelModified(boolean trainersLevelModified) {
         this.trainersLevelModified = trainersLevelModified;
-        return this;
     }
 
     public int getTrainersLevelModifier() {
         return trainersLevelModifier;
     }
 
-    public Settings setTrainersLevelModifier(int trainersLevelModifier) {
+    public void setTrainersLevelModifier(int trainersLevelModifier) {
         this.trainersLevelModifier = trainersLevelModifier;
-        return this;
     }
 
     public WildPokemonMod getWildPokemonMod() {
         return wildPokemonMod;
     }
 
-    public Settings setWildPokemonMod(WildPokemonMod wildPokemonMod) {
-        this.wildPokemonMod = wildPokemonMod;
-        return this;
+    public void setWildPokemonMod(boolean... bools) {
+        setWildPokemonMod(getEnum(WildPokemonMod.class, bools));
     }
 
-    public Settings setWildPokemonMod(boolean... bools) {
-        return setWildPokemonMod(getEnum(WildPokemonMod.class, bools));
+    private void setWildPokemonMod(WildPokemonMod wildPokemonMod) {
+        this.wildPokemonMod = wildPokemonMod;
     }
 
     public WildPokemonRestrictionMod getWildPokemonRestrictionMod() {
         return wildPokemonRestrictionMod;
     }
 
-    public Settings setWildPokemonRestrictionMod(WildPokemonRestrictionMod wildPokemonRestrictionMod) {
-        this.wildPokemonRestrictionMod = wildPokemonRestrictionMod;
-        return this;
+    public void setWildPokemonRestrictionMod(boolean... bools) {
+        setWildPokemonRestrictionMod(getEnum(WildPokemonRestrictionMod.class, bools));
     }
 
-    public Settings setWildPokemonRestrictionMod(boolean... bools) {
-        return setWildPokemonRestrictionMod(getEnum(WildPokemonRestrictionMod.class, bools));
+    private void setWildPokemonRestrictionMod(WildPokemonRestrictionMod wildPokemonRestrictionMod) {
+        this.wildPokemonRestrictionMod = wildPokemonRestrictionMod;
     }
 
     public boolean isUseTimeBasedEncounters() {
         return useTimeBasedEncounters;
     }
 
-    public Settings setUseTimeBasedEncounters(boolean useTimeBasedEncounters) {
+    public void setUseTimeBasedEncounters(boolean useTimeBasedEncounters) {
         this.useTimeBasedEncounters = useTimeBasedEncounters;
-        return this;
     }
 
     public boolean isBlockWildLegendaries() {
         return blockWildLegendaries;
     }
 
-    public Settings setBlockWildLegendaries(boolean blockWildLegendaries) {
+    public void setBlockWildLegendaries(boolean blockWildLegendaries) {
         this.blockWildLegendaries = blockWildLegendaries;
-        return this;
     }
 
     public boolean isUseMinimumCatchRate() {
         return useMinimumCatchRate;
     }
 
-    public Settings setUseMinimumCatchRate(boolean useMinimumCatchRate) {
+    public void setUseMinimumCatchRate(boolean useMinimumCatchRate) {
         this.useMinimumCatchRate = useMinimumCatchRate;
-        return this;
     }
 
     public int getMinimumCatchRateLevel() {
         return minimumCatchRateLevel;
     }
 
-    public Settings setMinimumCatchRateLevel(int minimumCatchRateLevel) {
+    public void setMinimumCatchRateLevel(int minimumCatchRateLevel) {
         this.minimumCatchRateLevel = minimumCatchRateLevel;
-        return this;
     }
 
     public boolean isRandomizeWildPokemonHeldItems() {
         return randomizeWildPokemonHeldItems;
     }
 
-    public Settings setRandomizeWildPokemonHeldItems(boolean randomizeWildPokemonHeldItems) {
+    public void setRandomizeWildPokemonHeldItems(boolean randomizeWildPokemonHeldItems) {
         this.randomizeWildPokemonHeldItems = randomizeWildPokemonHeldItems;
-        return this;
     }
 
     public boolean isBanBadRandomWildPokemonHeldItems() {
         return banBadRandomWildPokemonHeldItems;
     }
 
-    public Settings setBanBadRandomWildPokemonHeldItems(boolean banBadRandomWildPokemonHeldItems) {
+    public void setBanBadRandomWildPokemonHeldItems(boolean banBadRandomWildPokemonHeldItems) {
         this.banBadRandomWildPokemonHeldItems = banBadRandomWildPokemonHeldItems;
-        return this;
     }
 
     public boolean isBalanceShakingGrass() {
         return balanceShakingGrass;
     }
 
-    public Settings setBalanceShakingGrass(boolean balanceShakingGrass) {
+    public void setBalanceShakingGrass(boolean balanceShakingGrass) {
         this.balanceShakingGrass = balanceShakingGrass;
-        return this;
     }
 
     public boolean isWildLevelsModified() {
         return wildLevelsModified;
     }
 
-    public Settings setWildLevelsModified(boolean wildLevelsModified) {
+    public void setWildLevelsModified(boolean wildLevelsModified) {
         this.wildLevelsModified = wildLevelsModified;
-        return this;
     }
 
     public int getWildLevelModifier() {
         return wildLevelModifier;
     }
 
-    public Settings setWildLevelModifier(int wildLevelModifier) {
+    public void setWildLevelModifier(int wildLevelModifier) {
         this.wildLevelModifier = wildLevelModifier;
-        return this;
     }
 
     public StaticPokemonMod getStaticPokemonMod() {
         return staticPokemonMod;
     }
 
-    public Settings setStaticPokemonMod(StaticPokemonMod staticPokemonMod) {
-        this.staticPokemonMod = staticPokemonMod;
-        return this;
+    public void setStaticPokemonMod(boolean... bools) {
+        setStaticPokemonMod(getEnum(StaticPokemonMod.class, bools));
     }
 
-    public Settings setStaticPokemonMod(boolean... bools) {
-        return setStaticPokemonMod(getEnum(StaticPokemonMod.class, bools));
+    private void setStaticPokemonMod(StaticPokemonMod staticPokemonMod) {
+        this.staticPokemonMod = staticPokemonMod;
     }
 
     public TMsMod getTmsMod() {
         return tmsMod;
     }
 
-    public Settings setTmsMod(TMsMod tmsMod) {
-        this.tmsMod = tmsMod;
-        return this;
+    public void setTmsMod(boolean... bools) {
+        setTmsMod(getEnum(TMsMod.class, bools));
     }
 
-    public Settings setTmsMod(boolean... bools) {
-        return setTmsMod(getEnum(TMsMod.class, bools));
+    private void setTmsMod(TMsMod tmsMod) {
+        this.tmsMod = tmsMod;
     }
 
     public boolean isTmLevelUpMoveSanity() {
         return tmLevelUpMoveSanity;
     }
 
-    public Settings setTmLevelUpMoveSanity(boolean tmLevelUpMoveSanity) {
+    public void setTmLevelUpMoveSanity(boolean tmLevelUpMoveSanity) {
         this.tmLevelUpMoveSanity = tmLevelUpMoveSanity;
-        return this;
     }
 
     public boolean isKeepFieldMoveTMs() {
         return keepFieldMoveTMs;
     }
 
-    public Settings setKeepFieldMoveTMs(boolean keepFieldMoveTMs) {
+    public void setKeepFieldMoveTMs(boolean keepFieldMoveTMs) {
         this.keepFieldMoveTMs = keepFieldMoveTMs;
-        return this;
     }
 
     public boolean isFullHMCompat() {
         return fullHMCompat;
     }
 
-    public Settings setFullHMCompat(boolean fullHMCompat) {
+    public void setFullHMCompat(boolean fullHMCompat) {
         this.fullHMCompat = fullHMCompat;
-        return this;
     }
 
     public boolean isTmsForceGoodDamaging() {
         return tmsForceGoodDamaging;
     }
 
-    public Settings setTmsForceGoodDamaging(boolean tmsForceGoodDamaging) {
+    public void setTmsForceGoodDamaging(boolean tmsForceGoodDamaging) {
         this.tmsForceGoodDamaging = tmsForceGoodDamaging;
-        return this;
     }
 
     public int getTmsGoodDamagingPercent() {
         return tmsGoodDamagingPercent;
     }
 
-    public Settings setTmsGoodDamagingPercent(int tmsGoodDamagingPercent) {
+    public void setTmsGoodDamagingPercent(int tmsGoodDamagingPercent) {
         this.tmsGoodDamagingPercent = tmsGoodDamagingPercent;
-        return this;
     }
 
     public TMsHMsCompatibilityMod getTmsHmsCompatibilityMod() {
         return tmsHmsCompatibilityMod;
     }
 
-    public Settings setTmsHmsCompatibilityMod(TMsHMsCompatibilityMod tmsHmsCompatibilityMod) {
-        this.tmsHmsCompatibilityMod = tmsHmsCompatibilityMod;
-        return this;
+    public void setTmsHmsCompatibilityMod(boolean... bools) {
+        setTmsHmsCompatibilityMod(getEnum(TMsHMsCompatibilityMod.class, bools));
     }
 
-    public Settings setTmsHmsCompatibilityMod(boolean... bools) {
-        return setTmsHmsCompatibilityMod(getEnum(TMsHMsCompatibilityMod.class, bools));
+    private void setTmsHmsCompatibilityMod(TMsHMsCompatibilityMod tmsHmsCompatibilityMod) {
+        this.tmsHmsCompatibilityMod = tmsHmsCompatibilityMod;
     }
 
     public MoveTutorMovesMod getMoveTutorMovesMod() {
         return moveTutorMovesMod;
     }
 
-    public Settings setMoveTutorMovesMod(MoveTutorMovesMod moveTutorMovesMod) {
-        this.moveTutorMovesMod = moveTutorMovesMod;
-        return this;
+    public void setMoveTutorMovesMod(boolean... bools) {
+        setMoveTutorMovesMod(getEnum(MoveTutorMovesMod.class, bools));
     }
 
-    public Settings setMoveTutorMovesMod(boolean... bools) {
-        return setMoveTutorMovesMod(getEnum(MoveTutorMovesMod.class, bools));
+    private void setMoveTutorMovesMod(MoveTutorMovesMod moveTutorMovesMod) {
+        this.moveTutorMovesMod = moveTutorMovesMod;
     }
 
     public boolean isTutorLevelUpMoveSanity() {
         return tutorLevelUpMoveSanity;
     }
 
-    public Settings setTutorLevelUpMoveSanity(boolean tutorLevelUpMoveSanity) {
+    public void setTutorLevelUpMoveSanity(boolean tutorLevelUpMoveSanity) {
         this.tutorLevelUpMoveSanity = tutorLevelUpMoveSanity;
-        return this;
     }
 
     public boolean isKeepFieldMoveTutors() {
         return keepFieldMoveTutors;
     }
 
-    public Settings setKeepFieldMoveTutors(boolean keepFieldMoveTutors) {
+    public void setKeepFieldMoveTutors(boolean keepFieldMoveTutors) {
         this.keepFieldMoveTutors = keepFieldMoveTutors;
-        return this;
     }
 
     public boolean isTutorsForceGoodDamaging() {
         return tutorsForceGoodDamaging;
     }
 
-    public Settings setTutorsForceGoodDamaging(boolean tutorsForceGoodDamaging) {
+    public void setTutorsForceGoodDamaging(boolean tutorsForceGoodDamaging) {
         this.tutorsForceGoodDamaging = tutorsForceGoodDamaging;
-        return this;
     }
 
     public int getTutorsGoodDamagingPercent() {
         return tutorsGoodDamagingPercent;
     }
 
-    public Settings setTutorsGoodDamagingPercent(int tutorsGoodDamagingPercent) {
+    public void setTutorsGoodDamagingPercent(int tutorsGoodDamagingPercent) {
         this.tutorsGoodDamagingPercent = tutorsGoodDamagingPercent;
-        return this;
     }
 
     public MoveTutorsCompatibilityMod getMoveTutorsCompatibilityMod() {
         return moveTutorsCompatibilityMod;
     }
 
-    public Settings setMoveTutorsCompatibilityMod(MoveTutorsCompatibilityMod moveTutorsCompatibilityMod) {
-        this.moveTutorsCompatibilityMod = moveTutorsCompatibilityMod;
-        return this;
+    public void setMoveTutorsCompatibilityMod(boolean... bools) {
+        setMoveTutorsCompatibilityMod(getEnum(MoveTutorsCompatibilityMod.class, bools));
     }
 
-    public Settings setMoveTutorsCompatibilityMod(boolean... bools) {
-        return setMoveTutorsCompatibilityMod(getEnum(MoveTutorsCompatibilityMod.class, bools));
+    private void setMoveTutorsCompatibilityMod(MoveTutorsCompatibilityMod moveTutorsCompatibilityMod) {
+        this.moveTutorsCompatibilityMod = moveTutorsCompatibilityMod;
     }
 
     public InGameTradesMod getInGameTradesMod() {
         return inGameTradesMod;
     }
 
-    public Settings setInGameTradesMod(InGameTradesMod inGameTradesMod) {
-        this.inGameTradesMod = inGameTradesMod;
-        return this;
+    public void setInGameTradesMod(boolean... bools) {
+        setInGameTradesMod(getEnum(InGameTradesMod.class, bools));
     }
 
-    public Settings setInGameTradesMod(boolean... bools) {
-        return setInGameTradesMod(getEnum(InGameTradesMod.class, bools));
+    private void setInGameTradesMod(InGameTradesMod inGameTradesMod) {
+        this.inGameTradesMod = inGameTradesMod;
     }
 
     public boolean isRandomizeInGameTradesNicknames() {
         return randomizeInGameTradesNicknames;
     }
 
-    public Settings setRandomizeInGameTradesNicknames(boolean randomizeInGameTradesNicknames) {
+    public void setRandomizeInGameTradesNicknames(boolean randomizeInGameTradesNicknames) {
         this.randomizeInGameTradesNicknames = randomizeInGameTradesNicknames;
-        return this;
     }
 
     public boolean isRandomizeInGameTradesOTs() {
         return randomizeInGameTradesOTs;
     }
 
-    public Settings setRandomizeInGameTradesOTs(boolean randomizeInGameTradesOTs) {
+    public void setRandomizeInGameTradesOTs(boolean randomizeInGameTradesOTs) {
         this.randomizeInGameTradesOTs = randomizeInGameTradesOTs;
-        return this;
     }
 
     public boolean isRandomizeInGameTradesIVs() {
         return randomizeInGameTradesIVs;
     }
 
-    public Settings setRandomizeInGameTradesIVs(boolean randomizeInGameTradesIVs) {
+    public void setRandomizeInGameTradesIVs(boolean randomizeInGameTradesIVs) {
         this.randomizeInGameTradesIVs = randomizeInGameTradesIVs;
-        return this;
     }
 
     public boolean isRandomizeInGameTradesItems() {
         return randomizeInGameTradesItems;
     }
 
-    public Settings setRandomizeInGameTradesItems(boolean randomizeInGameTradesItems) {
+    public void setRandomizeInGameTradesItems(boolean randomizeInGameTradesItems) {
         this.randomizeInGameTradesItems = randomizeInGameTradesItems;
-        return this;
     }
 
     public FieldItemsMod getFieldItemsMod() {
         return fieldItemsMod;
     }
 
-    public Settings setFieldItemsMod(FieldItemsMod fieldItemsMod) {
-        this.fieldItemsMod = fieldItemsMod;
-        return this;
+    public void setFieldItemsMod(boolean... bools) {
+        setFieldItemsMod(getEnum(FieldItemsMod.class, bools));
     }
 
-    public Settings setFieldItemsMod(boolean... bools) {
-        return setFieldItemsMod(getEnum(FieldItemsMod.class, bools));
+    private void setFieldItemsMod(FieldItemsMod fieldItemsMod) {
+        this.fieldItemsMod = fieldItemsMod;
     }
 
     public boolean isBanBadRandomFieldItems() {
@@ -1692,66 +1607,60 @@ public class Settings {
     }
 
 
-    public Settings setBanBadRandomFieldItems(boolean banBadRandomFieldItems) {
+    public void setBanBadRandomFieldItems(boolean banBadRandomFieldItems) {
         this.banBadRandomFieldItems = banBadRandomFieldItems;
-        return this;
     }
 
     public ShopItemsMod getShopItemsMod() {
         return shopItemsMod;
     }
 
-    public Settings setShopItemsMod(ShopItemsMod shopItemsMod) {
-        this.shopItemsMod = shopItemsMod;
-        return this;
+    public void setShopItemsMod(boolean... bools) {
+        setShopItemsMod(getEnum(ShopItemsMod.class, bools));
     }
 
-    public Settings setShopItemsMod(boolean... bools) {
-        return setShopItemsMod(getEnum(ShopItemsMod.class, bools));
+    private void setShopItemsMod(ShopItemsMod shopItemsMod) {
+        this.shopItemsMod = shopItemsMod;
     }
 
     public boolean isBanBadRandomShopItems() {
         return banBadRandomShopItems;
     }
 
-    public Settings setBanBadRandomShopItems(boolean banBadRandomShopItems) {
+    public void setBanBadRandomShopItems(boolean banBadRandomShopItems) {
         this.banBadRandomShopItems = banBadRandomShopItems;
-        return this;
     }
 
     public boolean isBanRegularShopItems() {
         return banRegularShopItems;
     }
 
-    public Settings setBanRegularShopItems(boolean banRegularShopItems) {
+    public void setBanRegularShopItems(boolean banRegularShopItems) {
         this.banRegularShopItems = banRegularShopItems;
-        return this;
     }
 
     public boolean isBanOPShopItems() {
         return banOPShopItems;
     }
 
-    public Settings setBanOPShopItems(boolean banOPShopItems) {
+    public void setBanOPShopItems(boolean banOPShopItems) {
         this.banOPShopItems = banOPShopItems;
-        return this;
     }
 
     public boolean isBalanceShopPrices() {
         return balanceShopPrices;
     }
 
-    public Settings setBalanceShopPrices(boolean balanceShopPrices) {
+    public void setBalanceShopPrices(boolean balanceShopPrices) {
         this.balanceShopPrices = balanceShopPrices;
-        return this;
     }
    
     public boolean isGuaranteeEvolutionItems() {
         return guaranteeEvolutionItems;
     }
-    public Settings setGuaranteeEvolutionItems(boolean guaranteeEvolutionItems) {
+
+    public void setGuaranteeEvolutionItems(boolean guaranteeEvolutionItems) {
         this.guaranteeEvolutionItems = guaranteeEvolutionItems;
-        return this;
     }
 
     private static int makeByteSelected(boolean... bools) {
@@ -1787,7 +1696,7 @@ public class Settings {
         out.write((value >> 8) & 0xFF);
     }
 
-    public static <E extends Enum<E>> E restoreEnum(Class<E> clazz, byte b, int... indices) {
+    private static <E extends Enum<E>> E restoreEnum(Class<E> clazz, byte b, int... indices) {
         boolean[] bools = new boolean[indices.length];
         int i = 0;
         for (int idx : indices) {
@@ -1798,7 +1707,7 @@ public class Settings {
     }
 
     @SuppressWarnings("unchecked")
-    public static <E extends Enum<E>> E getEnum(Class<E> clazz, boolean... bools) {
+    private static <E extends Enum<E>> E getEnum(Class<E> clazz, boolean... bools) {
         int index = getSetEnum(clazz.getSimpleName(), bools);
         try {
             return ((E[]) clazz.getMethod("values").invoke(null))[index];
