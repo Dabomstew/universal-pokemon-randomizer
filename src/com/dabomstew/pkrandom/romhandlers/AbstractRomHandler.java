@@ -325,11 +325,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         return mainPokemonList.get(this.random.nextInt(mainPokemonList.size()));
     }
 
-    public Pokemon randomForme() {
-        checkPokemonRestrictions();
-        return altFormesList.get(this.random.nextInt(altFormesList.size()));
-    }
-
     @Override
     public Pokemon randomNonLegendaryPokemon() {
         checkPokemonRestrictions();

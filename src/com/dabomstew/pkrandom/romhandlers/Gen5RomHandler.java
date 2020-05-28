@@ -2626,7 +2626,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             NARCArchive pokespritesNARC = this.readNARC(romEntry.getString("PokemonGraphics"));
 
             // First prepare the palette, it's the easy bit
-            byte[] rawPalette = pokespritesNARC.files.get(pk.number * 20 + 18);
+            int palIndex = pk.number * 20 + 18;
+            if (random.nextInt(10) == 0) {
+                // shiny
+                palIndex++;
+            }
+            byte[] rawPalette = pokespritesNARC.files.get(palIndex);
             int[] palette = new int[16];
             for (int i = 1; i < 16; i++) {
                 palette[i] = GFXFunctions.conv16BitColorToARGB(readWord(rawPalette, 40 + i * 2));
