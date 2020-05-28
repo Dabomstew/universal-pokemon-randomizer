@@ -17,7 +17,7 @@ public class Gen5Constants {
 
     public static final int pokemonCount = 649, moveCount = 559, nonUnovaPokemonCount = 493;
     private static final int bw1FormeCount = 18, bw2FormeCount = 24;
-    private static final int bw1formeOffset = 0, bw2formeOffset = 15, bw2formeMovesetOffset = 34;
+    private static final int bw1formeOffset = 0, bw2formeOffset = 15, bw2formeMovesetOffset = 35;
 
     public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3,
             bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7,
