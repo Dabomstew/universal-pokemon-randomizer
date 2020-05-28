@@ -11,7 +11,7 @@ public class Gen4Constants {
     public static final int Type_HGSS = 2;
 
     public static final int pokemonCount = 493, moveCount = 467;
-    public static final int dpFormeCount = 5, platHgSsFormeCount = 12;
+    private static final int dpFormeCount = 5, platHgSsFormeCount = 12;
     public static final int formeOffset = 2;
 
     public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3,
@@ -122,11 +122,11 @@ public class Gen4Constants {
         }
     }
 
-    public static final List<Integer> dpRequiredFieldTMs = Arrays.asList(new Integer[] { 2, 3, 5, 9, 12, 19, 23, 28,
-            34, 39, 41, 43, 46, 47, 49, 50, 62, 69, 79, 80, 82, 84, 85, 87 });
+    public static final List<Integer> dpRequiredFieldTMs = Arrays.asList(2, 3, 5, 9, 12, 19, 23, 28,
+            34, 39, 41, 43, 46, 47, 49, 50, 62, 69, 79, 80, 82, 84, 85, 87);
 
-    public static final List<Integer> ptRequiredFieldTMs = Arrays.asList(new Integer[] { 2, 3, 5, 7, 9, 11, 12, 18, 19,
-            23, 28, 34, 37, 39, 41, 43, 46, 47, 49, 50, 62, 69, 79, 80, 82, 84, 85, 87 });
+    public static final List<Integer> ptRequiredFieldTMs = Arrays.asList(2, 3, 5, 7, 9, 11, 12, 18, 19,
+            23, 28, 34, 37, 39, 41, 43, 46, 47, 49, 50, 62, 69, 79, 80, 82, 84, 85, 87);
 
     // DPPt:
     // cut, fly, surf, strength, flash, dig, teleport, waterfall,
@@ -139,7 +139,7 @@ public class Gen4Constants {
     // DPPt: rock smash, cut
     public static final List<Integer> dpptEarlyRequiredHMMoves = Arrays.asList(249, 15);
     // HGSS: just cut
-    public static final List<Integer> hgssEarlyRequiredHMMoves = Arrays.asList(15);
+    public static final List<Integer> hgssEarlyRequiredHMMoves = Collections.singletonList(15);
 
     public static ItemList allowedItems, nonBadItems;
 

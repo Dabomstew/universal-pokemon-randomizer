@@ -120,8 +120,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             fis.skip(0x0C);
             byte[] sig = FileFunctions.readFullyIntoBuffer(fis, 4);
             fis.close();
-            String ndsCode = new String(sig, "US-ASCII");
-            return ndsCode;
+            return new String(sig, "US-ASCII");
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }

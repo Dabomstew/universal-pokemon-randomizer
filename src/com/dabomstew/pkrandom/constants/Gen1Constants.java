@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.constants;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.dabomstew.pkrandom.pokemon.ItemList;
@@ -38,12 +39,12 @@ public class Gen1Constants {
 
     public static final List<Integer> fieldMoves = Arrays.asList(15, 19, 57, 70, 148, 91, 100);
 
-    public static final List<Integer> earlyRequiredHMs = Arrays.asList(15);
+    public static final List<Integer> earlyRequiredHMs = Collections.singletonList(15);
 
     public static final int hmsStartIndex = 0xC4, tmsStartIndex = 0xC9;
 
-    public static final List<Integer> requiredFieldTMs = Arrays.asList(new Integer[] { 3, 4, 8, 10, 12, 14, 16, 19, 20,
-            22, 25, 26, 30, 40, 43, 44, 45, 47 });
+    public static final List<Integer> requiredFieldTMs = Arrays.asList(3, 4, 8, 10, 12, 14, 16, 19, 20,
+            22, 25, 26, 30, 40, 43, 44, 45, 47);
 
     public static final int towerMapsStartIndex = 0x90, towerMapsEndIndex = 0x94;
 
