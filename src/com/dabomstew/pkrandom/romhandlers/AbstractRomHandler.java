@@ -2076,17 +2076,21 @@ public abstract class AbstractRomHandler implements RomHandler {
                     pokemonLeft.remove(newPK);
                 } else if (oldBST >= 600 && limit600) {
                     // System.out.println(old.name + " " + old.number + ": Over 600 BST, pure random");
-                    newPK = pickReplacement(old, false, null, true, false, false, false); // Pure random setup
+                    newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
+                    pokemonLeft.remove(newPK);
+                    //newPK = pickReplacement(old, false, null, true, false, false, false); // Pure random setup
                 } else {
 
                     if ((old.number == 638 || old.number == 639 || old.number == 640) && limitMusketeers) {
                         // System.out.println(old.name + " " + old.number + ": triggered limit on replacement");
-                        newPK = pickReplacement(old, true, null, true, true, true, true); // This sets up picking a replacement with similar strength
+                        newPK = pickStaticPowerLvlReplacement(pokemonLeft, old, true, replacements, true);
+                        //newPK = pickReplacement(old, true, null, true, true, true, true); // This sets up picking a replacement with similar strength
                         // and limit on bw musketeers
                     } else {
-                        newPK = pickReplacement(old, true, null, true, true, false, true); // This sets up picking a replacement with similar strength
+                        newPK = pickStaticPowerLvlReplacement(pokemonLeft, old, true, replacements, false);
+                        //newPK = pickReplacement(old, true, null, true, true, false, true); // This sets up picking a replacement with similar strength
                     }
-                    pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
+                    pokemonLeft.remove(newPK);
                     // System.out.println(old.name + " " + old.number + " -> " + newPK.name + " " + newPK.number);                        
                 }
 
@@ -3899,6 +3903,30 @@ public abstract class AbstractRomHandler implements RomHandler {
         int currentBST = Math.min(current.bstForPowerLevels(), balancedBST);
         int minTarget = currentBST - currentBST / 10;
         int maxTarget = currentBST + currentBST / 10;
+        List<Pokemon> canPick = new ArrayList<>();
+        int expandRounds = 0;
+        while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 3)) {
+            for (Pokemon pk : pokemonPool) {
+                if (pk.bstForPowerLevels() >= minTarget && pk.bstForPowerLevels() <= maxTarget
+                        && (!banSamePokemon || pk != current) && (usedUp == null || !usedUp.contains(pk))
+                        && !canPick.contains(pk)) {
+                    canPick.add(pk);
+                }
+            }
+            minTarget -= currentBST / 20;
+            maxTarget += currentBST / 20;
+            expandRounds++;
+        }
+        return canPick.get(this.random.nextInt(canPick.size()));
+    }
+
+    private Pokemon pickStaticPowerLvlReplacement(List<Pokemon> pokemonPool, Pokemon current, boolean banSamePokemon,
+                                                List<Pokemon> usedUp, boolean limitBST) {
+        // start with within 10% and add 5% either direction till we find
+        // something
+        int currentBST = current.bstForPowerLevels();
+        int minTarget = limitBST ? currentBST - currentBST / 5 : currentBST - currentBST / 10;
+        int maxTarget = limitBST ? currentBST : currentBST + currentBST / 10;
         List<Pokemon> canPick = new ArrayList<>();
         int expandRounds = 0;
         while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 3)) {
