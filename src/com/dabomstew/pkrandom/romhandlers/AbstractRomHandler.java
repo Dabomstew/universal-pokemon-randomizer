@@ -1148,6 +1148,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                         newPK = mainPokemonList.get(newPK.baseForme - 1);
                     }
                     tp.pokemon = newPK;
+                    if (newPK.cosmeticForms > 0) {
+                        tp.forme = this.random.nextInt(newPK.cosmeticForms);
+                    }
                     tp.resetMoves = true;
                     if (levelModifier != 0) {
                         tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
@@ -1187,6 +1190,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                         newPK = mainPokemonList.get(newPK.baseForme - 1);
                     }
                     tp.pokemon = newPK;
+                    if (newPK.cosmeticForms > 0) {
+                        tp.forme = this.random.nextInt(newPK.cosmeticForms);
+                    }
                     tp.resetMoves = true;
                     if (levelModifier != 0) {
                         tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));

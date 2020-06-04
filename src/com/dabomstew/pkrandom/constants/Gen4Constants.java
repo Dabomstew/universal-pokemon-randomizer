@@ -77,6 +77,7 @@ public class Gen4Constants {
 
     public static final Map<Integer,String> formeSuffixes = setupFormeSuffixes();
     public static final Map<Integer,FormeInfo> formeMappings = setupFormeMappings();
+    public static final Map<Integer,Integer> cosmeticForms = setupCosmeticForms();
 
     private static final Map<Integer,Map<Integer,String>> formeSuffixesByBaseForme = setupFormeSuffixesByBaseForme();
     private static final Map<Integer,String> dummyFormeSuffixes = setupDummyFormeSuffixes();
@@ -282,6 +283,16 @@ public class Gen4Constants {
         formeMappings.put(507,new FormeInfo(479,5));
 
         return formeMappings;
+    }
+
+    private static Map<Integer,Integer> setupCosmeticForms() {
+        Map<Integer,Integer> cosmeticForms = new TreeMap<>();
+
+        cosmeticForms.put(201,28);
+        cosmeticForms.put(412,3);
+        cosmeticForms.put(422,2);
+        cosmeticForms.put(423,2);
+        return cosmeticForms;
     }
 
     private static Map<Integer,Map<Integer,String>> setupFormeSuffixesByBaseForme() {

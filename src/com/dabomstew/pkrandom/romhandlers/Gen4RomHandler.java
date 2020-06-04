@@ -417,6 +417,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             pkmn.rareHeldItem = item2;
         }
         pkmn.darkGrassHeldItem = -1;
+
+        int cosmeticForms = Gen4Constants.cosmeticForms.getOrDefault(pkmn.number,0);
+        if (cosmeticForms > 0) {
+            pkmn.cosmeticForms = cosmeticForms;
+        }
     }
 
     private String[] readPokemonNames() {
