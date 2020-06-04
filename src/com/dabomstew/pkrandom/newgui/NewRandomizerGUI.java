@@ -1455,7 +1455,7 @@ public class NewRandomizerGUI {
         tpForceFullyEvolvedAtSlider.setValue(tpForceFullyEvolvedAtSlider.getMinimum());
         tpPercentageLevelModifierSlider.setVisible(true);
         tpPercentageLevelModifierSlider.setEnabled(false);
-        tpPercentageLevelModifierSlider.setValue(tpPercentageLevelModifierSlider.getMinimum());
+        tpPercentageLevelModifierSlider.setValue(0);
         tpPercentageLevelModifierCheckBox.setVisible(true);
         tpPercentageLevelModifierCheckBox.setEnabled(false);
         tpPercentageLevelModifierCheckBox.setSelected(false);
@@ -1509,7 +1509,7 @@ public class NewRandomizerGUI {
         wpPercentageLevelModifierCheckBox.setSelected(false);
         wpPercentageLevelModifierSlider.setVisible(true);
         wpPercentageLevelModifierSlider.setEnabled(false);
-        wpPercentageLevelModifierSlider.setValue(wpPercentageLevelModifierSlider.getMinimum());
+        wpPercentageLevelModifierSlider.setValue(0);
         wpSetMinimumCatchRateSlider.setVisible(true);
         wpSetMinimumCatchRateSlider.setEnabled(false);
         wpSetMinimumCatchRateSlider.setValue(wpSetMinimumCatchRateSlider.getMinimum());
@@ -2178,7 +2178,7 @@ public class NewRandomizerGUI {
             wpPercentageLevelModifierSlider.setEnabled(true);
         } else {
             wpPercentageLevelModifierSlider.setEnabled(false);
-            wpPercentageLevelModifierSlider.setValue(wpPercentageLevelModifierSlider.getMinimum());
+            wpPercentageLevelModifierSlider.setValue(0);
         }
 
         if (pmsMetronomeOnlyModeRadioButton.isSelected()) {
