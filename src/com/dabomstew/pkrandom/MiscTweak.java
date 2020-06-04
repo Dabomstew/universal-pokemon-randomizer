@@ -30,7 +30,7 @@ import java.util.ResourceBundle;
 
 public class MiscTweak implements Comparable<MiscTweak> {
 
-    private static final ResourceBundle bundle = ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle");
+    private static final ResourceBundle bundle = ResourceBundle.getBundle("com/dabomstew/pkrandom/newgui/Bundle");
 
     public static List<MiscTweak> allTweaks = new ArrayList<>();
 
@@ -60,7 +60,7 @@ public class MiscTweak implements Comparable<MiscTweak> {
 
     private MiscTweak(int value, String tweakID, int priority) {
         this.value = value;
-        this.tweakName = bundle.getString("CodeTweaks." + tweakID + ".name");
+        this.tweakName = bundle.getString("CodeTweaks." + tweakID + ".name"); // this feels really dumb
         this.tooltipText = bundle.getString("CodeTweaks." + tweakID + ".toolTipText");
         this.priority = priority;
         allTweaks.add(this);
