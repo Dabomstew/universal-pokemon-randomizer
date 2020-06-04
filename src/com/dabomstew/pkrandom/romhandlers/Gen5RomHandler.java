@@ -448,6 +448,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 for (int i = 1; i < formeCount; i++) {
                     altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.number,i)); // Assumes that formes are in memory in the same order as their numbers
                 }
+            } else {
+                if (pkmn.number != 421 && pkmn.number != 493 && pkmn.number != 585 && pkmn.number != 586 && pkmn.number < 649) {
+                    // Reason for exclusions:
+                    // Cherrim/Arceus/Genesect: to avoid confusion
+                    // Deerling/Sawsbuck: should be handled automatically in gen 5 (needs confirmation)
+                    pkmn.cosmeticForms = formeCount;
+                }
             }
         }
     }

@@ -38,6 +38,7 @@ public class Pokemon implements Comparable<Pokemon> {
     public String formeSuffix = "";
     public int baseForme = 0;
     public int formeNumber = 0;
+    public int cosmeticForms = 0;
 
     public Type primaryType, secondaryType;
 

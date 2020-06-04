@@ -137,6 +137,7 @@ public class Settings {
     private boolean reorderDamagingMoves;
     private boolean movesetsForceGoodDamaging;
     private int movesetsGoodDamagingPercent = 0;
+    private boolean blockBrokenMovesetMoves;
 
     public enum TrainersMod {
         UNCHANGED, RANDOM, DISTRIBUTED, MAINPLAYTHROUGH, TYPE_THEMED
@@ -156,6 +157,7 @@ public class Settings {
     private int trainersForceFullyEvolvedLevel = 30;
     private boolean trainersLevelModified;
     private int trainersLevelModifier = 0; // -50 ~ 50
+    private boolean allowTrainerAlternateFormes;
 
     public enum WildPokemonMod {
         UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING
@@ -193,6 +195,7 @@ public class Settings {
     private boolean fullHMCompat;
     private boolean tmsForceGoodDamaging;
     private int tmsGoodDamagingPercent = 0;
+    private boolean blockBrokenTMMoves;
 
     public enum TMsHMsCompatibilityMod {
         UNCHANGED, RANDOM_PREFER_TYPE, COMPLETELY_RANDOM, FULL
@@ -209,6 +212,7 @@ public class Settings {
     private boolean keepFieldMoveTutors;
     private boolean tutorsForceGoodDamaging;
     private int tutorsGoodDamagingPercent = 0;
+    private boolean blockBrokenTutorMoves;
 
     public enum MoveTutorsCompatibilityMod {
         UNCHANGED, RANDOM_PREFER_TYPE, COMPLETELY_RANDOM, FULL
@@ -448,7 +452,11 @@ public class Settings {
         out.write(makeByteSelected(
                 expCurveMod == ExpCurveMod.LEGENDARIES,
                 expCurveMod == ExpCurveMod.STRONG_LEGENDARIES,
-                expCurveMod == ExpCurveMod.ALL));
+                expCurveMod == ExpCurveMod.ALL,
+                blockBrokenMovesetMoves,
+                blockBrokenTMMoves,
+                blockBrokenTutorMoves,
+                allowTrainerAlternateFormes));
         
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -674,6 +682,12 @@ public class Settings {
 
         settings.setExpCurveMod(restoreEnum(ExpCurveMod.class,data[39],0,1,2));
 
+        settings.setBlockBrokenMovesetMoves(restoreState(data[39],3));
+        settings.setBlockBrokenTMMoves(restoreState(data[39],4));
+        settings.setBlockBrokenTutorMoves(restoreState(data[39],5));
+
+        settings.setAllowTrainerAlternateFormes(restoreState(data[39],6));
+
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
         settings.setRomName(romName);
@@ -736,6 +750,16 @@ public class Settings {
             this.setLimitPokemon(false);
         } else if (this.currentRestrictions != null) {
             this.currentRestrictions.limitToGen(rh.generationOfPokemon());
+        }
+
+        // gen 5 exclusive stuff
+        if (rh.generationOfPokemon() != 5) {
+            if (trainersMod == TrainersMod.DISTRIBUTED || trainersMod == TrainersMod.MAINPLAYTHROUGH) {
+                trainersMod = TrainersMod.RANDOM;
+            }
+            if (fieldItemsMod == FieldItemsMod.RANDOM_EVEN) {
+                fieldItemsMod = FieldItemsMod.RANDOM;
+            }
         }
 
         // misc tweaks
@@ -888,7 +912,9 @@ public class Settings {
     }
 
     public void setBlockBrokenMoves(boolean blockBrokenMoves) {
-        this.blockBrokenMoves = blockBrokenMoves;
+        blockBrokenMovesetMoves = blockBrokenMoves;
+        blockBrokenTMMoves = blockBrokenMoves;
+        blockBrokenTutorMoves = blockBrokenMoves;
     }
 
     public boolean isLimitPokemon() {
@@ -1199,6 +1225,14 @@ public class Settings {
         this.movesetsGoodDamagingPercent = movesetsGoodDamagingPercent;
     }
 
+    public boolean isBlockBrokenMovesetMoves() {
+        return blockBrokenMovesetMoves;
+    }
+
+    public void setBlockBrokenMovesetMoves(boolean blockBrokenMovesetMoves) {
+        this.blockBrokenMovesetMoves = blockBrokenMovesetMoves;
+    }
+
     public TrainersMod getTrainersMod() {
         return trainersMod;
     }
@@ -1316,6 +1350,14 @@ public class Settings {
 
     public void setTrainersLevelModifier(int trainersLevelModifier) {
         this.trainersLevelModifier = trainersLevelModifier;
+    }
+
+    public boolean isAllowTrainerAlternateFormes() {
+        return allowTrainerAlternateFormes;
+    }
+
+    public void setAllowTrainerAlternateFormes(boolean allowTrainerAlternateFormes) {
+        this.allowTrainerAlternateFormes = allowTrainerAlternateFormes;
     }
 
     public WildPokemonMod getWildPokemonMod() {
@@ -1478,6 +1520,14 @@ public class Settings {
         this.tmsGoodDamagingPercent = tmsGoodDamagingPercent;
     }
 
+    public boolean isBlockBrokenTMMoves() {
+        return blockBrokenTMMoves;
+    }
+
+    public void setBlockBrokenTMMoves(boolean blockBrokenTMMoves) {
+        this.blockBrokenTMMoves = blockBrokenTMMoves;
+    }
+
     public TMsHMsCompatibilityMod getTmsHmsCompatibilityMod() {
         return tmsHmsCompatibilityMod;
     }
@@ -1532,6 +1582,14 @@ public class Settings {
 
     public void setTutorsGoodDamagingPercent(int tutorsGoodDamagingPercent) {
         this.tutorsGoodDamagingPercent = tutorsGoodDamagingPercent;
+    }
+
+    public boolean isBlockBrokenTutorMoves() {
+        return blockBrokenTutorMoves;
+    }
+
+    public void setBlockBrokenTutorMoves(boolean blockBrokenTutorMoves) {
+        this.blockBrokenTutorMoves = blockBrokenTutorMoves;
     }
 
     public MoveTutorsCompatibilityMod getMoveTutorsCompatibilityMod() {

@@ -172,10 +172,11 @@ public interface RomHandler {
     void setTrainers(List<Trainer> trainerData);
 
     void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
-                               int levelModifier, boolean distributionSetting, boolean mainPlaythroughSetting);
+                               int levelModifier, boolean distributionSetting, boolean mainPlaythroughSetting,
+                               boolean includeFormes);
 
     void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
-                               boolean noEarlyWonderGuard, int levelModifier);
+                               boolean noEarlyWonderGuard, int levelModifier, boolean includeFormes);
 
     void rivalCarriesStarter();
 

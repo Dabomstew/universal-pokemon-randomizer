@@ -104,7 +104,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         altFormesList = this.getAltFormes();
         if (restrictions != null) {
             mainPokemonList = new ArrayList<>();
-            List<Pokemon> allPokemon = this.getPokemonInclFormes();
+            List<Pokemon> allPokemon = this.getPokemon();
 
             if (restrictions.allow_gen1) {
                 addPokesFromRange(mainPokemonList, allPokemon, 1, 151);
@@ -949,10 +949,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
-            int levelModifier, boolean distributionSetting, boolean mainPlaythroughSetting) {
+            int levelModifier, boolean distributionSetting, boolean mainPlaythroughSetting, boolean includeFormes) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
-        boolean includeFormes = true; // TODO change this to be a real setting
         // New: randomize the order trainers are randomized in.
         // Leads to less predictable results for various modifiers.
         // Need to keep the original ordering around for saving though.
@@ -963,6 +962,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         cachedAllList = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
                 mainPokemonList);
         if (includeFormes) {
+            cachedAllList = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
+                    mainPokemonList);
             if (noLegendaries) {
                 cachedAllList.addAll(noLegendaryAltsList);
             } else {
@@ -996,6 +997,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                             newPK = mainPokemonList.get(newPK.baseForme - 1);
                         }
                         tp.pokemon = newPK;
+                        if (newPK.cosmeticForms > 0) {
+                            tp.forme = this.random.nextInt(newPK.cosmeticForms);
+                        }
                     }
                     else { // pure random when trainer not in pool
                         // System.out.println(">>>> NOT IN POOL: "+t.fullDisplayName);
@@ -1007,6 +1011,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                             newPK = mainPokemonList.get(newPK.baseForme - 1);
                         }
                         tp.pokemon = newPK;
+                        if (newPK.cosmeticForms > 0) {
+                            tp.forme = this.random.nextInt(newPK.cosmeticForms);
+                        }
                     }
                 }
                 
@@ -1023,7 +1030,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                         newPK = mainPokemonList.get(newPK.baseForme - 1);
                     }
                     tp.pokemon = newPK;
-                            
+                    if (newPK.cosmeticForms > 0) {
+                        tp.forme = this.random.nextInt(newPK.cosmeticForms);
+                    }
                 }
                 
                 else { 
@@ -1037,6 +1046,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                         newPK = mainPokemonList.get(newPK.baseForme - 1);
                     }
                     tp.pokemon = newPK;
+                    if (newPK.cosmeticForms > 0) {
+                        tp.forme = this.random.nextInt(newPK.cosmeticForms);
+                    }
                 }
                 
                 tp.resetMoves = true;
@@ -1052,9 +1064,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
-            boolean noEarlyWonderGuard, int levelModifier) {
+            boolean noEarlyWonderGuard, int levelModifier, boolean includeFormes) {
         checkPokemonRestrictions();
-        boolean includeFormes = true;
         List<Trainer> currentTrainers = this.getTrainers();
         cachedReplacementLists = new TreeMap<>();
         cachedAllList = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(

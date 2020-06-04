@@ -246,15 +246,15 @@ public class Randomizer {
         maybeLogMoveChanges(log, romHandler);
 
         // Movesets
-        boolean noBrokenMoves = settings.doBlockBrokenMoves();
+        boolean noBrokenMovesetMoves = settings.isBlockBrokenMovesetMoves();
         boolean forceLv1s = romHandler.supportsFourStartingMoves() && settings.isStartWithGuaranteedMoves();
         int forceLv1Count = settings.getGuaranteedMoveCount();
         double msGoodDamagingProb = settings.isMovesetsForceGoodDamaging() ? settings.getMovesetsGoodDamagingPercent() / 100.0
                 : 0;
         if (settings.getMovesetsMod() == Settings.MovesetsMod.RANDOM_PREFER_SAME_TYPE) {
-            romHandler.randomizeMovesLearnt(true, noBrokenMoves, forceLv1s, forceLv1Count, msGoodDamagingProb);
+            romHandler.randomizeMovesLearnt(true, noBrokenMovesetMoves, forceLv1s, forceLv1Count, msGoodDamagingProb);
         } else if (settings.getMovesetsMod() == Settings.MovesetsMod.COMPLETELY_RANDOM) {
-            romHandler.randomizeMovesLearnt(false, noBrokenMoves, forceLv1s, forceLv1Count, msGoodDamagingProb);
+            romHandler.randomizeMovesLearnt(false, noBrokenMovesetMoves, forceLv1s, forceLv1Count, msGoodDamagingProb);
         }
 
         if (settings.isReorderDamagingMoves()) {
@@ -311,20 +311,24 @@ public class Randomizer {
         if (settings.getTrainersMod() == Settings.TrainersMod.RANDOM) {
             romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
-                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, false, false); // final 2 booleans set up even distribution and main playthrough flags
+                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, false, false,
+                    settings.isAllowTrainerAlternateFormes()); // final 2 booleans set up even distribution and main playthrough flags
         } else if (settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED) {
             romHandler.typeThemeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersMatchTypingDistribution(), settings.isTrainersBlockLegendaries(),
                     settings.isTrainersBlockEarlyWonderGuard(),
-                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
+                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0,
+                    settings.isAllowTrainerAlternateFormes());
         } else if (settings.getTrainersMod() == Settings.TrainersMod.DISTRIBUTED) {
             romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
-                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, true, false);
+                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, true, false,
+                    settings.isAllowTrainerAlternateFormes());
         } else if (settings.getTrainersMod() == Settings.TrainersMod.MAINPLAYTHROUGH) {
             romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
-                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, true, true);
+                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, true, true,
+                    settings.isAllowTrainerAlternateFormes());
         }
 
         if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)
@@ -428,11 +432,12 @@ public class Randomizer {
         }
 
         // TMs
+        boolean noBrokenTMMoves = settings.isBlockBrokenTMMoves();
         if (!(settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY)
                 && settings.getTmsMod() == Settings.TMsMod.RANDOM) {
             double goodDamagingProb = settings.isTmsForceGoodDamaging() ? settings.getTmsGoodDamagingPercent() / 100.0
                     : 0;
-            romHandler.randomizeTMMoves(noBrokenMoves, settings.isKeepFieldMoveTMs(), goodDamagingProb);
+            romHandler.randomizeTMMoves(noBrokenTMMoves, settings.isKeepFieldMoveTMs(), goodDamagingProb);
             log.println("--TM Moves--");
             List<Integer> tmMoves = romHandler.getTMMoves();
             for (int i = 0; i < tmMoves.size(); i++) {
@@ -471,12 +476,13 @@ public class Randomizer {
 
         // Move Tutors (new 1.0.3)
         if (romHandler.hasMoveTutors()) {
+            boolean noBrokenTutorMoves = settings.isBlockBrokenTutorMoves();
             if (!(settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY)
                     && settings.getMoveTutorMovesMod() == Settings.MoveTutorMovesMod.RANDOM) {
                 List<Integer> oldMtMoves = romHandler.getMoveTutorMoves();
                 double goodDamagingProb = settings.isTutorsForceGoodDamaging() ? settings
                         .getTutorsGoodDamagingPercent() / 100.0 : 0;
-                romHandler.randomizeMoveTutorMoves(noBrokenMoves, settings.isKeepFieldMoveTutors(), goodDamagingProb);
+                romHandler.randomizeMoveTutorMoves(noBrokenTutorMoves, settings.isKeepFieldMoveTutors(), goodDamagingProb);
                 log.println("--Move Tutor Moves--");
                 List<Integer> newMtMoves = romHandler.getMoveTutorMoves();
                 for (int i = 0; i < newMtMoves.size(); i++) {
