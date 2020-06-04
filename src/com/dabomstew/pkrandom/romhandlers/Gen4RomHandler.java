@@ -1184,12 +1184,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     // Get a single set of encounters...
                     // Write the encounters we get 3x for morning, day, night
                     EncounterSet grass = encounters.next();
+                    writeGrassEncounterLevelsHGSS(b, 8, grass.encounters);
                     writePokemonHGSS(b, 20, grass.encounters);
                     writePokemonHGSS(b, 44, grass.encounters);
                     writePokemonHGSS(b, 68, grass.encounters);
                 } else {
-                    for (int i = 0; i < 3; i++) {
-                        EncounterSet grass = encounters.next();
+                    EncounterSet grass = encounters.next();
+                    writeGrassEncounterLevelsHGSS(b, 8, grass.encounters);
+                    writePokemonHGSS(b, 20, grass.encounters);
+                    for (int i = 1; i < 3; i++) {
+                        grass = encounters.next();
                         writePokemonHGSS(b, 20 + i * 24, grass.encounters);
                     }
                 }
@@ -1231,6 +1235,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 Encounter here = eIter.next();
                 writeWord(data, offset + i * 2, here.pokemon.number);
             }
+        }
+
+    }
+
+    private void writeGrassEncounterLevelsHGSS(byte[] data, int offset, List<Encounter> encounters) {
+        int enclength = encounters.size();
+        for (int i = 0; i < enclength; i++) {
+            data[offset + i] = (byte) encounters.get(i).level;
         }
 
     }
