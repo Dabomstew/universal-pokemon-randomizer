@@ -187,7 +187,11 @@ public class Gen5Constants {
             807, 808, 809, 810, 811, 812);
     
 //    public static final Map<Integer, String> bw1ShopIndex = new HashMap<Integer, String>() {1:"Check"};
-    
+
+    public static final List<Integer> bw1MainGameShops = Arrays.asList(
+            3, 5, 6, 8, 9, 12, 14, 17, 18, 19, 21, 22
+    );
+
     public static final List<String> bw1ShopNames = Arrays.asList(
             "Primary 0 Badges",
             "Shopping Mall 9 TMs",
@@ -215,6 +219,10 @@ public class Gen5Constants {
             "Primary 5 Badges",
             "Primary 7 Badges",
             "Primary 8 Badges");
+
+    public static final List<Integer> bw2MainGameShops = Arrays.asList(
+            9, 11, 14, 15, 16, 18, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 31
+    );
     
     public static final List<String> bw2ShopNames = Arrays.asList(
             "Primary 0 Badges",
@@ -334,6 +342,15 @@ public class Gen5Constants {
         default:
             return 0; // normal by default
         }
+    }
+
+    public static List<Integer> getMainGameShops(int romType) {
+        if (romType == Type_BW) {
+            return bw1MainGameShops;
+        } else if (romType == Type_BW2) {
+            return bw2MainGameShops;
+        }
+        return new ArrayList<>();
     }
 
     public static int getFormeCount(int romType) {

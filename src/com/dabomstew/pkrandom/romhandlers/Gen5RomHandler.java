@@ -258,7 +258,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private ItemList allowedItems, nonBadItems;
     private List<Integer> regularShopItems;
     private List<Integer> opShopItems;
-    private Map<Integer, List<Integer>> shopItemsRandomized = new HashMap<>();
     
     private NARCArchive pokeNarc, moveNarc, stringsNarc, storyTextNarc, scriptNarc, shopNarc;
     private byte [] shopItemOverlay;
@@ -452,7 +451,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 if (pkmn.number != 421 && pkmn.number != 493 && pkmn.number != 585 && pkmn.number != 586 && pkmn.number < 649) {
                     // Reason for exclusions:
                     // Cherrim/Arceus/Genesect: to avoid confusion
-                    // Deerling/Sawsbuck: should be handled automatically in gen 5 (needs confirmation)
+                    // Deerling/Sawsbuck: handled automatically in gen 5
                     pkmn.cosmeticForms = formeCount;
                 }
             }
@@ -727,10 +726,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     public List<Move> getMoves() {
         return Arrays.asList(moves);
-    }
-    @Override
-    public Map<Integer, List<Integer>> getShopItemsRandomized() {
-        return shopItemsRandomized;
     }
 
     @Override
@@ -2519,14 +2514,14 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public List<Integer> getShopItems() {
+    public Map<Integer, List<Integer>> getShopItems() {
         int[] tmShops = romEntry.arrayEntries.get("TMShops");
         int[] regularShops = romEntry.arrayEntries.get("RegularShops");
         int[] shopItemOffsets = romEntry.arrayEntries.get("ShopItemOffsets");
         int[] shopItemSizes = romEntry.arrayEntries.get("ShopItemSizes");
         int shopCount = romEntry.getInt("ShopCount");
         List<Integer> shopItems = new ArrayList<>();    
-        
+        Map<Integer,List<Integer>> shopItemsMap = new TreeMap<>();
 
         IntStream.range(0,shopCount).forEachOrdered(i -> {
                     boolean badShop = false;
@@ -2544,32 +2539,30 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         }
                     }
                     if (!badShop) {
+                        List<Integer> items = new ArrayList<>();
                         if (romEntry.romType == Gen5Constants.Type_BW) {
                             for (int j = 0; j < shopItemSizes[i]; j++) {
-                                shopItems.add(readWord(shopItemOverlay,shopItemOffsets[i] + j * 2));
+                                items.add(readWord(shopItemOverlay,shopItemOffsets[i] + j * 2));
                             }
                         } else if (romEntry.romType == Gen5Constants.Type_BW2) {
                             byte[] shop = shopNarc.files.get(i);
                             for (int j = 0; j < shop.length; j += 2) {
-                                shopItems.add(readWord(shop,j));
+                                items.add(readWord(shop,j));
                             }
                         }
-
+                        shopItemsMap.put(i,items);
                     }
                 });
-        return shopItems;
+        return shopItemsMap;
     }
 
     @Override
-    public void setShopItems(List<Integer> shopItems) {
+    public void setShopItems(Map<Integer, List<Integer>> shopItems) {
         int[] shopItemOffsets = romEntry.arrayEntries.get("ShopItemOffsets");
         int[] shopItemSizes = romEntry.arrayEntries.get("ShopItemSizes");
         int[] tmShops = romEntry.arrayEntries.get("TMShops");
         int[] regularShops = romEntry.arrayEntries.get("RegularShops");
         int shopCount = romEntry.getInt("ShopCount");
-  
-
-        Iterator<Integer> iterItems = shopItems.iterator();
 
         IntStream.range(0,shopCount).forEachOrdered(i -> {
                     boolean badShop = false;
@@ -2582,23 +2575,20 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         if (i == regularShop) badShop = true;
                     }
                     if (!badShop) {
-                        List<Integer> shopContents = new ArrayList<>();
+                        List<Integer> shopContents = shopItems.get(i);
+                        Iterator<Integer> iterItems = shopContents.iterator();
                         if (romEntry.romType == Gen5Constants.Type_BW) {
                             for (int j = 0; j < shopItemSizes[i]; j++) {
                                 Integer item = iterItems.next();
                                 writeWord(shopItemOverlay,shopItemOffsets[i] + j * 2, item);
-                                shopContents.add(item);
                             }
                         } else if (romEntry.romType == Gen5Constants.Type_BW2) {
                             byte[] shop = shopNarc.files.get(i);
                             for (int j = 0; j < shop.length; j += 2) {
                                 Integer item = iterItems.next();
                                 writeWord(shop,j,item);
-                                shopContents.add(item);
                             }
                         }
-                        // now add 
-                        this.shopItemsRandomized.put(i, shopContents);
                     }
                     
                 });
@@ -2624,6 +2614,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+    }
+
+    @Override
+    public List<Integer> getMainGameShops() {
+        return Gen5Constants.getMainGameShops(romEntry.romType);
     }
 
     @Override

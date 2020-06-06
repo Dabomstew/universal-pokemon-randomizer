@@ -1401,18 +1401,23 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public List<Integer> getShopItems() {
+    public Map<Integer, List<Integer>> getShopItems() {
         return null; // Not implemented
     }
 
     @Override
-    public void setShopItems(List<Integer> shopItems) {
+    public void setShopItems(Map<Integer, List<Integer>> shopItems) {
         // Not implemented
     }
 
     @Override
     public void setShopPrices() {
         // Not implemented
+    }
+
+    @Override
+    public List<Integer> getMainGameShops() {
+        return new ArrayList<>();
     }
 
     @Override
@@ -1574,10 +1579,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
         return trainerClassNames;
     }
-    @Override
-    public Map<Integer, List<Integer>> getShopItemsRandomized() {
-        return null;
-    }
+
     @Override
     public String[] getShopNames() {
         return null;

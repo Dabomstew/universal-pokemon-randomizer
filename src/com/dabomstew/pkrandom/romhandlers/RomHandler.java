@@ -211,10 +211,6 @@ public interface RomHandler {
 
     // return all the moves valid in this game.
     List<Move> getMoves();
-    
-    Map<Integer, List<Integer>> getShopItemsRandomized();
-
-    // Randomizer: moves learnt
 
     Map<Integer, List<MoveLearnt>> getMovesLearnt();
 
@@ -421,11 +417,13 @@ public interface RomHandler {
 
     void randomizeShopItems(boolean banBadItems, boolean banRegularShopItems, boolean banOPShopItems, boolean balancePrices, boolean placeEvolutionItems);
 
-    List<Integer> getShopItems();
+    Map<Integer, List<Integer>> getShopItems();
 
-    void setShopItems(List<Integer> shopItems);
+    void setShopItems(Map<Integer, List<Integer>> shopItems);
 
     void setShopPrices();
+
+    List<Integer> getMainGameShops();
 
     // stats stuff
     void minimumCatchRate(int rateNonLegendary, int rateLegendary);

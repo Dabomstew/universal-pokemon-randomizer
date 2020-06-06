@@ -28,26 +28,13 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Random;
-import java.util.Set;
-import java.util.Stack;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.Encounter;
@@ -3142,9 +3129,22 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void shuffleShopItems() {
-        List<Integer> currentItems = this.getShopItems();
+        Map<Integer,List<Integer>> currentItems = this.getShopItems();
         if (currentItems == null) return;
-        Collections.shuffle(currentItems, this.random);
+        List<Integer> itemList = new ArrayList<>();
+        for (List<Integer> shopList: currentItems.values()) {
+            itemList.addAll(shopList);
+        }
+        Collections.shuffle(itemList, this.random);
+
+        Iterator<Integer> itemListIter = itemList.iterator();
+
+        for (List<Integer> shopList: currentItems.values()) {
+            for (int i = 0; i < shopList.size(); i++) {
+                shopList.remove(i);
+                shopList.add(i,itemListIter.next());
+            }
+        }
 
         this.setShopItems(currentItems);
     }
@@ -3161,30 +3161,89 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (banOPShopItems) {
             possibleItems.banSingles(this.getOPShopItems().stream().mapToInt(Integer::intValue).toArray());
         }
-        List<Integer> currentItems = this.getShopItems();
+        Map<Integer,List<Integer>> currentItems = this.getShopItems();
 
-        int shopItemCount = currentItems.size();
+        int shopItemCount = currentItems.values().stream().mapToInt(List::size).sum();
 
         List<Integer> newItems = new ArrayList<>();
+        Map<Integer,List<Integer>> newItemsMap = new TreeMap<>();
         int newItem;
         System.out.println("Placing evolution items: " + placeEvolutionItems);
         if (placeEvolutionItems) {
             List<Integer> evolutionItems = getEvolutionItems();
             newItems.addAll(evolutionItems);
             shopItemCount = shopItemCount - newItems.size();
+
             for (int i = 0; i < shopItemCount; i++) {
                 while (newItems.contains(newItem = possibleItems.randomNonTM(this.random)));
                 newItems.add(newItem);
+            }
+
+            // Guarantee main-game
+            List<Integer> mainGameShopsTemp = getMainGameShops();
+            List<Integer> mainGameShops = new ArrayList<>();
+            List<Integer> nonMainGameShops = new ArrayList<>();
+            for (int i: currentItems.keySet()) {
+                if (mainGameShopsTemp.contains(i)) {
+                    mainGameShops.add(i);
+                } else {
+                    nonMainGameShops.add(i);
+                }
+            }
+
+            // Confirms that the main-game shop list gotten from the constants matches the in-game main-game shops
+            for (int i: mainGameShopsTemp) {
+                if (!mainGameShops.contains(i)) {
+                    System.err.println("Discrepancy between main-game shop list in constants and in game: index " + i);
+                }
+            }
+
+            // Place items in non-main-game shops; skip over evolution items
+            Collections.shuffle(newItems, this.random);
+            for (int i: nonMainGameShops) {
+                int j = 0;
+                List<Integer> newShopItems = new ArrayList<>();
+                for (Integer ignored: currentItems.get(i)) {
+                    Integer item = newItems.get(j);
+                    while (evolutionItems.contains(item)) {
+                        j++;
+                        item = newItems.get(j);
+                    }
+                    newShopItems.add(item);
+                    newItems.remove(item);
+                }
+                newItemsMap.put(i,newShopItems);
+            }
+
+            // Place items in main-game shops
+            Collections.shuffle(newItems, this.random);
+            for (int i: mainGameShops) {
+                List<Integer> newShopItems = new ArrayList<>();
+                for (Integer ignored: currentItems.get(i)) {
+                    Integer item = newItems.get(0);
+                    newShopItems.add(item);
+                    newItems.remove(0);
+                }
+                newItemsMap.put(i,newShopItems);
             }
         } else {
             for (int i = 0; i < shopItemCount; i++) {
                 while (newItems.contains(newItem = possibleItems.randomNonTM(this.random)));
                 newItems.add(newItem);
             }
-        }
-        Collections.shuffle(newItems, this.random);
 
-        this.setShopItems(newItems);
+            Iterator<Integer> newItemsIter = newItems.iterator();
+
+            for (int i: currentItems.keySet()) {
+                List<Integer> newShopItems = new ArrayList<>();
+                for (Integer ignored: currentItems.get(i)) {
+                    newShopItems.add(newItemsIter.next());
+                }
+                newItemsMap.put(i,newShopItems);
+            }
+        }
+
+        this.setShopItems(newItemsMap);
         if (balancePrices) {
             this.setShopPrices();
         }

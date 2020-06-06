@@ -560,7 +560,8 @@ public class Randomizer {
 
         
         // Shops
-        if (settings.getShopItemsMod() == Settings.ShopItemsMod.RANDOM && this.romHandler.generationOfPokemon() == 5) {
+        if ((settings.getShopItemsMod() == Settings.ShopItemsMod.RANDOM || settings.getShopItemsMod() == Settings.ShopItemsMod.SHUFFLE)
+                && this.romHandler.generationOfPokemon() == 5) {
             maybeLogShops(log, romHandler);
         }
         // Test output for placement history
@@ -869,7 +870,7 @@ public class Randomizer {
         String[] shopNames = romHandler.getShopNames();
         String[] itemNames = romHandler.getItemNames();
         log.println("--Shops--");
-        Map<Integer, List<Integer>> shopsDict = romHandler.getShopItemsRandomized();
+        Map<Integer, List<Integer>> shopsDict = romHandler.getShopItems();
         for (int shopID : shopsDict.keySet()) {
             log.printf("%s", shopNames[shopID]);
             log.println();
