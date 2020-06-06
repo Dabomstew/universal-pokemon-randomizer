@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.IngameTrade;
@@ -79,6 +80,11 @@ public class Randomizer {
         RandomSource.seed(seed);
 
         int checkValue = 0;
+
+        log.println("Randomizer Version: " + GlobalConstants.VERSION_STRING);
+        log.println("Random Seed: " + seed);
+        log.println("Settings String: " + settings.toString());
+        log.println();
 
         // limit pokemon?
         if (settings.isLimitPokemon()) {

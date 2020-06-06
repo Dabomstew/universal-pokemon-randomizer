@@ -5,6 +5,8 @@ import java.util.List;
 
 public class GlobalConstants {
 
+    public static final String VERSION_STRING = "3.1.0-dev";
+
     public static final boolean[] bannedRandomMoves = new boolean[560], bannedForDamagingMove = new boolean[560];
     static {
         bannedRandomMoves[144] = true; // Transform, glitched in RBY

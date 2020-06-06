@@ -2768,7 +2768,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         // List<Integer> chosenItems = new ArrayList<Integer>(); // collecting chosenItems for later process
         
         if (distributeItemsControl) {
-            System.out.println("Controlled random item placement...");
             for (int i = 0; i < fieldItemCount; i++) {
                 int chosenItem = possibleItems.randomNonTM(this.random);
                 // System.out.println("Chosen item " +chosenItem+ " " + this.getItemPlacementHistory(chosenItem) + " vs. " + this.getItemPlacementAverage());
@@ -3168,7 +3167,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Integer> newItems = new ArrayList<>();
         Map<Integer,List<Integer>> newItemsMap = new TreeMap<>();
         int newItem;
-        System.out.println("Placing evolution items: " + placeEvolutionItems);
         if (placeEvolutionItems) {
             List<Integer> evolutionItems = getEvolutionItems();
             newItems.addAll(evolutionItems);

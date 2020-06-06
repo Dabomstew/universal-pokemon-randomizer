@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.newgui;
 
 import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
@@ -198,6 +199,7 @@ public class NewRandomizerGUI {
     private JCheckBox limitPokemonCheckBox;
     private JButton limitPokemonButton;
     private JCheckBox tpAllowAlternateFormesCheckBox;
+    private JLabel versionLabel;
 
     private static JFrame frame;
 
@@ -353,6 +355,8 @@ public class NewRandomizerGUI {
     }
 
     private void initExplicit() {
+
+        versionLabel.setText(String.format(bundle.getString("GUI.versionLabel.text"), GlobalConstants.VERSION_STRING));
         mtNoExistLabel.setVisible(false);
         mtNoneAvailableLabel.setVisible(false);
         baseTweaksPanel.add(liveTweaksPanel);
