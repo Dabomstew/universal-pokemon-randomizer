@@ -30,6 +30,7 @@ package com.dabomstew.pkrandom.newgui;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.CustomNamesSet;
+import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
@@ -333,6 +334,13 @@ public class PresetLoadDialog extends JDialog {
     }// GEN-LAST:event_romFileButtonActionPerformed
 
     private void acceptButtonActionPerformed() {// GEN-FIRST:event_acceptButtonActionPerformed
+        if (customNames == null) {
+            try {
+                customNames = FileFunctions.getCustomNames();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         completed = true;
         this.setVisible(false);
     }// GEN-LAST:event_acceptButtonActionPerformed
