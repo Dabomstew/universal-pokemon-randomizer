@@ -19,11 +19,15 @@ public class Gen5Constants {
     private static final int bw1FormeCount = 18, bw2FormeCount = 24;
     private static final int bw1formeOffset = 0, bw2formeOffset = 15, bw2formeMovesetOffset = 35;
 
+    private static final int bw1NonPokemonBattleSpriteCount = 3;
+    private static final int bw2NonPokemonBattleSpriteCount = 36;
+
     public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3,
             bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7,
             bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14,
             bsDarkGrassHeldItemOffset = 16, bsGrowthCurveOffset = 21, bsAbility1Offset = 24, bsAbility2Offset = 25,
-            bsAbility3Offset = 26, bsFormeOffset = 28, bsFormeCountOffset = 32, bsTMHMCompatOffset = 40, bsMTCompatOffset = 60;
+            bsAbility3Offset = 26, bsFormeOffset = 28, bsFormeSpriteOffset = 30, bsFormeCountOffset = 32,
+            bsTMHMCompatOffset = 40, bsMTCompatOffset = 60;
 
     public static final byte[] bw1NewStarterScript = { 0x24, 0x00, (byte) 0xA7, 0x02, (byte) 0xE7, 0x00, 0x00, 0x00,
             (byte) 0xDE, 0x00, 0x00, 0x00, (byte) 0xF8, 0x01, 0x05, 0x00 };
@@ -376,6 +380,15 @@ public class Gen5Constants {
             return bw1formeOffset;
         } else if (romType == Type_BW2) {
             return bw2formeMovesetOffset;
+        }
+        return 0;
+    }
+
+    public static int getNonPokemonBattleSpriteCount(int romType) {
+        if (romType == Type_BW) {
+            return bw1NonPokemonBattleSpriteCount;
+        } else if (romType == Type_BW2) {
+            return bw2NonPokemonBattleSpriteCount;
         }
         return 0;
     }

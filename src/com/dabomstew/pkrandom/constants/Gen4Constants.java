@@ -269,18 +269,18 @@ public class Gen4Constants {
     private static Map<Integer,FormeInfo> setupFormeMappings() {
         Map<Integer,FormeInfo> formeMappings = new TreeMap<>();
 
-        formeMappings.put(496,new FormeInfo(386,1));
-        formeMappings.put(497,new FormeInfo(386,2));
-        formeMappings.put(498,new FormeInfo(386,3));
-        formeMappings.put(499,new FormeInfo(413,1));
-        formeMappings.put(500,new FormeInfo(413,2));
-        formeMappings.put(501,new FormeInfo(487,1));
-        formeMappings.put(502,new FormeInfo(492,1));
-        formeMappings.put(503,new FormeInfo(479,1));
-        formeMappings.put(504,new FormeInfo(479,2));
-        formeMappings.put(505,new FormeInfo(479,3));
-        formeMappings.put(506,new FormeInfo(479,4));
-        formeMappings.put(507,new FormeInfo(479,5));
+        formeMappings.put(496,new FormeInfo(386,1, 0));
+        formeMappings.put(497,new FormeInfo(386,2, 0));
+        formeMappings.put(498,new FormeInfo(386,3, 0));
+        formeMappings.put(499,new FormeInfo(413,1, 0));
+        formeMappings.put(500,new FormeInfo(413,2, 0));
+        formeMappings.put(501,new FormeInfo(487,1, 0));
+        formeMappings.put(502,new FormeInfo(492,1, 0));
+        formeMappings.put(503,new FormeInfo(479,1, 0));
+        formeMappings.put(504,new FormeInfo(479,2, 0));
+        formeMappings.put(505,new FormeInfo(479,3, 0));
+        formeMappings.put(506,new FormeInfo(479,4, 0));
+        formeMappings.put(507,new FormeInfo(479,5, 0));
 
         return formeMappings;
     }

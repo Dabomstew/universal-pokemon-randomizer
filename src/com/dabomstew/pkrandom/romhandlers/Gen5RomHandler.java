@@ -357,9 +357,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 pokes[i] = new Pokemon();
                 pokes[i].number = i;
                 loadBasicPokeStats(pokes[i], pokeNarc.files.get(k), formeMappings);
-                pokes[i].name = pokeNames[formeMappings.get(k).baseForme];
-                pokes[i].baseForme = formeMappings.get(k).baseForme;
-                pokes[i].formeNumber = formeMappings.get(k).formeNumber;
+                FormeInfo fi = formeMappings.get(k);
+                pokes[i].name = pokeNames[fi.baseForme];
+                pokes[i].baseForme = fi.baseForme;
+                pokes[i].formeNumber = fi.formeNumber;
+                pokes[i].formeSpriteIndex = fi.formeSpriteOffset + Gen5Constants.pokemonCount + Gen5Constants.getNonPokemonBattleSpriteCount(romEntry.romType);
                 pokes[i].formeSuffix = Gen5Constants.getFormeSuffix(k,romEntry.romType);
                 i = i + 1;
             }
@@ -445,7 +447,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             int firstFormeOffset = readWord(stats, Gen5Constants.bsFormeOffset);
             if (firstFormeOffset != 0) {
                 for (int i = 1; i < formeCount; i++) {
-                    altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.number,i)); // Assumes that formes are in memory in the same order as their numbers
+                    altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.number,i,readWord(stats,Gen5Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
                 }
             } else {
                 if (pkmn.number != 421 && pkmn.number != 493 && pkmn.number != 585 && pkmn.number != 586 && pkmn.number < 649) {
@@ -2624,11 +2626,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     public BufferedImage getMascotImage() {
         try {
-            Pokemon pk = randomPokemon();
+            Pokemon pk = randomPokemonInclFormes();
             NARCArchive pokespritesNARC = this.readNARC(romEntry.getString("PokemonGraphics"));
 
             // First prepare the palette, it's the easy bit
-            int palIndex = pk.number * 20 + 18;
+            int palIndex = pk.getSpriteIndex() * 20 + 18;
             if (random.nextInt(10) == 0) {
                 // shiny
                 palIndex++;
@@ -2640,7 +2642,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
 
             // Get the picture and uncompress it.
-            byte[] compressedPic = pokespritesNARC.files.get(pk.number * 20);
+            byte[] compressedPic = pokespritesNARC.files.get(pk.getSpriteIndex() * 20);
             byte[] uncompressedPic = DSDecmp.Decompress(compressedPic);
 
             // Output to 64x144 tiled image to prepare for unscrambling

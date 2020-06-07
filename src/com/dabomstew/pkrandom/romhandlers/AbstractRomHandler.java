@@ -313,6 +313,12 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public Pokemon randomPokemonInclFormes() {
+        checkPokemonRestrictions();
+        return mainPokemonListInclFormes.get(this.random.nextInt(mainPokemonListInclFormes.size()));
+    }
+
+    @Override
     public Pokemon randomNonLegendaryPokemon() {
         checkPokemonRestrictions();
         return noLegendaryList.get(this.random.nextInt(noLegendaryList.size()));
@@ -3262,7 +3268,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void standardizeEXPCurves(Settings.ExpCurveMod mod) {
-        List<Pokemon> pokes = getPokemon();
+        List<Pokemon> pokes = getPokemonInclFormes();
         switch (mod) {
             case LEGENDARIES:
                 for (Pokemon pkmn : pokes) {

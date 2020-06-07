@@ -39,6 +39,7 @@ public class Pokemon implements Comparable<Pokemon> {
     public int baseForme = 0;
     public int formeNumber = 0;
     public int cosmeticForms = 0;
+    public int formeSpriteIndex = 0;
 
     public Type primaryType, secondaryType;
 
@@ -171,6 +172,10 @@ public class Pokemon implements Comparable<Pokemon> {
         } else {
             return hp + attack + defense + spatk + spdef + speed;
         }
+    }
+
+    public int getSpriteIndex() {
+        return formeNumber == 0 ? number : formeSpriteIndex + formeNumber - 1;
     }
 
     public String fullName() {

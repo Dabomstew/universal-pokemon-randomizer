@@ -110,6 +110,8 @@ public interface RomHandler {
     // Give a random Pokemon who's in this game
     Pokemon randomPokemon();
 
+    Pokemon randomPokemonInclFormes();
+
     // Give a random non-legendary Pokemon who's in this game
     // Business rules for who's legendary are in Pokemon class
     Pokemon randomNonLegendaryPokemon();
