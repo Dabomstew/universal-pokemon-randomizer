@@ -778,7 +778,8 @@ public class Randomizer {
     }
 
     private void maybeLogTrainerChanges(final PrintStream log, final RomHandler romHandler) {
-        if (settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED && !settings.isRivalCarriesStarterThroughout() && !settings.isTrainersLevelModified()) {
+        if (settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED && !settings.isRivalCarriesStarterThroughout()
+                && !settings.isTrainersLevelModified() && !settings.isTrainersForceFullyEvolved()) {
             log.println("Trainers: Unchanged." + NEWLINE);
         } else {
             log.println("--Trainers Pokemon--");

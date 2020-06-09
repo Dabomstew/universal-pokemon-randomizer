@@ -1822,6 +1822,7 @@ public class NewRandomizerGUI {
             tpRandomEvenDistributionMainRadioButton.setEnabled(pokemonGeneration == 5);
             tpRandomEvenDistributionMainRadioButton.setVisible(pokemonGeneration == 5);
             tpAllowAlternateFormesCheckBox.setVisible(pokemonGeneration >= 4);
+            tpForceFullyEvolvedAtCheckBox.setEnabled(true);
             tpPercentageLevelModifierCheckBox.setEnabled(true);
 
             tpRandomizeTrainerNamesCheckBox.setEnabled(true);
@@ -2071,15 +2072,15 @@ public class NewRandomizerGUI {
             tpDontUseLegendariesCheckBox.setSelected(false);
             tpNoEarlyWonderGuardCheckBox.setEnabled(false);
             tpNoEarlyWonderGuardCheckBox.setSelected(false);
-            tpForceFullyEvolvedAtCheckBox.setEnabled(false);
-            tpForceFullyEvolvedAtCheckBox.setSelected(false);
+//            tpForceFullyEvolvedAtCheckBox.setEnabled(false);
+//            tpForceFullyEvolvedAtCheckBox.setSelected(false);
             tpAllowAlternateFormesCheckBox.setEnabled(false);
             tpAllowAlternateFormesCheckBox.setSelected(false);
         } else {
             tpSimilarStrengthCheckBox.setEnabled(true);
             tpDontUseLegendariesCheckBox.setEnabled(true);
             tpNoEarlyWonderGuardCheckBox.setEnabled(true);
-            tpForceFullyEvolvedAtCheckBox.setEnabled(true);
+//            tpForceFullyEvolvedAtCheckBox.setEnabled(true);
             if (!limitPokemonCheckBox.isSelected()) {
                 tpAllowAlternateFormesCheckBox.setEnabled(true);
             }
