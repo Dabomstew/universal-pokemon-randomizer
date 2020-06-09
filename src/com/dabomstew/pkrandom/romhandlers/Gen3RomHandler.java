@@ -1524,6 +1524,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         for (int i = 0; i < numOfEntries; i++) {
             Encounter enc = encounters.encounters.get(i);
             // min, max, species, species
+            int levels = enc.level | (enc.maxLevel << 8);
+            writeWord(dataOffset + i * 4, levels);
             writeWord(dataOffset + i * 4 + 2, pokedexToInternal[enc.pokemon.number]);
         }
     }
