@@ -32,6 +32,7 @@ package com.dabomstew.pkrandom.newgui;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.SysConstants;
+import com.dabomstew.pkrandom.Version;
 
 import javax.swing.*;
 import java.awt.event.MouseEvent;
@@ -57,7 +58,7 @@ public class PresetMakeDialog extends javax.swing.JDialog {
         super(parent, true);
         initComponents();
         randomSeedField.setText(Long.toString(seed));
-        configStringField.setText(Settings.VERSION + "" + configString);
+        configStringField.setText(Version.VERSION + "" + configString);
         this.seed = seed;
         this.configString = configString;
         presetFileChooser.setCurrentDirectory(new File("./"));
@@ -185,7 +186,7 @@ public class PresetMakeDialog extends javax.swing.JDialog {
             fh = FileFunctions.fixFilename(fh, "rndp");
             try {
                 DataOutputStream dos = new DataOutputStream(new FileOutputStream(fh));
-                dos.writeByte((byte) Settings.VERSION);
+                dos.writeInt(Version.VERSION);
                 dos.writeLong(seed);
                 dos.writeUTF(configString);
                 byte[] customnames = readFile(FileFunctions.openConfig(SysConstants.customNamesFile));

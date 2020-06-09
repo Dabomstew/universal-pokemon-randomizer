@@ -356,7 +356,7 @@ public class NewRandomizerGUI {
 
     private void initExplicit() {
 
-        versionLabel.setText(String.format(bundle.getString("GUI.versionLabel.text"), GlobalConstants.VERSION_STRING));
+        versionLabel.setText(String.format(bundle.getString("GUI.versionLabel.text"), Version.VERSION_STRING));
         mtNoExistLabel.setVisible(false);
         mtNoneAvailableLabel.setVisible(false);
         baseTweaksPanel.add(liveTweaksPanel);

@@ -81,9 +81,9 @@ public class Randomizer {
 
         int checkValue = 0;
 
-        log.println("Randomizer Version: " + GlobalConstants.VERSION_STRING);
+        log.println("Randomizer Version: " + Version.VERSION_STRING);
         log.println("Random Seed: " + seed);
-        log.println("Settings String: " + Settings.VERSION + settings.toString());
+        log.println("Settings String: " + Version.VERSION + settings.toString());
         log.println();
 
         // limit pokemon?

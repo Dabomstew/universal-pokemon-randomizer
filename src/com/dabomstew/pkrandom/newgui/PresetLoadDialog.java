@@ -29,10 +29,7 @@ package com.dabomstew.pkrandom.newgui;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import com.dabomstew.pkrandom.CustomNamesSet;
-import com.dabomstew.pkrandom.FileFunctions;
-import com.dabomstew.pkrandom.RandomSource;
-import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
@@ -130,7 +127,7 @@ public class PresetLoadDialog extends JDialog {
 
         try {
             int presetVersionNumber = Integer.parseInt(configString.substring(0, 3));
-            if (presetVersionNumber != Settings.VERSION) {
+            if (presetVersionNumber != Version.VERSION) {
                 promptForDifferentRandomizerVersion(presetVersionNumber);
                 safelyClearFields();
                 invalidValues();
@@ -171,41 +168,14 @@ public class PresetLoadDialog extends JDialog {
 
     private void promptForDifferentRandomizerVersion(int presetVN) {
         // so what version number was it?
-        if (presetVN > Settings.VERSION) {
+        if (presetVN > Version.VERSION) {
             // it's for a newer version
             JOptionPane.showMessageDialog(this, bundle.getString("PresetLoadDialog.newerVersionRequired"));
         } else {
             // tell them which older version to use to load this preset
             // this should be the newest version that used that value
             // for the constant PRESET_FILE_VERSION
-            String versionWanted = "";
-            if (presetVN == 100) {
-                versionWanted = "1.0.1a";
-            } else if (presetVN == 102) {
-                versionWanted = "1.0.2a";
-            } else if (presetVN == 110) {
-                versionWanted = "1.1.0";
-            } else if (presetVN == 111) {
-                versionWanted = "1.1.1";
-            } else if (presetVN == 112) {
-                versionWanted = "1.1.2";
-            } else if (presetVN == 120) {
-                versionWanted = "1.2.0a";
-            } else if (presetVN == 150) {
-                versionWanted = "1.5.0";
-            } else if (presetVN == 160) {
-                versionWanted = "1.6.0a";
-            } else if (presetVN == 161) {
-                versionWanted = "1.6.1";
-            } else if (presetVN == 162) {
-                versionWanted = "1.6.2";
-            } else if (presetVN == 163) {
-                versionWanted = "1.6.3b";
-            } else if (presetVN == 170) {
-                versionWanted = "1.7.0b";
-            } else if (presetVN == 171) {
-                versionWanted = "1.7.1";
-            }
+            String versionWanted = Version.oldVersions.getOrDefault(presetVN,"Unknown");
             JOptionPane.showMessageDialog(this,
                     String.format(bundle.getString("PresetLoadDialog.olderVersionRequired"), versionWanted));
         }
@@ -257,10 +227,10 @@ public class PresetLoadDialog extends JDialog {
             File fh = presetFileChooser.getSelectedFile();
             try {
                 DataInputStream dis = new DataInputStream(new FileInputStream(fh));
-                int checkByte = dis.readByte() & 0xFF;
-                if (checkByte != Settings.VERSION) {
+                int checkInt = dis.readInt();
+                if (checkInt != Version.VERSION) {
                     dis.close();
-                    promptForDifferentRandomizerVersion(checkByte);
+                    promptForDifferentRandomizerVersion(checkInt);
                     return;
                 }
                 long seed = dis.readLong();
@@ -268,7 +238,7 @@ public class PresetLoadDialog extends JDialog {
                 customNames = new CustomNamesSet(dis);
                 changeFieldsWithoutCheck = true;
                 this.randomSeedField.setText(Long.toString(seed));
-                this.configStringField.setText(checkByte + "" + preset);
+                this.configStringField.setText(checkInt + "" + preset);
                 changeFieldsWithoutCheck = false;
                 if (checkValues()) {
                     this.randomSeedField.setEnabled(false);
