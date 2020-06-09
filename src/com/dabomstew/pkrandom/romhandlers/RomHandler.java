@@ -160,6 +160,8 @@ public interface RomHandler {
 
     void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries, int levelModifier);
 
+    void onlyChangeWildLevels(int levelModifier);
+
     boolean hasTimeBasedEncounters();
 
     List<Pokemon> bannedForWildEncounters();
@@ -183,6 +185,8 @@ public interface RomHandler {
     void rivalCarriesStarter();
 
     void forceFullyEvolvedTrainerPokes(int minLevel);
+
+    void onlyChangeTrainerLevels(int levelModifier);
 
     // Randomizer: moves
 

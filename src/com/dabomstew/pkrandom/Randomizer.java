@@ -335,6 +335,10 @@ public class Randomizer {
                     settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
                     settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, true, true,
                     settings.isAllowTrainerAlternateFormes());
+        } else {
+            if (settings.isTrainersLevelModified()) {
+                romHandler.onlyChangeTrainerLevels(settings.getTrainersLevelModifier());
+            }
         }
 
         if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)
@@ -426,6 +430,9 @@ public class Randomizer {
                     settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0);
             break;
         default:
+            if (settings.isWildLevelsModified()) {
+                romHandler.onlyChangeWildLevels(settings.getWildLevelModifier());
+            }
             break;
         }
 
@@ -734,7 +741,7 @@ public class Randomizer {
     }
 
     private void maybeLogWildPokemonChanges(final PrintStream log, final RomHandler romHandler) {
-        if (settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED) {
+        if (settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED && !settings.isWildLevelsModified()) {
             log.println("Wild Pokemon: Unchanged." + NEWLINE);
         } else {
             log.println("--Wild Pokemon--");
@@ -771,7 +778,7 @@ public class Randomizer {
     }
 
     private void maybeLogTrainerChanges(final PrintStream log, final RomHandler romHandler) {
-        if (settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED && !settings.isRivalCarriesStarterThroughout()) {
+        if (settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED && !settings.isRivalCarriesStarterThroughout() && !settings.isTrainersLevelModified()) {
             log.println("Trainers: Unchanged." + NEWLINE);
         } else {
             log.println("--Trainers Pokemon--");

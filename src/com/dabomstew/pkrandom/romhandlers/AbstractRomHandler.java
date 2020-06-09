@@ -941,6 +941,21 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public void onlyChangeWildLevels(int levelModifier) {
+        List<EncounterSet> currentEncounters = this.getEncounters(true);
+
+        if (levelModifier != 0) {
+            for (EncounterSet area : currentEncounters) {
+                for (Encounter enc : area.encounters) {
+                    enc.level = Math.min(100, (int) Math.round(enc.level * (1 + levelModifier / 100.0)));
+                    enc.maxLevel = Math.min(100, (int) Math.round(enc.maxLevel * (1 + levelModifier / 100.0)));
+                }
+            }
+            setEncounters(true, currentEncounters);
+        }
+    }
+
+    @Override
     public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
             int levelModifier, boolean distributionSetting, boolean mainPlaythroughSetting, boolean includeFormes) {
         checkPokemonRestrictions();
@@ -1224,6 +1239,19 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
         this.setTrainers(currentTrainers);
+    }
+
+    @Override
+    public void onlyChangeTrainerLevels(int levelModifier) {
+        List<Trainer> currentTrainers = this.getTrainers();
+        if (levelModifier != 0) {
+            for (Trainer t: currentTrainers) {
+                for (TrainerPokemon tp: t.pokemon) {
+                    tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
+                }
+            }
+            this.setTrainers(currentTrainers);
+        }
     }
 
     // MOVE DATA
@@ -2788,7 +2816,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 // System.out.println(" > Placed item #" +currentNum+ " -> " + chosenItem);
             }
         } else {
-            System.out.println("Pure random item placement...");
             for (int i = 0; i < fieldItemCount; i++) {
                 newItems.add(possibleItems.randomNonTM(this.random));
             }

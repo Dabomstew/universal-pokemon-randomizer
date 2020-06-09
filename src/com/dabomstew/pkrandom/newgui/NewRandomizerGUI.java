@@ -1822,6 +1822,7 @@ public class NewRandomizerGUI {
             tpRandomEvenDistributionMainRadioButton.setEnabled(pokemonGeneration == 5);
             tpRandomEvenDistributionMainRadioButton.setVisible(pokemonGeneration == 5);
             tpAllowAlternateFormesCheckBox.setVisible(pokemonGeneration >= 4);
+            tpPercentageLevelModifierCheckBox.setEnabled(true);
 
             tpRandomizeTrainerNamesCheckBox.setEnabled(true);
             tpRandomizeTrainerClassNamesCheckBox.setEnabled(true);
@@ -1842,6 +1843,7 @@ public class NewRandomizerGUI {
             wpRandomizeHeldItemsCheckBox.setVisible(pokemonGeneration != 1);
             wpBanBadItemsCheckBox.setVisible(pokemonGeneration != 1);
             wpBalanceShakingGrassPokemonCheckBox.setVisible(pokemonGeneration >= 5);
+            wpPercentageLevelModifierCheckBox.setEnabled(true);
 
             tmUnchangedRadioButton.setEnabled(true);
             tmUnchangedRadioButton.setSelected(true);
@@ -2071,8 +2073,6 @@ public class NewRandomizerGUI {
             tpNoEarlyWonderGuardCheckBox.setSelected(false);
             tpForceFullyEvolvedAtCheckBox.setEnabled(false);
             tpForceFullyEvolvedAtCheckBox.setSelected(false);
-            tpPercentageLevelModifierCheckBox.setEnabled(false);
-            tpPercentageLevelModifierCheckBox.setSelected(false);
             tpAllowAlternateFormesCheckBox.setEnabled(false);
             tpAllowAlternateFormesCheckBox.setSelected(false);
         } else {
@@ -2080,7 +2080,6 @@ public class NewRandomizerGUI {
             tpDontUseLegendariesCheckBox.setEnabled(true);
             tpNoEarlyWonderGuardCheckBox.setEnabled(true);
             tpForceFullyEvolvedAtCheckBox.setEnabled(true);
-            tpPercentageLevelModifierCheckBox.setEnabled(true);
             if (!limitPokemonCheckBox.isSelected()) {
                 tpAllowAlternateFormesCheckBox.setEnabled(true);
             }
@@ -2154,12 +2153,9 @@ public class NewRandomizerGUI {
             wpUseTimeBasedEncountersCheckBox.setSelected(false);
             wpDontUseLegendariesCheckBox.setEnabled(false);
             wpDontUseLegendariesCheckBox.setSelected(false);
-            wpPercentageLevelModifierCheckBox.setEnabled(false);
-            wpPercentageLevelModifierCheckBox.setSelected(false);
         } else {
             wpUseTimeBasedEncountersCheckBox.setEnabled(true);
             wpDontUseLegendariesCheckBox.setEnabled(true);
-            wpPercentageLevelModifierCheckBox.setEnabled(true);
         }
 
         if (wpRandomizeHeldItemsCheckBox.isSelected()
