@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class Version {
     public static final int VERSION = 310;
-    public static final String VERSION_STRING = "3.1.0-dev";
+    public static final String VERSION_STRING = "3.1.0";
 
     public static final Map<Integer,String> oldVersions = setupVersionsMap();
 
