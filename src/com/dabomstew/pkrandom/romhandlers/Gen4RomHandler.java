@@ -904,6 +904,35 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 encounters.add(other);
             }
         }
+
+        // Now do the extra encounters (Feebas tiles, honey trees, Great Marsh rotating Pokemon, etc.)
+        String extraEncountersFile = romEntry.getString("ExtraEncounters");
+        NARCArchive extraEncounterData = readNARC(extraEncountersFile);
+
+        // Feebas tiles
+        byte[] feebasData = extraEncounterData.files.get(0);
+        EncounterSet feebasEncounters = readExtraEncountersDPPt(feebasData, 0, 1);
+        feebasEncounters.displayName = "Mt. Coronet Feebas Tiles";
+        encounters.add(feebasEncounters);
+
+        // Honey trees
+        int[] honeyTreeOffsets = romEntry.arrayEntries.get("HoneyTreeOffsets");
+        for (int i = 0; i < honeyTreeOffsets.length; i++) {
+            byte[] honeyTreeData = extraEncounterData.files.get(honeyTreeOffsets[i]);
+            EncounterSet honeyTreeEncounters = readExtraEncountersDPPt(honeyTreeData, 0, 6);
+            honeyTreeEncounters.displayName = "Honey Tree Group " + (i + 1);
+            encounters.add(honeyTreeEncounters);
+        }
+
+        // Great Marsh rotating Pokemon
+        int[] greatMarshOffsets = new int[]{9, 10};
+        for (int i = 0; i < greatMarshOffsets.length; i++) {
+            byte[] greatMarshData = extraEncounterData.files.get(greatMarshOffsets[i]);
+            EncounterSet greatMarshEncounters = readExtraEncountersDPPt(greatMarshData, 0, 32);
+            String pokedexStatus = i == 0 ? "(Post-National Dex)" : "(Pre-National Dex)";
+            greatMarshEncounters.displayName = "Great Marsh Rotating Pokemon " + pokedexStatus;
+            encounters.add(greatMarshEncounters);
+        }
         return encounters;
     }
 
@@ -932,6 +961,19 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             encounters.add(enc);
         }
         return encounters;
+    }
+
+    private EncounterSet readExtraEncountersDPPt(byte[] data, int offset, int amount) {
+        EncounterSet es = new EncounterSet();
+        es.rate = 1;
+        for (int i = 0; i < amount; i++) {
+            int pokemon = readLong(data, offset + i * 4);
+            Encounter e = new Encounter();
+            e.level = 1;
+            e.pokemon = pokes[pokemon];
+            es.encounters.add(e);
+        }
+        return es;
     }
 
     private List<EncounterSet> getEncountersHGSS(boolean useTimeOfDay) throws IOException {
@@ -1189,6 +1231,34 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         // Save
         writeNARC(encountersFile, encounterData);
 
+        // Now do the extra encounters (Feebas tiles, honey trees, Great Marsh rotating Pokemon, etc.)
+        String extraEncountersFile = romEntry.getString("ExtraEncounters");
+        NARCArchive extraEncounterData = readNARC(extraEncountersFile);
+
+        // Feebas tiles
+        byte[] feebasData = extraEncounterData.files.get(0);
+        EncounterSet feebasEncounters = encounters.next();
+        writeExtraEncountersDPPt(feebasData, 0, feebasEncounters.encounters);
+
+        // Honey trees
+        int[] honeyTreeOffsets = romEntry.arrayEntries.get("HoneyTreeOffsets");
+        for (int i = 0; i < honeyTreeOffsets.length; i++) {
+            byte[] honeyTreeData = extraEncounterData.files.get(honeyTreeOffsets[i]);
+            EncounterSet honeyTreeEncounters = encounters.next();
+            writeExtraEncountersDPPt(honeyTreeData, 0, honeyTreeEncounters.encounters);
+        }
+
+        // Great Marsh rotating Pokemon
+        int[] greatMarshOffsets = new int[]{9, 10};
+        for (int i = 0; i < greatMarshOffsets.length; i++) {
+            byte[] greatMarshData = extraEncounterData.files.get(greatMarshOffsets[i]);
+            EncounterSet greatMarshEncounters = encounters.next();
+            writeExtraEncountersDPPt(greatMarshData, 0, greatMarshEncounters.encounters);
+        }
+
+        // Save
+        writeNARC(extraEncountersFile, extraEncounterData);
+
     }
 
     private void writeEncountersDPPt(byte[] data, int offset, List<Encounter> encounters, int enclength) {
@@ -1205,6 +1275,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             Encounter enc = encounters.get(i);
             writeLong(data, offset + i * 8, (enc.level << 8) + enc.maxLevel);
             writeLong(data, offset + i * 8 + 4, enc.pokemon.number);
+        }
+    }
+
+    private void writeExtraEncountersDPPt(byte[] data, int offset, List<Encounter> encounters) {
+        int enclength = encounters.size();
+        for (int i = 0; i < enclength; i++) {
+            Encounter enc = encounters.get(i);
+            writeLong(data, offset + i * 4, enc.pokemon.number);
         }
     }
 
