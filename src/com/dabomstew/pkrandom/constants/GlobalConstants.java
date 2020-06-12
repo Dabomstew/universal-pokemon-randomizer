@@ -1,7 +1,12 @@
 package com.dabomstew.pkrandom.constants;
 
+import com.dabomstew.pkrandom.pokemon.Stat;
+import com.dabomstew.pkrandom.pokemon.StatChange;
+
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class GlobalConstants {
 
@@ -64,8 +69,80 @@ public class GlobalConstants {
             544, // Gear Grind
             41 // Twineedle
             );
-    
-    
+
+    public static final Map<Integer,StatChange> gen6StatChanges = setupStatChanges(6);
+    public static final Map<Integer,StatChange> gen7StatChanges = setupStatChanges(7);
+    public static final Map<Integer,StatChange> gen8StatChanges = setupStatChanges(8);
+
+    private static Map<Integer,StatChange> setupStatChanges(int generation) {
+        Map<Integer,StatChange> map = new TreeMap<>();
+
+        switch(generation) {
+            case 6:
+                map.put(12,new StatChange(Stat.SPATK.val,90));
+                map.put(15,new StatChange(Stat.ATK.val,90));
+                map.put(18,new StatChange(Stat.SPEED.val,101));
+                map.put(25,new StatChange(Stat.DEF.val | Stat.SPDEF.val,40, 50));
+                map.put(26,new StatChange(Stat.SPEED.val,110));
+                map.put(31,new StatChange(Stat.ATK.val,92));
+                map.put(34,new StatChange(Stat.ATK.val,102));
+                map.put(36,new StatChange(Stat.SPATK.val,95));
+                map.put(40,new StatChange(Stat.SPATK.val,85));
+                map.put(45,new StatChange(Stat.SPATK.val,110));
+                map.put(62,new StatChange(Stat.ATK.val,95));
+                map.put(65,new StatChange(Stat.SPDEF.val,95));
+                map.put(71,new StatChange(Stat.SPDEF.val,70));
+                map.put(76,new StatChange(Stat.ATK.val,120));
+                map.put(181,new StatChange(Stat.DEF.val,85));
+                map.put(182,new StatChange(Stat.DEF.val,95));
+                map.put(184,new StatChange(Stat.SPATK.val,60));
+                map.put(189,new StatChange(Stat.SPDEF.val,95));
+                map.put(267,new StatChange(Stat.SPATK.val,100));
+                map.put(295,new StatChange(Stat.SPDEF.val,73));
+                map.put(398,new StatChange(Stat.SPDEF.val,60));
+                map.put(407,new StatChange(Stat.DEF.val,65));
+                map.put(508,new StatChange(Stat.ATK.val,110));
+                map.put(521,new StatChange(Stat.ATK.val,115));
+                map.put(526,new StatChange(Stat.SPDEF.val,80));
+                map.put(545,new StatChange(Stat.ATK.val,100));
+                map.put(553,new StatChange(Stat.DEF.val,80));
+                break;
+            case 7:
+                map.put(24,new StatChange(Stat.ATK.val,95));
+                map.put(51,new StatChange(Stat.ATK.val,100));
+//                map.put(65,new StatChange(Stat.SPDEF.val,105)); // Should be Mega Alakazam
+                map.put(83,new StatChange(Stat.ATK.val,90));
+                map.put(85,new StatChange(Stat.SPEED.val,110));
+                map.put(101,new StatChange(Stat.SPEED.val,150));
+                map.put(103,new StatChange(Stat.SPDEF.val,75));
+                map.put(164,new StatChange(Stat.SPATK.val,86));
+                map.put(168,new StatChange(Stat.SPDEF.val,70));
+                map.put(211,new StatChange(Stat.DEF.val,85));
+                map.put(219,new StatChange(Stat.HP.val | Stat.SPATK.val,60,90));
+                map.put(222,new StatChange(Stat.HP.val | Stat.DEF.val | Stat.SPDEF.val,65,95,95));
+                map.put(226,new StatChange(Stat.HP.val,85));
+                map.put(277,new StatChange(Stat.SPATK.val,75));
+                map.put(279,new StatChange(Stat.SPATK.val,95));
+                map.put(284,new StatChange(Stat.SPATK.val | Stat.SPEED.val,100,80));
+                map.put(301,new StatChange(Stat.SPEED.val,90));
+                map.put(313,new StatChange(Stat.DEF.val | Stat.SPDEF.val,75,85));
+                map.put(314,new StatChange(Stat.DEF.val | Stat.SPDEF.val,75,85));
+                map.put(337,new StatChange(Stat.HP.val,90));
+                map.put(338,new StatChange(Stat.HP.val,90));
+                map.put(358,new StatChange(Stat.HP.val | Stat.DEF.val | Stat.SPDEF.val,75,80,90));
+                map.put(527,new StatChange(Stat.HP.val,65));
+                map.put(558,new StatChange(Stat.ATK.val,105));
+                map.put(614,new StatChange(Stat.ATK.val,130));
+                map.put(615,new StatChange(Stat.HP.val | Stat.DEF.val,80,50));
+                break;
+            case 8:
+                map.put(681,new StatChange(Stat.DEF.val | Stat.SPDEF.val,140,140));
+//                map.put(681,new StatChange(Stat.ATK.val | Stat.SPATK.val,140,140)); // Should be Aegislash Blade Forme
+                break;
+        }
+        return map;
+    }
+
     /* @formatter:on */
 
     public static final int[] ptSpecialIntros = { 377, 378, 379, 479, 480, 482, 483, 484, 485, 486, 487, 491, 492, 493 };
