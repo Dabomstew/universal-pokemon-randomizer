@@ -151,9 +151,13 @@ public class GlobalConstants {
 
     public static final List<Integer> negativeAbilities = Arrays.asList(129, 112, 54, 59, 161, 103, 100, 121);
     // Defeatist, Slow Start, Truant, Forecast, Zen Mode, Klutz, Stall, Multitype
+    // To be tested (Gen 6): Stance Change, Parental Bond
+    // To be tested (Gen 7): Shields Down, Schooling, Disguise, Battle Bond, Power Construct, RKS System
+    // To be tested (Gen 8): Gulp Missile, Ice Face, Hunger Switch
 
     public static final List<Integer> badAbilities = Arrays.asList(58, 57, 107, 108, 119, 118, 132, 131, 140);
     // Minus, Plus, Anticipation, Forewarn, Frisk, Honey Gather, Friend Guard, Healer, Telepathy
+    // TBD: Symbiosis, Aura Break, Battery, Receiver, Power of Alchemy
 
     public static final int WONDER_GUARD_INDEX = 25;
 
