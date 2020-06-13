@@ -5,8 +5,27 @@ public class Gen7Constants {
     public static final int Type_SM = 0;
     public static final int Type_USUM = 1;
 
-    private static final int highestAbilityIndexSM = 232;
-    private static final int highestAbilityIndexUSUM = 233;
+    private static final int pokemonCountSM = 802, pokemonCountUSUM = 807;
+    private static final int moveCountSM = 719, moveCountUSUM = 728;
+    private static final int highestAbilityIndexSM = 232, highestAbilityIndexUSUM = 233;
+
+    public static int getPokemonCount(int romType) {
+        if (romType == Type_SM) {
+            return pokemonCountSM;
+        } else if (romType == Type_USUM) {
+            return pokemonCountUSUM;
+        }
+        return pokemonCountSM;
+    }
+
+    public static int getMoveCount(int romType) {
+        if (romType == Type_SM) {
+            return moveCountSM;
+        } else if (romType == Type_USUM) {
+            return moveCountUSUM;
+        }
+        return moveCountSM;
+    }
 
     public static int getHighestAbilityIndex(int romType) {
         if (romType == Type_SM) {
