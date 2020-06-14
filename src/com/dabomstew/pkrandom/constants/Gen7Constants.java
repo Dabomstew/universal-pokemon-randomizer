@@ -2,8 +2,8 @@ package com.dabomstew.pkrandom.constants;
 
 public class Gen7Constants {
 
-    public static final int Type_SM = 0;
-    public static final int Type_USUM = 1;
+    public static final int Type_SM = N3DSConstants.Type_SM;
+    public static final int Type_USUM = N3DSConstants.Type_USUM;
 
     private static final int pokemonCountSM = 802, pokemonCountUSUM = 807;
     private static final int moveCountSM = 719, moveCountUSUM = 728;

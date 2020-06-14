@@ -4,8 +4,8 @@ import java.util.*;
 
 public class Gen6Constants {
 
-    public static final int Type_XY = 0;
-    public static final int Type_ORAS = 1;
+    public static final int Type_XY = N3DSConstants.Type_XY;
+    public static final int Type_ORAS = N3DSConstants.Type_ORAS;
 
     public static final int pokemonCount = 721;
     private static final int moveCountXY = 617, moveCountORAS = 621;
