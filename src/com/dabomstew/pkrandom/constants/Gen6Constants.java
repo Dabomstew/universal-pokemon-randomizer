@@ -23,6 +23,12 @@ public class Gen6Constants {
             bsAbility3Offset = 26, bsFormeOffset = 28, bsFormeSpriteOffset = 30, bsFormeCountOffset = 32;
 //            bsTMHMCompatOffset = 40, bsMTCompatOffset = 60; // Need to confirm these
 
+    public static final String tmDataPrefix = "D400AE02AF02B002";
+    public static final int tmCount = 100, tmBlockOneCount = 92, tmBlockTwoCount = 8, hmBlockOneCount = 5,
+            rockSmashOffsetORAS = 10, diveOffsetORAS = 28;
+    private static final int tmBlockTwoStartingOffsetXY = 97, tmBlockTwoStartingOffsetORAS = 98,
+            hmCountXY = 5, hmCountORAS = 7;
+
     public static final Map<Integer,List<Integer>> speciesToMegaStoneXY = setupSpeciesToMegaStone(Type_XY);
     public static final Map<Integer,List<Integer>> speciesToMegaStoneORAS = setupSpeciesToMegaStone(Type_ORAS);
 
@@ -33,6 +39,24 @@ public class Gen6Constants {
             return moveCountORAS;
         }
         return moveCountXY;
+    }
+
+    public static int getTMBlockTwoStartingOffset(int romType) {
+        if (romType == Type_XY) {
+            return tmBlockTwoStartingOffsetXY;
+        } else if (romType == Type_ORAS) {
+            return tmBlockTwoStartingOffsetORAS;
+        }
+        return tmBlockTwoStartingOffsetXY;
+    }
+
+    public static int getHMCount(int romType) {
+        if (romType == Type_XY) {
+            return hmCountXY;
+        } else if (romType == Type_ORAS) {
+            return hmCountORAS;
+        }
+        return hmCountXY;
     }
 
     public static int getHighestAbilityIndex(int romType) {
