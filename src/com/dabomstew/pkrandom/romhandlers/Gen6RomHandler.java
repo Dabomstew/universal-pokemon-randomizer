@@ -26,8 +26,10 @@ package com.dabomstew.pkrandom.romhandlers;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.constants.Gen6Constants;
+import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.*;
+import pptxt.N3DSTxtHandler;
 
 import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
@@ -62,6 +64,22 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         private String romCode;
         private String titleId;
         private int romType;
+        private Map<String, String> strings = new HashMap<>();
+        private Map<String, Integer> numbers = new HashMap<>();
+
+        private int getInt(String key) {
+            if (!numbers.containsKey(key)) {
+                numbers.put(key, 0);
+            }
+            return numbers.get(key);
+        }
+
+        private String getString(String key) {
+            if (!strings.containsKey(key)) {
+                strings.put(key, "");
+            }
+            return strings.get(key);
+        }
     }
 
     private static List<RomEntry> roms;
@@ -106,6 +124,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                             }
                         } else if (r[0].equals("TitleId")) {
                             current.titleId = r[1];
+                        } else if (r[0].endsWith("Offset") || r[0].endsWith("Count") || r[0].endsWith("Number")) {
+                            int offs = parseRIInt(r[1]);
+                            current.numbers.put(r[0], offs);
+                        } else {
+                            current.strings.put(r[0],r[1]);
                         }
                     }
                 }
@@ -116,11 +139,31 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
     }
 
+    private static int parseRIInt(String off) {
+        int radix = 10;
+        off = off.trim().toLowerCase();
+        if (off.startsWith("0x") || off.startsWith("&h")) {
+            radix = 16;
+            off = off.substring(2);
+        }
+        try {
+            return Integer.parseInt(off, radix);
+        } catch (NumberFormatException ex) {
+            System.err.println("invalid base " + radix + "number " + off);
+            return 0;
+        }
+    }
+
     // This ROM
     private Pokemon[] pokes;
+    private Map<Integer,FormeInfo> formeMappings = new TreeMap<>();
     private List<Pokemon> pokemonList;
     private RomEntry romEntry;
     private byte[] code;
+    private List<String> abilityNames;
+    private List<String> itemNames;
+
+    private GARCArchive pokeGarc, stringsGarc, storyTextGarc;
 
     @Override
     protected boolean detect3DSRom(String productCode, String titleId) {
@@ -154,15 +197,113 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             throw new RandomizerIOException(e);
         }
 
-        // TODO: Actually make this work by loading it from the ROM. Only doing it this
-        // way temporarily so the randomizer won't crash
-        pokes = new Pokemon[Gen6Constants.pokemonCount + 1];
-        for (int i = 1; i <= Gen6Constants.pokemonCount; i++) {
-            pokes[i] = new Pokemon();
-            pokes[i].number = i;
+        try {
+            stringsGarc = readGARC(romEntry.getString("TextStrings"));
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
         }
 
+        // TODO: Actually make this work by loading it from the ROM. Only doing it this
+        // way temporarily so the randomizer won't crash
+//        pokes = new Pokemon[Gen6Constants.pokemonCount + 1];
+//        for (int i = 1; i <= Gen6Constants.pokemonCount; i++) {
+//            pokes[i] = new Pokemon();
+//            pokes[i].number = i;
+//        }
+        loadPokemonStats();
+
+        abilityNames = getStrings(false,romEntry.getInt("AbilityNamesTextOffset"));
+        itemNames = getStrings(false,romEntry.getInt("ItemNamesTextOffset"));
+
         pokemonList = Arrays.asList(Arrays.copyOfRange(pokes,0,Gen6Constants.pokemonCount + 1));
+    }
+
+    private void loadPokemonStats() {
+        try {
+            pokeGarc = this.readGARC(romEntry.getString("PokemonStats"));
+            String[] pokeNames = readPokemonNames();
+            int formeCount = 0;
+            pokes = new Pokemon[Gen6Constants.pokemonCount + formeCount + 1];
+            for (int i = 1; i <= Gen6Constants.pokemonCount; i++) {
+                pokes[i] = new Pokemon();
+                pokes[i].number = i;
+                loadBasicPokeStats(pokes[i],pokeGarc.files.get(i).get(0),formeMappings);
+                pokes[i].name = pokeNames[i];
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+
+    private void loadBasicPokeStats(Pokemon pkmn, byte[] stats, Map<Integer,FormeInfo> altFormes) {
+        pkmn.hp = stats[Gen6Constants.bsHPOffset] & 0xFF;
+        pkmn.attack = stats[Gen6Constants.bsAttackOffset] & 0xFF;
+        pkmn.defense = stats[Gen6Constants.bsDefenseOffset] & 0xFF;
+        pkmn.speed = stats[Gen6Constants.bsSpeedOffset] & 0xFF;
+        pkmn.spatk = stats[Gen6Constants.bsSpAtkOffset] & 0xFF;
+        pkmn.spdef = stats[Gen6Constants.bsSpDefOffset] & 0xFF;
+        // Type
+        pkmn.primaryType = Gen6Constants.typeTable[stats[Gen6Constants.bsPrimaryTypeOffset] & 0xFF];
+        pkmn.secondaryType = Gen6Constants.typeTable[stats[Gen6Constants.bsSecondaryTypeOffset] & 0xFF];
+        // Only one type?
+        if (pkmn.secondaryType == pkmn.primaryType) {
+            pkmn.secondaryType = null;
+        }
+        pkmn.catchRate = stats[Gen6Constants.bsCatchRateOffset] & 0xFF;
+        pkmn.growthCurve = ExpCurve.fromByte(stats[Gen6Constants.bsGrowthCurveOffset]);
+
+        pkmn.ability1 = stats[Gen6Constants.bsAbility1Offset] & 0xFF;
+        pkmn.ability2 = stats[Gen6Constants.bsAbility2Offset] & 0xFF;
+        pkmn.ability3 = stats[Gen6Constants.bsAbility3Offset] & 0xFF;
+
+        // Held Items?
+        int item1 = FileFunctions.read2ByteInt(stats, Gen6Constants.bsCommonHeldItemOffset);
+        int item2 = FileFunctions.read2ByteInt(stats, Gen6Constants.bsRareHeldItemOffset);
+
+        if (item1 == item2) {
+            // guaranteed
+            pkmn.guaranteedHeldItem = item1;
+            pkmn.commonHeldItem = 0;
+            pkmn.rareHeldItem = 0;
+            pkmn.darkGrassHeldItem = 0;
+        } else {
+            pkmn.guaranteedHeldItem = 0;
+            pkmn.commonHeldItem = item1;
+            pkmn.rareHeldItem = item2;
+            pkmn.darkGrassHeldItem = FileFunctions.read2ByteInt(stats, Gen6Constants.bsDarkGrassHeldItemOffset);
+        }
+
+//        int formeCount = stats[Gen6Constants.bsFormeCountOffset] & 0xFF;
+//        if (formeCount > 1) {
+//            int firstFormeOffset = FileFunctions.read2ByteInt(stats, Gen6Constants.bsFormeOffset);
+//            if (firstFormeOffset != 0) {
+//                for (int i = 1; i < formeCount; i++) {
+//                    altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.number,i,FileFunctions.read2ByteInt(stats,Gen6Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
+//                }
+//            } else {
+//                if (pkmn.number != 421 && pkmn.number != 493 && pkmn.number != 585 && pkmn.number != 586 && pkmn.number < 649) {
+//                    // Reason for exclusions:
+//                    // Cherrim/Arceus/Genesect: to avoid confusion
+//                    // Deerling/Sawsbuck: handled automatically in gen 5
+//                    pkmn.cosmeticForms = formeCount;
+//                }
+//            }
+//        }
+    }
+
+    private String[] readPokemonNames() {
+        String[] pokeNames = new String[Gen6Constants.pokemonCount + 1];
+        List<String> nameList = getStrings(false, romEntry.getInt("PokemonNamesTextOffset"));
+        for (int i = 1; i <= Gen6Constants.pokemonCount; i++) {
+            pokeNames[i] = nameList.get(i);
+        }
+        return pokeNames;
+    }
+
+    private List<String> getStrings(boolean isStoryText, int index) {
+        GARCArchive baseGARC = isStoryText ? storyTextGarc : stringsGarc;
+        byte[] rawFile = baseGARC.files.get(index).get(0);
+        return new ArrayList<>(N3DSTxtHandler.readTexts(rawFile,true,romEntry.romType));
     }
 
     @Override
@@ -179,9 +320,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     public List<Pokemon> getPokemonInclFormes() {
         // TODO: Actually make this work by loading it from the ROM. Only doing it this
         // way temporarily so the randomizer won't crash when trying to write an output ROM.
-        ArrayList<Pokemon> pokemonInclFormes = new ArrayList<>();
-        pokemonInclFormes.add(pokes[0]);
-        return pokemonInclFormes;
+        return pokemonList;
     }
 
     @Override
@@ -488,7 +627,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public String[] getItemNames() {
-        return new String[0];
+        return itemNames.toArray(new String[0]);
     }
 
     @Override
@@ -498,7 +637,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public String abilityName(int number) {
-        return null;
+        return abilityNames.get(number);
     }
 
     @Override

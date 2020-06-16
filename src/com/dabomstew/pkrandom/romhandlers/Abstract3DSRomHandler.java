@@ -25,6 +25,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.NCCH;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 
@@ -114,6 +115,10 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 
     protected void writeCode(byte[] data) throws IOException {
         baseRom.writeCode(data);
+    }
+
+    protected GARCArchive readGARC(String subpath) throws IOException {
+        return new GARCArchive(readFile(subpath));
     }
 
     protected byte[] readFile(String location) throws IOException {
