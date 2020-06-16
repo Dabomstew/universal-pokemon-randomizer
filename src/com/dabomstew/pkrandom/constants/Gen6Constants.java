@@ -1,5 +1,7 @@
 package com.dabomstew.pkrandom.constants;
 
+import com.dabomstew.pkrandom.pokemon.Type;
+
 import java.util.*;
 
 public class Gen6Constants {
@@ -10,6 +12,8 @@ public class Gen6Constants {
     public static final int pokemonCount = 721;
     private static final int moveCountXY = 617, moveCountORAS = 621;
     private static final int highestAbilityIndexXY = 188, highestAbilityIndexORAS = 191;
+
+    public static final Type[] typeTable = constructTypeTable();
 
     // Copied from pk3DS. "Dark Grass Held Item" should probably be renamed
     public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3,
@@ -38,6 +42,29 @@ public class Gen6Constants {
             return highestAbilityIndexORAS;
         }
         return highestAbilityIndexXY;
+    }
+
+    private static Type[] constructTypeTable() {
+        Type[] table = new Type[256];
+        table[0x00] = Type.NORMAL;
+        table[0x01] = Type.FIGHTING;
+        table[0x02] = Type.FLYING;
+        table[0x03] = Type.POISON;
+        table[0x04] = Type.GROUND;
+        table[0x05] = Type.ROCK;
+        table[0x06] = Type.BUG;
+        table[0x07] = Type.GHOST;
+        table[0x08] = Type.STEEL;
+        table[0x09] = Type.FIRE;
+        table[0x0A] = Type.WATER;
+        table[0x0B] = Type.GRASS;
+        table[0x0C] = Type.ELECTRIC;
+        table[0x0D] = Type.PSYCHIC;
+        table[0x0E] = Type.ICE;
+        table[0x0F] = Type.DRAGON;
+        table[0x10] = Type.DARK;
+        table[0x11] = Type.FAIRY;
+        return table;
     }
 
     private static Map<Integer,List<Integer>> setupSpeciesToMegaStone(int romType) {
