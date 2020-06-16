@@ -446,8 +446,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 tms.add(readWord(code, offset + i * 2));
             }
             return tms;
-        }
-        else {
+        } else {
             return null;
         }
     }
@@ -468,8 +467,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 hms.add(readWord(code, offset + Gen6Constants.diveOffsetORAS));
             }
             return hms;
-        }
-        else {
+        } else {
             return null;
         }
     }
