@@ -2,6 +2,9 @@ package com.dabomstew.pkrandom.ctr;
 
 import cuecompressors.BLZCoder;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -11,6 +14,8 @@ public class GARCArchive {
 
     private final int VER_4 = 0x0400;
     private final int VER_6 = 0x0600;
+    private final int garcHeaderSize_4 = 0x1C;
+    private final int garcHeaderSize_6 = 0x24;
     private final String garcMagic = "CRAG";
     private final String fatoMagic = "OTAF";
     private final String fatbMagic = "BTAF";
@@ -128,7 +133,7 @@ public class GARCArchive {
                 FATBSubEntry subEntry = entry.subEntries.get(k);
                 bbuf.position(garc.dataOffset + subEntry.start);
                 byte[] file = new byte[subEntry.length];
-                boolean compressed = bbuf.get(bbuf.position() + 1) == 0x11;
+                boolean compressed = bbuf.get(bbuf.position()) == 0x11;
                 bbuf.get(file);
                 if (compressed) {
                     files.put(k,new BLZCoder(null).BLZ_DecodePub(file,"garc"));
@@ -139,6 +144,142 @@ public class GARCArchive {
             fimb.files.add(files);
         }
         return true;
+    }
+
+    public byte[] getBytes() throws IOException {
+        int garcHeaderSize = garc.version == VER_4 ? garcHeaderSize_4 : garcHeaderSize_6;
+        ByteBuffer garcBuf = ByteBuffer.allocate(garcHeaderSize);
+        garcBuf.order(ByteOrder.LITTLE_ENDIAN);
+        garcBuf.put(garcMagic.getBytes());
+        garcBuf.putInt(garcHeaderSize);
+        garcBuf.putShort((short)0xFEFF);
+        garcBuf.putShort((short)VER_4);
+        garcBuf.putInt(4);
+
+        ByteBuffer fatoBuf = ByteBuffer.allocate(fato.headerSize);
+        fatoBuf.order(ByteOrder.LITTLE_ENDIAN);
+        fatoBuf.put(fatoMagic.getBytes());
+        fatoBuf.putInt(fato.headerSize);
+        fatoBuf.putShort((short)fato.entryCount);
+        fatoBuf.putShort((short)fato.padding);
+
+        ByteBuffer fatbBuf = ByteBuffer.allocate(fatb.headerSize);
+        fatbBuf.order(ByteOrder.LITTLE_ENDIAN);
+        fatbBuf.put(fatbMagic.getBytes());
+        fatbBuf.putInt(fatb.headerSize);
+        fatbBuf.putInt(fatb.fileCount);
+
+        ByteBuffer fimbHeaderBuf = ByteBuffer.allocate(fimb.headerSize);
+        fimbHeaderBuf.order(ByteOrder.LITTLE_ENDIAN);
+        fimbHeaderBuf.put(fimbMagic.getBytes());
+        fimbHeaderBuf.putInt(fimb.headerSize);
+
+        ByteArrayOutputStream fimbPayloadStream = new ByteArrayOutputStream(); // Unknown size, can't use ByteBuffer
+
+        int fimbOffset = 0;
+        int largestSize = 0;
+        int largestPadded = 0;
+        for (Map<Integer,byte[]> directory: fimb.files) {
+            int bitVector = 0;
+            int totalLength = 0;
+            for (int k: directory.keySet()) {
+                bitVector |= (1 << k);
+                byte[] file = directory.get(k);
+                fimbPayloadStream.write(file);
+                totalLength += file.length;
+            }
+
+            int paddingRequired = totalLength % garc.contentPadToNearest;
+            if (paddingRequired != 0) {
+                paddingRequired = garc.contentPadToNearest - paddingRequired;
+            }
+
+            if (totalLength > largestSize) {
+                largestSize = totalLength;
+            }
+            if (totalLength + paddingRequired > largestPadded) {
+                largestPadded = totalLength + paddingRequired;
+            }
+
+            for (int i = 0; i < paddingRequired; i++) {
+                fimbPayloadStream.write(fato.padding & 0xFF);
+            }
+
+            fatoBuf.putInt(fatbBuf.position() - 12);
+
+            fatbBuf.putInt(bitVector);
+            fatbBuf.putInt(fimbOffset);
+            fimbOffset = fimbPayloadStream.size();
+            fatbBuf.putInt(fimbOffset);
+            fatbBuf.putInt(totalLength);
+        }
+
+        int dataOffset = garcHeaderSize + fatoBuf.position() + fatbBuf.position() + fimb.headerSize;
+        garcBuf.putInt(dataOffset);
+        garcBuf.putInt(dataOffset + fimbOffset);
+        if (garc.version == VER_4) {
+            garcBuf.putInt(largestSize);
+        } else if (garc.version == VER_6) {
+            garcBuf.putInt(largestPadded);
+            garcBuf.putInt(largestSize);
+            garcBuf.putInt(garc.contentPadToNearest);
+        }
+        fimbHeaderBuf.putInt(fimbPayloadStream.size());
+
+        garcBuf.flip();
+        fatoBuf.flip();
+        fatbBuf.flip();
+        fimbHeaderBuf.flip();
+
+        byte[] fullArray = new byte[garcBuf.limit() + fatoBuf.limit() + fatbBuf.limit() + fimbHeaderBuf.limit() + fimbPayloadStream.size()];
+        System.arraycopy(garcBuf.array(),
+                0,
+                fullArray,
+                0,
+                garcBuf.limit());
+        System.arraycopy(fatoBuf.array(),
+                0,
+                fullArray,
+                garcBuf.limit(),
+                fatoBuf.limit());
+        System.arraycopy(fatbBuf.array(),
+                0,
+                fullArray,
+                garcBuf.limit()+fatoBuf.limit(),
+                fatbBuf.limit());
+        System.arraycopy(fimbHeaderBuf.array(),
+                0,
+                fullArray,
+                garcBuf.limit()+fatoBuf.limit()+fatbBuf.limit(),
+                fimbHeaderBuf.limit());
+//        garcBuf.get(fullArray);
+//        fatoBuf.get(fullArray,garcBuf.limit(),fatoBuf.limit());
+//        fatbBuf.get(fullArray,garcBuf.limit()+fatoBuf.limit(),fatbBuf.limit());
+//        fimbHeaderBuf.get(fullArray,garcBuf.limit()+fatoBuf.limit()+fatbBuf.limit(),fimbHeaderBuf.limit());
+        System.arraycopy(fimbPayloadStream.toByteArray(),
+                0,
+                fullArray,
+                garcBuf.limit()+fatoBuf.limit()+fatbBuf.limit()+fimbHeaderBuf.limit(),
+                fimbPayloadStream.size());
+        return fullArray;
+    }
+
+
+
+    public byte[] getFile(int index) {
+        return fimb.files.get(index).get(0);
+    }
+
+    public byte[] getFile(int index, int subIndex) {
+        return fimb.files.get(index).get(subIndex);
+    }
+
+    public void setFile(int index, byte[] data) {
+        fimb.files.get(index).put(0,data);
+    }
+
+    public Map<Integer,byte[]> getDirectory(int index) {
+        return fimb.files.get(index);
     }
 
     private class GARCFrame {
