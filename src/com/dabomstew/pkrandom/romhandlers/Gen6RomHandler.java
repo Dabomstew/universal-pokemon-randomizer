@@ -296,6 +296,49 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 //        }
     }
 
+    private void savePokemonStats() {
+        for (int i = 1; i <= Gen6Constants.pokemonCount; i++) {
+            saveBasicPokeStats(pokes[i], pokeGarc.files.get(i).get(0));
+        }
+        try {
+            this.writeGARC(romEntry.getString("PokemonStats"),pokeGarc);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+
+    private void saveBasicPokeStats(Pokemon pkmn, byte[] stats) {
+        stats[Gen6Constants.bsHPOffset] = (byte) pkmn.hp;
+        stats[Gen6Constants.bsAttackOffset] = (byte) pkmn.attack;
+        stats[Gen6Constants.bsDefenseOffset] = (byte) pkmn.defense;
+        stats[Gen6Constants.bsSpeedOffset] = (byte) pkmn.speed;
+        stats[Gen6Constants.bsSpAtkOffset] = (byte) pkmn.spatk;
+        stats[Gen6Constants.bsSpDefOffset] = (byte) pkmn.spdef;
+        stats[Gen6Constants.bsPrimaryTypeOffset] = Gen6Constants.typeToByte(pkmn.primaryType);
+        if (pkmn.secondaryType == null) {
+            stats[Gen6Constants.bsSecondaryTypeOffset] = stats[Gen6Constants.bsPrimaryTypeOffset];
+        } else {
+            stats[Gen6Constants.bsSecondaryTypeOffset] = Gen6Constants.typeToByte(pkmn.secondaryType);
+        }
+        stats[Gen6Constants.bsCatchRateOffset] = (byte) pkmn.catchRate;
+        stats[Gen6Constants.bsGrowthCurveOffset] = pkmn.growthCurve.toByte();
+
+        stats[Gen6Constants.bsAbility1Offset] = (byte) pkmn.ability1;
+        stats[Gen6Constants.bsAbility2Offset] = (byte) pkmn.ability2;
+        stats[Gen6Constants.bsAbility3Offset] = (byte) pkmn.ability3;
+
+        // Held items
+        if (pkmn.guaranteedHeldItem > 0) {
+            FileFunctions.write2ByteInt(stats, Gen6Constants.bsCommonHeldItemOffset, pkmn.guaranteedHeldItem);
+            FileFunctions.write2ByteInt(stats, Gen6Constants.bsRareHeldItemOffset, pkmn.guaranteedHeldItem);
+            FileFunctions.write2ByteInt(stats, Gen6Constants.bsDarkGrassHeldItemOffset, 0);
+        } else {
+            FileFunctions.write2ByteInt(stats, Gen6Constants.bsCommonHeldItemOffset, pkmn.commonHeldItem);
+            FileFunctions.write2ByteInt(stats, Gen6Constants.bsRareHeldItemOffset, pkmn.rareHeldItem);
+            FileFunctions.write2ByteInt(stats, Gen6Constants.bsDarkGrassHeldItemOffset, pkmn.darkGrassHeldItem);
+        }
+    }
+
     private String[] readPokemonNames() {
         String[] pokeNames = new String[Gen6Constants.pokemonCount + 1];
         List<String> nameList = getStrings(false, romEntry.getInt("PokemonNamesTextOffset"));
@@ -349,6 +392,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     protected void savingROM() throws IOException {
+
+        savePokemonStats();
         // do nothing for now
     }
 
