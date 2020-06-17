@@ -121,6 +121,10 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
         return new GARCArchive(readFile(subpath));
     }
 
+    protected void writeGARC(String subpath, GARCArchive garc) throws IOException {
+        this.writeFile(subpath,garc.getBytes());
+    }
+
     protected byte[] readFile(String location) throws IOException {
         return baseRom.getFile(location);
     }

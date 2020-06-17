@@ -125,6 +125,11 @@ public class FileFunctions {
         return (data[index] & 0xFF) | ((data[index + 1] & 0xFF) << 8);
     }
 
+    public static void write2ByteInt(byte[] data, int offset, int value) {
+        data[offset] = (byte) (value & 0xFF);
+        data[offset + 1] = (byte) ((value >> 8) & 0xFF);
+    }
+
     public static void writeFullInt(byte[] data, int offset, int value) {
         byte[] valueBytes = ByteBuffer.allocate(4).putInt(value).array();
         System.arraycopy(valueBytes, 0, data, offset, 4);
