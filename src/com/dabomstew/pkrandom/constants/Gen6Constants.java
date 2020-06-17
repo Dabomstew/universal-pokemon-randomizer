@@ -1,5 +1,6 @@
 package com.dabomstew.pkrandom.constants;
 
+import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.pokemon.Type;
 
 import java.util.*;
@@ -12,6 +13,21 @@ public class Gen6Constants {
     public static final int pokemonCount = 721;
     private static final int moveCountXY = 617, moveCountORAS = 621;
     private static final int highestAbilityIndexXY = 188, highestAbilityIndexORAS = 191;
+
+    public static final MoveCategory[] moveCategoryIndices = { MoveCategory.STATUS, MoveCategory.PHYSICAL,
+            MoveCategory.SPECIAL };
+
+    public static byte moveCategoryToByte(MoveCategory cat) {
+        switch (cat) {
+            case PHYSICAL:
+                return 1;
+            case SPECIAL:
+                return 2;
+            case STATUS:
+            default:
+                return 0;
+        }
+    }
 
     public static final Type[] typeTable = constructTypeTable();
 

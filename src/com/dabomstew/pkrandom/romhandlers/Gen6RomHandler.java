@@ -27,7 +27,9 @@ import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen6Constants;
+import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.ctr.GARCArchive;
+import com.dabomstew.pkrandom.ctr.Mini;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.*;
 import pptxt.N3DSTxtHandler;
@@ -159,12 +161,13 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     private Pokemon[] pokes;
     private Map<Integer,FormeInfo> formeMappings = new TreeMap<>();
     private List<Pokemon> pokemonList;
+    private Move[] moves;
     private RomEntry romEntry;
     private byte[] code;
     private List<String> abilityNames;
     private List<String> itemNames;
 
-    private GARCArchive pokeGarc, stringsGarc, storyTextGarc;
+    private GARCArchive pokeGarc, moveGarc, stringsGarc, storyTextGarc;
 
     @Override
     protected boolean detect3DSRom(String productCode, String titleId) {
@@ -212,6 +215,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 //            pokes[i].number = i;
 //        }
         loadPokemonStats();
+        loadMoves();
 
         abilityNames = getStrings(false,romEntry.getInt("AbilityNamesTextOffset"));
         itemNames = getStrings(false,romEntry.getInt("ItemNamesTextOffset"));
@@ -307,6 +311,42 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         return new ArrayList<>(N3DSTxtHandler.readTexts(rawFile,true,romEntry.romType));
     }
 
+    private void loadMoves() {
+        try {
+            moveGarc = this.readGARC(romEntry.getString("MoveData"));
+            int moveCount = Gen6Constants.getMoveCount(romEntry.romType);
+            moves = new Move[moveCount + 1];
+            List<String> moveNames = getStrings(false, romEntry.getInt("MoveNamesTextOffset"));
+            for (int i = 1; i <= moveCount; i++) {
+                byte[] moveData;
+                if (romEntry.romType == Gen6Constants.Type_ORAS) {
+                    moveData = Mini.UnpackMini(moveGarc.files.get(0).get(0), "WD")[i];
+                } else {
+                    moveData = moveGarc.files.get(i).get(0);
+                }
+                moves[i] = new Move();
+                moves[i].name = moveNames.get(i);
+                moves[i].number = i;
+                moves[i].internalId = i;
+                moves[i].hitratio = (moveData[4] & 0xFF);
+                moves[i].power = moveData[3] & 0xFF;
+                moves[i].pp = moveData[5] & 0xFF;
+                moves[i].type = Gen6Constants.typeTable[moveData[0] & 0xFF];
+                moves[i].category = Gen6Constants.moveCategoryIndices[moveData[2] & 0xFF];
+
+                if (GlobalConstants.normalMultihitMoves.contains(i)) {
+                    moves[i].hitCount = 19 / 6.0;
+                } else if (GlobalConstants.doubleHitMoves.contains(i)) {
+                    moves[i].hitCount = 2;
+                } else if (i == GlobalConstants.TRIPLE_KICK_INDEX) {
+                    moves[i].hitCount = 2.71; // this assumes the first hit lands
+                }
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+
     @Override
     protected void savingROM() throws IOException {
         // do nothing for now
@@ -363,7 +403,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Move> getMoves() {
-        return new ArrayList<>();
+        return Arrays.asList(moves);
     }
 
     @Override

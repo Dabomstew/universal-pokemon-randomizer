@@ -58,13 +58,16 @@ public class GlobalConstants {
             42, // Pin Missile
             350, // Rock Blast
             131, // Spike Cannon
-            541 // Tail Slap
+            541, // Tail Slap
+            594 // Water Shuriken
             );
     
     public static final List<Integer> doubleHitMoves = Arrays.asList(
             155, // Bonemerang
             458, // Double Hit
+            742, // Double Iron Bash
             24, // Double Kick
+            751, // Dragon Darts
             530, // Dual Chop
             544, // Gear Grind
             41 // Twineedle
