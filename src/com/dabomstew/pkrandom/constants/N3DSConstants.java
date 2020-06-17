@@ -175,4 +175,14 @@ public class N3DSConstants {
         }
         return map;
     }
+
+    public static int getVariableCode(String name, int romType) {
+        Map<Integer,String> map = getTextVariableCodes(romType);
+        for (int k: map.keySet()) {
+            if (map.get(k).equals(name)) {
+                return k;
+            }
+        }
+        return 0;
+    }
 }

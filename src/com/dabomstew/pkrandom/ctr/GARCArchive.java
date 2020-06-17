@@ -20,6 +20,7 @@ public class GARCArchive {
     private final String fatoMagic = "OTAF";
     private final String fatbMagic = "BTAF";
     private final String fimbMagic = "BMIF";
+    private boolean skipDecompression;
 
     public List<Map<Integer,byte[]>> files = new ArrayList<>();
 
@@ -32,7 +33,8 @@ public class GARCArchive {
 
     }
 
-    public GARCArchive(byte[] data) throws IOException {
+    public GARCArchive(byte[] data, boolean skipDecompression) throws IOException {
+        this.skipDecompression = skipDecompression;
         boolean success = readFrames(data);
         if (!success) {
             throw new IOException("Invalid GARC file");
@@ -133,7 +135,7 @@ public class GARCArchive {
                 FATBSubEntry subEntry = entry.subEntries.get(k);
                 bbuf.position(garc.dataOffset + subEntry.start);
                 byte[] file = new byte[subEntry.length];
-                boolean compressed = bbuf.get(bbuf.position()) == 0x11;
+                boolean compressed = bbuf.get(bbuf.position()) == 0x11 && !skipDecompression;
                 bbuf.get(file);
                 if (compressed) {
                     files.put(k,new BLZCoder(null).BLZ_DecodePub(file,"garc"));

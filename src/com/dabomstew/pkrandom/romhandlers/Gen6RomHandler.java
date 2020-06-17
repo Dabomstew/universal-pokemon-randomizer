@@ -202,7 +202,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
 
         try {
-            stringsGarc = readGARC(romEntry.getString("TextStrings"));
+            stringsGarc = readGARC(romEntry.getString("TextStrings"),true);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
@@ -225,7 +225,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     private void loadPokemonStats() {
         try {
-            pokeGarc = this.readGARC(romEntry.getString("PokemonStats"));
+            pokeGarc = this.readGARC(romEntry.getString("PokemonStats"),true);
             String[] pokeNames = readPokemonNames();
             int formeCount = 0;
             pokes = new Pokemon[Gen6Constants.pokemonCount + formeCount + 1];
@@ -354,9 +354,20 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         return new ArrayList<>(N3DSTxtHandler.readTexts(rawFile,true,romEntry.romType));
     }
 
+    private void setStrings(boolean isStoryText, int index, List<String> strings) {
+        GARCArchive baseGARC = isStoryText ? storyTextGarc : stringsGarc;
+        byte[] oldRawFile = baseGARC.files.get(index).get(0);
+        try {
+            byte[] newRawFile = N3DSTxtHandler.saveEntry(oldRawFile, strings, romEntry.romType);
+            baseGARC.setFile(index, newRawFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void loadMoves() {
         try {
-            moveGarc = this.readGARC(romEntry.getString("MoveData"));
+            moveGarc = this.readGARC(romEntry.getString("MoveData"),true);
             int moveCount = Gen6Constants.getMoveCount(romEntry.romType);
             moves = new Move[moveCount + 1];
             List<String> moveNames = getStrings(false, romEntry.getInt("MoveNamesTextOffset"));
@@ -394,7 +405,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     protected void savingROM() throws IOException {
 
         savePokemonStats();
-        // do nothing for now
     }
 
     @Override

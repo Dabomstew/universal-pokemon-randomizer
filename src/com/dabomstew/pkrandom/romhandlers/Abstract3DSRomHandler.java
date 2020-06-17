@@ -117,8 +117,8 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
         baseRom.writeCode(data);
     }
 
-    protected GARCArchive readGARC(String subpath) throws IOException {
-        return new GARCArchive(readFile(subpath));
+    protected GARCArchive readGARC(String subpath, boolean skipDecompression) throws IOException {
+        return new GARCArchive(readFile(subpath),skipDecompression);
     }
 
     protected void writeGARC(String subpath, GARCArchive garc) throws IOException {
