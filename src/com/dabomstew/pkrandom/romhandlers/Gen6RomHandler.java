@@ -25,6 +25,7 @@ package com.dabomstew.pkrandom.romhandlers;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
+import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen6Constants;
 import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -477,12 +478,43 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getTMMoves() {
-        return new ArrayList<>();
+        String tmDataPrefix = Gen6Constants.tmDataPrefix;
+        int offset = find(code, tmDataPrefix);
+        if (offset != 0) {
+            offset += Gen6Constants.tmDataPrefix.length() / 2; // because it was a prefix
+            List<Integer> tms = new ArrayList<>();
+            for (int i = 0; i < Gen6Constants.tmBlockOneCount; i++) {
+                tms.add(readWord(code, offset + i * 2));
+            }
+            int blockTwoStartingOffset = Gen6Constants.getTMBlockTwoStartingOffset(romEntry.romType);
+            for (int i = blockTwoStartingOffset; i < blockTwoStartingOffset + Gen6Constants.tmBlockTwoCount; i++) {
+                tms.add(readWord(code, offset + i * 2));
+            }
+            return tms;
+        } else {
+            return null;
+        }
     }
 
     @Override
     public List<Integer> getHMMoves() {
-        return new ArrayList<>();
+        String tmDataPrefix = Gen6Constants.tmDataPrefix;
+        int offset = find(code, tmDataPrefix);
+        if (offset != 0) {
+            offset += Gen6Constants.tmDataPrefix.length() / 2; // because it was a prefix
+            offset += Gen6Constants.tmBlockOneCount * 2; // TM data
+            List<Integer> hms = new ArrayList<>();
+            for (int i = 0; i < Gen6Constants.hmBlockOneCount; i++) {
+                hms.add(readWord(code, offset + i * 2));
+            }
+            if (romEntry.romType == Gen6Constants.Type_ORAS) {
+                hms.add(readWord(code, offset + Gen6Constants.rockSmashOffsetORAS));
+                hms.add(readWord(code, offset + Gen6Constants.diveOffsetORAS));
+            }
+            return hms;
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -490,14 +522,32 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         // do nothing for now
     }
 
+    private int find(byte[] data, String hexString) {
+        if (hexString.length() % 2 != 0) {
+            return -3; // error
+        }
+        byte[] searchFor = new byte[hexString.length() / 2];
+        for (int i = 0; i < searchFor.length; i++) {
+            searchFor[i] = (byte) Integer.parseInt(hexString.substring(i * 2, i * 2 + 2), 16);
+        }
+        List<Integer> found = RomFunctions.search(data, searchFor);
+        if (found.size() == 0) {
+            return -1; // not found
+        } else if (found.size() > 1) {
+            return -2; // not unique
+        } else {
+            return found.get(0);
+        }
+    }
+
     @Override
     public int getTMCount() {
-        return 0;
+        return Gen6Constants.tmCount;
     }
 
     @Override
     public int getHMCount() {
-        return 0;
+        return Gen6Constants.getHMCount(romEntry.romType);
     }
 
     @Override

@@ -25,6 +25,7 @@ package com.dabomstew.pkrandom.romhandlers;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
+import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen7Constants;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.*;
@@ -288,12 +289,24 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getTMMoves() {
-        return new ArrayList<>();
+        String tmDataPrefix = Gen7Constants.getTmDataPrefix(romEntry.romType);
+        int offset = find(code, tmDataPrefix);
+        if (offset != 0) {
+            offset += tmDataPrefix.length() / 2; // because it was a prefix
+            List<Integer> tms = new ArrayList<>();
+            for (int i = 0; i < Gen7Constants.tmCount; i++) {
+                tms.add(readWord(code, offset + i * 2));
+            }
+            return tms;
+        } else {
+            return null;
+        }
     }
 
     @Override
     public List<Integer> getHMMoves() {
-        return new ArrayList<>();
+        // Gen 7 does not have any HMs
+        return null;
     }
 
     @Override
@@ -301,13 +314,32 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         // do nothing for now
     }
 
+    private int find(byte[] data, String hexString) {
+        if (hexString.length() % 2 != 0) {
+            return -3; // error
+        }
+        byte[] searchFor = new byte[hexString.length() / 2];
+        for (int i = 0; i < searchFor.length; i++) {
+            searchFor[i] = (byte) Integer.parseInt(hexString.substring(i * 2, i * 2 + 2), 16);
+        }
+        List<Integer> found = RomFunctions.search(data, searchFor);
+        if (found.size() == 0) {
+            return -1; // not found
+        } else if (found.size() > 1) {
+            return -2; // not unique
+        } else {
+            return found.get(0);
+        }
+    }
+
     @Override
     public int getTMCount() {
-        return 0;
+        return Gen7Constants.tmCount;
     }
 
     @Override
     public int getHMCount() {
+        // Gen 7 does not have any HMs
         return 0;
     }
 
