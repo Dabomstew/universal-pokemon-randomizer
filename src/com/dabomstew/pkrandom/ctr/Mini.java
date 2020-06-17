@@ -3,9 +3,9 @@ package com.dabomstew.pkrandom.ctr;
 /*----------------------------------------------------------------------------*/
 /*--  Mini.java - class for packing/unpacking Mini archives                 --*/
 /*--                                                                        --*/
-/*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
-/*--  Pokemon and any associated names and the like are                     --*/
-/*--  trademark and (C) Nintendo 1996-2012.                                 --*/
+/*--  Code based on "pk3DS", copyright (C) Kaphotics                        --*/
+/*--                                                                        --*/
+/*--  Ported to Java by UPR-ZX Team under the terms of the GPL:             --*/
 /*--                                                                        --*/
 /*--  This program is free software: you can redistribute it and/or modify  --*/
 /*--  it under the terms of the GNU General Public License as published by  --*/
@@ -23,7 +23,69 @@ package com.dabomstew.pkrandom.ctr;
 
 import com.dabomstew.pkrandom.FileFunctions;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 public class Mini {
+    public static void PackMiniArchiveIntoGARC(GARCArchive garc, byte[][] miniArchive, String identifier) throws IOException {
+        Map<Integer, byte[]> newMap = new TreeMap<>();
+        newMap.put(0, Mini.PackMini(miniArchive, identifier));
+        List<Map<Integer, byte[]>> newList = new ArrayList<>();
+        newList.add(newMap);
+        garc.updateFiles(newList);
+    }
+
+    public static byte[] PackMini(byte[][] fileData, String identifier) throws IOException {
+        // Create new Binary with the relevant header bytes
+        byte[] data = new byte[4];
+        data[0] = (byte) identifier.charAt(0);
+        data[1] = (byte) identifier.charAt(1);
+        ByteBuffer buf = ByteBuffer.allocate(2);
+        buf.order(ByteOrder.LITTLE_ENDIAN);
+        buf.putShort((short) fileData.length);
+        System.arraycopy(buf.array(), 0, data, 2, 2);
+
+        int count = fileData.length;
+        int dataOffset = 4 + 4 + (count * 4);
+
+        // Start the data filling
+        ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
+        ByteArrayOutputStream offsetMap = new ByteArrayOutputStream();
+        // For each file...
+        for (int i = 0; i < count; i++) {
+            int fileOffset = dataOut.size() + dataOffset;
+            buf = ByteBuffer.allocate(4);
+            buf.order(ByteOrder.LITTLE_ENDIAN);
+            buf.putInt(fileOffset);
+            offsetMap.write(buf.array());
+            dataOut.write(fileData[i]);
+
+            // Pad with zeroes until len % 4 == 0
+            while (dataOut.size() % 4 != 0) {
+                dataOut.write((byte) 0);
+            }
+        }
+        // Cap the file
+        buf = ByteBuffer.allocate(4);
+        buf.order(ByteOrder.LITTLE_ENDIAN);
+        buf.putInt(dataOut.size() + dataOffset);
+        offsetMap.write(buf.array());
+
+        ByteArrayOutputStream newPack = new ByteArrayOutputStream();
+        ByteArrayOutputStream header = new ByteArrayOutputStream();
+        header.write(data);
+        header.writeTo(newPack);
+        offsetMap.writeTo(newPack);
+        dataOut.writeTo(newPack);
+        return newPack.toByteArray();
+    }
+
     public static byte[][] UnpackMini(byte[] fileData, String identifier) {
         if (fileData == null || fileData.length < 4) {
             return null;

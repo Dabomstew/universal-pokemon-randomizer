@@ -146,6 +146,10 @@ public class GARCArchive {
         return true;
     }
 
+    public void updateFiles(List<Map<Integer,byte[]>> files) {
+        fimb.files = files;
+    }
+
     public byte[] getBytes() throws IOException {
         int garcHeaderSize = garc.version == VER_4 ? garcHeaderSize_4 : garcHeaderSize_6;
         ByteBuffer garcBuf = ByteBuffer.allocate(garcHeaderSize);

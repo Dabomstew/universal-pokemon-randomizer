@@ -296,49 +296,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 //        }
     }
 
-    private void savePokemonStats() {
-        for (int i = 1; i <= Gen6Constants.pokemonCount; i++) {
-            saveBasicPokeStats(pokes[i], pokeGarc.files.get(i).get(0));
-        }
-        try {
-            this.writeGARC(romEntry.getString("PokemonStats"),pokeGarc);
-        } catch (IOException e) {
-            throw new RandomizerIOException(e);
-        }
-    }
-
-    private void saveBasicPokeStats(Pokemon pkmn, byte[] stats) {
-        stats[Gen6Constants.bsHPOffset] = (byte) pkmn.hp;
-        stats[Gen6Constants.bsAttackOffset] = (byte) pkmn.attack;
-        stats[Gen6Constants.bsDefenseOffset] = (byte) pkmn.defense;
-        stats[Gen6Constants.bsSpeedOffset] = (byte) pkmn.speed;
-        stats[Gen6Constants.bsSpAtkOffset] = (byte) pkmn.spatk;
-        stats[Gen6Constants.bsSpDefOffset] = (byte) pkmn.spdef;
-        stats[Gen6Constants.bsPrimaryTypeOffset] = Gen6Constants.typeToByte(pkmn.primaryType);
-        if (pkmn.secondaryType == null) {
-            stats[Gen6Constants.bsSecondaryTypeOffset] = stats[Gen6Constants.bsPrimaryTypeOffset];
-        } else {
-            stats[Gen6Constants.bsSecondaryTypeOffset] = Gen6Constants.typeToByte(pkmn.secondaryType);
-        }
-        stats[Gen6Constants.bsCatchRateOffset] = (byte) pkmn.catchRate;
-        stats[Gen6Constants.bsGrowthCurveOffset] = pkmn.growthCurve.toByte();
-
-        stats[Gen6Constants.bsAbility1Offset] = (byte) pkmn.ability1;
-        stats[Gen6Constants.bsAbility2Offset] = (byte) pkmn.ability2;
-        stats[Gen6Constants.bsAbility3Offset] = (byte) pkmn.ability3;
-
-        // Held items
-        if (pkmn.guaranteedHeldItem > 0) {
-            FileFunctions.write2ByteInt(stats, Gen6Constants.bsCommonHeldItemOffset, pkmn.guaranteedHeldItem);
-            FileFunctions.write2ByteInt(stats, Gen6Constants.bsRareHeldItemOffset, pkmn.guaranteedHeldItem);
-            FileFunctions.write2ByteInt(stats, Gen6Constants.bsDarkGrassHeldItemOffset, 0);
-        } else {
-            FileFunctions.write2ByteInt(stats, Gen6Constants.bsCommonHeldItemOffset, pkmn.commonHeldItem);
-            FileFunctions.write2ByteInt(stats, Gen6Constants.bsRareHeldItemOffset, pkmn.rareHeldItem);
-            FileFunctions.write2ByteInt(stats, Gen6Constants.bsDarkGrassHeldItemOffset, pkmn.darkGrassHeldItem);
-        }
-    }
-
     private String[] readPokemonNames() {
         String[] pokeNames = new String[Gen6Constants.pokemonCount + 1];
         List<String> nameList = getStrings(false, romEntry.getInt("PokemonNamesTextOffset"));
@@ -394,7 +351,86 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     protected void savingROM() throws IOException {
 
         savePokemonStats();
-        // do nothing for now
+        saveMoves();
+    }
+
+    private void savePokemonStats() {
+        for (int i = 1; i <= Gen6Constants.pokemonCount; i++) {
+            saveBasicPokeStats(pokes[i], pokeGarc.files.get(i).get(0));
+        }
+        try {
+            this.writeGARC(romEntry.getString("PokemonStats"),pokeGarc);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+
+    private void saveBasicPokeStats(Pokemon pkmn, byte[] stats) {
+        stats[Gen6Constants.bsHPOffset] = (byte) pkmn.hp;
+        stats[Gen6Constants.bsAttackOffset] = (byte) pkmn.attack;
+        stats[Gen6Constants.bsDefenseOffset] = (byte) pkmn.defense;
+        stats[Gen6Constants.bsSpeedOffset] = (byte) pkmn.speed;
+        stats[Gen6Constants.bsSpAtkOffset] = (byte) pkmn.spatk;
+        stats[Gen6Constants.bsSpDefOffset] = (byte) pkmn.spdef;
+        stats[Gen6Constants.bsPrimaryTypeOffset] = Gen6Constants.typeToByte(pkmn.primaryType);
+        if (pkmn.secondaryType == null) {
+            stats[Gen6Constants.bsSecondaryTypeOffset] = stats[Gen6Constants.bsPrimaryTypeOffset];
+        } else {
+            stats[Gen6Constants.bsSecondaryTypeOffset] = Gen6Constants.typeToByte(pkmn.secondaryType);
+        }
+        stats[Gen6Constants.bsCatchRateOffset] = (byte) pkmn.catchRate;
+        stats[Gen6Constants.bsGrowthCurveOffset] = pkmn.growthCurve.toByte();
+
+        stats[Gen6Constants.bsAbility1Offset] = (byte) pkmn.ability1;
+        stats[Gen6Constants.bsAbility2Offset] = (byte) pkmn.ability2;
+        stats[Gen6Constants.bsAbility3Offset] = (byte) pkmn.ability3;
+
+        // Held items
+        if (pkmn.guaranteedHeldItem > 0) {
+            FileFunctions.write2ByteInt(stats, Gen6Constants.bsCommonHeldItemOffset, pkmn.guaranteedHeldItem);
+            FileFunctions.write2ByteInt(stats, Gen6Constants.bsRareHeldItemOffset, pkmn.guaranteedHeldItem);
+            FileFunctions.write2ByteInt(stats, Gen6Constants.bsDarkGrassHeldItemOffset, 0);
+        } else {
+            FileFunctions.write2ByteInt(stats, Gen6Constants.bsCommonHeldItemOffset, pkmn.commonHeldItem);
+            FileFunctions.write2ByteInt(stats, Gen6Constants.bsRareHeldItemOffset, pkmn.rareHeldItem);
+            FileFunctions.write2ByteInt(stats, Gen6Constants.bsDarkGrassHeldItemOffset, pkmn.darkGrassHeldItem);
+        }
+    }
+
+    private void saveMoves() {
+        int moveCount = Gen6Constants.getMoveCount(romEntry.romType);
+        byte[][] miniArchive = new byte[0][0];
+        if (romEntry.romType == Gen6Constants.Type_ORAS) {
+            miniArchive = Mini.UnpackMini(moveGarc.files.get(0).get(0), "WD");
+        }
+        for (int i = 1; i <= moveCount; i++) {
+            byte[] data;
+            if (romEntry.romType == Gen6Constants.Type_ORAS) {
+                data = miniArchive[i];
+            } else {
+                data = moveGarc.files.get(i).get(0);
+            }
+            data[2] = Gen6Constants.moveCategoryToByte(moves[i].category);
+            data[3] = (byte) moves[i].power;
+            data[0] = Gen6Constants.typeToByte(moves[i].type);
+            int hitratio = (int) Math.round(moves[i].hitratio);
+            if (hitratio < 0) {
+                hitratio = 0;
+            }
+            if (hitratio > 101) {
+                hitratio = 100;
+            }
+            data[4] = (byte) hitratio;
+            data[5] = (byte) moves[i].pp;
+        }
+        try {
+            if (romEntry.romType == Gen6Constants.Type_ORAS) {
+                Mini.PackMiniArchiveIntoGARC(moveGarc, miniArchive, "WD");
+            }
+            this.writeGARC(romEntry.getString("MoveData"), moveGarc);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     @Override
