@@ -51,7 +51,7 @@ public class Gen6Constants {
             bsAbility3Offset = 26, bsFormeOffset = 28, bsFormeSpriteOffset = 30, bsFormeCountOffset = 32,
             bsTMHMCompatOffset = 40, bsMTCompatOffset = 56; // Need to confirm these
 
-    public static final int evolutionMethodCount = 31;
+    public static final int evolutionMethodCount = 34;
 
     public static final int slowpokeIndex = 79, karrablastIndex = 588, shelmetIndex = 616;
 

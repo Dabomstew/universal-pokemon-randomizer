@@ -33,6 +33,9 @@ public enum EvolutionType {
     LEVEL_WITH_DARK(-1, -1, -1, -1, -1, 30),
     LEVEL_UPSIDE_DOWN(-1, -1, -1, -1, -1, 28),
     LEVEL_RAIN(-1, -1, -1, -1, -1, 31),
+    LEVEL_DAY(-1, -1, -1, -1, -1, 32),
+    LEVEL_NIGHT(-1, -1, -1, -1, -1, 33),
+    LEVEL_FEMALE_ESPURR(-1, -1, -1, -1, -1, 34),
     NONE(-1, -1, -1, -1, -1);
     /* @formatter:on */
 
