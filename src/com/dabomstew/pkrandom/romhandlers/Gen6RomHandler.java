@@ -249,13 +249,26 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         try {
             pokeGarc = this.readGARC(romEntry.getString("PokemonStats"),true);
             String[] pokeNames = readPokemonNames();
-            int formeCount = 0;
+            int formeCount = Gen6Constants.getFormeCount(romEntry.romType);
             pokes = new Pokemon[Gen6Constants.pokemonCount + formeCount + 1];
             for (int i = 1; i <= Gen6Constants.pokemonCount; i++) {
                 pokes[i] = new Pokemon();
                 pokes[i].number = i;
                 loadBasicPokeStats(pokes[i],pokeGarc.files.get(i).get(0),formeMappings);
                 pokes[i].name = pokeNames[i];
+            }
+
+            int i = Gen6Constants.pokemonCount + 1;
+            for (int k: formeMappings.keySet()) {
+                pokes[i] = new Pokemon();
+                pokes[i].number = i;
+                loadBasicPokeStats(pokes[i], pokeGarc.files.get(k).get(0),formeMappings);
+                FormeInfo fi = formeMappings.get(k);
+                pokes[i].name = pokeNames[fi.baseForme];
+                pokes[i].baseForme = fi.baseForme;
+                pokes[i].formeNumber = fi.formeNumber;
+//                pokes[i].formeSuffix = Gen6Constants.getFormeSuffix(k,romEntry.romType);
+                i++;
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
@@ -301,22 +314,22 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             pkmn.darkGrassHeldItem = FileFunctions.read2ByteInt(stats, Gen6Constants.bsDarkGrassHeldItemOffset);
         }
 
-//        int formeCount = stats[Gen6Constants.bsFormeCountOffset] & 0xFF;
-//        if (formeCount > 1) {
-//            int firstFormeOffset = FileFunctions.read2ByteInt(stats, Gen6Constants.bsFormeOffset);
-//            if (firstFormeOffset != 0) {
-//                for (int i = 1; i < formeCount; i++) {
-//                    altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.number,i,FileFunctions.read2ByteInt(stats,Gen6Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
-//                }
-//            } else {
-//                if (pkmn.number != 421 && pkmn.number != 493 && pkmn.number != 585 && pkmn.number != 586 && pkmn.number < 649) {
-//                    // Reason for exclusions:
-//                    // Cherrim/Arceus/Genesect: to avoid confusion
-//                    // Deerling/Sawsbuck: handled automatically in gen 5
-//                    pkmn.cosmeticForms = formeCount;
-//                }
-//            }
-//        }
+        int formeCount = stats[Gen6Constants.bsFormeCountOffset] & 0xFF;
+        if (formeCount > 1) {
+            int firstFormeOffset = FileFunctions.read2ByteInt(stats, Gen6Constants.bsFormeOffset);
+            if (firstFormeOffset != 0 ) {
+                for (int i = 1; i < formeCount; i++) {
+                    altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.number,i,FileFunctions.read2ByteInt(stats,Gen6Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
+                }
+            } else {
+                if (pkmn.number != 421 && pkmn.number != 493 && pkmn.number != 585 && pkmn.number != 586 && pkmn.number < 649) {
+                    // Reason for exclusions:
+                    // Cherrim/Arceus/Genesect: to avoid confusion
+                    // Deerling/Sawsbuck: handled automatically in gen 5
+                    pkmn.cosmeticForms = formeCount;
+                }
+            }
+        }
     }
 
     private String[] readPokemonNames() {

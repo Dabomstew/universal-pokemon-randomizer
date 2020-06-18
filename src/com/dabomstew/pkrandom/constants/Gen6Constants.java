@@ -11,6 +11,18 @@ public class Gen6Constants {
     public static final int Type_ORAS = N3DSConstants.Type_ORAS;
 
     public static final int pokemonCount = 721;
+    private static final int xyFormeCount = 77, orasFormeCount = 80;
+    private static final int xyformeOffset = 0, orasformeOffset = 0, orasformeMovesetOffset = 35;
+
+    private static final List<Integer> actuallyCosmeticFormsXY = Arrays.asList(
+            737, // Cherrim
+            748, // Meowstic
+            749, 750, 751, 752, 753, 754, 755, 756, 757, // Furfrou
+            794, 795, 796, 797 // Floette (non-Eternal)
+    );
+
+    public static final int actuallyCosmeticFormCountXY = actuallyCosmeticFormsXY.size();
+
     private static final int moveCountXY = 617, moveCountORAS = 621;
     private static final int highestAbilityIndexXY = 188, highestAbilityIndexORAS = 191;
 
@@ -53,6 +65,33 @@ public class Gen6Constants {
 
     public static final Map<Integer,List<Integer>> speciesToMegaStoneXY = setupSpeciesToMegaStone(Type_XY);
     public static final Map<Integer,List<Integer>> speciesToMegaStoneORAS = setupSpeciesToMegaStone(Type_ORAS);
+
+    public static int getFormeCount(int romType) {
+        if (romType == Type_XY) {
+            return xyFormeCount;
+        } else if (romType == Type_ORAS) {
+            return orasFormeCount;
+        }
+        return 0;
+    }
+
+    public static int getFormeOffset(int romType) {
+        if (romType == Type_XY) {
+            return xyformeOffset;
+        } else if (romType == Type_ORAS) {
+            return orasformeOffset;
+        }
+        return 0;
+    }
+
+    public static int getFormeMovesetOffset(int romType) {
+        if (romType == Type_XY) {
+            return xyformeOffset;
+        } else if (romType == Type_ORAS) {
+            return orasformeMovesetOffset;
+        }
+        return 0;
+    }
 
     public static int getMoveCount(int romType) {
         if (romType == Type_XY) {
