@@ -41,6 +41,10 @@ public class Gen6Constants {
 
     public static final int evolutionMethodCount = 31;
 
+    public static final int slowpokeIndex = 79, karrablastIndex = 588, shelmetIndex = 616;
+
+    public static final int waterStoneIndex = 84;
+
     public static final String tmDataPrefix = "D400AE02AF02B002";
     public static final int tmCount = 100, tmBlockOneCount = 92, tmBlockTwoCount = 8, hmBlockOneCount = 5,
             rockSmashOffsetORAS = 10, diveOffsetORAS = 28;
