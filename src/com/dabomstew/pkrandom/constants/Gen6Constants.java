@@ -39,6 +39,8 @@ public class Gen6Constants {
             bsAbility3Offset = 26, bsFormeOffset = 28, bsFormeSpriteOffset = 30, bsFormeCountOffset = 32;
 //            bsTMHMCompatOffset = 40, bsMTCompatOffset = 60; // Need to confirm these
 
+    public static final int evolutionMethodCount = 31;
+
     public static final String tmDataPrefix = "D400AE02AF02B002";
     public static final int tmCount = 100, tmBlockOneCount = 92, tmBlockTwoCount = 8, hmBlockOneCount = 5,
             rockSmashOffsetORAS = 10, diveOffsetORAS = 28;

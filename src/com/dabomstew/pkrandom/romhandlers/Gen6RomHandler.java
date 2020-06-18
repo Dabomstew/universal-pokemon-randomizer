@@ -243,6 +243,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+        populateEvolutions();
     }
 
     private void loadBasicPokeStats(Pokemon pkmn, byte[] stats, Map<Integer,FormeInfo> altFormes) {
@@ -308,6 +309,46 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             pokeNames[i] = nameList.get(i);
         }
         return pokeNames;
+    }
+
+    private void populateEvolutions() {
+        for (Pokemon pkmn : pokes) {
+            if (pkmn != null) {
+                pkmn.evolutionsFrom.clear();
+                pkmn.evolutionsTo.clear();
+            }
+        }
+
+        // Read NARC
+        try {
+            GARCArchive evoGARC = readGARC(romEntry.getString("PokemonEvolutions"),true);
+            for (int i = 1; i <= Gen6Constants.pokemonCount; i++) {
+                Pokemon pk = pokes[i];
+                byte[] evoEntry = evoGARC.files.get(i).get(0);
+                for (int evo = 0; evo < 8; evo++) {
+                    int method = readWord(evoEntry, evo * 6);
+                    int species = readWord(evoEntry, evo * 6 + 4);
+                    if (method >= 1 && method <= Gen6Constants.evolutionMethodCount && species >= 1) {
+                        EvolutionType et = EvolutionType.fromIndex(6, method);
+                        if (et.equals(EvolutionType.LEVEL_HIGH_BEAUTY)) continue; // Remove Feebas "split" evolution
+                        int extraInfo = readWord(evoEntry, evo * 6 + 2);
+                        Evolution evol = new Evolution(pk, pokes[species], true, et, extraInfo);
+                        if (!pk.evolutionsFrom.contains(evol)) {
+                            pk.evolutionsFrom.add(evol);
+                            pokes[species].evolutionsTo.add(evol);
+                        }
+                    }
+                }
+                // split evos don't carry stats
+                if (pk.evolutionsFrom.size() > 1) {
+                    for (Evolution e : pk.evolutionsFrom) {
+                        e.carryStats = false;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     private List<String> getStrings(boolean isStoryText, int index) {
@@ -379,6 +420,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+
+        writeEvolutions();
     }
 
     private void saveBasicPokeStats(Pokemon pkmn, byte[] stats) {
@@ -410,6 +453,35 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             FileFunctions.write2ByteInt(stats, Gen6Constants.bsCommonHeldItemOffset, pkmn.commonHeldItem);
             FileFunctions.write2ByteInt(stats, Gen6Constants.bsRareHeldItemOffset, pkmn.rareHeldItem);
             FileFunctions.write2ByteInt(stats, Gen6Constants.bsDarkGrassHeldItemOffset, pkmn.darkGrassHeldItem);
+        }
+    }
+
+    private void writeEvolutions() {
+        try {
+            GARCArchive evoGARC = readGARC(romEntry.getString("PokemonEvolutions"),true);
+            for (int i = 1; i <= Gen6Constants.pokemonCount; i++) {
+                byte[] evoEntry = evoGARC.files.get(i).get(0);
+                Pokemon pk = pokes[i];
+                int evosWritten = 0;
+                for (Evolution evo : pk.evolutionsFrom) {
+                    writeWord(evoEntry, evosWritten * 6, evo.type.toIndex(5));
+                    writeWord(evoEntry, evosWritten * 6 + 2, evo.extraInfo);
+                    writeWord(evoEntry, evosWritten * 6 + 4, evo.to.number);
+                    evosWritten++;
+                    if (evosWritten == 7) {
+                        break;
+                    }
+                }
+                while (evosWritten < 7) {
+                    writeWord(evoEntry, evosWritten * 6, 0);
+                    writeWord(evoEntry, evosWritten * 6 + 2, 0);
+                    writeWord(evoEntry, evosWritten * 6 + 4, 0);
+                    evosWritten++;
+                }
+            }
+            writeGARC(romEntry.getString("PokemonEvolutions"), evoGARC);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
         }
     }
 
