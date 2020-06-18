@@ -236,13 +236,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             throw new RandomizerIOException(e);
         }
 
-        // TODO: Actually make this work by loading it from the ROM. Only doing it this
-        // way temporarily so the randomizer won't crash
-//        pokes = new Pokemon[Gen6Constants.pokemonCount + 1];
-//        for (int i = 1; i <= Gen6Constants.pokemonCount; i++) {
-//            pokes[i] = new Pokemon();
-//            pokes[i].number = i;
-//        }
         loadPokemonStats();
         loadMoves();
 
