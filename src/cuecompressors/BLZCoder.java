@@ -2,6 +2,8 @@ package cuecompressors;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import com.dabomstew.pkrandom.FileFunctions;
 
@@ -151,15 +153,19 @@ public class BLZCoder {
     }
 
     public byte[] BLZ_DecodePub(byte[] data, String reference) {
-        BLZResult result = BLZ_Decode(data);
-        if (result != null) {
-            byte[] retbuf = new byte[result.length];
-            for (int i = 0; i < result.length; i++) {
-                retbuf[i] = (byte) result.buffer[i];
-            }
-            return retbuf;
+        if (reference.equals("GARC")) {
+            return LZSS_Decode(data);
         } else {
-            return null;
+            BLZResult result = BLZ_Decode(data);
+            if (result != null) {
+                byte[] retbuf = new byte[result.length];
+                for (int i = 0; i < result.length; i++) {
+                    retbuf[i] = (byte) result.buffer[i];
+                }
+                return retbuf;
+            } else {
+                return null;
+            }
         }
     }
 
@@ -261,6 +267,101 @@ public class BLZCoder {
 
         return new BLZResult(raw_buffer, raw_len);
 
+    }
+
+    private byte[] LZSS_Decode(byte[] data) {
+        ByteBuffer buf = ByteBuffer.wrap(data);
+        buf.order(ByteOrder.LITTLE_ENDIAN);
+        if (buf.get(0) != 0x11) {
+            System.err.println("Not a valid LZSS compressed file");
+            return null;
+        }
+        int decSize = buf.getInt() >>> 8;
+        if (decSize == 0) {
+            decSize = buf.getInt();
+        }
+
+        ByteBuffer outBuf = ByteBuffer.allocate(decSize);
+        byte flags = 0;
+        int mask = 1;
+        while (outBuf.position() < decSize) {
+            if (mask == 1) {
+                if (buf.position() >= data.length) {
+                    System.err.println("Not enough data");
+                    return null;
+                }
+                flags = buf.get();
+                mask = 0x80;
+            } else {
+                mask >>>= 1;
+            }
+
+            if ((flags & mask) > 0) {
+                if (buf.position() >= data.length) {
+                    System.err.println("Not enough data");
+                    return null;
+                }
+                byte byte1 = buf.get();
+                int length = byte1 >> 4;
+                int disp;
+                if (length == 0) {
+                    if (buf.position() + 1 >= data.length) {
+                        System.err.println("Not enough data");
+                        return null;
+                    }
+                    byte byte2 = buf.get();
+                    byte byte3 = buf.get();
+                    length = (((byte1 & 0x0F) << 4) | ((byte2 & 0xFF) >>> 4)) + 0x11;
+                    disp = (((byte2 & 0x0F) << 8) | (byte3 & 0xFF)) + 0x1;
+                } else if (length == 1) {
+                    if (buf.position() + 2 >= data.length) {
+                        System.err.println("Not enough data");
+                        return null;
+                    }
+
+                    byte byte2 = buf.get();
+                    byte byte3 = buf.get();
+                    byte byte4 = buf.get();
+
+                    length = (((byte1 & 0x0F) << 12) | ((byte2 & 0xFF) << 4) | ((byte3 & 0xFF) >>> 4)) + 0x111;
+                    disp = (((byte3 & 0x0F) << 8) | (byte4 & 0xFF)) + 0x1;
+                } else {
+                    if (buf.position() > data.length) {
+                        System.err.println("Not enough data");
+                        return null;
+                    }
+                    byte byte2 = buf.get();
+
+                    length = ((byte1 & 0xF0) >>> 4) + 0x1;
+                    disp = (((byte1 & 0x0F) << 8) | (byte2 & 0xFF)) + 0x1;
+                }
+
+                if (disp > outBuf.position()) {
+                    System.err.println("oops");
+                    return null;
+                }
+                int bufIndex = outBuf.position() - disp;
+                for (int i = 0; i < length; i++) {
+                    byte next = outBuf.get(bufIndex);
+                    bufIndex++;
+                    outBuf.put(next);
+                }
+            } else {
+                if (buf.position() > data.length) {
+                    System.err.println("Not enough data");
+                    return null;
+                }
+                byte next = buf.get();
+                outBuf.put(next);
+
+            }
+        }
+        if ((buf.position() ^ (buf.position() & 0x3)) + 4 < data.length) {
+            System.err.println("Too much input");
+            return null;
+        }
+        outBuf.flip();
+        return outBuf.array();
     }
 
     private int[] prepareData(byte[] data) {

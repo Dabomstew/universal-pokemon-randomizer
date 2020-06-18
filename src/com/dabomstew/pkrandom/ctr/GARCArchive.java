@@ -138,7 +138,7 @@ public class GARCArchive {
                 boolean compressed = bbuf.get(bbuf.position()) == 0x11 && !skipDecompression;
                 bbuf.get(file);
                 if (compressed) {
-                    files.put(k,new BLZCoder(null).BLZ_DecodePub(file,"garc"));
+                    files.put(k,new BLZCoder(null).BLZ_DecodePub(file,"GARC"));
                 } else {
                     files.put(k,file);
                 }
