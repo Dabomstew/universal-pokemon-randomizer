@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Version {
-    public static final int VERSION = 310;
-    public static final String VERSION_STRING = "3.1.0";
+    public static final int VERSION = 311; // Increment by 1 for new version
+    public static final String VERSION_STRING = "3.2.0-dev";
 
     public static final Map<Integer,String> oldVersions = setupVersionsMap();
 
