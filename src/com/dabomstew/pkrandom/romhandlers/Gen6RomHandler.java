@@ -190,6 +190,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     private Pokemon[] pokes;
     private Map<Integer,FormeInfo> formeMappings = new TreeMap<>();
     private List<Pokemon> pokemonList;
+    private List<Pokemon> pokemonListInclFormes;
     private Move[] moves;
     private RomEntry romEntry;
     private byte[] code;
@@ -239,10 +240,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         loadPokemonStats();
         loadMoves();
 
+        pokemonListInclFormes = Arrays.asList(pokes);
+        pokemonList = Arrays.asList(Arrays.copyOfRange(pokes,0,Gen6Constants.pokemonCount + 1));
+
         abilityNames = getStrings(false,romEntry.getInt("AbilityNamesTextOffset"));
         itemNames = getStrings(false,romEntry.getInt("ItemNamesTextOffset"));
 
-        pokemonList = Arrays.asList(Arrays.copyOfRange(pokes,0,Gen6Constants.pokemonCount + 1));
     }
 
     private void loadPokemonStats() {
@@ -558,7 +561,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Pokemon> getPokemonInclFormes() {
-        return pokemonList;
+        return pokemonListInclFormes;
     }
 
     @Override
