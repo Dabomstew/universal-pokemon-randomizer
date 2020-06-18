@@ -67,13 +67,21 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         super(random, logStream);
     }
 
+    private static class OffsetWithinEntry {
+        private int entry;
+        private int offset;
+    }
+
     private static class RomEntry {
         private String name;
         private String romCode;
         private String titleId;
         private int romType;
+        private boolean staticPokemonSupport = false, copyStaticPokemon = false;
         private Map<String, String> strings = new HashMap<>();
         private Map<String, Integer> numbers = new HashMap<>();
+        private Map<String, int[]> arrayEntries = new HashMap<>();
+        private Map<String, OffsetWithinEntry[]> offsetArrayEntries = new HashMap<>();
 
         private int getInt(String key) {
             if (!numbers.containsKey(key)) {
@@ -132,6 +140,22 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                             }
                         } else if (r[0].equals("TitleId")) {
                             current.titleId = r[1];
+                        } else if (r[0].equals("CopyFrom")) {
+                            for (RomEntry otherEntry : roms) {
+                                if (r[1].equalsIgnoreCase(otherEntry.romCode)) {
+                                    // copy from here
+                                    current.arrayEntries.putAll(otherEntry.arrayEntries);
+                                    current.numbers.putAll(otherEntry.numbers);
+                                    current.strings.putAll(otherEntry.strings);
+                                    current.offsetArrayEntries.putAll(otherEntry.offsetArrayEntries);
+//                                    if (current.copyStaticPokemon) {
+//                                        current.staticPokemon.addAll(otherEntry.staticPokemon);
+//                                        current.staticPokemonSupport = true;
+//                                    } else {
+//                                        current.staticPokemonSupport = false;
+//                                    }
+                                }
+                            }
                         } else if (r[0].endsWith("Offset") || r[0].endsWith("Count") || r[0].endsWith("Number")) {
                             int offs = parseRIInt(r[1]);
                             current.numbers.put(r[0], offs);
