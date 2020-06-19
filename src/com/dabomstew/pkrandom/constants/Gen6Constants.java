@@ -11,17 +11,21 @@ public class Gen6Constants {
     public static final int Type_ORAS = N3DSConstants.Type_ORAS;
 
     public static final int pokemonCount = 721;
-    private static final int xyFormeCount = 77, orasFormeCount = 80;
-    private static final int xyformeOffset = 0, orasformeOffset = 0, orasformeMovesetOffset = 35;
+    private static final int xyFormeCount = 77, orasFormeCount = 104;
+    private static final int orasformeMovesetOffset = 35;
 
-    private static final List<Integer> actuallyCosmeticFormsXY = Arrays.asList(
+    public static final List<Integer> actuallyCosmeticForms = Arrays.asList(
             737, // Cherrim
-            748, // Meowstic
+            743, // Keldeo
             749, 750, 751, 752, 753, 754, 755, 756, 757, // Furfrou
-            794, 795, 796, 797 // Floette (non-Eternal)
+            794, 795, 796, 797, // Floette (non-Eternal)
+            815, 816, 817, 818, 819, 820 // Cosplay Pikachu
     );
 
-    public static final int actuallyCosmeticFormCountXY = actuallyCosmeticFormsXY.size();
+//    public static final int actuallyCosmeticFormCountXY = actuallyCosmeticForms.size();
+
+    public static final Map<Integer,String> formeSuffixes = setupFormeSuffixes();
+    public static final Map<Integer,String> dummyFormeSuffixes = setupDummyFormeSuffixes();
 
     private static final int moveCountXY = 617, moveCountORAS = 621;
     private static final int highestAbilityIndexXY = 188, highestAbilityIndexORAS = 191;
@@ -75,18 +79,9 @@ public class Gen6Constants {
         return 0;
     }
 
-    public static int getFormeOffset(int romType) {
-        if (romType == Type_XY) {
-            return xyformeOffset;
-        } else if (romType == Type_ORAS) {
-            return orasformeOffset;
-        }
-        return 0;
-    }
-
     public static int getFormeMovesetOffset(int romType) {
         if (romType == Type_XY) {
-            return xyformeOffset;
+            return orasformeMovesetOffset;
         } else if (romType == Type_ORAS) {
             return orasformeMovesetOffset;
         }
@@ -196,6 +191,209 @@ public class Gen6Constants {
             default:
                 return 0; // normal by default
         }
+    }
+
+    private static Map<Integer,String> setupFormeSuffixes() {
+        Map<Integer,String> formeSuffixes = new HashMap<>();
+        formeSuffixes.put(722,"-A"); // Deoxys-A
+        formeSuffixes.put(723,"-D"); // Deoxys-D
+        formeSuffixes.put(724,"-S"); // Deoxys-S
+        formeSuffixes.put(725,"-S"); // Wormadam-S
+        formeSuffixes.put(726,"-T"); // Wormadam-T
+        formeSuffixes.put(727,"-S"); // Shaymin-S
+        formeSuffixes.put(728,"-O"); // Giratina-O
+        formeSuffixes.put(729,"-H"); // Rotom-H
+        formeSuffixes.put(730,"-W"); // Rotom-W
+        formeSuffixes.put(731,"-Fr"); // Rotom-Fr
+        formeSuffixes.put(732,"-Fa"); // Rotom-Fa
+        formeSuffixes.put(733,"-M"); // Rotom-M
+        formeSuffixes.put(734,"-F"); // Castform-F
+        formeSuffixes.put(735,"-W"); // Castform-W
+        formeSuffixes.put(736,"-I"); // Castform-I
+        formeSuffixes.put(737,"-S"); // Cherrim-S (cosmetic)
+        formeSuffixes.put(738,"-B"); // Basculin-B
+        formeSuffixes.put(739,"-Z"); // Darmanitan-Z
+        formeSuffixes.put(740,"-P"); // Meloetta-P
+        formeSuffixes.put(741,"-W"); // Kyurem-W
+        formeSuffixes.put(742,"-B"); // Kyurem-B
+        formeSuffixes.put(743,"-R"); // Keldeo-R (cosmetic)
+        formeSuffixes.put(744,"-T"); // Tornadus-T
+        formeSuffixes.put(745,"-T"); // Thundurus-T
+        formeSuffixes.put(746,"-T"); // Landorus-T
+        formeSuffixes.put(747,"-Mega"); // Mega Gengar
+        formeSuffixes.put(748,"-F"); // Meowstic
+        // 749 - 757 Furfrou
+        formeSuffixes.put(758,"-Mega"); // Mega Gardevoir
+        formeSuffixes.put(759,"-Mega"); // Mega Ampharos
+        formeSuffixes.put(760,"-Mega"); // Mega Venusaur
+        formeSuffixes.put(761,"-Mega-X"); // Mega Charizard X
+        formeSuffixes.put(762,"-Mega-Y"); // Mega Charizard Y
+        formeSuffixes.put(763,"-Mega-X"); // Mega Mewtwo X
+        formeSuffixes.put(764,"-Mega-Y"); // Mega Mewtwo Y
+        formeSuffixes.put(765,"-Mega"); // Mega Blaziken
+        formeSuffixes.put(766,"-Mega"); // Mega Medicham
+        formeSuffixes.put(767,"-Mega"); // Mega Houndoom
+        formeSuffixes.put(768,"-Mega"); // Mega Aggron
+        formeSuffixes.put(769,"-Mega"); // Mega Banette
+        formeSuffixes.put(770,"-Mega"); // Mega Tyranitar
+        formeSuffixes.put(771,"-Mega"); // Mega Scizor
+        formeSuffixes.put(772,"-Mega"); // Mega Pinsir
+        formeSuffixes.put(773,"-Mega"); // Mega Aerodactyl
+        formeSuffixes.put(774,"-Mega"); // Mega Lucario
+        formeSuffixes.put(775,"-Mega"); // Mega Abomasnow
+        formeSuffixes.put(776,"-B");    // Aegislash-B
+        formeSuffixes.put(777,"-Mega"); // Mega Blastoise
+        formeSuffixes.put(778,"-Mega"); // Mega Kangaskhan
+        formeSuffixes.put(779,"-Mega"); // Mega Gyarados
+        formeSuffixes.put(780,"-Mega"); // Mega Absol
+        formeSuffixes.put(781,"-Mega"); // Mega Alakazam
+        formeSuffixes.put(782,"-Mega"); // Mega Heracross
+        formeSuffixes.put(783,"-Mega"); // Mega Mawile
+        formeSuffixes.put(784,"-Mega"); // Mega Manectric
+        formeSuffixes.put(785,"-Mega"); // Mega Garchomp
+        formeSuffixes.put(786,"-Mega"); // Mega Latios
+        formeSuffixes.put(787,"-Mega"); // Mega Latias
+        formeSuffixes.put(788,"-M"); // Pumpkaboo-M
+        formeSuffixes.put(789,"-L"); // Pumpkaboo-L
+        formeSuffixes.put(790,"-XL"); // Pumpkaboo-XL
+        formeSuffixes.put(791,"-M"); // Gourgeist-M
+        formeSuffixes.put(792,"-L"); // Gourgeist-L
+        formeSuffixes.put(793,"-XL"); // Gourgeist-XL
+        // 794 - 797 Floette
+        formeSuffixes.put(798,"-E"); // Floette-E
+        formeSuffixes.put(799,"-Mega"); // Mega Swampert
+        formeSuffixes.put(800,"-Mega"); // Mega Sceptile
+        formeSuffixes.put(801,"-Mega"); // Mega Sableye
+        formeSuffixes.put(802,"-Mega"); // Mega Altaria
+        formeSuffixes.put(803,"-Mega"); // Mega Gallade
+        formeSuffixes.put(804,"-Mega"); // Mega Audino
+        formeSuffixes.put(805,"-Mega"); // Mega Sharpedo
+        formeSuffixes.put(806,"-Mega"); // Mega Slowbro
+        formeSuffixes.put(807,"-Mega"); // Mega Steelix
+        formeSuffixes.put(808,"-Mega"); // Mega Pidgeot
+        formeSuffixes.put(809,"-Mega"); // Mega Glalie
+        formeSuffixes.put(810,"-Mega"); // Mega Diancie
+        formeSuffixes.put(811,"-Mega"); // Mega Metagross
+        formeSuffixes.put(812,"-P"); // Kyogre-P
+        formeSuffixes.put(813,"-P"); // Groudon-P
+        formeSuffixes.put(814,"-Mega"); // Mega Rayquaza
+        // 815 - 820 contest Pikachu
+        formeSuffixes.put(821,"-U"); // Hoopa-U
+        formeSuffixes.put(822,"-Mega"); // Mega Camerupt
+        formeSuffixes.put(823,"-Mega"); // Mega Lopunny
+        formeSuffixes.put(824,"-Mega"); // Mega Salamence
+        formeSuffixes.put(825,"-Mega"); // Mega Beedrill
+
+        return formeSuffixes;
+    }
+
+    private static Map<Integer,Map<Integer,String>> setupFormeSuffixesByBaseForme() {
+        Map<Integer,Map<Integer,String>> map = new HashMap<>();
+
+        Map<Integer,String> deoxysMap = new HashMap<>();
+        deoxysMap.put(1,"-A");
+        deoxysMap.put(2,"-D");
+        deoxysMap.put(3,"-S");
+        map.put(386,deoxysMap);
+
+        Map<Integer,String> wormadamMap = new HashMap<>();
+        wormadamMap.put(1,"-S");
+        wormadamMap.put(2,"-T");
+        map.put(413,wormadamMap);
+
+        Map<Integer,String> shayminMap = new HashMap<>();
+        shayminMap.put(1,"-S");
+        map.put(492,shayminMap);
+
+        Map<Integer,String> giratinaMap = new HashMap<>();
+        giratinaMap.put(1,"-O");
+        map.put(487,giratinaMap);
+
+        Map<Integer,String> rotomMap = new HashMap<>();
+        rotomMap.put(1,"-H");
+        rotomMap.put(2,"-W");
+        rotomMap.put(3,"-Fr");
+        rotomMap.put(4,"-Fa");
+        rotomMap.put(5,"-M");
+        map.put(479,rotomMap);
+
+        Map<Integer,String> castformMap = new HashMap<>();
+        castformMap.put(1,"-F");
+        castformMap.put(2,"-W");
+        castformMap.put(3,"-I");
+        map.put(351,castformMap);
+
+        Map<Integer,String> basculinMap = new HashMap<>();
+        basculinMap.put(1,"-B");
+        map.put(550,basculinMap);
+
+        Map<Integer,String> darmanitanMap = new HashMap<>();
+        darmanitanMap.put(1,"-Z");
+        map.put(555,darmanitanMap);
+
+        Map<Integer,String> meloettaMap = new HashMap<>();
+        meloettaMap.put(1,"-P");
+        map.put(648,meloettaMap);
+
+        Map<Integer,String> kyuremMap = new HashMap<>();
+        kyuremMap.put(1,"-W");
+        kyuremMap.put(2,"-B");
+        map.put(646,kyuremMap);
+
+        Map<Integer,String> tornadusMap = new HashMap<>();
+        tornadusMap.put(1,"-T");
+        map.put(641,tornadusMap);
+
+        Map<Integer,String> thundurusMap = new HashMap<>();
+        thundurusMap.put(1,"-T");
+        map.put(642,thundurusMap);
+
+        Map<Integer,String> landorusMap = new HashMap<>();
+        landorusMap.put(1,"-T");
+        map.put(645,landorusMap);
+
+        Map<Integer,String> meowsticMap = new HashMap<>();
+        meowsticMap.put(1,"-F");
+        map.put(678,meowsticMap);
+
+        Map<Integer,String> aegislashMap = new HashMap<>();
+        aegislashMap.put(1,"-B");
+        map.put(681,aegislashMap);
+
+        Map<Integer,String> pumpkabooMap = new HashMap<>();
+        pumpkabooMap.put(1,"-M");
+        pumpkabooMap.put(2,"-L");
+        pumpkabooMap.put(3,"-XL");
+        map.put(710,pumpkabooMap);
+
+        Map<Integer,String> gourgeistMap = new HashMap<>();
+        gourgeistMap.put(1,"-M");
+        gourgeistMap.put(2,"-L");
+        gourgeistMap.put(3,"-XL");
+        map.put(711,gourgeistMap);
+
+        Map<Integer,String> floetteMap = new HashMap<>();
+        floetteMap.put(5,"-E");
+        map.put(670,floetteMap);
+
+        for (Integer species: speciesToMegaStoneORAS.keySet()) {
+            Map<Integer,String> megaMap = new HashMap<>();
+            if (species == 6 || species == 150) {
+                megaMap.put(1,"-Mega-X");
+                megaMap.put(2,"-Mega-Y");
+            } else {
+                megaMap.put(1,"-Mega");
+            }
+            map.put(species,megaMap);
+        }
+
+        return map;
+    }
+
+    private static Map<Integer,String> setupDummyFormeSuffixes() {
+        Map<Integer,String> m = new HashMap<>();
+        m.put(0,"");
+        return m;
     }
 
     private static Map<Integer,List<Integer>> setupSpeciesToMegaStone(int romType) {

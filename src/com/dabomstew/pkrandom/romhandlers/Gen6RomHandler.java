@@ -189,6 +189,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     // This ROM
     private Pokemon[] pokes;
     private Map<Integer,FormeInfo> formeMappings = new TreeMap<>();
+    private Map<Integer,Map<Integer,Integer>> absolutePokeNumByBaseForme;
+    private Map<Integer,Integer> dummyAbsolutePokeNums;
     private List<Pokemon> pokemonList;
     private List<Pokemon> pokemonListInclFormes;
     private Move[] moves;
@@ -261,16 +263,35 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 pokes[i].name = pokeNames[i];
             }
 
+            absolutePokeNumByBaseForme = new HashMap<>();
+            dummyAbsolutePokeNums = new HashMap<>();
+            dummyAbsolutePokeNums.put(0,0);
+
             int i = Gen6Constants.pokemonCount + 1;
+            int formNum = 1;
+            int prevSpecies = 0;
+            Map<Integer,Integer> currentMap = new HashMap<>();
             for (int k: formeMappings.keySet()) {
                 pokes[i] = new Pokemon();
                 pokes[i].number = i;
                 loadBasicPokeStats(pokes[i], pokeGarc.files.get(k).get(0),formeMappings);
                 FormeInfo fi = formeMappings.get(k);
                 pokes[i].name = pokeNames[fi.baseForme];
-                pokes[i].baseForme = fi.baseForme;
+                pokes[i].baseForme = pokes[fi.baseForme];
                 pokes[i].formeNumber = fi.formeNumber;
-//                pokes[i].formeSuffix = Gen6Constants.getFormeSuffix(k,romEntry.romType);
+                pokes[i].formeSuffix = Gen6Constants.formeSuffixes.getOrDefault(k,"");
+                if (fi.baseForme == prevSpecies) {
+                    formNum++;
+                    currentMap.put(formNum,i);
+                } else {
+                    if (prevSpecies != 0) {
+                        absolutePokeNumByBaseForme.put(prevSpecies,currentMap);
+                    }
+                    prevSpecies = fi.baseForme;
+                    formNum = 1;
+                    currentMap = new HashMap<>();
+                    currentMap.put(formNum,i);
+                }
                 i++;
             }
         } catch (IOException e) {
@@ -319,17 +340,28 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
         int formeCount = stats[Gen6Constants.bsFormeCountOffset] & 0xFF;
         if (formeCount > 1) {
-            int firstFormeOffset = FileFunctions.read2ByteInt(stats, Gen6Constants.bsFormeOffset);
-            if (firstFormeOffset != 0 ) {
-                for (int i = 1; i < formeCount; i++) {
-                    altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.number,i,FileFunctions.read2ByteInt(stats,Gen6Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
+            if (!altFormes.keySet().contains(pkmn.number)) {
+                int firstFormeOffset = FileFunctions.read2ByteInt(stats, Gen6Constants.bsFormeOffset);
+                if (firstFormeOffset != 0) {
+                    for (int i = 1; i < formeCount; i++) {
+                        altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.number,i,FileFunctions.read2ByteInt(stats,Gen6Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
+                        if (Gen6Constants.actuallyCosmeticForms.contains(firstFormeOffset+i-1)) {
+                            if (pkmn.number != 421) { // No Cherrim
+                                pkmn.cosmeticForms += 1;
+                            }
+                        }
+                    }
+                } else {
+                    if (pkmn.number != 493 && pkmn.number != 649 && pkmn.number != 716) {
+                        // Reason for exclusions:
+                        // Arceus/Genesect: to avoid confusion
+                        // Xerneas: Should be handled automatically?
+                        pkmn.cosmeticForms = formeCount;
+                    }
                 }
             } else {
-                if (pkmn.number != 421 && pkmn.number != 493 && pkmn.number != 585 && pkmn.number != 586 && pkmn.number < 649) {
-                    // Reason for exclusions:
-                    // Cherrim/Arceus/Genesect: to avoid confusion
-                    // Deerling/Sawsbuck: handled automatically in gen 5
-                    pkmn.cosmeticForms = formeCount;
+                if (Gen6Constants.actuallyCosmeticForms.contains(pkmn.number)) {
+                    pkmn.actuallyCosmetic = true;
                 }
             }
         }

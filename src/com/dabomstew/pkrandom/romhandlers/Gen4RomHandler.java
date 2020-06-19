@@ -368,7 +368,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 pokes[i].number = i;
                 loadBasicPokeStats(pokes[i], pokeNarc.files.get(k));
                 pokes[i].name = pokeNames[Gen4Constants.formeMappings.get(k).baseForme];
-                pokes[i].baseForme = Gen4Constants.formeMappings.get(k).baseForme;
+                pokes[i].baseForme = pokes[Gen4Constants.formeMappings.get(k).baseForme];
                 pokes[i].formeNumber = Gen4Constants.formeMappings.get(k).formeNumber;
                 pokes[i].formeSuffix = Gen4Constants.formeSuffixes.get(k);
                 i = i + 1;

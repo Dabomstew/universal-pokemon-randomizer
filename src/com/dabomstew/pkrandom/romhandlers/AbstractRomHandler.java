@@ -34,7 +34,6 @@ import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.Encounter;
@@ -210,7 +209,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void shufflePokemonStats(boolean evolutionSanity) {
         if (evolutionSanity) {
             copyUpEvolutionsHelper(pk -> pk.shuffleStats(AbstractRomHandler.this.random),
-                    (evFrom, evTo, toMonIsFinalEvo) -> evTo.copyShuffledStatsUpEvolution(evFrom));
+                    (evFrom, evTo, toMonIsFinalEvo) -> evTo.copyShuffledStatsUpEvolution(evFrom),
+                    Pokemon::copyBaseFormeBaseStats);
         } else {
             List<Pokemon> allPokes = this.getPokemon();
             for (Pokemon pk : allPokes) {
@@ -226,7 +226,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         if (evolutionSanity) {
             copyUpEvolutionsHelper(pk -> pk.randomizeStatsWithinBST(AbstractRomHandler.this.random),
-                    (evFrom, evTo, toMonIsFinalEvo) -> evTo.copyRandomizedStatsUpEvolution(evFrom));
+                    (evFrom, evTo, toMonIsFinalEvo) -> evTo.copyRandomizedStatsUpEvolution(evFrom),
+                    Pokemon::copyBaseFormeBaseStats);
         } else {
             List<Pokemon> allPokes = this.getPokemonInclFormes();
             for (Pokemon pk : allPokes) {
@@ -404,6 +405,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                         }
                     }
                 }
+            }, (pk, baseForme) -> {
+                pk.primaryType = baseForme.primaryType;
+                pk.secondaryType = baseForme.secondaryType;
             });
         } else {
             // Entirely random types
@@ -485,7 +489,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     evTo.ability2 = evFrom.ability2;
                     evTo.ability3 = evFrom.ability3;
                 }
-            });
+            }, Pokemon::copyBaseFormeAbilities);
         }
 
         else {
@@ -1002,7 +1006,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         if (newPK.formeNumber > 0) {
                             tp.forme = newPK.formeNumber;
                             tp.formeSuffix = newPK.formeSuffix;
-                            newPK = mainPokemonList.get(newPK.baseForme - 1);
+                            newPK = mainPokemonList.get(newPK.baseForme.number - 1);
                         }
                         tp.pokemon = newPK;
                         if (newPK.cosmeticForms > 0) {
@@ -1016,7 +1020,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         if (newPK.formeNumber > 0) {
                             tp.forme = newPK.formeNumber;
                             tp.formeSuffix = newPK.formeSuffix;
-                            newPK = mainPokemonList.get(newPK.baseForme - 1);
+                            newPK = mainPokemonList.get(newPK.baseForme.number - 1);
                         }
                         tp.pokemon = newPK;
                         if (newPK.cosmeticForms > 0) {
@@ -1035,7 +1039,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (newPK.formeNumber > 0) {
                         tp.forme = newPK.formeNumber;
                         tp.formeSuffix = newPK.formeSuffix;
-                        newPK = mainPokemonList.get(newPK.baseForme - 1);
+                        newPK = mainPokemonList.get(newPK.baseForme.number - 1);
                     }
                     tp.pokemon = newPK;
                     if (newPK.cosmeticForms > 0) {
@@ -1051,7 +1055,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (newPK.formeNumber > 0) {
                         tp.forme = newPK.formeNumber;
                         tp.formeSuffix = newPK.formeSuffix;
-                        newPK = mainPokemonList.get(newPK.baseForme - 1);
+                        newPK = mainPokemonList.get(newPK.baseForme.number - 1);
                     }
                     tp.pokemon = newPK;
                     if (newPK.cosmeticForms > 0) {
@@ -1153,7 +1157,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (newPK.formeNumber > 0) {
                         tp.forme = newPK.formeNumber;
                         tp.formeSuffix = newPK.formeSuffix;
-                        newPK = mainPokemonList.get(newPK.baseForme - 1);
+                        newPK = mainPokemonList.get(newPK.baseForme.number - 1);
                     }
                     tp.pokemon = newPK;
                     if (newPK.cosmeticForms > 0) {
@@ -1195,7 +1199,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (newPK.formeNumber > 0) {
                         tp.forme = newPK.formeNumber;
                         tp.formeSuffix = newPK.formeSuffix;
-                        newPK = mainPokemonList.get(newPK.baseForme - 1);
+                        newPK = mainPokemonList.get(newPK.baseForme.number - 1);
                     }
                     tp.pokemon = newPK;
                     if (newPK.cosmeticForms > 0) {
@@ -3477,6 +3481,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo);
     }
 
+    private interface CosmeticFormAction {
+        void applyTo(Pokemon pk, Pokemon baseForme);
+    }
+
     /**
      * Universal implementation for things that have "copy X up evolutions"
      * support.
@@ -3487,7 +3495,7 @@ public abstract class AbstractRomHandler implements RomHandler {
      *            Method to run on all evolved Pokemon with a linear chain of
      *            single evolutions.
      */
-    private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction) {
+    private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction, CosmeticFormAction cfAction) {
         List<Pokemon> allPokes = this.getPokemonInclFormes();
         for (Pokemon pk : allPokes) {
             if (pk != null) {
@@ -3506,6 +3514,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // go "up" evolutions looking for pre-evos to do first
         for (Pokemon pk : allPokes) {
+            if (pk != null && pk.actuallyCosmetic) {
+                cfAction.applyTo(pk,pk.baseForme);
+            }
             if (pk != null && !pk.temporaryFlag) {
                 // Non-randomized pokes at this point must have
                 // a linear chain of single evolutions down to

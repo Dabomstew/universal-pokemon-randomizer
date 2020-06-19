@@ -36,10 +36,11 @@ public class Pokemon implements Comparable<Pokemon> {
     public int number;
 
     public String formeSuffix = "";
-    public int baseForme = 0;
+    public Pokemon baseForme = null;
     public int formeNumber = 0;
     public int cosmeticForms = 0;
     public int formeSpriteIndex = 0;
+    public boolean actuallyCosmetic = false;
 
     public Type primaryType, secondaryType;
 
@@ -172,6 +173,21 @@ public class Pokemon implements Comparable<Pokemon> {
         } else {
             return hp + attack + defense + spatk + spdef + speed;
         }
+    }
+
+    public void copyBaseFormeBaseStats(Pokemon baseForme) {
+        hp = baseForme.hp;
+        attack = baseForme.attack;
+        defense = baseForme.defense;
+        speed = baseForme.speed;
+        spatk = baseForme.spatk;
+        spdef = baseForme.spdef;
+    }
+
+    public void copyBaseFormeAbilities(Pokemon baseForme) {
+        ability1 = baseForme.ability1;
+        ability2 = baseForme.ability2;
+        ability3 = baseForme.ability3;
     }
 
     public int getSpriteIndex() {
