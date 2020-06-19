@@ -61,6 +61,9 @@ public class Pokemon implements Comparable<Pokemon> {
     public List<Evolution> evolutionsFrom = new ArrayList<>();
     public List<Evolution> evolutionsTo = new ArrayList<>();
 
+    public List<MegaEvolution> megaEvolutionsFrom = new ArrayList<>();
+    public List<MegaEvolution> megaEvolutionsTo = new ArrayList<>();
+
     private List<Integer> shuffledStatsOrder;
 
     // A flag to use for things like recursive stats copying.

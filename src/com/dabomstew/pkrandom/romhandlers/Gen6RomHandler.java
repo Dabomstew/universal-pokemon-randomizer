@@ -291,6 +291,9 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                     formNum = 1;
                     currentMap = new HashMap<>();
                     currentMap.put(formNum,i);
+                    if (k >= Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.romType)) {
+                        absolutePokeNumByBaseForme.put(prevSpecies,currentMap);
+                    }
                 }
                 i++;
             }
@@ -298,6 +301,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             throw new RandomizerIOException(e);
         }
         populateEvolutions();
+        populateMegaEvolutions();
     }
 
     private void loadBasicPokeStats(Pokemon pkmn, byte[] stats, Map<Integer,FormeInfo> altFormes) {
@@ -384,7 +388,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             }
         }
 
-        // Read NARC
+        // Read GARC
         try {
             GARCArchive evoGARC = readGARC(romEntry.getString("PokemonEvolutions"),true);
             for (int i = 1; i <= Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.romType); i++) {
@@ -407,6 +411,47 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 // split evos don't carry stats
                 if (pk.evolutionsFrom.size() > 1) {
                     for (Evolution e : pk.evolutionsFrom) {
+                        e.carryStats = false;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+
+    private void populateMegaEvolutions() {
+        for (Pokemon pkmn : pokes) {
+            if (pkmn != null) {
+                pkmn.megaEvolutionsFrom.clear();
+                pkmn.megaEvolutionsTo.clear();
+            }
+        }
+
+        // Read GARC
+        try {
+            GARCArchive megaEvoGARC = readGARC(romEntry.getString("MegaEvolutions"),true);
+            for (int i = 1; i <= Gen6Constants.pokemonCount; i++) {
+                Pokemon pk = pokes[i];
+                byte[] megaEvoEntry = megaEvoGARC.files.get(i).get(0);
+                for (int evo = 0; evo < 3; evo++) {
+                    int formNum = readWord(megaEvoEntry, evo * 8);
+                    int method = readWord(megaEvoEntry, evo * 8 + 2);
+                    if (method >= 1) {
+                        int argument = readWord(megaEvoEntry, evo * 8 + 4);
+                        int megaSpecies = absolutePokeNumByBaseForme
+                                .getOrDefault(pk.number,dummyAbsolutePokeNums)
+                                .getOrDefault(formNum,0);
+                        MegaEvolution megaEvo = new MegaEvolution(pk, pokes[megaSpecies], method, argument);
+                        if (!pk.megaEvolutionsFrom.contains(megaEvo)) {
+                            pk.megaEvolutionsFrom.add(megaEvo);
+                            pokes[megaSpecies].megaEvolutionsTo.add(megaEvo);
+                        }
+                    }
+                }
+                // split evos don't carry stats
+                if (pk.megaEvolutionsFrom.size() > 1) {
+                    for (MegaEvolution e : pk.megaEvolutionsFrom) {
                         e.carryStats = false;
                     }
                 }

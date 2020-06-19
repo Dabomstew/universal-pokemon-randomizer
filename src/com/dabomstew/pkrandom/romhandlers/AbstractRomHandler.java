@@ -36,21 +36,7 @@ import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
-import com.dabomstew.pkrandom.pokemon.Encounter;
-import com.dabomstew.pkrandom.pokemon.EncounterSet;
-import com.dabomstew.pkrandom.pokemon.Evolution;
-import com.dabomstew.pkrandom.pokemon.EvolutionType;
-import com.dabomstew.pkrandom.pokemon.ExpCurve;
-import com.dabomstew.pkrandom.pokemon.GenRestrictions;
-import com.dabomstew.pkrandom.pokemon.IngameTrade;
-import com.dabomstew.pkrandom.pokemon.ItemList;
-import com.dabomstew.pkrandom.pokemon.Move;
-import com.dabomstew.pkrandom.pokemon.MoveCategory;
-import com.dabomstew.pkrandom.pokemon.MoveLearnt;
-import com.dabomstew.pkrandom.pokemon.Pokemon;
-import com.dabomstew.pkrandom.pokemon.Trainer;
-import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
-import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.pokemon.*;
 
 public abstract class AbstractRomHandler implements RomHandler {
 
@@ -3531,26 +3517,34 @@ public abstract class AbstractRomHandler implements RomHandler {
                 cfAction.applyTo(pk,pk.baseForme);
             }
             if (pk != null && !pk.temporaryFlag) {
-                // Non-randomized pokes at this point must have
-                // a linear chain of single evolutions down to
-                // a randomized poke.
-                Stack<Evolution> currentStack = new Stack<>();
-                Evolution ev = pk.evolutionsTo.get(0);
-                while (!ev.from.temporaryFlag) {
-                    currentStack.push(ev);
-                    ev = ev.from.evolutionsTo.get(0);
-                }
+                if (pk.megaEvolutionsTo.size() > 0) {
+                    MegaEvolution megaEv = pk.megaEvolutionsTo.get(0);
+                    epAction.applyTo(megaEv.from, megaEv.to, true);
+                } else {
+                    // Non-randomized pokes at this point must have
+                    // a linear chain of single evolutions down to
+                    // a randomized poke.
+                    Stack<Evolution> currentStack = new Stack<>();
+                    Evolution ev = pk.evolutionsTo.get(0);
+                    while (!ev.from.temporaryFlag) {
+                        currentStack.push(ev);
+                        ev = ev.from.evolutionsTo.get(0);
+                    }
 
-                // Now "ev" is set to an evolution from a Pokemon that has had
-                // the base action done on it to one that hasn't.
-                // Do the evolution action for everything left on the stack.
-                epAction.applyTo(ev.from, ev.to, !middleEvos.contains(ev.to));
-                ev.to.temporaryFlag = true;
-                while (!currentStack.isEmpty()) {
-                    ev = currentStack.pop();
+                    // Now "ev" is set to an evolution from a Pokemon that has had
+                    // the base action done on it to one that hasn't.
+                    // Do the evolution action for everything left on the stack.
                     epAction.applyTo(ev.from, ev.to, !middleEvos.contains(ev.to));
                     ev.to.temporaryFlag = true;
+                    while (!currentStack.isEmpty()) {
+                        ev = currentStack.pop();
+                        epAction.applyTo(ev.from, ev.to, !middleEvos.contains(ev.to));
+                        ev.to.temporaryFlag = true;
+                    }
                 }
+            }
+            if (pk != null && pk.megaEvolutionsFrom.size() > 0) {
+
             }
         }
     }
