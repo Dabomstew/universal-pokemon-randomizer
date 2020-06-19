@@ -32,6 +32,7 @@ import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.Mini;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.*;
 import pptxt.N3DSTxtHandler;
 
@@ -604,7 +605,156 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
-        return new ArrayList<>();
+        try {
+            if (romEntry.romType == Gen6Constants.Type_ORAS) {
+                return getEncountersORAS(useTimeOfDay);
+            } else {
+                return getEncountersXY(useTimeOfDay);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+
+    private List<EncounterSet> getEncountersXY(boolean useTimeOfDay) throws IOException {
+        GARCArchive encounterGarc = readGARC(romEntry.getString("WildPokemon"), false);
+        List<EncounterSet> encounters = new ArrayList<>();
+        for (int i = 0; i < encounterGarc.files.size(); i++) {
+            byte[] b = encounterGarc.files.get(i).get(0);
+            int offset = FileFunctions.readFullIntLittleEndian(b, 0x10) + 0x10;
+            int length = b.length - offset;
+            if (length < 0x178) { // No encounters in this map
+                continue;
+            }
+            byte[] encounterData = new byte[0x178];
+            System.arraycopy(b, offset, encounterData, 0, 0x178);
+
+            // First, 12 grass encounters, 12 rough terrain encounters, and 12 encounters each for yellow/purple/red flowers
+            EncounterSet grassEncounters = readEncounter(encounterData, 0, 12);
+            grassEncounters.displayName = "Map " + i + ", offset " + offset + ", Grass Pokemon";
+            encounters.add(grassEncounters);
+            EncounterSet yellowFlowerEncounters = readEncounter(encounterData, 48, 12);
+            yellowFlowerEncounters.displayName = "Map " + i + ", offset " + offset + ", Yellow Flower Pokemon";
+            encounters.add(yellowFlowerEncounters);
+            EncounterSet purpleFlowerEncounters = readEncounter(encounterData, 96, 12);
+            purpleFlowerEncounters.displayName = "Map " + i + ", offset " + offset + ", Purple Flower Pokemon";
+            encounters.add(purpleFlowerEncounters);
+            EncounterSet redFlowerEncounters = readEncounter(encounterData, 144, 12);
+            redFlowerEncounters.displayName = "Map " + i + ", offset " + offset + ", Red Flower Pokemon";
+            encounters.add(redFlowerEncounters);
+            EncounterSet roughTerrainEncounters = readEncounter(encounterData, 192, 12);
+            roughTerrainEncounters.displayName = "Map " + i + ", offset " + offset + ", Rough Terrain Pokemon";
+            encounters.add(roughTerrainEncounters);
+
+            // 5 surf and 5 rock smash encounters
+            EncounterSet surfEncounters = readEncounter(encounterData, 240, 5);
+            surfEncounters.displayName = "Map " + i + ", offset " + offset + ", Surf Pokemon";
+            encounters.add(surfEncounters);
+            EncounterSet rockSmashEncounters = readEncounter(encounterData, 260, 5);
+            rockSmashEncounters.displayName = "Map " + i + ", offset " + offset + ", Rock Smash Pokemon";
+            encounters.add(rockSmashEncounters);
+
+            // 3 Encounters for each type of rod
+            EncounterSet oldRodEncounters = readEncounter(encounterData, 280, 3);
+            oldRodEncounters.displayName = "Map " + i + ", offset " + offset + ", Old Rod Pokemon";
+            encounters.add(oldRodEncounters);
+            EncounterSet goodRodEncounters = readEncounter(encounterData, 292, 3);
+            goodRodEncounters.displayName = "Map " + i + ", offset " + offset + ", Good Rod Pokemon";
+            encounters.add(goodRodEncounters);
+            EncounterSet superRodEncounters = readEncounter(encounterData, 304, 3);
+            superRodEncounters.displayName = "Map " + i + ", offset " + offset + ", Super Rod Pokemon";
+            encounters.add(superRodEncounters);
+
+            // Lastly, 5 for each kind of Horde
+            EncounterSet hordeCommonEncounters = readEncounter(encounterData, 316, 5);
+            hordeCommonEncounters.displayName = "Map " + i + ", offset " + offset + ", Common Horde Pokemon";
+            encounters.add(hordeCommonEncounters);
+            EncounterSet hordeUncommonEncounters = readEncounter(encounterData, 336, 5);
+            hordeUncommonEncounters.displayName = "Map " + i + ", offset " + offset + ", Uncommon Horde Pokemon";
+            encounters.add(hordeUncommonEncounters);
+            EncounterSet hordeRareEncounters = readEncounter(encounterData, 356, 5);
+            hordeRareEncounters.displayName = "Map " + i + ", offset " + offset + ", Rare Horde Pokemon";
+            encounters.add(hordeRareEncounters);
+        }
+        return encounters;
+    }
+
+    private List<EncounterSet> getEncountersORAS(boolean useTimeOfDay) throws IOException {
+        GARCArchive encounterGarc = readGARC(romEntry.getString("WildPokemon"), false);
+        List<EncounterSet> encounters = new ArrayList<>();
+        for (int i = 0; i < encounterGarc.files.size(); i++) {
+            byte[] b = encounterGarc.files.get(i).get(0);
+            int offset = FileFunctions.readFullIntLittleEndian(b, 0x10) + 0xE;
+            int offset2 = FileFunctions.readFullIntLittleEndian(b, 0x14);
+            int length = offset2 - offset;
+            if (length < 0xF6) { // No encounters in this map
+                continue;
+            }
+            byte[] encounterData = new byte[0xF6];
+            System.arraycopy(b, offset, encounterData, 0, 0xF6);
+
+            // First, read 12 grass encounters and 12 tall grass encounters
+            EncounterSet grassEncounters = readEncounter(encounterData, 0, 12);
+            grassEncounters.displayName = "Map " + i + ", offset " + offset + ", Grass Pokemon";
+            encounters.add(grassEncounters);
+            EncounterSet tallGrassEncounters = readEncounter(encounterData, 48, 12);
+            tallGrassEncounters.displayName = "Map " + i + ", offset " + offset + ", Tall Grass Pokemon";
+            encounters.add(tallGrassEncounters);
+
+            // Now, potentially 3 DexNav Foreign encounters
+            EncounterSet swarmEncounters = readEncounter(encounterData, 96, 3);
+            swarmEncounters.displayName = "Map " + i + ", offset " + offset + ", DexNav Foreign Pokemon";
+            encounters.add(swarmEncounters);
+
+            // 5 surf and 5 rock smash encounters
+            EncounterSet surfEncounters = readEncounter(encounterData, 108, 5);
+            surfEncounters.displayName = "Map " + i + ", offset " + offset + ", Surf Pokemon";
+            encounters.add(surfEncounters);
+            EncounterSet rockSmashEncounters = readEncounter(encounterData, 128, 5);
+            rockSmashEncounters.displayName = "Map " + i + ", offset " + offset + ", Rock Smash Pokemon";
+            encounters.add(rockSmashEncounters);
+
+            // 3 Encounters for each type of rod
+            EncounterSet oldRodEncounters = readEncounter(encounterData, 148, 3);
+            oldRodEncounters.displayName = "Map " + i + ", offset " + offset + ", Old Rod Pokemon";
+            encounters.add(oldRodEncounters);
+            EncounterSet goodRodEncounters = readEncounter(encounterData, 160, 3);
+            goodRodEncounters.displayName = "Map " + i + ", offset " + offset + ", Good Rod Pokemon";
+            encounters.add(goodRodEncounters);
+            EncounterSet superRodEncounters = readEncounter(encounterData, 172, 3);
+            superRodEncounters.displayName = "Map " + i + ", offset " + offset + ", Super Rod Pokemon";
+            encounters.add(superRodEncounters);
+
+            // Lastly, 5 for each kind of Horde
+            EncounterSet hordeCommonEncounters = readEncounter(encounterData, 184, 5);
+            hordeCommonEncounters.displayName = "Map " + i + ", offset " + offset + ", Common Horde Pokemon";
+            encounters.add(hordeCommonEncounters);
+            EncounterSet hordeUncommonEncounters = readEncounter(encounterData, 204, 5);
+            hordeUncommonEncounters.displayName = "Map " + i + ", offset " + offset + ", Uncommon Horde Pokemon";
+            encounters.add(hordeUncommonEncounters);
+            EncounterSet hordeRareEncounters = readEncounter(encounterData, 224, 5);
+            hordeRareEncounters.displayName = "Map " + i + ", offset " + offset + ", Rare Horde Pokemon";
+            encounters.add(hordeRareEncounters);
+        }
+        return encounters;
+    }
+
+    private EncounterSet readEncounter(byte[] data, int offset, int amount) {
+        EncounterSet es = new EncounterSet();
+        es.rate = 1;
+        for (int i = 0; i < amount; i++) {
+            int index = readWord(data, offset + i * 4) & 0x7FF;
+            int f = readWord(data, offset + i * 4) >> 11;
+            if (index != 0) {
+                Encounter e = new Encounter();
+                e.pokemon = pokes[index];
+                e.formeNumber = f;
+                e.level = data[offset + 2 + i * 4];
+                e.maxLevel = data[offset + 3 + i * 4];
+                es.encounters.add(e);
+            }
+        }
+        return es;
     }
 
     @Override

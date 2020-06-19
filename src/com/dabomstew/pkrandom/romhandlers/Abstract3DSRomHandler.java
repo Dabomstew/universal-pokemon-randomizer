@@ -143,6 +143,18 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
         data[offset + 1] = (byte) ((value >> 8) & 0xFF);
     }
 
+    protected int readLong(byte[] data, int offset) {
+        return (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8) | ((data[offset + 2] & 0xFF) << 16)
+                | ((data[offset + 3] & 0xFF) << 24);
+    }
+
+    protected void writeLong(byte[] data, int offset, int value) {
+        data[offset] = (byte) (value & 0xFF);
+        data[offset + 1] = (byte) ((value >> 8) & 0xFF);
+        data[offset + 2] = (byte) ((value >> 16) & 0xFF);
+        data[offset + 3] = (byte) ((value >> 24) & 0xFF);
+    }
+
     protected void writeFile(String location, byte[] data, int offset, int length) throws IOException {
         if (offset != 0 || length != data.length) {
             byte[] newData = new byte[length];

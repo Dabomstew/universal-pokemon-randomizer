@@ -28,6 +28,7 @@ public class Encounter {
     public int level;
     public int maxLevel;
     public Pokemon pokemon;
+    public int formeNumber;
 
     public String toString() {
         if (pokemon == null) {
