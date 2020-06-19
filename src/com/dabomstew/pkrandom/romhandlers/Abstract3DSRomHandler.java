@@ -28,6 +28,7 @@ import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.NCCH;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.pokemon.Type;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -142,6 +143,18 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
         data[offset + 1] = (byte) ((value >> 8) & 0xFF);
     }
 
+    protected int readLong(byte[] data, int offset) {
+        return (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8) | ((data[offset + 2] & 0xFF) << 16)
+                | ((data[offset + 3] & 0xFF) << 24);
+    }
+
+    protected void writeLong(byte[] data, int offset, int value) {
+        data[offset] = (byte) (value & 0xFF);
+        data[offset + 1] = (byte) ((value >> 8) & 0xFF);
+        data[offset + 2] = (byte) ((value >> 16) & 0xFF);
+        data[offset + 3] = (byte) ((value >> 24) & 0xFF);
+    }
+
     protected void writeFile(String location, byte[] data, int offset, int length) throws IOException {
         if (offset != 0 || length != data.length) {
             byte[] newData = new byte[length];
@@ -252,5 +265,51 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
             hexChars[i * 2 + 1] = HEX_ARRAY[unsignedByte & 0x0F];
         }
         return new String(hexChars);
+    }
+
+    // Not tested on Gen 7
+    protected int typeTMPaletteNumber(Type t) {
+        if (t == null) {
+            return 322; // CURSE
+        }
+        switch (t) {
+            case DARK:
+                return 309;
+            case DRAGON:
+                return 310;
+            case PSYCHIC:
+                return 311;
+            case NORMAL:
+                return 312;
+            case POISON:
+                return 313;
+            case ICE:
+                return 314;
+            case FIGHTING:
+                return 315;
+            case FIRE:
+                return 316;
+            case WATER:
+                return 317;
+            case FLYING:
+                return 323;
+            case GRASS:
+                return 318;
+            case ROCK:
+                return 319;
+            case ELECTRIC:
+                return 320;
+            case GROUND:
+                return 321;
+            case GHOST:
+            default:
+                return 322; // for CURSE
+            case STEEL:
+                return 324;
+            case BUG:
+                return 325;
+            case FAIRY:
+                return 546;
+        }
     }
 }

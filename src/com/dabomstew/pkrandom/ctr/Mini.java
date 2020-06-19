@@ -27,20 +27,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class Mini {
-    public static void PackMiniArchiveIntoGARC(GARCArchive garc, byte[][] miniArchive, String identifier) throws IOException {
-        Map<Integer, byte[]> newMap = new TreeMap<>();
-        newMap.put(0, Mini.PackMini(miniArchive, identifier));
-        List<Map<Integer, byte[]>> newList = new ArrayList<>();
-        newList.add(newMap);
-        garc.updateFiles(newList);
-    }
-
     public static byte[] PackMini(byte[][] fileData, String identifier) throws IOException {
         // Create new Binary with the relevant header bytes
         byte[] data = new byte[4];
