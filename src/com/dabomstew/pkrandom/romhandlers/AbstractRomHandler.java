@@ -353,7 +353,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizePokemonTypes(boolean evolutionSanity) {
-        List<Pokemon> allPokes = this.getPokemon();
+        List<Pokemon> allPokes = this.getPokemonInclFormes();
         if (evolutionSanity) {
             // Type randomization with evolution sanity
             copyUpEvolutionsHelper(pk -> {
@@ -479,7 +479,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         else {
-            List<Pokemon> allPokes = this.getPokemon();
+            List<Pokemon> allPokes = this.getPokemonInclFormes();
             for (Pokemon pk : allPokes) {
                 if (pk == null) {
                     continue;
