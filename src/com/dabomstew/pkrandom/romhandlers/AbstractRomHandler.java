@@ -2987,8 +2987,18 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void randomizeEvolutions(boolean similarStrength, boolean sameType, boolean limitToThreeStages,
             boolean forceChange) {
         checkPokemonRestrictions();
-        List<Pokemon> pokemonPool = new ArrayList<>(mainPokemonList);
+        List<Pokemon> pokemonPool = new ArrayList<>(mainPokemonListInclFormes);
+        List<Pokemon> actuallyCosmeticPokemonPool = new ArrayList<>();
         int stageLimit = limitToThreeStages ? 3 : 10;
+
+        for (int i = 0; i < pokemonPool.size(); i++) {
+            Pokemon pk = pokemonPool.get(i);
+            if (pk.actuallyCosmetic) {
+                pokemonPool.remove(pk);
+                i--;
+                actuallyCosmeticPokemonPool.add(pk);
+            }
+        }
 
         // Cache old evolutions for data later
         Map<Pokemon, List<Evolution>> originalEvos = new HashMap<>();
@@ -3153,6 +3163,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             // If no error, done and return
             if (!hadError) {
+                for (Pokemon pk: actuallyCosmeticPokemonPool) {
+                    pk.copyBaseFormeEvolutions(pk.baseForme);
+                }
                 return;
             } else {
                 loops++;

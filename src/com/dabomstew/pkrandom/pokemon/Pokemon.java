@@ -190,6 +190,10 @@ public class Pokemon implements Comparable<Pokemon> {
         ability3 = baseForme.ability3;
     }
 
+    public void copyBaseFormeEvolutions(Pokemon baseForme) {
+        evolutionsFrom = baseForme.evolutionsFrom;
+    }
+
     public int getSpriteIndex() {
         return formeNumber == 0 ? number : formeSpriteIndex + formeNumber - 1;
     }

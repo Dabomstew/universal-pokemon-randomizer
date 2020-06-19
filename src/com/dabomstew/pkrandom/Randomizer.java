@@ -183,9 +183,9 @@ public class Randomizer {
                     settings.isEvosMaxThreeStages(), settings.isEvosForceChange());
 
             log.println("--Randomized Evolutions--");
-            List<Pokemon> allPokes = romHandler.getPokemon();
+            List<Pokemon> allPokes = romHandler.getPokemonInclFormes();
             for (Pokemon pk : allPokes) {
-                if (pk != null) {
+                if (pk != null && !pk.actuallyCosmetic) {
                     int numEvos = pk.evolutionsFrom.size();
                     if (numEvos > 0) {
                         StringBuilder evoStr = new StringBuilder(pk.evolutionsFrom.get(0).to.fullName());
@@ -649,13 +649,15 @@ public class Randomizer {
                 }
                 log.print("|ITEM");
                 log.println();
+                int i = 0;
                 for (Pokemon pkmn : allPokes) {
                     if (pkmn != null) {
+                        i++;
                         String typeString = pkmn.primaryType == null ? "???" : pkmn.primaryType.toString();
                         if (pkmn.secondaryType != null) {
                             typeString += "/" + pkmn.secondaryType.toString();
                         }
-                        log.printf("%3d|" + nameSpFormat + "|%-17s|%4d|%4d|%4d|%4d|%4d|%4d", pkmn.number, pkmn.fullName(), typeString,
+                        log.printf("%3d|" + nameSpFormat + "|%-17s|%4d|%4d|%4d|%4d|%4d|%4d", i, pkmn.fullName(), typeString,
                                 pkmn.hp, pkmn.attack, pkmn.defense, pkmn.spatk, pkmn.spdef, pkmn.speed);
                         if (abils > 0) {
                             log.printf("|" + abSpFormat + "|" + abSpFormat, romHandler.abilityName(pkmn.ability1),

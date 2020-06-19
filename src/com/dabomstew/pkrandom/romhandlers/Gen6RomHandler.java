@@ -387,7 +387,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         // Read NARC
         try {
             GARCArchive evoGARC = readGARC(romEntry.getString("PokemonEvolutions"),true);
-            for (int i = 1; i <= Gen6Constants.pokemonCount; i++) {
+            for (int i = 1; i <= Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.romType); i++) {
                 Pokemon pk = pokes[i];
                 byte[] evoEntry = evoGARC.files.get(i).get(0);
                 for (int evo = 0; evo < 8; evo++) {
