@@ -629,10 +629,23 @@ public class Randomizer {
 
                 }
             } else {
-                log.print("NUM|NAME      |TYPE             |  HP| ATK| DEF|SATK|SDEF| SPD");
+                String nameSp = "      ";
+                String nameSpFormat = "%-13s";
+                String abSp = "    ";
+                String abSpFormat = "%-12s";
+                if (romHandler.generationOfPokemon() == 5) {
+                    nameSp = "         ";
+                } else if (romHandler.generationOfPokemon() >= 6) {
+                    nameSp = "            ";
+                    nameSpFormat = "%-16s";
+                    abSp = "      ";
+                    abSpFormat = "%-14s";
+                }
+
+                log.print("NUM|NAME" + nameSp + "|TYPE             |  HP| ATK| DEF|SATK|SDEF| SPD");
                 int abils = romHandler.abilitiesPerPokemon();
                 for (int i = 0; i < abils; i++) {
-                    log.print("|ABILITY" + (i + 1) + "    ");
+                    log.print("|ABILITY" + (i + 1) + abSp);
                 }
                 log.print("|ITEM");
                 log.println();
@@ -642,13 +655,13 @@ public class Randomizer {
                         if (pkmn.secondaryType != null) {
                             typeString += "/" + pkmn.secondaryType.toString();
                         }
-                        log.printf("%3d|%-13s|%-17s|%4d|%4d|%4d|%4d|%4d|%4d", pkmn.number, pkmn.fullName(), typeString,
+                        log.printf("%3d|" + nameSpFormat + "|%-17s|%4d|%4d|%4d|%4d|%4d|%4d", pkmn.number, pkmn.fullName(), typeString,
                                 pkmn.hp, pkmn.attack, pkmn.defense, pkmn.spatk, pkmn.spdef, pkmn.speed);
                         if (abils > 0) {
-                            log.printf("|%-12s|%-12s", romHandler.abilityName(pkmn.ability1),
+                            log.printf("|" + abSpFormat + "|" + abSpFormat, romHandler.abilityName(pkmn.ability1),
                                     romHandler.abilityName(pkmn.ability2));
                             if (abils > 2) {
-                                log.printf("|%-12s", romHandler.abilityName(pkmn.ability3));
+                                log.printf("|" + abSpFormat, romHandler.abilityName(pkmn.ability3));
                             }
                         }
                         log.print("|");
