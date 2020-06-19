@@ -651,7 +651,7 @@ public class Randomizer {
                 log.println();
                 int i = 0;
                 for (Pokemon pkmn : allPokes) {
-                    if (pkmn != null) {
+                    if (pkmn != null && !pkmn.actuallyCosmetic) {
                         i++;
                         String typeString = pkmn.primaryType == null ? "???" : pkmn.primaryType.toString();
                         if (pkmn.secondaryType != null) {
