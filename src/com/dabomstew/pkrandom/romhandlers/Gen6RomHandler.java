@@ -430,9 +430,14 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     protected void savingROM() throws IOException {
-
         savePokemonStats();
         saveMoves();
+        try {
+            writeCode(code);
+            writeGARC(romEntry.getString("TextStrings"), stringsGarc);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     private void savePokemonStats() {
@@ -537,7 +542,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
         try {
             if (romEntry.romType == Gen6Constants.Type_ORAS) {
-                Mini.PackMiniArchiveIntoGARC(moveGarc, miniArchive, "WD");
+                moveGarc.setFile(0, Mini.PackMini(miniArchive, "WD"));
             }
             this.writeGARC(romEntry.getString("MoveData"), moveGarc);
         } catch (IOException e) {
@@ -672,8 +677,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             for (int i = 0; i < Gen6Constants.tmBlockOneCount; i++) {
                 tms.add(readWord(code, offset + i * 2));
             }
-            int blockTwoStartingOffset = Gen6Constants.getTMBlockTwoStartingOffset(romEntry.romType);
-            for (int i = blockTwoStartingOffset; i < blockTwoStartingOffset + Gen6Constants.tmBlockTwoCount; i++) {
+            offset += (Gen6Constants.getTMBlockTwoStartingOffset(romEntry.romType) * 2);
+            for (int i = 0; i < (Gen6Constants.tmCount - Gen6Constants.tmBlockOneCount); i++) {
                 tms.add(readWord(code, offset + i * 2));
             }
             return tms;
@@ -705,7 +710,63 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public void setTMMoves(List<Integer> moveIndexes) {
-        // do nothing for now
+        String tmDataPrefix = Gen6Constants.tmDataPrefix;
+        int offset = find(code, tmDataPrefix);
+        if (offset > 0) {
+            offset += Gen6Constants.tmDataPrefix.length() / 2; // because it was a prefix
+            for (int i = 0; i < Gen6Constants.tmBlockOneCount; i++) {
+                writeWord(code, offset + i * 2, moveIndexes.get(i));
+            }
+            offset += (Gen6Constants.getTMBlockTwoStartingOffset(romEntry.romType) * 2);
+            for (int i = 0; i < (Gen6Constants.tmCount - Gen6Constants.tmBlockOneCount); i++) {
+                writeWord(code, offset + i * 2, moveIndexes.get(i + Gen6Constants.tmBlockOneCount));
+            }
+
+            // Update TM item descriptions
+            List<String> itemDescriptions = getStrings(false, romEntry.getInt("ItemDescriptionsTextOffset"));
+            List<String> moveDescriptions = getStrings(false, romEntry.getInt("MoveDescriptionsTextOffset"));
+            // TM01 is item 328 and so on
+            for (int i = 0; i < Gen6Constants.tmBlockOneCount; i++) {
+                itemDescriptions.set(i + Gen6Constants.tmBlockOneOffset, moveDescriptions.get(moveIndexes.get(i)));
+            }
+            // TM93-95 are 618-620
+            for (int i = 0; i < Gen6Constants.tmBlockTwoCount; i++) {
+                itemDescriptions.set(i + Gen6Constants.tmBlockTwoOffset,
+                        moveDescriptions.get(moveIndexes.get(i + Gen6Constants.tmBlockOneCount)));
+            }
+            // TM96-100 are 690 and so on
+            for (int i = 0; i < Gen6Constants.tmBlockThreeCount; i++) {
+                itemDescriptions.set(i + Gen6Constants.tmBlockThreeOffset,
+                        moveDescriptions.get(moveIndexes.get(i + Gen6Constants.tmBlockOneCount + Gen6Constants.tmBlockTwoCount)));
+            }
+            // Save the new item descriptions
+            setStrings(false, romEntry.getInt("ItemDescriptionsTextOffset"), itemDescriptions);
+            // Palettes
+            String palettePrefix = Gen6Constants.itemPalettesPrefix;
+            int offsPals = find(code, palettePrefix);
+            if (offsPals > 0) {
+                offsPals += Gen6Constants.itemPalettesPrefix.length() / 2; // because it was a prefix
+                // Write pals
+                for (int i = 0; i < Gen6Constants.tmBlockOneCount; i++) {
+                    int itmNum = Gen6Constants.tmBlockOneOffset + i;
+                    Move m = this.moves[moveIndexes.get(i)];
+                    int pal = this.typeTMPaletteNumber(m.type);
+                    writeWord(code, offsPals + itmNum * 4, pal);
+                }
+                for (int i = 0; i < (Gen6Constants.tmBlockTwoCount); i++) {
+                    int itmNum = Gen6Constants.tmBlockTwoOffset + i;
+                    Move m = this.moves[moveIndexes.get(i + Gen6Constants.tmBlockOneCount)];
+                    int pal = this.typeTMPaletteNumber(m.type);
+                    writeWord(code, offsPals + itmNum * 4, pal);
+                }
+                for (int i = 0; i < (Gen6Constants.tmBlockThreeCount); i++) {
+                    int itmNum = Gen6Constants.tmBlockThreeOffset + i;
+                    Move m = this.moves[moveIndexes.get(i + Gen6Constants.tmBlockOneCount + Gen6Constants.tmBlockTwoCount)];
+                    int pal = this.typeTMPaletteNumber(m.type);
+                    writeWord(code, offsPals + itmNum * 4, pal);
+                }
+            }
+        }
     }
 
     private int find(byte[] data, String hexString) {

@@ -46,10 +46,12 @@ public class Gen6Constants {
     public static final int waterStoneIndex = 84;
 
     public static final String tmDataPrefix = "D400AE02AF02B002";
-    public static final int tmCount = 100, tmBlockOneCount = 92, tmBlockTwoCount = 8, hmBlockOneCount = 5,
+    public static final int tmCount = 100, tmBlockOneCount = 92, tmBlockTwoCount = 3, tmBlockThreeCount = 5,
+            tmBlockOneOffset = 328, tmBlockTwoOffset = 618, tmBlockThreeOffset = 690, hmBlockOneCount = 5,
             rockSmashOffsetORAS = 10, diveOffsetORAS = 28;
     private static final int tmBlockTwoStartingOffsetXY = 97, tmBlockTwoStartingOffsetORAS = 98,
             hmCountXY = 5, hmCountORAS = 7;
+    public static final String itemPalettesPrefix = "6F7461746500FF920A063F";
 
     public static final Map<Integer,List<Integer>> speciesToMegaStoneXY = setupSpeciesToMegaStone(Type_XY);
     public static final Map<Integer,List<Integer>> speciesToMegaStoneORAS = setupSpeciesToMegaStone(Type_ORAS);
