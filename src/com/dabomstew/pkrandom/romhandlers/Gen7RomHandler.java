@@ -208,6 +208,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public int starterCount() {
+        return 3;
+    }
+
+    @Override
     public List<Integer> getStarterHeldItems() {
         return new ArrayList<>();
     }

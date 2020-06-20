@@ -539,9 +539,17 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     private void savePokemonStats() {
-        for (int i = 1; i <= Gen6Constants.pokemonCount; i++) {
-            saveBasicPokeStats(pokes[i], pokeGarc.files.get(i).get(0));
+        int k = 0x40;
+        byte[] duplicateData = pokeGarc.files.get(Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.romType) + 1).get(0);
+        for (int i = 1; i <= Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.romType); i++) {
+            byte[] pokeData = pokeGarc.files.get(i).get(0);
+            saveBasicPokeStats(pokes[i], pokeData);
+            for (byte pokeDataByte : pokeData) {
+                duplicateData[k] = pokeDataByte;
+                k++;
+            }
         }
+
         try {
             this.writeGARC(romEntry.getString("PokemonStats"),pokeGarc);
         } catch (IOException e) {
@@ -568,7 +576,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         stats[Gen6Constants.bsGrowthCurveOffset] = pkmn.growthCurve.toByte();
 
         stats[Gen6Constants.bsAbility1Offset] = (byte) pkmn.ability1;
-        stats[Gen6Constants.bsAbility2Offset] = (byte) pkmn.ability2;
+        stats[Gen6Constants.bsAbility2Offset] = pkmn.ability2 != 0 ? (byte) pkmn.ability2 : (byte) pkmn.ability1;
         stats[Gen6Constants.bsAbility3Offset] = (byte) pkmn.ability3;
 
         // Held items
@@ -665,24 +673,93 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Pokemon> getStarters() {
-        // TODO: Actually make this work by loading it from the ROM. Only doing it this
-        // way temporarily so the randomizer won't crash
-        List<Pokemon> starters = new ArrayList<>();
-        if (romEntry.romType == Gen6Constants.Type_XY) {
-            starters.add(pokes[650]);
-            starters.add(pokes[653]);
-            starters.add(pokes[656]);
-        } else {
-            starters.add(pokes[252]);
-            starters.add(pokes[255]);
-            starters.add(pokes[258]);
+        List<StaticEncounter> starters = new ArrayList<>();
+        try {
+            byte[] fieldCRO = readFile(romEntry.getString("StaticPokemon"));
+
+            List<Integer> starterIndices =
+                    Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().collect(Collectors.toList());
+
+            // Gift Pokemon
+            int count = Gen6Constants.getGiftPokemonCount(romEntry.romType);
+            int size = Gen6Constants.getGiftPokemonSize(romEntry.romType);
+            int offset = romEntry.getInt("GiftPokemonOffset");
+            for (int i = 0; i < count; i++) {
+                if (!starterIndices.contains(i)) continue;
+                StaticEncounter se = new StaticEncounter();
+                se.pkmn = pokes[FileFunctions.read2ByteInt(fieldCRO,offset+i*size)];
+                se.forme = fieldCRO[offset+i*size + 4];
+                se.level = fieldCRO[offset+i*size + 5];
+                int heldItem = FileFunctions.readFullIntLittleEndian(fieldCRO,offset+i*size + 12);
+                if (heldItem < 0) {
+                    heldItem = 0;
+                }
+                se.heldItem = heldItem;
+                starters.add(se);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
         }
-        return starters;
+
+        return starters.stream().map(pk -> pk.pkmn).collect(Collectors.toList());
     }
 
     @Override
     public boolean setStarters(List<Pokemon> newStarters) {
-        return false;
+        try {
+            byte[] fieldCRO = readFile(romEntry.getString("StaticPokemon"));
+            byte[] displayCRO = readFile(romEntry.getString("StarterDisplay"));
+
+            List<Integer> starterIndices =
+                    Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().collect(Collectors.toList());
+
+            // Gift Pokemon
+            int count = Gen6Constants.getGiftPokemonCount(romEntry.romType);
+            int size = Gen6Constants.getGiftPokemonSize(romEntry.romType);
+            int offset = romEntry.getInt("GiftPokemonOffset");
+            int displayOffset = readWord(displayCRO,romEntry.getInt("StarterOffsetOffset")) + romEntry.getInt("StarterExtraOffset");
+
+            Iterator<Pokemon> starterIter = newStarters.iterator();
+
+            int displayIndex = 0;
+
+            for (int i = 0; i < count; i++) {
+                if (!starterIndices.contains(i)) continue;
+
+                StaticEncounter newStatic = new StaticEncounter();
+                Pokemon starter = starterIter.next();
+                if (starter.formeNumber > 0) {
+                    newStatic.forme = starter.formeNumber;
+                    newStatic.formeSuffix = starter.formeSuffix;
+                    starter = mainPokemonList.get(starter.baseForme.number - 1);
+                }
+                newStatic.pkmn = starter;
+                if (starter.cosmeticForms > 0) {
+                    newStatic.forme = this.random.nextInt(starter.cosmeticForms);
+                }
+                writeWord(fieldCRO,offset+i*size,newStatic.pkmn.number);
+                fieldCRO[offset+i*size + 4] = (byte)newStatic.forme;
+//                fieldCRO[offset+i*size + 5] = (byte)newStatic.level;
+                if (newStatic.heldItem == 0) {
+                    writeWord(fieldCRO,offset+i*size + 12,-1);
+                } else {
+                    writeWord(fieldCRO,offset+i*size + 12,newStatic.heldItem);
+                }
+                writeWord(displayCRO,displayOffset+displayIndex*0x54,newStatic.pkmn.number);
+                displayCRO[displayOffset+displayIndex*0x54+2] = (byte)newStatic.forme;
+                displayIndex++;
+            }
+            writeFile(romEntry.getString("StaticPokemon"),fieldCRO);
+            writeFile(romEntry.getString("StarterDisplay"),displayCRO);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+        return true;
+    }
+
+    @Override
+    public int starterCount() {
+        return romEntry.romType == Gen6Constants.Type_XY ? 6 : 12;
     }
 
     @Override

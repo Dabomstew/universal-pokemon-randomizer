@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
@@ -654,7 +655,7 @@ public class Randomizer {
                                 pkmn.hp, pkmn.attack, pkmn.defense, pkmn.spatk, pkmn.spdef, pkmn.speed);
                         if (abils > 0) {
                             log.printf("|" + abSpFormat + "|" + abSpFormat, romHandler.abilityName(pkmn.ability1),
-                                    romHandler.abilityName(pkmn.ability2));
+                                    pkmn.ability1 == pkmn.ability2 ? "--" : romHandler.abilityName(pkmn.ability2));
                             if (abils > 2) {
                                 log.printf("|" + abSpFormat, romHandler.abilityName(pkmn.ability3));
                             }
@@ -695,7 +696,13 @@ public class Randomizer {
         if (romHandler.canChangeStarters()) {
             if (settings.getStartersMod() == Settings.StartersMod.CUSTOM) {
                 log.println("--Custom Starters--");
-                List<Pokemon> romPokemon = romHandler.getPokemon();
+                List<Pokemon> romPokemon =
+                        romHandler.generationOfPokemon() == 6 ?
+                                romHandler.getPokemonInclFormes()
+                                        .stream()
+                                        .filter(pk -> pk == null || !pk.actuallyCosmetic)
+                                        .collect(Collectors.toList()) :
+                                romHandler.getPokemon();
                 int[] customStarters = settings.getCustomStarters();
                 Pokemon pkmn1 = romPokemon.get(customStarters[0]);
                 log.println("Set starter 1 to " + pkmn1.fullName());
@@ -706,22 +713,40 @@ public class Randomizer {
                 } else {
                     Pokemon pkmn3 = romPokemon.get(customStarters[2]);
                     log.println("Set starter 3 to " + pkmn3.fullName());
-                    romHandler.setStarters(Arrays.asList(pkmn1, pkmn2, pkmn3));
+                    if (romHandler.starterCount() > 3) {
+                        List<Pokemon> starters = new ArrayList<>();
+                        starters.add(pkmn1);
+                        starters.add(pkmn2);
+                        starters.add(pkmn3);
+                        for (int i = 3; i < romHandler.starterCount(); i++) {
+                            Pokemon pkmn = romHandler.random2EvosPokemon();
+                            while (starters.contains(pkmn)) {
+                                pkmn = romHandler.random2EvosPokemon();
+                            }
+                            log.println("Set starter " + i + " to " + pkmn.fullName());
+                            starters.add(pkmn);
+                        }
+                        romHandler.setStarters(starters);
+                    } else {
+                        romHandler.setStarters(Arrays.asList(pkmn1, pkmn2, pkmn3));
+                    }
                 }
                 log.println();
 
             } else if (settings.getStartersMod() == Settings.StartersMod.COMPLETELY_RANDOM) {
                 // Randomise
                 log.println("--Random Starters--");
-                int starterCount = 3;
-                if (romHandler.isYellow()) {
-                    starterCount = 2;
-                }
+                int starterCount = romHandler.starterCount();
                 List<Pokemon> starters = new ArrayList<>();
                 for (int i = 0; i < starterCount; i++) {
-                    Pokemon pkmn = romHandler.randomPokemon();
-                    while (starters.contains(pkmn)) {
-                        pkmn = romHandler.randomPokemon();
+                    Pokemon pkmn =
+                            romHandler.generationOfPokemon() == 6 ?
+                                    romHandler.randomPokemonInclFormes() :
+                                    romHandler.randomPokemon();
+                    while (starters.contains(pkmn) || pkmn.actuallyCosmetic) {
+                        pkmn = romHandler.generationOfPokemon() == 6 ?
+                                    romHandler.randomPokemonInclFormes() :
+                                    romHandler.randomPokemon();
                     }
                     log.println("Set starter " + (i + 1) + " to " + pkmn.fullName());
                     starters.add(pkmn);
@@ -731,10 +756,7 @@ public class Randomizer {
             } else if (settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_TWO_EVOLUTIONS) {
                 // Randomise
                 log.println("--Random 2-Evolution Starters--");
-                int starterCount = 3;
-                if (romHandler.isYellow()) {
-                    starterCount = 2;
-                }
+                int starterCount = romHandler.starterCount();
                 List<Pokemon> starters = new ArrayList<>();
                 for (int i = 0; i < starterCount; i++) {
                     Pokemon pkmn = romHandler.random2EvosPokemon();

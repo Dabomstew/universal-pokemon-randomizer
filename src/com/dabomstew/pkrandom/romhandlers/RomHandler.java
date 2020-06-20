@@ -89,6 +89,8 @@ public interface RomHandler {
     // Was for before CUE's compressors were found and arm9 was untouchable.
     boolean canChangeStarters();
 
+    int starterCount();
+
     // Randomizer: Pokemon stats
 
     // Run the stats shuffler on each Pokemon.

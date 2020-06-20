@@ -325,7 +325,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (twoEvoPokes == null) {
             // Prepare the list
             twoEvoPokes = new ArrayList<>();
-            List<Pokemon> allPokes = this.getPokemon();
+            List<Pokemon> allPokes =
+                    generationOfPokemon() == 6 ?
+                            this.getPokemonInclFormes()
+                                    .stream()
+                                    .filter(pk -> pk == null || !pk.actuallyCosmetic)
+                                    .collect(Collectors.toList()) :
+                            this.getPokemon();
             for (Pokemon pk : allPokes) {
                 if (pk != null && pk.evolutionsTo.size() == 0 && pk.evolutionsFrom.size() > 0) {
                     // Potential candidate
@@ -2083,6 +2089,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (newPK.cosmeticForms > 0) {
                         newStatic.forme = this.random.nextInt(newPK.cosmeticForms);
                     }
+                    newStatic.level = old.level;
+                    newStatic.heldItem = old.heldItem;
                     if (legendariesLeft.size() == 0) {
                         legendariesLeft.addAll(onlyLegendaryList);
                         if (generationOfPokemon() >= 6) {
@@ -2101,6 +2109,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (newPK.cosmeticForms > 0) {
                         newStatic.forme = this.random.nextInt(newPK.cosmeticForms);
                     }
+                    newStatic.level = old.level;
+                    newStatic.heldItem = old.heldItem;
                     if (nonlegsLeft.size() == 0) {
                         nonlegsLeft.addAll(noLegendaryList);
                         if (generationOfPokemon() >= 6) {
@@ -2135,6 +2145,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (newPK.cosmeticForms > 0) {
                         newStatic.forme = this.random.nextInt(newPK.cosmeticForms);
                     }
+                    newStatic.level = old.level;
+                    newStatic.heldItem = old.heldItem;
                 } else {
 
                     if ((oldPK.number == 638 || oldPK.number == 639 || oldPK.number == 640) && limitMusketeers) {
@@ -2162,6 +2174,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (newPK.cosmeticForms > 0) {
                         newStatic.forme = this.random.nextInt(newPK.cosmeticForms);
                     }
+                    newStatic.level = old.level;
+                    newStatic.heldItem = old.heldItem;
                 }
 
                 if (pokemonLeft.size() == 0) {
@@ -2174,10 +2188,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         else { // Completely random
             List<Pokemon> pokemonLeft = new ArrayList<>(generationOfPokemon() < 6 ? mainPokemonList : mainPokemonListInclFormes);
             pokemonLeft.removeAll(banned);
-            for (Pokemon old : currentStaticPokemon.stream().map(enc -> enc.pkmn).collect(Collectors.toList())) {
+            for (StaticEncounter old : currentStaticPokemon) {
                 StaticEncounter newStatic = new StaticEncounter();
                 Pokemon newPK;
-                if (old.number == 487 && ptGiratina) {
+                if (old.pkmn.number == 487 && ptGiratina) {
                     newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
                     pokemonLeft.remove(newPK);
                 } else {
@@ -2192,6 +2206,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (newPK.cosmeticForms > 0) {
                         newStatic.forme = this.random.nextInt(newPK.cosmeticForms);
                     }
+                    newStatic.level = old.level;
+                    newStatic.heldItem = old.heldItem;
                 }
                 if (pokemonLeft.size() == 0) {
                     pokemonLeft.addAll(generationOfPokemon() < 6 ? mainPokemonList : mainPokemonListInclFormes);

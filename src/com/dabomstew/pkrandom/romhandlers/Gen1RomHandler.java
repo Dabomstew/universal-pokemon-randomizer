@@ -710,6 +710,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public int starterCount() {
+        return isYellow() ? 2 : 3;
+    }
+
+    @Override
     public List<Integer> getStarterHeldItems() {
         // do nothing
         return new ArrayList<>();

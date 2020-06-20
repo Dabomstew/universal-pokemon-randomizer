@@ -705,6 +705,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public int starterCount() {
+        return 3;
+    }
+
+    @Override
     public List<Integer> getStarterHeldItems() {
         // do nothing
         return new ArrayList<>();

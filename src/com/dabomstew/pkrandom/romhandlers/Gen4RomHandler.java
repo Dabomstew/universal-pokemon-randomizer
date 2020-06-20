@@ -2168,6 +2168,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         return true;
     }
 
+    @Override
+    public int starterCount() {
+        return 3;
+    }
+
     private void populateEvolutions() {
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {

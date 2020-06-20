@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class NewRandomizerGUI {
     private JTabbedPane tabbedPane1;
@@ -2445,7 +2446,13 @@ public class NewRandomizerGUI {
 
     private void populateDropdowns() {
         List<Pokemon> currentStarters = romHandler.getStarters();
-        List<Pokemon> allPokes = romHandler.getPokemon();
+        List<Pokemon> allPokes =
+                romHandler.generationOfPokemon() == 6 ?
+                        romHandler.getPokemonInclFormes()
+                                .stream()
+                                .filter(pk -> pk == null || !pk.actuallyCosmetic)
+                                .collect(Collectors.toList()) :
+                        romHandler.getPokemon();
         String[] pokeNames = new String[allPokes.size() - 1];
         for (int i = 1; i < allPokes.size(); i++) {
             pokeNames[i - 1] = allPokes.get(i).fullName();
