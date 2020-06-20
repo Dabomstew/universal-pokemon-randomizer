@@ -3040,6 +3040,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                             }
                         }
                     }
+                    if (checkEvo.type == EvolutionType.LEVEL_UPSIDE_DOWN) {
+                        checkEvo.type = EvolutionType.LEVEL;
+                        changedEvos.add(checkEvo);
+                    }
                 }
             }
         }
