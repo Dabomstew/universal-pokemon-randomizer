@@ -900,12 +900,27 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         EncounterSet es = new EncounterSet();
         es.rate = 1;
         for (int i = 0; i < amount; i++) {
-            int index = readWord(data, offset + i * 4) & 0x7FF;
-            int f = readWord(data, offset + i * 4) >> 11;
-            if (index != 0) {
+            int species = readWord(data, offset + i * 4) & 0x7FF;
+            int forme = readWord(data, offset + i * 4) >> 11;
+            if (species != 0) {
                 Encounter e = new Encounter();
-                e.pokemon = pokes[index];
-                e.formeNumber = f;
+                Pokemon baseForme = pokes[species];
+
+                // If the forme is purely cosmetic, just use the base forme as the Pokemon
+                // for this encounter (the cosmetic forme will be stored in the encounter).
+                // Do the same for formes 30 and 31, because they actually aren't formes, but
+                // rather act as indicators for what forme should appear when encountered:
+                // 30 = Spawn the cosmetic forme specific to the user's region (Scatterbug line)
+                // 31 = Spawn *any* cosmetic forme with equal probability (Unown Mirage Cave)
+                if (forme <= baseForme.cosmeticForms || forme == 30 || forme == 31) {
+                    e.pokemon = pokes[species];
+                } else {
+                    int speciesWithForme = absolutePokeNumByBaseForme
+                            .getOrDefault(species, dummyAbsolutePokeNums)
+                            .getOrDefault(forme, 0);
+                    e.pokemon = pokes[speciesWithForme];
+                }
+                e.formeNumber = forme;
                 e.level = data[offset + 2 + i * 4];
                 e.maxLevel = data[offset + 3 + i * 4];
                 es.encounters.add(e);
