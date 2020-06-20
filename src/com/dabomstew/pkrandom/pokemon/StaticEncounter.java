@@ -14,4 +14,9 @@ public class StaticEncounter {
     public StaticEncounter(Pokemon pkmn) {
         this.pkmn = pkmn;
     }
+
+    @Override
+    public String toString() {
+        return pkmn.name + formeSuffix;
+    }
 }

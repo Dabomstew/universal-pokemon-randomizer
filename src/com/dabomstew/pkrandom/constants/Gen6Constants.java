@@ -24,8 +24,16 @@ public class Gen6Constants {
 
 //    public static final int actuallyCosmeticFormCountXY = actuallyCosmeticForms.size();
 
+    public static final Map<Integer,List<Integer>> speciesToMegaStoneXY = setupSpeciesToMegaStone(Type_XY);
+    public static final Map<Integer,List<Integer>> speciesToMegaStoneORAS = setupSpeciesToMegaStone(Type_ORAS);
+
     public static final Map<Integer,String> formeSuffixes = setupFormeSuffixes();
     public static final Map<Integer,String> dummyFormeSuffixes = setupDummyFormeSuffixes();
+    public static final Map<Integer,Map<Integer,String>> formeSuffixesByBaseForme = setupFormeSuffixesByBaseForme();
+
+    public static String getFormeSuffixByBaseForme(int baseForme, int formNum) {
+        return formeSuffixesByBaseForme.getOrDefault(baseForme,dummyFormeSuffixes).getOrDefault(formNum,"");
+    }
 
     private static final int moveCountXY = 617, moveCountORAS = 621;
     private static final int highestAbilityIndexXY = 188, highestAbilityIndexORAS = 191;
@@ -77,9 +85,6 @@ public class Gen6Constants {
     private static final int tmBlockTwoStartingOffsetXY = 97, tmBlockTwoStartingOffsetORAS = 98,
             hmCountXY = 5, hmCountORAS = 7;
     public static final String itemPalettesPrefix = "6F7461746500FF920A063F";
-
-    public static final Map<Integer,List<Integer>> speciesToMegaStoneXY = setupSpeciesToMegaStone(Type_XY);
-    public static final Map<Integer,List<Integer>> speciesToMegaStoneORAS = setupSpeciesToMegaStone(Type_ORAS);
 
     public static int getFormeCount(int romType) {
         if (romType == Type_XY) {
@@ -413,6 +418,22 @@ public class Gen6Constants {
         Map<Integer,String> floetteMap = new HashMap<>();
         floetteMap.put(5,"-E");
         map.put(670,floetteMap);
+
+        Map<Integer,String> kyogreMap = new HashMap<>();
+        kyogreMap.put(1,"-P");
+        map.put(382,kyogreMap);
+
+        Map<Integer,String> groudonMap = new HashMap<>();
+        groudonMap.put(1,"-P");
+        map.put(383,groudonMap);
+
+        Map<Integer,String> rayquazaMap = new HashMap<>();
+        rayquazaMap.put(1,"-Mega");
+        map.put(384,rayquazaMap);
+
+        Map<Integer,String> hoopaMap = new HashMap<>();
+        hoopaMap.put(1,"-U");
+        map.put(720,hoopaMap);
 
         for (Integer species: speciesToMegaStoneORAS.keySet()) {
             Map<Integer,String> megaMap = new HashMap<>();

@@ -1086,6 +1086,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                     heldItem = 0;
                 }
                 se.heldItem = heldItem;
+                se.formeSuffix = Gen6Constants.getFormeSuffixByBaseForme(se.pkmn.number,se.forme);
                 statics.add(se);
             }
 

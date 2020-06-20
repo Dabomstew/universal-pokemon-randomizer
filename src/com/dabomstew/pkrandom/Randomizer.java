@@ -866,18 +866,18 @@ public class Randomizer {
                 log.println("--Static Pokemon--");
                 Map<Pokemon, Integer> seenPokemon = new TreeMap<>();
                 for (int i = 0; i < oldStatics.size(); i++) {
-                    Pokemon oldP = oldStatics.get(i).pkmn;
-                    Pokemon newP = newStatics.get(i).pkmn;
-                    checkValue = addToCV(checkValue, newP.number);
-                    log.print(oldP.fullName());
-                    if (seenPokemon.containsKey(oldP)) {
-                        int amount = seenPokemon.get(oldP);
+                    StaticEncounter oldP = oldStatics.get(i);
+                    StaticEncounter newP = newStatics.get(i);
+                    checkValue = addToCV(checkValue, newP.pkmn.number);
+                    log.print(oldP.toString());
+                    if (seenPokemon.containsKey(oldP.pkmn)) {
+                        int amount = seenPokemon.get(oldP.pkmn);
                         log.print("(" + (++amount) + ")");
-                        seenPokemon.put(oldP, amount);
+                        seenPokemon.put(oldP.pkmn, amount);
                     } else {
-                        seenPokemon.put(oldP, 1);
+                        seenPokemon.put(oldP.pkmn, 1);
                     }
-                    log.println(" => " + newP.fullName());
+                    log.println(" => " + newP.toString());
                 }
                 log.println();
             }
