@@ -723,6 +723,9 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
             int displayIndex = 0;
 
+            List<String> starterText = getStrings(false,romEntry.getInt("StarterTextOffset"));
+            int[] starterTextIndices = romEntry.arrayEntries.get("SpecificStarterTextOffsets");
+
             for (int i = 0; i < count; i++) {
                 if (!starterIndices.contains(i)) continue;
 
@@ -747,10 +750,15 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
                 writeWord(displayCRO,displayOffset+displayIndex*0x54,newStatic.pkmn.number);
                 displayCRO[displayOffset+displayIndex*0x54+2] = (byte)newStatic.forme;
+                if (displayIndex < 3) {
+                    starterText.set(starterTextIndices[displayIndex],
+                            "The " + starter.primaryType.camelCase() + "-type Pokémon\n[VAR PKNAME(0000)]");
+                }
                 displayIndex++;
             }
             writeFile(romEntry.getString("StaticPokemon"),fieldCRO);
             writeFile(romEntry.getString("StarterDisplay"),displayCRO);
+            setStrings(false, romEntry.getInt("StarterTextOffset"), starterText);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
