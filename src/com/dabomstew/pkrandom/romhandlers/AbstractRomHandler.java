@@ -29,6 +29,7 @@ package com.dabomstew.pkrandom.romhandlers;
 
 import java.io.PrintStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
@@ -2043,79 +2044,138 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMusketeers, boolean limit600) {
         // Load
         checkPokemonRestrictions();
-        List<Pokemon> currentStaticPokemon = this.getStaticPokemon();
-        List<Pokemon> replacements = new ArrayList<>();
+        List<StaticEncounter> currentStaticPokemon = this.getStaticPokemon();
+        List<StaticEncounter> replacements = new ArrayList<>();
         List<Pokemon> banned = this.bannedForStaticPokemon();
         if (swapLegendaries) {
             List<Pokemon> legendariesLeft = new ArrayList<>(onlyLegendaryList);
+            if (generationOfPokemon() >= 6) {
+                legendariesLeft.addAll(onlyLegendaryAltsList);
+            }
             List<Pokemon> nonlegsLeft = new ArrayList<>(noLegendaryList);
+            if (generationOfPokemon() >= 6) {
+                nonlegsLeft.addAll(noLegendaryAltsList);
+            }
             legendariesLeft.removeAll(banned);
             nonlegsLeft.removeAll(banned);
-            for (Pokemon old : currentStaticPokemon) {
+            for (StaticEncounter old : currentStaticPokemon) {
+                StaticEncounter newStatic = new StaticEncounter();
                 Pokemon newPK;
-                if (old.number == 487 && ptGiratina) {
+                if (old.pkmn.number == 487 && ptGiratina) {
                     newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
+                    newStatic.pkmn = newPK;
                     legendariesLeft.remove(newPK);
                     if (legendariesLeft.size() == 0) {
                         legendariesLeft.addAll(onlyLegendaryList);
+                        if (generationOfPokemon() >= 6) {
+                            legendariesLeft.addAll(onlyLegendaryAltsList);
+                        }
                         legendariesLeft.removeAll(banned);
                     }
-                } else if (old.isLegendary()) {
+                } else if (old.pkmn.isLegendary()) {
                     newPK = legendariesLeft.remove(this.random.nextInt(legendariesLeft.size()));
+                    if (newPK.formeNumber > 0) {
+                        newStatic.forme = newPK.formeNumber;
+                        newStatic.formeSuffix = newPK.formeSuffix;
+                        newPK = mainPokemonList.get(newPK.baseForme.number - 1);
+                    }
+                    newStatic.pkmn = newPK;
+                    if (newPK.cosmeticForms > 0) {
+                        newStatic.forme = this.random.nextInt(newPK.cosmeticForms);
+                    }
                     if (legendariesLeft.size() == 0) {
                         legendariesLeft.addAll(onlyLegendaryList);
+                        if (generationOfPokemon() >= 6) {
+                            legendariesLeft.addAll(onlyLegendaryAltsList);
+                        }
                         legendariesLeft.removeAll(banned);
                     }
                 } else {
                     newPK = nonlegsLeft.remove(this.random.nextInt(nonlegsLeft.size()));
+                    if (newPK.formeNumber > 0) {
+                        newStatic.forme = newPK.formeNumber;
+                        newStatic.formeSuffix = newPK.formeSuffix;
+                        newPK = mainPokemonList.get(newPK.baseForme.number - 1);
+                    }
+                    newStatic.pkmn = newPK;
+                    if (newPK.cosmeticForms > 0) {
+                        newStatic.forme = this.random.nextInt(newPK.cosmeticForms);
+                    }
                     if (nonlegsLeft.size() == 0) {
                         nonlegsLeft.addAll(noLegendaryList);
+                        if (generationOfPokemon() >= 6) {
+                            nonlegsLeft.addAll(noLegendaryAltsList);
+                        }
                         nonlegsLeft.removeAll(banned);
                     }
                 }
-                replacements.add(newPK);
+                replacements.add(newStatic);
             }
         }
         else if (similarStrength) {
-            List<Pokemon> pokemonLeft = new ArrayList<>(mainPokemonList);
+            List<Pokemon> pokemonLeft = new ArrayList<>(this.generationOfPokemon() < 6 ? mainPokemonList : mainPokemonListInclFormes);
             pokemonLeft.removeAll(banned);
-            for (Pokemon old : currentStaticPokemon) {
+            for (StaticEncounter old : currentStaticPokemon) {
+                StaticEncounter newStatic = new StaticEncounter();
                 Pokemon newPK;
-                Integer oldBST = old.hp + old.attack + old.defense + old.spatk + old.spdef + old.speed;
-                if (old.number == 487 && ptGiratina) {
+                Pokemon oldPK = old.pkmn;
+                Integer oldBST = oldPK.hp + oldPK.attack + oldPK.defense + oldPK.spatk + oldPK.spdef + oldPK.speed;
+                if (oldPK.number == 487 && ptGiratina) {
                     newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
                     pokemonLeft.remove(newPK);
                 } else if (oldBST >= 600 && limit600) {
-                    // System.out.println(old.name + " " + old.number + ": Over 600 BST, pure random");
                     newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
                     pokemonLeft.remove(newPK);
-                    //newPK = pickReplacement(old, false, null, true, false, false, false); // Pure random setup
+                    if (newPK.formeNumber > 0) {
+                        newStatic.forme = newPK.formeNumber;
+                        newStatic.formeSuffix = newPK.formeSuffix;
+                        newPK = mainPokemonList.get(newPK.baseForme.number - 1);
+                    }
+                    newStatic.pkmn = newPK;
+                    if (newPK.cosmeticForms > 0) {
+                        newStatic.forme = this.random.nextInt(newPK.cosmeticForms);
+                    }
                 } else {
 
-                    if ((old.number == 638 || old.number == 639 || old.number == 640) && limitMusketeers) {
-                        // System.out.println(old.name + " " + old.number + ": triggered limit on replacement");
-                        newPK = pickStaticPowerLvlReplacement(pokemonLeft, old, true, replacements, true);
-                        //newPK = pickReplacement(old, true, null, true, true, true, true); // This sets up picking a replacement with similar strength
-                        // and limit on bw musketeers
+                    if ((oldPK.number == 638 || oldPK.number == 639 || oldPK.number == 640) && limitMusketeers) {
+                        newPK = pickStaticPowerLvlReplacement(
+                                pokemonLeft,
+                                oldPK,
+                                true,
+                                replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
+                                true);
                     } else {
-                        newPK = pickStaticPowerLvlReplacement(pokemonLeft, old, true, replacements, false);
-                        //newPK = pickReplacement(old, true, null, true, true, false, true); // This sets up picking a replacement with similar strength
+                        newPK = pickStaticPowerLvlReplacement(
+                                pokemonLeft,
+                                oldPK,
+                                true,
+                                replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
+                                false);
                     }
                     pokemonLeft.remove(newPK);
-                    // System.out.println(old.name + " " + old.number + " -> " + newPK.name + " " + newPK.number);                        
+                    if (newPK.formeNumber > 0) {
+                        newStatic.forme = newPK.formeNumber;
+                        newStatic.formeSuffix = newPK.formeSuffix;
+                        newPK = mainPokemonList.get(newPK.baseForme.number - 1);
+                    }
+                    newStatic.pkmn = newPK;
+                    if (newPK.cosmeticForms > 0) {
+                        newStatic.forme = this.random.nextInt(newPK.cosmeticForms);
+                    }
                 }
 
                 if (pokemonLeft.size() == 0) {
-                    pokemonLeft.addAll(mainPokemonList);
+                    pokemonLeft.addAll(generationOfPokemon() < 6 ? mainPokemonList : mainPokemonListInclFormes);
                     pokemonLeft.removeAll(banned);
                 }
-                replacements.add(newPK);
+                replacements.add(newStatic);
             }
         }
         else { // Completely random
-            List<Pokemon> pokemonLeft = new ArrayList<>(mainPokemonList);
+            List<Pokemon> pokemonLeft = new ArrayList<>(generationOfPokemon() < 6 ? mainPokemonList : mainPokemonListInclFormes);
             pokemonLeft.removeAll(banned);
-            for (Pokemon old : currentStaticPokemon) {
+            for (Pokemon old : currentStaticPokemon.stream().map(enc -> enc.pkmn).collect(Collectors.toList())) {
+                StaticEncounter newStatic = new StaticEncounter();
                 Pokemon newPK;
                 if (old.number == 487 && ptGiratina) {
                     newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
@@ -2123,13 +2183,21 @@ public abstract class AbstractRomHandler implements RomHandler {
                 } else {
                     newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
                     pokemonLeft.remove(newPK);
-                    // System.out.println(old.name + " " + old.number + " -> " + newPK.name + " " + newPK.number);
+                    if (newPK.formeNumber > 0) {
+                        newStatic.forme = newPK.formeNumber;
+                        newStatic.formeSuffix = newPK.formeSuffix;
+                        newPK = mainPokemonList.get(newPK.baseForme.number - 1);
+                    }
+                    newStatic.pkmn = newPK;
+                    if (newPK.cosmeticForms > 0) {
+                        newStatic.forme = this.random.nextInt(newPK.cosmeticForms);
+                    }
                 }
                 if (pokemonLeft.size() == 0) {
-                    pokemonLeft.addAll(mainPokemonList);
+                    pokemonLeft.addAll(generationOfPokemon() < 6 ? mainPokemonList : mainPokemonListInclFormes);
                     pokemonLeft.removeAll(banned);
                 }
-                replacements.add(newPK);
+                replacements.add(newStatic);
             }
         }
 

@@ -48,19 +48,7 @@ import com.dabomstew.pkrandom.constants.Gen1Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.pokemon.Encounter;
-import com.dabomstew.pkrandom.pokemon.EncounterSet;
-import com.dabomstew.pkrandom.pokemon.Evolution;
-import com.dabomstew.pkrandom.pokemon.EvolutionType;
-import com.dabomstew.pkrandom.pokemon.ExpCurve;
-import com.dabomstew.pkrandom.pokemon.IngameTrade;
-import com.dabomstew.pkrandom.pokemon.ItemList;
-import com.dabomstew.pkrandom.pokemon.Move;
-import com.dabomstew.pkrandom.pokemon.MoveLearnt;
-import com.dabomstew.pkrandom.pokemon.Pokemon;
-import com.dabomstew.pkrandom.pokemon.Trainer;
-import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
-import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.pokemon.*;
 import compressors.Gen1Decmp;
 
 public class Gen1RomHandler extends AbstractGBCRomHandler {
@@ -1190,23 +1178,23 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public List<Pokemon> getStaticPokemon() {
-        List<Pokemon> statics = new ArrayList<>();
+    public List<StaticEncounter> getStaticPokemon() {
+        List<StaticEncounter> statics = new ArrayList<>();
         if (romEntry.getValue("StaticPokemonSupport") > 0) {
             for (int offset : romEntry.staticPokemonSingle) {
-                statics.add(pokes[pokeRBYToNumTable[rom[offset] & 0xFF]]);
+                statics.add(new StaticEncounter(pokes[pokeRBYToNumTable[rom[offset] & 0xFF]]));
             }
             for (GameCornerPokemon gcp : romEntry.staticPokemonGameCorner) {
-                statics.add(pokes[pokeRBYToNumTable[rom[gcp.offsets[0]] & 0xFF]]);
+                statics.add(new StaticEncounter(pokes[pokeRBYToNumTable[rom[gcp.offsets[0]] & 0xFF]]));
             }
             // Ghost Marowak
-            statics.add(pokes[pokeRBYToNumTable[rom[romEntry.ghostMarowakOffsets[0]] & 0xFF]]);
+            statics.add(new StaticEncounter(pokes[pokeRBYToNumTable[rom[romEntry.ghostMarowakOffsets[0]] & 0xFF]]));
         }
         return statics;
     }
 
     @Override
-    public boolean setStaticPokemon(List<Pokemon> staticPokemon) {
+    public boolean setStaticPokemon(List<StaticEncounter> staticPokemon) {
         if (romEntry.getValue("StaticPokemonSupport") == 0) {
             return false;
         }
@@ -1219,12 +1207,12 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
         // Singular entries
         for (int i = 0; i < singleSize; i++) {
-            rom[romEntry.staticPokemonSingle.get(i)] = (byte) pokeNumToRBYTable[staticPokemon.get(i).number];
+            rom[romEntry.staticPokemonSingle.get(i)] = (byte) pokeNumToRBYTable[staticPokemon.get(i).pkmn.number];
         }
 
         // Game corner
         for (int i = 0; i < gcSize; i++) {
-            byte pokeNum = (byte) pokeNumToRBYTable[staticPokemon.get(i + singleSize).number];
+            byte pokeNum = (byte) pokeNumToRBYTable[staticPokemon.get(i + singleSize).pkmn.number];
             int[] offsets = romEntry.staticPokemonGameCorner.get(i).offsets;
             for (int offset : offsets) {
                 rom[offset] = pokeNum;
@@ -1232,7 +1220,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         }
 
         // Ghost Marowak
-        byte maroNum = (byte) pokeNumToRBYTable[staticPokemon.get(singleSize + gcSize).number];
+        byte maroNum = (byte) pokeNumToRBYTable[staticPokemon.get(singleSize + gcSize).pkmn.number];
         for (int maroOffset : romEntry.ghostMarowakOffsets) {
             rom[maroOffset] = maroNum;
         }

@@ -268,12 +268,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public List<Pokemon> getStaticPokemon() {
+    public List<StaticEncounter> getStaticPokemon() {
         return new ArrayList<>();
     }
 
     @Override
-    public boolean setStaticPokemon(List<Pokemon> staticPokemon) {
+    public boolean setStaticPokemon(List<StaticEncounter> staticPokemon) {
         return false;
     }
 

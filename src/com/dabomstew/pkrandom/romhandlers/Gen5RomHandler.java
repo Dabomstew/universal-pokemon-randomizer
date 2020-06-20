@@ -1343,30 +1343,30 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public List<Pokemon> getStaticPokemon() {
-        List<Pokemon> sp = new ArrayList<>();
+    public List<StaticEncounter> getStaticPokemon() {
+        List<StaticEncounter> sp = new ArrayList<>();
         if (!romEntry.staticPokemonSupport) {
             return sp;
         }
         NARCArchive scriptNARC = scriptNarc;
         for (StaticPokemon statP : romEntry.staticPokemon) {
-            sp.add(statP.getPokemon(this, scriptNARC));
+            sp.add(new StaticEncounter(statP.getPokemon(this, scriptNARC)));
         }
         return sp;
     }
 
     @Override
-    public boolean setStaticPokemon(List<Pokemon> staticPokemon) {
+    public boolean setStaticPokemon(List<StaticEncounter> staticPokemon) {
         if (!romEntry.staticPokemonSupport) {
             return false;
         }
         if (staticPokemon.size() != romEntry.staticPokemon.size()) {
             return false;
         }
-        Iterator<Pokemon> statics = staticPokemon.iterator();
+        Iterator<StaticEncounter> statics = staticPokemon.iterator();
         NARCArchive scriptNARC = scriptNarc;
         for (StaticPokemon statP : romEntry.staticPokemon) {
-            statP.setPokemon(this, scriptNARC, statics.next());
+            statP.setPokemon(this, scriptNARC, statics.next().pkmn);
         }
         if (romEntry.offsetArrayEntries.containsKey("StaticPokemonFormValues")) {
             OffsetWithinEntry[] formValues = romEntry.offsetArrayEntries.get("StaticPokemonFormValues");

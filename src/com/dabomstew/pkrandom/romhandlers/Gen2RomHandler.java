@@ -39,18 +39,7 @@ import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.constants.Gen2Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.pokemon.Encounter;
-import com.dabomstew.pkrandom.pokemon.EncounterSet;
-import com.dabomstew.pkrandom.pokemon.Evolution;
-import com.dabomstew.pkrandom.pokemon.EvolutionType;
-import com.dabomstew.pkrandom.pokemon.ExpCurve;
-import com.dabomstew.pkrandom.pokemon.IngameTrade;
-import com.dabomstew.pkrandom.pokemon.ItemList;
-import com.dabomstew.pkrandom.pokemon.Move;
-import com.dabomstew.pkrandom.pokemon.MoveLearnt;
-import com.dabomstew.pkrandom.pokemon.Pokemon;
-import com.dabomstew.pkrandom.pokemon.Trainer;
-import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
+import com.dabomstew.pkrandom.pokemon.*;
 import compressors.Gen2Decmp;
 
 public class Gen2RomHandler extends AbstractGBCRomHandler {
@@ -1030,25 +1019,25 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public List<Pokemon> getStaticPokemon() {
-        List<Pokemon> statics = new ArrayList<>();
+    public List<StaticEncounter> getStaticPokemon() {
+        List<StaticEncounter> statics = new ArrayList<>();
         if (romEntry.getValue("StaticPokemonSupport") > 0) {
             for (StaticPokemon sp : romEntry.staticPokemon) {
-                statics.add(sp.getPokemon(this));
+                statics.add(new StaticEncounter(sp.getPokemon(this)));
             }
         }
         if (romEntry.getValue("StaticPokemonOddEggOffset") > 0) {
             int oeOffset = romEntry.getValue("StaticPokemonOddEggOffset");
             int oeSize = romEntry.getValue("StaticPokemonOddEggDataSize");
             for (int i = 0; i < Gen2Constants.oddEggPokemonCount; i++) {
-                statics.add(pokes[rom[oeOffset + i * oeSize] & 0xFF]);
+                statics.add(new StaticEncounter(pokes[rom[oeOffset + i * oeSize] & 0xFF]));
             }
         }
         return statics;
     }
 
     @Override
-    public boolean setStaticPokemon(List<Pokemon> staticPokemon) {
+    public boolean setStaticPokemon(List<StaticEncounter> staticPokemon) {
         if (romEntry.getValue("StaticPokemonSupport") == 0) {
             return false;
         }
@@ -1065,16 +1054,16 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             return false;
         }
 
-        Iterator<Pokemon> statics = staticPokemon.iterator();
+        Iterator<StaticEncounter> statics = staticPokemon.iterator();
         for (StaticPokemon sp : romEntry.staticPokemon) {
-            sp.setPokemon(this, statics.next());
+            sp.setPokemon(this, statics.next().pkmn);
         }
 
         if (romEntry.getValue("StaticPokemonOddEggOffset") > 0) {
             int oeOffset = romEntry.getValue("StaticPokemonOddEggOffset");
             int oeSize = romEntry.getValue("StaticPokemonOddEggDataSize");
             for (int i = 0; i < Gen2Constants.oddEggPokemonCount; i++) {
-                rom[oeOffset + i * oeSize] = (byte) statics.next().number;
+                rom[oeOffset + i * oeSize] = (byte) statics.next().pkmn.number;
             }
         }
 

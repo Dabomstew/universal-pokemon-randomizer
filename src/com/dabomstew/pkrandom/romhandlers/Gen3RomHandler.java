@@ -39,18 +39,7 @@ import com.dabomstew.pkrandom.constants.Gen3Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.pokemon.Encounter;
-import com.dabomstew.pkrandom.pokemon.EncounterSet;
-import com.dabomstew.pkrandom.pokemon.Evolution;
-import com.dabomstew.pkrandom.pokemon.EvolutionType;
-import com.dabomstew.pkrandom.pokemon.ExpCurve;
-import com.dabomstew.pkrandom.pokemon.IngameTrade;
-import com.dabomstew.pkrandom.pokemon.ItemList;
-import com.dabomstew.pkrandom.pokemon.Move;
-import com.dabomstew.pkrandom.pokemon.MoveLearnt;
-import com.dabomstew.pkrandom.pokemon.Pokemon;
-import com.dabomstew.pkrandom.pokemon.Trainer;
-import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
+import com.dabomstew.pkrandom.pokemon.*;
 import compressors.DSDecmp;
 
 public class Gen3RomHandler extends AbstractGBRomHandler {
@@ -1683,17 +1672,17 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public List<Pokemon> getStaticPokemon() {
-        List<Pokemon> statics = new ArrayList<>();
+    public List<StaticEncounter> getStaticPokemon() {
+        List<StaticEncounter> statics = new ArrayList<>();
         List<StaticPokemon> staticsHere = romEntry.staticPokemon;
         for (StaticPokemon staticPK : staticsHere) {
-            statics.add(staticPK.getPokemon(this));
+            statics.add(new StaticEncounter(staticPK.getPokemon(this)));
         }
         return statics;
     }
 
     @Override
-    public boolean setStaticPokemon(List<Pokemon> staticPokemon) {
+    public boolean setStaticPokemon(List<StaticEncounter> staticPokemon) {
         // Support Deoxys/Mew gifts/catches in E/FR/LG
         attemptObedienceEvolutionPatches();
 
@@ -1703,7 +1692,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
 
         for (int i = 0; i < staticsHere.size(); i++) {
-            staticsHere.get(i).setPokemon(this, staticPokemon.get(i));
+            staticsHere.get(i).setPokemon(this, staticPokemon.get(i).pkmn);
         }
         return true;
     }

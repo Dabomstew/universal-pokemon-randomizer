@@ -37,11 +37,10 @@ import pptxt.N3DSTxtHandler;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Gen6RomHandler extends Abstract3DSRomHandler {
 
@@ -75,7 +74,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         private String romCode;
         private String titleId;
         private int romType;
-        private boolean staticPokemonSupport = false, copyStaticPokemon = false;
+        private boolean staticPokemonSupport = true, copyStaticPokemon = true;
         private Map<String, String> strings = new HashMap<>();
         private Map<String, Integer> numbers = new HashMap<>();
         private Map<String, int[]> arrayEntries = new HashMap<>();
@@ -153,6 +152,18 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 //                                        current.staticPokemonSupport = false;
 //                                    }
                                 }
+                            }
+                        } else if (r[1].startsWith("[") && r[1].endsWith("]")) {
+                            String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
+                            if (offsets.length == 1 && offsets[0].trim().isEmpty()) {
+                                current.arrayEntries.put(r[0], new int[0]);
+                            } else {
+                                int[] offs = new int[offsets.length];
+                                int c = 0;
+                                for (String off : offsets) {
+                                    offs[c++] = parseRIInt(off);
+                                }
+                                current.arrayEntries.put(r[0], offs);
                             }
                         } else if (r[0].endsWith("Offset") || r[0].endsWith("Count") || r[0].endsWith("Number")) {
                             int offs = parseRIInt(r[1]);
@@ -960,17 +971,106 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public boolean canChangeStaticPokemon() {
-        return false;
+        return romEntry.staticPokemonSupport;
     }
 
     @Override
-    public List<Pokemon> getStaticPokemon() {
-        return new ArrayList<>();
+    public List<StaticEncounter> getStaticPokemon() {
+        List<StaticEncounter> statics = new ArrayList<>();
+        try {
+            byte[] fieldCRO = readFile(romEntry.getString("StaticPokemon"));
+
+            // Static Pokemon
+            int count = Gen6Constants.getStaticPokemonCount(romEntry.romType);
+            int size = Gen6Constants.staticPokemonSize;
+            int offset = romEntry.getInt("StaticPokemonOffset");
+            for (int i = 0; i < count; i++) {
+                StaticEncounter se = new StaticEncounter();
+                se.pkmn = pokes[FileFunctions.read2ByteInt(fieldCRO,offset+i*size)];
+                se.forme = fieldCRO[offset+i*size + 2];
+                se.level = fieldCRO[offset+i*size + 3];
+                short heldItem = (short)FileFunctions.read2ByteInt(fieldCRO,offset+i*size + 4);
+                if (heldItem < 0) {
+                    heldItem = 0;
+                }
+                se.heldItem = heldItem;
+                statics.add(se);
+            }
+
+            List<Integer> skipStarters =
+                    Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().collect(Collectors.toList());
+
+            // Gift Pokemon
+            count = Gen6Constants.getGiftPokemonCount(romEntry.romType);
+            size = Gen6Constants.getGiftPokemonSize(romEntry.romType);
+            offset = romEntry.getInt("GiftPokemonOffset");
+            for (int i = 0; i < count; i++) {
+                if (skipStarters.contains(i)) continue;
+                StaticEncounter se = new StaticEncounter();
+                se.pkmn = pokes[FileFunctions.read2ByteInt(fieldCRO,offset+i*size)];
+                se.forme = fieldCRO[offset+i*size + 4];
+                se.level = fieldCRO[offset+i*size + 5];
+                int heldItem = FileFunctions.readFullIntLittleEndian(fieldCRO,offset+i*size + 12);
+                if (heldItem < 0) {
+                    heldItem = 0;
+                }
+                se.heldItem = heldItem;
+                statics.add(se);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+
+        return statics;
     }
 
     @Override
-    public boolean setStaticPokemon(List<Pokemon> staticPokemon) {
-        return false;
+    public boolean setStaticPokemon(List<StaticEncounter> staticPokemon) {
+        // Static Pokemon
+        try {
+            byte[] fieldCRO = readFile(romEntry.getString("StaticPokemon"));
+
+            Iterator<StaticEncounter> staticIter = staticPokemon.iterator();
+
+            int staticCount = Gen6Constants.getStaticPokemonCount(romEntry.romType);
+            int size = Gen6Constants.staticPokemonSize;
+            int offset = romEntry.getInt("StaticPokemonOffset");
+            for (int i = 0; i < staticCount; i++) {
+                StaticEncounter se = staticIter.next();
+                writeWord(fieldCRO,offset+i*size,se.pkmn.number);
+                fieldCRO[offset+i*size + 2] = (byte)se.forme;
+                fieldCRO[offset+i*size + 3] = (byte)se.level;
+                if (se.heldItem == 0) {
+                    writeWord(fieldCRO,offset+i*size + 4,-1);
+                } else {
+                    writeWord(fieldCRO,offset+i*size + 4,se.heldItem);
+                }
+            }
+
+            List<Integer> skipStarters =
+                    Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().collect(Collectors.toList());
+
+            // Gift Pokemon
+            int giftCount = Gen6Constants.getGiftPokemonCount(romEntry.romType);
+            size = Gen6Constants.getGiftPokemonSize(romEntry.romType);
+            offset = romEntry.getInt("GiftPokemonOffset");
+            for (int i = 0; i < giftCount; i++) {
+                if (skipStarters.contains(i)) continue;
+                StaticEncounter se = staticIter.next();
+                writeWord(fieldCRO,offset+i*size,se.pkmn.number);
+                fieldCRO[offset+i*size + 4] = (byte)se.forme;
+                fieldCRO[offset+i*size + 5] = (byte)se.level;
+                if (se.heldItem == 0) {
+                    writeWord(fieldCRO,offset+i*size + 12,-1);
+                } else {
+                    writeWord(fieldCRO,offset+i*size + 12,se.heldItem);
+                }
+            }
+            writeFile(romEntry.getString("StaticPokemon"),fieldCRO);
+            return true;
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     @Override
@@ -1166,6 +1266,15 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     @Override
     public boolean hasTimeBasedEncounters() {
         return false;
+    }
+
+    @Override
+    public List<Pokemon> bannedForStaticPokemon() {
+        return Gen6Constants.actuallyCosmeticForms
+                .stream()
+                .filter(index -> index < Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.romType))
+                .map(index -> pokes[index])
+                .collect(Collectors.toList());
     }
 
     @Override

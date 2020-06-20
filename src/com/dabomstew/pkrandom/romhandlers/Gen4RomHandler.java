@@ -1728,26 +1728,26 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public List<Pokemon> getStaticPokemon() {
-        List<Pokemon> sp = new ArrayList<>();
+    public List<StaticEncounter> getStaticPokemon() {
+        List<StaticEncounter> sp = new ArrayList<>();
         if (!romEntry.staticPokemonSupport) {
             return sp;
         }
         try {
             NARCArchive scriptNARC = scriptNarc;
             for (StaticPokemon statP : romEntry.staticPokemon) {
-                sp.add(statP.getPokemon(this, scriptNARC));
+                sp.add(new StaticEncounter(statP.getPokemon(this, scriptNARC)));
             }
             if (romEntry.arrayEntries.containsKey("StaticPokemonTrades")) {
                 NARCArchive tradeNARC = this.readNARC(romEntry.getString("InGameTrades"));
                 int[] trades = romEntry.arrayEntries.get("StaticPokemonTrades");
                 for (int tradeNum : trades) {
-                    sp.add(pokes[readLong(tradeNARC.files.get(tradeNum), 0)]);
+                    sp.add(new StaticEncounter(pokes[readLong(tradeNARC.files.get(tradeNum), 0)]));
                 }
             }
             if (romEntry.getInt("MysteryEggOffset") > 0) {
                 byte[] ovOverlay = readOverlay(romEntry.getInt("MoveTutorMovesOvlNumber"));
-                sp.add(pokes[ovOverlay[romEntry.getInt("MysteryEggOffset")] & 0xFF]);
+                sp.add(new StaticEncounter(pokes[ovOverlay[romEntry.getInt("MysteryEggOffset")] & 0xFF]));
             }
             if (romEntry.getInt("FossilTableOffset") > 0) {
                 byte[] ftData = arm9;
@@ -1757,7 +1757,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 }
                 // read the 7 Fossil Pokemon
                 for (int f = 0; f < Gen4Constants.fossilCount; f++) {
-                    sp.add(pokes[readWord(ftData, baseOffset + 2 + f * 4)]);
+                    sp.add(new StaticEncounter(pokes[readWord(ftData, baseOffset + 2 + f * 4)]));
                 }
             }
         } catch (IOException e) {
@@ -1767,7 +1767,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public boolean setStaticPokemon(List<Pokemon> staticPokemon) {
+    public boolean setStaticPokemon(List<StaticEncounter> staticPokemon) {
         if (!romEntry.staticPokemonSupport) {
             return false;
         }
@@ -1779,16 +1779,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             return false;
         }
         try {
-            Iterator<Pokemon> statics = staticPokemon.iterator();
+            Iterator<StaticEncounter> statics = staticPokemon.iterator();
             NARCArchive scriptNARC = scriptNarc;
             for (StaticPokemon statP : romEntry.staticPokemon) {
-                statP.setPokemon(this, scriptNARC, statics.next());
+                statP.setPokemon(this, scriptNARC, statics.next().pkmn);
             }
             if (romEntry.arrayEntries.containsKey("StaticPokemonTrades")) {
                 NARCArchive tradeNARC = this.readNARC(romEntry.getString("InGameTrades"));
                 int[] trades = romEntry.arrayEntries.get("StaticPokemonTrades");
                 for (int tradeNum : trades) {
-                    Pokemon thisTrade = statics.next();
+                    Pokemon thisTrade = statics.next().pkmn;
                     List<Integer> possibleAbilities = new ArrayList<>();
                     possibleAbilities.add(thisTrade.ability1);
                     if (thisTrade.ability2 > 0) {
@@ -1807,7 +1807,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             if (romEntry.getInt("MysteryEggOffset") > 0) {
                 // Same overlay as MT moves
                 // Truncate the pokemon# to 1byte, unless it's 0
-                int pokenum = statics.next().number;
+                int pokenum = statics.next().pkmn.number;
                 if (pokenum > 255) {
                     pokenum = this.random.nextInt(255) + 1;
                 }
@@ -1820,14 +1820,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 if (romEntry.romType == Gen4Constants.Type_HGSS) {
                     byte[] ftData = readOverlay(romEntry.getInt("FossilTableOvlNumber"));
                     for (int f = 0; f < Gen4Constants.fossilCount; f++) {
-                        int pokenum = statics.next().number;
+                        int pokenum = statics.next().pkmn.number;
                         writeWord(ftData, baseOffset + 2 + f * 4, pokenum);
                     }
                     writeOverlay(romEntry.getInt("FossilTableOvlNumber"), ftData);
                 } else {
                     // write to arm9
                     for (int f = 0; f < Gen4Constants.fossilCount; f++) {
-                        int pokenum = statics.next().number;
+                        int pokenum = statics.next().pkmn.number;
                         writeWord(arm9, baseOffset + 2 + f * 4, pokenum);
                     }
                 }

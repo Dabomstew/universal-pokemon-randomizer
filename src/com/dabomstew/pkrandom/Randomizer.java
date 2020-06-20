@@ -33,14 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.dabomstew.pkrandom.pokemon.Encounter;
-import com.dabomstew.pkrandom.pokemon.EncounterSet;
-import com.dabomstew.pkrandom.pokemon.IngameTrade;
-import com.dabomstew.pkrandom.pokemon.Move;
-import com.dabomstew.pkrandom.pokemon.MoveLearnt;
-import com.dabomstew.pkrandom.pokemon.Pokemon;
-import com.dabomstew.pkrandom.pokemon.Trainer;
-import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
+import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen5RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
@@ -833,7 +826,7 @@ public class Randomizer {
 
     private int maybeChangeAndLogStaticPokemon(final PrintStream log, final RomHandler romHandler, int checkValue) {
         if (romHandler.canChangeStaticPokemon()) {
-            List<Pokemon> oldStatics = romHandler.getStaticPokemon();
+            List<StaticEncounter> oldStatics = romHandler.getStaticPokemon();
             if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING) { // Legendary for L
                 romHandler.randomizeStaticPokemon(true, false,settings.isLimitMusketeers(),
                         settings.isLimit600());
@@ -844,15 +837,15 @@ public class Randomizer {
                 romHandler.randomizeStaticPokemon(false, true,settings.isLimitMusketeers(),
                         settings.isLimit600());
             }
-            List<Pokemon> newStatics = romHandler.getStaticPokemon();
+            List<StaticEncounter> newStatics = romHandler.getStaticPokemon();
             if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED) {
                 log.println("Static Pokemon: Unchanged." + NEWLINE);
             } else {
                 log.println("--Static Pokemon--");
                 Map<Pokemon, Integer> seenPokemon = new TreeMap<>();
                 for (int i = 0; i < oldStatics.size(); i++) {
-                    Pokemon oldP = oldStatics.get(i);
-                    Pokemon newP = newStatics.get(i);
+                    Pokemon oldP = oldStatics.get(i).pkmn;
+                    Pokemon newP = newStatics.get(i).pkmn;
                     checkValue = addToCV(checkValue, newP.number);
                     log.print(oldP.fullName());
                     if (seenPokemon.containsKey(oldP)) {

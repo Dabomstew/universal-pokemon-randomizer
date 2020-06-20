@@ -61,6 +61,15 @@ public class Gen6Constants {
 
     public static final int waterStoneIndex = 84;
 
+    public static final int staticPokemonSize = 0xC;
+    private static final int staticPokemonCountXY = 0xC;
+    private static final int staticPokemonCountORAS = 0x3B;
+
+    private static final int giftPokemonSizeXY = 0x18;
+    private static final int giftPokemonSizeORAS = 0x24;
+    private static final int giftPokemonCountXY = 0x13;
+    private static final int giftPokemonCountORAS = 0x25;
+
     public static final String tmDataPrefix = "D400AE02AF02B002";
     public static final int tmCount = 100, tmBlockOneCount = 92, tmBlockTwoCount = 3, tmBlockThreeCount = 5,
             tmBlockOneOffset = 328, tmBlockTwoOffset = 618, tmBlockThreeOffset = 690, hmBlockOneCount = 5,
@@ -124,6 +133,33 @@ public class Gen6Constants {
             return highestAbilityIndexORAS;
         }
         return highestAbilityIndexXY;
+    }
+
+    public static int getStaticPokemonCount(int romType) {
+        if (romType == Type_XY) {
+            return staticPokemonCountXY;
+        } else if (romType == Type_ORAS) {
+            return staticPokemonCountORAS;
+        }
+        return staticPokemonCountXY;
+    }
+
+    public static int getGiftPokemonCount(int romType) {
+        if (romType == Type_XY) {
+            return giftPokemonCountXY;
+        } else if (romType == Type_ORAS) {
+            return giftPokemonCountORAS;
+        }
+        return giftPokemonCountXY;
+    }
+
+    public static int getGiftPokemonSize(int romType) {
+        if (romType == Type_XY) {
+            return giftPokemonSizeXY;
+        } else if (romType == Type_ORAS) {
+            return giftPokemonSizeORAS;
+        }
+        return giftPokemonSizeXY;
     }
 
     private static Type[] constructTypeTable() {
