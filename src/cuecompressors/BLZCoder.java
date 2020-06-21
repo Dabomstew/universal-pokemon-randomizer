@@ -270,7 +270,7 @@ public class BLZCoder {
 
     }
 
-    // LZSS Encoding ported to Java from pk3DS by Kaphotics and pokemon-x-y-icons by CatTrinket
+    // LZSS Decoding ported to Java (based on pk3DS by Kaphotics and pokemon-x-y-icons by CatTrinket)
 
     private byte[] LZSS_Decode(byte[] data) {
         ByteBuffer buf = ByteBuffer.wrap(data);
@@ -591,7 +591,7 @@ public class BLZCoder {
         return pak_buffer;
     }
 
-    // LZSS Encoding ported to Java from pk3DS by Kaphotics
+    // LZSS Encoding ported to Java (based on pk3DS by Kaphotics)
 
     private byte[] LZSS_Encode(byte[] data) {
         if (data.length > 0xFFFFFF) {
