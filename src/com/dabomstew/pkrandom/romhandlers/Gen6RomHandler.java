@@ -1205,6 +1205,9 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     private void writeEncounter(byte[] data, int offset, List<Encounter> encounters) {
         for (int i = 0; i < encounters.size(); i++) {
             Encounter encounter = encounters.get(i);
+            if (encounter.pokemon.formeNumber > 0) { // Failsafe if we need to write encounters without modifying species
+                encounter.pokemon = encounter.pokemon.baseForme;
+            }
             int speciesAndFormeData = (encounter.formeNumber << 11) + encounter.pokemon.number;
             writeWord(data, offset + i * 4, speciesAndFormeData);
             data[offset + 2 + i * 4] = (byte) encounter.level;

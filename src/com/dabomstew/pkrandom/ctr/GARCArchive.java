@@ -23,6 +23,7 @@ public class GARCArchive {
     private boolean skipDecompression;
 
     public List<Map<Integer,byte[]>> files = new ArrayList<>();
+    private Map<Integer,Boolean> isCompressed = new TreeMap<>();
 
     private GARCFrame garc;
     private FATOFrame fato;
@@ -139,8 +140,10 @@ public class GARCArchive {
                 bbuf.get(file);
                 if (compressed) {
                     files.put(k,new BLZCoder(null).BLZ_DecodePub(file,"GARC"));
+                    isCompressed.put(i,true);
                 } else {
                     files.put(k,file);
+                    isCompressed.put(i,false);
                 }
             }
             fimb.files.add(files);
@@ -185,12 +188,16 @@ public class GARCArchive {
         int fimbOffset = 0;
         int largestSize = 0;
         int largestPadded = 0;
-        for (Map<Integer,byte[]> directory: fimb.files) {
+        for (int i = 0; i < fimb.files.size(); i++) {
+            Map<Integer,byte[]> directory = fimb.files.get(i);
             int bitVector = 0;
             int totalLength = 0;
             for (int k: directory.keySet()) {
                 bitVector |= (1 << k);
                 byte[] file = directory.get(k);
+                if (isCompressed.get(i)) {
+                    file = new BLZCoder(null).BLZ_EncodePub(file,false,false,"GARC");
+                }
                 fimbPayloadStream.write(file);
                 totalLength += file.length;
             }
@@ -207,7 +214,7 @@ public class GARCArchive {
                 largestPadded = totalLength + paddingRequired;
             }
 
-            for (int i = 0; i < paddingRequired; i++) {
+            for (int j = 0; j < paddingRequired; j++) {
                 fimbPayloadStream.write(fato.padding & 0xFF);
             }
 

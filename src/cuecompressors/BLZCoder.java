@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 
 import com.dabomstew.pkrandom.FileFunctions;
 
@@ -405,19 +406,23 @@ public class BLZCoder {
     public byte[] BLZ_EncodePub(byte[] data, boolean arm9, boolean best, String reference) {
         int mode = best ? BLZ_BEST : BLZ_NORMAL;
         this.arm9 = arm9;
-        System.out.printf("- encoding '%s' (memory)", reference);
-        long startTime = System.currentTimeMillis();
-        BLZResult result = BLZ_Encode(data, mode);
-        System.out.print(" - done, time=" + (System.currentTimeMillis() - startTime) + "ms");
-        System.out.print("\n");
-        if (result != null) {
-            byte[] retbuf = new byte[result.length];
-            for (int i = 0; i < result.length; i++) {
-                retbuf[i] = (byte) result.buffer[i];
-            }
-            return retbuf;
+        if (reference.equals("GARC")) {
+            return LZSS_Encode(data);
         } else {
-            return null;
+            System.out.printf("- encoding '%s' (memory)", reference);
+            long startTime = System.currentTimeMillis();
+            BLZResult result = BLZ_Encode(data, mode);
+            System.out.print(" - done, time=" + (System.currentTimeMillis() - startTime) + "ms");
+            System.out.print("\n");
+            if (result != null) {
+                byte[] retbuf = new byte[result.length];
+                for (int i = 0; i < result.length; i++) {
+                    retbuf[i] = (byte) result.buffer[i];
+                }
+                return retbuf;
+            } else {
+                return null;
+            }
         }
     }
 
@@ -582,6 +587,116 @@ public class BLZCoder {
         }
         new_len = pak;
         return pak_buffer;
+    }
+
+    private byte[] LZSS_Encode(byte[] data) {
+        if (data.length > 0xFFFFFF) {
+            System.err.println("Encoding: Too much data");
+            return null;
+        }
+
+        ByteBuffer inBuf = ByteBuffer.wrap(data);
+        ByteBuffer outBuf = ByteBuffer.allocate(data.length);
+        outBuf.order(ByteOrder.LITTLE_ENDIAN);
+        outBuf.put((byte)0x11);
+        outBuf.putInt(data.length);
+        outBuf.position(outBuf.position()-1); // Go back one byte since length should only be 3 bytes
+
+        int compressedLength = 4;
+
+        ByteBuffer blockBuf = ByteBuffer.allocate((8 * 4) + 1);
+        blockBuf.put((byte)0);
+        int bufferedBlocks = 0;
+        while (inBuf.position() < data.length) {
+            if (bufferedBlocks == 8) {
+                outBuf.put(Arrays.copyOfRange(blockBuf.array(),0,blockBuf.position()));
+                compressedLength += blockBuf.position();
+                blockBuf.rewind();
+                blockBuf.put((byte)0);
+                bufferedBlocks = 0;
+            }
+
+            int oldLength = Math.min(inBuf.position(),0x1000);
+            LengthDispPair pair =
+                    getOccurrenceLength(
+                            inBuf,
+                            inBuf.position(),
+                            Math.min(data.length - inBuf.position(), 0x10110),
+                            inBuf.position() - oldLength,
+                            oldLength);
+            int length = pair.length;
+            int disp = pair.disp;
+
+            if (length < 3) {
+                blockBuf.put(inBuf.get());
+            } else {
+                inBuf.position(inBuf.position() + length);
+
+                byte compFlag = (byte)(blockBuf.get(0) | (1 << (7 - bufferedBlocks)));
+                blockBuf.put(0,compFlag);
+
+                if (length > 0x110) {
+                    blockBuf.put((byte)(0x10 | (((length - 0x111) >>> 12) & 0x0F))); // Dangerous
+                    blockBuf.put((byte)(((length - 0x111) >>> 4) & 0xFF));
+                    blockBuf.put((byte)(((length - 0x111) << 4) & 0xF0));
+                    blockBuf.position(blockBuf.position()-1);
+                } else if (length > 0x10) {
+                    blockBuf.put((byte)(((length - 0x111) >>> 4) & 0x0F));
+                    blockBuf.put((byte)(((length - 0x111) << 4) & 0xF0));
+                    blockBuf.position(blockBuf.position()-1);
+                } else {
+                    blockBuf.put((byte)(((length - 1) << 4) & 0xF0));
+                    blockBuf.position(blockBuf.position()-1);
+                }
+                byte dispPart1 = (byte)(blockBuf.get(blockBuf.position()) | (byte)(((disp - 1) >>> 8) & 0x0F));
+                blockBuf.put(dispPart1);
+                blockBuf.put((byte)((disp - 1) & 0xFF));
+            }
+            bufferedBlocks++;
+        }
+        if (bufferedBlocks > 0) {
+            outBuf.put(Arrays.copyOfRange(blockBuf.array(),0,blockBuf.position()));
+            compressedLength += blockBuf.position();
+        }
+        return Arrays.copyOfRange(outBuf.array(),0,outBuf.position());
+    }
+
+    private LengthDispPair getOccurrenceLength(ByteBuffer buf, int newIndex, int newLength, int oldIndex, int oldLength) {
+        int disp = 0;
+        if (newLength == 0) {
+            return new LengthDispPair(0,0);
+        }
+        int maxLength = 0;
+
+        for (int i = 0; i < oldLength - 1; i++) {
+            int currentOldStart = oldIndex + i;
+            int currentLength = 0;
+
+            for (int j = 0; j < newLength; j++) {
+                if (buf.get(currentOldStart + j) != buf.get(newIndex + j)) break;
+                currentLength++;
+            }
+
+            if (currentLength > maxLength) {
+                maxLength = currentLength;
+                disp = oldLength - i;
+
+                if (maxLength == newLength) {
+                    break;
+                }
+            }
+        }
+        return new LengthDispPair(maxLength,disp);
+    }
+
+    private class LengthDispPair {
+        int length;
+        int disp;
+
+        LengthDispPair(int length, int disp) {
+            this.length = length;
+            this.disp = disp;
+        }
     }
 
     private static class SearchPair {
