@@ -270,6 +270,8 @@ public class BLZCoder {
 
     }
 
+    // LZSS Encoding ported to Java from pk3DS by Kaphotics and pokemon-x-y-icons by CatTrinket
+
     private byte[] LZSS_Decode(byte[] data) {
         ByteBuffer buf = ByteBuffer.wrap(data);
         buf.order(ByteOrder.LITTLE_ENDIAN);
@@ -589,6 +591,8 @@ public class BLZCoder {
         return pak_buffer;
     }
 
+    // LZSS Encoding ported to Java from pk3DS by Kaphotics
+
     private byte[] LZSS_Encode(byte[] data) {
         if (data.length > 0xFFFFFF) {
             System.err.println("Encoding: Too much data");
@@ -602,15 +606,12 @@ public class BLZCoder {
         outBuf.putInt(data.length);
         outBuf.position(outBuf.position()-1); // Go back one byte since length should only be 3 bytes
 
-        int compressedLength = 4;
-
         ByteBuffer blockBuf = ByteBuffer.allocate((8 * 4) + 1);
         blockBuf.put((byte)0);
         int bufferedBlocks = 0;
         while (inBuf.position() < data.length) {
             if (bufferedBlocks == 8) {
                 outBuf.put(Arrays.copyOfRange(blockBuf.array(),0,blockBuf.position()));
-                compressedLength += blockBuf.position();
                 blockBuf.rewind();
                 blockBuf.put((byte)0);
                 bufferedBlocks = 0;
@@ -656,7 +657,6 @@ public class BLZCoder {
         }
         if (bufferedBlocks > 0) {
             outBuf.put(Arrays.copyOfRange(blockBuf.array(),0,blockBuf.position()));
-            compressedLength += blockBuf.position();
         }
         return Arrays.copyOfRange(outBuf.array(),0,outBuf.position());
     }
