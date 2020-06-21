@@ -32,6 +32,7 @@ import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.Mini;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.*;
 import pptxt.N3DSTxtHandler;
 
@@ -309,6 +310,9 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                     }
                 }
                 i++;
+            }
+            if (prevSpecies != 0) {
+                absolutePokeNumByBaseForme.put(prevSpecies,currentMap);
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
@@ -1024,7 +1028,191 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encountersList) {
-        // do nothing for now
+        try {
+            if (romEntry.romType == Gen6Constants.Type_ORAS) {
+                setEncountersORAS(encountersList);
+            } else {
+                setEncountersXY(encountersList);
+            }
+        } catch (IOException ex) {
+            throw new RandomizerIOException(ex);
+        }
+    }
+
+    private void setEncountersXY(List<EncounterSet> encountersList) throws IOException {
+        String encountersFile = romEntry.getString("WildPokemon");
+        GARCArchive encounterGarc = readGARC(encountersFile, false);
+        Iterator<EncounterSet> encounters = encountersList.iterator();
+        for (int i = 0; i < encounterGarc.files.size() - 1; i++) {
+            byte[] b = encounterGarc.files.get(i).get(0);
+            int offset = FileFunctions.readFullIntLittleEndian(b, 0x10) + 0x10;
+            int length = b.length - offset;
+            if (length < 0x178) { // No encounters in this map
+                continue;
+            }
+            byte[] encounterData = new byte[0x178];
+            System.arraycopy(b, offset, encounterData, 0, 0x178);
+
+            // First, 12 grass encounters, 12 rough terrain encounters, and 12 encounters each for yellow/purple/red flowers
+            if (readEncounter(encounterData, 0, 12).encounters.size() > 0) {
+                EncounterSet grass = encounters.next();
+                writeEncounter(encounterData, 0, grass.encounters);
+            }
+            if (readEncounter(encounterData, 48, 12).encounters.size() > 0) {
+                EncounterSet yellowFlowers = encounters.next();
+                writeEncounter(encounterData, 48, yellowFlowers.encounters);
+            }
+            if (readEncounter(encounterData, 96, 12).encounters.size() > 0) {
+                EncounterSet purpleFlowers = encounters.next();
+                writeEncounter(encounterData, 96, purpleFlowers.encounters);
+            }
+            if (readEncounter(encounterData, 144, 12).encounters.size() > 0) {
+                EncounterSet redFlowers = encounters.next();
+                writeEncounter(encounterData, 144, redFlowers.encounters);
+            }
+            if (readEncounter(encounterData, 192, 12).encounters.size() > 0) {
+                EncounterSet roughTerrain = encounters.next();
+                writeEncounter(encounterData, 192, roughTerrain.encounters);
+            }
+
+            // 5 surf and 5 rock smash encounters
+            if (readEncounter(encounterData, 240, 5).encounters.size() > 0) {
+                EncounterSet surf = encounters.next();
+                writeEncounter(encounterData, 240, surf.encounters);
+            }
+            if (readEncounter(encounterData, 260, 5).encounters.size() > 0) {
+                EncounterSet rockSmash = encounters.next();
+                writeEncounter(encounterData, 260, rockSmash.encounters);
+            }
+
+            // 3 Encounters for each type of rod
+            if (readEncounter(encounterData, 280, 3).encounters.size() > 0) {
+                EncounterSet oldRod = encounters.next();
+                writeEncounter(encounterData, 280, oldRod.encounters);
+            }
+            if (readEncounter(encounterData, 292, 3).encounters.size() > 0) {
+                EncounterSet goodRod = encounters.next();
+                writeEncounter(encounterData, 292, goodRod.encounters);
+            }
+            if (readEncounter(encounterData, 304, 3).encounters.size() > 0) {
+                EncounterSet superRod = encounters.next();
+                writeEncounter(encounterData, 304, superRod.encounters);
+            }
+
+            // Lastly, 5 for each kind of Horde
+            if (readEncounter(encounterData, 316, 5).encounters.size() > 0) {
+                EncounterSet commonHorde = encounters.next();
+                writeEncounter(encounterData, 316, commonHorde.encounters);
+            }
+            if (readEncounter(encounterData, 336, 5).encounters.size() > 0) {
+                EncounterSet uncommonHorde = encounters.next();
+                writeEncounter(encounterData, 336, uncommonHorde.encounters);
+            }
+            if (readEncounter(encounterData, 356, 5).encounters.size() > 0) {
+                EncounterSet rareHorde = encounters.next();
+                writeEncounter(encounterData, 356, rareHorde.encounters);
+            }
+
+            // Write the encounter data back to the file
+            System.arraycopy(encounterData, 0, b, offset, 0x178);
+        }
+
+        // Save
+        // TODO: Needs compression, game crashes on load without it
+        writeGARC(encountersFile, encounterGarc);
+    }
+
+    private void setEncountersORAS(List<EncounterSet> encountersList) throws IOException {
+        String encountersFile = romEntry.getString("WildPokemon");
+        GARCArchive encounterGarc = readGARC(encountersFile, false);
+        Iterator<EncounterSet> encounters = encountersList.iterator();
+        byte[] decStorage = encounterGarc.files.get(encounterGarc.files.size() - 1).get(0);
+        for (int i = 0; i < encounterGarc.files.size() - 2; i++) {
+            byte[] b = encounterGarc.files.get(i).get(0);
+            int offset = FileFunctions.readFullIntLittleEndian(b, 0x10) + 0xE;
+            int offset2 = FileFunctions.readFullIntLittleEndian(b, 0x14);
+            int length = offset2 - offset;
+            if (length < 0xF6) { // No encounters in this map
+                continue;
+            }
+            byte[] encounterData = new byte[0xF6];
+            System.arraycopy(b, offset, encounterData, 0, 0xF6);
+
+            // First, 12 grass encounters and 12 long grass encounters
+            if (readEncounter(encounterData, 0, 12).encounters.size() > 0) {
+                EncounterSet grass = encounters.next();
+                writeEncounter(encounterData, 0, grass.encounters);
+            }
+            if (readEncounter(encounterData, 48, 12).encounters.size() > 0) {
+                EncounterSet longGrass = encounters.next();
+                writeEncounter(encounterData, 48, longGrass.encounters);
+            }
+
+            // Now, 3 DexNav Foreign encounters
+            if (readEncounter(encounterData, 96, 3).encounters.size() > 0) {
+                EncounterSet dexNav = encounters.next();
+                writeEncounter(encounterData, 96, dexNav.encounters);
+            }
+
+            // 5 surf and 5 rock smash encounters
+            if (readEncounter(encounterData, 108, 5).encounters.size() > 0) {
+                EncounterSet surf = encounters.next();
+                writeEncounter(encounterData, 108, surf.encounters);
+            }
+            if (readEncounter(encounterData, 128, 5).encounters.size() > 0) {
+                EncounterSet rockSmash = encounters.next();
+                writeEncounter(encounterData, 128, rockSmash.encounters);
+            }
+
+            // 3 Encounters for each type of rod
+            if (readEncounter(encounterData, 148, 3).encounters.size() > 0) {
+                EncounterSet oldRod = encounters.next();
+                writeEncounter(encounterData, 148, oldRod.encounters);
+            }
+            if (readEncounter(encounterData, 160, 3).encounters.size() > 0) {
+                EncounterSet goodRod = encounters.next();
+                writeEncounter(encounterData, 160, goodRod.encounters);
+            }
+            if (readEncounter(encounterData, 172, 3).encounters.size() > 0) {
+                EncounterSet superRod = encounters.next();
+                writeEncounter(encounterData, 172, superRod.encounters);
+            }
+
+            // Lastly, 5 for each kind of Horde
+            if (readEncounter(encounterData, 184, 5).encounters.size() > 0) {
+                EncounterSet commonHorde = encounters.next();
+                writeEncounter(encounterData, 184, commonHorde.encounters);
+            }
+            if (readEncounter(encounterData, 204, 5).encounters.size() > 0) {
+                EncounterSet uncommonHorde = encounters.next();
+                writeEncounter(encounterData, 204, uncommonHorde.encounters);
+            }
+            if (readEncounter(encounterData, 224, 5).encounters.size() > 0) {
+                EncounterSet rareHorde = encounters.next();
+                writeEncounter(encounterData, 224, rareHorde.encounters);
+            }
+
+            // Write the encounter data back to the file
+            System.arraycopy(encounterData, 0, b, offset, 0xF6);
+
+            // Also write the encounter data to the decStorage file
+            int decStorageOffset = FileFunctions.readFullIntLittleEndian(decStorage, (i + 1) * 4) + 0xE;
+            System.arraycopy(encounterData, 0, decStorage, decStorageOffset, 0xF4);
+        }
+
+        // Save
+        // TODO: Needs compression, game crashes on load without it
+        writeGARC(encountersFile, encounterGarc);
+    }
+
+    private void writeEncounter(byte[] data, int offset, List<Encounter> encounters) {
+        for (int i = 0; i < encounters.size(); i++) {
+            Encounter encounter = encounters.get(i);
+            int speciesAndFormeData = (encounter.formeNumber << 11) + encounter.pokemon.number;
+            writeWord(data, offset + i * 4, speciesAndFormeData);
+            data[offset + 2 + i * 4] = (byte) encounter.level;
+            data[offset + 3 + i * 4] = (byte) encounter.maxLevel;
+        }
     }
 
     private void loadWildMapNames() {

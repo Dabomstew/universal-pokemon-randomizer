@@ -46,6 +46,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<Pokemon> mainPokemonListInclFormes;
     private List<Pokemon> altFormesList;
     private List<Pokemon> noLegendaryList, onlyLegendaryList;
+    private List<Pokemon> noLegendaryListInclFormes, onlyLegendaryListInclFormes;
     private List<Pokemon> noLegendaryAltsList, onlyLegendaryAltsList;
     protected final Random random;
     protected PrintStream logStream;
@@ -131,7 +132,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         noLegendaryList = new ArrayList<>();
+        noLegendaryListInclFormes = new ArrayList<>();
         onlyLegendaryList = new ArrayList<>();
+        onlyLegendaryListInclFormes = new ArrayList<>();
         noLegendaryAltsList = new ArrayList<>();
         onlyLegendaryAltsList = new ArrayList<>();
         giratinaPicks = new ArrayList<>();
@@ -147,6 +150,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                     giratinaPicks.add(p);
                     break;
                 }
+            }
+        }
+        for (Pokemon p : mainPokemonListInclFormes) {
+            if (p.isLegendary()) {
+                onlyLegendaryListInclFormes.add(p);
+            } else {
+                noLegendaryListInclFormes.add(p);
             }
         }
         for (Pokemon f : altFormesList) {
@@ -310,6 +320,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     public Pokemon randomNonLegendaryPokemon() {
         checkPokemonRestrictions();
         return noLegendaryList.get(this.random.nextInt(noLegendaryList.size()));
+    }
+
+    private Pokemon randomNonLegendaryPokemonInclFormes() {
+        checkPokemonRestrictions();
+        return noLegendaryListInclFormes.get(this.random.nextInt(noLegendaryListInclFormes.size()));
     }
 
     @Override
@@ -556,6 +571,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         Collections.shuffle(scrambledEncounters, this.random);
 
         List<Pokemon> banned = this.bannedForWildEncounters();
+        boolean includeFormes = generationOfPokemon() >= 6;
         // Assume EITHER catch em all OR type themed OR match strength for now
         if (catchEmAll) {
 
@@ -659,9 +675,42 @@ public abstract class AbstractRomHandler implements RomHandler {
             // Entirely random
             for (EncounterSet area : scrambledEncounters) {
                 for (Encounter enc : area.encounters) {
-                    enc.pokemon = noLegendaries ? randomNonLegendaryPokemon() : randomPokemon();
+                    Pokemon randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
+                    Pokemon randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
+                    enc.pokemon = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
+                    while (enc.pokemon.actuallyCosmetic) {
+                        randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
+                        randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
+                        enc.pokemon = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
+                    }
+                    enc.formeNumber = 0;
+                    if (enc.pokemon.formeNumber > 0) {
+                        enc.formeNumber = enc.pokemon.formeNumber;
+                        if (enc.pokemon.baseForme != null) {
+                            enc.pokemon = mainPokemonList.get(enc.pokemon.baseForme.number - 1);
+                        }
+                    }
+                    if (enc.pokemon.cosmeticForms > 0) {
+                        enc.pokemon.formeNumber = this.random.nextInt(enc.pokemon.cosmeticForms);
+                    }
                     while (banned.contains(enc.pokemon) || area.bannedPokemon.contains(enc.pokemon)) {
-                        enc.pokemon = noLegendaries ? randomNonLegendaryPokemon() : randomPokemon();
+                        randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
+                        randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
+                        enc.pokemon = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
+                        while (enc.pokemon.actuallyCosmetic) {
+                            randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
+                            randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
+                            enc.pokemon = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
+                        }
+                        enc.formeNumber = 0;
+                        if (enc.pokemon.formeNumber > 0) {
+                            enc.formeNumber = enc.pokemon.formeNumber;
+                            if (enc.pokemon.baseForme != null) {
+                                enc.pokemon = mainPokemonList.get(enc.pokemon.baseForme.number - 1);
+                            }                        }
+                        if (enc.pokemon.cosmeticForms > 0) {
+                            enc.pokemon.formeNumber = this.random.nextInt(enc.pokemon.cosmeticForms);
+                        }
                     }
                 }
             }
