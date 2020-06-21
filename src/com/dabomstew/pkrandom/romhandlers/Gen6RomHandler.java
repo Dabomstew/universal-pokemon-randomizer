@@ -305,9 +305,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                     formNum = 1;
                     currentMap = new HashMap<>();
                     currentMap.put(formNum,i);
-                    if (k >= Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.romType)) {
-                        absolutePokeNumByBaseForme.put(prevSpecies,currentMap);
-                    }
                 }
                 i++;
             }
