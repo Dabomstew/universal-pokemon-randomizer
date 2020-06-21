@@ -965,6 +965,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return new ArrayList<>();
     }
 
+    @Override
+    public List<MegaEvolution> getMegaEvolutions() {
+        return new ArrayList<>();
+    }
+
     public List<Trainer> getTrainers() {
         int traineroffset = romEntry.getValue("TrainerDataTableOffset");
         int traineramount = Gen1Constants.trainerClassCount;

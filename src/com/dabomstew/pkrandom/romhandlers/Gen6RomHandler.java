@@ -202,6 +202,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     private Map<Integer,Integer> dummyAbsolutePokeNums;
     private List<Pokemon> pokemonList;
     private List<Pokemon> pokemonListInclFormes;
+    private List<MegaEvolution> megaEvolutions;
     private Move[] moves;
     private RomEntry romEntry;
     private byte[] code;
@@ -442,6 +443,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
         // Read GARC
         try {
+            megaEvolutions = new ArrayList<>();
             GARCArchive megaEvoGARC = readGARC(romEntry.getString("MegaEvolutions"),true);
             for (int i = 1; i <= Gen6Constants.pokemonCount; i++) {
                 Pokemon pk = pokes[i];
@@ -459,6 +461,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                             pk.megaEvolutionsFrom.add(megaEvo);
                             pokes[megaSpecies].megaEvolutionsTo.add(megaEvo);
                         }
+                        megaEvolutions.add(megaEvo);
                     }
                 }
                 // split evos don't carry stats
@@ -669,6 +672,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     @Override
     public List<Pokemon> getAltFormes() {
         return new ArrayList<>();
+    }
+
+    @Override
+    public List<MegaEvolution> getMegaEvolutions() {
+        return megaEvolutions;
     }
 
     @Override

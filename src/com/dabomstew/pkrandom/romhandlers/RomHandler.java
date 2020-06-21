@@ -69,6 +69,8 @@ public interface RomHandler {
 
     List<Pokemon> getAltFormes();
 
+    List<MegaEvolution> getMegaEvolutions();
+
     // Setup Gen Restrictions.
     void setPokemonPool(GenRestrictions restrictions);
 

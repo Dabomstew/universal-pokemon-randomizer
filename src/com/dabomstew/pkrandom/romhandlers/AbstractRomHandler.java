@@ -2049,6 +2049,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMusketeers, boolean limit600) {
         // Load
+        boolean swapMegaEvos = true;
         checkPokemonRestrictions();
         List<StaticEncounter> currentStaticPokemon = this.getStaticPokemon();
         List<StaticEncounter> replacements = new ArrayList<>();
@@ -2079,7 +2080,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                         legendariesLeft.removeAll(banned);
                     }
                 } else if (old.pkmn.isLegendary()) {
-                    newPK = legendariesLeft.remove(this.random.nextInt(legendariesLeft.size()));
+                    if (swapMegaEvos && !old.pkmn.megaEvolutionsFrom.isEmpty()) {
+                        newPK = getMegaEvoPokemon(onlyLegendaryList, legendariesLeft, newStatic);
+                    } else {
+                        newPK = legendariesLeft.remove(this.random.nextInt(legendariesLeft.size()));
+                    }
+
                     if (newPK.formeNumber > 0) {
                         newStatic.forme = newPK.formeNumber;
                         newStatic.formeSuffix = newPK.formeSuffix;
@@ -2091,6 +2097,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                     newStatic.level = old.level;
                     newStatic.heldItem = old.heldItem;
+
                     if (legendariesLeft.size() == 0) {
                         legendariesLeft.addAll(onlyLegendaryList);
                         if (generationOfPokemon() >= 6) {
@@ -2099,7 +2106,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                         legendariesLeft.removeAll(banned);
                     }
                 } else {
-                    newPK = nonlegsLeft.remove(this.random.nextInt(nonlegsLeft.size()));
+                    if (swapMegaEvos && !old.pkmn.megaEvolutionsFrom.isEmpty()) {
+                        newPK = getMegaEvoPokemon(noLegendaryList, nonlegsLeft, newStatic);
+                    } else {
+                        newPK = nonlegsLeft.remove(this.random.nextInt(nonlegsLeft.size()));
+                    }
                     if (newPK.formeNumber > 0) {
                         newStatic.forme = newPK.formeNumber;
                         newStatic.formeSuffix = newPK.formeSuffix;
@@ -2134,8 +2145,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                     newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
                     pokemonLeft.remove(newPK);
                 } else if (oldBST >= 600 && limit600) {
-                    newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
-                    pokemonLeft.remove(newPK);
+                    if (swapMegaEvos && !old.pkmn.megaEvolutionsFrom.isEmpty()) {
+                        newPK = getMegaEvoPokemon(mainPokemonList, pokemonLeft, newStatic);
+                    } else {
+                        newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
+                    }
                     if (newPK.formeNumber > 0) {
                         newStatic.forme = newPK.formeNumber;
                         newStatic.formeSuffix = newPK.formeSuffix;
@@ -2157,12 +2171,41 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
                                 true);
                     } else {
-                        newPK = pickStaticPowerLvlReplacement(
-                                pokemonLeft,
-                                oldPK,
-                                true,
-                                replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
-                                false);
+                        if (swapMegaEvos && !old.pkmn.megaEvolutionsFrom.isEmpty()) {
+                            List<Pokemon> megaEvoPokemonLeft =
+                                    getMegaEvolutions()
+                                            .stream()
+                                            .map(mega -> mega.from)
+                                            .distinct()
+                                            .filter(pokemonLeft::contains)
+                                            .collect(Collectors.toList());
+                            if (megaEvoPokemonLeft.isEmpty()) {
+                                megaEvoPokemonLeft =
+                                        getMegaEvolutions()
+                                                .stream()
+                                                .map(mega -> mega.from)
+                                                .distinct()
+                                                .filter(mainPokemonList::contains)
+                                                .collect(Collectors.toList());
+                            }
+                            newPK = pickStaticPowerLvlReplacement(
+                                    megaEvoPokemonLeft,
+                                    oldPK,
+                                    true,
+                                    replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
+                                    false);
+                            newStatic.heldItem = newPK
+                                    .megaEvolutionsFrom
+                                    .get(this.random.nextInt(newPK.megaEvolutionsFrom.size()))
+                                    .argument;
+                        } else {
+                            newPK = pickStaticPowerLvlReplacement(
+                                    pokemonLeft,
+                                    oldPK,
+                                    true,
+                                    replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
+                                    false);
+                        }
                     }
                     pokemonLeft.remove(newPK);
                     if (newPK.formeNumber > 0) {
@@ -2195,7 +2238,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                     newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
                     pokemonLeft.remove(newPK);
                 } else {
-                    newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
+                    if (swapMegaEvos && old.pkmn.megaEvolutionsFrom.size() > 0) {
+                        newPK = getMegaEvoPokemon(mainPokemonList, pokemonLeft, newStatic);
+                    } else {
+                        newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
+                    }
                     pokemonLeft.remove(newPK);
                     if (newPK.formeNumber > 0) {
                         newStatic.forme = newPK.formeNumber;
@@ -2219,6 +2266,35 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Save
         this.setStaticPokemon(replacements);
+    }
+
+    private Pokemon getMegaEvoPokemon(List<Pokemon> fullList, List<Pokemon> pokemonLeft, StaticEncounter newStatic) {
+        List<MegaEvolution> megaEvos = getMegaEvolutions();
+        List<Pokemon> megaEvoPokemon =
+                megaEvos
+                        .stream()
+                        .map(mega -> mega.from)
+                        .distinct()
+                        .collect(Collectors.toList());
+        Pokemon newPK;
+        List<Pokemon> megaEvoPokemonLeft =
+                megaEvoPokemon
+                        .stream()
+                        .filter(pokemonLeft::contains)
+                        .collect(Collectors.toList());
+        if (megaEvoPokemonLeft.isEmpty()) {
+            megaEvoPokemonLeft = megaEvoPokemon
+                    .stream()
+                    .filter(fullList::contains)
+                    .collect(Collectors.toList());
+        }
+        newPK = megaEvoPokemonLeft.remove(this.random.nextInt(megaEvoPokemonLeft.size()));
+        pokemonLeft.remove(newPK);
+        newStatic.heldItem = newPK
+                .megaEvolutionsFrom
+                .get(this.random.nextInt(newPK.megaEvolutionsFrom.size()))
+                .argument;
+        return newPK;
     }
 
     @Override

@@ -192,6 +192,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public List<MegaEvolution> getMegaEvolutions() {
+        return new ArrayList<>(); // To be implemented
+    }
+
+    @Override
     public List<Pokemon> getStarters() {
         // TODO: Actually make this work by loading it from the ROM. Only doing it this
         // way temporarily so the randomizer won't crash

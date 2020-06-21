@@ -591,6 +591,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public List<MegaEvolution> getMegaEvolutions() {
+        return new ArrayList<>();
+    }
+
+    @Override
     public List<Pokemon> getStarters() {
         NARCArchive scriptNARC = scriptNarc;
         List<Pokemon> starters = new ArrayList<>();
