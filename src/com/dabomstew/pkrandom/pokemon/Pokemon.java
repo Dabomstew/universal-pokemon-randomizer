@@ -252,11 +252,11 @@ public class Pokemon implements Comparable<Pokemon> {
             487, 493, 643, 644, 646, 716, 717, 791, 792);
 
     public boolean isLegendary() {
-        return formeNumber == 0 ? legendaries.contains(this.number) : legendaries.contains(this.baseForme);
+        return formeNumber == 0 ? legendaries.contains(this.number) : legendaries.contains(this.baseForme.number);
     }
 
     public boolean isStrongLegendary() {
-        return formeNumber == 0 ? strongLegendaries.contains(this.number) : strongLegendaries.contains(this.baseForme);
+        return formeNumber == 0 ? strongLegendaries.contains(this.number) : strongLegendaries.contains(this.baseForme.number);
     }
 
 }
