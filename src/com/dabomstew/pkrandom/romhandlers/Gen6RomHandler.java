@@ -1571,12 +1571,31 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public Map<Pokemon, boolean[]> getTMHMCompatibility() {
-        return new TreeMap<>();
+        Map<Pokemon, boolean[]> compat = new TreeMap<>();
+        int formeCount = Gen6Constants.getFormeCount(romEntry.romType);
+        for (int i = 1; i <= Gen6Constants.pokemonCount + formeCount; i++) {
+            byte[] data;
+            data = pokeGarc.files.get(i).get(0);
+            Pokemon pkmn = pokes[i];
+            boolean[] flags = new boolean[Gen6Constants.tmCount + Gen6Constants.getHMCount(romEntry.romType) + 1];
+            for (int j = 0; j < 13; j++) {
+                readByteIntoFlags(data, flags, j * 8 + 1, Gen6Constants.bsTMHMCompatOffset + j);
+            }
+            compat.put(pkmn, flags);
+        }
+        return compat;
     }
 
     @Override
     public void setTMHMCompatibility(Map<Pokemon, boolean[]> compatData) {
-        // do nothing for now
+        for (Map.Entry<Pokemon, boolean[]> compatEntry : compatData.entrySet()) {
+            Pokemon pkmn = compatEntry.getKey();
+            boolean[] flags = compatEntry.getValue();
+            byte[] data = pokeGarc.files.get(pkmn.number).get(0);
+            for (int j = 0; j < 13; j++) {
+                data[Gen6Constants.bsTMHMCompatOffset + j] = getByteFromFlags(flags, j * 8 + 1);
+            }
+        }
     }
 
     @Override
