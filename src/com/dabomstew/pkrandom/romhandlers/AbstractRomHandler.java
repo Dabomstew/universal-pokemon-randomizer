@@ -1907,6 +1907,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
 
+            if (pkmn.actuallyCosmetic) {
+                for (int i = 0; i < moves.size(); i++) {
+                    moves.get(i).move = movesets.get(pkmn.baseForme.number).get(i).move;
+                }
+                continue;
+            }
+
             // Find last lv1 move
             // lv1index ends up as the index of the first non-lv1 move
             int lv1index = 0;

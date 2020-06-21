@@ -272,9 +272,10 @@ public class Randomizer {
             List<String> movesets = new ArrayList<>();
             Map<Integer, List<MoveLearnt>> moveData = romHandler.getMovesLearnt();
             List<Pokemon> pkmnList = romHandler.getPokemonInclFormes();
+            int i = 1;
             for (Pokemon pkmn : pkmnList) {
 
-                if (pkmn == null) {
+                if (pkmn == null || pkmn.actuallyCosmetic) {
                     continue;
                 }
                 StringBuilder evoStr = new StringBuilder(); 
@@ -288,8 +289,8 @@ public class Randomizer {
 
                 // sb.append(String.format("%03d %s", pkmn.number, pkmn.fullName())).append(System.getProperty("line.separator")).append(String.format("HP %-3d ATK %-3d DEF %-3d SPATK %-3d SPDEF %-3d SPD %-3d", pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef)).append(System.getProperty("line.separator"));
 
-                sb.append(String.format("%03d %s", pkmn.number, pkmn.fullName())).append(evoStr).append(System.getProperty("line.separator")).append(String.format("HP  %-3d", pkmn.hp)).append(System.getProperty("line.separator")).append(String.format("ATK %-3d", pkmn.attack)).append(System.getProperty("line.separator")).append(String.format("DEF %-3d", pkmn.defense)).append(System.getProperty("line.separator")).append(String.format("SPA %-3d", pkmn.spatk)).append(System.getProperty("line.separator")).append(String.format("SPD %-3d", pkmn.spdef)).append(System.getProperty("line.separator")).append(String.format("SPE %-3d", pkmn.speed)).append(System.getProperty("line.separator"));
-
+                sb.append(String.format("%03d %s", i, pkmn.fullName())).append(evoStr).append(System.getProperty("line.separator")).append(String.format("HP  %-3d", pkmn.hp)).append(System.getProperty("line.separator")).append(String.format("ATK %-3d", pkmn.attack)).append(System.getProperty("line.separator")).append(String.format("DEF %-3d", pkmn.defense)).append(System.getProperty("line.separator")).append(String.format("SPA %-3d", pkmn.spatk)).append(System.getProperty("line.separator")).append(String.format("SPD %-3d", pkmn.spdef)).append(System.getProperty("line.separator")).append(String.format("SPE %-3d", pkmn.speed)).append(System.getProperty("line.separator"));
+                i++;
 
                 List<MoveLearnt> data = moveData.get(pkmn.number);
                 for (MoveLearnt ml : data) {
