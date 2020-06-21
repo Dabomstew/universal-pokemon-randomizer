@@ -2245,12 +2245,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                                                 .filter(mainPokemonList::contains)
                                                 .collect(Collectors.toList());
                             }
+                            boolean limitBST = generationOfPokemon() == 6 && (oldPK.number == 380 || oldPK.number == 381);
                             newPK = pickStaticPowerLvlReplacement(
                                     megaEvoPokemonLeft,
                                     oldPK,
                                     true,
                                     replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
-                                    false);
+                                    limitBST);
                             newStatic.heldItem = newPK
                                     .megaEvolutionsFrom
                                     .get(this.random.nextInt(newPK.megaEvolutionsFrom.size()))
