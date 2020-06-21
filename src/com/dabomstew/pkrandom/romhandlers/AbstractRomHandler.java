@@ -675,6 +675,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             // Entirely random
             for (EncounterSet area : scrambledEncounters) {
                 for (Encounter enc : area.encounters) {
+                    boolean checkCosmetics = true;
                     Pokemon randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
                     Pokemon randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
                     enc.pokemon = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
@@ -686,14 +687,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                     enc.formeNumber = 0;
                     if (enc.pokemon.formeNumber > 0) {
                         enc.formeNumber = enc.pokemon.formeNumber;
-                        if (enc.pokemon.baseForme != null) {
-                            enc.pokemon = mainPokemonList.get(enc.pokemon.baseForme.number - 1);
-                        }
+                        enc.pokemon = mainPokemonList.get(enc.pokemon.baseForme.number - 1);
+                        checkCosmetics = false;
                     }
-                    if (enc.pokemon.cosmeticForms > 0) {
-                        enc.pokemon.formeNumber = this.random.nextInt(enc.pokemon.cosmeticForms);
+                    if (checkCosmetics && enc.pokemon.cosmeticForms > 0) {
+                        enc.formeNumber = this.random.nextInt(enc.pokemon.cosmeticForms);
                     }
                     while (banned.contains(enc.pokemon) || area.bannedPokemon.contains(enc.pokemon)) {
+                        checkCosmetics = true;
                         randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
                         randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
                         enc.pokemon = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
@@ -705,11 +706,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                         enc.formeNumber = 0;
                         if (enc.pokemon.formeNumber > 0) {
                             enc.formeNumber = enc.pokemon.formeNumber;
-                            if (enc.pokemon.baseForme != null) {
-                                enc.pokemon = mainPokemonList.get(enc.pokemon.baseForme.number - 1);
-                            }                        }
-                        if (enc.pokemon.cosmeticForms > 0) {
-                            enc.pokemon.formeNumber = this.random.nextInt(enc.pokemon.cosmeticForms);
+                            enc.pokemon = mainPokemonList.get(enc.pokemon.baseForme.number - 1);
+                            checkCosmetics = false;
+                        }
+                        if (checkCosmetics && enc.pokemon.cosmeticForms > 0) {
+                            enc.formeNumber = this.random.nextInt(enc.pokemon.cosmeticForms);
                         }
                     }
                 }
