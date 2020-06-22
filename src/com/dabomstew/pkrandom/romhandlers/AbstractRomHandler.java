@@ -976,10 +976,19 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries, int levelModifier) {
         checkPokemonRestrictions();
         // Build the full 1-to-1 map
+        boolean includeFormes = generationOfPokemon() >= 6;
         Map<Pokemon, Pokemon> translateMap = new TreeMap<>();
-        List<Pokemon> remainingLeft = allPokemonWithoutNull();
-        List<Pokemon> remainingRight = noLegendaries ? new ArrayList<>(noLegendaryList)
-                : new ArrayList<>(mainPokemonList);
+        List<Pokemon> remainingLeft = includeFormes ? allPokemonInclFormesWithoutNull() : allPokemonWithoutNull();
+        remainingLeft.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
+        List<Pokemon> remainingRight;
+        if (includeFormes) {
+            remainingRight = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
+                    : new ArrayList<>(mainPokemonListInclFormes);
+            remainingRight.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
+        } else {
+            remainingRight = noLegendaries ? new ArrayList<>(noLegendaryList)
+                    : new ArrayList<>(mainPokemonList);
+        }
         List<Pokemon> banned = this.bannedForWildEncounters();
         // Banned pokemon should be mapped to themselves
         for (Pokemon bannedPK : banned) {
@@ -1016,13 +1025,18 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             if (remainingRight.size() == 0) {
                 // restart
-                remainingRight.addAll(noLegendaries ? noLegendaryList : mainPokemonList);
+                if (includeFormes) {
+                    remainingRight.addAll(noLegendaries ? noLegendaryListInclFormes : mainPokemonListInclFormes);
+                    remainingRight.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
+                } else {
+                    remainingRight.addAll(noLegendaries ? noLegendaryList : mainPokemonList);
+                }
                 remainingRight.removeAll(banned);
             }
         }
 
         // Map remaining to themselves just in case
-        List<Pokemon> allPokes = allPokemonWithoutNull();
+        List<Pokemon> allPokes = includeFormes ? allPokemonInclFormesWithoutNull() : allPokemonWithoutNull();
         for (Pokemon poke : allPokes) {
             if (!translateMap.containsKey(poke)) {
                 translateMap.put(poke, poke);
@@ -1037,8 +1051,15 @@ public abstract class AbstractRomHandler implements RomHandler {
                 enc.pokemon = translateMap.get(enc.pokemon);
                 if (area.bannedPokemon.contains(enc.pokemon)) {
                     // Ignore the map and put a random non-banned poke
-                    List<Pokemon> tempPickable = noLegendaries ? new ArrayList<>(noLegendaryList)
-                            : new ArrayList<>(mainPokemonList);
+                    List<Pokemon> tempPickable;
+                    if (includeFormes) {
+                        tempPickable = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
+                                : new ArrayList<>(mainPokemonListInclFormes);
+                        tempPickable.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
+                    } else {
+                        tempPickable = noLegendaries ? new ArrayList<>(noLegendaryList)
+                                : new ArrayList<>(mainPokemonList);
+                    }
                     tempPickable.removeAll(banned);
                     tempPickable.removeAll(area.bannedPokemon);
                     if (tempPickable.size() == 0) {
@@ -1051,6 +1072,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         enc.pokemon = tempPickable.get(picked);
                     }
                 }
+                setFormeForEncounter(enc);
             }
         }
         if (levelModifier != 0) {
