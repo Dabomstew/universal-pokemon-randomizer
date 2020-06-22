@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.constants;
 
 import com.dabomstew.pkrandom.pokemon.MoveCategory;
+import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
 
 import java.util.*;
@@ -21,8 +22,6 @@ public class Gen6Constants {
             794, 795, 796, 797, // Floette (non-Eternal)
             815, 816, 817, 818, 819, 820 // Cosplay Pikachu
     );
-
-//    public static final int actuallyCosmeticFormCountXY = actuallyCosmeticForms.size();
 
     public static final Map<Integer,List<Integer>> speciesToMegaStoneXY = setupSpeciesToMegaStone(Type_XY);
     public static final Map<Integer,List<Integer>> speciesToMegaStoneORAS = setupSpeciesToMegaStone(Type_ORAS);
@@ -508,5 +507,120 @@ public class Gen6Constants {
         }
 
         return map;
+    }
+
+    public static void tagTrainersXY(List<Trainer> trs) {
+
+        // Gym Trainers & Leaders
+        tag(trs,"GYM1", 39, 40, 48, 6);
+        tag(trs,"GYM2",64, 63, 106, 105, 76);
+        tag(trs,"GYM3",83, 84, 146, 147, 21);
+        tag(trs,"GYM4", 121, 122, 123, 124, 22);
+        tag(trs,"GYM5", 461, 462, 463, 464, 465, 466, 467, 468, 469, 28, 29, 30, 23);
+        tag(trs,"GYM6", 245, 250, 248, 243, 24);
+        tag(trs,"GYM7", 170, 171, 172, 365, 366, 25);
+        tag(trs,"GYM8", 168, 169, 31, 32, 26);
+
+        // Elite 4
+        tag(trs, 269, "ELITE1"); // Malva
+        tag(trs, 271, "ELITE2"); // Siebold
+        tag(trs, 187, "ELITE3"); // Wikstrom
+        tag(trs, 270, "ELITE4"); // Drasna
+        tag(trs, 276, "CHAMPION"); // Diantha
+
+        tag(trs,"THEMED:LYSANDRE", 303, 525, 526);
+
+        // Rival - Serena
+        tagRival(trs, "RIVAL1", 596);
+        tagRival(trs, "RIVAL2", 575);
+        tagRival(trs, "RIVAL3", 581);
+        tagRival(trs, "RIVAL4", 578);
+        tagRival(trs, "RIVAL5", 584);
+        tagRival(trs, "RIVAL6", 607);
+        tagRival(trs, "RIVAL7", 587);
+        tagRival(trs, "RIVAL8", 590);
+        tagRival(trs, "RIVAL9", 593);
+        tagRival(trs, "RIVAL10", 599);
+
+        // Rival - Calem
+        tagRival(trs, "RIVAL1", 435);
+        tagRival(trs, "RIVAL2", 130);
+        tagRival(trs, "RIVAL3", 329);
+        tagRival(trs, "RIVAL4", 184);
+        tagRival(trs, "RIVAL5", 332);
+        tagRival(trs, "RIVAL6", 604);
+        tagRival(trs, "RIVAL7", 335);
+        tagRival(trs, "RIVAL8", 338);
+        tagRival(trs, "RIVAL9", 341);
+        tagRival(trs, "RIVAL10", 519);
+
+        // Rival - Shauna
+        tagRival(trs, "FRIEND1", 137);
+        tagRival(trs, "FRIEND2", 321);
+    }
+
+    public static void tagTrainersORAS(List<Trainer> trs) {
+
+        // Gym Trainers & Leaders
+        tag(trs,"GYM1",562, 22, 667, 561);
+        tag(trs,"GYM2",60, 56, 59, 563);
+        tag(trs,"GYM3",34, 568, 614, 35, 567);
+        tag(trs,"GYM4",81, 824, 83, 615, 823, 613, 85, 569);
+        tag(trs,"GYM5",63, 64, 65, 66, 67, 68, 69, 570);
+        tag(trs,"GYM6",115, 517, 516, 118, 730, 571);
+        tag(trs,"GYM7",157, 158, 159, 226, 320, 225, 552);
+        tag(trs,"GYM8",647, 342, 594, 646, 338, 339, 340, 341, 572, 943); // Includes Wallace in Delta Episode
+
+        // Elite 4
+        tag(trs, "ELITE1", 553, 909); // Sidney
+        tag(trs, "ELITE2", 554, 910); // Phoebe
+        tag(trs, "ELITE3", 555, 911); // Glacia
+        tag(trs, "ELITE4", 556, 912); // Drake
+        tag(trs, "CHAMPION", 557, 913, 680, 942); // Steven (includes other appearances)
+
+        tag(trs,"THEMED:MAXIE", 235, 236, 271);
+        tag(trs,"THEMED:ARCHIE",178, 231, 266);
+        tag(trs,"THEMED:MATT",683, 684, 685, 686, 687);
+        tag(trs,"THEMED:SHELLY",688,689,690);
+        tag(trs,"THEMED:TABITHA",691,692,693);
+        tag(trs,"THEMED:COURTNEY",694,695,696,697,698);
+        tag(trs, "THEMED:WALLY", 518, 583, 944, 946);
+
+        // Rival - Brendan
+        tagRival(trs, "RIVAL1", 1);
+        tagRival(trs, "RIVAL2", 289);
+        tagRival(trs, "RIVAL3", 674);
+        tagRival(trs, "RIVAL4", 292);
+        tagRival(trs, "RIVAL5", 527);
+        tagRival(trs, "RIVAL6", 699);
+
+        // Rival - May
+        tagRival(trs, "RIVAL1", 4);
+        tagRival(trs, "RIVAL2", 295);
+        tagRival(trs, "RIVAL3", 677);
+        tagRival(trs, "RIVAL4", 298);
+        tagRival(trs, "RIVAL5", 530);
+        tagRival(trs, "RIVAL6", 906);
+    }
+
+    private static void tagRival(List<Trainer> allTrainers, String tag, int offset) {
+        allTrainers.get(offset - 1).tag = tag + "-0";
+        allTrainers.get(offset).tag = tag + "-1";
+        allTrainers.get(offset + 1).tag = tag + "-2";
+
+    }
+
+    private static void tag(List<Trainer> allTrainers, int number, String tag) {
+        if (allTrainers.size() > (number - 1)) {
+            allTrainers.get(number - 1).tag = tag;
+        }
+    }
+
+    private static void tag(List<Trainer> allTrainers, String tag, int... numbers) {
+        for (int num : numbers) {
+            if (allTrainers.size() > (num - 1)) {
+                allTrainers.get(num - 1).tag = tag;
+            }
+        }
     }
 }

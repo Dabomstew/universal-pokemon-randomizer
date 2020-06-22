@@ -672,7 +672,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Pokemon> getAltFormes() {
-        return new ArrayList<>();
+        int formeCount = Gen6Constants.getFormeCount(romEntry.romType);
+        return pokemonListInclFormes.subList(Gen6Constants.pokemonCount + 1, Gen6Constants.pokemonCount + formeCount + 1);
     }
 
     @Override
@@ -1237,7 +1238,91 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Trainer> getTrainers() {
-        return new ArrayList<>();
+        List<Trainer> allTrainers = new ArrayList<>();
+        boolean isORAS = romEntry.romType == Gen6Constants.Type_ORAS;
+        try {
+            GARCArchive trainers = this.readGARC(romEntry.getString("TrainerData"),true);
+            GARCArchive trpokes = this.readGARC(romEntry.getString("TrainerPokemon"),true);
+            int trainernum = trainers.files.size();
+            List<String> tclasses = this.getTrainerClassNames();
+            List<String> tnames = this.getTrainerNames();
+            Map<Integer,String> tnamesMap = new TreeMap<>();
+            for (int i = 0; i < tnames.size(); i++) {
+                tnamesMap.put(i,tnames.get(i));
+            }
+            for (int i = 1; i < trainernum; i++) {
+                byte[] trainer = trainers.files.get(i).get(0);
+                byte[] trpoke = trpokes.files.get(i).get(0);
+                Trainer tr = new Trainer();
+                tr.poketype = isORAS ? readWord(trainer,0) : trainer[0] & 0xFF;
+                tr.offset = i;
+                tr.trainerclass = isORAS ? readWord(trainer,2) : trainer[1] & 0xFF;
+                int offset = isORAS ? 6 : 2;
+                int battleType = trainer[offset] & 0xFF;
+                int numPokes = trainer[offset+1] & 0xFF;
+                int trainerAILevel = trainer[offset+9] & 0xFF;
+                boolean healer = trainer[offset+13] != 0;
+                int pokeOffs = 0;
+                String trainerClass = tclasses.get(tr.trainerclass);
+                String trainerName = tnamesMap.getOrDefault(i - 1, "UNKNOWN");
+                tr.fullDisplayName = trainerClass + " " + trainerName;
+
+
+                for (int poke = 0; poke < numPokes; poke++) {
+                    // Structure is
+                    // IV SB LV LV SP SP FRM FRM
+                    // (HI HI)
+                    // (M1 M1 M2 M2 M3 M3 M4 M4)
+                    // where SB = 0 0 Ab Ab 0 0 Fm Ml
+                    // Ab Ab = ability number, 0 for random
+                    // Fm = 1 for forced female
+                    // Ml = 1 for forced male
+                    // There's also a trainer flag to force gender, but
+                    // this allows fixed teams with mixed genders.
+
+                    // int secondbyte = trpoke[pokeOffs + 1] & 0xFF;
+                    int level = readWord(trpoke, pokeOffs + 2);
+                    int species = readWord(trpoke, pokeOffs + 4);
+                    int formnum = readWord(trpoke, pokeOffs + 6);
+                    TrainerPokemon tpk = new TrainerPokemon();
+                    tpk.level = level;
+                    tpk.pokemon = pokes[species];
+                    tpk.AILevel = trainerAILevel;
+                    tpk.ability = trpoke[pokeOffs + 1] & 0xFF;
+                    tpk.forme = formnum;
+                    tpk.formeSuffix = Gen6Constants.getFormeSuffixByBaseForme(species,formnum);
+                    tpk.absolutePokeNumber = absolutePokeNumByBaseForme
+                            .getOrDefault(species,dummyAbsolutePokeNums)
+                            .getOrDefault(formnum,0);
+                    pokeOffs += 8;
+                    if ((tr.poketype & 2) == 2) {
+                        tpk.heldItem = readWord(trpoke, pokeOffs);
+                        pokeOffs += 2;
+                    }
+                    if ((tr.poketype & 1) == 1) {
+                        int attack1 = readWord(trpoke, pokeOffs);
+                        int attack2 = readWord(trpoke, pokeOffs + 2);
+                        int attack3 = readWord(trpoke, pokeOffs + 4);
+                        int attack4 = readWord(trpoke, pokeOffs + 6);
+                        tpk.move1 = attack1;
+                        tpk.move2 = attack2;
+                        tpk.move3 = attack3;
+                        tpk.move4 = attack4;
+                        pokeOffs += 8;
+                    }
+                    tr.pokemon.add(tpk);
+                }
+                allTrainers.add(tr);
+            }
+            if (romEntry.romType == Gen6Constants.Type_XY) {
+                Gen6Constants.tagTrainersXY(allTrainers);
+            } else {
+                Gen6Constants.tagTrainersORAS(allTrainers);
+            }
+        } catch (IOException ex) {
+            throw new RandomizerIOException(ex);
+        }
+        return allTrainers;
     }
 
     @Override
@@ -1252,7 +1337,73 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public void setTrainers(List<Trainer> trainerData) {
-        // do nothing for now
+        Iterator<Trainer> allTrainers = trainerData.iterator();
+        boolean isORAS = romEntry.romType == Gen6Constants.Type_ORAS;
+        try {
+            GARCArchive trainers = this.readGARC(romEntry.getString("TrainerData"),true);
+            GARCArchive trpokes = this.readGARC(romEntry.getString("TrainerPokemon"),true);
+            // Get current movesets in case we need to reset them for certain
+            // trainer mons.
+            Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
+            int trainernum = trainers.files.size();
+            for (int i = 1; i < trainernum; i++) {
+                byte[] trainer = trainers.files.get(i).get(0);
+                Trainer tr = allTrainers.next();
+                // preserve original poketype for held item & moves
+                int offset = 0;
+                if (isORAS) {
+                    writeWord(trainer,0,tr.poketype);
+                    offset = 4;
+                } else {
+                    trainer[0] = (byte) tr.poketype;
+                }
+                int numPokes = tr.pokemon.size();
+                trainer[offset+3] = (byte) numPokes;
+
+                int bytesNeeded = 8 * numPokes;
+                if ((tr.poketype & 1) == 1) {
+                    bytesNeeded += 8 * numPokes;
+                }
+                if ((tr.poketype & 2) == 2) {
+                    bytesNeeded += 2 * numPokes;
+                }
+                byte[] trpoke = new byte[bytesNeeded];
+                int pokeOffs = 0;
+                Iterator<TrainerPokemon> tpokes = tr.pokemon.iterator();
+                for (int poke = 0; poke < numPokes; poke++) {
+                    TrainerPokemon tp = tpokes.next();
+                    trpoke[pokeOffs] = (byte) tp.AILevel;
+                    // no gender or ability info, so no byte 1
+                    writeWord(trpoke, pokeOffs + 2, tp.level);
+                    writeWord(trpoke, pokeOffs + 4, tp.pokemon.number);
+                    writeWord(trpoke, pokeOffs + 6, tp.forme);
+                    pokeOffs += 8;
+                    if ((tr.poketype & 2) == 2) {
+                        writeWord(trpoke, pokeOffs, tp.heldItem);
+                        pokeOffs += 2;
+                    }
+                    if ((tr.poketype & 1) == 1) {
+                        if (tp.resetMoves) {
+                            int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.absolutePokeNumber, movesets, tp.level);
+                            for (int m = 0; m < 4; m++) {
+                                writeWord(trpoke, pokeOffs + m * 2, pokeMoves[m]);
+                            }
+                        } else {
+                            writeWord(trpoke, pokeOffs, tp.move1);
+                            writeWord(trpoke, pokeOffs + 2, tp.move2);
+                            writeWord(trpoke, pokeOffs + 4, tp.move3);
+                            writeWord(trpoke, pokeOffs + 6, tp.move4);
+                        }
+                        pokeOffs += 8;
+                    }
+                }
+                trpokes.setFile(i,trpoke);
+            }
+            this.writeGARC(romEntry.getString("TrainerData"), trainers);
+            this.writeGARC(romEntry.getString("TrainerPokemon"), trpokes);
+        } catch (IOException ex) {
+            throw new RandomizerIOException(ex);
+        }
     }
 
     @Override
@@ -1765,7 +1916,10 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<String> getTrainerNames() {
-        return new ArrayList<>();
+        List<String> tnames = getStrings(false, romEntry.getInt("TrainerNamesTextOffset"));
+        tnames.remove(0); // blank one
+
+        return tnames;
     }
 
     @Override
@@ -1790,7 +1944,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<String> getTrainerClassNames() {
-        return new ArrayList<>();
+        return getStrings(false, romEntry.getInt("TrainerClassesTextOffset"));
     }
 
     @Override

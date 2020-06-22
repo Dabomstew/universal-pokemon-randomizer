@@ -34,7 +34,7 @@ public class TrainerPokemon {
     public int move4;
 
     public int AILevel;
-    public int heldItem;
+    public int heldItem = 0;
     public int ability;
     public int forme;
     public String formeSuffix = "";
@@ -46,4 +46,14 @@ public class TrainerPokemon {
         return pokemon.name + formeSuffix + " Lv" + level;
     }
 
+    public boolean canMegaEvolve() {
+        if (heldItem != 0) {
+            for (MegaEvolution mega: pokemon.megaEvolutionsFrom) {
+                if (mega.argument == heldItem) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }
