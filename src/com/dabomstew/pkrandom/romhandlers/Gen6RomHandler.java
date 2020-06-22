@@ -1578,7 +1578,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             data = pokeGarc.files.get(i).get(0);
             Pokemon pkmn = pokes[i];
             boolean[] flags = new boolean[Gen6Constants.tmCount + Gen6Constants.getHMCount(romEntry.romType) + 1];
-            for (int j = 0; j < 13; j++) {
+            for (int j = 0; j < 14; j++) {
                 readByteIntoFlags(data, flags, j * 8 + 1, Gen6Constants.bsTMHMCompatOffset + j);
             }
             compat.put(pkmn, flags);
