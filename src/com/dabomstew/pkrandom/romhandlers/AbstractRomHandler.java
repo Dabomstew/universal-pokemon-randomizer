@@ -575,9 +575,17 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Assume EITHER catch em all OR type themed OR match strength for now
         if (catchEmAll) {
 
-            List<Pokemon> allPokes = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
-                    mainPokemonList);
+            List<Pokemon> allPokes;
+            if (includeFormes) {
+                allPokes = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes) : new ArrayList<>(
+                        mainPokemonListInclFormes);
+                allPokes.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
+            } else {
+                allPokes = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
+                        mainPokemonList);
+            }
             allPokes.removeAll(banned);
+
             for (EncounterSet area : scrambledEncounters) {
                 List<Pokemon> pickablePokemon = allPokes;
                 if (area.bannedPokemon.size() > 0) {
@@ -589,8 +597,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (pickablePokemon.size() == 0) {
                         // Only banned pokes are left, ignore them and pick
                         // something else for now.
-                        List<Pokemon> tempPickable = noLegendaries ? new ArrayList<>(noLegendaryList)
-                                : new ArrayList<>(mainPokemonList);
+                        List<Pokemon> tempPickable;
+                        if (includeFormes) {
+                            tempPickable = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes) : new ArrayList<>(
+                                    mainPokemonListInclFormes);
+                        } else {
+                            tempPickable = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
+                                    mainPokemonList);
+                        }
                         tempPickable.removeAll(banned);
                         tempPickable.removeAll(area.bannedPokemon);
                         if (tempPickable.size() == 0) {
@@ -598,6 +612,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         }
                         int picked = this.random.nextInt(tempPickable.size());
                         enc.pokemon = tempPickable.get(picked);
+                        setFormeForEncounter(enc);
                     } else {
                         // Picked this Pokemon, remove it
                         int picked = this.random.nextInt(pickablePokemon.size());
@@ -606,9 +621,15 @@ public abstract class AbstractRomHandler implements RomHandler {
                         if (allPokes != pickablePokemon) {
                             allPokes.remove(enc.pokemon);
                         }
+                        setFormeForEncounter(enc);
                         if (allPokes.size() == 0) {
                             // Start again
-                            allPokes.addAll(noLegendaries ? noLegendaryList : mainPokemonList);
+                            if (includeFormes) {
+                                allPokes.addAll(noLegendaries ? noLegendaryListInclFormes : mainPokemonListInclFormes);
+                                allPokes.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
+                            } else {
+                                allPokes.addAll(noLegendaries ? noLegendaryList : mainPokemonList);
+                            }
                             allPokes.removeAll(banned);
                             if (pickablePokemon != allPokes) {
                                 pickablePokemon.addAll(allPokes);
@@ -626,7 +647,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 while (possiblePokemon == null && iterLoops < 10000) {
                     Type areaTheme = randomType();
                     if (!cachedPokeLists.containsKey(areaTheme)) {
-                        List<Pokemon> pType = pokemonOfType(areaTheme, noLegendaries);
+                        List<Pokemon> pType = includeFormes ? pokemonOfTypeInclFormes(areaTheme, noLegendaries) :
+                                pokemonOfType(areaTheme, noLegendaries);
                         pType.removeAll(banned);
                         cachedPokeLists.put(areaTheme, pType);
                     }
@@ -647,11 +669,21 @@ public abstract class AbstractRomHandler implements RomHandler {
                 for (Encounter enc : area.encounters) {
                     // Pick a random themed pokemon
                     enc.pokemon = possiblePokemon.get(this.random.nextInt(possiblePokemon.size()));
+                    while (enc.pokemon.actuallyCosmetic) {
+                        enc.pokemon = possiblePokemon.get(this.random.nextInt(possiblePokemon.size()));
+                    }
+                    setFormeForEncounter(enc);
                 }
             }
         } else if (usePowerLevels) {
-            List<Pokemon> allowedPokes = noLegendaries ? new ArrayList<>(noLegendaryList)
-                    : new ArrayList<>(mainPokemonList);
+            List<Pokemon> allowedPokes;
+            if (includeFormes) {
+                allowedPokes  = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
+                        : new ArrayList<>(mainPokemonListInclFormes);
+            } else {
+                allowedPokes = noLegendaries ? new ArrayList<>(noLegendaryList)
+                        : new ArrayList<>(mainPokemonList);
+            }
             allowedPokes.removeAll(banned);
             for (EncounterSet area : scrambledEncounters) {
                 List<Pokemon> localAllowed = allowedPokes;
@@ -663,11 +695,23 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (balanceShakingGrass) {
                         if (area.displayName.contains("Shaking")) {
                             enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, (enc.level + enc.maxLevel) / 2);
+                            while (enc.pokemon.actuallyCosmetic) {
+                                enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, (enc.level + enc.maxLevel) / 2);
+                            }
+                            setFormeForEncounter(enc);
                         } else {
                             enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100);
+                            while (enc.pokemon.actuallyCosmetic) {
+                                enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100);
+                            }
+                            setFormeForEncounter(enc);
                         }
                     } else {
                         enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100);
+                        while (enc.pokemon.actuallyCosmetic) {
+                            enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100);
+                        }
+                        setFormeForEncounter(enc);
                     }
                 }
             }
@@ -675,7 +719,6 @@ public abstract class AbstractRomHandler implements RomHandler {
             // Entirely random
             for (EncounterSet area : scrambledEncounters) {
                 for (Encounter enc : area.encounters) {
-                    boolean checkCosmetics = true;
                     Pokemon randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
                     Pokemon randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
                     enc.pokemon = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
@@ -684,17 +727,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                         randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
                         enc.pokemon = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
                     }
-                    enc.formeNumber = 0;
-                    if (enc.pokemon.formeNumber > 0) {
-                        enc.formeNumber = enc.pokemon.formeNumber;
-                        enc.pokemon = mainPokemonList.get(enc.pokemon.baseForme.number - 1);
-                        checkCosmetics = false;
-                    }
-                    if (checkCosmetics && enc.pokemon.cosmeticForms > 0) {
-                        enc.formeNumber = this.random.nextInt(enc.pokemon.cosmeticForms);
-                    }
+                    setFormeForEncounter(enc);
                     while (banned.contains(enc.pokemon) || area.bannedPokemon.contains(enc.pokemon)) {
-                        checkCosmetics = true;
                         randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
                         randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
                         enc.pokemon = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
@@ -703,15 +737,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                             randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
                             enc.pokemon = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
                         }
-                        enc.formeNumber = 0;
-                        if (enc.pokemon.formeNumber > 0) {
-                            enc.formeNumber = enc.pokemon.formeNumber;
-                            enc.pokemon = mainPokemonList.get(enc.pokemon.baseForme.number - 1);
-                            checkCosmetics = false;
-                        }
-                        if (checkCosmetics && enc.pokemon.cosmeticForms > 0) {
-                            enc.formeNumber = this.random.nextInt(enc.pokemon.cosmeticForms);
-                        }
+                        setFormeForEncounter(enc);
                     }
                 }
             }
@@ -3792,6 +3818,18 @@ public abstract class AbstractRomHandler implements RomHandler {
         return typedPokes;
     }
 
+    private List<Pokemon> pokemonOfTypeInclFormes(Type type, boolean noLegendaries) {
+        List<Pokemon> typedPokes = new ArrayList<>();
+        for (Pokemon pk : mainPokemonListInclFormes) {
+            if (pk != null && (!noLegendaries || !pk.isLegendary())) {
+                if (pk.primaryType == type || pk.secondaryType == type) {
+                    typedPokes.add(pk);
+                }
+            }
+        }
+        return typedPokes;
+    }
+
     private List<Pokemon> allPokemonWithoutNull() {
         List<Pokemon> allPokes = new ArrayList<>(this.getPokemon());
         allPokes.remove(0);
@@ -4248,6 +4286,19 @@ public abstract class AbstractRomHandler implements RomHandler {
             expandRounds++;
         }
         return canPick.get(this.random.nextInt(canPick.size()));
+    }
+
+    private void setFormeForEncounter(Encounter enc) {
+        boolean checkCosmetics = true;
+        enc.formeNumber = 0;
+        if (enc.pokemon.formeNumber > 0) {
+            enc.formeNumber = enc.pokemon.formeNumber;
+            enc.pokemon = mainPokemonList.get(enc.pokemon.baseForme.number - 1);
+            checkCosmetics = false;
+        }
+        if (checkCosmetics && enc.pokemon.cosmeticForms > 0) {
+            enc.formeNumber = this.random.nextInt(enc.pokemon.cosmeticForms);
+        }
     }
 
     private Pokemon pickStaticPowerLvlReplacement(List<Pokemon> pokemonPool, Pokemon current, boolean banSamePokemon,
