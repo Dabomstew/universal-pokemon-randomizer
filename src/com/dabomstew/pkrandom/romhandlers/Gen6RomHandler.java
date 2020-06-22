@@ -1911,7 +1911,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public boolean canChangeTrainerText() {
-        return false;
+        return true;
     }
 
     @Override
@@ -1924,12 +1924,15 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public int maxTrainerNameLength() {
-        return 0;
+        return 10;
     }
 
     @Override
     public void setTrainerNames(List<String> trainerNames) {
-        // do nothing for now
+        List<String> tnames = getStrings(false, romEntry.getInt("TrainerNamesTextOffset"));
+        List<String> newTNames = new ArrayList<>(trainerNames);
+        newTNames.add(0, tnames.get(0)); // the 0-entry, preserve it
+        setStrings(false, romEntry.getInt("TrainerNamesTextOffset"), newTNames);
     }
 
     @Override
@@ -1949,12 +1952,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public void setTrainerClassNames(List<String> trainerClassNames) {
-        // do nothing for now
+        setStrings(false, romEntry.getInt("TrainerClassesTextOffset"), trainerClassNames);
     }
 
     @Override
     public int maxTrainerClassNameLength() {
-        return 0;
+        return 15; // "Pokémon Breeder" is possible, so,
     }
 
     @Override
@@ -1964,7 +1967,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getDoublesTrainerClasses() {
-        return new ArrayList<>();
+        int[] doublesClasses = romEntry.arrayEntries.get("DoublesTrainerClasses");
+        List<Integer> doubles = new ArrayList<>();
+        for (int tClass : doublesClasses) {
+            doubles.add(tClass);
+        }
+        return doubles;
     }
 
     @Override
@@ -1984,7 +1992,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public int internalStringLength(String string) {
-        return 0;
+        return string.length();
     }
 
     @Override
