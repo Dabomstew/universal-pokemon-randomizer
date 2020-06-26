@@ -19,4 +19,15 @@ public class StaticEncounter {
     public String toString() {
         return pkmn.name + formeSuffix;
     }
+
+    public boolean canMegaEvolve() {
+        if (heldItem != 0) {
+            for (MegaEvolution mega: pkmn.megaEvolutionsFrom) {
+                if (mega.argument == heldItem) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }
