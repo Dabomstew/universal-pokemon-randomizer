@@ -98,8 +98,8 @@ public class GARCArchive {
         }
         fatb.headerSize = bbuf.getInt();
         fatb.fileCount = bbuf.getInt();
-        fatb.entries = new FATBEntry[fato.entryCount];
-        for (int i = 0; i < fato.entryCount; i++) {
+        fatb.entries = new FATBEntry[fatb.fileCount];
+        for (int i = 0; i < fatb.fileCount; i++) {
             fatb.entries[i] = new FATBEntry();
             fatb.entries[i].vector = bbuf.getInt();
             fatb.entries[i].subEntries = new TreeMap<>();
@@ -139,8 +139,13 @@ public class GARCArchive {
                 boolean compressed = bbuf.get(bbuf.position()) == 0x11 && !skipDecompression;
                 bbuf.get(file);
                 if (compressed) {
-                    files.put(k,new BLZCoder(null).BLZ_DecodePub(file,"GARC"));
-                    isCompressed.put(i,true);
+                    try {
+                        files.put(k,new BLZCoder(null).BLZ_DecodePub(file,"GARC"));
+                        isCompressed.put(i,true);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return false;
+                    }
                 } else {
                     files.put(k,file);
                     isCompressed.put(i,false);
