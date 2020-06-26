@@ -11,6 +11,8 @@ import java.util.Arrays;
 public class AMX {
 
     public byte[] decData;
+    public int scriptOffset = 0;
+
     private int amxMagic = 0x0A0AF1E0;
     private int amxMagicDebug = 0x0A0AF1EF;
     private long mask = 0xFF;
@@ -38,6 +40,7 @@ public class AMX {
                 if (found == scriptNum) {
                     int length = FileFunctions.readFullIntLittleEndian(data,i-4);
                     readHeaderAndDecompress(Arrays.copyOfRange(data,i-4,i-4+length));
+                    scriptOffset = i-4;
                     break;
                 } else {
                     found++;
@@ -50,6 +53,7 @@ public class AMX {
         readHeaderAndDecompress(encData);
     }
 
+    // Credit to the creators of pk3DS (Kaphotics et al)
     private void readHeaderAndDecompress(byte[] encData) throws IOException {
         length = FileFunctions.readFullIntLittleEndian(encData,0);
         int magic = FileFunctions.readFullIntLittleEndian(encData,4);
@@ -73,6 +77,7 @@ public class AMX {
         extraData = Arrays.copyOfRange(encData,0x1C,scriptInstrStart);
     }
 
+    // Credit to FireyFly
     private byte[] decompressBytes(byte[] data, int length) {
         byte[] code = new byte[length];
         int i = 0, j = 0, x = 0, f = 0;
@@ -130,6 +135,7 @@ public class AMX {
         return out.toByteArray();
     }
 
+    // Modified version of the AMX script compression algorithm from pk3DS
     private void compressBytes(ByteBuffer inBuf, ByteArrayOutputStream out) {
         short cmd = inBuf.getShort(inBuf.position());
         short val = inBuf.getShort(inBuf.position()+2);
