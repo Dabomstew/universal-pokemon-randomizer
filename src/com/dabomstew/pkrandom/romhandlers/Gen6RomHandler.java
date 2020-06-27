@@ -1761,7 +1761,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             Pokemon pkmn = compatEntry.getKey();
             boolean[] flags = compatEntry.getValue();
             byte[] data = pokeGarc.files.get(pkmn.number).get(0);
-            for (int j = 0; j < 13; j++) {
+            for (int j = 0; j < 14; j++) {
                 data[Gen6Constants.bsTMHMCompatOffset + j] = getByteFromFlags(flags, j * 8 + 1);
             }
         }
