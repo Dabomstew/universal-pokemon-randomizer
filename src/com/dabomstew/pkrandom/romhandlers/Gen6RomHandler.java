@@ -214,6 +214,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     private Map<Integer, String> wildMapNames;
     private List<String> itemNames;
     private List<String> shopNames;
+    private ItemList allowedItems, nonBadItems;
 
     private GARCArchive pokeGarc, moveGarc, stringsGarc, storyTextGarc;
 
@@ -269,6 +270,9 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         if (romEntry.romType == Gen6Constants.Type_ORAS) {
             isORAS = true;
         }
+
+        allowedItems = Gen6Constants.getAllowedItems(romEntry.romType).copy();
+        nonBadItems = Gen6Constants.nonBadItems.copy();
     }
 
     private void loadPokemonStats() {
@@ -1600,12 +1604,17 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public int miscTweaksAvailable() {
-        return 0;
+        int available = 0;
+        available |= MiscTweak.BAN_LUCKY_EGG.getValue();
+        return available;
     }
 
     @Override
     public void applyMiscTweak(MiscTweak tweak) {
-        // do nothing for now
+        if (tweak == MiscTweak.BAN_LUCKY_EGG) {
+            allowedItems.banSingles(Gen6Constants.luckyEggIndex);
+            nonBadItems.banSingles(Gen6Constants.luckyEggIndex);
+        }
     }
 
     @Override
@@ -2087,12 +2096,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public ItemList getAllowedItems() {
-        return Gen6Constants.getAllowedItems(romEntry.romType);
+        return allowedItems;
     }
 
     @Override
     public ItemList getNonBadItems() {
-        return Gen6Constants.nonBadItems;
+        return nonBadItems;
     }
 
     @Override

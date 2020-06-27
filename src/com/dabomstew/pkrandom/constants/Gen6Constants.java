@@ -73,7 +73,7 @@ public class Gen6Constants {
 
     public static final int slowpokeIndex = 79, karrablastIndex = 588, shelmetIndex = 616;
 
-    public static final int waterStoneIndex = 84;
+    public static final int waterStoneIndex = 84, luckyEggIndex = 0xE7;
 
     public static final int staticPokemonSize = 0xC;
     private static final int staticPokemonCountXY = 0xC;
