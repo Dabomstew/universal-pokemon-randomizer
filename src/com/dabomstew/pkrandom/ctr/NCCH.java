@@ -23,10 +23,17 @@ package com.dabomstew.pkrandom.ctr;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.SysConstants;
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureDSA;
 import cuecompressors.BLZCoder;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -38,6 +45,7 @@ public class NCCH {
     private String titleId;
     private long exefsOffset, romfsOffset, fileDataOffset;
     private ExefsFileHeader codeFileHeader;
+    private List<ExefsFileHeader> extraExefsFiles;
     private Map<String, RomfsFile> romfsFiles;
     private boolean romOpen;
     private String tmpFolder;
@@ -46,6 +54,7 @@ public class NCCH {
     private byte[] codeRamstored;
 
     private static final int media_unit_size = 0x200;
+    private static final int header_and_exheader_size = 0xA00;
     private static final int exefs_header_size = 0x200;
     private static final int romfs_header_size = 0x5C;
     private static final int romfs_magic_1 = 0x49564643;
@@ -78,16 +87,16 @@ public class NCCH {
 
     public void reopenROM() throws IOException {
         if (!this.romOpen) {
-            this.baseRom = new RandomAccessFile(this.romFilename, "r");
-            this.romOpen = true;
+            baseRom = new RandomAccessFile(this.romFilename, "r");
+            romOpen = true;
         }
     }
 
     public void closeROM() throws IOException {
-        if (this.romOpen && this.baseRom != null) {
-            this.baseRom.close();
-            this.baseRom = null;
-            this.romOpen = false;
+        if (this.romOpen && baseRom != null) {
+            baseRom.close();
+            baseRom = null;
+            romOpen = false;
         }
     }
 
@@ -114,11 +123,14 @@ public class NCCH {
             fileHeaders[i] = new ExefsFileHeader(exefsHeaderData, i * 0x10);
         }
 
-        // For the purposes of randomization, the only file in the exefs that we
-        // care about is the .code file (i.e., the game's executable).
+        // For the purposes of randomization, we only care about the .code file
+        // (i.e., the game's executable), so treat it separately
+        extraExefsFiles = new ArrayList<>();
         for (ExefsFileHeader fileHeader : fileHeaders) {
             if (fileHeader.isValid() && fileHeader.filename.equals(".code")) {
                 codeFileHeader = fileHeader;
+            } else if (fileHeader.isValid()) {
+                extraExefsFiles.add(fileHeader);
             }
         }
     }
@@ -191,6 +203,111 @@ public class NCCH {
         if (metadata.siblingFileOffset != metadata_unused) {
             visitFile(metadata.siblingFileOffset, rootPath, fileMetadataBlock);
         }
+    }
+
+    public void saveAsNCCH(String filename) throws IOException, NoSuchAlgorithmException {
+        this.reopenROM();
+
+        // Initialise new ROM
+        RandomAccessFile fNew = new RandomAccessFile(filename, "rw");
+
+        // Read the header and exheader and write it to the output ROM
+        byte[] header = new byte[header_and_exheader_size];
+        baseRom.seek(ncchStartingOffset);
+        baseRom.readFully(header);
+        fNew.write(header);
+
+        // The logo is small enough (8KB) to just read the whole thing into memory. Write it to the new ROM directly
+        // after the header, then update the new ROM's logo offset
+        long logoOffset = ncchStartingOffset + FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x198) * media_unit_size;
+        long logoLength = ncchStartingOffset + FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x19C) * media_unit_size;
+        byte[] logo = new byte[(int) logoLength];
+        baseRom.seek(logoOffset);
+        baseRom.readFully(logo);
+        long newLogoOffset = header_and_exheader_size;
+        fNew.seek(newLogoOffset);
+        fNew.write(logo);
+        fNew.seek(0x198);
+        fNew.write((int) newLogoOffset / media_unit_size);
+
+        // The plain region is even smaller (1KB) so repeat the same process
+        long plainOffset = ncchStartingOffset + FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x190) * media_unit_size;
+        long plainLength = (int) ncchStartingOffset + FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x194) * media_unit_size;
+        byte[] plain = new byte[(int) plainLength];
+        baseRom.seek(plainOffset);
+        baseRom.readFully(plain);
+        long newPlainOffset = header_and_exheader_size + logoLength;
+        fNew.seek(newPlainOffset);
+        fNew.write(plain);
+        fNew.seek(0x190);
+        fNew.write((int) newPlainOffset / media_unit_size);
+
+        // Now, reconstruct the exefs based on our new version of .code
+        long newExefsOffset = header_and_exheader_size + logoLength + plainLength;
+        long newExefsLength = rebuildExefs(fNew, newExefsOffset);
+        fNew.seek(0x1A0);
+        fNew.write((int) newExefsOffset / media_unit_size);
+        fNew.seek(0x1A4);
+        fNew.write((int) newExefsLength / media_unit_size);
+    }
+
+    private long rebuildExefs(RandomAccessFile fNew, long newExefsOffset) throws IOException, NoSuchAlgorithmException {
+        byte[] code = getCode();
+        if (codeCompressed) {
+            code = new BLZCoder(null).BLZ_EncodePub(code, false, false, ".code");
+        }
+
+        // Create a new ExefsFileHeader for our updated .code
+        ExefsFileHeader newCodeHeader = new ExefsFileHeader();
+        newCodeHeader.filename = codeFileHeader.filename;
+        newCodeHeader.size = code.length;
+        newCodeHeader.offset = 0;
+
+        // For all the file headers, write them to the new ROM and store them in order for hashing later
+        ExefsFileHeader[] newHeaders = new ExefsFileHeader[10];
+        newHeaders[0] = newCodeHeader;
+        fNew.seek(newExefsOffset);
+        fNew.write(newCodeHeader.asBytes());
+        for (int i = 0; i < extraExefsFiles.size(); i++) {
+            ExefsFileHeader header = extraExefsFiles.get(i);
+            newHeaders[i + 1] = header;
+            fNew.write(header.asBytes());
+        }
+
+        // Write the file data, then hash the data and write the hashes in reverse order
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        for (int i = 0; i < newHeaders.length; i++) {
+            ExefsFileHeader header = newHeaders[i];
+            if (header != null) {
+                byte[] data;
+                if (header.filename.equals(".code")) {
+                    data = code;
+                } else {
+                    long dataOffset = exefsOffset + 0x200 + header.offset;
+                    data = new byte[header.size];
+                    baseRom.seek(dataOffset);
+                    baseRom.readFully(data);
+                }
+                fNew.seek(newExefsOffset + 0x200 + header.offset);
+                fNew.write(data);
+                byte[] hash = digest.digest(data);
+                fNew.seek(newExefsOffset + 0x200 - ((i + 1) * 0x20));
+                fNew.write(hash);
+            }
+        }
+
+        // Get the total length of all the file data
+        long fileDataLength = code.length;
+        for (ExefsFileHeader header : extraExefsFiles) {
+            fileDataLength += header.size;
+        }
+
+        // Pad to media unit size
+        fileDataLength = alignLong(fileDataLength, media_unit_size);
+
+        // For retail games, they seem to add a completely empty media unit at the end of the exefs
+        long length = 0x200 + fileDataLength + media_unit_size;
+        return length;
     }
 
     public void saveAsLayeredFS(String outputPath) throws IOException {
@@ -350,6 +467,8 @@ public class NCCH {
         public int offset;
         public int size;
 
+        public ExefsFileHeader() { }
+
         public ExefsFileHeader(byte[] exefsHeaderData, int fileHeaderOffset) {
             byte[] filenameBytes = new byte[0x8];
             System.arraycopy(exefsHeaderData, fileHeaderOffset, filenameBytes, 0, 0x8);
@@ -360,6 +479,15 @@ public class NCCH {
 
         public boolean isValid() {
             return this.filename != "" && this.size != 0;
+        }
+
+        public byte[] asBytes() {
+            byte[] output = new byte[0x10];
+            byte[] filenameBytes = this.filename.getBytes(StandardCharsets.UTF_8);
+            System.arraycopy(filenameBytes, 0, output, 0, filenameBytes.length);
+            FileFunctions.writeFullIntLittleEndian(output, 0x08, this.offset);
+            FileFunctions.writeFullIntLittleEndian(output, 0x0C, this.size);
+            return output;
         }
     }
 

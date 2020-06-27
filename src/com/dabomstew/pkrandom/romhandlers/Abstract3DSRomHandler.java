@@ -34,6 +34,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
+import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
 public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
@@ -84,7 +85,12 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 
     @Override
     public boolean saveRomFile(String filename) {
-        // do nothing for now, as we currently don't support CXI writing.
+        try {
+            savingROM();
+            baseRom.saveAsNCCH(filename);
+        } catch (IOException | NoSuchAlgorithmException e) {
+            throw new RandomizerIOException(e);
+        }
         return true;
     }
 

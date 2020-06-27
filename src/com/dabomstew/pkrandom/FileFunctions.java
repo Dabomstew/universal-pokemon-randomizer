@@ -130,6 +130,11 @@ public class FileFunctions {
         data[offset + 1] = (byte) ((value >> 8) & 0xFF);
     }
 
+    public static void writeFullIntLittleEndian(byte[] data, int offset, int value) {
+        byte[] valueBytes = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(value).array();
+        System.arraycopy(valueBytes, 0, data, offset, 4);
+    }
+
     public static void writeFullInt(byte[] data, int offset, int value) {
         byte[] valueBytes = ByteBuffer.allocate(4).putInt(value).array();
         System.arraycopy(valueBytes, 0, data, offset, 4);
