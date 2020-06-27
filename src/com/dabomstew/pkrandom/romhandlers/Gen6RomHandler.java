@@ -43,6 +43,7 @@ import java.io.*;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Gen6RomHandler extends Abstract3DSRomHandler {
 
@@ -212,6 +213,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     private boolean loadedWildMapNames;
     private Map<Integer, String> wildMapNames;
     private List<String> itemNames;
+    private List<String> shopNames;
 
     private GARCArchive pokeGarc, moveGarc, stringsGarc, storyTextGarc;
 
@@ -261,6 +263,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
         abilityNames = getStrings(false,romEntry.getInt("AbilityNamesTextOffset"));
         itemNames = getStrings(false,romEntry.getInt("ItemNamesTextOffset"));
+        shopNames = Gen6Constants.getShopNames(romEntry.romType);
 
         loadedWildMapNames = false;
         if (romEntry.romType == Gen6Constants.Type_ORAS) {
@@ -547,7 +550,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     private void savePokemonStats() {
-        int k = 0x40;
+        int k = Gen6Constants.getBsSize(romEntry.romType);
         byte[] duplicateData = pokeGarc.files.get(Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.romType) + 1).get(0);
         for (int i = 1; i <= Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.romType); i++) {
             byte[] pokeData = pokeGarc.files.get(i).get(0);
@@ -1347,7 +1350,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getEvolutionItems() {
-        return new ArrayList<>();
+        return Gen6Constants.evolutionItems;
     }
 
     @Override
@@ -1921,7 +1924,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public boolean hasShopRandomization() {
-        return false;
+        return true;
     }
 
     @Override
@@ -2042,7 +2045,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public String[] getShopNames() {
-        return new String[0];
+        return shopNames.toArray(new String[0]);
     }
 
     @Override
@@ -2272,22 +2275,106 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public Map<Integer, List<Integer>> getShopItems() {
-        return new TreeMap<>();
+        int[] tmShops = romEntry.arrayEntries.get("TMShops");
+        int[] regularShops = romEntry.arrayEntries.get("RegularShops");
+        int[] shopItemSizes = romEntry.arrayEntries.get("ShopItemSizes");
+        int shopCount = romEntry.getInt("ShopCount");
+        Map<Integer,List<Integer>> shopItemsMap = new TreeMap<>();
+
+        int offset = find(code,Gen6Constants.shopItemsPrefix);
+        if (offset > 0) {
+            offset += Gen6Constants.shopItemsPrefix.length() / 2;
+        } else {
+            return shopItemsMap;
+        }
+        for (int i = 0; i < shopCount; i++) {
+            boolean badShop = false;
+            for (int tmShop: tmShops) {
+                if (i == tmShop) {
+                    badShop = true;
+                    offset += (shopItemSizes[i] * 2);
+                    break;
+                }
+            }
+            for (int regularShop: regularShops) {
+                if (badShop) break;
+                if (i == regularShop) {
+                    badShop = true;
+                    offset += (shopItemSizes[i] * 2);
+                    break;
+                }
+            }
+            if (!badShop) {
+                List<Integer> items = new ArrayList<>();
+                for (int j = 0; j < shopItemSizes[i]; j++) {
+                    items.add(FileFunctions.read2ByteInt(code,offset));
+                    offset += 2;
+                }
+                shopItemsMap.put(i,items);
+            }
+        }
+        return shopItemsMap;
     }
 
     @Override
     public void setShopItems(Map<Integer, List<Integer>> shopItems) {
-        // do nothing for now
+        int[] shopItemSizes = romEntry.arrayEntries.get("ShopItemSizes");
+        int[] tmShops = romEntry.arrayEntries.get("TMShops");
+        int[] regularShops = romEntry.arrayEntries.get("RegularShops");
+        int shopCount = romEntry.getInt("ShopCount");
+
+        int offset = find(code,Gen6Constants.shopItemsPrefix);
+        if (offset > 0) {
+            offset += Gen6Constants.shopItemsPrefix.length() / 2;
+        } else {
+            return;
+        }
+        for (int i = 0; i < shopCount; i++) {
+            boolean badShop = false;
+            for (int tmShop: tmShops) {
+                if (badShop) break;
+                if (i == tmShop) {
+                    badShop = true;
+                    offset += (shopItemSizes[i] * 2);
+                    break;
+                }
+            }
+            for (int regularShop: regularShops) {
+                if (badShop) break;
+                if (i == regularShop) {
+                    badShop = true;
+                    offset += (shopItemSizes[i] * 2);
+                    break;
+                }
+            }
+            if (!badShop) {
+                List<Integer> shopContents = shopItems.get(i);
+                Iterator<Integer> iterItems = shopContents.iterator();
+                for (int j = 0; j < shopItemSizes[i]; j++) {
+                    Integer item = iterItems.next();
+                    FileFunctions.write2ByteInt(code,offset,item);
+                    offset += 2;
+                }
+            }
+        }
     }
 
     @Override
     public void setShopPrices() {
-        // do nothing for now
+        try {
+            GARCArchive itemPriceGarc = this.readGARC(romEntry.getString("ItemData"),true);
+            for (int i = 1; i < itemPriceGarc.files.size(); i++) {
+                writeWord(itemPriceGarc.files.get(i).get(0),0,Gen6Constants.balancedItemPrices.get(i));
+            }
+            writeGARC(romEntry.getString("ItemData"),itemPriceGarc);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     @Override
     public List<Integer> getMainGameShops() {
-        return new ArrayList<>();
+        return Gen6Constants.getMainGameShops(romEntry.romType);
     }
 
     @Override

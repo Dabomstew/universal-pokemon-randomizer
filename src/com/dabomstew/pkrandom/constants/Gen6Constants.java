@@ -8,6 +8,7 @@ import com.dabomstew.pkrandom.pokemon.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class Gen6Constants {
 
@@ -65,6 +66,9 @@ public class Gen6Constants {
             bsAbility3Offset = 26, bsFormeOffset = 28, bsFormeSpriteOffset = 30, bsFormeCountOffset = 32,
             bsTMHMCompatOffset = 40, bsMTCompatOffset = 56; // Need to confirm these
 
+    private static final int bsSizeXY = 0x40;
+    private static final int bsSizeORAS = 0x50;
+
     public static final int evolutionMethodCount = 34;
 
     public static final int slowpokeIndex = 79, karrablastIndex = 588, shelmetIndex = 616;
@@ -89,6 +93,74 @@ public class Gen6Constants {
     public static final int hiddenItemCountORAS = 170;
     public static final String hiddenItemsPrefixORAS = "A100A200A300A400A5001400010053004A0084000900";
     public static final String itemPalettesPrefix = "6F7461746500FF920A063F";
+    public static final String shopItemsPrefix = "00726F6D3A2F446C6C53746172744D656E752E63726F00";
+    public static final String shopItemsPrefixPatched = "00726F6D323A2F446C6C53746172744D656E752E63726F00FF";
+
+    private static final List<Integer> mainGameShopsXY = Arrays.asList(
+            10,11,12,13,16,17,20,21,24,25
+    );
+
+    private static final List<Integer> mainGameShopsORAS = Arrays.asList(
+            10, 11, 13, 14, 16, 17, 18, 19, 20, 21
+    );
+
+    private static final List<String> shopNamesXY = Arrays.asList(
+            "Primary 0 Badges",
+            "Primary 1 Badges",
+            "Primary 2 Badges",
+            "Primary 3 Badges",
+            "Primary 4 Badges",
+            "Primary 5 Badges",
+            "Primary 6 Badges",
+            "Primary 7 Badges",
+            "Primary 8 Badges",
+            "Unused",
+            "Lumiose Herboriste",
+            "Lumiose Poké Ball Boutique",
+            "Lumiose Stone Emporium",
+            "Coumarine Incenses",
+            "Aquacorde Poké Ball",
+            "Aquacorde Potion",
+            "Lumiose North Secondary",
+            "Cyllage Secondary",
+            "Shalour Secondary (TMs)",
+            "Lumiose South Secondary (TMs)",
+            "Laverre Secondary",
+            "Snowbelle Secondary",
+            "Kiloude Secondary (TMs)",
+            "Anistar Secondary (TMs)",
+            "Santalune Secondary",
+            "Coumarine Secondary");
+
+    private static final List<String> shopNamesORAS = Arrays.asList(
+            "Primary 0 Badges (After Pokédex)",
+            "Primary 1 Badges",
+            "Primary 2 Badges",
+            "Primary 3 Badges",
+            "Primary 4 Badges",
+            "Primary 5 Badges",
+            "Primary 6 Badges",
+            "Primary 7 Badges",
+            "Primary 8 Badges",
+            "Primary 0 Badges (Before Pokédex)",
+            "Slateport Incenses",
+            "Slateport Vitamins",
+            "Slateport TMs",
+            "Rustboro Secondary",
+            "Slateport Secondary",
+            "Mauville Secondary (TMs)",
+            "Verdanturf Secondary",
+            "Fallarbor Secondary",
+            "Lavaridge Herbs",
+            "Lilycove Dept. Store 2F Left",
+            "Lilycove Dept. Store 3F Left",
+            "Lilycove Dept. Store 3F Right",
+            "Lilycove Dept. Store 4F Left (TMs)",
+            "Lilycove Dept. Store 4F Right (TMs)");
+
+
+    public static final List<Integer> evolutionItems = Arrays.asList(80,81,82,83,84,85,107,108,109,
+            110,221,226,227,233,235,252,321,322,323,324,325,326,327,646,647);
 
     private static final List<Integer> requiredFieldTMsXY = Arrays.asList(
             1, 9, 40, 19, 65, 73, 69, 74, 81, 57, 61, 97, 95, 71, 79, 30, 31, 36, 53, 29, 22, 3, 2, 80, 26);
@@ -104,6 +176,30 @@ public class Gen6Constants {
             return requiredFieldTMsXY;
         } else {
             return requiredFieldTMsORAS;
+        }
+    }
+
+    public static List<Integer> getMainGameShops(int romType) {
+        if (romType == Type_XY) {
+            return mainGameShopsXY;
+        } else {
+            return mainGameShopsORAS;
+        }
+    }
+
+    public static List<String> getShopNames(int romType) {
+        if (romType == Type_XY) {
+            return shopNamesXY;
+        } else {
+            return shopNamesORAS;
+        }
+    }
+
+    public static int getBsSize(int romType) {
+        if (romType == Type_XY) {
+            return bsSizeXY;
+        } else {
+            return bsSizeORAS;
         }
     }
 
@@ -732,4 +828,784 @@ public class Gen6Constants {
             }
         }
     }
+
+
+    public static final Map<Integer,Integer> balancedItemPrices = Stream.of(new Integer[][] {
+            // Skip item index 0. All prices divided by 10
+            {1, 300}, // Master Ball
+            {2, 120}, // Ultra Ball
+            {3, 60}, // Great Ball
+            {4, 20}, // Poké Ball
+            {5, 50}, // Safari Ball
+            {6, 100}, // Net Ball
+            {7, 100}, // Dive Ball
+            {8, 100}, // Nest Ball
+            {9, 100}, // Repeat Ball
+            {10, 100}, // Timer Ball
+            {11, 100}, // Luxury Ball
+            {12, 20}, // Premier Ball
+            {13, 100}, // Dusk Ball
+            {14, 30}, // Heal Ball
+            {15, 100}, // Quick Ball
+            {16, 20}, // Cherish Ball
+            {17, 30}, // Potion
+            {18, 10}, // Antidote
+            {19, 25}, // Burn Heal
+            {20, 25}, // Ice Heal
+            {21, 25}, // Awakening
+            {22, 20}, // Parlyz Heal
+            {23, 300}, // Full Restore
+            {24, 250}, // Max Potion
+            {25, 120}, // Hyper Potion
+            {26, 70}, // Super Potion
+            {27, 60}, // Full Heal
+            {28, 150}, // Revive
+            {29, 400}, // Max Revive
+            {30, 40}, // Fresh Water
+            {31, 60}, // Soda Pop
+            {32, 70}, // Lemonade
+            {33, 80}, // Moomoo Milk
+            {34, 40}, // EnergyPowder
+            {35, 110}, // Energy Root
+            {36, 45}, // Heal Powder
+            {37, 280}, // Revival Herb
+            {38, 300}, // Ether
+            {39, 450}, // Max Ether
+            {40, 1500}, // Elixir
+            {41, 1800}, // Max Elixir
+            {42, 45}, // Lava Cookie
+            {43, 10}, // Berry Juice
+            {44, 1000}, // Sacred Ash
+            {45, 980}, // HP Up
+            {46, 980}, // Protein
+            {47, 980}, // Iron
+            {48, 980}, // Carbos
+            {49, 980}, // Calcium
+            {50, 1000}, // Rare Candy
+            {51, 980}, // PP Up
+            {52, 980}, // Zinc
+            {53, 2490}, // PP Max
+            {54, 45}, // Old Gateau
+            {55, 70}, // Guard Spec.
+            {56, 65}, // Dire Hit
+            {57, 50}, // X Attack
+            {58, 55}, // X Defend
+            {59, 35}, // X Speed
+            {60, 95}, // X Accuracy
+            {61, 35}, // X Special
+            {62, 35}, // X Sp. Def
+            {63, 100}, // Poké Doll
+            {64, 100}, // Fluffy Tail
+            {65, 2}, // Blue Flute
+            {66, 2}, // Yellow Flute
+            {67, 2}, // Red Flute
+            {68, 2}, // Black Flute
+            {69, 2}, // White Flute
+            {70, 2}, // Shoal Salt
+            {71, 2}, // Shoal Shell
+            {72, 40}, // Red Shard
+            {73, 40}, // Blue Shard
+            {74, 40}, // Yellow Shard
+            {75, 40}, // Green Shard
+            {76, 50}, // Super Repel
+            {77, 70}, // Max Repel
+            {78, 55}, // Escape Rope
+            {79, 35}, // Repel
+            {80, 300}, // Sun Stone
+            {81, 300}, // Moon Stone
+            {82, 300}, // Fire Stone
+            {83, 300}, // Thunderstone
+            {84, 300}, // Water Stone
+            {85, 300}, // Leaf Stone
+            {86, 50}, // TinyMushroom
+            {87, 500}, // Big Mushroom
+            {88, 140}, // Pearl
+            {89, 750}, // Big Pearl
+            {90, 200}, // Stardust
+            {91, 980}, // Star Piece
+            {92, 1000}, // Nugget
+            {93, 500}, // Heart Scale
+            {94, 50}, // Honey
+            {95, 20}, // Growth Mulch
+            {96, 20}, // Damp Mulch
+            {97, 20}, // Stable Mulch
+            {98, 20}, // Gooey Mulch
+            {99, 500}, // Root Fossil
+            {100, 500}, // Claw Fossil
+            {101, 500}, // Helix Fossil
+            {102, 500}, // Dome Fossil
+            {103, 700}, // Old Amber
+            {104, 500}, // Armor Fossil
+            {105, 500}, // Skull Fossil
+            {106, 1000}, // Rare Bone
+            {107, 300}, // Shiny Stone
+            {108, 300}, // Dusk Stone
+            {109, 300}, // Dawn Stone
+            {110, 300}, // Oval Stone
+            {111, 210}, // Odd Keystone
+            {112, 1000}, // Griseous Orb
+            {113, 0}, // unknown
+            {114, 0}, // unknown
+            {115, 0}, // unknown
+            {116, 100}, // Douse Drive
+            {117, 100}, // Shock Drive
+            {118, 100}, // Burn Drive
+            {119, 100}, // Chill Drive
+            {120, 0}, // unknown
+            {121, 0}, // unknown
+            {122, 0}, // unknown
+            {123, 0}, // unknown
+            {124, 0}, // unknown
+            {125, 0}, // unknown
+            {126, 0}, // unknown
+            {127, 0}, // unknown
+            {128, 0}, // unknown
+            {129, 0}, // unknown
+            {130, 0}, // unknown
+            {131, 0}, // unknown
+            {132, 0}, // unknown
+            {133, 0}, // unknown
+            {134, 15}, // Sweet Heart
+            {135, 1000}, // Adamant Orb
+            {136, 1000}, // Lustrous Orb
+            {137, 5}, // Greet Mail
+            {138, 5}, // Favored Mail
+            {139, 5}, // RSVP Mail
+            {140, 5}, // Thanks Mail
+            {141, 5}, // Inquiry Mail
+            {142, 5}, // Like Mail
+            {143, 5}, // Reply Mail
+            {144, 5}, // BridgeMail S
+            {145, 5}, // BridgeMail D
+            {146, 5}, // BridgeMail T
+            {147, 5}, // BridgeMail V
+            {148, 5}, // BridgeMail M
+            {149, 20}, // Cheri Berry
+            {150, 25}, // Chesto Berry
+            {151, 10}, // Pecha Berry
+            {152, 25}, // Rawst Berry
+            {153, 25}, // Aspear Berry
+            {154, 300}, // Leppa Berry
+            {155, 5}, // Oran Berry
+            {156, 20}, // Persim Berry
+            {157, 50}, // Lum Berry
+            {158, 50}, // Sitrus Berry
+            {159, 10}, // Figy Berry
+            {160, 10}, // Wiki Berry
+            {161, 10}, // Mago Berry
+            {162, 10}, // Aguav Berry
+            {163, 10}, // Iapapa Berry
+            {164, 50}, // Razz Berry
+            {165, 50}, // Bluk Berry
+            {166, 50}, // Nanab Berry
+            {167, 50}, // Wepear Berry
+            {168, 50}, // Pinap Berry
+            {169, 50}, // Pomeg Berry
+            {170, 50}, // Kelpsy Berry
+            {171, 50}, // Qualot Berry
+            {172, 50}, // Hondew Berry
+            {173, 50}, // Grepa Berry
+            {174, 50}, // Tamato Berry
+            {175, 50}, // Cornn Berry
+            {176, 50}, // Magost Berry
+            {177, 50}, // Rabuta Berry
+            {178, 50}, // Nomel Berry
+            {179, 50}, // Spelon Berry
+            {180, 50}, // Pamtre Berry
+            {181, 50}, // Watmel Berry
+            {182, 50}, // Durin Berry
+            {183, 50}, // Belue Berry
+            {184, 100}, // Occa Berry
+            {185, 100}, // Passho Berry
+            {186, 100}, // Wacan Berry
+            {187, 100}, // Rindo Berry
+            {188, 100}, // Yache Berry
+            {189, 100}, // Chople Berry
+            {190, 100}, // Kebia Berry
+            {191, 100}, // Shuca Berry
+            {192, 100}, // Coba Berry
+            {193, 100}, // Payapa Berry
+            {194, 100}, // Tanga Berry
+            {195, 100}, // Charti Berry
+            {196, 100}, // Kasib Berry
+            {197, 100}, // Haban Berry
+            {198, 100}, // Colbur Berry
+            {199, 100}, // Babiri Berry
+            {200, 100}, // Chilan Berry
+            {201, 100}, // Liechi Berry
+            {202, 100}, // Ganlon Berry
+            {203, 100}, // Salac Berry
+            {204, 100}, // Petaya Berry
+            {205, 100}, // Apicot Berry
+            {206, 100}, // Lansat Berry
+            {207, 100}, // Starf Berry
+            {208, 100}, // Enigma Berry
+            {209, 100}, // Micle Berry
+            {210, 100}, // Custap Berry
+            {211, 100}, // Jaboca Berry
+            {212, 100}, // Rowap Berry
+            {213, 300}, // BrightPowder
+            {214, 100}, // White Herb
+            {215, 300}, // Macho Brace
+            {216, 600}, // Exp. Share
+            {217, 450}, // Quick Claw
+            {218, 100}, // Soothe Bell
+            {219, 100}, // Mental Herb
+            {220, 1000}, // Choice Band
+            {221, 500}, // King's Rock
+            {222, 200}, // SilverPowder
+            {223, 1500}, // Amulet Coin
+            {224, 100}, // Cleanse Tag
+            {225, 20}, // Soul Dew
+            {226, 300}, // DeepSeaTooth
+            {227, 300}, // DeepSeaScale
+            {228, 20}, // Smoke Ball
+            {229, 20}, // Everstone
+            {230, 300}, // Focus Band
+            {231, 1000}, // Lucky Egg
+            {232, 500}, // Scope Lens
+            {233, 300}, // Metal Coat
+            {234, 1000}, // Leftovers
+            {235, 300}, // Dragon Scale
+            {236, 10}, // Light Ball
+            {237, 200}, // Soft Sand
+            {238, 200}, // Hard Stone
+            {239, 200}, // Miracle Seed
+            {240, 200}, // BlackGlasses
+            {241, 200}, // Black Belt
+            {242, 200}, // Magnet
+            {243, 200}, // Mystic Water
+            {244, 200}, // Sharp Beak
+            {245, 200}, // Poison Barb
+            {246, 200}, // NeverMeltIce
+            {247, 200}, // Spell Tag
+            {248, 200}, // TwistedSpoon
+            {249, 200}, // Charcoal
+            {250, 200}, // Dragon Fang
+            {251, 200}, // Silk Scarf
+            {252, 300}, // Up-Grade
+            {253, 600}, // Shell Bell
+            {254, 200}, // Sea Incense
+            {255, 300}, // Lax Incense
+            {256, 1}, // Lucky Punch
+            {257, 1}, // Metal Powder
+            {258, 50}, // Thick Club
+            {259, 20}, // Stick
+            {260, 10}, // Red Scarf
+            {261, 10}, // Blue Scarf
+            {262, 10}, // Pink Scarf
+            {263, 10}, // Green Scarf
+            {264, 10}, // Yellow Scarf
+            {265, 150}, // Wide Lens
+            {266, 200}, // Muscle Band
+            {267, 200}, // Wise Glasses
+            {268, 600}, // Expert Belt
+            {269, 150}, // Light Clay
+            {270, 1000}, // Life Orb
+            {271, 100}, // Power Herb
+            {272, 150}, // Toxic Orb
+            {273, 150}, // Flame Orb
+            {274, 1}, // Quick Powder
+            {275, 200}, // Focus Sash
+            {276, 150}, // Zoom Lens
+            {277, 300}, // Metronome
+            {278, 100}, // Iron Ball
+            {279, 100}, // Lagging Tail
+            {280, 150}, // Destiny Knot
+            {281, 500}, // Black Sludge
+            {282, 20}, // Icy Rock
+            {283, 20}, // Smooth Rock
+            {284, 20}, // Heat Rock
+            {285, 20}, // Damp Rock
+            {286, 150}, // Grip Claw
+            {287, 1000}, // Choice Scarf
+            {288, 150}, // Sticky Barb
+            {289, 300}, // Power Bracer
+            {290, 300}, // Power Belt
+            {291, 300}, // Power Lens
+            {292, 300}, // Power Band
+            {293, 300}, // Power Anklet
+            {294, 300}, // Power Weight
+            {295, 50}, // Shed Shell
+            {296, 150}, // Big Root
+            {297, 1000}, // Choice Specs
+            {298, 200}, // Flame Plate
+            {299, 200}, // Splash Plate
+            {300, 200}, // Zap Plate
+            {301, 200}, // Meadow Plate
+            {302, 200}, // Icicle Plate
+            {303, 200}, // Fist Plate
+            {304, 200}, // Toxic Plate
+            {305, 200}, // Earth Plate
+            {306, 200}, // Sky Plate
+            {307, 200}, // Mind Plate
+            {308, 200}, // Insect Plate
+            {309, 200}, // Stone Plate
+            {310, 200}, // Spooky Plate
+            {311, 200}, // Draco Plate
+            {312, 200}, // Dread Plate
+            {313, 200}, // Iron Plate
+            {314, 200}, // Odd Incense
+            {315, 200}, // Rock Incense
+            {316, 100}, // Full Incense
+            {317, 200}, // Wave Incense
+            {318, 200}, // Rose Incense
+            {319, 1500}, // Luck Incense
+            {320, 100}, // Pure Incense
+            {321, 300}, // Protector
+            {322, 300}, // Electirizer
+            {323, 300}, // Magmarizer
+            {324, 300}, // Dubious Disc
+            {325, 300}, // Reaper Cloth
+            {326, 500}, // Razor Claw
+            {327, 500}, // Razor Fang
+            {328, 1000}, // TM01 Hone Claws
+            {329, 1000}, // TM02 Dragon Claw
+            {330, 1000}, // TM03 Psyshock
+            {331, 1000}, // TM04 Calm Mind
+            {332, 1000}, // TM05 Roar
+            {333, 1000}, // TM06 Toxic
+            {334, 2000}, // TM07 Hail
+            {335, 1000}, // TM08 Bulk Up
+            {336, 1000}, // TM09 Venoshock
+            {337, 1000}, // TM10 Hidden Power
+            {338, 2000}, // TM11 Sunny Day
+            {339, 1000}, // TM12 Taunt
+            {340, 1000}, // TM13 Ice Beam
+            {341, 2000}, // TM14 Blizzard
+            {342, 2000}, // TM15 Hyper Beam
+            {343, 2000}, // TM16 Light Screen
+            {344, 1000}, // TM17 Protect
+            {345, 2000}, // TM18 Rain Dance
+            {346, 1000}, // TM19 Telekinesis
+            {347, 2000}, // TM20 Safeguard
+            {348, 1000}, // TM21 Frustration
+            {349, 1000}, // TM22 SolarBeam
+            {350, 1000}, // TM23 Smack Down
+            {351, 1000}, // TM24 Thunderbolt
+            {352, 2000}, // TM25 Thunder
+            {353, 1000}, // TM26 Earthquake
+            {354, 1000}, // TM27 Return
+            {355, 1000}, // TM28 Dig
+            {356, 1000}, // TM29 Psychic
+            {357, 1000}, // TM30 Shadow Ball
+            {358, 1000}, // TM31 Brick Break
+            {359, 1000}, // TM32 Double Team
+            {360, 2000}, // TM33 Reflect
+            {361, 1000}, // TM34 Sludge Wave
+            {362, 1000}, // TM35 Flamethrower
+            {363, 1000}, // TM36 Sludge Bomb
+            {364, 2000}, // TM37 Sandstorm
+            {365, 2000}, // TM38 Fire Blast
+            {366, 1000}, // TM39 Rock Tomb
+            {367, 1000}, // TM40 Aerial Ace
+            {368, 1000}, // TM41 Torment
+            {369, 1000}, // TM42 Facade
+            {370, 1000}, // TM43 Flame Charge
+            {371, 1000}, // TM44 Rest
+            {372, 1000}, // TM45 Attract
+            {373, 1000}, // TM46 Thief
+            {374, 1000}, // TM47 Low Sweep
+            {375, 1000}, // TM48 Round
+            {376, 1000}, // TM49 Echoed Voice
+            {377, 1000}, // TM50 Overheat
+            {378, 1000}, // TM51 Ally Switch
+            {379, 1000}, // TM52 Focus Blast
+            {380, 1000}, // TM53 Energy Ball
+            {381, 1000}, // TM54 False Swipe
+            {382, 1000}, // TM55 Scald
+            {383, 1000}, // TM56 Fling
+            {384, 1000}, // TM57 Charge Beam
+            {385, 1000}, // TM58 Sky Drop
+            {386, 1000}, // TM59 Incinerate
+            {387, 1000}, // TM60 Quash
+            {388, 1000}, // TM61 Will-O-Wisp
+            {389, 1000}, // TM62 Acrobatics
+            {390, 1000}, // TM63 Embargo
+            {391, 1000}, // TM64 Explosion
+            {392, 1000}, // TM65 Shadow Claw
+            {393, 1000}, // TM66 Payback
+            {394, 1000}, // TM67 Retaliate
+            {395, 2000}, // TM68 Giga Impact
+            {396, 1000}, // TM69 Rock Polish
+            {397, 1000}, // TM70 Flash
+            {398, 1000}, // TM71 Stone Edge
+            {399, 1000}, // TM72 Volt Switch
+            {400, 1000}, // TM73 Thunder Wave
+            {401, 1000}, // TM74 Gyro Ball
+            {402, 1000}, // TM75 Swords Dance
+            {403, 1000}, // TM76 Struggle Bug
+            {404, 1000}, // TM77 Psych Up
+            {405, 1000}, // TM78 Bulldoze
+            {406, 1000}, // TM79 Frost Breath
+            {407, 1000}, // TM80 Rock Slide
+            {408, 1000}, // TM81 X-Scissor
+            {409, 1000}, // TM82 Dragon Tail
+            {410, 1000}, // TM83 Work Up
+            {411, 1000}, // TM84 Poison Jab
+            {412, 1000}, // TM85 Dream Eater
+            {413, 1000}, // TM86 Grass Knot
+            {414, 1000}, // TM87 Swagger
+            {415, 1000}, // TM88 Pluck
+            {416, 1000}, // TM89 U-turn
+            {417, 1000}, // TM90 Substitute
+            {418, 1000}, // TM91 Flash Cannon
+            {419, 1000}, // TM92 Trick Room
+            {420, 0}, // HM01
+            {421, 0}, // HM02
+            {422, 0}, // HM03
+            {423, 0}, // HM04
+            {424, 0}, // HM05
+            {425, 0}, // HM06
+            {426, 0}, // unknown
+            {427, 0}, // unknown
+            {428, 0}, // Explorer Kit
+            {429, 0}, // Loot Sack
+            {430, 0}, // Rule Book
+            {431, 0}, // Poké Radar
+            {432, 0}, // Point Card
+            {433, 0}, // Journal
+            {434, 0}, // Seal Case
+            {435, 0}, // Fashion Case
+            {436, 0}, // Seal Bag
+            {437, 0}, // Pal Pad
+            {438, 0}, // Works Key
+            {439, 0}, // Old Charm
+            {440, 0}, // Galactic Key
+            {441, 0}, // Red Chain
+            {442, 0}, // Town Map
+            {443, 0}, // Vs. Seeker
+            {444, 0}, // Coin Case
+            {445, 0}, // Old Rod
+            {446, 0}, // Good Rod
+            {447, 0}, // Super Rod
+            {448, 0}, // Sprayduck
+            {449, 0}, // Poffin Case
+            {450, 0}, // Bicycle
+            {451, 0}, // Suite Key
+            {452, 0}, // Oak's Letter
+            {453, 0}, // Lunar Wing
+            {454, 0}, // Member Card
+            {455, 0}, // Azure Flute
+            {456, 0}, // S.S. Ticket
+            {457, 0}, // Contest Pass
+            {458, 0}, // Magma Stone
+            {459, 0}, // Parcel
+            {460, 0}, // Coupon 1
+            {461, 0}, // Coupon 2
+            {462, 0}, // Coupon 3
+            {463, 0}, // Storage Key
+            {464, 0}, // SecretPotion
+            {465, 0}, // Vs. Recorder
+            {466, 0}, // Gracidea
+            {467, 0}, // Secret Key
+            {468, 0}, // Apricorn Box
+            {469, 0}, // Unown Report
+            {470, 0}, // Berry Pots
+            {471, 0}, // Dowsing MCHN
+            {472, 0}, // Blue Card
+            {473, 0}, // SlowpokeTail
+            {474, 0}, // Clear Bell
+            {475, 0}, // Card Key
+            {476, 0}, // Basement Key
+            {477, 0}, // SquirtBottle
+            {478, 0}, // Red Scale
+            {479, 0}, // Lost Item
+            {480, 0}, // Pass
+            {481, 0}, // Machine Part
+            {482, 0}, // Silver Wing
+            {483, 0}, // Rainbow Wing
+            {484, 0}, // Mystery Egg
+            {485, 2}, // Red Apricorn
+            {486, 2}, // Blu Apricorn
+            {487, 2}, // Ylw Apricorn
+            {488, 2}, // Grn Apricorn
+            {489, 2}, // Pnk Apricorn
+            {490, 2}, // Wht Apricorn
+            {491, 2}, // Blk Apricorn
+            {492, 30}, // Fast Ball
+            {493, 30}, // Level Ball
+            {494, 30}, // Lure Ball
+            {495, 30}, // Heavy Ball
+            {496, 30}, // Love Ball
+            {497, 30}, // Friend Ball
+            {498, 30}, // Moon Ball
+            {499, 30}, // Sport Ball
+            {500, 0}, // Park Ball
+            {501, 0}, // Photo Album
+            {502, 0}, // GB Sounds
+            {503, 0}, // Tidal Bell
+            {504, 1500}, // RageCandyBar
+            {505, 0}, // Data Card 01
+            {506, 0}, // Data Card 02
+            {507, 0}, // Data Card 03
+            {508, 0}, // Data Card 04
+            {509, 0}, // Data Card 05
+            {510, 0}, // Data Card 06
+            {511, 0}, // Data Card 07
+            {512, 0}, // Data Card 08
+            {513, 0}, // Data Card 09
+            {514, 0}, // Data Card 10
+            {515, 0}, // Data Card 11
+            {516, 0}, // Data Card 12
+            {517, 0}, // Data Card 13
+            {518, 0}, // Data Card 14
+            {519, 0}, // Data Card 15
+            {520, 0}, // Data Card 16
+            {521, 0}, // Data Card 17
+            {522, 0}, // Data Card 18
+            {523, 0}, // Data Card 19
+            {524, 0}, // Data Card 20
+            {525, 0}, // Data Card 21
+            {526, 0}, // Data Card 22
+            {527, 0}, // Data Card 23
+            {528, 0}, // Data Card 24
+            {529, 0}, // Data Card 25
+            {530, 0}, // Data Card 26
+            {531, 0}, // Data Card 27
+            {532, 0}, // Jade Orb
+            {533, 0}, // Lock Capsule
+            {534, 0}, // Red Orb
+            {535, 0}, // Blue Orb
+            {536, 0}, // Enigma Stone
+            {537, 300}, // Prism Scale
+            {538, 1000}, // Eviolite
+            {539, 100}, // Float Stone
+            {540, 600}, // Rocky Helmet
+            {541, 100}, // Air Balloon
+            {542, 100}, // Red Card
+            {543, 100}, // Ring Target
+            {544, 200}, // Binding Band
+            {545, 100}, // Absorb Bulb
+            {546, 100}, // Cell Battery
+            {547, 100}, // Eject Button
+            {548, 100}, // Fire Gem
+            {549, 100}, // Water Gem
+            {550, 100}, // Electric Gem
+            {551, 100}, // Grass Gem
+            {552, 100}, // Ice Gem
+            {553, 100}, // Fighting Gem
+            {554, 100}, // Poison Gem
+            {555, 100}, // Ground Gem
+            {556, 100}, // Flying Gem
+            {557, 100}, // Psychic Gem
+            {558, 100}, // Bug Gem
+            {559, 100}, // Rock Gem
+            {560, 100}, // Ghost Gem
+            {561, 100}, // Dragon Gem
+            {562, 100}, // Dark Gem
+            {563, 100}, // Steel Gem
+            {564, 100}, // Normal Gem
+            {565, 300}, // Health Wing
+            {566, 300}, // Muscle Wing
+            {567, 300}, // Resist Wing
+            {568, 300}, // Genius Wing
+            {569, 300}, // Clever Wing
+            {570, 300}, // Swift Wing
+            {571, 20}, // Pretty Wing
+            {572, 500}, // Cover Fossil
+            {573, 500}, // Plume Fossil
+            {574, 0}, // Liberty Pass
+            {575, 20}, // Pass Orb
+            {576, 100}, // Dream Ball
+            {577, 100}, // Poké Toy
+            {578, 0}, // Prop Case
+            {579, 0}, // Dragon Skull
+            {580, 0}, // BalmMushroom
+            {581, 0}, // Big Nugget
+            {582, 0}, // Pearl String
+            {583, 0}, // Comet Shard
+            {584, 0}, // Relic Copper
+            {585, 0}, // Relic Silver
+            {586, 0}, // Relic Gold
+            {587, 0}, // Relic Vase
+            {588, 0}, // Relic Band
+            {589, 0}, // Relic Statue
+            {590, 0}, // Relic Crown
+            {591, 45}, // Casteliacone
+            {592, 0}, // Dire Hit 2
+            {593, 0}, // X Speed 2
+            {594, 0}, // X Special 2
+            {595, 0}, // X Sp. Def 2
+            {596, 0}, // X Defend 2
+            {597, 0}, // X Attack 2
+            {598, 0}, // X Accuracy 2
+            {599, 0}, // X Speed 3
+            {600, 0}, // X Special 3
+            {601, 0}, // X Sp. Def 3
+            {602, 0}, // X Defend 3
+            {603, 0}, // X Attack 3
+            {604, 0}, // X Accuracy 3
+            {605, 0}, // X Speed 6
+            {606, 0}, // X Special 6
+            {607, 0}, // X Sp. Def 6
+            {608, 0}, // X Defend 6
+            {609, 0}, // X Attack 6
+            {610, 0}, // X Accuracy 6
+            {611, 0}, // Ability Urge
+            {612, 0}, // Item Drop
+            {613, 0}, // Item Urge
+            {614, 0}, // Reset Urge
+            {615, 0}, // Dire Hit 3
+            {616, 0}, // Light Stone
+            {617, 0}, // Dark Stone
+            {618, 1000}, // TM93 Wild Charge
+            {619, 1000}, // TM94 Rock Smash
+            {620, 1000}, // TM95 Snarl
+            {621, 0}, // Xtransceiver
+            {622, 0}, // God Stone
+            {623, 0}, // Gram 1
+            {624, 0}, // Gram 2
+            {625, 0}, // Gram 3
+            {626, 0}, // Xtransceiver
+            {627, 0}, // Medal Box
+            {628, 0}, // DNA Splicers
+            {629, 0}, // DNA Splicers
+            {630, 0}, // Permit
+            {631, 0}, // Oval Charm
+            {632, 0}, // Shiny Charm
+            {633, 0}, // Plasma Card
+            {634, 0}, // Grubby Hanky
+            {635, 0}, // Colress MCHN
+            {636, 0}, // Dropped Item
+            {637, 0}, // Dropped Item
+            {638, 0}, // Reveal Glass
+            {639,200}, // Weakness Policy
+            {640,600}, // Assault Vest
+            {641,0}, // Holo Caster
+            {642,0}, // Prof’s Letter
+            {643,0}, // Roller Skates
+            {644,200}, // Pixie Plate
+            {645,500}, // Ability Capsule
+            {646,300}, // Whipped Dream
+            {647,300}, // Sachet
+            {648,20}, // Luminous Moss
+            {649,20}, // Snowball
+            {650,300}, // Safety Goggles
+            {651,0}, // Poké Flute
+            {652,20}, // Rich Mulch
+            {653,20}, // Surprise Mulch
+            {654,20}, // Boost Mulch
+            {655,20}, // Amaze Mulch
+            {656,1000}, // Gengarite
+            {657,1000}, // Gardevoirite
+            {658,1000}, // Ampharosite
+            {659,1000}, // Venusaurite
+            {660,1000}, // Charizardite X
+            {661,1000}, // Blastoisinite
+            {662,2000}, // Mewtwonite X
+            {663,2000}, // Mewtwonite Y
+            {664,1000}, // Blazikenite
+            {665,500}, // Medichamite
+            {666,1000}, // Houndoominite
+            {667,1000}, // Aggronite
+            {668,500}, // Banettite
+            {669,2000}, // Tyranitarite
+            {670,1000}, // Scizorite
+            {671,1000}, // Pinsirite
+            {672,1000}, // Aerodactylite
+            {673,1000}, // Lucarionite
+            {674,500}, // Abomasite
+            {675,500}, // Kangaskhanite
+            {676,1000}, // Gyaradosite
+            {677,500}, // Absolite
+            {678,1000}, // Charizardite Y
+            {679,1000}, // Alakazite
+            {680,1000}, // Heracronite
+            {681,300}, // Mawilite
+            {682,500}, // Manectite
+            {683,2000}, // Garchompite
+            {684,2000}, // Latiasite
+            {685,2000}, // Latiosite
+            {686,100}, // Roseli Berry
+            {687,100}, // Kee Berry
+            {688,100}, // Maranga Berry
+            {689,0}, // Sprinklotad
+            {690,1000}, // TM96
+            {691,1000}, // TM97
+            {692,1000}, // TM98
+            {693,1000}, // TM99
+            {694,500}, // TM100
+            {695,0}, // Power Plant Pass
+            {696,0}, // Mega Ring
+            {697,0}, // Intriguing Stone
+            {698,0}, // Common Stone
+            {699,2}, // Discount Coupon
+            {700,0}, // Elevator Key
+            {701,0}, // TMV Pass
+            {702,0}, // Honor of Kalos
+            {703,0}, // Adventure Rules
+            {704,1}, // Strange Souvenir
+            {705,0}, // Lens Case
+            {706,0}, // Travel Trunk
+            {707,0}, // Travel Trunk
+            {708,45}, // Lumiose Galette
+            {709,45}, // Shalour Sable
+            {710,500}, // Jaw Fossil
+            {711,500}, // Sail Fossil
+            {712,0}, // Looker Ticket
+            {713,0}, // Bike
+            {714,0}, // Holo Caster
+            {715,100}, // Fairy Gem
+            {716,0}, // Mega Charm
+            {717,0}, // Mega Glove
+            {718,0}, // Mach Bike
+            {719,0}, // Acro Bike
+            {720,0}, // Wailmer Pail
+            {721,0}, // Devon Parts
+            {722,0}, // Soot Sack
+            {723,0}, // Basement Key
+            {724,0}, // Pokéblock Kit
+            {725,0}, // Letter
+            {726,0}, // Eon Ticket
+            {727,0}, // Scanner
+            {728,0}, // Go-Goggles
+            {729,0}, // Meteorite
+            {730,0}, // Key to Room 1
+            {731,0}, // Key to Room 2
+            {732,0}, // Key to Room 4
+            {733,0}, // Key to Room 6
+            {734,0}, // Storage Key
+            {735,0}, // Devon Scope
+            {736,0}, // S.S. Ticket
+            {737,0}, // HM07
+            {738,0}, // Devon Scuba Gear
+            {739,0}, // Contest Costume
+            {740,0}, // Contest Costume
+            {741,0}, // Magma Suit
+            {742,0}, // Aqua Suit
+            {743,0}, // Pair of Tickets
+            {744,0}, // Mega Bracelet
+            {745,0}, // Mega Pendant
+            {746,0}, // Mega Glasses
+            {747,0}, // Mega Anchor
+            {748,0}, // Mega Stickpin
+            {749,0}, // Mega Tiara
+            {750,0}, // Mega Anklet
+            {751,0}, // Meteorite
+            {752,1000}, // Swampertite
+            {753,1000}, // Sceptilite
+            {754,300}, // Sablenite
+            {755,500}, // Altarianite
+            {756,1000}, // Galladite
+            {757,500}, // Audinite
+            {758,2000}, // Metagrossite
+            {759,500}, // Sharpedonite
+            {760,500}, // Slowbronite
+            {761,1000}, // Steelixite
+            {762,500}, // Pidgeotite
+            {763,500}, // Glalitite
+            {764,2000}, // Diancite
+            {765,0}, // Prison Bottle
+            {766,0}, // Mega Cuff
+            {767,500}, // Cameruptite
+            {768,500}, // Lopunnite
+            {769,2000}, // Salamencite
+            {770,300}, // Beedrillite
+            {771,0}, // Meteorite
+            {772,0}, // Meteorite
+            {773,0}, // Key Stone
+            {774,0}, // Meteorite Shard
+            {775,0}, // Eon Flute
+    }).collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
 }
