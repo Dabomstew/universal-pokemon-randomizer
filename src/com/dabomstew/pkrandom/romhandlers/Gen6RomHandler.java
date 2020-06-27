@@ -263,6 +263,9 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         itemNames = getStrings(false,romEntry.getInt("ItemNamesTextOffset"));
 
         loadedWildMapNames = false;
+        if (romEntry.romType == Gen6Constants.Type_ORAS) {
+            isORAS = true;
+        }
     }
 
     private void loadPokemonStats() {
@@ -928,11 +931,13 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             EncounterSet grassEncounters = readEncounter(encounterData, 0, 12);
             if (grassEncounters.encounters.size() > 0) {
                 grassEncounters.displayName = mapName + " Grass/Cave";
+                grassEncounters.offset = i;
                 encounters.add(grassEncounters);
             }
             EncounterSet longGrassEncounters = readEncounter(encounterData, 48, 12);
             if (longGrassEncounters.encounters.size() > 0) {
                 longGrassEncounters.displayName = mapName + " Long Grass";
+                longGrassEncounters.offset = i;
                 encounters.add(longGrassEncounters);
             }
 
@@ -940,6 +945,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             EncounterSet dexNavForeignEncounters = readEncounter(encounterData, 96, 3);
             if (dexNavForeignEncounters.encounters.size() > 0) {
                 dexNavForeignEncounters.displayName = mapName + " DexNav Foreign Encounter";
+                dexNavForeignEncounters.offset = i;
                 encounters.add(dexNavForeignEncounters);
             }
 
@@ -947,11 +953,13 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             EncounterSet surfEncounters = readEncounter(encounterData, 108, 5);
             if (surfEncounters.encounters.size() > 0) {
                 surfEncounters.displayName = mapName + " Surf";
+                surfEncounters.offset = i;
                 encounters.add(surfEncounters);
             }
             EncounterSet rockSmashEncounters = readEncounter(encounterData, 128, 5);
             if (rockSmashEncounters.encounters.size() > 0) {
                 rockSmashEncounters.displayName = mapName + " Rock Smash";
+                rockSmashEncounters.offset = i;
                 encounters.add(rockSmashEncounters);
             }
 
@@ -959,16 +967,19 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             EncounterSet oldRodEncounters = readEncounter(encounterData, 148, 3);
             if (oldRodEncounters.encounters.size() > 0) {
                 oldRodEncounters.displayName = mapName + " Old Rod";
+                oldRodEncounters.offset = i;
                 encounters.add(oldRodEncounters);
             }
             EncounterSet goodRodEncounters = readEncounter(encounterData, 160, 3);
             if (goodRodEncounters.encounters.size() > 0) {
                 goodRodEncounters.displayName = mapName + " Good Rod";
+                goodRodEncounters.offset = i;
                 encounters.add(goodRodEncounters);
             }
             EncounterSet superRodEncounters = readEncounter(encounterData, 172, 3);
             if (superRodEncounters.encounters.size() > 0) {
                 superRodEncounters.displayName = mapName + " Super Rod";
+                superRodEncounters.offset = i;
                 encounters.add(superRodEncounters);
             }
 
@@ -976,16 +987,19 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             EncounterSet hordeCommonEncounters = readEncounter(encounterData, 184, 5);
             if (hordeCommonEncounters.encounters.size() > 0) {
                 hordeCommonEncounters.displayName = mapName + " Common Horde";
+                hordeCommonEncounters.offset = i;
                 encounters.add(hordeCommonEncounters);
             }
             EncounterSet hordeUncommonEncounters = readEncounter(encounterData, 204, 5);
             if (hordeUncommonEncounters.encounters.size() > 0) {
                 hordeUncommonEncounters.displayName = mapName + " Uncommon Horde";
+                hordeUncommonEncounters.offset = i;
                 encounters.add(hordeUncommonEncounters);
             }
             EncounterSet hordeRareEncounters = readEncounter(encounterData, 224, 5);
             if (hordeRareEncounters.encounters.size() > 0) {
                 hordeRareEncounters.displayName = mapName + " Rare Horde";
+                hordeRareEncounters.offset = i;
                 encounters.add(hordeRareEncounters);
             }
         }

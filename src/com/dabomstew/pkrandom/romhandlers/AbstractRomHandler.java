@@ -38,6 +38,7 @@ import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.*;
+import javafx.util.Pair;
 
 public abstract class AbstractRomHandler implements RomHandler {
 
@@ -55,6 +56,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private Map<Pokemon, Integer> placementHistory = new HashMap<>();
     private Map<Integer, Integer> itemPlacementHistory = new HashMap<>();
     boolean ptGiratina = false;
+    boolean isORAS = false;
 
     /* Constructor */
 
@@ -561,8 +563,19 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
             boolean noLegendaries, boolean balanceShakingGrass, int levelModifier) {
-        checkPokemonRestrictions();
+        boolean includeFormes = generationOfPokemon() >= 6;
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
+
+        // For now, treat this as Area 1-to-1 and we'll fix it later.
+        if (isORAS) {
+            List<EncounterSet> collapsedEncounters = collapseAreasORAS(currentEncounters);
+            area1to1EncountersImpl(collapsedEncounters, useTimeOfDay, catchEmAll, typeThemed,
+                    usePowerLevels, noLegendaries, levelModifier);
+            setEncounters(useTimeOfDay, currentEncounters);
+            return;
+        }
+
+        checkPokemonRestrictions();
 
         // New: randomize the order encounter sets are randomized in.
         // Leads to less predictable results for various modifiers.
@@ -571,7 +584,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         Collections.shuffle(scrambledEncounters, this.random);
 
         List<Pokemon> banned = this.bannedForWildEncounters();
-        boolean includeFormes = generationOfPokemon() >= 6;
         // Assume EITHER catch em all OR type themed OR match strength for now
         if (catchEmAll) {
 
@@ -720,26 +732,8 @@ public abstract class AbstractRomHandler implements RomHandler {
             // Entirely random
             for (EncounterSet area : scrambledEncounters) {
                 for (Encounter enc : area.encounters) {
-                    Pokemon randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
-                    Pokemon randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
-                    enc.pokemon = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
-                    while (enc.pokemon.actuallyCosmetic) {
-                        randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
-                        randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
-                        enc.pokemon = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
-                    }
+                    enc.pokemon = pickEntirelyRandomPokemon(includeFormes, noLegendaries, area, banned);
                     setFormeForEncounter(enc);
-                    while (banned.contains(enc.pokemon) || area.bannedPokemon.contains(enc.pokemon)) {
-                        randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
-                        randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
-                        enc.pokemon = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
-                        while (enc.pokemon.actuallyCosmetic) {
-                            randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
-                            randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
-                            enc.pokemon = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
-                        }
-                        setFormeForEncounter(enc);
-                    }
                 }
             }
         }
@@ -758,8 +752,23 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
             boolean usePowerLevels, boolean noLegendaries, int levelModifier) {
-        checkPokemonRestrictions();
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
+        if (isORAS) {
+            List<EncounterSet> collapsedEncounters = collapseAreasORAS(currentEncounters);
+            area1to1EncountersImpl(collapsedEncounters, useTimeOfDay, catchEmAll, typeThemed,
+                    usePowerLevels, noLegendaries, levelModifier);
+            setEncounters(useTimeOfDay, currentEncounters);
+            return;
+        } else {
+            area1to1EncountersImpl(currentEncounters, useTimeOfDay, catchEmAll, typeThemed,
+                    usePowerLevels, noLegendaries, levelModifier);
+            setEncounters(useTimeOfDay, currentEncounters);
+        }
+    }
+
+    private void area1to1EncountersImpl(List<EncounterSet> currentEncounters, boolean useTimeOfDay,
+             boolean catchEmAll, boolean typeThemed, boolean usePowerLevels, boolean noLegendaries, int levelModifier) {
+        checkPokemonRestrictions();
         List<Pokemon> banned = this.bannedForWildEncounters();
 
         // New: randomize the order encounter sets are randomized in.
@@ -931,24 +940,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                 // Build area map using randoms
                 Map<Pokemon, Pokemon> areaMap = new TreeMap<>();
                 for (Pokemon areaPk : inArea) {
-                    Pokemon randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
-                    Pokemon randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
-                    Pokemon picked = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
-                    while (picked.actuallyCosmetic) {
-                        randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
-                        randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
-                        picked = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
-                    }
-                    while (areaMap.containsValue(picked) || banned.contains(picked)
-                            || area.bannedPokemon.contains(picked)) {
-                        randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
-                        randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
-                        picked = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
-                        while (picked.actuallyCosmetic) {
-                            randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
-                            randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
-                            picked = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
-                        }
+                    Pokemon picked = pickEntirelyRandomPokemon(includeFormes, noLegendaries, area, banned);
+                    while (areaMap.containsValue(picked)) {
+                        picked = pickEntirelyRandomPokemon(includeFormes, noLegendaries, area, banned);
                     }
                     areaMap.put(areaPk, picked);
                 }
@@ -968,8 +962,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        setEncounters(useTimeOfDay, currentEncounters);
-
     }
 
     @Override
@@ -1101,6 +1093,80 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             setEncounters(true, currentEncounters);
         }
+    }
+
+    private List<EncounterSet> collapseAreasORAS(List<EncounterSet> currentEncounters) {
+        List<EncounterSet> output = new ArrayList<>();
+        Map<Integer, List<EncounterSet>> zonesToEncounters = mapZonesToEncounters(currentEncounters);
+        for (Integer zone : zonesToEncounters.keySet()) {
+            List<EncounterSet> encountersInZone = zonesToEncounters.get(zone);
+            int crashThreshold = computeDexNavCrashThreshold(encountersInZone);
+            if (crashThreshold <= 18) {
+                output.addAll(encountersInZone);
+                continue;
+            }
+
+            // Naive Area 1-to-1 randomization will crash the game, so let's start collapsing areas to prevent this.
+            // Start with combining all the fishing rod encounters, since it's a little less noticeable when they've
+            // been collapsed.
+            List<EncounterSet> collapsedEncounters = new ArrayList<>(encountersInZone);
+            EncounterSet rodGroup = new EncounterSet();
+            rodGroup.offset = zone;
+            rodGroup.displayName = "Rod Group";
+            for (EncounterSet area : encountersInZone) {
+                if (area.displayName.contains("Old Rod") || area.displayName.contains("Good Rod") || area.displayName.contains("Super Rod")) {
+                    collapsedEncounters.remove(area);
+                    rodGroup.encounters.addAll(area.encounters);
+                }
+            }
+            if (rodGroup.encounters.size() > 0) {
+                collapsedEncounters.add(rodGroup);
+            }
+            crashThreshold = computeDexNavCrashThreshold(collapsedEncounters);
+            if (crashThreshold <= 18) {
+                output.addAll(collapsedEncounters);
+                continue;
+            }
+
+            // Even after combining all the fishing rod encounters, we're still not below the threshold to prevent
+            // DexNav from crashing the game. Combine all the grass encounters now to drop us below the threshold;
+            // we've combined everything that DexNav normally combines, so at this point, we're *guaranteed* not
+            // to crash the game.
+            EncounterSet grassGroup = new EncounterSet();
+            grassGroup.offset = zone;
+            grassGroup.displayName = "Grass Group";
+            for (EncounterSet area : encountersInZone) {
+                if (area.displayName.contains("Grass/Cave") || area.displayName.contains("Long Grass") || area.displayName.contains("Horde")) {
+                    collapsedEncounters.remove(area);
+                    grassGroup.encounters.addAll(area.encounters);
+                }
+            }
+            if (grassGroup.encounters.size() > 0) {
+                collapsedEncounters.add(grassGroup);
+            }
+
+            output.addAll(collapsedEncounters);
+        }
+        return output;
+    }
+
+    private int computeDexNavCrashThreshold(List<EncounterSet> encountersInZone) {
+        int crashThreshold = 0;
+        for (EncounterSet area : encountersInZone) {
+            if (area.displayName.contains("Rock Smash")) {
+                continue; // Rock Smash Pokemon don't display on DexNav
+            }
+            Set<Pokemon> uniquePokemonInArea = new HashSet<>();
+            for (Encounter enc : area.encounters) {
+                if (enc.pokemon.baseForme != null) { // DexNav treats different forms as one Pokemon
+                    uniquePokemonInArea.add(enc.pokemon.baseForme);
+                } else {
+                    uniquePokemonInArea.add(enc.pokemon);
+                }
+            }
+            crashThreshold += uniquePokemonInArea.size();
+        }
+        return crashThreshold;
     }
 
     @Override
@@ -4477,6 +4543,43 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (checkCosmetics && enc.pokemon.cosmeticForms > 0) {
             enc.formeNumber = this.random.nextInt(enc.pokemon.cosmeticForms);
         }
+    }
+
+    private Map<Integer, List<EncounterSet>> mapZonesToEncounters(List<EncounterSet> encountersForAreas) {
+        Map<Integer, List<EncounterSet>> zonesToEncounters = new TreeMap<>();
+        for (EncounterSet encountersInArea : encountersForAreas) {
+            if (zonesToEncounters.containsKey(encountersInArea.offset)) {
+                zonesToEncounters.get(encountersInArea.offset).add(encountersInArea);
+            } else {
+                List<EncounterSet> encountersForZone = new ArrayList<>();
+                encountersForZone.add(encountersInArea);
+                zonesToEncounters.put(encountersInArea.offset, encountersForZone);
+            }
+        }
+        return zonesToEncounters;
+    }
+
+    public Pokemon pickEntirelyRandomPokemon(boolean includeFormes, boolean noLegendaries, EncounterSet area, List<Pokemon> banned) {
+        Pokemon result;
+        Pokemon randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
+        Pokemon randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
+        result = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
+        while (result.actuallyCosmetic) {
+            randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
+            randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
+            result = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
+        }
+        while (banned.contains(result) || area.bannedPokemon.contains(result)) {
+            randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
+            randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
+            result = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
+            while (result.actuallyCosmetic) {
+                randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
+                randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
+                result = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
+            }
+        }
+        return result;
     }
 
     private Pokemon pickStaticPowerLvlReplacement(List<Pokemon> pokemonPool, Pokemon current, boolean banSamePokemon,
