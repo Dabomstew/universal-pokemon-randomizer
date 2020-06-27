@@ -676,7 +676,7 @@ public class Gen5Constants {
             {2, 120}, // Ultra Ball
             {3, 60}, // Great Ball
             {4, 20}, // Poké Ball
-            {5, 0}, // Safari Ball
+            {5, 50}, // Safari Ball
             {6, 100}, // Net Ball
             {7, 100}, // Dive Ball
             {8, 100}, // Nest Ball
@@ -774,7 +774,7 @@ public class Gen5Constants {
             {100, 500}, // Claw Fossil
             {101, 500}, // Helix Fossil
             {102, 500}, // Dome Fossil
-            {103, 500}, // Old Amber
+            {103, 700}, // Old Amber
             {104, 500}, // Armor Fossil
             {105, 500}, // Skull Fossil
             {106, 1000}, // Rare Bone
@@ -1005,25 +1005,25 @@ public class Gen5Constants {
             {331, 1000}, // TM04 Calm Mind
             {332, 1000}, // TM05 Roar
             {333, 1000}, // TM06 Toxic
-            {334, 5000}, // TM07 Hail
+            {334, 2000}, // TM07 Hail
             {335, 1000}, // TM08 Bulk Up
             {336, 1000}, // TM09 Venoshock
             {337, 1000}, // TM10 Hidden Power
-            {338, 5000}, // TM11 Sunny Day
+            {338, 2000}, // TM11 Sunny Day
             {339, 1000}, // TM12 Taunt
             {340, 1000}, // TM13 Ice Beam
-            {341, 7000}, // TM14 Blizzard
-            {342, 9000}, // TM15 Hyper Beam
-            {343, 3000}, // TM16 Light Screen
+            {341, 2000}, // TM14 Blizzard
+            {342, 2000}, // TM15 Hyper Beam
+            {343, 2000}, // TM16 Light Screen
             {344, 1000}, // TM17 Protect
-            {345, 5000}, // TM18 Rain Dance
+            {345, 2000}, // TM18 Rain Dance
             {346, 1000}, // TM19 Telekinesis
-            {347, 3000}, // TM20 Safeguard
+            {347, 2000}, // TM20 Safeguard
             {348, 1000}, // TM21 Frustration
             {349, 1000}, // TM22 SolarBeam
             {350, 1000}, // TM23 Smack Down
             {351, 1000}, // TM24 Thunderbolt
-            {352, 7000}, // TM25 Thunder
+            {352, 2000}, // TM25 Thunder
             {353, 1000}, // TM26 Earthquake
             {354, 1000}, // TM27 Return
             {355, 1000}, // TM28 Dig
@@ -1031,12 +1031,12 @@ public class Gen5Constants {
             {357, 1000}, // TM30 Shadow Ball
             {358, 1000}, // TM31 Brick Break
             {359, 1000}, // TM32 Double Team
-            {360, 3000}, // TM33 Reflect
+            {360, 2000}, // TM33 Reflect
             {361, 1000}, // TM34 Sludge Wave
             {362, 1000}, // TM35 Flamethrower
             {363, 1000}, // TM36 Sludge Bomb
-            {364, 5000}, // TM37 Sandstorm
-            {365, 7000}, // TM38 Fire Blast
+            {364, 2000}, // TM37 Sandstorm
+            {365, 2000}, // TM38 Fire Blast
             {366, 1000}, // TM39 Rock Tomb
             {367, 1000}, // TM40 Aerial Ace
             {368, 1000}, // TM41 Torment
@@ -1066,7 +1066,7 @@ public class Gen5Constants {
             {392, 1000}, // TM65 Shadow Claw
             {393, 1000}, // TM66 Payback
             {394, 1000}, // TM67 Retaliate
-            {395, 9000}, // TM68 Giga Impact
+            {395, 2000}, // TM68 Giga Impact
             {396, 1000}, // TM69 Rock Polish
             {397, 1000}, // TM70 Flash
             {398, 1000}, // TM71 Stone Edge
