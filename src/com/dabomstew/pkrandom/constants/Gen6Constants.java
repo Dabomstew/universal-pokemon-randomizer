@@ -64,7 +64,7 @@ public class Gen6Constants {
             bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14,
             bsDarkGrassHeldItemOffset = 16, bsGrowthCurveOffset = 21, bsAbility1Offset = 24, bsAbility2Offset = 25,
             bsAbility3Offset = 26, bsFormeOffset = 28, bsFormeSpriteOffset = 30, bsFormeCountOffset = 32,
-            bsTMHMCompatOffset = 40, bsMTCompatOffset = 56; // Need to confirm these
+            bsTMHMCompatOffset = 40, bsSpecialMTCompatOffset = 56, bsMTCompatOffset = 64;
 
     private static final int bsSizeXY = 0x40;
     private static final int bsSizeORAS = 0x50;
@@ -95,6 +95,13 @@ public class Gen6Constants {
     public static final String itemPalettesPrefix = "6F7461746500FF920A063F";
     public static final String shopItemsPrefix = "00726F6D3A2F446C6C53746172744D656E752E63726F00";
     public static final String shopItemsPrefixPatched = "00726F6D323A2F446C6C53746172744D656E752E63726F00FF";
+
+    public static final int tutorsOffset = 0x35E;
+    public static final int tutorMoveCount = 60;
+    public static final String tutorsPrefix = "00466F726D617454797065000045646765494400FF";
+    public static final String tutorsPrefixPatched = "00466F726D61745479706500004564676549440000633A5C7265766973696F6E315F73616E676F5C73616E676F5F70726F6A6563745C70726F675C7372632F73797374656D2F6D6F74696F6E2F4D6F74696F6E2E6370700000"; // lol
+
+    public static final int[] tutorSize = new int[]{15, 17, 16, 15};
 
     private static final List<Integer> mainGameShopsXY = Arrays.asList(
             10,11,12,13,16,17,20,21,24,25

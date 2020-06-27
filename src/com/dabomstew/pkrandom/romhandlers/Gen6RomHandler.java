@@ -1769,27 +1769,94 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public boolean hasMoveTutors() {
-        return false;
+        return romEntry.romType == Gen6Constants.Type_ORAS;
     }
 
     @Override
     public List<Integer> getMoveTutorMoves() {
-        return new ArrayList<>();
+        List<Integer> mtMoves = new ArrayList<>();
+
+        int mtOffset = find(code,Gen6Constants.tutorsPrefix);
+        if (mtOffset > 0) {
+            mtOffset += Gen6Constants.tutorsPrefix.length() / 2;
+            int val = 0;
+            while (val != 0xFFFF) {
+                val = FileFunctions.read2ByteInt(code,mtOffset);
+                mtOffset += 2;
+                if (val == 0x26E || val == 0xFFFF) continue;
+                mtMoves.add(val);
+            }
+        }
+
+        return mtMoves;
     }
 
     @Override
     public void setMoveTutorMoves(List<Integer> moves) {
-        // do nothing for now
+
+        int mtOffset = find(code,Gen6Constants.shopItemsPrefix);
+        if (mtOffset > 0) {
+            mtOffset += Gen6Constants.shopItemsPrefix.length() / 2;
+            mtOffset += Gen6Constants.tutorsOffset;
+            for (int i = 0; i < Gen6Constants.tutorMoveCount; i++) {
+                FileFunctions.write2ByteInt(code,mtOffset + i*8, moves.get(i));
+            }
+        }
+
+        mtOffset = find(code,Gen6Constants.tutorsPrefix);
+        if (mtOffset > 0) {
+            mtOffset += Gen6Constants.tutorsPrefix.length() / 2;
+            for (int move: moves) {
+                int val = FileFunctions.read2ByteInt(code,mtOffset);
+                if (val == 0x26E) mtOffset += 2;
+                FileFunctions.write2ByteInt(code,mtOffset,move);
+                mtOffset += 2;
+            }
+        }
     }
 
     @Override
     public Map<Pokemon, boolean[]> getMoveTutorCompatibility() {
-        return new TreeMap<>();
+        Map<Pokemon, boolean[]> compat = new TreeMap<>();
+        int[] sizes = Gen6Constants.tutorSize;
+        int formeCount = Gen6Constants.getFormeCount(romEntry.romType);
+        for (int i = 1; i <= Gen6Constants.pokemonCount + formeCount; i++) {
+            byte[] data;
+            data = pokeGarc.files.get(i).get(0);
+            Pokemon pkmn = pokes[i];
+            boolean[] flags = new boolean[Arrays.stream(sizes).sum() + 1];
+            int offset = 0;
+            for (int mt = 0; mt < 4; mt++) {
+                for (int j = 0; j < 4; j++) {
+                    readByteIntoFlags(data, flags, offset + j * 8 + 1, Gen6Constants.bsMTCompatOffset + mt * 4 + j);
+                }
+                offset += sizes[mt];
+            }
+            compat.put(pkmn, flags);
+        }
+        return compat;
     }
 
     @Override
     public void setMoveTutorCompatibility(Map<Pokemon, boolean[]> compatData) {
-        // do nothing for now
+        if (!hasMoveTutors()) return;
+        int[] sizes = Gen6Constants.tutorSize;
+        int formeCount = Gen6Constants.getFormeCount(romEntry.romType);
+        for (int i = 1; i <= Gen6Constants.pokemonCount + formeCount; i++) {
+            byte[] data;
+            data = pokeGarc.files.get(i).get(0);
+            Pokemon pkmn = pokes[i];
+            boolean[] flags = compatData.get(pkmn);
+            int offset = 0;
+            for (int mt = 0; mt < 4; mt++) {
+                boolean[] mtflags = new boolean[sizes[mt] + 1];
+                System.arraycopy(flags, offset + 1, mtflags, 1, sizes[mt]);
+                for (int j = 0; j < 4; j++) {
+                    data[Gen6Constants.bsMTCompatOffset + mt * 4 + j] = getByteFromFlags(mtflags, j * 8 + 1);
+                }
+                offset += sizes[mt];
+            }
+        }
     }
 
     @Override
