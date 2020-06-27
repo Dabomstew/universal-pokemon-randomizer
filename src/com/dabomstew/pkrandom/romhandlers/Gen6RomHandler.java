@@ -769,7 +769,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 displayCRO[displayOffset+displayIndex*0x54+2] = (byte)newStatic.forme;
                 if (displayIndex < 3) {
                     starterText.set(starterTextIndices[displayIndex],
-                            "The " + starter.primaryType.camelCase() + "-type Pokémon\n[VAR PKNAME(0000)]");
+                            "[VAR PKNAME(0000)]");
                 }
                 displayIndex++;
             }
