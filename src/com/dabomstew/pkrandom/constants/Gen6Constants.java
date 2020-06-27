@@ -1,10 +1,13 @@
 package com.dabomstew.pkrandom.constants;
 
+import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Gen6Constants {
 
@@ -83,7 +86,26 @@ public class Gen6Constants {
             rockSmashOffsetORAS = 10, diveOffsetORAS = 28;
     private static final int tmBlockTwoStartingOffsetXY = 97, tmBlockTwoStartingOffsetORAS = 98,
             hmCountXY = 5, hmCountORAS = 7;
+    public static final int hiddenItemCountORAS = 170;
+    public static final String hiddenItemsPrefixORAS = "A100A200A300A400A5001400010053004A0084000900";
     public static final String itemPalettesPrefix = "6F7461746500FF920A063F";
+
+    private static final List<Integer> requiredFieldTMsXY = Arrays.asList(
+            1, 9, 40, 19, 65, 73, 69, 74, 81, 57, 61, 97, 95, 71, 79, 30, 31, 36, 53, 29, 22, 3, 2, 80, 26);
+
+    private static final List<Integer> requiredFieldTMsORAS = Arrays.asList(
+            37, 32, 62, 11, 86, 29, 59, 43, 53, 69, 6, 2, 13, 18, 22, 61, 30, 97, 7, 90, 26, 55, 34, 35, 64, 65, 66,
+            74, 79, 80, 81, 84, 89, 91, 93, 95);
+
+    public static final List<Integer> fieldMoves = Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 230, 291);
+
+    public static List<Integer> getRequiredFieldTMs(int romType) {
+        if (romType == Type_XY) {
+            return requiredFieldTMsXY;
+        } else {
+            return requiredFieldTMsORAS;
+        }
+    }
 
     public static int getFormeCount(int romType) {
         if (romType == Type_XY) {
@@ -452,6 +474,93 @@ public class Gen6Constants {
         Map<Integer,String> m = new HashMap<>();
         m.put(0,"");
         return m;
+    }
+
+    public static ItemList allowedItemsXY, allowedItemsORAS, nonBadItems;
+    public static List<Integer> regularShopItems, opShopItems;
+
+    static {
+        setupAllowedItems();
+    }
+
+    private static void setupAllowedItems() {
+        allowedItemsXY = new ItemList(717);
+        // Key items + version exclusives
+        allowedItemsXY.banRange(428, 76);
+        allowedItemsXY.banRange(505,32);
+        allowedItemsXY.banRange(621, 18);
+        allowedItemsXY.banSingles(574, 578, 579, 616, 617);
+        // Unknown blank items or version exclusives
+        allowedItemsXY.banRange(113, 3);
+        allowedItemsXY.banRange(120, 14);
+        // TMs & HMs - tms cant be held in gen5
+        allowedItemsXY.tmRange(328, 92);
+        allowedItemsXY.tmRange(618, 3);
+        allowedItemsXY.banRange(328, 100);
+        allowedItemsXY.banRange(618, 3);
+        // Battle Launcher exclusives
+        allowedItemsXY.banRange(592, 24);
+
+        // Key items (Gen 6)
+        allowedItemsXY.banRange(641,3);
+        allowedItemsXY.banSingles(651, 689);
+        allowedItemsXY.banRange(695,4);
+        allowedItemsXY.banRange(700,4);
+        allowedItemsXY.tmRange(705,3);
+        allowedItemsXY.tmRange(712,3);
+        allowedItemsXY.tmRange(716,2);
+
+        // TMs (Gen 6)
+        allowedItemsXY.tmRange(690,5);
+        allowedItemsXY.banRange(690,5);
+
+        allowedItemsORAS = allowedItemsXY.copy(775);
+        // Key items and an HM
+        allowedItemsORAS.banRange(718,33);
+        allowedItemsORAS.banRange(765,2);
+        allowedItemsORAS.banRange(771,5);
+
+        // non-bad items
+        // ban specific pokemon hold items, berries, apricorns, mail
+        nonBadItems = allowedItemsXY.copy();
+
+        nonBadItems.banSingles(0x6F, 0x70, 0xE1, 0xEC, 0x9B, 0x112, 0x2BB, 0x2C0);
+        nonBadItems.banRange(0x5F, 4); // mulch
+        nonBadItems.banRange(0x87, 2); // orbs
+        nonBadItems.banRange(0x89, 12); // mails
+        nonBadItems.banRange(0x9F, 25); // berries without useful battle effects
+        nonBadItems.banRange(0x100, 4); // pokemon specific
+        nonBadItems.banRange(0x104, 5); // contest scarves
+        nonBadItems.banRange(0x28C,4); // more mulch
+
+        regularShopItems = new ArrayList<>();
+
+        regularShopItems.addAll(IntStream.rangeClosed(2,4).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(0x11,0x1D).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(0x4C,0x4F).boxed().collect(Collectors.toList()));
+
+        opShopItems = new ArrayList<>();
+
+        // "Money items" etc
+        opShopItems.add(0x2A);
+        opShopItems.add(0x2B);
+        opShopItems.add(0x32);
+        opShopItems.add(0x36);
+        opShopItems.addAll(IntStream.rangeClosed(0x41,0x47).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(0x56,0x5C).boxed().collect(Collectors.toList()));
+        opShopItems.add(0x6A);
+        opShopItems.addAll(IntStream.rangeClosed(0xCE,0xD4).boxed().collect(Collectors.toList()));
+        opShopItems.add(0xE7);
+        opShopItems.add(0x23B);
+        opShopItems.addAll(IntStream.rangeClosed(0x244,0x24F).boxed().collect(Collectors.toList()));
+    }
+
+    public static ItemList getAllowedItems(int romType) {
+        if (romType == Type_XY) {
+            return allowedItemsXY;
+        } else {
+            return allowedItemsORAS;
+        }
     }
 
     private static Map<Integer,List<Integer>> setupSpeciesToMegaStone(int romType) {

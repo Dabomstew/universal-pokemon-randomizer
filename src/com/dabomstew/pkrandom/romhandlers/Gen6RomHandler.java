@@ -29,6 +29,7 @@ import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen6Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
+import com.dabomstew.pkrandom.ctr.AMX;
 import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.Mini;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -2002,22 +2003,22 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public ItemList getAllowedItems() {
-        return null;
+        return Gen6Constants.getAllowedItems(romEntry.romType);
     }
 
     @Override
     public ItemList getNonBadItems() {
-        return null;
+        return Gen6Constants.nonBadItems;
     }
 
     @Override
     public List<Integer> getRegularShopItems() {
-        return null;
+        return Gen6Constants.regularShopItems;
     }
 
     @Override
     public List<Integer> getOPShopItems() {
-        return null;
+        return Gen6Constants.opShopItems;
     }
 
     @Override
@@ -2035,29 +2036,184 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         return abilityNames.get(number);
     }
 
+    private int tmFromIndex(int index) {
+
+        if (index >= Gen6Constants.tmBlockOneOffset
+                && index < Gen6Constants.tmBlockOneOffset + Gen6Constants.tmBlockOneCount) {
+            return index - (Gen6Constants.tmBlockOneOffset - 1);
+        } else if (index >= Gen6Constants.tmBlockTwoOffset
+                && index < Gen6Constants.tmBlockTwoOffset + Gen6Constants.tmBlockTwoCount) {
+            return (index + Gen6Constants.tmBlockOneCount) - (Gen6Constants.tmBlockTwoOffset - 1);
+        } else {
+            return (index + Gen6Constants.tmBlockOneCount + Gen6Constants.tmBlockTwoCount) - (Gen6Constants.tmBlockThreeOffset - 1);
+        }
+    }
+
+    private int indexFromTM(int tm) {
+        if (tm >= 1 && tm <= Gen6Constants.tmBlockOneCount) {
+            return tm + (Gen6Constants.tmBlockOneOffset - 1);
+        } else if (tm > Gen6Constants.tmBlockOneCount && tm <= Gen6Constants.tmBlockOneCount + Gen6Constants.tmBlockTwoCount) {
+            return tm + (Gen6Constants.tmBlockTwoOffset - 1 - Gen6Constants.tmBlockOneCount);
+        } else {
+            return tm + (Gen6Constants.tmBlockThreeOffset - 1 - (Gen6Constants.tmBlockOneCount + Gen6Constants.tmBlockTwoCount));
+        }
+    }
+
     @Override
     public List<Integer> getCurrentFieldTMs() {
-        return new ArrayList<>();
+        List<Integer> fieldItems = this.getFieldItems();
+        List<Integer> fieldTMs = new ArrayList<>();
+
+        ItemList allowedItems = Gen6Constants.getAllowedItems(romEntry.romType);
+        for (int item : fieldItems) {
+            if (allowedItems.isTM(item)) {
+                fieldTMs.add(tmFromIndex(item));
+            }
+        }
+
+        return fieldTMs;
     }
 
     @Override
     public void setFieldTMs(List<Integer> fieldTMs) {
-        // do nothing for now
+        List<Integer> fieldItems = this.getFieldItems();
+        int fiLength = fieldItems.size();
+        Iterator<Integer> iterTMs = fieldTMs.iterator();
+
+        ItemList allowedItems = Gen6Constants.getAllowedItems(romEntry.romType);
+        for (int i = 0; i < fiLength; i++) {
+            int oldItem = fieldItems.get(i);
+            if (allowedItems.isTM(oldItem)) {
+                int newItem = indexFromTM(iterTMs.next());
+                fieldItems.set(i, newItem);
+            }
+        }
+
+        this.setFieldItems(fieldItems);
     }
 
     @Override
     public List<Integer> getRegularFieldItems() {
-        return new ArrayList<>();
+        List<Integer> fieldItems = this.getFieldItems();
+        List<Integer> fieldRegItems = new ArrayList<>();
+
+        ItemList allowedItems = Gen6Constants.getAllowedItems(romEntry.romType);
+        for (int item : fieldItems) {
+            if (allowedItems.isAllowed(item) && !(allowedItems.isTM(item))) {
+                fieldRegItems.add(item);
+            }
+        }
+
+        return fieldRegItems;
     }
 
     @Override
     public void setRegularFieldItems(List<Integer> items) {
-        // do nothing for now
+        List<Integer> fieldItems = this.getFieldItems();
+        int fiLength = fieldItems.size();
+        Iterator<Integer> iterNewItems = items.iterator();
+
+        ItemList allowedItems = Gen6Constants.getAllowedItems(romEntry.romType);
+        for (int i = 0; i < fiLength; i++) {
+            int oldItem = fieldItems.get(i);
+            if (!(allowedItems.isTM(oldItem)) && allowedItems.isAllowed(oldItem)) {
+                int newItem = iterNewItems.next();
+                fieldItems.set(i, newItem);
+            }
+        }
+
+        this.setFieldItems(fieldItems);
     }
 
     @Override
     public List<Integer> getRequiredFieldTMs() {
-        return new ArrayList<>();
+        return Gen6Constants.getRequiredFieldTMs(romEntry.romType);
+    }
+
+    public List<Integer> getFieldItems() {
+        List<Integer> fieldItems = new ArrayList<>();
+        try {
+            // normal items
+            int normalItemsFile = romEntry.getInt("FieldItemsScriptNumber");
+            int normalItemsOffset = romEntry.getInt("FieldItemsOffset");
+            GARCArchive scriptGarc = readGARC(romEntry.getString("Scripts"),true);
+            AMX normalItemAMX = new AMX(scriptGarc.files.get(normalItemsFile).get(0));
+            byte[] data = normalItemAMX.decData;
+            for (int i = normalItemsOffset; i < data.length; i += 12) {
+                int item = FileFunctions.read2ByteInt(data,i);
+                fieldItems.add(item);
+            }
+
+            // hidden items - separate handling for XY and ORAS
+            if (romEntry.romType == Gen6Constants.Type_XY) {
+                int hiddenItemsFile = romEntry.getInt("HiddenItemsScriptNumber");
+                int hiddenItemsOffset = romEntry.getInt("HiddenItemsOffset");
+                AMX hiddenItemAMX = new AMX(scriptGarc.files.get(hiddenItemsFile).get(0));
+                data = hiddenItemAMX.decData;
+                for (int i = hiddenItemsOffset; i < data.length; i += 12) {
+                    int item = FileFunctions.read2ByteInt(data,i);
+                    fieldItems.add(item);
+                }
+            } else {
+                String hiddenItemsPrefix = Gen6Constants.hiddenItemsPrefixORAS;
+                int offsHidden = find(code,hiddenItemsPrefix);
+                if (offsHidden > 0) {
+                    offsHidden += hiddenItemsPrefix.length() / 2;
+                    for (int i = 0; i < Gen6Constants.hiddenItemCountORAS; i++) {
+                        int item = FileFunctions.read2ByteInt(code, offsHidden + (i * 0xE) + 2);
+                        fieldItems.add(item);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+
+        return fieldItems;
+    }
+
+    public void setFieldItems(List<Integer> items) {
+        try {
+            Iterator<Integer> iterItems = items.iterator();
+            // normal items
+            int normalItemsFile = romEntry.getInt("FieldItemsScriptNumber");
+            int normalItemsOffset = romEntry.getInt("FieldItemsOffset");
+            GARCArchive scriptGarc = readGARC(romEntry.getString("Scripts"),true);
+            AMX normalItemAMX = new AMX(scriptGarc.files.get(normalItemsFile).get(0));
+            byte[] data = normalItemAMX.decData;
+            for (int i = normalItemsOffset; i < data.length; i += 12) {
+                int item = iterItems.next();
+                FileFunctions.write2ByteInt(data,i,item);
+            }
+            scriptGarc.setFile(normalItemsFile,normalItemAMX.getBytes());
+
+            // hidden items - separate handling for XY and ORAS
+            if (romEntry.romType == Gen6Constants.Type_XY) {
+                int hiddenItemsFile = romEntry.getInt("HiddenItemsScriptNumber");
+                int hiddenItemsOffset = romEntry.getInt("HiddenItemsOffset");
+                AMX hiddenItemAMX = new AMX(scriptGarc.files.get(hiddenItemsFile).get(0));
+                data = hiddenItemAMX.decData;
+                for (int i = hiddenItemsOffset; i < data.length; i += 12) {
+                    int item = iterItems.next();
+                    FileFunctions.write2ByteInt(data,i,item);
+                }
+                scriptGarc.setFile(hiddenItemsFile,hiddenItemAMX.getBytes());
+            } else {
+                String hiddenItemsPrefix = Gen6Constants.hiddenItemsPrefixORAS;
+                int offsHidden = find(code,hiddenItemsPrefix);
+                if (offsHidden > 0) {
+                    offsHidden += hiddenItemsPrefix.length() / 2;
+                    for (int i = 0; i < Gen6Constants.hiddenItemCountORAS; i++) {
+                        int item = iterItems.next();
+                        FileFunctions.write2ByteInt(code,offsHidden + (i * 0xE) + 2, item);
+                    }
+                }
+            }
+
+            writeGARC(romEntry.getString("Scripts"),scriptGarc);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     @Override
@@ -2092,7 +2248,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getFieldMoves() {
-        return new ArrayList<>();
+        return Gen6Constants.fieldMoves;
     }
 
     @Override

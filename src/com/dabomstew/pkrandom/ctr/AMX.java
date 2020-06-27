@@ -101,7 +101,7 @@ public class AMX {
 
     public byte[] getBytes() {
 
-        ByteBuffer bbuf = ByteBuffer.allocate(length);
+        ByteBuffer bbuf = ByteBuffer.allocate(length*2);
 
         bbuf.order(ByteOrder.LITTLE_ENDIAN);
 
@@ -115,8 +115,10 @@ public class AMX {
         bbuf.putInt(allocatedMemory);
         bbuf.put(extraData);
         bbuf.put(compressScript(decData));
+        bbuf.flip();
+        bbuf.putInt(bbuf.limit());
 
-        return bbuf.array();
+        return Arrays.copyOfRange(bbuf.array(),0,bbuf.limit());
     }
 
     private byte[] compressScript(byte[] data) {

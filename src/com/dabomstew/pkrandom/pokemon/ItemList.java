@@ -72,4 +72,11 @@ public class ItemList {
         return other;
     }
 
+    public ItemList copy(int newMax) {
+        ItemList other = new ItemList(newMax);
+        System.arraycopy(items, 0, other.items, 0, items.length);
+        System.arraycopy(tms, 0, other.tms, 0, tms.length);
+        return other;
+    }
+
 }
