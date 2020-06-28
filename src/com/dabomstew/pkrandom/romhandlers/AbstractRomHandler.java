@@ -2458,6 +2458,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (oldPK.number == 487 && ptGiratina) {
                     newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
                     pokemonLeft.remove(newPK);
+                    newStatic.pkmn = newPK;
                 } else if (oldBST >= 600 && limit600) {
                     if (swapMegaEvos && old.canMegaEvolve()) {
                         newPK = getMegaEvoPokemon(mainPokemonList, pokemonLeft, newStatic);
@@ -2551,6 +2552,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (old.pkmn.number == 487 && ptGiratina) {
                     newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
                     pokemonLeft.remove(newPK);
+                    newStatic.pkmn = newPK;
                 } else {
                     if (swapMegaEvos && old.canMegaEvolve()) {
                         newPK = getMegaEvoPokemon(mainPokemonList, pokemonLeft, newStatic);

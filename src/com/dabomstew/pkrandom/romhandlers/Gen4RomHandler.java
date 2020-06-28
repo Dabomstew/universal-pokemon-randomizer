@@ -457,6 +457,19 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+        try {
+            msgNarc = readNARC(romEntry.getString("Text"));
+            for (int i = 0; i < msgNarc.files.size(); i++) {
+                List<String> ts = getStrings(i);
+                for (String t: ts) {
+                    if (t.contains("Would you be willing")) {
+                        System.out.println("gsdaofja");
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void saveMoves() {
@@ -2775,9 +2788,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                         IngameTrade oldTrade = oldTrades.get(trade);
                         IngameTrade newTrade = trades.get(trade);
                         Map<String, String> replacements = new TreeMap<>();
-                        replacements.put(oldTrade.givenPokemon.name, newTrade.givenPokemon.name);
+                        replacements.put(oldTrade.givenPokemon.name.toUpperCase(), newTrade.givenPokemon.name);
                         if (oldTrade.requestedPokemon != newTrade.requestedPokemon) {
-                            replacements.put(oldTrade.requestedPokemon.name, newTrade.requestedPokemon.name);
+                            replacements.put(oldTrade.requestedPokemon.name.toUpperCase(), newTrade.requestedPokemon.name);
                         }
                         replaceAllStringsInEntry(textOffsets[trade], replacements, Gen4Constants.textCharsPerLine);
                         // hgss override for one set of strings that appears 2x
