@@ -411,7 +411,7 @@ public class NCCH {
                 baseRom.seek(metadata.file.offset);
                 baseRom.readFully(fileData);
             }
-            long currentDataOffset = level3Offset + fileDataOffset + metadata.fileDataOffset;
+            long currentDataOffset = newLevel3Offset + fileDataOffset + metadata.fileDataOffset;
             fNew.seek(currentDataOffset);
             fNew.write(fileData);
         }
