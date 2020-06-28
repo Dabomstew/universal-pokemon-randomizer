@@ -795,7 +795,20 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         List<Encounter> encs = new ArrayList<>();
         for (int i = 0; i < number; i++) {
             Encounter enc1 = new Encounter();
-            enc1.pokemon = pokes[((data[offset + i * 4] & 0xFF) + ((data[offset + 1 + i * 4] & 0x03) << 8))];
+            int species = readWord(data, offset + i * 4) & 0x7FF;
+            int forme = readWord(data, offset + i * 4) >> 11;
+            Pokemon baseForme = pokes[species];
+            if (forme <= baseForme.cosmeticForms || forme == 30 || forme == 31) {
+                enc1.pokemon = pokes[species];
+            } else {
+                int speciesWithForme = Gen5Constants.getAbsolutePokeNumByBaseForme(species,forme);
+                if (speciesWithForme == 0) {
+                    enc1.pokemon = pokes[species]; // Failsafe
+                } else {
+                    enc1.pokemon = pokes[speciesWithForme];
+                }
+            }
+            enc1.formeNumber = forme;
             enc1.level = data[offset + 2 + i * 4] & 0xFF;
             enc1.maxLevel = data[offset + 3 + i * 4] & 0xFF;
             encs.add(enc1);
@@ -1014,7 +1027,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 EncounterSet area = encounters.next();
                 for (int j = 0; j < amounts[i]; j++) {
                     Encounter enc = area.encounters.get(j);
-                    writeWord(entry, startOffset + offset + j * 4, enc.pokemon.number);
+                    if (enc.pokemon.formeNumber > 0) { // Failsafe if we need to write encounters without modifying species
+                        if (enc.pokemon.baseForme != null) {
+                            enc.pokemon = enc.pokemon.baseForme;
+                        }
+                    }
+                    int speciesAndFormeData = (enc.formeNumber << 11) + enc.pokemon.number;
+                    writeWord(entry, startOffset + offset + j * 4, speciesAndFormeData);
                     entry[startOffset + offset + j * 4 + 2] = (byte) enc.level;
                     entry[startOffset + offset + j * 4 + 3] = (byte) enc.maxLevel;
                 }
