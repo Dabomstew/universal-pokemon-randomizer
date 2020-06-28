@@ -72,6 +72,7 @@ public class Settings {
 
     private BaseStatisticsMod baseStatisticsMod = BaseStatisticsMod.UNCHANGED;
     private boolean baseStatsFollowEvolutions;
+    private boolean baseStatsFollowMegaEvolutions;
     private boolean updateBaseStats;
     private boolean standardizeEXPCurves;
     private ExpCurveMod expCurveMod = ExpCurveMod.LEGENDARIES;
@@ -83,6 +84,7 @@ public class Settings {
     private AbilitiesMod abilitiesMod = AbilitiesMod.UNCHANGED;
     private boolean allowWonderGuard = true;
     private boolean abilitiesFollowEvolutions;
+    private boolean abilitiesFollowMegaEvolutions;
     private boolean banTrappingAbilities;
     private boolean banNegativeAbilities;
     private boolean banBadAbilities;
@@ -92,6 +94,7 @@ public class Settings {
     }
 
     private StartersMod startersMod = StartersMod.UNCHANGED;
+    private boolean allowStarterAltFormes;
 
     // index in the rom's list of pokemon
     // offset from the dropdown index from RandomizerGUI by 1
@@ -106,6 +109,8 @@ public class Settings {
     }
 
     private TypesMod typesMod = TypesMod.UNCHANGED;
+
+    private boolean typesFollowMegaEvolutions;
 
     // Evolutions
     public enum EvolutionsMod {
@@ -158,6 +163,7 @@ public class Settings {
     private boolean trainersLevelModified;
     private int trainersLevelModifier = 0; // -50 ~ 50
     private boolean allowTrainerAlternateFormes;
+    private boolean swapTrainerMegaEvos;
 
     public enum WildPokemonMod {
         UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING
@@ -178,12 +184,16 @@ public class Settings {
     private boolean balanceShakingGrass;
     private boolean wildLevelsModified;
     private int wildLevelModifier = 0;
+    private boolean allowWildAltFormes;
 
     public enum StaticPokemonMod {
         UNCHANGED, RANDOM_MATCHING, COMPLETELY_RANDOM, SIMILAR_STRENGTH
     }
 
     private StaticPokemonMod staticPokemonMod = StaticPokemonMod.UNCHANGED;
+
+    private boolean allowStaticAltFormes;
+    private boolean swapStaticMegaEvos;
 
     public enum TMsMod {
         UNCHANGED, RANDOM
@@ -945,6 +955,14 @@ public class Settings {
         this.baseStatsFollowEvolutions = baseStatsFollowEvolutions;
     }
 
+    public boolean isBaseStatsFollowMegaEvolutions() {
+        return baseStatsFollowMegaEvolutions;
+    }
+
+    public void setBaseStatsFollowMegaEvolutions(boolean baseStatsFollowMegaEvolutions) {
+        this.baseStatsFollowMegaEvolutions = baseStatsFollowMegaEvolutions;
+    }
+
     public boolean isStandardizeEXPCurves() {
         return standardizeEXPCurves;
     }
@@ -999,6 +1017,14 @@ public class Settings {
 
     public void setAbilitiesFollowEvolutions(boolean abilitiesFollowEvolutions) {
         this.abilitiesFollowEvolutions = abilitiesFollowEvolutions;
+    }
+
+    public boolean isAbilitiesFollowMegaEvolutions() {
+        return abilitiesFollowMegaEvolutions;
+    }
+
+    public void setAbilitiesFollowMegaEvolutions(boolean abilitiesFollowMegaEvolutions) {
+        this.abilitiesFollowMegaEvolutions = abilitiesFollowMegaEvolutions;
     }
 
     public boolean isBanTrappingAbilities() {
@@ -1061,21 +1087,14 @@ public class Settings {
         this.banBadRandomStarterHeldItems = banBadRandomStarterHeldItems;
     }
 
-    public boolean isLimitMusketeers() {
-        return limitMusketeers;
+    public boolean isAllowStarterAltFormes() {
+        return allowStarterAltFormes;
     }
 
-    public void setLimitMusketeers(boolean limitMusketeers) {
-        this.limitMusketeers = limitMusketeers;
+    public void setAllowStarterAltFormes(boolean allowStarterAltFormes) {
+        this.allowStarterAltFormes = allowStarterAltFormes;
     }
 
-    public boolean isLimit600() {
-        return limit600;
-    }
-
-    public void setLimit600(boolean limit600) {
-        this.limit600 = limit600;
-    }
     
     public TypesMod getTypesMod() {
         return typesMod;
@@ -1087,6 +1106,14 @@ public class Settings {
 
     private void setTypesMod(TypesMod typesMod) {
         this.typesMod = typesMod;
+    }
+
+    public boolean isTypesFollowMegaEvolutions() {
+        return typesFollowMegaEvolutions;
+    }
+
+    public void setTypesFollowMegaEvolutions(boolean typesFollowMegaEvolutions) {
+        this.typesFollowMegaEvolutions = typesFollowMegaEvolutions;
     }
 
     public EvolutionsMod getEvolutionsMod() {
@@ -1360,6 +1387,14 @@ public class Settings {
         this.allowTrainerAlternateFormes = allowTrainerAlternateFormes;
     }
 
+    public boolean isSwapTrainerMegaEvos() {
+        return swapTrainerMegaEvos;
+    }
+
+    public void setSwapTrainerMegaEvos(boolean swapTrainerMegaEvos) {
+        this.swapTrainerMegaEvos = swapTrainerMegaEvos;
+    }
+
     public WildPokemonMod getWildPokemonMod() {
         return wildPokemonMod;
     }
@@ -1456,6 +1491,14 @@ public class Settings {
         this.wildLevelModifier = wildLevelModifier;
     }
 
+    public boolean isAllowWildAltFormes() {
+        return allowWildAltFormes;
+    }
+
+    public void setAllowWildAltFormes(boolean allowWildAltFormes) {
+        this.allowWildAltFormes = allowWildAltFormes;
+    }
+
     public StaticPokemonMod getStaticPokemonMod() {
         return staticPokemonMod;
     }
@@ -1466,6 +1509,38 @@ public class Settings {
 
     private void setStaticPokemonMod(StaticPokemonMod staticPokemonMod) {
         this.staticPokemonMod = staticPokemonMod;
+    }
+
+    public boolean isLimitMusketeers() {
+        return limitMusketeers;
+    }
+
+    public void setLimitMusketeers(boolean limitMusketeers) {
+        this.limitMusketeers = limitMusketeers;
+    }
+
+    public boolean isLimit600() {
+        return limit600;
+    }
+
+    public void setLimit600(boolean limit600) {
+        this.limit600 = limit600;
+    }
+
+    public boolean isAllowStaticAltFormes() {
+        return allowStaticAltFormes;
+    }
+
+    public void setAllowStaticAltFormes(boolean allowStaticAltFormes) {
+        this.allowStaticAltFormes = allowStaticAltFormes;
+    }
+
+    public boolean isSwapStaticMegaEvos() {
+        return swapStaticMegaEvos;
+    }
+
+    public void setSwapStaticMegaEvos(boolean swapStaticMegaEvos) {
+        this.swapStaticMegaEvos = swapStaticMegaEvos;
     }
 
     public TMsMod getTmsMod() {
