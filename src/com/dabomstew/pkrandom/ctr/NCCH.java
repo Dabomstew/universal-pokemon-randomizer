@@ -28,6 +28,7 @@ import com.sun.org.apache.xml.internal.security.algorithms.implementations.Signa
 import cuecompressors.BLZCoder;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -46,6 +47,7 @@ public class NCCH {
     private long exefsOffset, romfsOffset, fileDataOffset;
     private ExefsFileHeader codeFileHeader;
     private List<ExefsFileHeader> extraExefsFiles;
+    private List<FileMetadata> fileMetadataList;
     private Map<String, RomfsFile> romfsFiles;
     private boolean romOpen;
     private String tmpFolder;
@@ -170,6 +172,7 @@ public class NCCH {
         byte[] fileMetadataBlock = new byte[fileMetadataLength];
         baseRom.seek(level3Offset + fileMetadataOffset);
         baseRom.readFully(fileMetadataBlock);
+        fileMetadataList = new ArrayList<>();
         romfsFiles = new TreeMap<>();
         visitDirectory(0, "", directoryMetadataBlock, fileMetadataBlock);
     }
@@ -199,6 +202,8 @@ public class NCCH {
         file.offset = fileDataOffset + metadata.fileDataOffset;
         file.size = (int) metadata.fileDataLength;  // no Pokemon game has a file larger than unsigned int max
         file.fullPath = currentPath;
+        metadata.file = file;
+        fileMetadataList.add(metadata);
         romfsFiles.put(currentPath, file);
         if (metadata.siblingFileOffset != metadata_unused) {
             visitFile(metadata.siblingFileOffset, rootPath, fileMetadataBlock);
@@ -249,6 +254,17 @@ public class NCCH {
         fNew.write((int) newExefsOffset / media_unit_size);
         fNew.seek(0x1A4);
         fNew.write((int) newExefsLength / media_unit_size);
+
+        // Then, reconstruct the romfs
+        // TODO: is that 5 * media_unit_size unnecessary? It's what ORAS does
+        long newRomfsOffset = header_and_exheader_size + logoLength + plainLength + newExefsLength + (5 * media_unit_size);
+        long newRomfsLength = rebuildRomfs(fNew, newRomfsOffset);
+        fNew.seek(0x1B0);
+        fNew.write((int) newRomfsOffset / media_unit_size);
+        fNew.seek(0x1B4);
+        fNew.write((int) newRomfsLength / media_unit_size);
+
+        // Lastly, reconstruct the hashes and signatures
     }
 
     private long rebuildExefs(RandomAccessFile fNew, long newExefsOffset) throws IOException, NoSuchAlgorithmException {
@@ -308,6 +324,102 @@ public class NCCH {
         // For retail games, they seem to add a completely empty media unit at the end of the exefs
         long length = 0x200 + fileDataLength + media_unit_size;
         return length;
+    }
+
+    private long rebuildRomfs(RandomAccessFile fNew, long newRomfsOffset) throws IOException, NoSuchAlgorithmException {
+        // Start by copying the romfs header straight from the original ROM. We'll update the
+        // header as we continue to build the romfs
+        byte[] romfsHeaderData = new byte[romfs_header_size];
+        baseRom.seek(romfsOffset);
+        baseRom.readFully(romfsHeaderData);
+        fNew.seek(newRomfsOffset);
+        fNew.write(romfsHeaderData);
+
+        // TODO: don't do this. For now, just write out the master hash
+        int masterHashSize = FileFunctions.readFullIntLittleEndian(romfsHeaderData, 0x08);
+        byte[] masterHash = new byte[masterHashSize];
+        baseRom.seek(romfsOffset + 0x60);
+        baseRom.readFully(masterHash);
+        fNew.seek(newRomfsOffset + 0x60);
+        fNew.write(masterHash);
+
+        // Now find the level 3 (file data) offset, since the first thing we need to do is write the
+        // updated file data. We're assuming the master hash does not grow because we're not adding
+        // large amounts of data to the romfs
+        int level3HashBlockSize = 1 << FileFunctions.readFullIntLittleEndian(romfsHeaderData, 0x4C);
+        long level3Offset = romfsOffset + alignLong(0x60 + masterHashSize, level3HashBlockSize);
+        long newLevel3Offset = newRomfsOffset + alignLong(0x60 + masterHashSize, level3HashBlockSize);
+
+        // Copy the level 3 header straight from the original ROM. Since we're not adding or
+        // removing any files, the File/Directory tables should have the same offsets and lengths
+        byte[] level3HeaderData = new byte[level3_header_size];
+        baseRom.seek(level3Offset);
+        baseRom.readFully(level3HeaderData);
+        fNew.seek(newLevel3Offset);
+        fNew.write(level3HeaderData);
+
+        // Write out both hash tables and the directory metadata table. Since we're not adding or removing
+        // any files/directories, we can just use what's in the base ROM for this.
+        int directoryHashTableOffset = FileFunctions.readFullIntLittleEndian(level3HeaderData, 0x04);
+        int directoryHashTableLength = FileFunctions.readFullIntLittleEndian(level3HeaderData, 0x08);
+        int directoryMetadataTableOffset = FileFunctions.readFullIntLittleEndian(level3HeaderData, 0x0C);
+        int directoryMetadataTableLength = FileFunctions.readFullIntLittleEndian(level3HeaderData, 0x10);
+        int fileHashTableOffset = FileFunctions.readFullIntLittleEndian(level3HeaderData, 0x14);
+        int fileHashTableLength = FileFunctions.readFullIntLittleEndian(level3HeaderData, 0x18);
+        int fileDataOffset = FileFunctions.readFullIntLittleEndian(level3HeaderData, 0x24);
+        byte[] directoryHashTable = new byte[directoryHashTableLength];
+        baseRom.seek(level3Offset + directoryHashTableOffset);
+        baseRom.readFully(directoryHashTable);
+        fNew.seek(newLevel3Offset + directoryHashTableOffset);
+        fNew.write(directoryHashTable);
+        byte[] directoryMetadataTable = new byte[directoryMetadataTableLength];
+        baseRom.seek(level3Offset + directoryMetadataTableOffset);
+        baseRom.readFully(directoryMetadataTable);
+        fNew.seek(newLevel3Offset + directoryMetadataTableOffset);
+        fNew.write(directoryMetadataTable);
+        byte[] fileHashTable = new byte[fileHashTableLength];
+        baseRom.seek(level3Offset + fileHashTableOffset);
+        baseRom.readFully(fileHashTable);
+        fNew.seek(newLevel3Offset + fileHashTableOffset);
+        fNew.write(fileHashTable);
+
+        // Now reconstruct the file metadata table. It may need to be changed if any file grew or shrunk
+        int fileMetadataTableOffset = FileFunctions.readFullIntLittleEndian(level3HeaderData, 0x1C);
+        int fileMetadataTableLength = FileFunctions.readFullIntLittleEndian(level3HeaderData, 0x20);
+        byte[] newFileMetadataTable = updateFileMetadataTable(fileMetadataTableLength);
+        fNew.seek(newLevel3Offset + fileMetadataTableOffset);
+        fNew.write(newFileMetadataTable);
+
+        return fNew.getFilePointer() - newRomfsOffset;
+    }
+
+    private byte[] updateFileMetadataTable(int fileMetadataTableLength) {
+        fileMetadataList.sort((FileMetadata f1, FileMetadata f2) -> (int) (f1.fileDataOffset - f2.fileDataOffset));
+        byte[] fileMetadataTable = new byte[fileMetadataTableLength];
+        int currentTableOffset = 0;
+        long currentFileDataOffset = 0;
+        for (int i = 0; i < fileMetadataList.size(); i++) {
+            FileMetadata metadata = fileMetadataList.get(i);
+
+            // TODO: This shouldn't be necessary; you should be able to just do what's
+            // in this if-block all the time. But I'm trying to perfectly match the
+            // retail ROM for now, and the retail ROM has weird dead space between files.
+            // So in the case where the offset in the metadata is larger than the current
+            // offset (due to dead space), just ignore the current offset
+            if (currentFileDataOffset > metadata.fileDataOffset) {
+                metadata.fileDataOffset = currentFileDataOffset;
+            } else {
+                currentFileDataOffset = metadata.fileDataOffset;
+            }
+            if (metadata.file.fileChanged) {
+                metadata.fileDataLength = metadata.file.size;
+            }
+            byte[] metadataBytes = metadata.asBytes();
+            System.arraycopy(metadataBytes, 0, fileMetadataTable, currentTableOffset, metadataBytes.length);
+            currentTableOffset += metadataBytes.length;
+            currentFileDataOffset += metadata.fileDataLength;
+        }
+        return fileMetadataTable;
     }
 
     public void saveAsLayeredFS(String outputPath) throws IOException {
@@ -457,6 +569,11 @@ public class NCCH {
         return writingEnabled;
     }
 
+    public static int alignInt(int num, int alignment) {
+        int mask = ~(alignment - 1);
+        return (num + (alignment - 1)) & mask;
+    }
+
     public static long alignLong(long num, long alignment) {
         long mask = ~(alignment - 1);
         return (num + (alignment - 1)) & mask;
@@ -517,6 +634,7 @@ public class NCCH {
     }
 
     private class FileMetadata {
+        public int offset;
         public int parentDirectoryOffset;
         public int siblingFileOffset;
         public long fileDataOffset;
@@ -524,8 +642,10 @@ public class NCCH {
         public int nextFileInHashBucketOffset;
         public int nameLength;
         public String name;
+        public RomfsFile file; // used only for rebuilding CXI
 
         public FileMetadata(byte[] fileMetadataBlock, int offset) {
+            this.offset = offset;
             parentDirectoryOffset = FileFunctions.readFullIntLittleEndian(fileMetadataBlock, offset);
             siblingFileOffset = FileFunctions.readFullIntLittleEndian(fileMetadataBlock, offset + 0x04);
             fileDataOffset = FileFunctions.readFullLongLittleEndian(fileMetadataBlock, offset + 0x08);
@@ -538,6 +658,25 @@ public class NCCH {
                 System.arraycopy(fileMetadataBlock, offset + 0x20, nameBytes, 0, nameLength);
                 name = new String(nameBytes, StandardCharsets.UTF_16LE).trim();
             }
+        }
+
+        public byte[] asBytes() {
+            int metadataLength = 0x20;
+            if (nameLength != metadata_unused) {
+                metadataLength += alignInt(nameLength, 4);
+            }
+            byte[] output = new byte[metadataLength];
+            FileFunctions.writeFullIntLittleEndian(output, 0x00, this.parentDirectoryOffset);
+            FileFunctions.writeFullIntLittleEndian(output, 0x04, this.siblingFileOffset);
+            FileFunctions.writeFullLongLittleEndian(output, 0x08, this.fileDataOffset);
+            FileFunctions.writeFullLongLittleEndian(output, 0x10, this.fileDataLength);
+            FileFunctions.writeFullIntLittleEndian(output, 0x18, this.nextFileInHashBucketOffset);
+            FileFunctions.writeFullIntLittleEndian(output, 0x1C, this.nameLength);
+            if (!name.equals("")) {
+                byte[] nameBytes = name.getBytes(StandardCharsets.UTF_16LE);
+                System.arraycopy(nameBytes, 0, output, 0x20, nameBytes.length);
+            }
+            return output;
         }
     }
 }

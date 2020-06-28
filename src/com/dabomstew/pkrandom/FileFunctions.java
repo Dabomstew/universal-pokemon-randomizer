@@ -140,6 +140,11 @@ public class FileFunctions {
         System.arraycopy(valueBytes, 0, data, offset, 4);
     }
 
+    public static void writeFullLongLittleEndian(byte[] data, int offset, long value) {
+        byte[] valueBytes = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN).putLong(value).array();
+        System.arraycopy(valueBytes, 0, data, offset, 8);
+    }
+
     public static byte[] readFileFullyIntoBuffer(String filename) throws IOException {
         File fh = new File(filename);
         if (!fh.exists() || !fh.isFile() || !fh.canRead()) {

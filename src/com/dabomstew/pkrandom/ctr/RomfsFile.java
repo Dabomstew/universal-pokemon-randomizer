@@ -87,6 +87,7 @@ public class RomfsFile {
             getContents();
         }
         fileChanged = true;
+        size = data.length;
         if (status == Extracted.TO_FILE) {
             String tmpDir = parent.getTmpFolder();
             FileOutputStream fos = new FileOutputStream(new File(tmpDir + this.extFilename));
