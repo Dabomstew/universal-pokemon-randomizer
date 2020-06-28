@@ -103,6 +103,11 @@ public class Gen6Constants {
 
     public static final int[] tutorSize = new int[]{15, 17, 16, 15};
 
+    private static final String ingameTradesPrefixXY = "BA0A02015E000100BC0A150069000100";
+    private static final String ingameTradesPrefixORAS = "810B7A0097000A00000047006B000A00";
+
+    public static final int ingameTradeSize = 0x24;
+
     private static final List<Integer> mainGameShopsXY = Arrays.asList(
             10,11,12,13,16,17,20,21,24,25
     );
@@ -177,6 +182,14 @@ public class Gen6Constants {
             74, 79, 80, 81, 84, 89, 91, 93, 95);
 
     public static final List<Integer> fieldMoves = Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 230, 291);
+
+    public static String getIngameTradesPrefix(int romType) {
+        if (romType == Type_XY) {
+            return ingameTradesPrefixXY;
+        } else {
+            return ingameTradesPrefixORAS;
+        }
+    }
 
     public static List<Integer> getRequiredFieldTMs(int romType) {
         if (romType == Type_XY) {

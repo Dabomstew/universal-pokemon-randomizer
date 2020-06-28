@@ -3358,12 +3358,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                 // preserve trades for the same pokemon
                 trade.requestedPokemon = given;
             } else if (randomizeRequest) {
-                Pokemon request = this.randomPokemon();
-                while (usedRequests.contains(request) || request == given) {
-                    request = this.randomPokemon();
+                if (trade.requestedPokemon != null) {
+                    Pokemon request = this.randomPokemon();
+                    while (usedRequests.contains(request) || request == given) {
+                        request = this.randomPokemon();
+                    }
+                    usedRequests.add(request);
+                    trade.requestedPokemon = request;
                 }
-                usedRequests.add(request);
-                trade.requestedPokemon = request;
             }
 
             // nickname?

@@ -2311,12 +2311,60 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<IngameTrade> getIngameTrades() {
-        return new ArrayList<>();
+        List<IngameTrade> trades = new ArrayList<>();
+
+        int count = romEntry.getInt("IngameTradeCount");
+        String prefix = Gen6Constants.getIngameTradesPrefix(romEntry.romType);
+        List<String> tradeStrings = getStrings(false, romEntry.getInt("IngameTradesTextOffset"));
+        int textOffset = romEntry.getInt("IngameTradesTextExtraOffset");
+        int offset = find(code,prefix);
+        if (offset > 0) {
+            offset += prefix.length() / 2;
+            for (int i = 0; i < count; i++) {
+                IngameTrade trade = new IngameTrade();
+                trade.nickname = tradeStrings.get(textOffset + i);
+                trade.givenPokemon = pokes[FileFunctions.read2ByteInt(code,offset)];
+                trade.ivs = new int[6];
+                for (int iv = 0; iv < 6; iv++) {
+                    trade.ivs[iv] = code[offset + 5 + iv];
+                }
+                trade.otId = FileFunctions.read2ByteInt(code,offset + 0xE);
+                trade.item = FileFunctions.read2ByteInt(code,offset + 0x10);
+                trade.otName = tradeStrings.get(textOffset + count + i);
+                trade.requestedPokemon = pokes[FileFunctions.read2ByteInt(code,offset + 0x20)];
+                trades.add(trade);
+                offset += Gen6Constants.ingameTradeSize;
+            }
+        }
+        return trades;
     }
 
     @Override
     public void setIngameTrades(List<IngameTrade> trades) {
-        // do nothing for now
+
+        int count = romEntry.getInt("IngameTradeCount");
+        String prefix = Gen6Constants.getIngameTradesPrefix(romEntry.romType);
+        List<String> tradeStrings = getStrings(false, romEntry.getInt("IngameTradesTextOffset"));
+        int textOffset = romEntry.getInt("IngameTradesTextExtraOffset");
+        int offset = find(code,prefix);
+        if (offset > 0) {
+            offset += prefix.length() / 2;
+            for (int i = 0; i < count; i++) {
+                IngameTrade trade = trades.get(i);
+                tradeStrings.set(textOffset + i, trade.nickname);
+                FileFunctions.write2ByteInt(code,offset,trade.givenPokemon.number);
+                for (int iv = 0; iv < 6; iv++) {
+                    code[offset + 5 + iv] = (byte)trade.ivs[iv];
+                }
+                FileFunctions.write2ByteInt(code,offset + 0xE,trade.otId);
+                FileFunctions.write2ByteInt(code,offset + 0x10,trade.item);
+                tradeStrings.set(textOffset + count + i, trade.otName);
+                FileFunctions.write2ByteInt(code,offset + 0x20,
+                        trade.requestedPokemon == null ? 0 : trade.requestedPokemon.number);
+                offset += Gen6Constants.ingameTradeSize;
+            }
+            this.setStrings(false, romEntry.getInt("IngameTradesTextOffset"), tradeStrings);
+        }
     }
 
     @Override

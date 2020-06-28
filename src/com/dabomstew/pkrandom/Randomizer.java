@@ -546,7 +546,9 @@ public class Randomizer {
                 IngameTrade oldT = oldTrades.get(i);
                 IngameTrade newT = newTrades.get(i);
                 log.printf("Trade %-11s -> %-11s the %-11s        ->      %-11s -> %-15s the %s" + NEWLINE,
-                        oldT.requestedPokemon.fullName(), oldT.nickname, oldT.givenPokemon.fullName(), newT.requestedPokemon.fullName(),
+                        oldT.requestedPokemon != null ? oldT.requestedPokemon.fullName() : "Any",
+                        oldT.nickname, oldT.givenPokemon.fullName(),
+                        newT.requestedPokemon != null ? newT.requestedPokemon.fullName() : "Any",
                         newT.nickname, newT.givenPokemon.fullName());
             }
             log.println();
