@@ -161,7 +161,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
         for (Pokemon f : altFormesList) {
-            if (!f.isLegendary()) {
+            if (f.isLegendary()) {
                 onlyLegendaryAltsList.add(f);
             } else {
                 noLegendaryAltsList.add(f);
@@ -221,6 +221,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (megaEvolutionSanity) {
             List<MegaEvolution> allMegaEvos = getMegaEvolutions();
             for (MegaEvolution megaEvo: allMegaEvos) {
+                if (megaEvo.from.megaEvolutionsFrom.size() > 1) continue;
                 megaEvo.to.copyShuffledStatsUpEvolution(megaEvo.from);
             }
         }
@@ -245,6 +246,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (megaEvolutionSanity) {
             List<MegaEvolution> allMegaEvos = getMegaEvolutions();
             for (MegaEvolution megaEvo: allMegaEvos) {
+                if (megaEvo.from.megaEvolutionsFrom.size() > 1) continue;
                 megaEvo.to.copyRandomizedStatsUpEvolution(megaEvo.from);
             }
         }
@@ -450,6 +452,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (megaEvolutionSanity) {
             List<MegaEvolution> allMegaEvos = getMegaEvolutions();
             for (MegaEvolution megaEvo: allMegaEvos) {
+                if (megaEvo.from.megaEvolutionsFrom.size() > 1) continue;
                 megaEvo.to.primaryType = megaEvo.from.primaryType;
                 megaEvo.to.secondaryType = megaEvo.from.secondaryType;
 
@@ -563,6 +566,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (megaEvolutionSanity) {
             List<MegaEvolution> allMegaEvos = this.getMegaEvolutions();
             for (MegaEvolution megaEvo: allMegaEvos) {
+                if (megaEvo.from.megaEvolutionsFrom.size() > 1) continue;
                 megaEvo.to.ability1 = megaEvo.from.ability1;
                 megaEvo.to.ability2 = megaEvo.from.ability2;
                 megaEvo.to.ability3 = megaEvo.from.ability3;
@@ -1204,7 +1208,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
-            int levelModifier, boolean distributionSetting, boolean mainPlaythroughSetting, boolean includeFormes) {
+                                      int levelModifier, boolean distributionSetting, boolean mainPlaythroughSetting,
+                                      boolean includeFormes, boolean swapMegaEvos) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         // New: randomize the order trainers are randomized in.
@@ -1212,8 +1217,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Need to keep the original ordering around for saving though.
         List<Trainer> scrambledTrainers = new ArrayList<>(currentTrainers);
         Collections.shuffle(scrambledTrainers, this.random);
-
-        boolean swapMegaEvos = true; // TODO make setting
 
         cachedReplacementLists = new TreeMap<>();
         cachedAllList = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
@@ -1369,7 +1372,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
-            boolean noEarlyWonderGuard, int levelModifier, boolean includeFormes) {
+                                      boolean noEarlyWonderGuard, int levelModifier, boolean includeFormes, boolean swapMegaEvos) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         cachedReplacementLists = new TreeMap<>();
@@ -1384,8 +1387,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         typeWeightings = new TreeMap<>();
         totalTypeWeighting = 0;
-
-        boolean swapMegaEvos = true; // TODO make setting
 
         // Construct groupings for types
         // Anything starting with GYM or ELITE or CHAMPION is a group

@@ -502,6 +502,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public boolean hasStarterAltFormes() {
+        return false;
+    }
+
+    @Override
     public int starterCount() {
         return 3;
     }
@@ -1086,6 +1091,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public boolean hasStaticAltFormes() {
+        return false;
+    }
+
+    @Override
     public List<Pokemon> bannedForStaticPokemon() {
         return Collections.singletonList(pokes[Gen2Constants.unownIndex]); // Unown banned
     }
@@ -1289,6 +1299,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public boolean hasTimeBasedEncounters() {
         return true; // All GSC do
+    }
+
+    @Override
+    public boolean hasWildAltFormes() {
+        return false;
     }
 
     private void populateEvolutions() {
@@ -1630,6 +1645,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public int highestAbilityIndex() {
         return 0;
+    }
+
+    @Override
+    public boolean hasMegaEvolutions() {
+        return false;
     }
 
     @Override

@@ -710,6 +710,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public boolean hasStarterAltFormes() {
+        return false;
+    }
+
+    @Override
     public int starterCount() {
         return isYellow() ? 2 : 3;
     }
@@ -948,6 +953,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 }
             }
         }
+    }
+
+    @Override
+    public boolean hasWildAltFormes() {
+        return false;
     }
 
     @Override
@@ -1241,6 +1251,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     @Override
     public boolean canChangeStaticPokemon() {
         return (romEntry.getValue("StaticPokemonSupport") > 0);
+    }
+
+    @Override
+    public boolean hasStaticAltFormes() {
+        return false;
     }
 
     @Override
@@ -1606,6 +1621,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     @Override
     public int highestAbilityIndex() {
         return 0;
+    }
+
+    @Override
+    public boolean hasMegaEvolutions() {
+        return false;
     }
 
     @Override

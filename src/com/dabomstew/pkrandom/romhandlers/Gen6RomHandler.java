@@ -787,6 +787,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public boolean hasStarterAltFormes() {
+        return true;
+    }
+
+    @Override
     public int starterCount() {
         return romEntry.romType == Gen6Constants.Type_XY ? 6 : 12;
     }
@@ -1503,6 +1508,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public boolean hasStaticAltFormes() {
+        return true;
+    }
+
+    @Override
     public List<StaticEncounter> getStaticPokemon() {
         List<StaticEncounter> statics = new ArrayList<>();
         try {
@@ -1889,6 +1899,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public boolean hasWildAltFormes() {
+        return true;
+    }
+
+    @Override
     public List<Pokemon> bannedForStaticPokemon() {
         return Gen6Constants.actuallyCosmeticForms
                 .stream()
@@ -2127,6 +2142,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     @Override
     public String abilityName(int number) {
         return abilityNames.get(number);
+    }
+
+    @Override
+    public boolean hasMegaEvolutions() {
+        return true;
     }
 
     private int tmFromIndex(int index) {

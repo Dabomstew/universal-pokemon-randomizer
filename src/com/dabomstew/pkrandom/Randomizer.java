@@ -317,23 +317,23 @@ public class Randomizer {
             romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
                     settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, false, false,
-                    settings.isAllowTrainerAlternateFormes()); // final 2 booleans set up even distribution and main playthrough flags
+                    settings.isAllowTrainerAlternateFormes(), settings.isSwapTrainerMegaEvos()); // final 2 booleans set up even distribution and main playthrough flags
         } else if (settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED) {
             romHandler.typeThemeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersMatchTypingDistribution(), settings.isTrainersBlockLegendaries(),
                     settings.isTrainersBlockEarlyWonderGuard(),
                     settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0,
-                    settings.isAllowTrainerAlternateFormes());
+                    settings.isAllowTrainerAlternateFormes(), settings.isSwapTrainerMegaEvos());
         } else if (settings.getTrainersMod() == Settings.TrainersMod.DISTRIBUTED) {
             romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
                     settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, true, false,
-                    settings.isAllowTrainerAlternateFormes());
+                    settings.isAllowTrainerAlternateFormes(), settings.isSwapTrainerMegaEvos());
         } else if (settings.getTrainersMod() == Settings.TrainersMod.MAINPLAYTHROUGH) {
             romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
                     settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, true, true,
-                    settings.isAllowTrainerAlternateFormes());
+                    settings.isAllowTrainerAlternateFormes(), settings.isSwapTrainerMegaEvos());
         } else {
             if (settings.isTrainersLevelModified()) {
                 romHandler.onlyChangeTrainerLevels(settings.getTrainersLevelModifier());

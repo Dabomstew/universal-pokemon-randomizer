@@ -91,6 +91,8 @@ public interface RomHandler {
     // Was for before CUE's compressors were found and arm9 was untouchable.
     boolean canChangeStarters();
 
+    boolean hasStarterAltFormes();
+
     int starterCount();
 
     // Randomizer: Pokemon stats
@@ -145,6 +147,8 @@ public interface RomHandler {
     void randomizeAbilities(boolean evolutionSanity, boolean allowWonderGuard, boolean banTrappingAbilities,
                             boolean banNegativeAbilities, boolean banBadAbilities, boolean megaEvolutionSanity);
 
+    boolean hasMegaEvolutions();
+
     // Randomizer: wild pokemon
     List<EncounterSet> getEncounters(boolean useTimeOfDay);
 
@@ -162,6 +166,8 @@ public interface RomHandler {
 
     boolean hasTimeBasedEncounters();
 
+    boolean hasWildAltFormes();
+
     List<Pokemon> bannedForWildEncounters();
 
     // Randomizer: trainer pokemon
@@ -175,10 +181,10 @@ public interface RomHandler {
 
     void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
                                int levelModifier, boolean distributionSetting, boolean mainPlaythroughSetting,
-                               boolean includeFormes);
+                               boolean includeFormes, boolean swapMegaEvos);
 
     void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
-                               boolean noEarlyWonderGuard, int levelModifier, boolean includeFormes);
+                               boolean noEarlyWonderGuard, int levelModifier, boolean includeFormes, boolean swapMegaEvos1);
 
     void rivalCarriesStarter();
 
@@ -240,6 +246,8 @@ public interface RomHandler {
     void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMusketeers, boolean limit600, boolean allowAltFormes, boolean swapMegaEvos1);
 
     boolean canChangeStaticPokemon();
+
+    boolean hasStaticAltFormes();
 
     List<Pokemon> bannedForStaticPokemon();
 

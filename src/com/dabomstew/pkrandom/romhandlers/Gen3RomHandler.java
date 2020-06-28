@@ -1119,6 +1119,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    public boolean hasStarterAltFormes() {
+        return false;
+    }
+
+    @Override
     public int starterCount() {
         return 3;
     }
@@ -1323,6 +1328,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
             offs += 20;
         }
+    }
+
+    @Override
+    public boolean hasWildAltFormes() {
+        return false;
     }
 
     @Override
@@ -2477,6 +2487,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    public boolean hasStaticAltFormes() {
+        return false;
+    }
+
+    @Override
     public String getDefaultExtension() {
         return "gba";
     }
@@ -2503,6 +2518,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     @Override
     public String abilityName(int number) {
         return abilityNames[number];
+    }
+
+    @Override
+    public boolean hasMegaEvolutions() {
+        return false;
     }
 
     @Override

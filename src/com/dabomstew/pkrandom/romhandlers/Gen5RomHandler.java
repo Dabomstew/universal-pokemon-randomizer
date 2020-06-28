@@ -710,6 +710,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public boolean hasStarterAltFormes() {
+        return false;
+    }
+
+    @Override
     public int starterCount() {
         return 3;
     }
@@ -1372,6 +1377,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public boolean hasStaticAltFormes() {
+        return false;
+    }
+
+    @Override
     public List<StaticEncounter> getStaticPokemon() {
         List<StaticEncounter> sp = new ArrayList<>();
         if (!romEntry.staticPokemonSupport) {
@@ -1851,6 +1861,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         return true; // All BW/BW2 do [seasons]
     }
 
+    @Override
+    public boolean hasWildAltFormes() {
+        return true;
+    }
+
     private void populateEvolutions() {
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
@@ -2175,6 +2190,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     public String abilityName(int number) {
         return abilityNames.get(number);
+    }
+
+    @Override
+    public boolean hasMegaEvolutions() {
+        return false;
     }
 
     private List<Integer> getFieldItems() {

@@ -2164,13 +2164,28 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public boolean hasWildAltFormes() {
+        return false;
+    }
+
+    @Override
     public boolean canChangeStaticPokemon() {
         return romEntry.staticPokemonSupport;
     }
 
     @Override
+    public boolean hasStaticAltFormes() {
+        return false;
+    }
+
+    @Override
     public boolean canChangeStarters() {
         return true;
+    }
+
+    @Override
+    public boolean hasStarterAltFormes() {
+        return false;
     }
 
     @Override
@@ -2525,6 +2540,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     @Override
     public String abilityName(int number) {
         return abilityNames.get(number);
+    }
+
+    @Override
+    public boolean hasMegaEvolutions() {
+        return false;
     }
 
     private List<Integer> getFieldItems() {

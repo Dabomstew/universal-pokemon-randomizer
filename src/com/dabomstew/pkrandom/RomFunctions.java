@@ -43,16 +43,11 @@ public class RomFunctions {
         Set<Pokemon> dontCopyPokes = new TreeSet<>();
         for (Pokemon pkmn : allPokes) {
             if (pkmn != null) {
-                if (pkmn.evolutionsTo.size() < 1 && pkmn.megaEvolutionsTo.size() < 1) {
+                if (pkmn.evolutionsTo.size() < 1) {
                     dontCopyPokes.add(pkmn);
-                } else if (pkmn.evolutionsTo.size() >= 1) {
+                } else {
                     Evolution onlyEvo = pkmn.evolutionsTo.get(0);
                     if (!onlyEvo.carryStats) {
-                        dontCopyPokes.add(pkmn);
-                    }
-                } else if (pkmn.megaEvolutionsTo.size() >= 1) {
-                    MegaEvolution onlyMegaEvo = pkmn.megaEvolutionsTo.get(0);
-                    if (!onlyMegaEvo.carryStats) {
                         dontCopyPokes.add(pkmn);
                     }
                 }
