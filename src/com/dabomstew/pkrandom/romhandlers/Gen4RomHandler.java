@@ -457,19 +457,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
-        try {
-            msgNarc = readNARC(romEntry.getString("Text"));
-            for (int i = 0; i < msgNarc.files.size(); i++) {
-                List<String> ts = getStrings(i);
-                for (String t: ts) {
-                    if (t.contains("Would you be willing")) {
-                        System.out.println("gsdaofja");
-                    }
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private void saveMoves() {
