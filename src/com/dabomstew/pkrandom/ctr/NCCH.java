@@ -23,13 +23,9 @@ package com.dabomstew.pkrandom.ctr;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.SysConstants;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureDSA;
 import cuecompressors.BLZCoder;
 
 import java.io.*;
-import java.lang.reflect.Array;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -264,7 +260,25 @@ public class NCCH {
         fNew.seek(0x1B4);
         fNew.write((int) newRomfsLength / media_unit_size);
 
-        // Lastly, reconstruct the hashes and signatures
+        // Lastly, reconstruct the superblock hashes and signatures
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        int exefsHashRegionSize = FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x1A8) * media_unit_size;
+        byte[] exefsDataToHash = new byte[exefsHashRegionSize];
+        fNew.seek(newExefsOffset);
+        fNew.readFully(exefsDataToHash);
+        byte[] exefsSuperblockHash = digest.digest(exefsDataToHash);
+        fNew.seek(0x1C0);
+        fNew.write(exefsSuperblockHash);
+        int romfsHashRegionSize = FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x1B8) * media_unit_size;
+        byte[] romfsDataToHash = new byte[romfsHashRegionSize];
+        fNew.seek(newRomfsOffset);
+        fNew.readFully(romfsDataToHash);
+        byte[] romfsSuperblockHash = digest.digest(romfsDataToHash);
+        fNew.seek(0x1E0);
+        fNew.write(romfsSuperblockHash);
+
+        // TODO: actually reconstruct NCCH signature
+        fNew.close();
     }
 
     private long rebuildExefs(RandomAccessFile fNew, long newExefsOffset) throws IOException, NoSuchAlgorithmException {
@@ -335,17 +349,11 @@ public class NCCH {
         fNew.seek(newRomfsOffset);
         fNew.write(romfsHeaderData);
 
-        // TODO: don't do this. For now, just write out the master hash
-        int masterHashSize = FileFunctions.readFullIntLittleEndian(romfsHeaderData, 0x08);
-        byte[] masterHash = new byte[masterHashSize];
-        baseRom.seek(romfsOffset + 0x60);
-        baseRom.readFully(masterHash);
-        fNew.seek(newRomfsOffset + 0x60);
-        fNew.write(masterHash);
-
         // Now find the level 3 (file data) offset, since the first thing we need to do is write the
-        // updated file data. We're assuming the master hash does not grow because we're not adding
-        // large amounts of data to the romfs
+        // updated file data. We're assuming here that the master hash size is smaller than the level 3
+        // hash block size, which it almost certainly will because we're not adding large amounts of data
+        // to the romfs
+        int masterHashSize = FileFunctions.readFullIntLittleEndian(romfsHeaderData, 0x08);
         int level3HashBlockSize = 1 << FileFunctions.readFullIntLittleEndian(romfsHeaderData, 0x4C);
         long level3Offset = romfsOffset + alignLong(0x60 + masterHashSize, level3HashBlockSize);
         long newLevel3Offset = newRomfsOffset + alignLong(0x60 + masterHashSize, level3HashBlockSize);
@@ -366,7 +374,6 @@ public class NCCH {
         int directoryMetadataTableLength = FileFunctions.readFullIntLittleEndian(level3HeaderData, 0x10);
         int fileHashTableOffset = FileFunctions.readFullIntLittleEndian(level3HeaderData, 0x14);
         int fileHashTableLength = FileFunctions.readFullIntLittleEndian(level3HeaderData, 0x18);
-        int fileDataOffset = FileFunctions.readFullIntLittleEndian(level3HeaderData, 0x24);
         byte[] directoryHashTable = new byte[directoryHashTableLength];
         baseRom.seek(level3Offset + directoryHashTableOffset);
         baseRom.readFully(directoryHashTable);
@@ -390,7 +397,89 @@ public class NCCH {
         fNew.seek(newLevel3Offset + fileMetadataTableOffset);
         fNew.write(newFileMetadataTable);
 
-        return fNew.getFilePointer() - newRomfsOffset;
+        // Using the new file metadata table, output the file data
+        int fileDataOffset = FileFunctions.readFullIntLittleEndian(level3HeaderData, 0x24);
+        for (FileMetadata metadata : fileMetadataList) {
+            byte[] fileData;
+            if (metadata.file.fileChanged) {
+                fileData = metadata.file.getOverrideContents();
+            } else {
+                fileData = new byte[metadata.file.size];
+                baseRom.seek(metadata.file.offset);
+                baseRom.readFully(fileData);
+            }
+            long currentDataOffset = level3Offset + fileDataOffset + metadata.fileDataOffset;
+            fNew.seek(currentDataOffset);
+            fNew.write(fileData);
+        }
+
+        // Now that level 3 (file data) is done, construct level 2 (hashes of file data)
+        // Note that in the ROM, level 1 comes *before* level 2, so we need to calculate
+        // level 1 length and offset as well.
+        long newLevel3EndingOffset = fNew.getFilePointer();
+        long newLevel3HashdataSize = newLevel3EndingOffset - newLevel3Offset;
+        long numberOfLevel3HashBlocks = alignLong(newLevel3HashdataSize, level3HashBlockSize) / level3HashBlockSize;
+        int level2HashBlockSize = 1 << FileFunctions.readFullIntLittleEndian(romfsHeaderData, 0x34);
+        long newLevel2HashdataSize = numberOfLevel3HashBlocks * 0x20;
+        long numberOfLevel2HashBlocks = alignLong(newLevel2HashdataSize, level2HashBlockSize) / level2HashBlockSize;
+        int level1HashBlockSize = 1 << FileFunctions.readFullIntLittleEndian(romfsHeaderData, 0x1C);
+        long newLevel1HashdataSize = numberOfLevel2HashBlocks * 0x20;
+        long newLevel1Offset = alignLong(newLevel3Offset + newLevel3HashdataSize, level3HashBlockSize);
+        long newLevel2Offset = alignLong(newLevel1Offset + newLevel1HashdataSize, level1HashBlockSize);
+        long newFileEndingOffset = alignLong(newLevel2Offset + newLevel2HashdataSize, level2HashBlockSize);
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] dataToHash = new byte[level3HashBlockSize];
+        for (int i = 0; i < numberOfLevel3HashBlocks; i++) {
+            fNew.seek(newLevel3Offset + (i * level3HashBlockSize));
+            fNew.readFully(dataToHash);
+            byte[] hash = digest.digest(dataToHash);
+            fNew.seek(newLevel2Offset + (i * 0x20));
+            fNew.write(hash);
+        }
+        while (fNew.getFilePointer() != newFileEndingOffset) {
+            fNew.writeByte(0);
+        }
+
+        // Now that level 2 (hashes of file data) is done, construct level 1 (hashes of
+        // hashes of file data) and the master hash/level 0 (hashes of level 1)
+        dataToHash = new byte[level2HashBlockSize];
+        for (int i = 0; i < numberOfLevel2HashBlocks; i++) {
+            fNew.seek(newLevel2Offset + (i * level2HashBlockSize));
+            fNew.readFully(dataToHash);
+            byte[] hash = digest.digest(dataToHash);
+            fNew.seek(newLevel1Offset + (i * 0x20));
+            fNew.write(hash);
+        }
+        long numberOfLevel1HashBlocks = alignLong(newLevel1HashdataSize, level1HashBlockSize) / level1HashBlockSize;
+        dataToHash = new byte[level1HashBlockSize];
+        for (int i = 0; i < numberOfLevel1HashBlocks; i++) {
+            fNew.seek(newLevel1Offset + (i * level1HashBlockSize));
+            fNew.readFully(dataToHash);
+            byte[] hash = digest.digest(dataToHash);
+            fNew.seek(newRomfsOffset + 0x60 + (i * 0x20));
+            fNew.write(hash);
+        }
+
+        // Lastly, update the header and return the size of the new romfs
+        long level1LogicalOffset = 0;
+        long level2LogicalOffset = alignLong(newLevel1HashdataSize, level1HashBlockSize);
+        long level3LogicalOffset = alignLong(level2LogicalOffset + newLevel2HashdataSize, level2HashBlockSize);
+        FileFunctions.writeFullIntLittleEndian(romfsHeaderData, 0x08, (int) numberOfLevel1HashBlocks * 0x20);
+        FileFunctions.writeFullLongLittleEndian(romfsHeaderData, 0x0C, level1LogicalOffset);
+        FileFunctions.writeFullLongLittleEndian(romfsHeaderData, 0x14, newLevel1HashdataSize);
+        FileFunctions.writeFullLongLittleEndian(romfsHeaderData, 0x24, level2LogicalOffset);
+        FileFunctions.writeFullLongLittleEndian(romfsHeaderData, 0x2C, newLevel2HashdataSize);
+        FileFunctions.writeFullLongLittleEndian(romfsHeaderData, 0x3C, level3LogicalOffset);
+        FileFunctions.writeFullLongLittleEndian(romfsHeaderData, 0x44, newLevel3HashdataSize);
+        fNew.seek(newRomfsOffset);
+        fNew.write(romfsHeaderData);
+        long currentLength = newFileEndingOffset - newRomfsOffset;
+        long newRomfsLength = alignLong(currentLength, media_unit_size);
+        fNew.seek(newFileEndingOffset);
+        while (fNew.getFilePointer() < newRomfsOffset + newRomfsLength) {
+            fNew.writeByte(0);
+        }
+        return newRomfsLength;
     }
 
     private byte[] updateFileMetadataTable(int fileMetadataTableLength) {
@@ -398,9 +487,7 @@ public class NCCH {
         byte[] fileMetadataTable = new byte[fileMetadataTableLength];
         int currentTableOffset = 0;
         long currentFileDataOffset = 0;
-        for (int i = 0; i < fileMetadataList.size(); i++) {
-            FileMetadata metadata = fileMetadataList.get(i);
-
+        for (FileMetadata metadata : fileMetadataList) {
             // TODO: This shouldn't be necessary; you should be able to just do what's
             // in this if-block all the time. But I'm trying to perfectly match the
             // retail ROM for now, and the retail ROM has weird dead space between files.
