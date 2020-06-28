@@ -27,8 +27,7 @@ import cuecompressors.BLZCoder;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -260,7 +259,7 @@ public class NCCH {
         fNew.seek(0x1B4);
         fNew.write((int) newRomfsLength / media_unit_size);
 
-        // Lastly, reconstruct the superblock hashes and signatures
+        // Lastly, reconstruct the superblock hashes
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         int exefsHashRegionSize = FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x1A8) * media_unit_size;
         byte[] exefsDataToHash = new byte[exefsHashRegionSize];
@@ -277,7 +276,11 @@ public class NCCH {
         fNew.seek(0x1E0);
         fNew.write(romfsSuperblockHash);
 
-        // TODO: actually reconstruct NCCH signature
+        // While totally optional, let's zero out the NCCH signature so that
+        // it's clear this isn't a properly-signed ROM
+        byte[] zeroedSignature = new byte[0x100];
+        fNew.seek(0x0);
+        fNew.write(zeroedSignature);
         fNew.close();
     }
 
@@ -429,7 +432,7 @@ public class NCCH {
         long newFileEndingOffset = alignLong(newLevel2Offset + newLevel2HashdataSize, level2HashBlockSize);
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] dataToHash = new byte[level3HashBlockSize];
-        for (int i = 0; i < numberOfLevel3HashBlocks; i++) {
+        for (long i = 0; i < numberOfLevel3HashBlocks; i++) {
             fNew.seek(newLevel3Offset + (i * level3HashBlockSize));
             fNew.readFully(dataToHash);
             byte[] hash = digest.digest(dataToHash);
@@ -443,7 +446,7 @@ public class NCCH {
         // Now that level 2 (hashes of file data) is done, construct level 1 (hashes of
         // hashes of file data) and the master hash/level 0 (hashes of level 1)
         dataToHash = new byte[level2HashBlockSize];
-        for (int i = 0; i < numberOfLevel2HashBlocks; i++) {
+        for (long i = 0; i < numberOfLevel2HashBlocks; i++) {
             fNew.seek(newLevel2Offset + (i * level2HashBlockSize));
             fNew.readFully(dataToHash);
             byte[] hash = digest.digest(dataToHash);
@@ -452,7 +455,7 @@ public class NCCH {
         }
         long numberOfLevel1HashBlocks = alignLong(newLevel1HashdataSize, level1HashBlockSize) / level1HashBlockSize;
         dataToHash = new byte[level1HashBlockSize];
-        for (int i = 0; i < numberOfLevel1HashBlocks; i++) {
+        for (long i = 0; i < numberOfLevel1HashBlocks; i++) {
             fNew.seek(newLevel1Offset + (i * level1HashBlockSize));
             fNew.readFully(dataToHash);
             byte[] hash = digest.digest(dataToHash);
