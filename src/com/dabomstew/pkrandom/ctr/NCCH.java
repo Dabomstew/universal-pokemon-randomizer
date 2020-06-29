@@ -337,9 +337,7 @@ public class NCCH {
 
         // Pad to media unit size
         fileDataLength = alignLong(fileDataLength, media_unit_size);
-
-        // For retail games, they seem to add a completely empty media unit at the end of the exefs
-        long length = 0x200 + fileDataLength + media_unit_size;
+        long length = 0x200 + fileDataLength;
         return length;
     }
 
@@ -402,6 +400,7 @@ public class NCCH {
 
         // Using the new file metadata table, output the file data
         int fileDataOffset = FileFunctions.readFullIntLittleEndian(level3HeaderData, 0x24);
+        long endOfFileDataOffset = 0;
         for (FileMetadata metadata : fileMetadataList) {
             byte[] fileData;
             if (metadata.file.fileChanged) {
@@ -414,12 +413,13 @@ public class NCCH {
             long currentDataOffset = newLevel3Offset + fileDataOffset + metadata.fileDataOffset;
             fNew.seek(currentDataOffset);
             fNew.write(fileData);
+            endOfFileDataOffset = currentDataOffset + fileData.length;
         }
 
         // Now that level 3 (file data) is done, construct level 2 (hashes of file data)
         // Note that in the ROM, level 1 comes *before* level 2, so we need to calculate
         // level 1 length and offset as well.
-        long newLevel3EndingOffset = fNew.getFilePointer();
+        long newLevel3EndingOffset = endOfFileDataOffset;
         long newLevel3HashdataSize = newLevel3EndingOffset - newLevel3Offset;
         long numberOfLevel3HashBlocks = alignLong(newLevel3HashdataSize, level3HashBlockSize) / level3HashBlockSize;
         int level2HashBlockSize = 1 << FileFunctions.readFullIntLittleEndian(romfsHeaderData, 0x34);
@@ -427,8 +427,8 @@ public class NCCH {
         long numberOfLevel2HashBlocks = alignLong(newLevel2HashdataSize, level2HashBlockSize) / level2HashBlockSize;
         int level1HashBlockSize = 1 << FileFunctions.readFullIntLittleEndian(romfsHeaderData, 0x1C);
         long newLevel1HashdataSize = numberOfLevel2HashBlocks * 0x20;
-        long newLevel1Offset = alignLong(newLevel3Offset + newLevel3HashdataSize, level3HashBlockSize);
-        long newLevel2Offset = alignLong(newLevel1Offset + newLevel1HashdataSize, level1HashBlockSize);
+        long newLevel1Offset = newLevel3Offset + alignLong(newLevel3HashdataSize, level3HashBlockSize);
+        long newLevel2Offset = newLevel1Offset + alignLong(newLevel1HashdataSize, level1HashBlockSize);
         long newFileEndingOffset = alignLong(newLevel2Offset + newLevel2HashdataSize, level2HashBlockSize);
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] dataToHash = new byte[level3HashBlockSize];
