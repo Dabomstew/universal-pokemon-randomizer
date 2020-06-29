@@ -491,16 +491,7 @@ public class NCCH {
         int currentTableOffset = 0;
         long currentFileDataOffset = 0;
         for (FileMetadata metadata : fileMetadataList) {
-            // TODO: This shouldn't be necessary; you should be able to just do what's
-            // in this if-block all the time. But I'm trying to perfectly match the
-            // retail ROM for now, and the retail ROM has weird dead space between files.
-            // So in the case where the offset in the metadata is larger than the current
-            // offset (due to dead space), just ignore the current offset
-            if (currentFileDataOffset > metadata.fileDataOffset) {
-                metadata.fileDataOffset = currentFileDataOffset;
-            } else {
-                currentFileDataOffset = metadata.fileDataOffset;
-            }
+            metadata.fileDataOffset = currentFileDataOffset;
             if (metadata.file.fileChanged) {
                 metadata.fileDataLength = metadata.file.size;
             }
