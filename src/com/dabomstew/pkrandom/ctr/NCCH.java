@@ -232,15 +232,17 @@ public class NCCH {
 
         // The plain region is even smaller (1KB) so repeat the same process
         long plainOffset = ncchStartingOffset + FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x190) * media_unit_size;
-        long plainLength = (int) ncchStartingOffset + FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x194) * media_unit_size;
-        byte[] plain = new byte[(int) plainLength];
-        baseRom.seek(plainOffset);
-        baseRom.readFully(plain);
-        long newPlainOffset = header_and_exheader_size + logoLength;
-        fNew.seek(newPlainOffset);
-        fNew.write(plain);
-        fNew.seek(0x190);
-        fNew.write((int) newPlainOffset / media_unit_size);
+        long plainLength = FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x194) * media_unit_size;
+        if (plainLength > 0) {
+            byte[] plain = new byte[(int) plainLength];
+            baseRom.seek(plainOffset);
+            baseRom.readFully(plain);
+            long newPlainOffset = header_and_exheader_size + logoLength;
+            fNew.seek(newPlainOffset);
+            fNew.write(plain);
+            fNew.seek(0x190);
+            fNew.write((int) newPlainOffset / media_unit_size);
+        }
 
         // Now, reconstruct the exefs based on our new version of .code
         long newExefsOffset = header_and_exheader_size + logoLength + plainLength;
