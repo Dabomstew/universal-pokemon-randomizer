@@ -764,11 +764,8 @@ public class Settings {
 
         // gen 5 exclusive stuff
         if (rh.generationOfPokemon() != 5) {
-            if (trainersMod == TrainersMod.DISTRIBUTED || trainersMod == TrainersMod.MAINPLAYTHROUGH) {
+            if (trainersMod == TrainersMod.MAINPLAYTHROUGH) {
                 trainersMod = TrainersMod.RANDOM;
-            }
-            if (fieldItemsMod == FieldItemsMod.RANDOM_EVEN) {
-                fieldItemsMod = FieldItemsMod.RANDOM;
             }
         }
 
@@ -828,6 +825,10 @@ public class Settings {
 
         if (!rh.hasPhysicalSpecialSplit()) {
             this.setRandomizeMoveCategory(false);
+        }
+
+        if (!rh.hasShopRandomization()) {
+            this.setShopItemsMod(ShopItemsMod.UNCHANGED);
         }
 
         // done

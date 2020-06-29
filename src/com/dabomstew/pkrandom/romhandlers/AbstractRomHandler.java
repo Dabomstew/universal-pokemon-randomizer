@@ -1240,26 +1240,25 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             for (TrainerPokemon tp : t.pokemon) {
                 boolean swapThisMegaEvo = swapMegaEvos && tp.canMegaEvolve();
-                boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20; 
+                boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
+                Pokemon newPK;
                 // new code for distribution with mainplaythrough balancing
                 // what we do is check each trainer if they're part of the main playthrough
                 // if so, add to placement history, if not, pure random
                 if (distributionSetting && mainPlaythroughSetting) {
-                    // System.out.println("*** Main Playthrough Even Distribution ***");
                     // new code for main playthrough distribution
                     if (mainPlaythroughTrainers.contains(t.offset)) { // this determines if this trainer is in the pool of main playthrough
 
-                        Pokemon newPK =
+                        newPK =
                                 pickReplacement(
                                         tp.pokemon,
                                         usePowerLevels,
                                         null,
                                         noLegendaries,
                                         wgAllowed,
-                                        false,
                                         true,
                                         swapThisMegaEvo
-                                ); // final argument sets usePlacementHistory
+                                );
                         setPlacementHistory(newPK);
                         tp.absolutePokeNumber = newPK.number;
                         if (newPK.formeNumber > 0) {
@@ -1273,15 +1272,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                         }
                     }
                     else { // pure random when trainer not in pool
-                        // System.out.println(">>>> NOT IN POOL: "+t.fullDisplayName);
-                        Pokemon newPK =
+                        newPK =
                                 pickReplacement(
                                         tp.pokemon,
                                         usePowerLevels,
                                         null,
                                         noLegendaries,
                                         wgAllowed,
-                                        false,
                                         false,
                                         swapThisMegaEvo
                                 );
@@ -1296,50 +1293,20 @@ public abstract class AbstractRomHandler implements RomHandler {
                             tp.forme = this.random.nextInt(newPK.cosmeticForms);
                         }
                     }
-                }
-                
-                else if (distributionSetting) {
-                    // System.out.println("*** Full Playthrough Even Distribution ***");
-                    // new code for distribution, no main playthrough (all trainers equally distributed)
-                    // always adds to placement history
-                    Pokemon newPK =
+                } else {
+                    newPK =
                             pickReplacement(
                                     tp.pokemon,
                                     usePowerLevels,
                                     null,
                                     noLegendaries,
                                     wgAllowed,
-                                    false,
-                                    true,
-                                    swapThisMegaEvo
-                            ); // final argument sets usePlacementHistory
-                    setPlacementHistory(newPK);
-                    tp.absolutePokeNumber = newPK.number;
-                    if (newPK.formeNumber > 0) {
-                        tp.forme = newPK.formeNumber;
-                        tp.formeSuffix = newPK.formeSuffix;
-                        newPK = mainPokemonList.get(newPK.baseForme.number - 1);
-                    }
-                    tp.pokemon = newPK;
-                    if (newPK.cosmeticForms > 0) {
-                        tp.forme = this.random.nextInt(newPK.cosmeticForms);
-                    }
-                }
-                
-                else { 
-                    // System.out.println("*** Pure Random Distribution ***");
-                    // pure random, no settings applied
-                    Pokemon newPK =
-                            pickReplacement(
-                                    tp.pokemon,
-                                    usePowerLevels,
-                                    null,
-                                    noLegendaries,
-                                    wgAllowed,
-                                    false,
-                                    false,
+                                    distributionSetting,
                                     swapThisMegaEvo
                             );
+                    if (distributionSetting) {
+                        setPlacementHistory(newPK);
+                    }
                     tp.absolutePokeNumber = newPK.number;
                     if (newPK.formeNumber > 0) {
                         tp.forme = newPK.formeNumber;
@@ -1350,15 +1317,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (newPK.cosmeticForms > 0) {
                         tp.forme = this.random.nextInt(newPK.cosmeticForms);
                     }
-
-                    if (swapThisMegaEvo) {
-                        tp.heldItem = newPK
-                                .megaEvolutionsFrom
-                                .get(this.random.nextInt(newPK.megaEvolutionsFrom.size()))
-                                .argument;
-                    }
                 }
-                
+
+                if (swapThisMegaEvo) {
+                    tp.heldItem = newPK
+                            .megaEvolutionsFrom
+                            .get(this.random.nextInt(newPK.megaEvolutionsFrom.size()))
+                            .argument;
+                }
                 tp.resetMoves = true;
                 if (levelModifier != 0) {
                     tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
@@ -1457,7 +1423,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                                     noLegendaries,
                                     wgAllowed,
                                     false,
-                                    false,
                                     swapThisMegaEvo
                             );
                     tp.absolutePokeNumber = newPK.number;
@@ -1518,7 +1483,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                                     noLegendaries,
                                     shedAllowed,
                                     false,
-                                    true,
                                     swapThisMegaEvo
                             );
                     tp.absolutePokeNumber = newPK.number;
@@ -3302,16 +3266,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (distributeItemsControl) {
             for (int i = 0; i < fieldItemCount; i++) {
                 int chosenItem = possibleItems.randomNonTM(this.random);
-                // System.out.println("Chosen item " +chosenItem+ " " + this.getItemPlacementHistory(chosenItem) + " vs. " + this.getItemPlacementAverage());
                 int iterNum = 0;
                 while ((this.getItemPlacementHistory(chosenItem) > this.getItemPlacementAverage()) && iterNum < 100) {
                     chosenItem = possibleItems.randomNonTM(this.random);
                     iterNum +=1;
-                 // System.out.println("  >> Rerolling chosen item " +chosenItem+ " " + this.getItemPlacementHistory(chosenItem) + " vs. " + this.getItemPlacementAverage());
-                    }
+                }
                 newItems.add(chosenItem);
                 this.setItemPlacementHistory(chosenItem);
-                // System.out.println(" > Placed item #" +currentNum+ " -> " + chosenItem);
             }
         } else {
             for (int i = 0; i < fieldItemCount; i++) {
@@ -4416,7 +4377,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<Pokemon> cachedAllList;
 
     private Pokemon pickReplacement(Pokemon current, boolean usePowerLevels, Type type, boolean noLegendaries,
-            boolean wonderGuardAllowed, boolean limitBST, boolean usePlacementHistory, boolean swapMegaEvos) {
+                                    boolean wonderGuardAllowed, boolean usePlacementHistory, boolean swapMegaEvos) {
         List<Pokemon> pickFrom;
         if (swapMegaEvos) {
             pickFrom = getMegaEvolutions()
@@ -4431,7 +4392,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         if (type != null) {
             if (!cachedReplacementLists.containsKey(type)) {
-                System.out.println(current.name + " using cachedReplacementLists");
+//                System.out.println(current.name + " using cachedReplacementLists");
                 cachedReplacementLists.put(type, pokemonOfType(type, noLegendaries));
             }
             if (swapMegaEvos) {
@@ -4447,45 +4408,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        if (usePowerLevels && limitBST) {
-            // start with pokemon BST, and only extend downwards
-            int currentBST = current.bstForPowerLevels();
-            int minTarget = currentBST - currentBST / 5;
-            int maxTarget = currentBST;
-            List<Pokemon> canPick = new ArrayList<>();
-            int expandRounds = 0;
-            while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 2)) {
-                for (Pokemon pk : pickFrom) {
-                    if (pk.bstForPowerLevels() >= minTarget
-                            && pk.bstForPowerLevels() <= maxTarget
-                            && (wonderGuardAllowed || (pk.ability1 != GlobalConstants.WONDER_GUARD_INDEX
-                                    && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX))) {
-                        canPick.add(pk);
-                    }
-                }
-                minTarget -= currentBST / 10;
-                expandRounds++;
-            }
-            Pokemon chosenPokemon = canPick.get(this.random.nextInt(canPick.size()));
-            
-            // If usePlacementHistory is True, then we need to do some
-            // extra checking to make sure the randomly chosen pokemon
-            // is actually below the current average placement
-            // if not, re-roll
-            
-            if (usePlacementHistory) {
-             // System.out.println("Pokemon: "+ chosenPokemon.name + " placement history: " + getPlacementHistory(chosenPokemon) + " current average: " + getPlacementAverage());
-                int breaknum = 0;
-                while (getPlacementHistory(chosenPokemon) > getPlacementAverage() && breaknum < 100) {
-                 // System.out.println(">> Pokemon: "+ chosenPokemon.name + " exceed threshold, rerolling");
-                    chosenPokemon = canPick.get(this.random.nextInt(canPick.size()));
-                 // System.out.println(">> NEW Pokemon: "+ chosenPokemon.name + " placement history: " + getPlacementHistory(chosenPokemon) + " current average: " + getPlacementAverage());
-                    breaknum += 1;
-                }
-            }
-            return chosenPokemon;
-        }    
-        else if (usePowerLevels) {
+        if (usePowerLevels) {
             // start with within 10% and add 5% either direction till we find
             // something
             int currentBST = current.bstForPowerLevels();
@@ -4658,7 +4581,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     
     private void setPlacementHistory(Pokemon newPK) {
         Integer history = getPlacementHistory(newPK);
-        // System.out.println("Current history: " + newPK.name + " : " + history);
+         System.out.println("Current history: " + newPK.name + " : " + history);
         placementHistory.put(newPK, history + 1);        
     }
 
@@ -4708,11 +4631,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (Pokemon newPK : allPK) {
             if (placedPK.contains(newPK)) { // if it's in the list of previously placed, then check its viability 
                 if (placementHistory.get(newPK) <= placedAverage) {
-                    // System.out.println(newPK.name + ": " + placementHistory.get(newPK)+" "+placedAverage+" ACCEPT");
+//                     System.out.println(newPK.name + ": " + placementHistory.get(newPK)+" "+placedAverage+" ACCEPT");
                     toPlacePK.add(newPK);
                 }
                 else {
-                 // System.out.println(newPK.name + ": " + placementHistory.get(newPK)+" "+placedAverage+" REJECT");
+//                  System.out.println(newPK.name + ": " + placementHistory.get(newPK)+" "+placedAverage+" REJECT");
                 }
             }
             else {
@@ -4766,7 +4689,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             placedPKNum += itemPlacementHistory.get(p); 
         }
         return (float)placedPKNum / (float)placedPK.size();
-        }
+    }
     
     private void reportItemHistory() {
         String[] itemNames = this.getItemNames();
