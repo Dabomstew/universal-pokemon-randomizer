@@ -235,17 +235,6 @@
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.pbsFollowEvolutionsCheckBox.toolTipText"/>
                     </properties>
                   </component>
-                  <component id="5b04a" class="javax.swing.JCheckBox" binding="pbsUpdateBaseStatsCheckBox">
-                    <constraints>
-                      <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                      <gridbag weightx="0.0" weighty="0.0"/>
-                    </constraints>
-                    <properties>
-                      <enabled value="false"/>
-                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.pbsUpdateBaseStatsCheckBox.text"/>
-                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.pbsUpdateBaseStatsCheckBox.toolTipText"/>
-                    </properties>
-                  </component>
                   <hspacer id="fb58a">
                     <constraints>
                       <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
@@ -264,6 +253,28 @@
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </vspacer>
+                  <component id="5b04a" class="javax.swing.JCheckBox" binding="pbsUpdateBaseStatsCheckBox">
+                    <constraints>
+                      <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.pbsUpdateBaseStatsCheckBox.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.pbsUpdateBaseStatsCheckBox.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="6768d" class="javax.swing.JCheckBox" binding="pbsFollowMegaEvosCheckBox">
+                    <constraints>
+                      <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.pbsFollowMegaEvosCheckBox.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.pbsFollowMegaEvosCheckBox.toolTipText"/>
+                    </properties>
+                  </component>
                 </children>
               </grid>
               <hspacer id="17e6a">
@@ -314,7 +325,7 @@
                   </hspacer>
                   <vspacer id="8f6b1">
                     <constraints>
-                      <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </vspacer>
@@ -352,6 +363,17 @@
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.ptRandomCompletelyRadioButton.toolTipText"/>
                     </properties>
                   </component>
+                  <component id="360ba" class="javax.swing.JCheckBox" binding="ptFollowMegaEvosCheckBox">
+                    <constraints>
+                      <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.ptFollowMegaEvosCheckBox.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.ptFollowMegaEvosCheckBox.toolTipText"/>
+                    </properties>
+                  </component>
                 </children>
               </grid>
               <grid id="f8946" binding="pokemonAbilitiesPanel" layout-manager="GridBagLayout">
@@ -384,7 +406,7 @@
                   <vspacer id="2747c">
                     <constraints>
                       <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="4" fill="2" indent="0" use-parent-layout="false"/>
-                      <gridbag weightx="0.0" weighty="0.0"/>
+                      <gridbag weightx="0.0" weighty="0.1"/>
                     </constraints>
                   </vspacer>
                   <hspacer id="d7eda">
@@ -423,7 +445,7 @@
                   </component>
                   <component id="18744" class="javax.swing.JCheckBox" binding="paFollowEvolutionsCheckBox" default-binding="true">
                     <constraints>
-                      <grid row="2" column="2" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag top="0" left="5" bottom="0" right="0" weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -473,6 +495,17 @@
                       <enabled value="false"/>
                       <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.paBadAbilitiesCheckBox.text"/>
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.paBadAbilitiesCheckBox.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="b3439" class="javax.swing.JCheckBox" binding="paFollowMegaEvosCheckBox">
+                    <constraints>
+                      <grid row="2" column="3" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.paFollowMegaEvosCheckBox.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.paFollowMegaEvosCheckBox.toolTipText"/>
                     </properties>
                   </component>
                 </children>
@@ -685,7 +718,7 @@
                   </component>
                   <component id="12184" class="javax.swing.JRadioButton" binding="spRandomTwoEvosRadioButton">
                     <constraints>
-                      <grid row="4" column="1" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="4" column="1" row-span="1" col-span="4" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -697,7 +730,7 @@
                   <component id="83a64" class="javax.swing.JComboBox" binding="spComboBox1">
                     <constraints>
                       <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                      <gridbag weightx="0.0" weighty="0.0" ipadx="70"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
                       <enabled value="false"/>
@@ -709,7 +742,7 @@
                   <component id="36c27" class="javax.swing.JComboBox" binding="spComboBox2">
                     <constraints>
                       <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                      <gridbag top="0" left="5" bottom="0" right="0" weightx="0.0" weighty="0.0" ipadx="70"/>
+                      <gridbag top="0" left="5" bottom="0" right="0" weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
                       <enabled value="false"/>
@@ -721,7 +754,7 @@
                   <component id="3169c" class="javax.swing.JComboBox" binding="spComboBox3">
                     <constraints>
                       <grid row="2" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                      <gridbag top="0" left="5" bottom="0" right="5" weightx="0.0" weighty="0.0" ipadx="70"/>
+                      <gridbag top="0" left="5" bottom="0" right="5" weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
                       <enabled value="false"/>
@@ -750,6 +783,17 @@
                       <enabled value="false"/>
                       <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.spBanBadItemsCheckBox.text"/>
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.spBanBadItemsCheckBox.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="cad77" class="javax.swing.JCheckBox" binding="spAllowAltFormesCheckBox">
+                    <constraints>
+                      <grid row="4" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.spAllowAltFormesCheckBox.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.spAllowAltFormesCheckBox.toolTipText"/>
                     </properties>
                   </component>
                 </children>
@@ -876,6 +920,28 @@
                       <enabled value="false"/>
                       <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpRandomize600BSTCheckBox.text"/>
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpRandomize600BSTCheckBox.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="69057" class="javax.swing.JCheckBox" binding="stpAllowAltFormesCheckBox">
+                    <constraints>
+                      <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpAllowAltFormesCheckBox.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpAllowAltFormesCheckBox.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="c441c" class="javax.swing.JCheckBox" binding="stpSwapMegaEvosCheckBox">
+                    <constraints>
+                      <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpSwapMegaEvosCheckBox.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpSwapMegaEvosCheckBox.toolTipText"/>
                     </properties>
                   </component>
                 </children>
@@ -1540,6 +1606,17 @@
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.tpAllowAlternateFormesCheckBox.toolTipText"/>
                     </properties>
                   </component>
+                  <component id="af4d1" class="javax.swing.JCheckBox" binding="tpSwapMegaEvosCheckBox">
+                    <constraints>
+                      <grid row="7" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.tpSwapMegaEvosCheckBox.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.tpSwapMegaEvosCheckBox.toolTipText"/>
+                    </properties>
+                  </component>
                 </children>
               </grid>
               <hspacer id="66d2">
@@ -1835,6 +1912,17 @@
                       <snapToTicks value="true"/>
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpSetMinimumCatchRateSlider.toolTipText"/>
                       <value value="1"/>
+                    </properties>
+                  </component>
+                  <component id="438d0" class="javax.swing.JCheckBox" binding="wpAllowAltFormesCheckBox">
+                    <constraints>
+                      <grid row="9" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpAllowAltFormesCheckBox.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpAllowAltFormesCheckBox.toolTipText"/>
                     </properties>
                   </component>
                 </children>

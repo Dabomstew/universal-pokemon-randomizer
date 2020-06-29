@@ -213,6 +213,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public boolean hasStarterAltFormes() {
+        return true;
+    }
+
+    @Override
     public int starterCount() {
         return 3;
     }
@@ -275,6 +280,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     @Override
     public boolean canChangeStaticPokemon() {
         return false;
+    }
+
+    @Override
+    public boolean hasStaticAltFormes() {
+        return true;
     }
 
     @Override
@@ -409,6 +419,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public boolean hasWildAltFormes() {
+        return true;
+    }
+
+    @Override
     public void removeTradeEvolutions(boolean changeMoveEvos) {
         // do nothing for now
     }
@@ -536,6 +551,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     @Override
     public String abilityName(int number) {
         return null;
+    }
+
+    @Override
+    public boolean hasMegaEvolutions() {
+        return true;
     }
 
     @Override

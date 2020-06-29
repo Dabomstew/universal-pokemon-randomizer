@@ -91,16 +91,18 @@ public interface RomHandler {
     // Was for before CUE's compressors were found and arm9 was untouchable.
     boolean canChangeStarters();
 
+    boolean hasStarterAltFormes();
+
     int starterCount();
 
     // Randomizer: Pokemon stats
 
     // Run the stats shuffler on each Pokemon.
-    void shufflePokemonStats(boolean evolutionSanity);
+    void shufflePokemonStats(boolean evolutionSanity, boolean megaEvolutionSanity);
 
     // Randomise stats following evolutions for proportions or not (see
     // tooltips)
-    void randomizePokemonStats(boolean evolutionSanity);
+    void randomizePokemonStats(boolean evolutionSanity, boolean megaEvolutionSanity);
 
     // Update base stats to gen6
     void updatePokemonStats();
@@ -120,7 +122,7 @@ public interface RomHandler {
 
     // Give a random Pokemon who has 2 evolution stages
     // Should make a good starter Pokemon
-    Pokemon random2EvosPokemon();
+    Pokemon random2EvosPokemon(boolean allowAltFormes);
 
     // Randomizer: types
 
@@ -133,7 +135,7 @@ public interface RomHandler {
     // randomise Pokemon types, with a switch on whether evolutions
     // should follow the same types or not.
     // some evolutions dont anyway, e.g. Eeveelutions, Hitmons
-    void randomizePokemonTypes(boolean evolutionSanity);
+    void randomizePokemonTypes(boolean evolutionSanity, boolean megaEvolutionSanity);
 
     // Randomizer: pokemon abilities
     int abilitiesPerPokemon();
@@ -143,7 +145,9 @@ public interface RomHandler {
     String abilityName(int number);
 
     void randomizeAbilities(boolean evolutionSanity, boolean allowWonderGuard, boolean banTrappingAbilities,
-                            boolean banNegativeAbilities, boolean banBadAbilities);
+                            boolean banNegativeAbilities, boolean banBadAbilities, boolean megaEvolutionSanity);
+
+    boolean hasMegaEvolutions();
 
     // Randomizer: wild pokemon
     List<EncounterSet> getEncounters(boolean useTimeOfDay);
@@ -151,16 +155,18 @@ public interface RomHandler {
     void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters);
 
     void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-                          boolean noLegendaries, boolean balanceShakingGrass, int levelModifier);
+                          boolean noLegendaries, boolean balanceShakingGrass, int levelModifier, boolean allowAltFormes);
 
     void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
-                            boolean usePowerLevels, boolean noLegendaries, int levelModifier);
+                            boolean usePowerLevels, boolean noLegendaries, int levelModifier, boolean allowAltformes);
 
-    void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries, int levelModifier);
+    void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries, int levelModifier, boolean allowAltFormes);
 
     void onlyChangeWildLevels(int levelModifier);
 
     boolean hasTimeBasedEncounters();
+
+    boolean hasWildAltFormes();
 
     List<Pokemon> bannedForWildEncounters();
 
@@ -175,10 +181,10 @@ public interface RomHandler {
 
     void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
                                int levelModifier, boolean distributionSetting, boolean mainPlaythroughSetting,
-                               boolean includeFormes);
+                               boolean includeFormes, boolean swapMegaEvos);
 
     void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
-                               boolean noEarlyWonderGuard, int levelModifier, boolean includeFormes);
+                               boolean noEarlyWonderGuard, int levelModifier, boolean includeFormes, boolean swapMegaEvos1);
 
     void rivalCarriesStarter();
 
@@ -237,9 +243,11 @@ public interface RomHandler {
 
     boolean setStaticPokemon(List<StaticEncounter> staticPokemon);
 
-    void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMusketeers, boolean limit600);
+    void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMusketeers, boolean limit600, boolean allowAltFormes, boolean swapMegaEvos1);
 
     boolean canChangeStaticPokemon();
+
+    boolean hasStaticAltFormes();
 
     List<Pokemon> bannedForStaticPokemon();
 

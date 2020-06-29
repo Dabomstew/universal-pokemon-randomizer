@@ -2164,13 +2164,28 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public boolean hasWildAltFormes() {
+        return false;
+    }
+
+    @Override
     public boolean canChangeStaticPokemon() {
         return romEntry.staticPokemonSupport;
     }
 
     @Override
+    public boolean hasStaticAltFormes() {
+        return false;
+    }
+
+    @Override
     public boolean canChangeStarters() {
         return true;
+    }
+
+    @Override
+    public boolean hasStarterAltFormes() {
+        return false;
     }
 
     @Override
@@ -2527,6 +2542,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         return abilityNames.get(number);
     }
 
+    @Override
+    public boolean hasMegaEvolutions() {
+        return false;
+    }
+
     private List<Integer> getFieldItems() {
         List<Integer> fieldItems = new ArrayList<>();
         // normal items
@@ -2775,9 +2795,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                         IngameTrade oldTrade = oldTrades.get(trade);
                         IngameTrade newTrade = trades.get(trade);
                         Map<String, String> replacements = new TreeMap<>();
-                        replacements.put(oldTrade.givenPokemon.name, newTrade.givenPokemon.name);
+                        replacements.put(oldTrade.givenPokemon.name.toUpperCase(), newTrade.givenPokemon.name);
                         if (oldTrade.requestedPokemon != newTrade.requestedPokemon) {
-                            replacements.put(oldTrade.requestedPokemon.name, newTrade.requestedPokemon.name);
+                            replacements.put(oldTrade.requestedPokemon.name.toUpperCase(), newTrade.requestedPokemon.name);
                         }
                         replaceAllStringsInEntry(textOffsets[trade], replacements, Gen4Constants.textCharsPerLine);
                         // hgss override for one set of strings that appears 2x
