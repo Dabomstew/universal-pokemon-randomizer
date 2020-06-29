@@ -1242,6 +1242,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                 boolean swapThisMegaEvo = swapMegaEvos && tp.canMegaEvolve();
                 boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
                 Pokemon newPK;
+                Pokemon oldPK = tp.pokemon;
+                if (tp.forme > 0) {
+                    oldPK = getAltFormeOfPokemon(oldPK, tp.forme);
+                }
                 // new code for distribution with mainplaythrough balancing
                 // what we do is check each trainer if they're part of the main playthrough
                 // if so, add to placement history, if not, pure random
@@ -1251,7 +1255,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                         newPK =
                                 pickReplacement(
-                                        tp.pokemon,
+                                        oldPK,
                                         usePowerLevels,
                                         null,
                                         noLegendaries,
@@ -1274,7 +1278,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     else { // pure random when trainer not in pool
                         newPK =
                                 pickReplacement(
-                                        tp.pokemon,
+                                        oldPK,
                                         usePowerLevels,
                                         null,
                                         noLegendaries,
@@ -1296,7 +1300,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 } else {
                     newPK =
                             pickReplacement(
-                                    tp.pokemon,
+                                    oldPK,
                                     usePowerLevels,
                                     null,
                                     noLegendaries,
@@ -1415,9 +1419,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                 for (TrainerPokemon tp : t.pokemon) {
                     boolean swapThisMegaEvo = swapMegaEvos && tp.canMegaEvolve();
                     boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
+                    Pokemon oldPK = tp.pokemon;
+                    if (tp.forme > 0) {
+                        oldPK = getAltFormeOfPokemon(oldPK, tp.forme);
+                    }
                     Pokemon newPK =
                             pickReplacement(
-                                    tp.pokemon,
+                                    oldPK,
                                     usePowerLevels,
                                     typeForGroup,
                                     noLegendaries,
@@ -1475,9 +1483,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                 for (TrainerPokemon tp : t.pokemon) {
                     boolean swapThisMegaEvo = swapMegaEvos && tp.canMegaEvolve();
                     boolean shedAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
+                    Pokemon oldPK = tp.pokemon;
+                    if (tp.forme > 0) {
+                        oldPK = getAltFormeOfPokemon(oldPK, tp.forme);
+                    }
                     Pokemon newPK =
                             pickReplacement(
-                                    tp.pokemon,
+                                    oldPK,
                                     usePowerLevels,
                                     typeForTrainer,
                                     noLegendaries,

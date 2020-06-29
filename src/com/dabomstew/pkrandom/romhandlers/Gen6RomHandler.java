@@ -33,7 +33,6 @@ import com.dabomstew.pkrandom.ctr.AMX;
 import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.Mini;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.*;
 import pptxt.N3DSTxtHandler;
 
@@ -43,7 +42,6 @@ import java.io.*;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class Gen6RomHandler extends Abstract3DSRomHandler {
 
@@ -690,6 +688,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     @Override
     public List<MegaEvolution> getMegaEvolutions() {
         return megaEvolutions;
+    }
+
+    @Override
+    public Pokemon getAltFormeOfPokemon(Pokemon pk, int forme) {
+        int pokeNum = absolutePokeNumByBaseForme.getOrDefault(pk.number,dummyAbsolutePokeNums).getOrDefault(forme,0);
+        return pokeNum != 0 ? pokes[pokeNum] : pk;
     }
 
     @Override

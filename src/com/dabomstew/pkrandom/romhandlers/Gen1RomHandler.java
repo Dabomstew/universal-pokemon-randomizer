@@ -980,6 +980,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return new ArrayList<>();
     }
 
+    @Override
+    public Pokemon getAltFormeOfPokemon(Pokemon pk, int forme) {
+        return pk;
+    }
+
     public List<Trainer> getTrainers() {
         int traineroffset = romEntry.getValue("TrainerDataTableOffset");
         int traineramount = Gen1Constants.trainerClassCount;

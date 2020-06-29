@@ -576,6 +576,12 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public Pokemon getAltFormeOfPokemon(Pokemon pk, int forme) {
+        int pokeNum = Gen4Constants.getAbsolutePokeNumByBaseForme(pk.number,forme);
+        return pokeNum != 0 ? pokes[pokeNum] : pk;
+    }
+
+    @Override
     public List<Pokemon> getStarters() {
         if (romEntry.romType == Gen4Constants.Type_HGSS) {
             List<Integer> tailOffsets = RomFunctions.search(arm9, Gen4Constants.hgssStarterCodeSuffix);

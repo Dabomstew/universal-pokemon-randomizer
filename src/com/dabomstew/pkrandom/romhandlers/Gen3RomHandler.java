@@ -1555,6 +1555,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    public Pokemon getAltFormeOfPokemon(Pokemon pk, int forme) {
+        return pk;
+    }
+
+    @Override
     public Map<Integer, List<MoveLearnt>> getMovesLearnt() {
         Map<Integer, List<MoveLearnt>> movesets = new TreeMap<>();
         int baseOffset = romEntry.getValue("PokemonMovesets");
