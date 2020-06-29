@@ -251,8 +251,8 @@ public class NCCH {
         fNew.write((int) newExefsLength / media_unit_size);
 
         // Then, reconstruct the romfs
-        // TODO: is that 5 * media_unit_size unnecessary? It's what ORAS does
-        long newRomfsOffset = header_and_exheader_size + logoLength + plainLength + newExefsLength + (5 * media_unit_size);
+        // TODO: Fix the yet-unsolved alignment issues in rebuildRomfs when you remove this align
+        long newRomfsOffset = alignLong(header_and_exheader_size + logoLength + plainLength + newExefsLength, 4096);
         long newRomfsLength = rebuildRomfs(fNew, newRomfsOffset);
         fNew.seek(0x1B0);
         fNew.write((int) newRomfsOffset / media_unit_size);
@@ -309,6 +309,7 @@ public class NCCH {
 
         // Write the file data, then hash the data and write the hashes in reverse order
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        long endingOffset = 0;
         for (int i = 0; i < newHeaders.length; i++) {
             ExefsFileHeader header = newHeaders[i];
             if (header != null) {
@@ -326,19 +327,19 @@ public class NCCH {
                 byte[] hash = digest.digest(data);
                 fNew.seek(newExefsOffset + 0x200 - ((i + 1) * 0x20));
                 fNew.write(hash);
+                endingOffset = newExefsOffset + 0x200 + header.offset + header.size;
             }
         }
 
-        // Get the total length of all the file data
-        long fileDataLength = code.length;
-        for (ExefsFileHeader header : extraExefsFiles) {
-            fileDataLength += header.size;
+        // Pad to media unit size
+        fNew.seek(endingOffset);
+        long exefsLength = endingOffset - newExefsOffset;
+        while (exefsLength % media_unit_size != 0) {
+            fNew.writeByte(0);
+            exefsLength++;
         }
 
-        // Pad to media unit size
-        fileDataLength = alignLong(fileDataLength, media_unit_size);
-        long length = 0x200 + fileDataLength;
-        return length;
+        return exefsLength;
     }
 
     private long rebuildRomfs(RandomAccessFile fNew, long newRomfsOffset) throws IOException, NoSuchAlgorithmException {
