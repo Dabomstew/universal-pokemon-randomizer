@@ -312,22 +312,23 @@ public class Settings {
         // 1: pokemon base stats & abilities
         out.write(makeByteSelected(baseStatsFollowEvolutions, baseStatisticsMod == BaseStatisticsMod.RANDOM,
                 baseStatisticsMod == BaseStatisticsMod.SHUFFLE, baseStatisticsMod == BaseStatisticsMod.UNCHANGED,
-                standardizeEXPCurves, updateBaseStats));
+                standardizeEXPCurves, updateBaseStats, baseStatsFollowMegaEvolutions));
 
         // 2: pokemon types & more general options
         out.write(makeByteSelected(typesMod == TypesMod.RANDOM_FOLLOW_EVOLUTIONS,
                 typesMod == TypesMod.COMPLETELY_RANDOM, typesMod == TypesMod.UNCHANGED, raceMode, blockBrokenMoves,
-                limitPokemon));
+                limitPokemon, typesFollowMegaEvolutions));
 
         // 3: v171: changed to the abilities byte
 
         out.write(makeByteSelected(abilitiesMod == AbilitiesMod.UNCHANGED, abilitiesMod == AbilitiesMod.RANDOMIZE,
-                allowWonderGuard, abilitiesFollowEvolutions, banTrappingAbilities, banNegativeAbilities, banBadAbilities));
+                allowWonderGuard, abilitiesFollowEvolutions, banTrappingAbilities, banNegativeAbilities, banBadAbilities,
+                abilitiesFollowMegaEvolutions));
 
         // 4: starter pokemon stuff
         out.write(makeByteSelected(startersMod == StartersMod.CUSTOM, startersMod == StartersMod.COMPLETELY_RANDOM,
                 startersMod == StartersMod.UNCHANGED, startersMod == StartersMod.RANDOM_WITH_TWO_EVOLUTIONS,
-                randomizeStartersHeldItems, banBadRandomStarterHeldItems));
+                randomizeStartersHeldItems, banBadRandomStarterHeldItems, allowStarterAltFormes));
 
         // @5 dropdowns
         write2ByteInt(out, customStarters[0] - 1);
@@ -374,7 +375,7 @@ public class Settings {
                 staticPokemonMod == StaticPokemonMod.RANDOM_MATCHING,
                 staticPokemonMod == StaticPokemonMod.COMPLETELY_RANDOM,
                 staticPokemonMod == StaticPokemonMod.SIMILAR_STRENGTH,
-                limitMusketeers, limit600));
+                limitMusketeers, limit600, allowStaticAltFormes, swapStaticMegaEvos));
 
         // 18 tm randomization
         // new stuff 162
@@ -427,7 +428,8 @@ public class Settings {
                 rivalCarriesStarterThroughout,
                 trainersMatchTypingDistribution,
                 trainersBlockLegendaries,
-                trainersBlockEarlyWonderGuard));
+                trainersBlockEarlyWonderGuard,
+                swapTrainerMegaEvos));
 
         
 
@@ -466,7 +468,8 @@ public class Settings {
                 blockBrokenMovesetMoves,
                 blockBrokenTMMoves,
                 blockBrokenTutorMoves,
-                allowTrainerAlternateFormes));
+                allowTrainerAlternateFormes,
+                allowWildAltFormes));
         
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -511,6 +514,7 @@ public class Settings {
         settings.setStandardizeEXPCurves(restoreState(data[1], 4));
         settings.setBaseStatsFollowEvolutions(restoreState(data[1], 0));
         settings.setUpdateBaseStats(restoreState(data[1], 5));
+        settings.setBaseStatsFollowMegaEvolutions(restoreState(data[1],6));
 
         settings.setTypesMod(restoreEnum(TypesMod.class, data[2], 2, // UNCHANGED
                 0, // RANDOM_FOLLOW_EVOLUTIONS
@@ -519,6 +523,7 @@ public class Settings {
         settings.setRaceMode(restoreState(data[2], 3));
         settings.setBlockBrokenMoves(restoreState(data[2], 4));
         settings.setLimitPokemon(restoreState(data[2], 5));
+        settings.setTypesFollowMegaEvolutions(restoreState(data[2],6));
 
         settings.setAbilitiesMod(restoreEnum(AbilitiesMod.class, data[3], 0, // UNCHANGED
                 1 // RANDOMIZE
@@ -528,6 +533,7 @@ public class Settings {
         settings.setBanTrappingAbilities(restoreState(data[3], 4));
         settings.setBanNegativeAbilities(restoreState(data[3], 5));
         settings.setBanBadAbilities(restoreState(data[3], 6));
+        settings.setAbilitiesFollowMegaEvolutions(restoreState(data[3],7));
 
         settings.setStartersMod(restoreEnum(StartersMod.class, data[4], 2, // UNCHANGED
                 0, // CUSTOM
@@ -536,6 +542,7 @@ public class Settings {
         ));
         settings.setRandomizeStartersHeldItems(restoreState(data[4], 4));
         settings.setBanBadRandomStarterHeldItems(restoreState(data[4], 5));
+        settings.setAllowStarterAltFormes(restoreState(data[4],6));
 
         settings.setCustomStarters(new int[] { FileFunctions.read2ByteInt(data, 5) + 1,
                 FileFunctions.read2ByteInt(data, 7) + 1, FileFunctions.read2ByteInt(data, 9) + 1 });
@@ -591,6 +598,8 @@ public class Settings {
         
         settings.setLimitMusketeers(restoreState(data[17], 4));
         settings.setLimit600(restoreState(data[17], 5));
+        settings.setAllowStaticAltFormes(restoreState(data[17], 6));
+        settings.setSwapStaticMegaEvos(restoreState(data[17], 7));
         
         settings.setTmsMod(restoreEnum(TMsMod.class, data[18], 4, // UNCHANGED
                 3 // RANDOM
@@ -660,6 +669,7 @@ public class Settings {
         settings.setTrainersMatchTypingDistribution(restoreState(data[27], 2));
         settings.setTrainersBlockLegendaries(restoreState(data[27], 3));
         settings.setTrainersBlockEarlyWonderGuard(restoreState(data[27], 4));
+        settings.setSwapTrainerMegaEvos(restoreState(data[27], 5));
 
         
         // gen restrictions
@@ -697,6 +707,7 @@ public class Settings {
         settings.setBlockBrokenTutorMoves(restoreState(data[39],5));
 
         settings.setAllowTrainerAlternateFormes(restoreState(data[39],6));
+        settings.setAllowWildAltFormes(restoreState(data[39],7));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
