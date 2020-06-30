@@ -220,15 +220,17 @@ public class NCCH {
         // The logo is small enough (8KB) to just read the whole thing into memory. Write it to the new ROM directly
         // after the header, then update the new ROM's logo offset
         long logoOffset = ncchStartingOffset + FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x198) * media_unit_size;
-        long logoLength = ncchStartingOffset + FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x19C) * media_unit_size;
-        byte[] logo = new byte[(int) logoLength];
-        baseRom.seek(logoOffset);
-        baseRom.readFully(logo);
-        long newLogoOffset = header_and_exheader_size;
-        fNew.seek(newLogoOffset);
-        fNew.write(logo);
-        fNew.seek(0x198);
-        fNew.write((int) newLogoOffset / media_unit_size);
+        long logoLength = FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x19C) * media_unit_size;
+        if (logoLength > 0) {
+            byte[] logo = new byte[(int) logoLength];
+            baseRom.seek(logoOffset);
+            baseRom.readFully(logo);
+            long newLogoOffset = header_and_exheader_size;
+            fNew.seek(newLogoOffset);
+            fNew.write(logo);
+            fNew.seek(0x198);
+            fNew.write((int) newLogoOffset / media_unit_size);
+        }
 
         // The plain region is even smaller (1KB) so repeat the same process
         long plainOffset = ncchStartingOffset + FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x190) * media_unit_size;
