@@ -217,6 +217,16 @@ public class NCCH {
         baseRom.readFully(header);
         fNew.write(header);
 
+        // Just in case they were set wrong in the original header, let's correctly set the
+        // bytes in the header to indicate the output ROM is decrypted
+        byte[] flags = new byte[8];
+        baseRom.seek(ncchStartingOffset + 0x188);
+        baseRom.readFully(flags);
+        flags[3] = 0;
+        flags[7] = 4;
+        fNew.seek(0x188);
+        fNew.write(flags);
+
         // The logo is small enough (8KB) to just read the whole thing into memory. Write it to the new ROM directly
         // after the header, then update the new ROM's logo offset
         long logoOffset = ncchStartingOffset + FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x198) * media_unit_size;
