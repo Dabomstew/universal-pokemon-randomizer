@@ -217,30 +217,44 @@ public class NCCH {
         baseRom.readFully(header);
         fNew.write(header);
 
+        // Just in case they were set wrong in the original header, let's correctly set the
+        // bytes in the header to indicate the output ROM is decrypted
+        byte[] flags = new byte[8];
+        baseRom.seek(ncchStartingOffset + 0x188);
+        baseRom.readFully(flags);
+        flags[3] = 0;
+        flags[7] = 4;
+        fNew.seek(0x188);
+        fNew.write(flags);
+
         // The logo is small enough (8KB) to just read the whole thing into memory. Write it to the new ROM directly
         // after the header, then update the new ROM's logo offset
         long logoOffset = ncchStartingOffset + FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x198) * media_unit_size;
-        long logoLength = ncchStartingOffset + FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x19C) * media_unit_size;
-        byte[] logo = new byte[(int) logoLength];
-        baseRom.seek(logoOffset);
-        baseRom.readFully(logo);
-        long newLogoOffset = header_and_exheader_size;
-        fNew.seek(newLogoOffset);
-        fNew.write(logo);
-        fNew.seek(0x198);
-        fNew.write((int) newLogoOffset / media_unit_size);
+        long logoLength = FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x19C) * media_unit_size;
+        if (logoLength > 0) {
+            byte[] logo = new byte[(int) logoLength];
+            baseRom.seek(logoOffset);
+            baseRom.readFully(logo);
+            long newLogoOffset = header_and_exheader_size;
+            fNew.seek(newLogoOffset);
+            fNew.write(logo);
+            fNew.seek(0x198);
+            fNew.write((int) newLogoOffset / media_unit_size);
+        }
 
         // The plain region is even smaller (1KB) so repeat the same process
         long plainOffset = ncchStartingOffset + FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x190) * media_unit_size;
-        long plainLength = (int) ncchStartingOffset + FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x194) * media_unit_size;
-        byte[] plain = new byte[(int) plainLength];
-        baseRom.seek(plainOffset);
-        baseRom.readFully(plain);
-        long newPlainOffset = header_and_exheader_size + logoLength;
-        fNew.seek(newPlainOffset);
-        fNew.write(plain);
-        fNew.seek(0x190);
-        fNew.write((int) newPlainOffset / media_unit_size);
+        long plainLength = FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x194) * media_unit_size;
+        if (plainLength > 0) {
+            byte[] plain = new byte[(int) plainLength];
+            baseRom.seek(plainOffset);
+            baseRom.readFully(plain);
+            long newPlainOffset = header_and_exheader_size + logoLength;
+            fNew.seek(newPlainOffset);
+            fNew.write(plain);
+            fNew.seek(0x190);
+            fNew.write((int) newPlainOffset / media_unit_size);
+        }
 
         // Now, reconstruct the exefs based on our new version of .code
         long newExefsOffset = header_and_exheader_size + logoLength + plainLength;
