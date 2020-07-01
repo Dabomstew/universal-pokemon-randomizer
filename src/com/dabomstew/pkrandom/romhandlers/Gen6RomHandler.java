@@ -1298,7 +1298,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 String trainerName = tnamesMap.getOrDefault(i - 1, "UNKNOWN");
                 tr.fullDisplayName = trainerClass + " " + trainerName;
 
-
                 for (int poke = 0; poke < numPokes; poke++) {
                     // Structure is
                     // IV SB LV LV SP SP FRM FRM
@@ -1367,7 +1366,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData) {
+    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
         Iterator<Trainer> allTrainers = trainerData.iterator();
         boolean isORAS = romEntry.romType == Gen6Constants.Type_ORAS;
         try {
@@ -1390,6 +1389,13 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
                 int numPokes = tr.pokemon.size();
                 trainer[offset+3] = (byte) numPokes;
+
+                if (doubleBattleMode) {
+                    if (trainer[2] == 0) {
+                        trainer[2] = 1;
+                        trainer[12] |= 0x80; // Flag that needs to be set for trainers not to attack their own pokes
+                    }
+                }
 
                 int bytesNeeded = 8 * numPokes;
                 if ((tr.poketype & 1) == 1) {

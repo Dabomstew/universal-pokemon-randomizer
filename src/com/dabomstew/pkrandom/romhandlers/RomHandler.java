@@ -179,7 +179,7 @@ public interface RomHandler {
     
     List<Integer> getEvolutionItems();
 
-    void setTrainers(List<Trainer> trainerData);
+    void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode);
 
     void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
                                int levelModifier, boolean distributionSetting, boolean mainPlaythroughSetting,
@@ -193,6 +193,10 @@ public interface RomHandler {
     void forceFullyEvolvedTrainerPokes(int minLevel);
 
     void onlyChangeTrainerLevels(int levelModifier);
+
+    void addTrainerPokemon(int additionalNormal, int additionalImportant, int additionalBoss);
+
+    void doubleBattleMode();
 
     // Randomizer: moves
 

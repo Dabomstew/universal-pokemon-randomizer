@@ -1435,7 +1435,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData) {
+    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
         int baseOffset = romEntry.getValue("TrainerData");
         int amount = romEntry.getValue("TrainerCount");
         int entryLen = romEntry.getValue("TrainerEntrySize");

@@ -268,7 +268,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData) {
+    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
         // do nothing for now
     }
 

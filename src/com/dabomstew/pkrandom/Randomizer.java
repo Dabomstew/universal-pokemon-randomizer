@@ -313,6 +313,15 @@ public class Randomizer {
         }
 
         // Trainer Pokemon
+        romHandler.addTrainerPokemon(
+                settings.getAdditionalRegularTrainerPokemon(),
+                settings.getAdditionalImportantTrainerPokemon(),
+                settings.getAdditionalBossTrainerPokemon());
+
+        if (settings.isDoubleBattleMode()) {
+            romHandler.doubleBattleMode();
+        }
+
         if (settings.getTrainersMod() == Settings.TrainersMod.RANDOM) {
             romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),

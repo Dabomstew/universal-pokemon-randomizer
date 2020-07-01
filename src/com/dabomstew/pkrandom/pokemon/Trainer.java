@@ -87,4 +87,17 @@ public class Trainer implements Comparable<Trainer> {
     public int compareTo(Trainer o) {
         return offset - o.offset;
     }
+
+    public boolean isBoss() {
+        return tag != null && (tag.startsWith("ELITE") || tag.startsWith("CHAMPION")
+                || tag.startsWith("UBER") || tag.endsWith("LEADER"));
+    }
+
+    public boolean isImportant() {
+        return tag != null && (tag.startsWith("RIVAL") || tag.startsWith("FRIEND") || tag.endsWith("STRONG"));
+    }
+
+    public boolean skipImportant() {
+        return (tag.startsWith("RIVAL1-") || tag.startsWith("FRIEND1-") || tag.startsWith("NOTSTRONG"));
+    }
 }

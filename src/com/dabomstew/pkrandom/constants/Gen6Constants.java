@@ -736,15 +736,25 @@ public class Gen6Constants {
 
     public static void tagTrainersXY(List<Trainer> trs) {
 
-        // Gym Trainers & Leaders
-        tag(trs,"GYM1", 39, 40, 48, 6);
-        tag(trs,"GYM2",64, 63, 106, 105, 76);
-        tag(trs,"GYM3",83, 84, 146, 147, 21);
-        tag(trs,"GYM4", 121, 122, 123, 124, 22);
-        tag(trs,"GYM5", 461, 462, 463, 464, 465, 466, 467, 468, 469, 28, 29, 30, 23);
-        tag(trs,"GYM6", 245, 250, 248, 243, 24);
-        tag(trs,"GYM7", 170, 171, 172, 365, 366, 25);
-        tag(trs,"GYM8", 168, 169, 31, 32, 26);
+        // Gym Trainers
+        tag(trs,"GYM1", 39, 40, 48);
+        tag(trs,"GYM2",64, 63, 106, 105);
+        tag(trs,"GYM3",83, 84, 146, 147);
+        tag(trs,"GYM4", 121, 122, 123, 124);
+        tag(trs,"GYM5", 461, 462, 463, 464, 465, 466, 467, 468, 469, 28, 29, 30);
+        tag(trs,"GYM6", 245, 250, 248, 243);
+        tag(trs,"GYM7", 170, 171, 172, 365, 366);
+        tag(trs,"GYM8", 168, 169, 31, 32);
+
+        // Gym Leaders
+        tag(trs,"GYM1-LEADER", 6);
+        tag(trs,"GYM2-LEADER",76);
+        tag(trs,"GYM3-LEADER",21);
+        tag(trs,"GYM4-LEADER", 22);
+        tag(trs,"GYM5-LEADER", 23);
+        tag(trs,"GYM6-LEADER", 24);
+        tag(trs,"GYM7-LEADER", 25);
+        tag(trs,"GYM8-LEADER", 26);
 
         // Elite 4
         tag(trs, 269, "ELITE1"); // Malva
@@ -753,7 +763,10 @@ public class Gen6Constants {
         tag(trs, 270, "ELITE4"); // Drasna
         tag(trs, 276, "CHAMPION"); // Diantha
 
-        tag(trs,"THEMED:LYSANDRE", 303, 525, 526);
+        tag(trs,"THEMED:LYSANDRE-LEADER", 303, 525, 526);
+        tag(trs,"STRONG", 174, 175, 304, 344, 345, 346, 347, 348, 349, 350, 351, 470, 471, 472, 473, 474, 475, 476, 477, 478, 479); // Team Flare Admins lol
+        tag(trs,"STRONG", 324, 325, 438, 439, 573); // Tierno and Trevor
+        tag(trs,"STRONG", 327, 328); // Sycamore
 
         // Rival - Serena
         tagRival(trs, "RIVAL1", 596);
@@ -787,14 +800,24 @@ public class Gen6Constants {
     public static void tagTrainersORAS(List<Trainer> trs) {
 
         // Gym Trainers & Leaders
-        tag(trs,"GYM1",562, 22, 667, 561);
-        tag(trs,"GYM2",60, 56, 59, 563);
-        tag(trs,"GYM3",34, 568, 614, 35, 567);
-        tag(trs,"GYM4",81, 824, 83, 615, 823, 613, 85, 569);
-        tag(trs,"GYM5",63, 64, 65, 66, 67, 68, 69, 570);
-        tag(trs,"GYM6",115, 517, 516, 118, 730, 571);
-        tag(trs,"GYM7",157, 158, 159, 226, 320, 225, 552);
-        tag(trs,"GYM8",647, 342, 594, 646, 338, 339, 340, 341, 572, 943); // Includes Wallace in Delta Episode
+        tag(trs,"GYM1",562, 22, 667);
+        tag(trs,"GYM2",60, 56, 59);
+        tag(trs,"GYM3",34, 568, 614, 35);
+        tag(trs,"GYM4",81, 824, 83, 615, 823, 613, 85);
+        tag(trs,"GYM5",63, 64, 65, 66, 67, 68, 69);
+        tag(trs,"GYM6",115, 517, 516, 118, 730);
+        tag(trs,"GYM7",157, 158, 159, 226, 320, 225);
+        tag(trs,"GYM8",647, 342, 594, 646, 338, 339, 340, 341); // Includes Wallace in Delta Episode
+
+        // Gym Leaders
+        tag(trs,"GYM1-LEADER", 561);
+        tag(trs,"GYM2-LEADER",563);
+        tag(trs,"GYM3-LEADER",567);
+        tag(trs,"GYM4-LEADER", 569);
+        tag(trs,"GYM5-LEADER", 570);
+        tag(trs,"GYM6-LEADER", 571);
+        tag(trs,"GYM7-LEADER", 552);
+        tag(trs,"GYM8-LEADER", 572, 943);
 
         // Elite 4
         tag(trs, "ELITE1", 553, 909); // Sidney
@@ -803,13 +826,13 @@ public class Gen6Constants {
         tag(trs, "ELITE4", 556, 912); // Drake
         tag(trs, "CHAMPION", 557, 913, 680, 942); // Steven (includes other appearances)
 
-        tag(trs,"THEMED:MAXIE", 235, 236, 271);
-        tag(trs,"THEMED:ARCHIE",178, 231, 266);
-        tag(trs,"THEMED:MATT",683, 684, 685, 686, 687);
-        tag(trs,"THEMED:SHELLY",688,689,690);
-        tag(trs,"THEMED:TABITHA",691,692,693);
-        tag(trs,"THEMED:COURTNEY",694,695,696,697,698);
-        tag(trs, "THEMED:WALLY", 518, 583, 944, 946);
+        tag(trs,"THEMED:MAXIE-LEADER", 235, 236, 271);
+        tag(trs,"THEMED:ARCHIE-LEADER",178, 231, 266);
+        tag(trs,"THEMED:MATT-STRONG",683, 684, 685, 686, 687);
+        tag(trs,"THEMED:SHELLY-STRONG",688,689,690);
+        tag(trs,"THEMED:TABITHA-STRONG",691,692,693);
+        tag(trs,"THEMED:COURTNEY-STRONG",694,695,696,697,698);
+        tag(trs, "THEMED:WALLY-STRONG", 518, 583, 944, 946);
 
         // Rival - Brendan
         tagRival(trs, "RIVAL1", 1);
