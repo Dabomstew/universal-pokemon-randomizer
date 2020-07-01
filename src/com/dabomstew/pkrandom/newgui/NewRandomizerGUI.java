@@ -1,7 +1,6 @@
 package com.dabomstew.pkrandom.newgui;
 
 import com.dabomstew.pkrandom.*;
-import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
@@ -209,6 +208,14 @@ public class NewRandomizerGUI {
     private JCheckBox stpSwapMegaEvosCheckBox;
     private JCheckBox tpSwapMegaEvosCheckBox;
     private JCheckBox wpAllowAltFormesCheckBox;
+    private JCheckBox tpDoubleBattleModeCheckBox;
+    private JCheckBox tpBossTrainersCheckBox;
+    private JCheckBox tpImportantTrainersCheckBox;
+    private JCheckBox tpRegularTrainersCheckBox;
+    private JSpinner tpBossTrainersSpinner;
+    private JSpinner tpImportantTrainersSpinner;
+    private JSpinner tpRegularTrainersSpinner;
+    private JLabel tpAdditionalPokemonForLabel;
 
     private static JFrame frame;
 
@@ -348,6 +355,9 @@ public class NewRandomizerGUI {
         });
         limitPokemonCheckBox.addActionListener(e -> enableOrDisableSubControls());
         tpAllowAlternateFormesCheckBox.addActionListener(e -> enableOrDisableSubControls());
+        tpBossTrainersCheckBox.addActionListener(e -> enableOrDisableSubControls());
+        tpImportantTrainersCheckBox.addActionListener(e -> enableOrDisableSubControls());
+        tpRegularTrainersCheckBox.addActionListener(e -> enableOrDisableSubControls());
     }
 
     private void initFileChooserDirectories() {
@@ -387,6 +397,28 @@ public class NewRandomizerGUI {
 
         settingsMenu = new JPopupMenu();
 
+        SpinnerModel bossTrainerModel = new SpinnerNumberModel(
+                1,
+                1,
+                5,
+                1
+        );
+        SpinnerModel importantTrainerModel = new SpinnerNumberModel(
+                1,
+                1,
+                5,
+                1
+        );
+        SpinnerModel regularTrainerModel = new SpinnerNumberModel(
+                1,
+                1,
+                5,
+                1
+        );
+
+        tpBossTrainersSpinner.setModel(bossTrainerModel);
+        tpImportantTrainersSpinner.setModel(importantTrainerModel);
+        tpRegularTrainersSpinner.setModel(regularTrainerModel);
 
         customNamesEditorMenuItem = new JMenuItem();
         customNamesEditorMenuItem.setText(bundle.getString("GUI.customNamesEditorMenuItem.text"));
@@ -914,6 +946,13 @@ public class NewRandomizerGUI {
         tpPercentageLevelModifierSlider.setValue(settings.getTrainersLevelModifier());
         tpAllowAlternateFormesCheckBox.setSelected(settings.isAllowTrainerAlternateFormes());
         tpSwapMegaEvosCheckBox.setSelected(settings.isSwapTrainerMegaEvos());
+        tpDoubleBattleModeCheckBox.setSelected(settings.isDoubleBattleMode());
+        tpBossTrainersCheckBox.setSelected(settings.getAdditionalBossTrainerPokemon() > 0);
+        tpBossTrainersSpinner.setValue(settings.getAdditionalBossTrainerPokemon() > 0 ? settings.getAdditionalBossTrainerPokemon() : 1);
+        tpImportantTrainersCheckBox.setSelected(settings.getAdditionalImportantTrainerPokemon() > 0);
+        tpImportantTrainersSpinner.setValue(settings.getAdditionalImportantTrainerPokemon() > 0 ? settings.getAdditionalImportantTrainerPokemon() : 1);
+        tpRegularTrainersCheckBox.setSelected(settings.getAdditionalRegularTrainerPokemon() > 0);
+        tpRegularTrainersSpinner.setValue(settings.getAdditionalRegularTrainerPokemon() > 0 ? settings.getAdditionalRegularTrainerPokemon() : 1);
 
         wpARCatchEmAllModeRadioButton
                 .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL);
@@ -1100,6 +1139,10 @@ public class NewRandomizerGUI {
         settings.setTrainersLevelModifier(tpPercentageLevelModifierSlider.getValue());
         settings.setAllowTrainerAlternateFormes(tpAllowAlternateFormesCheckBox.isSelected() && tpAllowAlternateFormesCheckBox.isVisible());
         settings.setSwapTrainerMegaEvos(tpSwapMegaEvosCheckBox.isSelected() && tpSwapMegaEvosCheckBox.isVisible());
+        settings.setDoubleBattleMode(tpDoubleBattleModeCheckBox.isVisible() && tpDoubleBattleModeCheckBox.isSelected());
+        settings.setAdditionalBossTrainerPokemon(tpBossTrainersCheckBox.isVisible() && tpBossTrainersCheckBox.isSelected() ? (int)tpBossTrainersSpinner.getValue() : 0);
+        settings.setAdditionalImportantTrainerPokemon(tpImportantTrainersCheckBox.isVisible() && tpImportantTrainersCheckBox.isSelected() ? (int)tpImportantTrainersSpinner.getValue() : 0);
+        settings.setAdditionalRegularTrainerPokemon(tpRegularTrainersCheckBox.isVisible() && tpRegularTrainersCheckBox.isSelected() ? (int)tpRegularTrainersSpinner.getValue() : 0);
 
         settings.setWildPokemonMod(wpUnchangedRadioButton.isSelected(), wpRandomRadioButton.isSelected(), wpArea1To1RadioButton.isSelected(),
                 wpGlobal1To1RadioButton.isSelected());
@@ -1561,6 +1604,28 @@ public class NewRandomizerGUI {
         tpSwapMegaEvosCheckBox.setVisible(true);
         tpSwapMegaEvosCheckBox.setEnabled(false);
         tpSwapMegaEvosCheckBox.setSelected(false);
+        tpDoubleBattleModeCheckBox.setVisible(true);
+        tpDoubleBattleModeCheckBox.setEnabled(false);
+        tpDoubleBattleModeCheckBox.setSelected(false);
+        tpBossTrainersCheckBox.setVisible(true);
+        tpBossTrainersCheckBox.setEnabled(false);
+        tpBossTrainersCheckBox.setSelected(false);
+        tpImportantTrainersCheckBox.setVisible(true);
+        tpImportantTrainersCheckBox.setEnabled(false);
+        tpImportantTrainersCheckBox.setSelected(false);
+        tpRegularTrainersCheckBox.setVisible(true);
+        tpRegularTrainersCheckBox.setEnabled(false);
+        tpRegularTrainersCheckBox.setSelected(false);
+        tpBossTrainersSpinner.setVisible(true);
+        tpBossTrainersSpinner.setEnabled(false);
+        tpBossTrainersSpinner.setValue(1);
+        tpImportantTrainersSpinner.setVisible(true);
+        tpImportantTrainersSpinner.setEnabled(false);
+        tpImportantTrainersSpinner.setValue(1);
+        tpRegularTrainersSpinner.setVisible(true);
+        tpRegularTrainersSpinner.setEnabled(false);
+        tpRegularTrainersSpinner.setValue(1);
+        tpAdditionalPokemonForLabel.setVisible(true);
         wpUnchangedRadioButton.setVisible(true);
         wpUnchangedRadioButton.setEnabled(false);
         wpUnchangedRadioButton.setSelected(false);
@@ -1929,6 +1994,21 @@ public class NewRandomizerGUI {
             tpForceFullyEvolvedAtCheckBox.setEnabled(true);
             tpPercentageLevelModifierCheckBox.setEnabled(true);
             tpSwapMegaEvosCheckBox.setVisible(romHandler.hasMegaEvolutions());
+            tpDoubleBattleModeCheckBox.setVisible(pokemonGeneration >= 4);
+            tpDoubleBattleModeCheckBox.setEnabled(pokemonGeneration >= 4);
+
+            boolean additionalPokemonAvailable = pokemonGeneration >= 4;
+
+            tpAdditionalPokemonForLabel.setVisible(additionalPokemonAvailable);
+            tpBossTrainersCheckBox.setVisible(additionalPokemonAvailable);
+            tpBossTrainersCheckBox.setEnabled(additionalPokemonAvailable);
+            tpBossTrainersSpinner.setVisible(additionalPokemonAvailable);
+            tpImportantTrainersCheckBox.setVisible(additionalPokemonAvailable);
+            tpImportantTrainersCheckBox.setEnabled(additionalPokemonAvailable);
+            tpImportantTrainersSpinner.setVisible(additionalPokemonAvailable);
+            tpRegularTrainersCheckBox.setVisible(additionalPokemonAvailable);
+            tpRegularTrainersCheckBox.setEnabled(additionalPokemonAvailable);
+            tpRegularTrainersSpinner.setVisible(additionalPokemonAvailable);
 
             tpRandomizeTrainerNamesCheckBox.setEnabled(true);
             tpRandomizeTrainerClassNamesCheckBox.setEnabled(true);
@@ -2237,6 +2317,27 @@ public class NewRandomizerGUI {
         } else {
             tpPercentageLevelModifierSlider.setEnabled(false);
             tpPercentageLevelModifierSlider.setValue(0);
+        }
+
+        if (tpBossTrainersCheckBox.isSelected()) {
+            tpBossTrainersSpinner.setEnabled(true);
+        } else {
+            tpBossTrainersSpinner.setEnabled(false);
+            tpBossTrainersSpinner.setValue(1);
+        }
+
+        if (tpImportantTrainersCheckBox.isSelected()) {
+            tpImportantTrainersSpinner.setEnabled(true);
+        } else {
+            tpImportantTrainersSpinner.setEnabled(false);
+            tpImportantTrainersSpinner.setValue(1);
+        }
+
+        if (tpRegularTrainersCheckBox.isSelected()) {
+            tpRegularTrainersSpinner.setEnabled(true);
+        } else {
+            tpRegularTrainersSpinner.setEnabled(false);
+            tpRegularTrainersSpinner.setValue(1);
         }
 
         if (!spUnchangedRadioButton.isSelected() || !this.tpUnchangedRadioButton.isSelected()) {

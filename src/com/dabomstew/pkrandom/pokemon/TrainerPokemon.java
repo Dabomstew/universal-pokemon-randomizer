@@ -56,4 +56,26 @@ public class TrainerPokemon {
         }
         return false;
     }
+
+    public TrainerPokemon copy() {
+        TrainerPokemon tpk = new TrainerPokemon();
+        tpk.pokemon = pokemon;
+        tpk.level = level;
+
+        tpk.move1 = move1;
+        tpk.move2 = move2;
+        tpk.move3 = move3;
+        tpk.move4 = move4;
+
+        tpk.AILevel = AILevel;
+        tpk.heldItem = heldItem;
+        tpk.ability = ability;
+        tpk.forme = forme;
+        tpk.formeSuffix = formeSuffix;
+        tpk.absolutePokeNumber = absolutePokeNumber;
+
+        tpk.resetMoves = resetMoves;
+
+        return tpk;
+    }
 }

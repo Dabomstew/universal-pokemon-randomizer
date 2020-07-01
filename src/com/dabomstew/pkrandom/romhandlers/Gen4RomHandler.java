@@ -576,6 +576,12 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public Pokemon getAltFormeOfPokemon(Pokemon pk, int forme) {
+        int pokeNum = Gen4Constants.getAbsolutePokeNumByBaseForme(pk.number,forme);
+        return pokeNum != 0 ? pokes[pokeNum] : pk;
+    }
+
+    @Override
     public List<Pokemon> getStarters() {
         if (romEntry.romType == Gen4Constants.Type_HGSS) {
             List<Integer> tailOffsets = RomFunctions.search(arm9, Gen4Constants.hgssStarterCodeSuffix);
@@ -1492,6 +1498,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 int numPokes = trainer[3] & 0xFF;
                 int pokeOffs = 0;
                 tr.fullDisplayName = tclasses.get(tr.trainerclass) + " " + tnames.get(i - 1);
+                System.out.println("a");
                 // printBA(trpoke);
                 for (int poke = 0; poke < numPokes; poke++) {
                     int ailevel = trpoke[pokeOffs] & 0xFF;
@@ -1557,7 +1564,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         return null;
     }
     @Override
-    public void setTrainers(List<Trainer> trainerData) {
+    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
         Iterator<Trainer> allTrainers = trainerData.iterator();
         try {
             NARCArchive trainers = this.readNARC(romEntry.getString("TrainerData"));
@@ -1577,6 +1584,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 trainer[0] = (byte) tr.poketype;
                 int numPokes = tr.pokemon.size();
                 trainer[3] = (byte) numPokes;
+
+                if (doubleBattleMode) {
+                    if (tr.isBoss() || tr.isImportant()) {
+                        if (!tr.skipImportant()) {
+                            if (trainer[2] == 0) {
+                                trainer[16] |= 2;
+                            }
+                        }
+                    }
+                }
 
                 int bytesNeeded = 6 * numPokes;
                 if (romEntry.romType != Gen4Constants.Type_DP) {

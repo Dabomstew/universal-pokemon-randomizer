@@ -1455,17 +1455,17 @@ public class Gen5Constants {
         tag(trs, "GYM8", 0x109, 0x10A, 0x10F, 0x10E, 0x110, 0x10B, 0x113, 0x112);
 
         // Gym Leaders
-        tag(trs, 0x0C, "GYM1"); // Cilan
-        tag(trs, 0x0B, "GYM9"); // Chili
-        tag(trs, 0x0D, "GYM10"); // Cress
-        tag(trs, 0x15, "GYM2"); // Lenora
-        tag(trs, 0x16, "GYM3"); // Burgh
-        tag(trs, 0x17, "GYM4"); // Elesa
-        tag(trs, 0x18, "GYM5"); // Clay
-        tag(trs, 0x19, "GYM6"); // Skyla
-        tag(trs, 0x83, "GYM7"); // Brycen
-        tag(trs, 0x84, "GYM8"); // Iris or Drayden
-        tag(trs, 0x85, "GYM8"); // Iris or Drayden
+        tag(trs, 0x0C, "GYM1-LEADER"); // Cilan
+        tag(trs, 0x0B, "GYM9-LEADER"); // Chili
+        tag(trs, 0x0D, "GYM10-LEADER"); // Cress
+        tag(trs, 0x15, "GYM2-LEADER"); // Lenora
+        tag(trs, 0x16, "GYM3-LEADER"); // Burgh
+        tag(trs, 0x17, "GYM4-LEADER"); // Elesa
+        tag(trs, 0x18, "GYM5-LEADER"); // Clay
+        tag(trs, 0x19, "GYM6-LEADER"); // Skyla
+        tag(trs, 0x83, "GYM7-LEADER"); // Brycen
+        tag(trs, 0x84, "GYM8-LEADER"); // Iris or Drayden
+        tag(trs, 0x85, "GYM8-LEADER"); // Iris or Drayden
 
         // Elite 4
         tag(trs, 0xE4, "ELITE1"); // Shauntal
@@ -1504,6 +1504,10 @@ public class Gen5Constants {
         tagRivalBW(trs, "FRIEND4", 0x1EB);
         tagRivalBW(trs, "FRIEND5", 0x1EE);
         tagRivalBW(trs, "FRIEND6", 0x252);
+
+        // N
+        tag(trs, "NOTSTRONG", 64);
+        tag(trs, "STRONG", 65, 89, 218);
     }
 
     public static void tagTrainersBW2(List<Trainer> trs) {
@@ -1531,14 +1535,14 @@ public class Gen5Constants {
         // Order: Normal, Challenge Mode
         // All the challenge mode teams are near the end of the ROM
         // which makes things a bit easier.
-        tag(trs, "GYM1", 0x9c, 0x2fc); // Cheren
-        tag(trs, "GYM2", 0x9d, 0x2fd); // Roxie
-        tag(trs, "GYM3", 0x9a, 0x2fe); // Burgh
-        tag(trs, "GYM4", 0x99, 0x2ff); // Elesa
-        tag(trs, "GYM5", 0x9e, 0x300); // Clay
-        tag(trs, "GYM6", 0x9b, 0x301); // Skyla
-        tag(trs, "GYM7", 0x9f, 0x302); // Drayden
-        tag(trs, "GYM8", 0xa0, 0x303); // Marlon
+        tag(trs, "GYM1-LEADER", 0x9c, 0x2fc); // Cheren
+        tag(trs, "GYM2-LEADER", 0x9d, 0x2fd); // Roxie
+        tag(trs, "GYM3-LEADER", 0x9a, 0x2fe); // Burgh
+        tag(trs, "GYM4-LEADER", 0x99, 0x2ff); // Elesa
+        tag(trs, "GYM5-LEADER", 0x9e, 0x300); // Clay
+        tag(trs, "GYM6-LEADER", 0x9b, 0x301); // Skyla
+        tag(trs, "GYM7-LEADER", 0x9f, 0x302); // Drayden
+        tag(trs, "GYM8-LEADER", 0xa0, 0x303); // Marlon
 
         // Elite 4 / Champion
         // Order: Normal, Challenge Mode, Rematch, Rematch Challenge Mode
@@ -1568,13 +1572,13 @@ public class Gen5Constants {
         tag(trs, "GYM1", 0x173, 0x278, 0x32E);
 
         // The Restaurant Brothers
-        tag(trs, "GYM9", 0x1f0); // Cilan
-        tag(trs, "GYM10", 0x1ee); // Chili
-        tag(trs, "GYM11", 0x1ef); // Cress
+        tag(trs, "GYM9-LEADER", 0x1f0); // Cilan
+        tag(trs, "GYM10-LEADER", 0x1ee); // Chili
+        tag(trs, "GYM11-LEADER", 0x1ef); // Cress
 
         // Themed Trainers
-        tag(trs, "THEMED:ZINZOLIN", 0x2c0, 0x248, 0x15b);
-        tag(trs, "THEMED:COLRESS", 0x166, 0x158, 0x32d, 0x32f);
+        tag(trs, "THEMED:ZINZOLIN-STRONG", 0x2c0, 0x248, 0x15b);
+        tag(trs, "THEMED:COLRESS-STRONG", 0x166, 0x158, 0x32d, 0x32f);
         tag(trs, "THEMED:SHADOW1", 0x247, 0x15c, 0x2af);
         tag(trs, "THEMED:SHADOW2", 0x1f2, 0x2b0);
         tag(trs, "THEMED:SHADOW3", 0x1f3, 0x2b1);

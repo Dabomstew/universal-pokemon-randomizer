@@ -385,14 +385,14 @@ public class Gen4Constants {
         tag(trs, "GYM8", 0x158, 0x155, 0x12d, 0x12e, 0x12f, 0x11d, 0x119);
 
         // Gym Leaders
-        tag(trs, 0xf6, "GYM1");
-        tag(trs, 0x13b, "GYM2");
-        tag(trs, 0x13d, "GYM3"); // Maylene
-        tag(trs, 0x13c, "GYM4"); // Wake
-        tag(trs, 0x13e, "GYM5"); // Fantina
-        tag(trs, 0xfa, "GYM6"); // Byron
-        tag(trs, 0x13f, "GYM7"); // Candice
-        tag(trs, 0x140, "GYM8"); // Volkner
+        tag(trs, 0xf6, "GYM1-LEADER");
+        tag(trs, 0x13b, "GYM2-LEADER");
+        tag(trs, 0x13d, "GYM3-LEADER"); // Maylene
+        tag(trs, 0x13c, "GYM4-LEADER"); // Wake
+        tag(trs, 0x13e, "GYM5-LEADER"); // Fantina
+        tag(trs, 0xfa, "GYM6-LEADER"); // Byron
+        tag(trs, 0x13f, "GYM7-LEADER"); // Candice
+        tag(trs, 0x140, "GYM8-LEADER"); // Volkner
 
         // Elite 4
         tag(trs, 0x105, "ELITE1");
@@ -416,10 +416,10 @@ public class Gen4Constants {
         tagRivalConsecutive(trs, "RIVAL8", 0x349);
 
         // Themed
-        tag(trs, "THEMED:CYRUS", 0x193, 0x194);
-        tag(trs, "THEMED:MARS", 0x127, 0x195, 0x210);
-        tag(trs, "THEMED:JUPITER", 0x196, 0x197);
-        tag(trs, "THEMED:SATURN", 0x198, 0x199);
+        tag(trs, "THEMED:CYRUS-LEADER", 0x193, 0x194);
+        tag(trs, "THEMED:MARS-STRONG", 0x127, 0x195, 0x210);
+        tag(trs, "THEMED:JUPITER-STRONG", 0x196, 0x197);
+        tag(trs, "THEMED:SATURN-STRONG", 0x198, 0x199);
 
         // Lucas & Dawn tag battles
         tagFriendConsecutive(trs, "FRIEND1", 0x265);
@@ -441,14 +441,14 @@ public class Gen4Constants {
         tag(trs, "GYM8", 0x158, 0x155, 0x12d, 0x12e, 0x12f, 0x11d, 0x119, 0x14b);
 
         // Gym Leaders
-        tag(trs, 0xf6, "GYM1");
-        tag(trs, 0x13b, "GYM2");
-        tag(trs, 0x13e, "GYM3"); // Fantina
-        tag(trs, 0x13d, "GYM4"); // Maylene
-        tag(trs, 0x13c, "GYM5"); // Wake
-        tag(trs, 0xfa, "GYM6"); // Byron
-        tag(trs, 0x13f, "GYM7"); // Candice
-        tag(trs, 0x140, "GYM8"); // Volkner
+        tag(trs, 0xf6, "GYM1-LEADER");
+        tag(trs, 0x13b, "GYM2-LEADER");
+        tag(trs, 0x13e, "GYM3-LEADER"); // Fantina
+        tag(trs, 0x13d, "GYM4-LEADER"); // Maylene
+        tag(trs, 0x13c, "GYM5-LEADER"); // Wake
+        tag(trs, 0xfa, "GYM6-LEADER"); // Byron
+        tag(trs, 0x13f, "GYM7-LEADER"); // Candice
+        tag(trs, 0x140, "GYM8-LEADER"); // Volkner
 
         // Elite 4
         tag(trs, 0x105, "ELITE1");
@@ -495,10 +495,10 @@ public class Gen4Constants {
         tag(trs, 0x366, "CHAMPION");
 
         // Themed
-        tag(trs, "THEMED:CYRUS", 0x391, 0x193, 0x194);
-        tag(trs, "THEMED:MARS", 0x127, 0x195, 0x210, 0x39e);
-        tag(trs, "THEMED:JUPITER", 0x196, 0x197, 0x39f);
-        tag(trs, "THEMED:SATURN", 0x198, 0x199);
+        tag(trs, "THEMED:CYRUS-LEADER", 0x391, 0x193, 0x194);
+        tag(trs, "THEMED:MARS-STRONG", 0x127, 0x195, 0x210, 0x39e);
+        tag(trs, "THEMED:JUPITER-STRONG", 0x196, 0x197, 0x39f);
+        tag(trs, "THEMED:SATURN-STRONG", 0x198, 0x199);
 
         // Lucas & Dawn tag battles
         tagFriendConsecutive(trs, "FRIEND1", 0x265);
@@ -528,23 +528,23 @@ public class Gen4Constants {
         tag(trs, "GYM16", 0x2a9, 0x2aa, 0x2ab, 0x2ac);
 
         // Gym Leaders
-        tag(trs, 0x14, "GYM1");
-        tag(trs, 0x15, "GYM2");
-        tag(trs, 0x1e, "GYM3");
-        tag(trs, 0x1f, "GYM4");
-        tag(trs, 0x22, "GYM5");
-        tag(trs, 0x21, "GYM6");
-        tag(trs, 0x20, "GYM7");
-        tag(trs, 0x23, "GYM8");
+        tag(trs, 0x14, "GYM1-LEADER");
+        tag(trs, 0x15, "GYM2-LEADER");
+        tag(trs, 0x1e, "GYM3-LEADER");
+        tag(trs, 0x1f, "GYM4-LEADER");
+        tag(trs, 0x22, "GYM5-LEADER");
+        tag(trs, 0x21, "GYM6-LEADER");
+        tag(trs, 0x20, "GYM7-LEADER");
+        tag(trs, 0x23, "GYM8-LEADER");
 
-        tag(trs, 0xFD, "GYM9");
-        tag(trs, 0xFE, "GYM10");
-        tag(trs, 0xFF, "GYM11");
-        tag(trs, 0x100, "GYM12");
-        tag(trs, 0x101, "GYM13");
-        tag(trs, 0x102, "GYM14");
-        tag(trs, 0x103, "GYM15");
-        tag(trs, 0x105, "GYM16");
+        tag(trs, 0xFD, "GYM9-LEADER");
+        tag(trs, 0xFE, "GYM10-LEADER");
+        tag(trs, 0xFF, "GYM11-LEADER");
+        tag(trs, 0x100, "GYM12-LEADER");
+        tag(trs, 0x101, "GYM13-LEADER");
+        tag(trs, 0x102, "GYM14-LEADER");
+        tag(trs, 0x103, "GYM15-LEADER");
+        tag(trs, 0x105, "GYM16-LEADER");
 
         // Elite 4
         tag(trs, 0xf5, "ELITE1");
@@ -557,23 +557,23 @@ public class Gen4Constants {
         tag(trs, 0x104, "UBER");
 
         // Gym Rematches
-        tag(trs, 0x2c8, "GYM1");
-        tag(trs, 0x2c9, "GYM2");
-        tag(trs, 0x2ca, "GYM3");
-        tag(trs, 0x2cb, "GYM4");
-        tag(trs, 0x2ce, "GYM5");
-        tag(trs, 0x2cd, "GYM6");
-        tag(trs, 0x2cc, "GYM7");
-        tag(trs, 0x2cf, "GYM8");
+        tag(trs, 0x2c8, "GYM1-LEADER");
+        tag(trs, 0x2c9, "GYM2-LEADER");
+        tag(trs, 0x2ca, "GYM3-LEADER");
+        tag(trs, 0x2cb, "GYM4-LEADER");
+        tag(trs, 0x2ce, "GYM5-LEADER");
+        tag(trs, 0x2cd, "GYM6-LEADER");
+        tag(trs, 0x2cc, "GYM7-LEADER");
+        tag(trs, 0x2cf, "GYM8-LEADER");
 
-        tag(trs, 0x2d0, "GYM9");
-        tag(trs, 0x2d1, "GYM10");
-        tag(trs, 0x2d2, "GYM11");
-        tag(trs, 0x2d3, "GYM12");
-        tag(trs, 0x2d4, "GYM13");
-        tag(trs, 0x2d5, "GYM14");
-        tag(trs, 0x2d6, "GYM15");
-        tag(trs, 0x2d7, "GYM16");
+        tag(trs, 0x2d0, "GYM9-LEADER");
+        tag(trs, 0x2d1, "GYM10-LEADER");
+        tag(trs, 0x2d2, "GYM11-LEADER");
+        tag(trs, 0x2d3, "GYM12-LEADER");
+        tag(trs, 0x2d4, "GYM13-LEADER");
+        tag(trs, 0x2d5, "GYM14-LEADER");
+        tag(trs, 0x2d6, "GYM15-LEADER");
+        tag(trs, 0x2d7, "GYM16-LEADER");
 
         // Elite 4 Rematch
         tag(trs, 0x2be, "ELITE1");
@@ -610,11 +610,12 @@ public class Gen4Constants {
         tag(trs, 0x2DD, "CHAMPION");
 
         // Themed
-        tag(trs, "THEMED:ARIANA", 0x1df, 0x1de);
-        tag(trs, "THEMED:PETREL", 0x1e8, 0x1e7);
-        tag(trs, "THEMED:PROTON", 0x1e6, 0x2c2);
+        tag(trs, "THEMED:ARIANA-STRONG", 0x1df, 0x1de);
+        tag(trs, "THEMED:PETREL-STRONG", 0x1e8, 0x1e7);
+        tag(trs, "THEMED:PROTON-STRONG", 0x1e6, 0x2c2);
         tag(trs, "THEMED:SPROUTTOWER", 0x2b, 0x33, 0x34, 0x35, 0x36, 0x37, 0x122);
 
+        tag(trs,"LEADER",485); // Archer
     }
 
     private static void tag(List<Trainer> allTrainers, int number, String tag) {

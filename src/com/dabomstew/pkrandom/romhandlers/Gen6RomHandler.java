@@ -33,7 +33,6 @@ import com.dabomstew.pkrandom.ctr.AMX;
 import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.Mini;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.*;
 import pptxt.N3DSTxtHandler;
 
@@ -43,7 +42,6 @@ import java.io.*;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class Gen6RomHandler extends Abstract3DSRomHandler {
 
@@ -701,6 +699,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public Pokemon getAltFormeOfPokemon(Pokemon pk, int forme) {
+        int pokeNum = absolutePokeNumByBaseForme.getOrDefault(pk.number,dummyAbsolutePokeNums).getOrDefault(forme,0);
+        return pokeNum != 0 ? pokes[pokeNum] : pk;
+    }
+
+    @Override
     public List<Pokemon> getStarters() {
         List<StaticEncounter> starters = new ArrayList<>();
         try {
@@ -1302,7 +1306,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 String trainerName = tnamesMap.getOrDefault(i - 1, "UNKNOWN");
                 tr.fullDisplayName = trainerClass + " " + trainerName;
 
-
                 for (int poke = 0; poke < numPokes; poke++) {
                     // Structure is
                     // IV SB LV LV SP SP FRM FRM
@@ -1371,7 +1374,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData) {
+    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
         Iterator<Trainer> allTrainers = trainerData.iterator();
         boolean isORAS = romEntry.romType == Gen6Constants.Type_ORAS;
         try {
@@ -1394,6 +1397,13 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
                 int numPokes = tr.pokemon.size();
                 trainer[offset+3] = (byte) numPokes;
+
+                if (doubleBattleMode) {
+                    if (trainer[offset+2] == 0) {
+                        trainer[offset+2] = 1;
+                        trainer[offset+12] |= 0x80; // Flag that needs to be set for trainers not to attack their own pokes
+                    }
+                }
 
                 int bytesNeeded = 8 * numPokes;
                 if ((tr.poketype & 1) == 1) {

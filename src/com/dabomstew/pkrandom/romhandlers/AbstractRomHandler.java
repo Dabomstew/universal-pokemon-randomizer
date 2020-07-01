@@ -1443,6 +1443,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                 boolean swapThisMegaEvo = swapMegaEvos && tp.canMegaEvolve();
                 boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
                 Pokemon newPK;
+                Pokemon oldPK = tp.pokemon;
+                if (tp.forme > 0) {
+                    oldPK = getAltFormeOfPokemon(oldPK, tp.forme);
+                }
                 // new code for distribution with mainplaythrough balancing
                 // what we do is check each trainer if they're part of the main playthrough
                 // if so, add to placement history, if not, pure random
@@ -1452,7 +1456,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                         newPK =
                                 pickReplacement(
-                                        tp.pokemon,
+                                        oldPK,
                                         usePowerLevels,
                                         null,
                                         noLegendaries,
@@ -1475,7 +1479,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     else { // pure random when trainer not in pool
                         newPK =
                                 pickReplacement(
-                                        tp.pokemon,
+                                        oldPK,
                                         usePowerLevels,
                                         null,
                                         noLegendaries,
@@ -1497,7 +1501,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 } else {
                     newPK =
                             pickReplacement(
-                                    tp.pokemon,
+                                    oldPK,
                                     usePowerLevels,
                                     null,
                                     noLegendaries,
@@ -1534,7 +1538,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // Save it all up
-        this.setTrainers(currentTrainers);
+        this.setTrainers(currentTrainers, false);
     }
 
     @Override
@@ -1616,9 +1620,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                 for (TrainerPokemon tp : t.pokemon) {
                     boolean swapThisMegaEvo = swapMegaEvos && tp.canMegaEvolve();
                     boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
+                    Pokemon oldPK = tp.pokemon;
+                    if (tp.forme > 0) {
+                        oldPK = getAltFormeOfPokemon(oldPK, tp.forme);
+                    }
                     Pokemon newPK =
                             pickReplacement(
-                                    tp.pokemon,
+                                    oldPK,
                                     usePowerLevels,
                                     typeForGroup,
                                     noLegendaries,
@@ -1676,9 +1684,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                 for (TrainerPokemon tp : t.pokemon) {
                     boolean swapThisMegaEvo = swapMegaEvos && tp.canMegaEvolve();
                     boolean shedAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
+                    Pokemon oldPK = tp.pokemon;
+                    if (tp.forme > 0) {
+                        oldPK = getAltFormeOfPokemon(oldPK, tp.forme);
+                    }
                     Pokemon newPK =
                             pickReplacement(
-                                    tp.pokemon,
+                                    oldPK,
                                     usePowerLevels,
                                     typeForTrainer,
                                     noLegendaries,
@@ -1713,7 +1725,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // Save it all up
-        this.setTrainers(currentTrainers);
+        this.setTrainers(currentTrainers, false);
     }
 
     @Override
@@ -1722,7 +1734,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Trainer> currentTrainers = this.getTrainers();
         rivalCarriesStarterUpdate(currentTrainers, "RIVAL", 1);
         rivalCarriesStarterUpdate(currentTrainers, "FRIEND", 2);
-        this.setTrainers(currentTrainers);
+        this.setTrainers(currentTrainers, false);
     }
 
     @Override
@@ -1741,7 +1753,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        this.setTrainers(currentTrainers);
+        this.setTrainers(currentTrainers, false);
     }
 
     @Override
@@ -1753,8 +1765,78 @@ public abstract class AbstractRomHandler implements RomHandler {
                     tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
                 }
             }
-            this.setTrainers(currentTrainers);
+            this.setTrainers(currentTrainers, false);
         }
+    }
+
+    @Override
+    public void addTrainerPokemon(int additionalNormal, int additionalImportant, int additionalBoss) {
+
+        if (additionalNormal == 0 && additionalImportant == 0 && additionalBoss == 0) {
+            return;
+        }
+
+        List<Trainer> currentTrainers = this.getTrainers();
+        for (Trainer t: currentTrainers) {
+            int additional;
+            if (t.isBoss()) {
+                additional = additionalBoss;
+            } else if (t.isImportant()) {
+                if (t.skipImportant()) continue;
+                additional = additionalImportant;
+            } else {
+                additional = additionalNormal;
+            }
+
+            if (additional == 0) {
+                continue;
+            }
+
+            int lowest = 100;
+            List<TrainerPokemon> potentialPokes = new ArrayList<>();
+
+            // First pass: find lowest level
+            for (TrainerPokemon tpk: t.pokemon) {
+                if (tpk.level < lowest) {
+                    lowest = tpk.level;
+                }
+            }
+
+            // Second pass: find all Pokemon at lowest level
+            for (TrainerPokemon tpk: t.pokemon) {
+                if (tpk.level == lowest) {
+                    potentialPokes.add(tpk);
+                }
+            }
+
+            for (int i = 0; i < additional; i++) {
+                if (t.pokemon.size() == 6) break;
+                t.pokemon.add(potentialPokes.get(i % potentialPokes.size()).copy());
+            }
+        }
+        this.setTrainers(currentTrainers, false);
+    }
+
+    @Override
+    public void doubleBattleMode() {
+
+        List<Trainer> currentTrainers = this.getTrainers();
+        for (Trainer t: currentTrainers) {
+
+            if (generationOfPokemon() == 4 || generationOfPokemon() == 5) {
+                if (!t.isBoss() && !t.isImportant()) {
+                    continue;
+                }
+            }
+
+            if (t.pokemon.size() != 1 || (t.tag != null && (t.tag.startsWith("RIVAL1-") || t.tag.startsWith("FRIEND1-")))) {
+                continue;
+            }
+
+
+            t.pokemon.add(t.pokemon.get(0).copy());
+        }
+        this.setTrainers(currentTrainers, true);
     }
 
     // MOVE DATA
@@ -2522,7 +2604,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        this.setTrainers(trainers);
+        this.setTrainers(trainers, false);
 
         // tms
         List<Integer> tmMoves = this.getTMMoves();
@@ -4782,7 +4864,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     
     private void setPlacementHistory(Pokemon newPK) {
         Integer history = getPlacementHistory(newPK);
-         System.out.println("Current history: " + newPK.name + " : " + history);
+//         System.out.println("Current history: " + newPK.name + " : " + history);
         placementHistory.put(newPK, history + 1);        
     }
 
@@ -4957,7 +5039,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public boolean typeInGame(Type type) {
-        return !type.isHackOnly;
+        return !type.isHackOnly && !(type == Type.FAIRY && generationOfPokemon() < 6);
     }
 
     @Override

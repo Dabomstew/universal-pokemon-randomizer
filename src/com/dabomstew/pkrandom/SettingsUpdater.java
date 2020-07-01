@@ -250,6 +250,15 @@ public class SettingsUpdater {
             insertExtraByte(39, (byte) 1);
         }
 
+        if (oldVersion < 311) {
+
+            // double battle mode + boss/important extra pokemon
+            insertExtraByte(40, (byte) 0);
+
+            // regular extra pokemon
+            insertExtraByte(41, (byte) 0);
+        }
+
         // fix checksum
         CRC32 checksum = new CRC32();
         checksum.update(dataBlock, 0, actualDataLength - 8);

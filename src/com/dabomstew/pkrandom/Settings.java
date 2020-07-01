@@ -47,7 +47,7 @@ public class Settings {
 
     public static final int VERSION = Version.VERSION;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 40;
+    public static final int LENGTH_OF_SETTINGS_DATA = 42;
 
     private CustomNamesSet customNames;
 
@@ -164,6 +164,10 @@ public class Settings {
     private int trainersLevelModifier = 0; // -50 ~ 50
     private boolean allowTrainerAlternateFormes;
     private boolean swapTrainerMegaEvos;
+    private int additionalBossTrainerPokemon = 0;
+    private int additionalImportantTrainerPokemon = 0;
+    private int additionalRegularTrainerPokemon = 0;
+    private boolean doubleBattleMode;
 
     public enum WildPokemonMod {
         UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING
@@ -470,6 +474,10 @@ public class Settings {
                 blockBrokenTutorMoves,
                 allowTrainerAlternateFormes,
                 allowWildAltFormes));
+
+        out.write((doubleBattleMode ? 0x1 : 0) | (additionalBossTrainerPokemon << 1) | (additionalImportantTrainerPokemon << 4)); // There's one bit left here
+
+        out.write(additionalRegularTrainerPokemon);
         
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -708,6 +716,11 @@ public class Settings {
 
         settings.setAllowTrainerAlternateFormes(restoreState(data[39],6));
         settings.setAllowWildAltFormes(restoreState(data[39],7));
+
+        settings.setDoubleBattleMode(restoreState(data[40], 0));
+        settings.setAdditionalBossTrainerPokemon((data[40] & 0xE) >> 1);
+        settings.setAdditionalImportantTrainerPokemon((data[40] & 0x70) >> 4);
+        settings.setAdditionalRegularTrainerPokemon((data[41] & 0x7));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1405,6 +1418,38 @@ public class Settings {
 
     public void setSwapTrainerMegaEvos(boolean swapTrainerMegaEvos) {
         this.swapTrainerMegaEvos = swapTrainerMegaEvos;
+    }
+
+    public int getAdditionalBossTrainerPokemon() {
+        return additionalBossTrainerPokemon;
+    }
+
+    public void setAdditionalBossTrainerPokemon(int additional) {
+        this.additionalBossTrainerPokemon = additional;
+    }
+
+    public int getAdditionalImportantTrainerPokemon() {
+        return additionalImportantTrainerPokemon;
+    }
+
+    public void setAdditionalImportantTrainerPokemon(int additional) {
+        this.additionalImportantTrainerPokemon = additional;
+    }
+
+    public int getAdditionalRegularTrainerPokemon() {
+        return additionalRegularTrainerPokemon;
+    }
+
+    public void setAdditionalRegularTrainerPokemon(int additional) {
+        this.additionalRegularTrainerPokemon = additional;
+    }
+
+    public boolean isDoubleBattleMode() {
+        return doubleBattleMode;
+    }
+
+    public void setDoubleBattleMode(boolean doubleBattleMode) {
+        this.doubleBattleMode = doubleBattleMode;
     }
 
     public WildPokemonMod getWildPokemonMod() {
