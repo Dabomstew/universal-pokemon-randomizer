@@ -76,6 +76,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         private String name;
         private String romCode;
         private String titleId;
+        private String acronym;
         private int romType;
         private boolean staticPokemonSupport = true, copyStaticPokemon = true;
         private Map<String, String> strings = new HashMap<>();
@@ -140,6 +141,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                             }
                         } else if (r[0].equals("TitleId")) {
                             current.titleId = r[1];
+                        } else if (r[0].equals("Acronym")) {
+                            current.acronym = r[1];
                         } else if (r[0].equals("CopyFrom")) {
                             for (RomEntry otherEntry : roms) {
                                 if (r[1].equalsIgnoreCase(otherEntry.romCode)) {
@@ -551,6 +554,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+    }
+
+    @Override
+    protected String getGameAcronym() {
+        return romEntry.acronym;
     }
 
     private void savePokemonStats() {

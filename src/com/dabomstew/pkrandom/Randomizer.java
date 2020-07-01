@@ -591,7 +591,7 @@ public class Randomizer {
         if (saveAsDirectory) {
             romHandler.saveRomDirectory(filename);
         } else {
-            romHandler.saveRomFile(filename);
+            romHandler.saveRomFile(filename, seed);
         }
 
         // Log tail

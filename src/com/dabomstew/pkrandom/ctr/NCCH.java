@@ -41,6 +41,7 @@ public class NCCH {
     private String titleId;
     private long exefsOffset, romfsOffset, fileDataOffset;
     private ExefsFileHeader codeFileHeader;
+    private SMDH smdh;
     private List<ExefsFileHeader> extraExefsFiles;
     private List<FileMetadata> fileMetadataList;
     private Map<String, RomfsFile> romfsFiles;
@@ -120,14 +121,19 @@ public class NCCH {
             fileHeaders[i] = new ExefsFileHeader(exefsHeaderData, i * 0x10);
         }
 
-        // For the purposes of randomization, we only care about the .code file
-        // (i.e., the game's executable), so treat it separately
         extraExefsFiles = new ArrayList<>();
         for (ExefsFileHeader fileHeader : fileHeaders) {
             if (fileHeader.isValid() && fileHeader.filename.equals(".code")) {
                 codeFileHeader = fileHeader;
             } else if (fileHeader.isValid()) {
                 extraExefsFiles.add(fileHeader);
+            }
+
+            if (fileHeader.isValid() && fileHeader.filename.equals("icon")) {
+                byte[] smdhBytes = new byte[fileHeader.size];
+                baseRom.seek(exefsOffset + 0x200 + fileHeader.offset);
+                baseRom.readFully(smdhBytes);
+                smdh = new SMDH(smdhBytes);
             }
         }
     }
@@ -205,7 +211,7 @@ public class NCCH {
         }
     }
 
-    public void saveAsNCCH(String filename) throws IOException, NoSuchAlgorithmException {
+    public void saveAsNCCH(String filename, String gameAcronym, long seed) throws IOException, NoSuchAlgorithmException {
         this.reopenROM();
 
         // Initialise new ROM
@@ -256,7 +262,11 @@ public class NCCH {
             fNew.write((int) newPlainOffset / media_unit_size);
         }
 
-        // Now, reconstruct the exefs based on our new version of .code
+        // Update the SMDH so that Citra displays the seed in the title
+        smdh.setAllDescriptions(gameAcronym + " randomizer seed: " + seed);
+        smdh.setAllPublishers("Universal Pokemon Randomizer ZX");
+
+        // Now, reconstruct the exefs based on our new version of .code and our new SMDH
         long newExefsOffset = header_and_exheader_size + logoLength + plainLength;
         long newExefsLength = rebuildExefs(fNew, newExefsOffset);
         fNew.seek(0x1A0);
@@ -330,6 +340,8 @@ public class NCCH {
                 byte[] data;
                 if (header.filename.equals(".code")) {
                     data = code;
+                } else if (header.filename.equals("icon")) {
+                    data = smdh.getBytes();
                 } else {
                     long dataOffset = exefsOffset + 0x200 + header.offset;
                     data = new byte[header.size];

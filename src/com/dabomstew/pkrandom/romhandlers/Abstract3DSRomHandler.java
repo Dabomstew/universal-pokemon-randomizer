@@ -83,11 +83,13 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 
     protected abstract void savingROM() throws IOException;
 
+    protected abstract String getGameAcronym();
+
     @Override
-    public boolean saveRomFile(String filename) {
+    public boolean saveRomFile(String filename, long seed) {
         try {
             savingROM();
-            baseRom.saveAsNCCH(filename);
+            baseRom.saveAsNCCH(filename, getGameAcronym(), seed);
         } catch (IOException | NoSuchAlgorithmException e) {
             throw new RandomizerIOException(e);
         }

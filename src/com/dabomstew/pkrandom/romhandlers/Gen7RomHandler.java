@@ -62,6 +62,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         private String name;
         private String romCode;
         private String titleId;
+        private String acronym;
         private int romType;
     }
 
@@ -107,6 +108,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             }
                         } else if (r[0].equals("TitleId")) {
                             current.titleId = r[1];
+                        } else if (r[0].equals("Acronym")) {
+                            current.acronym = r[1];
                         }
                     }
                 }
@@ -170,6 +173,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     @Override
     protected void savingROM() {
         // do nothing for now
+    }
+
+    @Override
+    protected String getGameAcronym() {
+        return romEntry.acronym;
     }
 
     @Override
