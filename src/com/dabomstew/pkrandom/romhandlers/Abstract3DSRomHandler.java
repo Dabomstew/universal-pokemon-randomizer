@@ -290,8 +290,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
         return new String(hexChars);
     }
 
-    // Not tested on Gen 7
-    protected int typeTMPaletteNumber(Type t) {
+    protected int typeTMPaletteNumber(Type t, boolean isGen7) {
         if (t == null) {
             return 322; // CURSE
         }
@@ -332,7 +331,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
             case BUG:
                 return 325;
             case FAIRY:
-                return 546;
+                return isGen7 ? 555 : 546;
         }
     }
 }

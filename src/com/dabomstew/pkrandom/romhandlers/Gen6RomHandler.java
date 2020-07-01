@@ -1748,19 +1748,19 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 for (int i = 0; i < Gen6Constants.tmBlockOneCount; i++) {
                     int itmNum = Gen6Constants.tmBlockOneOffset + i;
                     Move m = this.moves[moveIndexes.get(i)];
-                    int pal = this.typeTMPaletteNumber(m.type);
+                    int pal = this.typeTMPaletteNumber(m.type, false);
                     writeWord(code, offsPals + itmNum * 4, pal);
                 }
                 for (int i = 0; i < (Gen6Constants.tmBlockTwoCount); i++) {
                     int itmNum = Gen6Constants.tmBlockTwoOffset + i;
                     Move m = this.moves[moveIndexes.get(i + Gen6Constants.tmBlockOneCount)];
-                    int pal = this.typeTMPaletteNumber(m.type);
+                    int pal = this.typeTMPaletteNumber(m.type, false);
                     writeWord(code, offsPals + itmNum * 4, pal);
                 }
                 for (int i = 0; i < (Gen6Constants.tmBlockThreeCount); i++) {
                     int itmNum = Gen6Constants.tmBlockThreeOffset + i;
                     Move m = this.moves[moveIndexes.get(i + Gen6Constants.tmBlockOneCount + Gen6Constants.tmBlockTwoCount)];
-                    int pal = this.typeTMPaletteNumber(m.type);
+                    int pal = this.typeTMPaletteNumber(m.type, false);
                     writeWord(code, offsPals + itmNum * 4, pal);
                 }
             }
