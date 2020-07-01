@@ -1155,7 +1155,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
 
         // Save
-        // TODO: Needs compression, game crashes on load without it
         writeGARC(encountersFile, encounterGarc);
     }
 
@@ -1238,7 +1237,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
 
         // Save
-        // TODO: Needs compression, game crashes on load without it
         writeGARC(encountersFile, encounterGarc);
     }
 
