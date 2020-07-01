@@ -62,6 +62,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         super(random, logStream);
     }
 
+    private static class OffsetWithinEntry {
+        private int entry;
+        private int offset;
+    }
+
     private static class RomEntry {
         private String name;
         private String romCode;
@@ -70,6 +75,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         private int romType;
         private Map<String, String> strings = new HashMap<>();
         private Map<String, Integer> numbers = new HashMap<>();
+        private Map<String, int[]> arrayEntries = new HashMap<>();
+        private Map<String, OffsetWithinEntry[]> offsetArrayEntries = new HashMap<>();
 
         private int getInt(String key) {
             if (!numbers.containsKey(key)) {
@@ -133,6 +140,16 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         } else if (r[0].endsWith("Offset") || r[0].endsWith("Count") || r[0].endsWith("Number")) {
                             int offs = parseRIInt(r[1]);
                             current.numbers.put(r[0], offs);
+                        } else if (r[0].equals("CopyFrom")) {
+                            for (RomEntry otherEntry : roms) {
+                                if (r[1].equalsIgnoreCase(otherEntry.romCode)) {
+                                    // copy from here
+                                    current.arrayEntries.putAll(otherEntry.arrayEntries);
+                                    current.numbers.putAll(otherEntry.numbers);
+                                    current.strings.putAll(otherEntry.strings);
+                                    current.offsetArrayEntries.putAll(otherEntry.offsetArrayEntries);
+                                }
+                            }
                         } else {
                             current.strings.put(r[0],r[1]);
                         }
@@ -201,10 +218,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         }
 
         try {
-            // TODO: Stop USUM from crashing here
-            if (romEntry.romType == Gen7Constants.Type_SM) {
-                stringsGarc = readGARC(romEntry.getString("TextStrings"), true);
-            }
+            stringsGarc = readGARC(romEntry.getString("TextStrings"), true);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
