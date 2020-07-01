@@ -76,7 +76,7 @@ public class Gen6Constants {
     public static final int waterStoneIndex = 84, luckyEggIndex = 0xE7;
 
     public static final int staticPokemonSize = 0xC;
-    private static final int staticPokemonCountXY = 0xC;
+    private static final int staticPokemonCountXY = 0xD;
     private static final int staticPokemonCountORAS = 0x3B;
 
     private static final int giftPokemonSizeXY = 0x18;
