@@ -1930,7 +1930,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public String getSupportLevel() {
-        return "None";
+        return "Complete";
     }
 
     @Override
