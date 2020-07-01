@@ -610,6 +610,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             List<EncounterSet> collapsedEncounters = collapseAreasORAS(currentEncounters);
             area1to1EncountersImpl(collapsedEncounters, useTimeOfDay, catchEmAll, typeThemed,
                     usePowerLevels, noLegendaries, levelModifier, allowAltFormes);
+            enhanceRandomEncountersORAS(collapsedEncounters, catchEmAll, typeThemed, usePowerLevels, noLegendaries, allowAltFormes);
             setEncounters(useTimeOfDay, currentEncounters);
             return;
         }
@@ -1130,6 +1131,206 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             setEncounters(true, currentEncounters);
         }
+    }
+
+    private void enhanceRandomEncountersORAS(List<EncounterSet> collapsedEncounters, boolean catchEmAll,
+             boolean typeThemed, boolean usePowerLevels, boolean noLegendaries, boolean allowAltFormes) {
+        List<Pokemon> banned = this.bannedForWildEncounters();
+        Map<Integer, List<EncounterSet>> zonesToEncounters = mapZonesToEncounters(collapsedEncounters);
+        Map<Type, List<Pokemon>> cachedPokeLists = new TreeMap<>();
+        for (List<EncounterSet> encountersInZone : zonesToEncounters.values()) {
+            int currentAreaIndex = -1;
+            List<EncounterSet> nonRockSmashAreas = new ArrayList<>();
+            Map<Integer, List<Integer>> areasAndEncountersToRandomize = new TreeMap<>();
+            // Since Rock Smash Pokemon do not show up on DexNav, they can be fully randomized
+            for (EncounterSet area : encountersInZone) {
+                if (area.displayName.contains("Rock Smash")) {
+                    // Assume EITHER catch em all OR type themed OR match strength for now
+                    if (catchEmAll) {
+                        for (Encounter enc : area.encounters) {
+                            boolean shouldRandomize = doesAnotherEncounterWithSamePokemonExistInArea(enc, area);
+                            if (shouldRandomize) {
+                                enc.pokemon = pickEntirelyRandomPokemon(allowAltFormes, noLegendaries, area, banned);
+                                setFormeForEncounter(enc);
+                            }
+                        }
+                    } else if (typeThemed) {
+                        List<Pokemon> possiblePokemon = null;
+                        int iterLoops = 0;
+                        while (possiblePokemon == null && iterLoops < 10000) {
+                            Type areaTheme = randomType();
+                            if (!cachedPokeLists.containsKey(areaTheme)) {
+                                List<Pokemon> pType = allowAltFormes ? pokemonOfTypeInclFormes(areaTheme, noLegendaries) :
+                                        pokemonOfType(areaTheme, noLegendaries);
+                                pType.removeAll(banned);
+                                cachedPokeLists.put(areaTheme, pType);
+                            }
+                            possiblePokemon = cachedPokeLists.get(areaTheme);
+                            if (area.bannedPokemon.size() > 0) {
+                                possiblePokemon = new ArrayList<>(possiblePokemon);
+                                possiblePokemon.removeAll(area.bannedPokemon);
+                            }
+                            if (possiblePokemon.size() == 0) {
+                                // Can't use this type for this area
+                                possiblePokemon = null;
+                            }
+                            iterLoops++;
+                        }
+                        if (possiblePokemon == null) {
+                            throw new RandomizationException("Could not randomize an area in a reasonable amount of attempts.");
+                        }
+                        for (Encounter enc : area.encounters) {
+                            // Pick a random themed pokemon
+                            enc.pokemon = possiblePokemon.get(this.random.nextInt(possiblePokemon.size()));
+                            while (enc.pokemon.actuallyCosmetic) {
+                                enc.pokemon = possiblePokemon.get(this.random.nextInt(possiblePokemon.size()));
+                            }
+                            setFormeForEncounter(enc);
+                        }
+                    } else if (usePowerLevels) {
+                        List<Pokemon> allowedPokes;
+                        if (allowAltFormes) {
+                            allowedPokes  = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
+                                    : new ArrayList<>(mainPokemonListInclFormes);
+                        } else {
+                            allowedPokes = noLegendaries ? new ArrayList<>(noLegendaryList)
+                                    : new ArrayList<>(mainPokemonList);
+                        }
+                        allowedPokes.removeAll(banned);
+                        List<Pokemon> localAllowed = allowedPokes;
+                        if (area.bannedPokemon.size() > 0) {
+                            localAllowed = new ArrayList<>(allowedPokes);
+                            localAllowed.removeAll(area.bannedPokemon);
+                        }
+                        for (Encounter enc : area.encounters) {
+                            enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100);
+                            while (enc.pokemon.actuallyCosmetic) {
+                                enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100);
+                            }
+                            setFormeForEncounter(enc);
+                        }
+                    } else {
+                        // Entirely random
+                        for (Encounter enc : area.encounters) {
+                            enc.pokemon = pickEntirelyRandomPokemon(allowAltFormes, noLegendaries, area, banned);
+                            setFormeForEncounter(enc);
+                        }
+                    }
+                } else {
+                    currentAreaIndex++;
+                    nonRockSmashAreas.add(area);
+                    List<Integer> encounterIndices = new ArrayList<>();
+                    for (int i = 0; i < area.encounters.size(); i++) {
+                        encounterIndices.add(i);
+                    }
+                    areasAndEncountersToRandomize.put(currentAreaIndex, encounterIndices);
+                }
+            }
+
+            // Now, randomize non-Rock Smash Pokemon until we hit the threshold for DexNav
+            int crashThreshold = computeDexNavCrashThreshold(encountersInZone);
+            while (crashThreshold < 18 && areasAndEncountersToRandomize.size() > 0) {
+                Set<Integer> areaIndices = areasAndEncountersToRandomize.keySet();
+                int areaIndex = areaIndices.stream().skip(this.random.nextInt(areaIndices.size())).findFirst().orElse(-1);
+                List<Integer> encounterIndices = areasAndEncountersToRandomize.get(areaIndex);
+                int indexInListOfEncounterIndices = this.random.nextInt(encounterIndices.size());
+                int randomEncounterIndex = encounterIndices.get(indexInListOfEncounterIndices);
+                EncounterSet area = nonRockSmashAreas.get(areaIndex);
+                Encounter enc = area.encounters.get(randomEncounterIndex);
+                // Assume EITHER catch em all OR type themed OR match strength for now
+                if (catchEmAll) {
+                    boolean shouldRandomize = doesAnotherEncounterWithSamePokemonExistInArea(enc, area);
+                    if (shouldRandomize) {
+                        enc.pokemon = pickEntirelyRandomPokemon(allowAltFormes, noLegendaries, area, banned);
+                        setFormeForEncounter(enc);
+                    }
+                } else if (typeThemed) {
+                    List<Pokemon> possiblePokemon = null;
+                    Type areaTheme = getTypeForArea(area);
+                    if (!cachedPokeLists.containsKey(areaTheme)) {
+                        List<Pokemon> pType = allowAltFormes ? pokemonOfTypeInclFormes(areaTheme, noLegendaries) :
+                                pokemonOfType(areaTheme, noLegendaries);
+                        pType.removeAll(banned);
+                        cachedPokeLists.put(areaTheme, pType);
+                    }
+                    possiblePokemon = cachedPokeLists.get(areaTheme);
+                    if (area.bannedPokemon.size() > 0) {
+                        possiblePokemon = new ArrayList<>(possiblePokemon);
+                        possiblePokemon.removeAll(area.bannedPokemon);
+                    }
+                    if (possiblePokemon.size() == 0) {
+                        // Can't use this type for this area
+                        throw new RandomizationException("Could not find a possible Pokemon of the correct type.");
+                    }
+                    // Pick a random themed pokemon
+                    enc.pokemon = possiblePokemon.get(this.random.nextInt(possiblePokemon.size()));
+                    while (enc.pokemon.actuallyCosmetic) {
+                        enc.pokemon = possiblePokemon.get(this.random.nextInt(possiblePokemon.size()));
+                    }
+                    setFormeForEncounter(enc);
+                } else if (usePowerLevels) {
+                    List<Pokemon> allowedPokes;
+                    if (allowAltFormes) {
+                        allowedPokes  = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
+                                : new ArrayList<>(mainPokemonListInclFormes);
+                    } else {
+                        allowedPokes = noLegendaries ? new ArrayList<>(noLegendaryList)
+                                : new ArrayList<>(mainPokemonList);
+                    }
+                    allowedPokes.removeAll(banned);
+                    List<Pokemon> localAllowed = allowedPokes;
+                    if (area.bannedPokemon.size() > 0) {
+                        localAllowed = new ArrayList<>(allowedPokes);
+                        localAllowed.removeAll(area.bannedPokemon);
+                    }
+                    enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100);
+                    while (enc.pokemon.actuallyCosmetic) {
+                        enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100);
+                    }
+                    setFormeForEncounter(enc);
+                } else {
+                    // Entirely random
+                    enc.pokemon = pickEntirelyRandomPokemon(allowAltFormes, noLegendaries, area, banned);
+                    setFormeForEncounter(enc);
+                }
+                crashThreshold = computeDexNavCrashThreshold(encountersInZone);
+                encounterIndices.remove(indexInListOfEncounterIndices);
+                if (encounterIndices.size() == 0) {
+                    areasAndEncountersToRandomize.remove(areaIndex);
+                }
+            }
+        }
+    }
+
+    private Type getTypeForArea(EncounterSet area) {
+        Pokemon firstPokemon = area.encounters.get(0).pokemon;
+        Type primaryType = firstPokemon.primaryType;
+        int primaryCount = 1;
+        Type secondaryType = null;
+        int secondaryCount = 0;
+        if (firstPokemon.secondaryType != null) {
+            secondaryType = firstPokemon.secondaryType;
+            secondaryCount = 1;
+        }
+        for (int i = 1; i < area.encounters.size(); i++) {
+            Pokemon pokemon = area.encounters.get(i).pokemon;
+            if (pokemon.primaryType == primaryType || pokemon.secondaryType == primaryType) {
+                primaryCount++;
+            }
+            if (pokemon.primaryType == secondaryType || pokemon.secondaryType == secondaryType) {
+                secondaryCount++;
+            }
+        }
+        return primaryCount > secondaryCount ? primaryType : secondaryType;
+    }
+
+    private boolean doesAnotherEncounterWithSamePokemonExistInArea(Encounter enc, EncounterSet area) {
+        for (Encounter encounterToCheck : area.encounters) {
+            if (enc != encounterToCheck && enc.pokemon == encounterToCheck.pokemon) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private List<EncounterSet> collapseAreasORAS(List<EncounterSet> currentEncounters) {
