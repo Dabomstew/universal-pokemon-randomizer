@@ -61,7 +61,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    public boolean saveRomFile(String filename) {
+    public boolean saveRomFile(String filename, long seed) {
         savingRom();
         try {
             FileOutputStream fos = new FileOutputStream(filename);

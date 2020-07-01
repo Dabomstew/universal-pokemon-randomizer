@@ -74,6 +74,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         private String name;
         private String romCode;
         private String titleId;
+        private String acronym;
         private int romType;
         private boolean staticPokemonSupport = true, copyStaticPokemon = true;
         private Map<String, String> strings = new HashMap<>();
@@ -138,6 +139,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                             }
                         } else if (r[0].equals("TitleId")) {
                             current.titleId = r[1];
+                        } else if (r[0].equals("Acronym")) {
+                            current.acronym = r[1];
                         } else if (r[0].equals("CopyFrom")) {
                             for (RomEntry otherEntry : roms) {
                                 if (r[1].equalsIgnoreCase(otherEntry.romCode)) {
@@ -549,6 +552,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+    }
+
+    @Override
+    protected String getGameAcronym() {
+        return romEntry.acronym;
     }
 
     private void savePokemonStats() {
@@ -1625,15 +1633,37 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     @Override
     public int miscTweaksAvailable() {
         int available = 0;
+        available |= MiscTweak.FASTEST_TEXT.getValue();
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
         return available;
     }
 
     @Override
     public void applyMiscTweak(MiscTweak tweak) {
-        if (tweak == MiscTweak.BAN_LUCKY_EGG) {
+        if (tweak == MiscTweak.FASTEST_TEXT) {
+            applyFastestText();
+        } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
             allowedItems.banSingles(Gen6Constants.luckyEggIndex);
             nonBadItems.banSingles(Gen6Constants.luckyEggIndex);
+        }
+    }
+
+    private void applyFastestText() {
+        int offset = find(code, Gen6Constants.fastestTextPrefixes[0]);
+        if (offset > 0) {
+            offset += Gen6Constants.fastestTextPrefixes[0].length() / 2; // because it was a prefix
+            code[offset] = 0x03;
+            code[offset + 1] = 0x40;
+            code[offset + 2] = (byte) 0xA0;
+            code[offset + 3] = (byte) 0xE3;
+        }
+        offset = find(code, Gen6Constants.fastestTextPrefixes[1]);
+        if (offset > 0) {
+            offset += Gen6Constants.fastestTextPrefixes[1].length() / 2; // because it was a prefix
+            code[offset] = 0x03;
+            code[offset + 1] = 0x50;
+            code[offset + 2] = (byte) 0xA0;
+            code[offset + 3] = (byte) 0xE3;
         }
     }
 

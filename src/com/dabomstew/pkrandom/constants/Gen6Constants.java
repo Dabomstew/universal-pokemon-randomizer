@@ -108,6 +108,8 @@ public class Gen6Constants {
 
     public static final int ingameTradeSize = 0x24;
 
+    public static final String[] fastestTextPrefixes = new String[]{"1080BDE80000A0E31080BDE8F0412DE9", "485080E59C4040E24C50C0E5EC009FE5"};
+
     private static final List<Integer> mainGameShopsXY = Arrays.asList(
             10,11,12,13,16,17,20,21,24,25
     );

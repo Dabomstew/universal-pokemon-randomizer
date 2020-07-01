@@ -62,6 +62,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         private String name;
         private String romCode;
         private String titleId;
+        private String acronym;
         private int romType;
     }
 
@@ -107,6 +108,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             }
                         } else if (r[0].equals("TitleId")) {
                             current.titleId = r[1];
+                        } else if (r[0].equals("Acronym")) {
+                            current.acronym = r[1];
                         }
                     }
                 }
@@ -169,7 +172,16 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     protected void savingROM() {
-        // do nothing for now
+        try {
+            writeCode(code);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+
+    @Override
+    protected String getGameAcronym() {
+        return romEntry.acronym;
     }
 
     @Override
@@ -304,12 +316,35 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public int miscTweaksAvailable() {
-        return 0;
+        int available = 0;
+        available |= MiscTweak.FASTEST_TEXT.getValue();
+        return available;
     }
 
     @Override
     public void applyMiscTweak(MiscTweak tweak) {
-        // do nothing for now
+        if (tweak == MiscTweak.FASTEST_TEXT) {
+            applyFastestText();
+        }
+    }
+
+    private void applyFastestText() {
+        int offset = find(code, Gen7Constants.fastestTextPrefixes[0]);
+        if (offset > 0) {
+            offset += Gen7Constants.fastestTextPrefixes[0].length() / 2; // because it was a prefix
+            code[offset] = 0x03;
+            code[offset + 1] = 0x40;
+            code[offset + 2] = (byte) 0xA0;
+            code[offset + 3] = (byte) 0xE3;
+        }
+        offset = find(code, Gen7Constants.fastestTextPrefixes[1]);
+        if (offset > 0) {
+            offset += Gen7Constants.fastestTextPrefixes[1].length() / 2; // because it was a prefix
+            code[offset] = 0x03;
+            code[offset + 1] = 0x50;
+            code[offset + 2] = (byte) 0xA0;
+            code[offset + 3] = (byte) 0xE3;
+        }
     }
 
     @Override
