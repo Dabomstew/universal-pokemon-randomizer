@@ -27,8 +27,10 @@ import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen7Constants;
+import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.*;
+import pptxt.N3DSTxtHandler;
 
 import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
@@ -64,6 +66,22 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         private String titleId;
         private String acronym;
         private int romType;
+        private Map<String, String> strings = new HashMap<>();
+        private Map<String, Integer> numbers = new HashMap<>();
+
+        private int getInt(String key) {
+            if (!numbers.containsKey(key)) {
+                numbers.put(key, 0);
+            }
+            return numbers.get(key);
+        }
+
+        private String getString(String key) {
+            if (!strings.containsKey(key)) {
+                strings.put(key, "");
+            }
+            return strings.get(key);
+        }
     }
 
     private static List<RomEntry> roms;
@@ -110,6 +128,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             current.titleId = r[1];
                         } else if (r[0].equals("Acronym")) {
                             current.acronym = r[1];
+                        } else if (r[0].endsWith("Offset") || r[0].endsWith("Count") || r[0].endsWith("Number")) {
+                            int offs = parseRIInt(r[1]);
+                            current.numbers.put(r[0], offs);
+                        } else {
+                            current.strings.put(r[0],r[1]);
                         }
                     }
                 }
@@ -120,11 +143,27 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         }
     }
 
+    private static int parseRIInt(String off) {
+        int radix = 10;
+        off = off.trim().toLowerCase();
+        if (off.startsWith("0x") || off.startsWith("&h")) {
+            radix = 16;
+            off = off.substring(2);
+        }
+        try {
+            return Integer.parseInt(off, radix);
+        } catch (NumberFormatException ex) {
+            System.err.println("invalid base " + radix + "number " + off);
+            return 0;
+        }
+    }
+
     // This ROM
     private Pokemon[] pokes;
     private List<Pokemon> pokemonList;
     private RomEntry romEntry;
     private byte[] code;
+    private GARCArchive stringsGarc, storyTextGarc;
 
     @Override
     protected boolean detect3DSRom(String productCode, String titleId) {
@@ -158,6 +197,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             throw new RandomizerIOException(e);
         }
 
+        try {
+            stringsGarc = readGARC(romEntry.getString("TextStrings"),true);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+
         // TODO: Actually make this work by loading it from the ROM. Only doing it this
         // way temporarily so the randomizer won't crash
         int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
@@ -170,10 +215,28 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         pokemonList = Arrays.asList(Arrays.copyOfRange(pokes,0,pokemonCount + 1));
     }
 
+    private List<String> getStrings(boolean isStoryText, int index) {
+        GARCArchive baseGARC = isStoryText ? storyTextGarc : stringsGarc;
+        byte[] rawFile = baseGARC.files.get(index).get(0);
+        return new ArrayList<>(N3DSTxtHandler.readTexts(rawFile,true,romEntry.romType));
+    }
+
+    private void setStrings(boolean isStoryText, int index, List<String> strings) {
+        GARCArchive baseGARC = isStoryText ? storyTextGarc : stringsGarc;
+        byte[] oldRawFile = baseGARC.files.get(index).get(0);
+        try {
+            byte[] newRawFile = N3DSTxtHandler.saveEntry(oldRawFile, strings, romEntry.romType);
+            baseGARC.setFile(index, newRawFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     protected void savingROM() {
         try {
             writeCode(code);
+            writeGARC(romEntry.getString("TextStrings"), stringsGarc);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
