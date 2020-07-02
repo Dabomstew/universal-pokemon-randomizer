@@ -610,6 +610,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             FileFunctions.write2ByteInt(stats, Gen6Constants.bsRareHeldItemOffset, pkmn.rareHeldItem);
             FileFunctions.write2ByteInt(stats, Gen6Constants.bsDarkGrassHeldItemOffset, pkmn.darkGrassHeldItem);
         }
+
+        if (pkmn.fullName().equals("Meowstic")) {
+            stats[Gen6Constants.bsGenderOffset] = 0;
+        } else if (pkmn.fullName().equals("Meowstic-F")) {
+            stats[Gen6Constants.bsGenderOffset] = (byte)0xFE;
+        }
     }
 
     private void writeEvolutions() {
