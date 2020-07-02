@@ -179,11 +179,19 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     // This ROM
     private Pokemon[] pokes;
+    private Map<Integer,FormeInfo> formeMappings = new TreeMap<>();
+    private Map<Integer,Map<Integer,Integer>> absolutePokeNumByBaseForme;
+    private Map<Integer,Integer> dummyAbsolutePokeNums;
     private List<Pokemon> pokemonList;
+    private List<Pokemon> pokemonListInclFormes;
+    private List<MegaEvolution> megaEvolutions;
     private Move[] moves;
     private RomEntry romEntry;
     private byte[] code;
-    private GARCArchive moveGarc, stringsGarc, storyTextGarc;
+    private List<String> itemNames;
+    private List<String> abilityNames;
+
+    private GARCArchive pokeGarc, moveGarc, stringsGarc, storyTextGarc;
 
     @Override
     protected boolean detect3DSRom(String productCode, String titleId) {
@@ -223,18 +231,14 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             throw new RandomizerIOException(e);
         }
 
+        loadPokemonStats();
         loadMoves();
 
-        // TODO: Actually make this work by loading it from the ROM. Only doing it this
-        // way temporarily so the randomizer won't crash
-        int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
-        pokes = new Pokemon[pokemonCount + 1];
-        for (int i = 1; i <= pokemonCount; i++) {
-            pokes[i] = new Pokemon();
-            pokes[i].number = i;
-        }
+        pokemonListInclFormes = Arrays.asList(pokes);
+        pokemonList = Arrays.asList(Arrays.copyOfRange(pokes,0,Gen7Constants.getPokemonCount(romEntry.romType) + 1));
 
-        pokemonList = Arrays.asList(Arrays.copyOfRange(pokes,0,pokemonCount + 1));
+        itemNames = getStrings(false,romEntry.getInt("ItemNamesTextOffset"));
+        abilityNames = getStrings(false,romEntry.getInt("AbilityNamesTextOffset"));
     }
 
     private List<String> getStrings(boolean isStoryText, int index) {
@@ -252,6 +256,138 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void loadPokemonStats() {
+        try {
+            pokeGarc = this.readGARC(romEntry.getString("PokemonStats"),true);
+            String[] pokeNames = readPokemonNames();
+            int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
+            int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
+            pokes = new Pokemon[pokemonCount + formeCount + 1];
+            for (int i = 1; i <= pokemonCount; i++) {
+                pokes[i] = new Pokemon();
+                pokes[i].number = i;
+                loadBasicPokeStats(pokes[i],pokeGarc.files.get(i).get(0),formeMappings);
+                pokes[i].name = pokeNames[i];
+            }
+
+            absolutePokeNumByBaseForme = new HashMap<>();
+            dummyAbsolutePokeNums = new HashMap<>();
+            dummyAbsolutePokeNums.put(0,0);
+
+            int i = pokemonCount + 1;
+            int formNum = 1;
+            int prevSpecies = 0;
+            Map<Integer,Integer> currentMap = new HashMap<>();
+            for (int k: formeMappings.keySet()) {
+                pokes[i] = new Pokemon();
+                pokes[i].number = i;
+                loadBasicPokeStats(pokes[i], pokeGarc.files.get(k).get(0),formeMappings);
+                FormeInfo fi = formeMappings.get(k);
+                pokes[i].name = pokeNames[fi.baseForme];
+                pokes[i].baseForme = pokes[fi.baseForme];
+                pokes[i].formeNumber = fi.formeNumber;
+                pokes[i].formeSuffix = Gen7Constants.getFormeSuffixByBaseForme(fi.baseForme,fi.formeNumber);
+                if (fi.baseForme == prevSpecies) {
+                    formNum++;
+                    currentMap.put(formNum,i);
+                } else {
+                    if (prevSpecies != 0) {
+                        absolutePokeNumByBaseForme.put(prevSpecies,currentMap);
+                    }
+                    prevSpecies = fi.baseForme;
+                    formNum = 1;
+                    currentMap = new HashMap<>();
+                    currentMap.put(formNum,i);
+                }
+                i++;
+            }
+            if (prevSpecies != 0) {
+                absolutePokeNumByBaseForme.put(prevSpecies,currentMap);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+//        populateEvolutions();
+//        populateMegaEvolutions();
+    }
+
+    private void loadBasicPokeStats(Pokemon pkmn, byte[] stats, Map<Integer,FormeInfo> altFormes) {
+        pkmn.hp = stats[Gen7Constants.bsHPOffset] & 0xFF;
+        pkmn.attack = stats[Gen7Constants.bsAttackOffset] & 0xFF;
+        pkmn.defense = stats[Gen7Constants.bsDefenseOffset] & 0xFF;
+        pkmn.speed = stats[Gen7Constants.bsSpeedOffset] & 0xFF;
+        pkmn.spatk = stats[Gen7Constants.bsSpAtkOffset] & 0xFF;
+        pkmn.spdef = stats[Gen7Constants.bsSpDefOffset] & 0xFF;
+        // Type
+        pkmn.primaryType = Gen7Constants.typeTable[stats[Gen7Constants.bsPrimaryTypeOffset] & 0xFF];
+        pkmn.secondaryType = Gen7Constants.typeTable[stats[Gen7Constants.bsSecondaryTypeOffset] & 0xFF];
+        // Only one type?
+        if (pkmn.secondaryType == pkmn.primaryType) {
+            pkmn.secondaryType = null;
+        }
+        pkmn.catchRate = stats[Gen7Constants.bsCatchRateOffset] & 0xFF;
+        pkmn.growthCurve = ExpCurve.fromByte(stats[Gen7Constants.bsGrowthCurveOffset]);
+
+        pkmn.ability1 = stats[Gen7Constants.bsAbility1Offset] & 0xFF;
+        pkmn.ability2 = stats[Gen7Constants.bsAbility2Offset] & 0xFF;
+        pkmn.ability3 = stats[Gen7Constants.bsAbility3Offset] & 0xFF;
+
+        // Held Items?
+        int item1 = FileFunctions.read2ByteInt(stats, Gen7Constants.bsCommonHeldItemOffset);
+        int item2 = FileFunctions.read2ByteInt(stats, Gen7Constants.bsRareHeldItemOffset);
+
+        if (item1 == item2) {
+            // guaranteed
+            pkmn.guaranteedHeldItem = item1;
+            pkmn.commonHeldItem = 0;
+            pkmn.rareHeldItem = 0;
+            pkmn.darkGrassHeldItem = 0;
+        } else {
+            pkmn.guaranteedHeldItem = 0;
+            pkmn.commonHeldItem = item1;
+            pkmn.rareHeldItem = item2;
+            pkmn.darkGrassHeldItem = FileFunctions.read2ByteInt(stats, Gen7Constants.bsDarkGrassHeldItemOffset);
+        }
+
+        int formeCount = stats[Gen7Constants.bsFormeCountOffset] & 0xFF;
+        if (formeCount > 1) {
+            if (!altFormes.keySet().contains(pkmn.number)) {
+                int firstFormeOffset = FileFunctions.read2ByteInt(stats, Gen7Constants.bsFormeOffset);
+                if (firstFormeOffset != 0) {
+                    for (int i = 1; i < formeCount; i++) {
+                        altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.number,i,FileFunctions.read2ByteInt(stats,Gen7Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
+                        if (Gen7Constants.getActuallyCosmeticForms(romEntry.romType).contains(firstFormeOffset+i-1)) {
+                            if (pkmn.number != 421) { // No Cherrim
+                                pkmn.cosmeticForms += 1;
+                            }
+                        }
+                    }
+                } else {
+                    if (pkmn.number != 493 && pkmn.number != 649 && pkmn.number != 716 && pkmn.number != 773) {
+                        // Reason for exclusions:
+                        // Arceus/Genesect/Silvally: to avoid confusion
+                        // Xerneas: Should be handled automatically?
+                        pkmn.cosmeticForms = formeCount;
+                    }
+                }
+            } else {
+                if (Gen7Constants.getActuallyCosmeticForms(romEntry.romType).contains(pkmn.number)) {
+                    pkmn.actuallyCosmetic = true;
+                }
+            }
+        }
+    }
+
+    private String[] readPokemonNames() {
+        int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
+        String[] pokeNames = new String[pokemonCount + 1];
+        List<String> nameList = getStrings(false, romEntry.getInt("PokemonNamesTextOffset"));
+        for (int i = 1; i <= pokemonCount; i++) {
+            pokeNames[i] = nameList.get(i);
+        }
+        return pokeNames;
     }
 
     private void loadMoves() {
@@ -308,11 +444,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Pokemon> getPokemonInclFormes() {
-        // TODO: Actually make this work by loading it from the ROM. Only doing it this
-        // way temporarily so the randomizer won't crash when trying to write an output ROM.
-        ArrayList<Pokemon> pokemonInclFormes = new ArrayList<>();
-        pokemonInclFormes.add(pokes[0]);
-        return pokemonInclFormes;
+        return pokemonListInclFormes;
     }
 
     @Override
@@ -749,7 +881,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public String[] getItemNames() {
-        return new String[0];
+        return itemNames.toArray(new String[0]);
     }
 
     @Override
@@ -759,7 +891,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public String abilityName(int number) {
-        return null;
+        return abilityNames.get(number);
     }
 
     @Override

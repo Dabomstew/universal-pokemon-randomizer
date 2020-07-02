@@ -37,10 +37,12 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public String formeSuffix = "";
     public Pokemon baseForme = null;
+    public Pokemon realBaseForme = null;
     public int formeNumber = 0;
     public int cosmeticForms = 0;
     public int formeSpriteIndex = 0;
     public boolean actuallyCosmetic = false;
+    public List<Integer> skipForms = new ArrayList<>();
 
     public Type primaryType, secondaryType;
 
