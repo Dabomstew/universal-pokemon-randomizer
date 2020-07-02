@@ -39,6 +39,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Gen7RomHandler extends Abstract3DSRomHandler {
 
@@ -185,6 +186,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     private List<Pokemon> pokemonList;
     private List<Pokemon> pokemonListInclFormes;
     private List<MegaEvolution> megaEvolutions;
+    private List<AreaData> areaDataList;
     private Move[] moves;
     private RomEntry romEntry;
     private byte[] code;
@@ -549,12 +551,210 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
-        return new ArrayList<>();
+        List<EncounterSet> encounters = new ArrayList<>();
+        try {
+            areaDataList = getAreaData();
+            for (AreaData areaData : areaDataList) {
+                if (!areaData.hasTables) {
+                    continue;
+                }
+                for (int i = 0; i < areaData.encounterTables.size(); i++) {
+                    byte[] encounterTable = areaData.encounterTables.get(i);
+                    byte[] dayTable = new byte[0x164];
+                    System.arraycopy(encounterTable, 0, dayTable, 0, 0x164);
+                    EncounterSet dayEncounters = readEncounterTable(dayTable);
+                    if (!useTimeOfDay) {
+                        dayEncounters.displayName = areaData.name + ", Table " + (i + 1);
+                        encounters.add(dayEncounters);
+                    } else {
+                        dayEncounters.displayName = areaData.name + ", Table " + (i + 1) + " (Day)";
+                        encounters.add(dayEncounters);
+                        byte[] nightTable = new byte[0x164];
+                        System.arraycopy(encounterTable, 0x164, nightTable, 0, 0x164);
+                        EncounterSet nightEncounters = readEncounterTable(nightTable);
+                        nightEncounters.displayName = areaData.name + ", Table " + (i + 1) + " (Night)";
+                        encounters.add(nightEncounters);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+        return encounters;
+    }
+
+    private EncounterSet readEncounterTable(byte[] encounterTable) {
+        int minLevel = encounterTable[0];
+        int maxLevel = encounterTable[1];
+        EncounterSet es = new EncounterSet();
+        es.rate = 1;
+        for (int i = 0; i < 10; i++) {
+            int offset = 0xC + (i * 4);
+            int species = readWord(encounterTable, offset) & 0x7FF;
+            int forme = readWord(encounterTable, offset) >> 11;
+            if (species != 0) {
+                Encounter e = new Encounter();
+                e.pokemon = getPokemonForEncounter(species, forme);
+                e.formeNumber = forme;
+                e.level = minLevel;
+                e.maxLevel = maxLevel;
+                es.encounters.add(e);
+
+                // Get all the SOS encounters for this non-SOS encounter
+                for (int j = 1; j < 8; j++) {
+                    species = readWord(encounterTable, offset + (40 * j)) & 0x7FF;
+                    forme = readWord(encounterTable, offset + (40 * j)) >> 11;
+                    Encounter sos = new Encounter();
+                    sos.pokemon = getPokemonForEncounter(species, forme);
+                    sos.formeNumber = forme;
+                    sos.level = minLevel;
+                    sos.maxLevel = maxLevel;
+                    sos.isSOS = true;
+                    sos.sosType = SOSType.GENERIC;
+                    es.encounters.add(sos);
+                }
+            }
+        }
+
+        // Get the weather SOS encounters for this area
+        for (int i = 0; i < 6; i++) {
+            int offset = 0x14C + (i * 4);
+            int species = readWord(encounterTable, offset) & 0x7FF;
+            int forme = readWord(encounterTable, offset) >> 11;
+            if (species != 0) {
+                Encounter weatherSOS = new Encounter();
+                weatherSOS.pokemon = getPokemonForEncounter(species, forme);
+                weatherSOS.formeNumber = forme;
+                weatherSOS.level = minLevel;
+                weatherSOS.maxLevel = maxLevel;
+                weatherSOS.isSOS = true;
+                weatherSOS.sosType = getSOSTypeForIndex(i);
+                es.encounters.add(weatherSOS);
+            }
+        }
+        return es;
+    }
+
+    private SOSType getSOSTypeForIndex(int index) {
+        if (index / 2 == 0) {
+            return SOSType.RAIN;
+        } else if (index / 2 == 1) {
+            return SOSType.HAIL;
+        } else {
+            return SOSType.SAND;
+        }
+    }
+
+    private Pokemon getPokemonForEncounter(int species, int forme) {
+        Pokemon pokemon = pokes[species];
+
+        // TODO: everything below once Pokemon reading is complete
+        // If the forme is purely cosmetic, just use the base forme as the Pokemon
+        // for this encounter (the cosmetic forme will be stored in the encounter).
+        // TODO: Are formes 30 and 31 used like Gen 6?
+        if (forme <= pokemon.cosmeticForms) {
+            return pokemon;
+        } else {
+            int speciesWithForme = absolutePokeNumByBaseForme
+                    .getOrDefault(species, dummyAbsolutePokeNums)
+                    .getOrDefault(forme, 0);
+            return pokes[speciesWithForme];
+        }
     }
 
     @Override
     public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encountersList) {
         // do nothing for now
+    }
+
+    private List<AreaData> getAreaData() throws IOException {
+        GARCArchive worldDataGarc = readGARC(romEntry.getString("WorldData"), false);
+        List<byte[]> worlds = new ArrayList<>();
+        for (Map<Integer, byte[]> file : worldDataGarc.files) {
+            byte[] world = Mini.UnpackMini(file.get(0), "WD")[0];
+            worlds.add(world);
+        }
+        GARCArchive zoneDataGarc = readGARC(romEntry.getString("ZoneData"), false);
+        byte[] zoneDataBytes = zoneDataGarc.getFile(0);
+        byte[] worldData = zoneDataGarc.getFile(1);
+        List<String> locationList = createGoodLocationList();
+        ZoneData[] zoneData = getZoneData(zoneDataBytes, worldData, locationList, worlds);
+        GARCArchive encounterGarc = readGARC(romEntry.getString("WildPokemon"), false);
+        int fileCount = encounterGarc.files.size();
+        int numberOfAreas = fileCount / 11;
+        AreaData[] areaData = new AreaData[numberOfAreas];
+        for (int i = 0; i < numberOfAreas; i++) {
+            int areaOffset = i;
+            areaData[i] = new AreaData();
+            areaData[i].fileNumber = 9 + (11 * i);
+            areaData[i].zones = Arrays.stream(zoneData).filter((zone -> zone.areaIndex == areaOffset)).collect(Collectors.toList());
+            areaData[i].name = areaData[i].zones.stream().map(zone -> zone.locationName).collect(Collectors.joining(" / "));
+            byte[] encounterData = encounterGarc.getFile(areaData[i].fileNumber);
+            if (encounterData.length == 0) {
+                areaData[i].hasTables = false;
+            } else {
+                byte[][] encounterTables = Mini.UnpackMini(encounterData, "EA");
+                areaData[i].hasTables = Arrays.stream(encounterTables).anyMatch(t -> t.length > 0);
+                if (!areaData[i].hasTables) {
+                    continue;
+                }
+
+                for (byte[] encounterTable : encounterTables) {
+                    byte[] trimmedEncounterTable = new byte[0x2C8];
+                    System.arraycopy(encounterTable, 4, trimmedEncounterTable, 0, 0x2C8);
+                    areaData[i].encounterTables.add(trimmedEncounterTable);
+                }
+            }
+        }
+
+        return Arrays.asList(areaData);
+    }
+
+    private List<String> createGoodLocationList() {
+        List<String> locationList = getStrings(false, romEntry.getInt("MapNamesTextOffset"));
+        List<String> goodLocationList = new ArrayList<>(locationList);
+        for (int i = 0; i < locationList.size(); i += 2) {
+            // The location list contains both areas and subareas. If a subarea is associated with an area, it will
+            // appear directly after it. This code combines these subarea and area names.
+            String subarea = locationList.get(i + 1);
+            if (!subarea.isEmpty() && subarea.charAt(0) != '[') {
+                String updatedLocation = goodLocationList.get(i) + " (" + subarea + ")";
+                goodLocationList.set(i, updatedLocation);
+            }
+
+            // Some areas appear in the location list multiple times and don't have any subarea name to distinguish
+            // them. This code distinguishes them by appending the number of times they've appeared previously to
+            // the area name.
+            if (i > 0) {
+                List<String> goodLocationUpToCurrent = goodLocationList.stream().limit(i - 1).collect(Collectors.toList());
+                if (!goodLocationList.get(i).isEmpty() && goodLocationUpToCurrent.contains(goodLocationList.get(i))) {
+                    int numberOfUsages = Collections.frequency(goodLocationUpToCurrent, goodLocationList.get(i));
+                    String updatedLocation = goodLocationList.get(i) + " (" + numberOfUsages + ")";
+                    goodLocationList.set(i, updatedLocation);
+                }
+            }
+        }
+        return goodLocationList;
+    }
+
+    private ZoneData[] getZoneData(byte[] zoneDataBytes, byte[] worldData, List<String> locationList, List<byte[]> worlds) {
+        ZoneData[] zoneData = new ZoneData[zoneDataBytes.length / ZoneData.size];
+        for (int i = 0; i < zoneData.length; i++) {
+            zoneData[i] = new ZoneData(zoneDataBytes, i);
+            zoneData[i].worldIndex = FileFunctions.read2ByteInt(worldData, i * 0x2);
+            zoneData[i].locationName = locationList.get(zoneData[i].parentMap);
+
+            byte[] world = worlds.get(zoneData[i].worldIndex);
+            int mappingOffset = FileFunctions.readFullIntLittleEndian(world, 0x8);
+            for (int offset = mappingOffset; offset < world.length; offset += 4) {
+                int potentialZoneIndex = FileFunctions.read2ByteInt(world, offset);
+                if (potentialZoneIndex == i) {
+                    zoneData[i].areaIndex = FileFunctions.read2ByteInt(world, offset + 0x2);
+                    break;
+                }
+            }
+        }
+        return zoneData;
     }
 
     @Override
@@ -800,7 +1000,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public boolean hasTimeBasedEncounters() {
-        return false;
+        return true;
     }
 
     @Override
@@ -1031,5 +1231,33 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     @Override
     public BufferedImage getMascotImage() {
         return null;
+    }
+
+    private class ZoneData {
+        public int worldIndex;
+        public int areaIndex;
+        public int parentMap;
+        public String locationName;
+        private byte[] data;
+
+        public static final int size = 0x54;
+
+        public ZoneData(byte[] zoneDataBytes, int index) {
+            data = new byte[size];
+            System.arraycopy(zoneDataBytes, index * size, data, 0, size);
+            parentMap = FileFunctions.readFullIntLittleEndian(data, 0x1C);
+        }
+    }
+
+    private class AreaData {
+        public int fileNumber;
+        public boolean hasTables;
+        public List<byte[]> encounterTables;
+        public List<ZoneData> zones;
+        public String name;
+
+        public AreaData() {
+            encounterTables = new ArrayList<>();
+        }
     }
 }

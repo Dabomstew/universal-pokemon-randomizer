@@ -1,7 +1,7 @@
 package com.dabomstew.pkrandom.pokemon;
 
 /*----------------------------------------------------------------------------*/
-/*--  Encounter.java - contains one wild Pokemon slot                       --*/
+/*--  DamageType.java - represents a Gen 7 SOS Encounter's type             --*/
 /*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -23,26 +23,6 @@ package com.dabomstew.pkrandom.pokemon;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-public class Encounter {
-
-    public int level;
-    public int maxLevel;
-    public Pokemon pokemon;
-    public int formeNumber;
-
-    // Used only for Gen 7's SOS mechanic
-    public boolean isSOS;
-    public SOSType sosType;
-
-    public String toString() {
-        if (pokemon == null) {
-            return "ERROR";
-        }
-        if (maxLevel == 0) {
-            return pokemon.name + " Lv" + level;
-        } else {
-            return pokemon.name + " Lvs " + level + "-" + maxLevel;
-        }
-    }
-
+public enum SOSType {
+    GENERIC, RAIN, HAIL, SAND
 }
