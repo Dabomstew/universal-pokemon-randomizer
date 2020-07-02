@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GlobalConstants {
 
@@ -72,6 +74,68 @@ public class GlobalConstants {
             544, // Gear Grind
             41 // Twineedle
             );
+
+    public static final List<Integer> varyingPowerZMoves = Arrays.asList(
+            622, // Breakneck Blitz (Physical)
+            623, // Breakneck Blitz (Special)
+            624, // All-Out Pummeling (Physical)
+            625, // All-Out Pummeling (Special)
+            626, // Supersonic Skystrike (Physical)
+            627, // Supersonic Skystrike (Special)
+            628, // Acid Downpour (Physical)
+            629, // Acid Downpour (Special)
+            630, // Tectonic Rage (Physical)
+            631, // Tectonic Rage (Special)
+            632, // Continental Crush (Physical)
+            633, // Continental Crush (Special)
+            634, // Savage Spin-Out (Physical)
+            635, // Savage Spin-Out (Special)
+            636, // Never-Ending Nightmare (Physical)
+            637, // Never-Ending Nightmare (Special)
+            638, // Corkscrew Crash (Physical)
+            639, // Corkscrew Crash (Special)
+            640, // Inferno Overdrive (Physical)
+            641, // Inferno Overdrive (Special)
+            642, // Hydro Vortex (Physical)
+            643, // Hydro Vortex (Special)
+            644, // Bloom Doom (Physical)
+            645, // Bloom Doom (Special)
+            646, // Gigavolt Havoc (Physical)
+            647, // Gigavolt Havoc (Special)
+            648, // Shattered Psyche (Physical)
+            649, // Shattered Psyche (Special)
+            650, // Subzero Slammer (Physical)
+            651, // Subzero Slammer (Special)
+            652, // Devastating Drake (Physical)
+            653, // Devastating Drake (Special)
+            654, // Black Hole Eclipse (Physical)
+            655, // Black Hole Eclipse (Special)
+            656, // Twinkle Tackle (Physical)
+            656 // Twinkle Tackle (Special)
+            );
+
+    public static final List<Integer> fixedPowerZMoves = Arrays.asList(
+            658, // Catastropika
+            695, // Sinister Arrow Raid
+            696, // Malicious Moonsault
+            697, // Oceanic Operetta
+            698, // Guardian of Alola
+            699, // Soul-Stealing 7-Star Strike
+            700, // Stoked Sparksurfer
+            701, // Pulverizing Pancake
+            702, // Extreme Evoboost
+            703, // Genesis Supernova
+            719, // 10,000,000 Volt Thunderbolt
+            723, // Light That Burns the Sky
+            724, // Searing Sunraze Smash
+            725, // Menacing Moonraze Maelstrom
+            726, // Let's Snuggle Forever
+            727, // Splintered Stormshards
+            728 // Clangorous Soulblaze
+            );
+
+    public static final List<Integer> zMoves = Stream.concat(fixedPowerZMoves.stream(),
+            varyingPowerZMoves.stream()).collect(Collectors.toList());
 
     public static final Map<Integer,StatChange> gen6StatChanges = setupStatChanges(6);
     public static final Map<Integer,StatChange> gen7StatChanges = setupStatChanges(7);

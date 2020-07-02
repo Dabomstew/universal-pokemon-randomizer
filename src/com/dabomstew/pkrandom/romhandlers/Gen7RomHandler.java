@@ -424,9 +424,36 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     protected void savingROM() {
+        saveMoves();
         try {
             writeCode(code);
             writeGARC(romEntry.getString("TextStrings"), stringsGarc);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+
+    private void saveMoves() {
+        int moveCount = Gen7Constants.getMoveCount(romEntry.romType);
+        byte[][] movesData = Mini.UnpackMini(moveGarc.files.get(0).get(0), "WD");
+        for (int i = 1; i <= moveCount; i++) {
+            byte[] moveData = movesData[i];
+            moveData[2] = Gen7Constants.moveCategoryToByte(moves[i].category);
+            moveData[3] = (byte) moves[i].power;
+            moveData[0] = Gen7Constants.typeToByte(moves[i].type);
+            int hitratio = (int) Math.round(moves[i].hitratio);
+            if (hitratio < 0) {
+                hitratio = 0;
+            }
+            if (hitratio > 101) {
+                hitratio = 100;
+            }
+            moveData[4] = (byte) hitratio;
+            moveData[5] = (byte) moves[i].pp;
+        }
+        try {
+            moveGarc.setFile(0, Mini.PackMini(movesData, "WD"));
+            this.writeGARC(romEntry.getString("MoveData"), moveGarc);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
