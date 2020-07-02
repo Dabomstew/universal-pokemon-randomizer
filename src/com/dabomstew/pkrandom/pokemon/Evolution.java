@@ -30,6 +30,8 @@ public class Evolution implements Comparable<Evolution> {
     public boolean carryStats;
     public EvolutionType type;
     public int extraInfo;
+    public int extraInfoGen7;
+    public int forme;
 
     public Evolution(Pokemon from, Pokemon to, boolean carryStats, EvolutionType type, int extra) {
         this.from = from;

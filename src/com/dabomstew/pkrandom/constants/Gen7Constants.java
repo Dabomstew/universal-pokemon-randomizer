@@ -27,6 +27,8 @@ public class Gen7Constants {
 
     public static final int bsSize = 0x54;
 
+    public static final int evolutionMethodCount = 42;
+
     private static List<Integer> speciesWithAlolanForms = Arrays.asList(
             19, 20, 26, 27, 28, 37, 38, 50, 51, 52, 53, 74, 75, 76, 88, 89, 103, 105
     );
