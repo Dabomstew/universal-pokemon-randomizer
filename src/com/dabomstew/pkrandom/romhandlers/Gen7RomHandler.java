@@ -630,20 +630,19 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     private Pokemon getPokemonForEncounter(int species, int forme) {
         Pokemon pokemon = pokes[species];
-        return pokemon;
 
         // TODO: everything below once Pokemon reading is complete
         // If the forme is purely cosmetic, just use the base forme as the Pokemon
         // for this encounter (the cosmetic forme will be stored in the encounter).
         // TODO: Are formes 30 and 31 used like Gen 6?
-        //if (forme <= pokemon.cosmeticForms) {
-        //    return pokemon;
-        //} else {
-        //    int speciesWithForme = absolutePokeNumByBaseForme
-        //            .getOrDefault(species, dummyAbsolutePokeNums)
-        //            .getOrDefault(forme, 0);
-        //    return pokes[speciesWithForme];
-        //}
+        if (forme <= pokemon.cosmeticForms) {
+            return pokemon;
+        } else {
+            int speciesWithForme = absolutePokeNumByBaseForme
+                    .getOrDefault(species, dummyAbsolutePokeNums)
+                    .getOrDefault(forme, 0);
+            return pokes[speciesWithForme];
+        }
     }
 
     @Override
