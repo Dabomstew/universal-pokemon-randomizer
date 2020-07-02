@@ -14,7 +14,7 @@ public class Gen7Constants {
     public static final int Type_USUM = N3DSConstants.Type_USUM;
 
     private static final int pokemonCountSM = 802, pokemonCountUSUM = 807;
-    private static final int formeCountSM = 159, formeCountUSUM = 168;
+    private static final int formeCountSM = 158, formeCountUSUM = 168;
     private static final int moveCountSM = 719, moveCountUSUM = 728;
     private static final int highestAbilityIndexSM = 232, highestAbilityIndexUSUM = 233;
 
