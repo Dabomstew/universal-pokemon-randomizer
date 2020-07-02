@@ -778,10 +778,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     private Pokemon getPokemonForEncounter(int species, int forme) {
         Pokemon pokemon = pokes[species];
 
-        // TODO: everything below once Pokemon reading is complete
         // If the forme is purely cosmetic, just use the base forme as the Pokemon
         // for this encounter (the cosmetic forme will be stored in the encounter).
-        // TODO: Are formes 30 and 31 used like Gen 6?
         if (forme <= pokemon.cosmeticForms) {
             return pokemon;
         } else {
@@ -794,7 +792,63 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encountersList) {
-        // do nothing for now
+        Iterator<EncounterSet> encounters = encountersList.iterator();
+        for (AreaData areaData : areaDataList) {
+            if (!areaData.hasTables) {
+                continue;
+            }
+
+            for (int i = 0; i < areaData.encounterTables.size(); i++) {
+                byte[] encounterTable = areaData.encounterTables.get(i);
+                if (useTimeOfDay) {
+                    EncounterSet dayEncounters = encounters.next();
+                    EncounterSet nightEncounters = encounters.next();
+                    writeEncounterTable(encounterTable, 0, dayEncounters.encounters);
+                    writeEncounterTable(encounterTable, 0x164, nightEncounters.encounters);
+                } else {
+                    EncounterSet dayEncounters = encounters.next();
+                    writeEncounterTable(encounterTable, 0, dayEncounters.encounters);
+                    writeEncounterTable(encounterTable, 0x164, dayEncounters.encounters);
+                }
+            }
+        }
+
+        try {
+            saveAreaData();
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+
+    private void writeEncounterTable(byte[] encounterTable, int offset, List<Encounter> encounters) {
+        Iterator<Encounter> encounter = encounters.iterator();
+        Encounter firstEncounter = encounters.get(0);
+        encounterTable[offset] = (byte) firstEncounter.level;
+        encounterTable[offset + 1] = (byte) firstEncounter.maxLevel;
+        int numberOfEncounterSlots = encounters.size() / 8;
+        for (int i = 0; i < numberOfEncounterSlots; i++) {
+            int currentOffset = offset + 0xC + (i * 4);
+            Encounter enc = encounter.next();
+            int speciesAndFormeData = (enc.formeNumber << 11) + enc.pokemon.number;
+            writeWord(encounterTable, currentOffset, speciesAndFormeData);
+
+            // SOS encounters for this encounter
+            for (int j = 1; j < 8; j++) {
+                Encounter sosEncounter = encounter.next();
+                speciesAndFormeData = (sosEncounter.formeNumber << 11) + sosEncounter.pokemon.number;
+                writeWord(encounterTable, currentOffset + (40 * j), speciesAndFormeData);
+            }
+        }
+
+        // Weather SOS encounters
+        if (encounters.size() != numberOfEncounterSlots * 8) {
+            for (int i = 0; i < 6; i++) {
+                int currentOffset = offset + 0x14C + (i * 4);
+                Encounter weatherSOSEncounter = encounter.next();
+                int speciesAndFormeData = (weatherSOSEncounter.formeNumber << 11) + weatherSOSEncounter.pokemon.number;
+                writeWord(encounterTable, currentOffset, speciesAndFormeData);
+            }
+        }
     }
 
     private List<AreaData> getAreaData() throws IOException {
@@ -838,6 +892,24 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         }
 
         return Arrays.asList(areaData);
+    }
+
+    private void saveAreaData() throws IOException {
+        GARCArchive encounterGarc = readGARC(romEntry.getString("WildPokemon"), false);
+        for (AreaData areaData : areaDataList) {
+            if (areaData.hasTables) {
+                byte[] encounterData = encounterGarc.getFile(areaData.fileNumber);
+                byte[][] encounterTables = Mini.UnpackMini(encounterData, "EA");
+                for (int i = 0; i < encounterTables.length; i++) {
+                    byte[] originalEncounterTable = encounterTables[i];
+                    byte[] newEncounterTable = areaData.encounterTables.get(i);
+                    System.arraycopy(newEncounterTable, 0, originalEncounterTable, 4, newEncounterTable.length);
+                }
+                byte[] newEncounterData = Mini.PackMini(encounterTables, "EA");
+                encounterGarc.setFile(areaData.fileNumber, newEncounterData);
+            }
+        }
+        writeGARC(romEntry.getString("WildPokemon"), encounterGarc);
     }
 
     private List<String> createGoodLocationList() {
