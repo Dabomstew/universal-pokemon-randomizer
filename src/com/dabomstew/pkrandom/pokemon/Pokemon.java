@@ -37,12 +37,11 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public String formeSuffix = "";
     public Pokemon baseForme = null;
-    public Pokemon realBaseForme = null;
     public int formeNumber = 0;
     public int cosmeticForms = 0;
     public int formeSpriteIndex = 0;
     public boolean actuallyCosmetic = false;
-    public List<Integer> skipForms = new ArrayList<>();
+    public List<Integer> realCosmeticFormNumbers = new ArrayList<>();
 
     public Type primaryType, secondaryType;
 
@@ -259,6 +258,10 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public boolean isStrongLegendary() {
         return formeNumber == 0 ? strongLegendaries.contains(this.number) : strongLegendaries.contains(this.baseForme.number);
+    }
+
+    public int getCosmeticFormNumber(int num) {
+        return realCosmeticFormNumbers.isEmpty() ? num : realCosmeticFormNumbers.get(num);
     }
 
 }

@@ -270,7 +270,18 @@ public class Gen7Constants {
     }
 
     private static List<Integer> actuallyCosmeticFormsSM = Arrays.asList(
-
+            818, // Cherrim
+            819, // Shellos
+            820, // Gastrodon
+            826, // Keldeo
+            832, 833, 834, 835, 836, 837, 838, 839, 840, // Furfrou
+            877, 878, 879, 880, // Floette (Non-Eternal)
+            910, 946, 947, 948, 956, 957, 958, 959, 960, // Totems
+            925, // Battle Bond Greninja
+            928, 929, // Power Construct Zygardes
+            931, 932, 933, 934, 935, 936, 938, 939, 940, 941, 942, 943, // Minior
+            949, // Magearna
+            950, 951, 952, 953, 954, 955 // Pikachu With Funny Hats
     );
 
     private static List<Integer> actuallyCosmeticFormsUSUM = Arrays.asList(
@@ -298,11 +309,11 @@ public class Gen7Constants {
     }
 
     private static List<Integer> ignoreFormsSM = Arrays.asList(
-
+            818, 925, 928, 929, 931, 932, 933, 934, 935, 936, 946, 948
     );
 
     private static List<Integer> ignoreFormsUSUM = Arrays.asList(
-            932, 935, 936, 938, 939, 940, 941, 942, 943, 953, 955, 975
+            823, 932, 935, 936, 938, 939, 940, 941, 942, 943, 953, 955, 975
     );
 
     public static List<Integer> getIgnoreForms(int romType) {
@@ -313,13 +324,32 @@ public class Gen7Constants {
         }
     }
 
-    private static List<Integer> altFormesWithCosmeticFormsSM = Arrays.asList(
+    private static Map<Integer,Integer> altFormesWithCosmeticFormsSM = setupAltFormesWithCosmeticForms(Type_SM);
+    private static Map<Integer,Integer> altFormesWithCosmeticFormsUSUM = setupAltFormesWithCosmeticForms(Type_USUM);
 
-    );
+    public static Map<Integer,Integer> getAltFormesWithCosmeticForms(int romType) {
+        if (romType == Type_SM) {
+            return altFormesWithCosmeticFormsSM;
+        } else {
+            return altFormesWithCosmeticFormsUSUM;
+        }
+    }
 
-    private static List<Integer> altFormesWithCosmeticFormsUSUM = Arrays.asList(
+    private static Map<Integer,Integer> setupAltFormesWithCosmeticForms(int romType) {
+        Map<Integer,Integer> map = new HashMap<>();
+        if (romType == Type_SM) {
+            map.put(909,1); // Alolan Raticate: 1 form
+            map.put(927,1);
+            map.put(937,6); // Core Minior: 6 forms
+        } else {
+            map.put(915,1); // Alolan Raticate: 1 form
+            map.put(930,1); // Alolan Marowak: 1 form
+            map.put(934,1);
+            map.put(944,6); // Core Minior: 6 forms
+        }
 
-    );
+        return map;
+    }
 
     private static Type[] constructTypeTable() {
         Type[] table = new Type[256];

@@ -285,18 +285,19 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 pokes[i].number = i;
                 loadBasicPokeStats(pokes[i], pokeGarc.files.get(k).get(0),formeMappings);
                 FormeInfo fi = formeMappings.get(k);
-                pokes[i].name = pokeNames[fi.baseForme];
+                int realBaseForme = pokes[fi.baseForme].baseForme == null ? fi.baseForme : pokes[fi.baseForme].baseForme.number;
+                pokes[i].name = pokeNames[realBaseForme];
                 pokes[i].baseForme = pokes[fi.baseForme];
                 pokes[i].formeNumber = fi.formeNumber;
                 pokes[i].formeSuffix = Gen7Constants.getFormeSuffixByBaseForme(fi.baseForme,fi.formeNumber);
-                if (fi.baseForme == prevSpecies) {
+                if (realBaseForme == prevSpecies) {
                     formNum++;
                     currentMap.put(formNum,i);
                 } else {
                     if (prevSpecies != 0) {
                         absolutePokeNumByBaseForme.put(prevSpecies,currentMap);
                     }
-                    prevSpecies = fi.baseForme;
+                    prevSpecies = realBaseForme;
                     formNum = 1;
                     currentMap = new HashMap<>();
                     currentMap.put(formNum,i);
@@ -356,12 +357,27 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             if (!altFormes.keySet().contains(pkmn.number)) {
                 int firstFormeOffset = FileFunctions.read2ByteInt(stats, Gen7Constants.bsFormeOffset);
                 if (firstFormeOffset != 0) {
+                    int j = 0;
+                    int jMax = 0;
+                    int theAltForme = 0;
+                    Set<Integer> altFormesWithCosmeticForms = Gen7Constants.getAltFormesWithCosmeticForms(romEntry.romType).keySet();
                     for (int i = 1; i < formeCount; i++) {
-                        altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.number,i,FileFunctions.read2ByteInt(stats,Gen7Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
-                        if (Gen7Constants.getActuallyCosmeticForms(romEntry.romType).contains(firstFormeOffset+i-1)) {
-                            if (pkmn.number != 421) { // No Cherrim
-                                pkmn.cosmeticForms += 1;
+                        if (j == 0 || j > jMax) {
+                            altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.number,i,FileFunctions.read2ByteInt(stats,Gen7Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
+                            if (Gen7Constants.getActuallyCosmeticForms(romEntry.romType).contains(firstFormeOffset+i-1)) {
+                                if (!Gen7Constants.getIgnoreForms(romEntry.romType).contains(firstFormeOffset+i-1)) { // Skip ignored forms (identical or confusing cosmetic forms)
+                                    pkmn.cosmeticForms += 1;
+                                    pkmn.realCosmeticFormNumbers.add(i);
+                                }
                             }
+                        } else {
+                            altFormes.put(firstFormeOffset + i - 1,new FormeInfo(theAltForme,j,FileFunctions.read2ByteInt(stats,Gen7Constants.bsFormeSpriteOffset)));
+                            j++;
+                        }
+                        if (altFormesWithCosmeticForms.contains(firstFormeOffset + i - 1)) {
+                            j = 1;
+                            jMax = Gen7Constants.getAltFormesWithCosmeticForms(romEntry.romType).get(firstFormeOffset + i - 1);
+                            theAltForme = firstFormeOffset + i - 1;
                         }
                     }
                 } else {
@@ -373,6 +389,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     }
                 }
             } else {
+                pkmn.cosmeticForms = Gen7Constants.getAltFormesWithCosmeticForms(romEntry.romType).getOrDefault(pkmn.number,0);
                 if (Gen7Constants.getActuallyCosmeticForms(romEntry.romType).contains(pkmn.number)) {
                     pkmn.actuallyCosmetic = true;
                 }
