@@ -207,14 +207,21 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void shufflePokemonStats(boolean evolutionSanity, boolean megaEvolutionSanity) {
         if (evolutionSanity) {
             copyUpEvolutionsHelper(pk -> pk.shuffleStats(AbstractRomHandler.this.random),
-                    (evFrom, evTo, toMonIsFinalEvo) -> evTo.copyShuffledStatsUpEvolution(evFrom),
-                    Pokemon::copyBaseFormeBaseStats);
+                    (evFrom, evTo, toMonIsFinalEvo) -> evTo.copyShuffledStatsUpEvolution(evFrom)
+            );
         } else {
-            List<Pokemon> allPokes = this.getPokemon();
+            List<Pokemon> allPokes = this.getPokemonInclFormes();
             for (Pokemon pk : allPokes) {
                 if (pk != null) {
                     pk.shuffleStats(this.random);
                 }
+            }
+        }
+
+        List<Pokemon> allPokes = this.getPokemonInclFormes();
+        for (Pokemon pk : allPokes) {
+            if (pk != null && pk.actuallyCosmetic) {
+                pk.copyBaseFormeBaseStats(pk.baseForme);
             }
         }
 
@@ -232,14 +239,21 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         if (evolutionSanity) {
             copyUpEvolutionsHelper(pk -> pk.randomizeStatsWithinBST(AbstractRomHandler.this.random),
-                    (evFrom, evTo, toMonIsFinalEvo) -> evTo.copyRandomizedStatsUpEvolution(evFrom),
-                    Pokemon::copyBaseFormeBaseStats);
+                    (evFrom, evTo, toMonIsFinalEvo) -> evTo.copyRandomizedStatsUpEvolution(evFrom)
+            );
         } else {
             List<Pokemon> allPokes = this.getPokemonInclFormes();
             for (Pokemon pk : allPokes) {
                 if (pk != null) {
                     pk.randomizeStatsWithinBST(this.random);
                 }
+            }
+        }
+
+        List<Pokemon> allPokes = this.getPokemonInclFormes();
+        for (Pokemon pk : allPokes) {
+            if (pk != null && pk.actuallyCosmetic) {
+                pk.copyBaseFormeBaseStats(pk.baseForme);
             }
         }
 
@@ -429,9 +443,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                         }
                     }
                 }
-            }, (pk, baseForme) -> {
-                pk.primaryType = baseForme.primaryType;
-                pk.secondaryType = baseForme.secondaryType;
             });
         } else {
             // Entirely random types
@@ -446,6 +457,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                         }
                     }
                 }
+            }
+        }
+
+        for (Pokemon pk : allPokes) {
+            if (pk != null && pk.actuallyCosmetic) {
+                pk.primaryType = pk.baseForme.primaryType;
+                pk.secondaryType = pk.baseForme.secondaryType;
             }
         }
 
@@ -531,7 +549,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     evTo.ability2 = evFrom.ability2;
                     evTo.ability3 = evFrom.ability3;
                 }
-            }, Pokemon::copyBaseFormeAbilities);
+            });
         } else {
             List<Pokemon> allPokes = this.getPokemonInclFormes();
             for (Pokemon pk : allPokes) {
@@ -560,6 +578,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                         pk.ability3 = pickRandomAbility(maxAbility, bannedAbilities, pk.ability1, pk.ability2);
                     }
                 }
+            }
+        }
+
+        List<Pokemon> allPokes = this.getPokemonInclFormes();
+        for (Pokemon pk : allPokes) {
+            if (pk != null && pk.actuallyCosmetic) {
+                pk.copyBaseFormeAbilities(pk.baseForme);
             }
         }
 
@@ -4207,14 +4232,12 @@ public abstract class AbstractRomHandler implements RomHandler {
     /**
      * Universal implementation for things that have "copy X up evolutions"
      * support.
-     * 
-     * @param bpAction
+     *  @param bpAction
      *            Method to run on all base or no-copy Pokemon
      * @param epAction
      *            Method to run on all evolved Pokemon with a linear chain of
-     *            single evolutions.
      */
-    private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction, CosmeticFormAction cfAction) {
+    private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction) {
         List<Pokemon> allPokes = this.getPokemonInclFormes();
         for (Pokemon pk : allPokes) {
             if (pk != null) {
@@ -4233,9 +4256,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // go "up" evolutions looking for pre-evos to do first
         for (Pokemon pk : allPokes) {
-            if (pk != null && pk.actuallyCosmetic) {
-                cfAction.applyTo(pk,pk.baseForme);
-            }
             if (pk != null && !pk.temporaryFlag) {
 
                 // Non-randomized pokes at this point must have
