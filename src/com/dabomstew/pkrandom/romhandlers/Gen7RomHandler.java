@@ -452,6 +452,67 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         }
     }
 
+    private void savePokemonStats() {
+        int k = Gen7Constants.bsSize;
+        int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
+        int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
+        byte[] duplicateData = pokeGarc.files.get(pokemonCount + formeCount + 1).get(0);
+        for (int i = 1; i <= pokemonCount + formeCount; i++) {
+            byte[] pokeData = pokeGarc.files.get(i).get(0);
+            saveBasicPokeStats(pokes[i], pokeData);
+            for (byte pokeDataByte : pokeData) {
+                duplicateData[k] = pokeDataByte;
+                k++;
+            }
+        }
+
+        try {
+            this.writeGARC(romEntry.getString("PokemonStats"),pokeGarc);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+
+//        writeEvolutions();
+    }
+
+    private void saveBasicPokeStats(Pokemon pkmn, byte[] stats) {
+        stats[Gen7Constants.bsHPOffset] = (byte) pkmn.hp;
+        stats[Gen7Constants.bsAttackOffset] = (byte) pkmn.attack;
+        stats[Gen7Constants.bsDefenseOffset] = (byte) pkmn.defense;
+        stats[Gen7Constants.bsSpeedOffset] = (byte) pkmn.speed;
+        stats[Gen7Constants.bsSpAtkOffset] = (byte) pkmn.spatk;
+        stats[Gen7Constants.bsSpDefOffset] = (byte) pkmn.spdef;
+        stats[Gen7Constants.bsPrimaryTypeOffset] = Gen7Constants.typeToByte(pkmn.primaryType);
+        if (pkmn.secondaryType == null) {
+            stats[Gen7Constants.bsSecondaryTypeOffset] = stats[Gen7Constants.bsPrimaryTypeOffset];
+        } else {
+            stats[Gen7Constants.bsSecondaryTypeOffset] = Gen7Constants.typeToByte(pkmn.secondaryType);
+        }
+        stats[Gen7Constants.bsCatchRateOffset] = (byte) pkmn.catchRate;
+        stats[Gen7Constants.bsGrowthCurveOffset] = pkmn.growthCurve.toByte();
+
+        stats[Gen7Constants.bsAbility1Offset] = (byte) pkmn.ability1;
+        stats[Gen7Constants.bsAbility2Offset] = pkmn.ability2 != 0 ? (byte) pkmn.ability2 : (byte) pkmn.ability1;
+        stats[Gen7Constants.bsAbility3Offset] = (byte) pkmn.ability3;
+
+        // Held items
+        if (pkmn.guaranteedHeldItem > 0) {
+            FileFunctions.write2ByteInt(stats, Gen7Constants.bsCommonHeldItemOffset, pkmn.guaranteedHeldItem);
+            FileFunctions.write2ByteInt(stats, Gen7Constants.bsRareHeldItemOffset, pkmn.guaranteedHeldItem);
+            FileFunctions.write2ByteInt(stats, Gen7Constants.bsDarkGrassHeldItemOffset, 0);
+        } else {
+            FileFunctions.write2ByteInt(stats, Gen7Constants.bsCommonHeldItemOffset, pkmn.commonHeldItem);
+            FileFunctions.write2ByteInt(stats, Gen7Constants.bsRareHeldItemOffset, pkmn.rareHeldItem);
+            FileFunctions.write2ByteInt(stats, Gen7Constants.bsDarkGrassHeldItemOffset, pkmn.darkGrassHeldItem);
+        }
+
+        if (pkmn.fullName().equals("Meowstic")) {
+            stats[Gen7Constants.bsGenderOffset] = 0;
+        } else if (pkmn.fullName().equals("Meowstic-F")) {
+            stats[Gen7Constants.bsGenderOffset] = (byte)0xFE;
+        }
+    }
+
     private void saveMoves() {
         int moveCount = Gen7Constants.getMoveCount(romEntry.romType);
         byte[][] movesData = Mini.UnpackMini(moveGarc.files.get(0).get(0), "WD");

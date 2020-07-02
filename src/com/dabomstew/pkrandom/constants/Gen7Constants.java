@@ -25,6 +25,8 @@ public class Gen7Constants {
             bsAbility3Offset = 26, bsFormeOffset = 28, bsFormeSpriteOffset = 30, bsFormeCountOffset = 32,
             bsTMHMCompatOffset = 40, bsSpecialMTCompatOffset = 56, bsMTCompatOffset = 64;
 
+    public static final int bsSize = 0x54;
+
     private static List<Integer> speciesWithAlolanForms = Arrays.asList(
             19, 20, 26, 27, 28, 37, 38, 50, 51, 52, 53, 74, 75, 76, 88, 89, 103, 105
     );
