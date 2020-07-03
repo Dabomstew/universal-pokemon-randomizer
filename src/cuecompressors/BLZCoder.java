@@ -600,11 +600,15 @@ public class BLZCoder {
         }
 
         ByteBuffer inBuf = ByteBuffer.wrap(data);
-        ByteBuffer outBuf = ByteBuffer.allocate(data.length);
+        ByteBuffer outBuf = ByteBuffer.allocate(data.length + 8);
         outBuf.order(ByteOrder.LITTLE_ENDIAN);
         outBuf.put((byte)0x11);
         outBuf.putInt(data.length);
         outBuf.position(outBuf.position()-1); // Go back one byte since length should only be 3 bytes
+        if (data.length == 0) {
+            outBuf.putInt(0);
+            return Arrays.copyOfRange(outBuf.array(),0,outBuf.position());
+        }
 
         ByteBuffer blockBuf = ByteBuffer.allocate((8 * 4) + 1);
         blockBuf.put((byte)0);
