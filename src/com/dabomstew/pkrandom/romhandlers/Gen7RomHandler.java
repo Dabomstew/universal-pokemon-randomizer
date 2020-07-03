@@ -424,17 +424,50 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.romType) + Gen7Constants.getFormeCount(romEntry.romType); i++) {
                 Pokemon pk = pokes[i];
                 byte[] evoEntry = evoGARC.files.get(i).get(0);
+                boolean skipNext = false;
                 for (int evo = 0; evo < 8; evo++) {
                     int method = readWord(evoEntry, evo * 8);
                     int species = readWord(evoEntry, evo * 8 + 4);
                     if (method >= 1 && method <= Gen7Constants.evolutionMethodCount && species >= 1) {
                         EvolutionType et = EvolutionType.fromIndex(7, method);
-                        if (et.equals(EvolutionType.LEVEL_HIGH_BEAUTY)) continue; // Remove Feebas "split" evolution
-                        int extraInfo = readWord(evoEntry, evo * 6 + 2);
-                        Evolution evol = new Evolution(pk, pokes[species], true, et, extraInfo);
+                        if (et.skipSplitEvo()) continue; // Remove Feebas "split" evolution
+                        if (skipNext) {
+                            skipNext = false;
+                            continue;
+                        }
+                        if (et == EvolutionType.LEVEL_GAME) {
+                            skipNext = true;
+                        }
+
+                        int extraInfo = readWord(evoEntry, evo * 8 + 2);
+                        int forme = evoEntry[evo * 8 + 6];
+                        int level = evoEntry[evo * 8 + 7];
+                        Evolution evol = new Evolution(pk, getPokemonForEncounter(species,forme), true, et, extraInfo);
+                        evol.forme = forme;
+                        evol.level = level;
+                        if (et.usesLevel()) {
+                            evol.extraInfo = level;
+                        }
+                        switch (et) {
+                            case LEVEL_GAME:
+                                evol.type = EvolutionType.LEVEL;
+                                break;
+                            case LEVEL_DAY_GAME:
+                                evol.type = EvolutionType.LEVEL_DAY;
+                                break;
+                            case LEVEL_NIGHT_GAME:
+                                evol.type = EvolutionType.LEVEL_NIGHT;
+                                break;
+                            default:
+                                break;
+                        }
+                        if (pk.baseForme != null && pk.baseForme.number == Gen7Constants.rockruffIndex && pk.formeNumber > 0) {
+                            evol.from = pk.baseForme;
+                            pk.baseForme.evolutionsFrom.add(evol);
+                        }
                         if (!pk.evolutionsFrom.contains(evol)) {
                             pk.evolutionsFrom.add(evol);
-                            pokes[species].evolutionsTo.add(evol);
+                            if (!pk.actuallyCosmetic) pokes[species].evolutionsTo.add(evol);
                         }
                     }
                 }
@@ -484,6 +517,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     protected void savingROM() {
+        savePokemonStats();
         saveMoves();
         try {
             writeCode(code);
@@ -513,7 +547,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             throw new RandomizerIOException(e);
         }
 
-//        writeEvolutions();
+        writeEvolutions();
     }
 
     private void saveBasicPokeStats(Pokemon pkmn, byte[] stats) {
@@ -562,18 +596,25 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 Pokemon pk = pokes[i];
                 int evosWritten = 0;
                 for (Evolution evo : pk.evolutionsFrom) {
-                    writeWord(evoEntry, evosWritten * 6, evo.type.toIndex(5));
-                    writeWord(evoEntry, evosWritten * 6 + 2, evo.extraInfo);
-                    writeWord(evoEntry, evosWritten * 6 + 4, evo.to.number);
+                    Pokemon toPK = evo.to;
+                    if (toPK.formeNumber > 0) {
+                        toPK = toPK.baseForme;
+                    }
+                    writeWord(evoEntry, evosWritten * 8, evo.type.toIndex(5));
+                    writeWord(evoEntry, evosWritten * 8 + 2, evo.type.usesLevel() ? 0 : evo.extraInfo);
+                    writeWord(evoEntry, evosWritten * 8 + 4, toPK.number);
+                    evoEntry[evosWritten * 8 + 6] = (byte)evo.forme;
+                    evoEntry[evosWritten * 8 + 7] = evo.type.usesLevel() ? (byte)evo.extraInfo : (byte)evo.level;
                     evosWritten++;
-                    if (evosWritten == 7) {
+                    if (evosWritten == 8) {
                         break;
                     }
                 }
-                while (evosWritten < 7) {
-                    writeWord(evoEntry, evosWritten * 6, 0);
-                    writeWord(evoEntry, evosWritten * 6 + 2, 0);
-                    writeWord(evoEntry, evosWritten * 6 + 4, 0);
+                while (evosWritten < 8) {
+                    writeWord(evoEntry, evosWritten * 8, 0);
+                    writeWord(evoEntry, evosWritten * 8 + 2, 0);
+                    writeWord(evoEntry, evosWritten * 8 + 4, 0);
+                    writeWord(evoEntry, evosWritten * 8 + 6, 0);
                     evosWritten++;
                 }
             }
