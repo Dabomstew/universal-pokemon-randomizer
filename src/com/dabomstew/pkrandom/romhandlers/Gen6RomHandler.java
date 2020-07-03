@@ -621,20 +621,20 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     private void writeEvolutions() {
         try {
             GARCArchive evoGARC = readGARC(romEntry.getString("PokemonEvolutions"),true);
-            for (int i = 1; i <= Gen6Constants.pokemonCount; i++) {
+            for (int i = 1; i <= Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.romType); i++) {
                 byte[] evoEntry = evoGARC.files.get(i).get(0);
                 Pokemon pk = pokes[i];
                 int evosWritten = 0;
                 for (Evolution evo : pk.evolutionsFrom) {
-                    writeWord(evoEntry, evosWritten * 6, evo.type.toIndex(5));
+                    writeWord(evoEntry, evosWritten * 6, evo.type.toIndex(6));
                     writeWord(evoEntry, evosWritten * 6 + 2, evo.extraInfo);
                     writeWord(evoEntry, evosWritten * 6 + 4, evo.to.number);
                     evosWritten++;
-                    if (evosWritten == 7) {
+                    if (evosWritten == 8) {
                         break;
                     }
                 }
-                while (evosWritten < 7) {
+                while (evosWritten < 8) {
                     writeWord(evoEntry, evosWritten * 6, 0);
                     writeWord(evoEntry, evosWritten * 6 + 2, 0);
                     writeWord(evoEntry, evosWritten * 6 + 4, 0);

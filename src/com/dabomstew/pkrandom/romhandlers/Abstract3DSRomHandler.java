@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Random;
 
 public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
@@ -128,6 +129,10 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 
     protected GARCArchive readGARC(String subpath, boolean skipDecompression) throws IOException {
         return new GARCArchive(readFile(subpath),skipDecompression);
+    }
+
+    protected GARCArchive readGARC(String subpath, List<Boolean> compressThese) throws IOException {
+        return new GARCArchive(readFile(subpath),compressThese);
     }
 
     protected void writeGARC(String subpath, GARCArchive garc) throws IOException {

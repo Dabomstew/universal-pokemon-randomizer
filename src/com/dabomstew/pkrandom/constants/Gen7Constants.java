@@ -3,10 +3,7 @@ package com.dabomstew.pkrandom.constants;
 import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.pokemon.Type;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Gen7Constants {
 
@@ -26,6 +23,8 @@ public class Gen7Constants {
             bsTMHMCompatOffset = 40, bsSpecialMTCompatOffset = 56, bsMTCompatOffset = 64;
 
     public static final int bsSize = 0x54;
+
+    public static final int evolutionMethodCount = 42;
 
     private static List<Integer> speciesWithAlolanForms = Arrays.asList(
             19, 20, 26, 27, 28, 37, 38, 50, 51, 52, 53, 74, 75, 76, 88, 89, 103, 105
@@ -61,6 +60,9 @@ public class Gen7Constants {
     public static final String itemPalettesPrefix = "070000000000000000010100";
 
     public static final String[] fastestTextPrefixes = new String[]{"1080BDE80E000500F0412DE9", "34019FE50060A0E3"};
+
+    private static final List<Boolean> relevantEncounterFilesSM = setupRelevantEncounterFiles(Type_SM);
+    private static final List<Boolean> relevantEncounterFilesUSUM = setupRelevantEncounterFiles(Type_USUM);
 
     public static int getPokemonCount(int romType) {
         if (romType == Type_SM) {
@@ -104,6 +106,14 @@ public class Gen7Constants {
             return highestAbilityIndexUSUM;
         }
         return highestAbilityIndexSM;
+    }
+
+    public static List<Boolean> getRelevantEncounterFiles(int romType) {
+        if (romType == Type_SM) {
+            return relevantEncounterFilesSM;
+        } else {
+            return relevantEncounterFilesUSUM;
+        }
     }
 
     private static Map<Integer,Map<Integer,String>> setupFormeSuffixesByBaseForme() {
@@ -420,5 +430,20 @@ public class Gen7Constants {
             default:
                 return 0; // normal by default
         }
+    }
+
+    private static List<Boolean> setupRelevantEncounterFiles(int romType) {
+        int fileCount = romType == Type_SM ? 2761 : 3696;
+        List<Boolean> list = new ArrayList<>();
+
+        for (int i = 0; i < fileCount; i++) {
+            if ((i - 9) % 11 == 0) {
+                list.add(true);
+            } else {
+                list.add(false);
+            }
+        }
+
+        return list;
     }
 }
