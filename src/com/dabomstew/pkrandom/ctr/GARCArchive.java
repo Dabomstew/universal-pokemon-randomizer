@@ -14,16 +14,18 @@ public class GARCArchive {
 
     private final int VER_4 = 0x0400;
     private final int VER_6 = 0x0600;
+    private int version;
     private final int garcHeaderSize_4 = 0x1C;
     private final int garcHeaderSize_6 = 0x24;
     private final String garcMagic = "CRAG";
     private final String fatoMagic = "OTAF";
     private final String fatbMagic = "BTAF";
     private final String fimbMagic = "BMIF";
-    private boolean skipDecompression;
+    private boolean skipDecompression = true;
 
     public List<Map<Integer,byte[]>> files = new ArrayList<>();
     private Map<Integer,Boolean> isCompressed = new TreeMap<>();
+    private List<Boolean> compressThese = null;
 
     private GARCFrame garc;
     private FATOFrame fato;
@@ -36,6 +38,15 @@ public class GARCArchive {
 
     public GARCArchive(byte[] data, boolean skipDecompression) throws IOException {
         this.skipDecompression = skipDecompression;
+        boolean success = readFrames(data);
+        if (!success) {
+            throw new IOException("Invalid GARC file");
+        }
+        files = fimb.files;
+    }
+
+    public GARCArchive(byte[] data, List<Boolean> compressedThese) throws IOException {
+        this.compressThese = compressedThese;
         boolean success = readFrames(data);
         if (!success) {
             throw new IOException("Invalid GARC file");
@@ -66,10 +77,12 @@ public class GARCArchive {
         if (garc.version == VER_4) {
             garc.contentLargestUnpadded = bbuf.getInt();
             garc.contentPadToNearest = 4;
+            version = 4;
         } else if (garc.version == VER_6) {
             garc.contentLargestPadded = bbuf.getInt();
             garc.contentLargestUnpadded = bbuf.getInt();
             garc.contentPadToNearest = bbuf.getInt();
+            version = 6;
         } else {
             return false;
         }
@@ -136,7 +149,9 @@ public class GARCArchive {
                 FATBSubEntry subEntry = entry.subEntries.get(k);
                 bbuf.position(garc.dataOffset + subEntry.start);
                 byte[] file = new byte[subEntry.length];
-                boolean compressed = bbuf.get(bbuf.position()) == 0x11 && !skipDecompression;
+                boolean compressed = compressThese == null ?
+                        bbuf.get(bbuf.position()) == 0x11 && !skipDecompression :
+                        bbuf.get(bbuf.position()) == 0x11 && compressThese.get(i);
                 bbuf.get(file);
                 if (compressed) {
                     try {
@@ -167,7 +182,7 @@ public class GARCArchive {
         garcBuf.put(garcMagic.getBytes());
         garcBuf.putInt(garcHeaderSize);
         garcBuf.putShort((short)0xFEFF);
-        garcBuf.putShort((short)VER_4);
+        garcBuf.putShort(version == 4 ? (short)VER_4 : (short)VER_6);
         garcBuf.putInt(4);
 
         ByteBuffer fatoBuf = ByteBuffer.allocate(fato.headerSize);

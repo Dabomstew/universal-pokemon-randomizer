@@ -863,7 +863,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         byte[] worldData = zoneDataGarc.getFile(1);
         List<String> locationList = createGoodLocationList();
         ZoneData[] zoneData = getZoneData(zoneDataBytes, worldData, locationList, worlds);
-        GARCArchive encounterGarc = readGARC(romEntry.getString("WildPokemon"), false);
+        GARCArchive encounterGarc = readGARC(romEntry.getString("WildPokemon"), Gen7Constants.getRelevantEncounterFiles(romEntry.romType));
         int fileCount = encounterGarc.files.size();
         int numberOfAreas = fileCount / 11;
         AreaData[] areaData = new AreaData[numberOfAreas];
@@ -895,7 +895,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     private void saveAreaData() throws IOException {
-        GARCArchive encounterGarc = readGARC(romEntry.getString("WildPokemon"), false);
+        GARCArchive encounterGarc = readGARC(romEntry.getString("WildPokemon"), Gen7Constants.getRelevantEncounterFiles(romEntry.romType));
         for (AreaData areaData : areaDataList) {
             if (areaData.hasTables) {
                 byte[] encounterData = encounterGarc.getFile(areaData.fileNumber);
