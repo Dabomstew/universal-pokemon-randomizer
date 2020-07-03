@@ -193,7 +193,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     private List<String> itemNames;
     private List<String> abilityNames;
 
-    private GARCArchive pokeGarc, moveGarc, stringsGarc, storyTextGarc;
+    private GARCArchive pokeGarc, moveGarc, encounterGarc, stringsGarc, storyTextGarc;
 
     @Override
     protected boolean detect3DSRom(String productCode, String titleId) {
@@ -229,6 +229,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
         try {
             stringsGarc = readGARC(romEntry.getString("TextStrings"), true);
+            areaDataList = getAreaData();
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
@@ -682,33 +683,28 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     @Override
     public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
         List<EncounterSet> encounters = new ArrayList<>();
-        try {
-            areaDataList = getAreaData();
-            for (AreaData areaData : areaDataList) {
-                if (!areaData.hasTables) {
-                    continue;
-                }
-                for (int i = 0; i < areaData.encounterTables.size(); i++) {
-                    byte[] encounterTable = areaData.encounterTables.get(i);
-                    byte[] dayTable = new byte[0x164];
-                    System.arraycopy(encounterTable, 0, dayTable, 0, 0x164);
-                    EncounterSet dayEncounters = readEncounterTable(dayTable);
-                    if (!useTimeOfDay) {
-                        dayEncounters.displayName = areaData.name + ", Table " + (i + 1);
-                        encounters.add(dayEncounters);
-                    } else {
-                        dayEncounters.displayName = areaData.name + ", Table " + (i + 1) + " (Day)";
-                        encounters.add(dayEncounters);
-                        byte[] nightTable = new byte[0x164];
-                        System.arraycopy(encounterTable, 0x164, nightTable, 0, 0x164);
-                        EncounterSet nightEncounters = readEncounterTable(nightTable);
-                        nightEncounters.displayName = areaData.name + ", Table " + (i + 1) + " (Night)";
-                        encounters.add(nightEncounters);
-                    }
+        for (AreaData areaData : areaDataList) {
+            if (!areaData.hasTables) {
+                continue;
+            }
+            for (int i = 0; i < areaData.encounterTables.size(); i++) {
+                byte[] encounterTable = areaData.encounterTables.get(i);
+                byte[] dayTable = new byte[0x164];
+                System.arraycopy(encounterTable, 0, dayTable, 0, 0x164);
+                EncounterSet dayEncounters = readEncounterTable(dayTable);
+                if (!useTimeOfDay) {
+                    dayEncounters.displayName = areaData.name + ", Table " + (i + 1);
+                    encounters.add(dayEncounters);
+                } else {
+                    dayEncounters.displayName = areaData.name + ", Table " + (i + 1) + " (Day)";
+                    encounters.add(dayEncounters);
+                    byte[] nightTable = new byte[0x164];
+                    System.arraycopy(encounterTable, 0x164, nightTable, 0, 0x164);
+                    EncounterSet nightEncounters = readEncounterTable(nightTable);
+                    nightEncounters.displayName = areaData.name + ", Table " + (i + 1) + " (Night)";
+                    encounters.add(nightEncounters);
                 }
             }
-        } catch (IOException e) {
-            throw new RandomizerIOException(e);
         }
         return encounters;
     }
@@ -863,7 +859,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         byte[] worldData = zoneDataGarc.getFile(1);
         List<String> locationList = createGoodLocationList();
         ZoneData[] zoneData = getZoneData(zoneDataBytes, worldData, locationList, worlds);
-        GARCArchive encounterGarc = readGARC(romEntry.getString("WildPokemon"), Gen7Constants.getRelevantEncounterFiles(romEntry.romType));
+        encounterGarc = readGARC(romEntry.getString("WildPokemon"), Gen7Constants.getRelevantEncounterFiles(romEntry.romType));;
         int fileCount = encounterGarc.files.size();
         int numberOfAreas = fileCount / 11;
         AreaData[] areaData = new AreaData[numberOfAreas];
@@ -895,7 +891,6 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     private void saveAreaData() throws IOException {
-        GARCArchive encounterGarc = readGARC(romEntry.getString("WildPokemon"), Gen7Constants.getRelevantEncounterFiles(romEntry.romType));
         for (AreaData areaData : areaDataList) {
             if (areaData.hasTables) {
                 byte[] encounterData = encounterGarc.getFile(areaData.fileNumber);
