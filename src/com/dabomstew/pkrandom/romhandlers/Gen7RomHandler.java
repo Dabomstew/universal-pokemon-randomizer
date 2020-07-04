@@ -685,13 +685,33 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Pokemon> getStarters() {
-        // TODO: Actually make this work by loading it from the ROM. Only doing it this
-        // way temporarily so the randomizer won't crash
-        List<Pokemon> starters = new ArrayList<>();
-        starters.add(pokes[722]);
-        starters.add(pokes[725]);
-        starters.add(pokes[728]);
-        return starters;
+        List<StaticEncounter> starters = new ArrayList<>();
+        try {
+            GARCArchive staticGarc = readGARC(romEntry.getString("StaticPokemon"), true);
+            byte[] giftsFile = staticGarc.files.get(0).get(0);
+            for (int i = 0; i < 3; i++) {
+                int offset = i * 0x14;
+                StaticEncounter se = new StaticEncounter();
+                int species = FileFunctions.read2ByteInt(giftsFile, offset);
+                Pokemon pokemon = pokes[species];
+                byte forme = giftsFile[offset + 2];
+                if (forme > pokemon.cosmeticForms && forme != 30 && forme != 31) {
+                    int speciesWithForme = absolutePokeNumByBaseForme
+                            .getOrDefault(species, dummyAbsolutePokeNums)
+                            .getOrDefault(forme, 0);
+                    pokemon = pokes[speciesWithForme];
+                }
+                se.pkmn = pokemon;
+                se.forme = forme;
+                se.formeSuffix = Gen7Constants.getFormeSuffixByBaseForme(species, forme);
+                se.level = giftsFile[offset + 3];
+                se.heldItem = FileFunctions.read2ByteInt(giftsFile, offset + 8);
+                starters.add(se);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+        return starters.stream().map(pk -> pk.pkmn).collect(Collectors.toList());
     }
 
     @Override
@@ -820,7 +840,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
         // If the forme is purely cosmetic, just use the base forme as the Pokemon
         // for this encounter (the cosmetic forme will be stored in the encounter).
-        if (forme <= pokemon.cosmeticForms) {
+        if (forme <= pokemon.cosmeticForms || forme == 30 || forme == 31) {
             return pokemon;
         } else {
             int speciesWithForme = absolutePokeNumByBaseForme
@@ -1030,7 +1050,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public boolean canChangeStaticPokemon() {
-        return false;
+        return true;
     }
 
     @Override
@@ -1040,7 +1060,66 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<StaticEncounter> getStaticPokemon() {
-        return new ArrayList<>();
+        List<StaticEncounter> statics = new ArrayList<>();
+        try {
+            GARCArchive staticGarc = readGARC(romEntry.getString("StaticPokemon"), true);
+
+            // Gifts, start at 3 to skip the starters
+            byte[] giftsFile = staticGarc.files.get(0).get(0);
+            int numberOfGifts = giftsFile.length / 0x14;
+            for (int i = 3; i < numberOfGifts; i++) {
+                int offset = i * 0x14;
+                StaticEncounter se = new StaticEncounter();
+                int species = FileFunctions.read2ByteInt(giftsFile, offset);
+                Pokemon pokemon = pokes[species];
+                byte forme = giftsFile[offset + 2];
+                if (forme > pokemon.cosmeticForms && forme != 30 && forme != 31) {
+                    // TODO: make this not blow up on certain formes
+                    int speciesWithForme = absolutePokeNumByBaseForme
+                            .getOrDefault(species, dummyAbsolutePokeNums)
+                            .getOrDefault(forme, 0);
+                    pokemon = pokes[speciesWithForme];
+                }
+                se.pkmn = pokemon;
+                se.forme = forme;
+                se.formeSuffix = Gen7Constants.getFormeSuffixByBaseForme(species, forme);
+                se.level = giftsFile[offset + 3];
+                se.heldItem = FileFunctions.read2ByteInt(giftsFile, offset + 8);
+                statics.add(se);
+            }
+
+            // Static encounters
+            byte[] staticEncountersFile = staticGarc.files.get(1).get(0);
+            int numberOfStaticEncounters = staticEncountersFile.length / 0x38;
+            for (int i = 0; i < numberOfStaticEncounters; i++) {
+                int offset = i * 0x38;
+                StaticEncounter se = new StaticEncounter();
+                int species = FileFunctions.read2ByteInt(staticEncountersFile, offset);
+                Pokemon pokemon = pokes[species];
+                byte forme = staticEncountersFile[offset + 2];
+                // TODO: make this not blow up on certain formes
+                if (forme > pokemon.cosmeticForms && forme != 30 && forme != 31) {
+                    int speciesWithForme = absolutePokeNumByBaseForme
+                            .getOrDefault(species, dummyAbsolutePokeNums)
+                            .getOrDefault(forme, 0);
+                    pokemon = pokes[speciesWithForme];
+                }
+                se.pkmn = pokemon;
+                se.forme = forme;
+                se.formeSuffix = Gen7Constants.getFormeSuffixByBaseForme(species, forme);
+                se.level = staticEncountersFile[offset + 3];
+                int heldItem = FileFunctions.read2ByteInt(staticEncountersFile, offset + 4);
+                if (heldItem < 0) {
+                    heldItem = 0;
+                }
+                se.heldItem = heldItem;
+                // TODO: Aura? It's a byte at offset + 0x25
+                statics.add(se);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+        return statics;
     }
 
     @Override
