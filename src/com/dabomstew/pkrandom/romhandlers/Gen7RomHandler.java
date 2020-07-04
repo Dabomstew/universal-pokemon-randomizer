@@ -1109,7 +1109,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 se.formeSuffix = Gen7Constants.getFormeSuffixByBaseForme(species, forme);
                 se.level = staticEncountersFile[offset + 3];
                 int heldItem = FileFunctions.read2ByteInt(staticEncountersFile, offset + 4);
-                if (heldItem < 0) {
+                if (heldItem == 0xFFFF) {
                     heldItem = 0;
                 }
                 se.heldItem = heldItem;
