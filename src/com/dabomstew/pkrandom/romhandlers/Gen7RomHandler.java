@@ -431,6 +431,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     if (method >= 1 && method <= Gen7Constants.evolutionMethodCount && species >= 1) {
                         EvolutionType et = EvolutionType.fromIndex(7, method);
                         if (et.skipSplitEvo()) continue; // Remove Feebas "split" evolution
+                        if (et.equals(EvolutionType.LEVEL_FEMALE_ESPURR)) {
+                            et = EvolutionType.LEVEL_FEMALE_ONLY;
+                        }
                         if (skipNext) {
                             skipNext = false;
                             continue;
