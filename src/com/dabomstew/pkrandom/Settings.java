@@ -122,6 +122,7 @@ public class Settings {
     private boolean evosSameTyping;
     private boolean evosMaxThreeStages;
     private boolean evosForceChange;
+    private boolean evosAllowAltFormes;
 
     // Move data
     private boolean randomizeMovePowers;
@@ -425,7 +426,7 @@ public class Settings {
 
         // 26 evolutions
         out.write(makeByteSelected(evolutionsMod == EvolutionsMod.UNCHANGED, evolutionsMod == EvolutionsMod.RANDOM,
-                evosSimilarStrength, evosSameTyping, evosMaxThreeStages, evosForceChange));
+                evosSimilarStrength, evosSameTyping, evosMaxThreeStages, evosForceChange, evosAllowAltFormes));
         
         // 27 pokemon trainer misc
         out.write(makeByteSelected(trainersUsePokemonOfSimilarStrength, 
@@ -670,6 +671,7 @@ public class Settings {
         settings.setEvosSameTyping(restoreState(data[26], 3));
         settings.setEvosMaxThreeStages(restoreState(data[26], 4));
         settings.setEvosForceChange(restoreState(data[26], 5));
+        settings.setEvosAllowAltFormes(restoreState(data[26],6));
 
         // new pokemon trainer misc
         settings.setTrainersUsePokemonOfSimilarStrength(restoreState(data[27], 0));
@@ -932,6 +934,14 @@ public class Settings {
 
     public void setMakeEvolutionsEasier(boolean makeEvolutionsEasier) {
         this.makeEvolutionsEasier = makeEvolutionsEasier;
+    }
+
+    public boolean isEvosAllowAltFormes() {
+        return evosAllowAltFormes;
+    }
+
+    public void setEvosAllowAltFormes(boolean evosAllowAltFormes) {
+        this.evosAllowAltFormes = evosAllowAltFormes;
     }
 
     public boolean isRaceMode() {

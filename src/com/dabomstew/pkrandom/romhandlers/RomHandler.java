@@ -427,7 +427,7 @@ public interface RomHandler {
     void removePartyEvolutions();
 
     void randomizeEvolutions(boolean similarStrength, boolean sameType, boolean limitToThreeStages,
-                             boolean forceChange);
+                             boolean forceChange, boolean allowAltFormes);
 
     boolean hasShopRandomization();
 

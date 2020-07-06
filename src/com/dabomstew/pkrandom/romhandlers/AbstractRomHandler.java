@@ -3718,7 +3718,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Log changes now that we're done (to avoid repeats)
         log("--Condensed Level Evolutions--");
         for (Evolution evol : changedEvos) {
-            log(String.format("%s now evolves into %s at minimum level %d", evol.from.name, evol.to.name,
+            log(String.format("%s now evolves into %s at minimum level %d", evol.from.name, evol.toFullName(),
                     evol.extraInfo));
         }
         logBlankLine();
@@ -3727,8 +3727,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeEvolutions(boolean similarStrength, boolean sameType, boolean limitToThreeStages,
-            boolean forceChange) {
-        boolean allowAltFormes = true;
+                                    boolean forceChange, boolean allowAltFormes) {
         checkPokemonRestrictions();
         List<Pokemon> pokemonPool = new ArrayList<>(mainPokemonListInclFormes);
         List<Pokemon> actuallyCosmeticPokemonPool = new ArrayList<>();
@@ -3756,6 +3755,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (Pokemon pk : pokemonPool) {
                 for (Evolution ev : pk.evolutionsFrom) {
                     oldEvoPairs.add(new EvolutionPair(ev.from, ev.to));
+                    if (ev.from.number == 790) { // Special case for Cosmoem to add Lunala since we remove the split evo
+                        oldEvoPairs.add(new EvolutionPair(ev.from, pokemonPool.get(ev.from.number + 1)));
+                    }
                 }
             }
         }

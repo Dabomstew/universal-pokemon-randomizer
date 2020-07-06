@@ -174,7 +174,7 @@ public class Randomizer {
         // Applied after type to pick new evos based on new types.
         if (settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM) {
             romHandler.randomizeEvolutions(settings.isEvosSimilarStrength(), settings.isEvosSameTyping(),
-                    settings.isEvosMaxThreeStages(), settings.isEvosForceChange());
+                    settings.isEvosMaxThreeStages(), settings.isEvosForceChange(), settings.isEvosAllowAltFormes());
 
             log.println("--Randomized Evolutions--");
             List<Pokemon> allPokes = romHandler.getPokemonInclFormes();

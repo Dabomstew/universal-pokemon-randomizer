@@ -216,6 +216,7 @@ public class NewRandomizerGUI {
     private JSpinner tpImportantTrainersSpinner;
     private JSpinner tpRegularTrainersSpinner;
     private JLabel tpAdditionalPokemonForLabel;
+    private JCheckBox peAllowAltFormesCheckBox;
 
     private static JFrame frame;
 
@@ -912,6 +913,7 @@ public class NewRandomizerGUI {
         peSameTypingCheckBox.setSelected(settings.isEvosSameTyping());
         peLimitEvolutionsToThreeCheckBox.setSelected(settings.isEvosMaxThreeStages());
         peForceChangeCheckBox.setSelected(settings.isEvosForceChange());
+        peAllowAltFormesCheckBox.setSelected(settings.isEvosAllowAltFormes());
 
         mdRandomizeMoveAccuracyCheckBox.setSelected(settings.isRandomizeMoveAccuracies());
         mdRandomizeMoveCategoryCheckBox.setSelected(settings.isRandomizeMoveCategory());
@@ -1110,6 +1112,7 @@ public class NewRandomizerGUI {
         settings.setEvosSameTyping(peSameTypingCheckBox.isSelected());
         settings.setEvosMaxThreeStages(peLimitEvolutionsToThreeCheckBox.isSelected());
         settings.setEvosForceChange(peForceChangeCheckBox.isSelected());
+        settings.setEvosAllowAltFormes(peAllowAltFormesCheckBox.isSelected() && peAllowAltFormesCheckBox.isVisible());
 
         settings.setRandomizeMoveAccuracies(mdRandomizeMoveAccuracyCheckBox.isSelected());
         settings.setRandomizeMoveCategory(mdRandomizeMoveCategoryCheckBox.isSelected());
@@ -1421,6 +1424,9 @@ public class NewRandomizerGUI {
         peMakeEvolutionsEasierCheckBox.setVisible(true);
         peMakeEvolutionsEasierCheckBox.setEnabled(false);
         peMakeEvolutionsEasierCheckBox.setSelected(false);
+        peAllowAltFormesCheckBox.setVisible(true);
+        peAllowAltFormesCheckBox.setEnabled(false);
+        peAllowAltFormesCheckBox.setSelected(false);
         spUnchangedRadioButton.setVisible(true);
         spUnchangedRadioButton.setEnabled(false);
         spUnchangedRadioButton.setSelected(false);
@@ -1904,6 +1910,7 @@ public class NewRandomizerGUI {
 //        peForceChangeCheckBox.setEnabled(true);
             peChangeImpossibleEvosCheckBox.setEnabled(true);
             peMakeEvolutionsEasierCheckBox.setEnabled(true);
+            peAllowAltFormesCheckBox.setVisible(pokemonGeneration >= 7);
 
             // Starters, Statics & Trades
 
@@ -2194,6 +2201,7 @@ public class NewRandomizerGUI {
             peSameTypingCheckBox.setEnabled(true);
             peLimitEvolutionsToThreeCheckBox.setEnabled(true);
             peForceChangeCheckBox.setEnabled(true);
+            peAllowAltFormesCheckBox.setEnabled(true);
         } else {
             peSimilarStrengthCheckBox.setEnabled(false);
             peSimilarStrengthCheckBox.setSelected(false);
@@ -2203,6 +2211,8 @@ public class NewRandomizerGUI {
             peLimitEvolutionsToThreeCheckBox.setSelected(false);
             peForceChangeCheckBox.setEnabled(false);
             peForceChangeCheckBox.setSelected(false);
+            peAllowAltFormesCheckBox.setEnabled(false);
+            peAllowAltFormesCheckBox.setSelected(false);
         }
 
         boolean spCustomStatus = spCustomRadioButton.isSelected();
