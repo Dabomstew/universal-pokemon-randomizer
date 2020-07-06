@@ -3717,6 +3717,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void randomizeEvolutions(boolean similarStrength, boolean sameType, boolean limitToThreeStages,
             boolean forceChange) {
+        boolean allowAltFormes = true;
         checkPokemonRestrictions();
         List<Pokemon> pokemonPool = new ArrayList<>(mainPokemonListInclFormes);
         List<Pokemon> actuallyCosmeticPokemonPool = new ArrayList<>();
@@ -3769,8 +3770,15 @@ public abstract class AbstractRomHandler implements RomHandler {
                     // Pick a Pokemon as replacement
                     replacements.clear();
 
+                    List<Pokemon> chosenList =
+                            allowAltFormes ?
+                            mainPokemonListInclFormes
+                                    .stream()
+                                    .filter(pk -> !pk.actuallyCosmetic)
+                                    .collect(Collectors.toList()) :
+                            mainPokemonList;
                     // Step 1: base filters
-                    for (Pokemon pk : mainPokemonList) {
+                    for (Pokemon pk : chosenList) {
                         // Prevent evolving into oneself (mandatory)
                         if (pk == fromPK) {
                             continue;
@@ -3881,6 +3889,18 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                     // Step 4: add it to the new evos pool
                     Evolution newEvo = new Evolution(fromPK, picked, ev.carryStats, ev.type, ev.extraInfo);
+                    boolean checkCosmetics = true;
+                    if (picked.formeNumber > 0) {
+                        newEvo.forme = picked.formeNumber;
+                        newEvo.formeSuffix = picked.formeSuffix;
+                        newEvo.to = picked.baseForme;
+                        checkCosmetics = false;
+                    }
+                    if (checkCosmetics && newEvo.to.cosmeticForms > 0) {
+                        newEvo.forme = newEvo.to.getCosmeticFormNumber(this.random.nextInt(newEvo.to.cosmeticForms));
+                    } else if (!checkCosmetics && picked.cosmeticForms > 0) {
+                        newEvo.forme += picked.getCosmeticFormNumber(this.random.nextInt(picked.cosmeticForms));
+                    }
                     fromPK.evolutionsFrom.add(newEvo);
                     picked.evolutionsTo.add(newEvo);
                     newEvoPairs.add(new EvolutionPair(fromPK, picked));

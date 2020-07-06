@@ -31,6 +31,7 @@ public class Evolution implements Comparable<Evolution> {
     public EvolutionType type;
     public int extraInfo;
     public int forme;
+    public String formeSuffix = "";
     public int level;
 
     public Evolution(Pokemon from, Pokemon to, boolean carryStats, EvolutionType type, int extra) {
@@ -76,4 +77,7 @@ public class Evolution implements Comparable<Evolution> {
         } else return Integer.compare(this.type.ordinal(), o.type.ordinal());
     }
 
+    public String toFullName() {
+        return to.name + formeSuffix;
+    }
 }

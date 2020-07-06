@@ -392,7 +392,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     }
                 }
             } else {
-                pkmn.cosmeticForms = Gen7Constants.getAltFormesWithCosmeticForms(romEntry.romType).getOrDefault(pkmn.number,0);
+                if (!Gen7Constants.getIgnoreForms(romEntry.romType).contains(pkmn.number)) {
+                    pkmn.cosmeticForms = Gen7Constants.getAltFormesWithCosmeticForms(romEntry.romType).getOrDefault(pkmn.number,0);
+                }
                 if (Gen7Constants.getActuallyCosmeticForms(romEntry.romType).contains(pkmn.number)) {
                     pkmn.actuallyCosmetic = true;
                 }

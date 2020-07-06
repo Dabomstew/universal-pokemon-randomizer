@@ -182,12 +182,12 @@ public class Randomizer {
                 if (pk != null && !pk.actuallyCosmetic) {
                     int numEvos = pk.evolutionsFrom.size();
                     if (numEvos > 0) {
-                        StringBuilder evoStr = new StringBuilder(pk.evolutionsFrom.get(0).to.fullName());
+                        StringBuilder evoStr = new StringBuilder(pk.evolutionsFrom.get(0).toFullName());
                         for (int i = 1; i < numEvos; i++) {
                             if (i == numEvos - 1) {
-                                evoStr.append(" and ").append(pk.evolutionsFrom.get(i).to.fullName());
+                                evoStr.append(" and ").append(pk.evolutionsFrom.get(i).toFullName());
                             } else {
-                                evoStr.append(", ").append(pk.evolutionsFrom.get(i).to.fullName());
+                                evoStr.append(", ").append(pk.evolutionsFrom.get(i).toFullName());
                             }
                         }
                         // log.println(pk.fullName() + " now evolves into " + evoStr.toString());
