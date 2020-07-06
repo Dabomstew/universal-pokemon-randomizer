@@ -2719,7 +2719,12 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
         else if (similarStrength) {
-            List<Pokemon> pokemonLeft = new ArrayList<>(!allowAltFormes ? mainPokemonList : mainPokemonListInclFormes);
+            List<Pokemon> listInclFormesExclCosmetics =
+                    mainPokemonListInclFormes
+                            .stream()
+                            .filter(pk -> !pk.actuallyCosmetic)
+                            .collect(Collectors.toList());
+            List<Pokemon> pokemonLeft = new ArrayList<>(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
             pokemonLeft.removeAll(banned);
             for (StaticEncounter old : currentStaticPokemon) {
                 StaticEncounter newStatic = new StaticEncounter();
@@ -2794,14 +2799,19 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
 
                 if (pokemonLeft.size() == 0) {
-                    pokemonLeft.addAll(!allowAltFormes ? mainPokemonList : mainPokemonListInclFormes);
+                    pokemonLeft.addAll(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
                     pokemonLeft.removeAll(banned);
                 }
                 replacements.add(newStatic);
             }
         }
         else { // Completely random
-            List<Pokemon> pokemonLeft = new ArrayList<>(!allowAltFormes ? mainPokemonList : mainPokemonListInclFormes);
+            List<Pokemon> listInclFormesExclCosmetics =
+                    mainPokemonListInclFormes
+                            .stream()
+                            .filter(pk -> !pk.actuallyCosmetic)
+                            .collect(Collectors.toList());
+            List<Pokemon> pokemonLeft = new ArrayList<>(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
             pokemonLeft.removeAll(banned);
             for (StaticEncounter old : currentStaticPokemon) {
                 StaticEncounter newStatic = new StaticEncounter();
@@ -2823,7 +2833,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     newStatic.level = old.level;
                 }
                 if (pokemonLeft.size() == 0) {
-                    pokemonLeft.addAll(!allowAltFormes ? mainPokemonList : mainPokemonListInclFormes);
+                    pokemonLeft.addAll(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
                     pokemonLeft.removeAll(banned);
                 }
                 replacements.add(newStatic);
