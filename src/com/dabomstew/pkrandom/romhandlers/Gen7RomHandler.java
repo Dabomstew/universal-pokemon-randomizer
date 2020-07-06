@@ -934,7 +934,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             areaData[i] = new AreaData();
             areaData[i].fileNumber = 9 + (11 * i);
             areaData[i].zones = Arrays.stream(zoneData).filter((zone -> zone.areaIndex == areaOffset)).collect(Collectors.toList());
-            areaData[i].name = areaData[i].zones.stream().map(zone -> zone.locationName).collect(Collectors.joining(" / "));
+            areaData[i].name = getAreaNameFromZones(areaData[i].zones);
             byte[] encounterData = encounterGarc.getFile(areaData[i].fileNumber);
             if (encounterData.length == 0) {
                 areaData[i].hasTables = false;
@@ -992,7 +992,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 List<String> goodLocationUpToCurrent = goodLocationList.stream().limit(i - 1).collect(Collectors.toList());
                 if (!goodLocationList.get(i).isEmpty() && goodLocationUpToCurrent.contains(goodLocationList.get(i))) {
                     int numberOfUsages = Collections.frequency(goodLocationUpToCurrent, goodLocationList.get(i));
-                    String updatedLocation = goodLocationList.get(i) + " (" + numberOfUsages + ")";
+                    String updatedLocation = goodLocationList.get(i) + " (" + (numberOfUsages + 1) + ")";
                     goodLocationList.set(i, updatedLocation);
                 }
             }
@@ -1018,6 +1018,14 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             }
         }
         return zoneData;
+    }
+
+    private String getAreaNameFromZones(List<ZoneData> zoneData) {
+        Set<String> uniqueZoneNames = new HashSet<>();
+        for (ZoneData zone : zoneData) {
+            uniqueZoneNames.add(zone.locationName);
+        }
+        return String.join(" / ", uniqueZoneNames);
     }
 
     @Override
@@ -1124,7 +1132,44 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public boolean setStaticPokemon(List<StaticEncounter> staticPokemon) {
-        return false;
+        try {
+            GARCArchive staticGarc = readGARC(romEntry.getString("StaticPokemon"), true);
+            Iterator<StaticEncounter> staticIter = staticPokemon.iterator();
+
+            // Gifts, start at 3 to skip the starters
+            byte[] giftsFile = staticGarc.files.get(0).get(0);
+            int numberOfGifts = giftsFile.length / 0x14;
+            for (int i = 3; i < numberOfGifts; i++) {
+                int offset = i * 0x14;
+                StaticEncounter se = staticIter.next();
+                writeWord(giftsFile, offset, se.pkmn.number);
+                giftsFile[offset + 2] = (byte) se.forme;
+                giftsFile[offset + 3] = (byte) se.level;
+                writeWord(giftsFile, offset + 8, se.heldItem);
+            }
+
+            // Static encounters
+            byte[] staticEncountersFile = staticGarc.files.get(1).get(0);
+            int numberOfStaticEncounters = staticEncountersFile.length / 0x38;
+            for (int i = 0; i < numberOfStaticEncounters; i++) {
+                int offset = i * 0x38;
+                StaticEncounter se = staticIter.next();
+                writeWord(staticEncountersFile, offset, se.pkmn.number);
+                staticEncountersFile[offset + 2] = (byte) se.forme;
+                staticEncountersFile[offset + 3] = (byte) se.level;
+                if (se.heldItem == 0) {
+                    writeWord(staticEncountersFile, offset + 4, -1);
+                } else {
+                    writeWord(staticEncountersFile, offset + 4, se.heldItem);
+                }
+            }
+
+            writeGARC(romEntry.getString("StaticPokemon"), staticGarc);
+            return true;
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+
     }
 
     @Override
