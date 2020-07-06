@@ -932,7 +932,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             areaData[i] = new AreaData();
             areaData[i].fileNumber = 9 + (11 * i);
             areaData[i].zones = Arrays.stream(zoneData).filter((zone -> zone.areaIndex == areaOffset)).collect(Collectors.toList());
-            areaData[i].name = areaData[i].zones.stream().map(zone -> zone.locationName).collect(Collectors.joining(" / "));
+            areaData[i].name = getAreaNameFromZones(areaData[i].zones);
             byte[] encounterData = encounterGarc.getFile(areaData[i].fileNumber);
             if (encounterData.length == 0) {
                 areaData[i].hasTables = false;
@@ -990,7 +990,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 List<String> goodLocationUpToCurrent = goodLocationList.stream().limit(i - 1).collect(Collectors.toList());
                 if (!goodLocationList.get(i).isEmpty() && goodLocationUpToCurrent.contains(goodLocationList.get(i))) {
                     int numberOfUsages = Collections.frequency(goodLocationUpToCurrent, goodLocationList.get(i));
-                    String updatedLocation = goodLocationList.get(i) + " (" + numberOfUsages + ")";
+                    String updatedLocation = goodLocationList.get(i) + " (" + (numberOfUsages + 1) + ")";
                     goodLocationList.set(i, updatedLocation);
                 }
             }
@@ -1016,6 +1016,14 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             }
         }
         return zoneData;
+    }
+
+    private String getAreaNameFromZones(List<ZoneData> zoneData) {
+        Set<String> uniqueZoneNames = new HashSet<>();
+        for (ZoneData zone : zoneData) {
+            uniqueZoneNames.add(zone.locationName);
+        }
+        return String.join(" / ", uniqueZoneNames);
     }
 
     @Override
