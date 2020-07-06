@@ -2731,6 +2731,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                 newStatic.heldItem = old.heldItem;
                 Pokemon newPK;
                 Pokemon oldPK = old.pkmn;
+                if (old.forme > 0) {
+                    oldPK = getAltFormeOfPokemon(oldPK, old.forme);
+                }
                 Integer oldBST = oldPK.hp + oldPK.attack + oldPK.defense + oldPK.spatk + oldPK.spdef + oldPK.speed;
                 if (oldPK.number == 487 && ptGiratina) {
                     newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
