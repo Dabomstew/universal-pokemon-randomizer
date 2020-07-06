@@ -2818,6 +2818,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
                     }
                     pokemonLeft.remove(newPK);
+                    newStatic.pkmn = newPK;
                     setFormeForStaticEncounter(newStatic, newPK);
                     newStatic.level = old.level;
                 }
