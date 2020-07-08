@@ -819,12 +819,13 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getStarterHeldItems() {
+        // do nothing
         return new ArrayList<>();
     }
 
     @Override
     public void setStarterHeldItems(List<Integer> items) {
-        // do nothing for now
+        // do nothing
     }
 
     @Override

@@ -718,7 +718,32 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public boolean setStarters(List<Pokemon> newStarters) {
-        return false;
+        try {
+            GARCArchive staticGarc = readGARC(romEntry.getString("StaticPokemon"), true);
+            byte[] giftsFile = staticGarc.files.get(0).get(0);
+            for (int i = 0; i < 3; i++) {
+                int offset = i * 0x14;
+                Pokemon starter = newStarters.get(i);
+                int forme = 0;
+                boolean checkCosmetics = true;
+                if (starter.formeNumber > 0) {
+                    forme = starter.formeNumber;
+                    starter = mainPokemonList.get(starter.baseForme.number - 1);
+                    checkCosmetics = false;
+                }
+                if (checkCosmetics && starter.cosmeticForms > 0) {
+                    forme = starter.getCosmeticFormNumber(this.random.nextInt(starter.cosmeticForms));
+                } else if (!checkCosmetics && starter.cosmeticForms > 0) {
+                    forme += starter.getCosmeticFormNumber(this.random.nextInt(starter.cosmeticForms));
+                }
+                writeWord(giftsFile, offset, starter.number);
+                giftsFile[offset + 2] = (byte) forme;
+            }
+            writeGARC(romEntry.getString("StaticPokemon"), staticGarc);
+            return true;
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     @Override
@@ -733,12 +758,13 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getStarterHeldItems() {
+        // do nothing
         return new ArrayList<>();
     }
 
     @Override
     public void setStarterHeldItems(List<Integer> items) {
-        // do nothing for now
+        // do nothing
     }
 
     @Override
