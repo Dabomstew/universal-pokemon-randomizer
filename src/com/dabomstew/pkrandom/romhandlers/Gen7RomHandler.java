@@ -314,7 +314,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             throw new RandomizerIOException(e);
         }
         populateEvolutions();
-//        populateMegaEvolutions();
+        populateMegaEvolutions();
     }
 
     private void loadBasicPokeStats(Pokemon pkmn, byte[] stats, Map<Integer,FormeInfo> altFormes) {
@@ -479,6 +479,49 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 // split evos don't carry stats
                 if (pk.evolutionsFrom.size() > 1) {
                     for (Evolution e : pk.evolutionsFrom) {
+                        e.carryStats = false;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+
+    private void populateMegaEvolutions() {
+        for (Pokemon pkmn : pokes) {
+            if (pkmn != null) {
+                pkmn.megaEvolutionsFrom.clear();
+                pkmn.megaEvolutionsTo.clear();
+            }
+        }
+
+        // Read GARC
+        try {
+            megaEvolutions = new ArrayList<>();
+            GARCArchive megaEvoGARC = readGARC(romEntry.getString("MegaEvolutions"),true);
+            for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.romType); i++) {
+                Pokemon pk = pokes[i];
+                byte[] megaEvoEntry = megaEvoGARC.files.get(i).get(0);
+                for (int evo = 0; evo < 2; evo++) {
+                    int formNum = readWord(megaEvoEntry, evo * 8);
+                    int method = readWord(megaEvoEntry, evo * 8 + 2);
+                    if (method >= 1) {
+                        int argument = readWord(megaEvoEntry, evo * 8 + 4);
+                        int megaSpecies = absolutePokeNumByBaseForme
+                                .getOrDefault(pk.number,dummyAbsolutePokeNums)
+                                .getOrDefault(formNum,0);
+                        MegaEvolution megaEvo = new MegaEvolution(pk, pokes[megaSpecies], method, argument);
+                        if (!pk.megaEvolutionsFrom.contains(megaEvo)) {
+                            pk.megaEvolutionsFrom.add(megaEvo);
+                            pokes[megaSpecies].megaEvolutionsTo.add(megaEvo);
+                        }
+                        megaEvolutions.add(megaEvo);
+                    }
+                }
+                // split evos don't carry stats
+                if (pk.megaEvolutionsFrom.size() > 1) {
+                    for (MegaEvolution e : pk.megaEvolutionsFrom) {
                         e.carryStats = false;
                     }
                 }
@@ -677,7 +720,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<MegaEvolution> getMegaEvolutions() {
-        return new ArrayList<>(); // To be implemented
+        return megaEvolutions;
     }
 
     @Override
