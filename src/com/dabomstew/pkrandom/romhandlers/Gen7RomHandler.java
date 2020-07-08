@@ -1093,12 +1093,59 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public Map<Integer, List<MoveLearnt>> getMovesLearnt() {
-        return new TreeMap<>();
+        Map<Integer, List<MoveLearnt>> movesets = new TreeMap<>();
+        try {
+            GARCArchive movesLearnt = this.readGARC(romEntry.getString("PokemonMovesets"),true);
+            int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
+            for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.romType) + formeCount; i++) {
+                Pokemon pkmn = pokes[i];
+                byte[] movedata;
+                movedata = movesLearnt.files.get(i).get(0);
+                int moveDataLoc = 0;
+                List<MoveLearnt> learnt = new ArrayList<>();
+                while (readWord(movedata, moveDataLoc) != 0xFFFF || readWord(movedata, moveDataLoc + 2) != 0xFFFF) {
+                    int move = readWord(movedata, moveDataLoc);
+                    int level = readWord(movedata, moveDataLoc + 2);
+                    MoveLearnt ml = new MoveLearnt();
+                    ml.level = level;
+                    ml.move = move;
+                    learnt.add(ml);
+                    moveDataLoc += 4;
+                }
+                movesets.put(pkmn.number, learnt);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+        return movesets;
     }
 
     @Override
     public void setMovesLearnt(Map<Integer, List<MoveLearnt>> movesets) {
-        // do nothing for now
+        try {
+            GARCArchive movesLearnt = readGARC(romEntry.getString("PokemonMovesets"),true);
+            int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
+            for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.romType) + formeCount; i++) {
+                Pokemon pkmn = pokes[i];
+                List<MoveLearnt> learnt = movesets.get(pkmn.number);
+                int sizeNeeded = learnt.size() * 4 + 4;
+                byte[] moveset = new byte[sizeNeeded];
+                int j = 0;
+                for (; j < learnt.size(); j++) {
+                    MoveLearnt ml = learnt.get(j);
+                    writeWord(moveset, j * 4, ml.move);
+                    writeWord(moveset, j * 4 + 2, ml.level);
+                }
+                writeWord(moveset, j * 4, 0xFFFF);
+                writeWord(moveset, j * 4 + 2, 0xFFFF);
+                movesLearnt.setFile(i, moveset);
+            }
+            // Save
+            this.writeGARC(romEntry.getString("PokemonMovesets"), movesLearnt);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+
     }
 
     @Override
