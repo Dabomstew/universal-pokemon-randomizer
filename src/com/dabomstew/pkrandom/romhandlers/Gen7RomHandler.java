@@ -229,6 +229,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
         try {
             stringsGarc = readGARC(romEntry.getString("TextStrings"), true);
+            storyTextGarc = readGARC(romEntry.getString("StoryText"), true);
             areaDataList = getAreaData();
         } catch (IOException e) {
             throw new RandomizerIOException(e);
@@ -572,6 +573,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         try {
             writeCode(code);
             writeGARC(romEntry.getString("TextStrings"), stringsGarc);
+            writeGARC(romEntry.getString("StoryText"), storyTextGarc);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
@@ -765,7 +767,83 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public boolean setStarters(List<Pokemon> newStarters) {
-        return false;
+        try {
+            GARCArchive staticGarc = readGARC(romEntry.getString("StaticPokemon"), true);
+            byte[] giftsFile = staticGarc.files.get(0).get(0);
+            for (int i = 0; i < 3; i++) {
+                int offset = i * 0x14;
+                Pokemon starter = newStarters.get(i);
+                int forme = 0;
+                boolean checkCosmetics = true;
+                if (starter.formeNumber > 0) {
+                    forme = starter.formeNumber;
+                    starter = mainPokemonList.get(starter.baseForme.number - 1);
+                    checkCosmetics = false;
+                }
+                if (checkCosmetics && starter.cosmeticForms > 0) {
+                    forme = starter.getCosmeticFormNumber(this.random.nextInt(starter.cosmeticForms));
+                } else if (!checkCosmetics && starter.cosmeticForms > 0) {
+                    forme += starter.getCosmeticFormNumber(this.random.nextInt(starter.cosmeticForms));
+                }
+                writeWord(giftsFile, offset, starter.number);
+                giftsFile[offset + 2] = (byte) forme;
+            }
+            writeGARC(romEntry.getString("StaticPokemon"), staticGarc);
+            setStarterText(newStarters);
+            return true;
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+
+    // TODO: We should be editing the script file so that the game reads in our new
+    // starters; this way, strings that depend on the starter defined in the script
+    // would work without any modification. Instead, we're just manually editing all
+    // strings here, and if a string originally referred to the starter in the script,
+    // we just hardcode the starter's name if we can get away with it.
+    private void setStarterText(List<Pokemon> newStarters) {
+        int starterTextIndex = romEntry.getInt("StarterTextOffset");
+        List<String> starterText = getStrings(true, starterTextIndex);
+        if (romEntry.romType == Gen7Constants.Type_USUM) {
+            String rowletDescriptor = newStarters.get(0).name + starterText.get(1).substring(6);
+            String littenDescriptor = newStarters.get(1).name + starterText.get(2).substring(6);
+            String popplioDescriptor = newStarters.get(2).name + starterText.get(3).substring(7);
+            starterText.set(1, rowletDescriptor);
+            starterText.set(2, littenDescriptor);
+            starterText.set(3, popplioDescriptor);
+            for (int i = 0; i < 3; i++) {
+                int confirmationOffset = i + 7;
+                int optionOffset = i + 14;
+                Pokemon starter = newStarters.get(i);
+                String confirmationText = String.format("So, you wanna go with the %s-type Pokémon\\n%s?[VAR 0114(0005)]",
+                        starter.primaryType.camelCase(), starter.name);
+                String optionText = starter.name;
+                starterText.set(confirmationOffset, confirmationText);
+                starterText.set(optionOffset, optionText);
+            }
+        } else {
+            String rowletDescriptor = newStarters.get(0).name + starterText.get(11).substring(6);
+            String littenDescriptor = newStarters.get(1).name + starterText.get(12).substring(6);
+            String popplioDescriptor = newStarters.get(2).name + starterText.get(13).substring(7);
+            starterText.set(11, rowletDescriptor);
+            starterText.set(12, littenDescriptor);
+            starterText.set(13, popplioDescriptor);
+            for (int i = 0; i < 3; i++) {
+                int optionOffset = i + 1;
+                int confirmationOffset = i + 4;
+                int flavorOffset = i + 35;
+                Pokemon starter = newStarters.get(i);
+                String optionText = String.format("The %s-type %s", starter.primaryType.camelCase(), starter.name);
+                String confirmationText = String.format("Will you choose the %s-type Pokémon\\n%s?[VAR 0114(0008)]",
+                        starter.primaryType.camelCase(), starter.name);
+                String flavorSubstring = starterText.get(flavorOffset).substring(starterText.get(flavorOffset).indexOf("\\n"));
+                String flavorText = String.format("The %s-type %s", starter.primaryType.camelCase(), starter.name) + flavorSubstring;
+                starterText.set(optionOffset, optionText);
+                starterText.set(confirmationOffset, confirmationText);
+                starterText.set(flavorOffset, flavorText);
+            }
+        }
+        setStrings(true, starterTextIndex, starterText);
     }
 
     @Override
@@ -780,12 +858,13 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getStarterHeldItems() {
+        // do nothing
         return new ArrayList<>();
     }
 
     @Override
     public void setStarterHeldItems(List<Integer> items) {
-        // do nothing for now
+        // do nothing
     }
 
     @Override
@@ -1645,12 +1724,79 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<IngameTrade> getIngameTrades() {
-        return new ArrayList<>();
+        List<IngameTrade> ingameTrades = new ArrayList<>();
+        try {
+            GARCArchive staticGarc = readGARC(romEntry.getString("StaticPokemon"), true);
+            List<String> tradeStrings = getStrings(true, romEntry.getInt("IngameTradesTextOffset"));
+            byte[] tradesFile = staticGarc.files.get(4).get(0);
+            int numberOfIngameTrades = tradesFile.length / 0x34;
+            for (int i = 0; i < numberOfIngameTrades; i++) {
+                int offset = i * 0x34;
+                IngameTrade trade = new IngameTrade();
+                int givenSpecies = FileFunctions.read2ByteInt(tradesFile, offset);
+                int requestedSpecies = FileFunctions.read2ByteInt(tradesFile, offset + 0x2C);
+                Pokemon givenPokemon = pokes[givenSpecies];
+                Pokemon requestedPokemon = pokes[requestedSpecies];
+                int forme = tradesFile[offset + 4];
+                if (forme > givenPokemon.cosmeticForms && forme != 30 && forme != 31) {
+                    int speciesWithForme = absolutePokeNumByBaseForme
+                            .getOrDefault(givenSpecies, dummyAbsolutePokeNums)
+                            .getOrDefault(forme, 0);
+                    givenPokemon = pokes[speciesWithForme];
+                }
+                trade.givenPokemon = givenPokemon;
+                trade.requestedPokemon = requestedPokemon;
+                trade.nickname = tradeStrings.get(FileFunctions.read2ByteInt(tradesFile, offset + 2));
+                trade.otName = tradeStrings.get(FileFunctions.read2ByteInt(tradesFile, offset + 0x18));
+                trade.otId = FileFunctions.readFullIntLittleEndian(tradesFile, offset + 0x10);
+                trade.ivs = new int[6];
+                for (int iv = 0; iv < 6; iv++) {
+                    trade.ivs[iv] = tradesFile[offset + 6 + iv];
+                }
+                trade.item = FileFunctions.read2ByteInt(tradesFile, offset + 0x14);
+                if (trade.item < 0) {
+                    trade.item = 0;
+                }
+                ingameTrades.add(trade);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+        return ingameTrades;
     }
 
     @Override
     public void setIngameTrades(List<IngameTrade> trades) {
-        // do nothing for now
+        try {
+            GARCArchive staticGarc = readGARC(romEntry.getString("StaticPokemon"), true);
+            List<String> tradeStrings = getStrings(true, romEntry.getInt("IngameTradesTextOffset"));
+            byte[] tradesFile = staticGarc.files.get(4).get(0);
+            int numberOfIngameTrades = tradesFile.length / 0x34;
+            for (int i = 0; i < numberOfIngameTrades; i++) {
+                IngameTrade trade = trades.get(i);
+                int offset = i * 0x34;
+                Pokemon givenPokemon = trade.givenPokemon;
+                int forme = 0;
+                if (givenPokemon.formeNumber > 0) {
+                    forme = givenPokemon.formeNumber;
+                    givenPokemon = mainPokemonList.get(givenPokemon.baseForme.number - 1);
+                }
+                FileFunctions.write2ByteInt(tradesFile, offset, givenPokemon.number);
+                tradesFile[offset + 4] = (byte) forme;
+                FileFunctions.write2ByteInt(tradesFile, offset + 0x2C, trade.requestedPokemon.number);
+                tradeStrings.set(FileFunctions.read2ByteInt(tradesFile, offset + 2), trade.nickname);
+                tradeStrings.set(FileFunctions.read2ByteInt(tradesFile, offset + 0x18), trade.otName);
+                FileFunctions.writeFullIntLittleEndian(tradesFile, offset + 0x10, trade.otId);
+                for (int iv = 0; iv < 6; iv++) {
+                    tradesFile[offset + 6 + iv] = (byte) trade.ivs[iv];
+                }
+                FileFunctions.write2ByteInt(tradesFile, offset + 0x14, trade.item);
+            }
+            writeGARC(romEntry.getString("StaticPokemon"), staticGarc);
+            setStrings(true, romEntry.getInt("IngameTradesTextOffset"), tradeStrings);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     @Override
