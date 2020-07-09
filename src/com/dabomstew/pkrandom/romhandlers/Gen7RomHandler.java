@@ -229,6 +229,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
         try {
             stringsGarc = readGARC(romEntry.getString("TextStrings"), true);
+            storyTextGarc = readGARC(romEntry.getString("StoryText"), true);
             areaDataList = getAreaData();
         } catch (IOException e) {
             throw new RandomizerIOException(e);
@@ -527,6 +528,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         try {
             writeCode(code);
             writeGARC(romEntry.getString("TextStrings"), stringsGarc);
+            writeGARC(romEntry.getString("StoryText"), storyTextGarc);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
@@ -740,10 +742,61 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 giftsFile[offset + 2] = (byte) forme;
             }
             writeGARC(romEntry.getString("StaticPokemon"), staticGarc);
+            setStarterText(newStarters);
             return true;
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+    }
+
+    // TODO: We should be editing the script file so that the game reads in our new
+    // starters; this way, strings that depend on the starter defined in the script
+    // would work without any modification. Instead, we're just manually editing all
+    // strings here, and if a string originally referred to the starter in the script,
+    // we just hardcode the starter's name if we can get away with it.
+    private void setStarterText(List<Pokemon> newStarters) {
+        int starterTextIndex = romEntry.getInt("StarterTextOffset");
+        List<String> starterText = getStrings(true, starterTextIndex);
+        if (romEntry.romType == Gen7Constants.Type_USUM) {
+            String rowletDescriptor = newStarters.get(0).name + starterText.get(1).substring(6);
+            String littenDescriptor = newStarters.get(1).name + starterText.get(2).substring(6);
+            String popplioDescriptor = newStarters.get(2).name + starterText.get(3).substring(7);
+            starterText.set(1, rowletDescriptor);
+            starterText.set(2, littenDescriptor);
+            starterText.set(3, popplioDescriptor);
+            for (int i = 0; i < 3; i++) {
+                int confirmationOffset = i + 7;
+                int optionOffset = i + 14;
+                Pokemon starter = newStarters.get(i);
+                String confirmationText = String.format("So, you wanna go with the %s-type Pokémon\\n%s?[VAR 0114(0005)]",
+                        starter.primaryType.camelCase(), starter.name);
+                String optionText = starter.name;
+                starterText.set(confirmationOffset, confirmationText);
+                starterText.set(optionOffset, optionText);
+            }
+        } else {
+            String rowletDescriptor = newStarters.get(0).name + starterText.get(11).substring(6);
+            String littenDescriptor = newStarters.get(1).name + starterText.get(12).substring(6);
+            String popplioDescriptor = newStarters.get(2).name + starterText.get(13).substring(7);
+            starterText.set(11, rowletDescriptor);
+            starterText.set(12, littenDescriptor);
+            starterText.set(13, popplioDescriptor);
+            for (int i = 0; i < 3; i++) {
+                int optionOffset = i + 1;
+                int confirmationOffset = i + 4;
+                int flavorOffset = i + 35;
+                Pokemon starter = newStarters.get(i);
+                String optionText = String.format("The %s-type %s", starter.primaryType.camelCase(), starter.name);
+                String confirmationText = String.format("Will you choose the %s-type Pokémon\\n%s?[VAR 0114(0008)]",
+                        starter.primaryType.camelCase(), starter.name);
+                String flavorSubstring = starterText.get(flavorOffset).substring(starterText.get(flavorOffset).indexOf("\\n"));
+                String flavorText = String.format("The %s-type %s", starter.primaryType.camelCase(), starter.name) + flavorSubstring;
+                starterText.set(optionOffset, optionText);
+                starterText.set(confirmationOffset, confirmationText);
+                starterText.set(flavorOffset, flavorText);
+            }
+        }
+        setStrings(true, starterTextIndex, starterText);
     }
 
     @Override
