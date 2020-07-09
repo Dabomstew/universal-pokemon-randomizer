@@ -3021,6 +3021,17 @@
                       <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.miscNoneAvailableLabel.text"/>
                     </properties>
                   </component>
+                  <component id="27c9" class="javax.swing.JCheckBox" binding="miscSOSBattlesCheckBox">
+                    <constraints>
+                      <grid row="4" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="CodeTweaks.sosBattles.name"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="CodeTweaks.sosBattles.toolTipText"/>
+                    </properties>
+                  </component>
                 </children>
               </grid>
               <hspacer id="c4e06">

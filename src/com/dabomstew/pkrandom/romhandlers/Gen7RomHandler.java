@@ -338,6 +338,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         pkmn.ability2 = stats[Gen7Constants.bsAbility2Offset] & 0xFF;
         pkmn.ability3 = stats[Gen7Constants.bsAbility3Offset] & 0xFF;
 
+        pkmn.callRate = stats[Gen7Constants.bsCallRateOffset] & 0xFF;
+
         // Held Items?
         int item1 = FileFunctions.read2ByteInt(stats, Gen7Constants.bsCommonHeldItemOffset);
         int item2 = FileFunctions.read2ByteInt(stats, Gen7Constants.bsRareHeldItemOffset);
@@ -617,6 +619,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         stats[Gen7Constants.bsAbility1Offset] = (byte) pkmn.ability1;
         stats[Gen7Constants.bsAbility2Offset] = pkmn.ability2 != 0 ? (byte) pkmn.ability2 : (byte) pkmn.ability1;
         stats[Gen7Constants.bsAbility3Offset] = (byte) pkmn.ability3;
+
+        stats[Gen7Constants.bsCallRateOffset] = (byte) pkmn.callRate;
 
         // Held items
         if (pkmn.guaranteedHeldItem > 0) {
@@ -1266,6 +1270,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     public int miscTweaksAvailable() {
         int available = 0;
         available |= MiscTweak.FASTEST_TEXT.getValue();
+        available |= MiscTweak.SOS_BATTLES_FOR_ALL.getValue();
         return available;
     }
 
@@ -1273,6 +1278,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     public void applyMiscTweak(MiscTweak tweak) {
         if (tweak == MiscTweak.FASTEST_TEXT) {
             applyFastestText();
+        }
+        if (tweak == MiscTweak.SOS_BATTLES_FOR_ALL) {
+            positiveCallRates();
         }
     }
 
@@ -1292,6 +1300,18 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             code[offset + 1] = 0x50;
             code[offset + 2] = (byte) 0xA0;
             code[offset + 3] = (byte) 0xE3;
+        }
+    }
+
+    private void positiveCallRates() {
+        for (Pokemon pk: pokes) {
+            if (pk == null) continue;
+            if (pk.callRate == 0) {
+                pk.callRate = 3;
+            }
+            if (pk.callRate < 0) {
+                pk.callRate = 3;
+            }
         }
     }
 

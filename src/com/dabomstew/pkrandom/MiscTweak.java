@@ -51,6 +51,7 @@ public class MiscTweak implements Comparable<MiscTweak> {
     public static final MiscTweak BAN_LUCKY_EGG = new MiscTweak(1 << 12, "luckyEgg", 1);
     public static final MiscTweak NO_FREE_LUCKY_EGG = new MiscTweak(1 << 13,"freeLuckyEgg",0);
     public static final MiscTweak BAN_BIG_MANIAC_ITEMS = new MiscTweak(1 << 14, "maniacItems",1);
+    public static final MiscTweak SOS_BATTLES_FOR_ALL = new MiscTweak(1 << 15, "sosBattles",0);
     /* @formatter:on */
 
     private final int value;

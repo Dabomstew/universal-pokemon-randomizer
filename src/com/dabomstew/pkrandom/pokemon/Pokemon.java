@@ -57,6 +57,8 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public int frontSpritePointer, picDimensions;
 
+    public int callRate;
+
     public ExpCurve growthCurve;
 
     public List<Evolution> evolutionsFrom = new ArrayList<>();

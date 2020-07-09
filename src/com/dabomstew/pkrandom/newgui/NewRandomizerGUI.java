@@ -217,6 +217,7 @@ public class NewRandomizerGUI {
     private JSpinner tpRegularTrainersSpinner;
     private JLabel tpAdditionalPokemonForLabel;
     private JCheckBox peAllowAltFormesCheckBox;
+    private JCheckBox miscSOSBattlesCheckBox;
 
     private static JFrame frame;
 
