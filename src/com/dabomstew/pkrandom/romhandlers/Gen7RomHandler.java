@@ -1704,12 +1704,79 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<IngameTrade> getIngameTrades() {
-        return new ArrayList<>();
+        List<IngameTrade> ingameTrades = new ArrayList<>();
+        try {
+            GARCArchive staticGarc = readGARC(romEntry.getString("StaticPokemon"), true);
+            List<String> tradeStrings = getStrings(true, romEntry.getInt("IngameTradesTextOffset"));
+            byte[] tradesFile = staticGarc.files.get(4).get(0);
+            int numberOfIngameTrades = tradesFile.length / 0x34;
+            for (int i = 0; i < numberOfIngameTrades; i++) {
+                int offset = i * 0x34;
+                IngameTrade trade = new IngameTrade();
+                int givenSpecies = FileFunctions.read2ByteInt(tradesFile, offset);
+                int requestedSpecies = FileFunctions.read2ByteInt(tradesFile, offset + 0x2C);
+                Pokemon givenPokemon = pokes[givenSpecies];
+                Pokemon requestedPokemon = pokes[requestedSpecies];
+                int forme = tradesFile[offset + 4];
+                if (forme > givenPokemon.cosmeticForms && forme != 30 && forme != 31) {
+                    int speciesWithForme = absolutePokeNumByBaseForme
+                            .getOrDefault(givenSpecies, dummyAbsolutePokeNums)
+                            .getOrDefault(forme, 0);
+                    givenPokemon = pokes[speciesWithForme];
+                }
+                trade.givenPokemon = givenPokemon;
+                trade.requestedPokemon = requestedPokemon;
+                trade.nickname = tradeStrings.get(FileFunctions.read2ByteInt(tradesFile, offset + 2));
+                trade.otName = tradeStrings.get(FileFunctions.read2ByteInt(tradesFile, offset + 0x18));
+                trade.otId = FileFunctions.readFullIntLittleEndian(tradesFile, offset + 0x10);
+                trade.ivs = new int[6];
+                for (int iv = 0; iv < 6; iv++) {
+                    trade.ivs[iv] = tradesFile[offset + 6 + iv];
+                }
+                trade.item = FileFunctions.read2ByteInt(tradesFile, offset + 0x14);
+                if (trade.item < 0) {
+                    trade.item = 0;
+                }
+                ingameTrades.add(trade);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+        return ingameTrades;
     }
 
     @Override
     public void setIngameTrades(List<IngameTrade> trades) {
-        // do nothing for now
+        try {
+            GARCArchive staticGarc = readGARC(romEntry.getString("StaticPokemon"), true);
+            List<String> tradeStrings = getStrings(true, romEntry.getInt("IngameTradesTextOffset"));
+            byte[] tradesFile = staticGarc.files.get(4).get(0);
+            int numberOfIngameTrades = tradesFile.length / 0x34;
+            for (int i = 0; i < numberOfIngameTrades; i++) {
+                IngameTrade trade = trades.get(i);
+                int offset = i * 0x34;
+                Pokemon givenPokemon = trade.givenPokemon;
+                int forme = 0;
+                if (givenPokemon.formeNumber > 0) {
+                    forme = givenPokemon.formeNumber;
+                    givenPokemon = mainPokemonList.get(givenPokemon.baseForme.number - 1);
+                }
+                FileFunctions.write2ByteInt(tradesFile, offset, givenPokemon.number);
+                tradesFile[offset + 4] = (byte) forme;
+                FileFunctions.write2ByteInt(tradesFile, offset + 0x2C, trade.requestedPokemon.number);
+                tradeStrings.set(FileFunctions.read2ByteInt(tradesFile, offset + 2), trade.nickname);
+                tradeStrings.set(FileFunctions.read2ByteInt(tradesFile, offset + 0x18), trade.otName);
+                FileFunctions.writeFullIntLittleEndian(tradesFile, offset + 0x10, trade.otId);
+                for (int iv = 0; iv < 6; iv++) {
+                    tradesFile[offset + 6 + iv] = (byte) trade.ivs[iv];
+                }
+                FileFunctions.write2ByteInt(tradesFile, offset + 0x14, trade.item);
+            }
+            writeGARC(romEntry.getString("StaticPokemon"), staticGarc);
+            setStrings(true, romEntry.getInt("IngameTradesTextOffset"), tradeStrings);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     @Override
