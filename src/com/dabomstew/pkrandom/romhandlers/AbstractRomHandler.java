@@ -2396,6 +2396,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         Set<Integer> allBanned = new HashSet<Integer>(noBroken ? this.getGameBreakingMoves() : Collections.EMPTY_SET);
         allBanned.addAll(hms);
         allBanned.addAll(this.getMovesBannedFromLevelup());
+        allBanned.addAll(GlobalConstants.zMoves);
 
         // Build sets of moves
         List<Move> validMoves = new ArrayList<>();
@@ -2460,7 +2461,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             // Find last lv1 move
             // lv1index ends up as the index of the first non-lv1 move
-            int lv1index = 0;
+            int lv1index = moves.get(0).level == 1 ? 0 : 1; // Evolution move handling (level 0 = evo move)
             while (lv1index < moves.size() && moves.get(lv1index).level == 1) {
                 lv1index++;
             }
@@ -2557,6 +2558,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             List<Integer> damagingMoveIndices = new ArrayList<>();
             List<Move> damagingMoves = new ArrayList<>();
             for (int i = 0; i < moves.size(); i++) {
+                if (moves.get(i).level == 0) continue; // Don't reorder evolution move
                 Move mv = allMoves.get(moves.get(i).move);
                 if (mv.power > 1) {
                     // considered a damaging move for this purpose
