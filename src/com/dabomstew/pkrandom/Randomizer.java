@@ -644,11 +644,16 @@ public class Randomizer {
                 String abSpFormat = "%-12s";
                 if (romHandler.generationOfPokemon() == 5) {
                     nameSp = "         ";
-                } else if (romHandler.generationOfPokemon() >= 6) {
+                } else if (romHandler.generationOfPokemon() == 6) {
                     nameSp = "            ";
                     nameSpFormat = "%-16s";
                     abSp = "      ";
                     abSpFormat = "%-14s";
+                } else if (romHandler.generationOfPokemon() >= 7) {
+                    nameSp = "            ";
+                    nameSpFormat = "%-16s";
+                    abSp = "        ";
+                    abSpFormat = "%-16s";
                 }
 
                 log.print("NUM|NAME" + nameSp + "|TYPE             |  HP| ATK| DEF|SATK|SDEF| SPD");
