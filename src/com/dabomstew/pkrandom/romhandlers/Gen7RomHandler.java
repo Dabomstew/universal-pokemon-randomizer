@@ -748,7 +748,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 StaticEncounter se = new StaticEncounter();
                 int species = FileFunctions.read2ByteInt(giftsFile, offset);
                 Pokemon pokemon = pokes[species];
-                byte forme = giftsFile[offset + 2];
+                int forme = giftsFile[offset + 2];
                 if (forme > pokemon.cosmeticForms && forme != 30 && forme != 31) {
                     int speciesWithForme = absolutePokeNumByBaseForme
                             .getOrDefault(species, dummyAbsolutePokeNums)
