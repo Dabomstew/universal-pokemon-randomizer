@@ -721,7 +721,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Pokemon> getAltFormes() {
-        return new ArrayList<>();
+        int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
+        int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
+        return pokemonListInclFormes.subList(pokemonCount + 1, pokemonCount + formeCount + 1);
     }
 
     @Override
@@ -731,7 +733,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public Pokemon getAltFormeOfPokemon(Pokemon pk, int forme) {
-        return pk;
+        int pokeNum = absolutePokeNumByBaseForme.getOrDefault(pk.number,dummyAbsolutePokeNums).getOrDefault(forme,0);
+        return pokeNum != 0 ? pokes[pokeNum] : pk;
     }
 
     @Override
