@@ -1572,7 +1572,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public String getSupportLevel() {
-        return "None";
+        return "Partial";
     }
 
     @Override
@@ -1839,16 +1839,18 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public boolean supportsFourStartingMoves() {
-        return false;
+        return true;
     }
 
     @Override
     public List<Integer> getFieldMoves() {
+        // Gen 7 does not have field moves
         return new ArrayList<>();
     }
 
     @Override
     public List<Integer> getEarlyRequiredHMMoves() {
+        // Gen 7 does not have any HMs
         return new ArrayList<>();
     }
 
