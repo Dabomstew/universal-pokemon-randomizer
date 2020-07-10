@@ -169,6 +169,7 @@ public class Settings {
     private int additionalImportantTrainerPokemon = 0;
     private int additionalRegularTrainerPokemon = 0;
     private boolean doubleBattleMode;
+    private boolean shinyChance;
 
     public enum WildPokemonMod {
         UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING
@@ -434,7 +435,8 @@ public class Settings {
                 trainersMatchTypingDistribution,
                 trainersBlockLegendaries,
                 trainersBlockEarlyWonderGuard,
-                swapTrainerMegaEvos));
+                swapTrainerMegaEvos,
+                shinyChance));
 
         
 
@@ -680,6 +682,7 @@ public class Settings {
         settings.setTrainersBlockLegendaries(restoreState(data[27], 3));
         settings.setTrainersBlockEarlyWonderGuard(restoreState(data[27], 4));
         settings.setSwapTrainerMegaEvos(restoreState(data[27], 5));
+        settings.setShinyChance(restoreState(data[27], 6));
 
         
         // gen restrictions
@@ -1460,6 +1463,14 @@ public class Settings {
 
     public void setDoubleBattleMode(boolean doubleBattleMode) {
         this.doubleBattleMode = doubleBattleMode;
+    }
+
+    public boolean isShinyChance() {
+        return shinyChance;
+    }
+
+    public void setShinyChance(boolean shinyChance) {
+        this.shinyChance = shinyChance;
     }
 
     public WildPokemonMod getWildPokemonMod() {

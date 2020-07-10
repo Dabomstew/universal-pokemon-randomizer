@@ -183,10 +183,11 @@ public interface RomHandler {
 
     void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
                                int levelModifier, boolean distributionSetting, boolean mainPlaythroughSetting,
-                               boolean includeFormes, boolean swapMegaEvos);
+                               boolean includeFormes, boolean swapMegaEvos, boolean shinyChance);
 
     void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
-                               boolean noEarlyWonderGuard, int levelModifier, boolean includeFormes, boolean swapMegaEvos1);
+                               boolean noEarlyWonderGuard, int levelModifier, boolean includeFormes,
+                               boolean swapMegaEvos1, boolean shinyChance);
 
     void rivalCarriesStarter();
 

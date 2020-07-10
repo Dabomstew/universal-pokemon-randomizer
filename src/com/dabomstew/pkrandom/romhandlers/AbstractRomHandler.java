@@ -1435,7 +1435,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
                                       int levelModifier, boolean distributionSetting, boolean mainPlaythroughSetting,
-                                      boolean includeFormes, boolean swapMegaEvos) {
+                                      boolean includeFormes, boolean swapMegaEvos, boolean shinyChance) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         // New: randomize the order trainers are randomized in.
@@ -1543,6 +1543,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (levelModifier != 0) {
                     tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
                 }
+                if (shinyChance) {
+                    if (this.random.nextInt(256) == 0) {
+                        tp.IVs |= (1 << 30);
+                    }
+                }
             }
         }
 
@@ -1568,7 +1573,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
-                                      boolean noEarlyWonderGuard, int levelModifier, boolean includeFormes, boolean swapMegaEvos) {
+                                      boolean noEarlyWonderGuard, int levelModifier, boolean includeFormes, boolean swapMegaEvos, boolean shinyChance) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         cachedReplacementLists = new TreeMap<>();
@@ -1679,6 +1684,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (levelModifier != 0) {
                         tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
                     }
+                    if (shinyChance) {
+                        if (this.random.nextInt(256) == 0) {
+                            tp.IVs |= (1 << 30);
+                        }
+                    }
                 }
             }
         }
@@ -1735,6 +1745,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                     tp.resetMoves = true;
                     if (levelModifier != 0) {
                         tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
+                    }
+                    if (shinyChance) {
+                        if (this.random.nextInt(256) == 0) {
+                            tp.IVs |= (1 << 30);
+                        }
                     }
                 }
             }
@@ -4362,8 +4377,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private List<Pokemon> pokemonOfType(Type type, boolean noLegendaries) {
         List<Pokemon> typedPokes = new ArrayList<>();
-        for (Pokemon pk : mainPokemonList) {
-            if (pk != null && (!noLegendaries || !pk.isLegendary())) {
+        for (Pokemon pk : mainPokemonListInclFormes) {
+            if (pk != null && (!noLegendaries || !pk.isLegendary()) && !pk.actuallyCosmetic) {
                 if (pk.primaryType == type || pk.secondaryType == type) {
                     typedPokes.add(pk);
                 }

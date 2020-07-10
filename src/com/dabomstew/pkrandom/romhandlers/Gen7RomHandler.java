@@ -1275,7 +1275,6 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             for (int i = 1; i < trainernum; i++) {
                 byte[] trainer = trainers.files.get(i).get(0);
                 Trainer tr = allTrainers.next();
-                // preserve original poketype for held item & moves
                 int offset = 0;
                 trainer[13] = (byte) tr.poketype;
                 int numPokes = tr.pokemon.size();
