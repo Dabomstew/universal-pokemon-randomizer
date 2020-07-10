@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.constants;
 
 import com.dabomstew.pkrandom.pokemon.MoveCategory;
+import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
 
 import java.util.*;
@@ -64,6 +65,27 @@ public class Gen7Constants {
 
     private static final List<Boolean> relevantEncounterFilesSM = setupRelevantEncounterFiles(Type_SM);
     private static final List<Boolean> relevantEncounterFilesUSUM = setupRelevantEncounterFiles(Type_USUM);
+
+    public static final List<Integer> heldZCrystals = Arrays.asList(
+            0x308, // Normal
+            0x30E, // Fighting
+            0x311, // Flying
+            0x30F, // Poison
+            0x310, // Ground
+            0x314, // Rock
+            0x313, // Bug
+            0x315, // Ghost
+            0x318, // Steel
+            0x309, // Fire
+            0x30A, // Water
+            0x30C, // Grass
+            0x30B, // Electric
+            0x312, // Psychic
+            0x30D, // Ice
+            0x316, // Dragon
+            0x317, // Dark
+            0x319  // Fairy
+    );
 
     public static int getPokemonCount(int romType) {
         if (romType == Type_SM) {
@@ -446,5 +468,114 @@ public class Gen7Constants {
         }
 
         return list;
+    }
+
+    public static void tagTrainersSM(List<Trainer> trs) {
+
+        tag(trs,"ELITE1", 23, 152, 349); // Hala
+        tag(trs,"ELITE2",90, 153, 351); // Olivia
+        tag(trs,"ELITE3", 154, 403); // Nanu
+        tag(trs,"ELITE4", 155, 359); // Hapu
+        tag(trs,"ELITE5", 149, 350); // Acerola
+        tag(trs,"ELITE6", 156, 352); // Kahili
+
+        tag(trs,"RIVAL2-0", 129);
+        tag(trs,"RIVAL2-1", 413);
+        tag(trs,"RIVAL2-2", 414);
+        tagRival(trs,"RIVAL3",477);
+
+        tagRival(trs,"FRIEND1", 6);
+        tagRival(trs,"FRIEND2", 9);
+        tagRival(trs,"FRIEND3", 12);
+        tagRival(trs,"FRIEND4", 76);
+        tagRival(trs,"FRIEND5", 82);
+        tagRival(trs,"FRIEND6", 438);
+        tagRival(trs,"FRIEND7", 217);
+        tagRival(trs,"FRIEND8", 220);
+        tagRival(trs,"FRIEND9", 447);
+        tagRival(trs,"FRIEND10", 450);
+        tagRival(trs,"FRIEND11", 482);
+        tagRival(trs,"FRIEND12", 356);
+
+        tag(trs,"THEMED:GLADION-STRONG", 79, 185, 239, 240, 415, 416, 417, 418, 419, 441);
+        tag(trs,"THEMED:ILIMA-STRONG", 52, 215, 216, 396);
+        tag(trs,"THEMED:LANA-STRONG", 144);
+        tag(trs,"THEMED:KIAWE-STRONG", 398);
+        tag(trs,"THEMED:MALLOW-STRONG", 146);
+        tag(trs,"THEMED:SOPHOCLES-STRONG", 405);
+        tag(trs,"THEMED:MOLAYNE-STRONG", 167, 481);
+        tag(trs,"THEMED:MINA-STRONG", 435, 467);
+        tag(trs,"THEMED:PLUMERIA-STRONG", 89, 238, 401);
+        tag(trs,"THEMED:SINA-STRONG", 75);
+        tag(trs,"THEMED:DEXIO-STRONG", 74, 412);
+        tag(trs,"THEMED:FABA-STRONG",132, 241, 360, 410);
+        tag(trs,"THEMED:GUZMA-LEADER", 138, 235, 236, 400);
+        tag(trs,"THEMED:LUSAMINE-LEADER", 131, 158);
+    }
+
+    public static void tagTrainersUSUM(List<Trainer> trs) {
+
+        tag(trs,"ELITE1", 23, 650); // Hala
+        tag(trs,"ELITE2", 90, 153, 351); // Olivia
+        tag(trs,"ELITE3", 154, 508); // Nanu
+        tag(trs,"ELITE4", 359, 497); // Hapu
+        tag(trs,"ELITE5", 489, 490); // Big Mo
+        tag(trs,"ELITE6", 149, 350); // Acerola
+        tag(trs,"ELITE7", 156, 352); // Kahili
+
+        tagRival(trs,"RIVAL2", 477); // Kukui
+
+        // Hau
+        tagRival(trs,"FRIEND1", 491);
+        tagRival(trs,"FRIEND2", 9);
+        tagRival(trs,"FRIEND3", 12);
+        tagRival(trs,"FRIEND4", 76);
+        tagRival(trs,"FRIEND5", 82);
+        tagRival(trs,"FRIEND6", 438);
+        tagRival(trs,"FRIEND7", 217);
+        tagRival(trs,"FRIEND8", 220);
+        tagRival(trs,"FRIEND9", 447);
+        tagRival(trs,"FRIEND10", 450);
+        tagRival(trs,"FRIEND11", 494);
+        tagRival(trs,"FRIEND12", 356);
+
+        tag(trs,"THEMED:GLADION-STRONG", 79, 185, 239, 240, 415, 416, 417, 418, 419, 441);
+        tag(trs,"THEMED:ILIMA-STRONG", 52, 215, 216, 396, 502);
+        tag(trs,"THEMED:LANA-STRONG", 144, 503);
+        tag(trs,"THEMED:KIAWE-STRONG", 398, 504);
+        tag(trs,"THEMED:MALLOW-STRONG", 146, 505);
+        tag(trs,"THEMED:SOPHOCLES-STRONG", 405, 506);
+        tag(trs,"THEMED:MINA-STRONG", 507);
+        tag(trs,"THEMED:PLUMERIA-STRONG", 89, 238, 401);
+        tag(trs,"THEMED:SINA-STRONG", 75);
+        tag(trs,"THEMED:DEXIO-STRONG", 74, 412, 623);
+        tag(trs,"THEMED:FABA-STRONG", 132, 241, 410, 561);
+        tag(trs,"THEMED:SOLIERA-STRONG", 498, 499, 648, 651);
+        tag(trs,"THEMED:DULSE-STRONG", 500, 501, 649, 652);
+        tag(trs,"THEMED:GUZMA-LEADER", 138, 235, 236, 558, 647);
+        tag(trs,"THEMED:LUSAMINE-LEADER", 131, 644);
+
+        tag(trs,"UBER", 541, 542, 543, 580, 572, 573, 559, 560, 562, 645); // RR Episode
+    }
+
+    private static void tagRival(List<Trainer> allTrainers, String tag, int offset) {
+        allTrainers.get(offset - 1).tag = tag + "-0";
+        allTrainers.get(offset).tag = tag + "-1";
+        allTrainers.get(offset + 1).tag = tag + "-2";
+
+    }
+
+    private static void tag(List<Trainer> allTrainers, int number, String tag) {
+        if (allTrainers.size() > (number - 1)) {
+            allTrainers.get(number - 1).tag = tag;
+        }
+    }
+
+    private static void tag(List<Trainer> allTrainers, String tag, int... numbers) {
+        for (int num : numbers) {
+            if (allTrainers.size() > (num - 1)) {
+                allTrainers.get(num - 1).tag = tag;
+            }
+        }
     }
 }

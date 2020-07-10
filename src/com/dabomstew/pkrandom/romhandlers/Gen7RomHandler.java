@@ -721,7 +721,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Pokemon> getAltFormes() {
-        return new ArrayList<>();
+        int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
+        int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
+        return pokemonListInclFormes.subList(pokemonCount + 1, pokemonCount + formeCount + 1);
     }
 
     @Override
@@ -731,7 +733,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public Pokemon getAltFormeOfPokemon(Pokemon pk, int forme) {
-        return pk;
+        int pokeNum = absolutePokeNumByBaseForme.getOrDefault(pk.number,dummyAbsolutePokeNums).getOrDefault(forme,0);
+        return pokeNum != 0 ? pokes[pokeNum] : pk;
     }
 
     @Override
@@ -1156,7 +1159,84 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Trainer> getTrainers() {
-        return new ArrayList<>();
+        List<Trainer> allTrainers = new ArrayList<>();
+        try {
+            GARCArchive trainers = this.readGARC(romEntry.getString("TrainerData"),true);
+            GARCArchive trpokes = this.readGARC(romEntry.getString("TrainerPokemon"),true);
+            int trainernum = trainers.files.size();
+            List<String> tclasses = this.getTrainerClassNames();
+            List<String> tnames = this.getTrainerNames();
+            Map<Integer,String> tnamesMap = new TreeMap<>();
+            for (int i = 0; i < tnames.size(); i++) {
+                tnamesMap.put(i,tnames.get(i));
+            }
+            for (int i = 1; i < trainernum; i++) {
+                byte[] trainer = trainers.files.get(i).get(0);
+                byte[] trpoke = trpokes.files.get(i).get(0);
+                Trainer tr = new Trainer();
+                tr.poketype = trainer[13] & 0xFF;
+                tr.offset = i;
+                tr.trainerclass = trainer[0] & 0xFF;
+                int battleType = trainer[2] & 0xFF;
+                int numPokes = trainer[3] & 0xFF;
+                int trainerAILevel = trainer[12] & 0xFF;
+                boolean healer = trainer[15] != 0;
+                int pokeOffs = 0;
+                String trainerClass = tclasses.get(tr.trainerclass);
+                String trainerName = tnamesMap.getOrDefault(i - 1, "UNKNOWN");
+                tr.fullDisplayName = trainerClass + " " + trainerName;
+
+                for (int poke = 0; poke < numPokes; poke++) {
+                    // Structure is
+                    // IV SB LV LV SP SP FRM FRM
+                    // (HI HI)
+                    // (M1 M1 M2 M2 M3 M3 M4 M4)
+                    // where SB = 0 0 Ab Ab 0 0 Fm Ml
+                    // Ab Ab = ability number, 0 for random
+                    // Fm = 1 for forced female
+                    // Ml = 1 for forced male
+                    // There's also a trainer flag to force gender, but
+                    // this allows fixed teams with mixed genders.
+
+                    // int secondbyte = trpoke[pokeOffs + 1] & 0xFF;
+                    int level = readWord(trpoke, pokeOffs + 14);
+                    int species = readWord(trpoke, pokeOffs + 16);
+                    int formnum = readWord(trpoke, pokeOffs + 18);
+                    TrainerPokemon tpk = new TrainerPokemon();
+                    tpk.level = level;
+                    tpk.pokemon = pokes[species];
+                    tpk.AILevel = trainerAILevel;
+                    tpk.ability = trpoke[pokeOffs + 1] & 0xFF;
+                    tpk.forme = formnum;
+                    tpk.formeSuffix = Gen7Constants.getFormeSuffixByBaseForme(species,formnum);
+                    tpk.absolutePokeNumber = absolutePokeNumByBaseForme
+                            .getOrDefault(species,dummyAbsolutePokeNums)
+                            .getOrDefault(formnum,0);
+                    pokeOffs += 20;
+                    tpk.heldItem = readWord(trpoke, pokeOffs);
+                    pokeOffs += 4;
+                    int attack1 = readWord(trpoke, pokeOffs);
+                    int attack2 = readWord(trpoke, pokeOffs + 2);
+                    int attack3 = readWord(trpoke, pokeOffs + 4);
+                    int attack4 = readWord(trpoke, pokeOffs + 6);
+                    tpk.move1 = attack1;
+                    tpk.move2 = attack2;
+                    tpk.move3 = attack3;
+                    tpk.move4 = attack4;
+                    pokeOffs += 8;
+                    tr.pokemon.add(tpk);
+                }
+                allTrainers.add(tr);
+            }
+            if (romEntry.romType == Gen7Constants.Type_SM) {
+                Gen7Constants.tagTrainersSM(allTrainers);
+            } else {
+                Gen7Constants.tagTrainersUSUM(allTrainers);
+            }
+        } catch (IOException ex) {
+            throw new RandomizerIOException(ex);
+        }
+        return allTrainers;
     }
 
     @Override
@@ -1171,7 +1251,61 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
-        // do nothing for now
+        Iterator<Trainer> allTrainers = trainerData.iterator();
+        try {
+            GARCArchive trainers = this.readGARC(romEntry.getString("TrainerData"),true);
+            GARCArchive trpokes = this.readGARC(romEntry.getString("TrainerPokemon"),true);
+            // Get current movesets in case we need to reset them for certain
+            // trainer mons.
+            Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
+            int trainernum = trainers.files.size();
+            for (int i = 1; i < trainernum; i++) {
+                byte[] trainer = trainers.files.get(i).get(0);
+                Trainer tr = allTrainers.next();
+                // preserve original poketype for held item & moves
+                int offset = 0;
+                trainer[13] = (byte) tr.poketype;
+                int numPokes = tr.pokemon.size();
+                trainer[offset+3] = (byte) numPokes;
+
+                int bytesNeeded = 32 * numPokes;
+                byte[] trpoke = new byte[bytesNeeded];
+                int pokeOffs = 0;
+                Iterator<TrainerPokemon> tpokes = tr.pokemon.iterator();
+                for (int poke = 0; poke < numPokes; poke++) {
+                    TrainerPokemon tp = tpokes.next();
+                    // no gender or ability info, so no byte 1
+                    writeWord(trpoke, pokeOffs + 14, tp.level);
+                    writeWord(trpoke, pokeOffs + 16, tp.pokemon.number);
+                    writeWord(trpoke, pokeOffs + 18, tp.forme);
+                    pokeOffs += 20;
+                    writeWord(trpoke, pokeOffs, tp.heldItem);
+                    pokeOffs += 4;
+                    if (tp.resetMoves) {
+                        int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.absolutePokeNumber, movesets, tp.level);
+                        for (int m = 0; m < 4; m++) {
+                            writeWord(trpoke, pokeOffs + m * 2, pokeMoves[m]);
+                        }
+                        if (Gen7Constants.heldZCrystals.contains(tp.heldItem)) { // Choose a new Z-Crystal at random based on the types of the Pokemon's moves
+                            int chosenMove = this.random.nextInt(Arrays.stream(pokeMoves).filter(pk -> pk != 0).toArray().length);
+                            int newZCrystal = Gen7Constants.heldZCrystals.get((int)Gen7Constants.typeToByte(moves[pokeMoves[chosenMove]].type));
+                            writeWord(trpoke, pokeOffs - 4, newZCrystal);
+                        }
+                    } else {
+                        writeWord(trpoke, pokeOffs, tp.move1);
+                        writeWord(trpoke, pokeOffs + 2, tp.move2);
+                        writeWord(trpoke, pokeOffs + 4, tp.move3);
+                        writeWord(trpoke, pokeOffs + 6, tp.move4);
+                    }
+                    pokeOffs += 8;
+                }
+                trpokes.setFile(i,trpoke);
+            }
+            this.writeGARC(romEntry.getString("TrainerData"), trainers);
+            this.writeGARC(romEntry.getString("TrainerPokemon"), trpokes);
+        } catch (IOException ex) {
+            throw new RandomizerIOException(ex);
+        }
     }
 
     @Override
@@ -1584,17 +1718,23 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<String> getTrainerNames() {
-        return new ArrayList<>();
+        List<String> tnames = getStrings(false, romEntry.getInt("TrainerNamesTextOffset"));
+        tnames.remove(0); // blank one
+
+        return tnames;
     }
 
     @Override
     public int maxTrainerNameLength() {
-        return 0;
+        return 10;
     }
 
     @Override
     public void setTrainerNames(List<String> trainerNames) {
-        // do nothing for now
+        List<String> tnames = getStrings(false, romEntry.getInt("TrainerNamesTextOffset"));
+        List<String> newTNames = new ArrayList<>(trainerNames);
+        newTNames.add(0, tnames.get(0)); // the 0-entry, preserve it
+        setStrings(false, romEntry.getInt("TrainerNamesTextOffset"), newTNames);
     }
 
     @Override
@@ -1609,17 +1749,17 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<String> getTrainerClassNames() {
-        return new ArrayList<>();
+        return getStrings(false, romEntry.getInt("TrainerClassesTextOffset"));
     }
 
     @Override
     public void setTrainerClassNames(List<String> trainerClassNames) {
-        // do nothing for now
+        setStrings(false, romEntry.getInt("TrainerClassesTextOffset"), trainerClassNames);
     }
 
     @Override
     public int maxTrainerClassNameLength() {
-        return 0;
+        return 15;
     }
 
     @Override

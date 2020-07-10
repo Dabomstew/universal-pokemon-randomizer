@@ -1456,6 +1456,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                 cachedAllList.addAll(altFormesList);
             }
         }
+        cachedAllList =
+                cachedAllList
+                        .stream()
+                        .filter(pk -> !pk.actuallyCosmetic)
+                        .collect(Collectors.toList());
         List<Integer> mainPlaythroughTrainers = getMainPlaythroughTrainers();
 
         // Fully random is easy enough - randomize then worry about rival
@@ -1576,6 +1581,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                 cachedAllList.addAll(altFormesList);
             }
         }
+        cachedAllList =
+                cachedAllList
+                        .stream()
+                        .filter(pk -> !pk.actuallyCosmetic)
+                        .collect(Collectors.toList());
         typeWeightings = new TreeMap<>();
         totalTypeWeighting = 0;
 
@@ -2660,10 +2670,20 @@ public abstract class AbstractRomHandler implements RomHandler {
             List<Pokemon> legendariesLeft = new ArrayList<>(onlyLegendaryList);
             if (allowAltFormes) {
                 legendariesLeft.addAll(onlyLegendaryAltsList);
+                legendariesLeft =
+                        legendariesLeft
+                                .stream()
+                                .filter(pk -> !pk.actuallyCosmetic)
+                                .collect(Collectors.toList());
             }
             List<Pokemon> nonlegsLeft = new ArrayList<>(noLegendaryList);
             if (allowAltFormes) {
                 nonlegsLeft.addAll(noLegendaryAltsList);
+                nonlegsLeft =
+                        nonlegsLeft
+                                .stream()
+                                .filter(pk -> !pk.actuallyCosmetic)
+                                .collect(Collectors.toList());
             }
             legendariesLeft.removeAll(banned);
             nonlegsLeft.removeAll(banned);
@@ -2697,6 +2717,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                         legendariesLeft.addAll(onlyLegendaryList);
                         if (allowAltFormes) {
                             legendariesLeft.addAll(onlyLegendaryAltsList);
+                            legendariesLeft =
+                                    legendariesLeft
+                                            .stream()
+                                            .filter(pk -> !pk.actuallyCosmetic)
+                                            .collect(Collectors.toList());
                         }
                         legendariesLeft.removeAll(banned);
                     }
@@ -2713,6 +2738,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                         nonlegsLeft.addAll(noLegendaryList);
                         if (allowAltFormes) {
                             nonlegsLeft.addAll(noLegendaryAltsList);
+                            nonlegsLeft =
+                                    nonlegsLeft
+                                            .stream()
+                                            .filter(pk -> !pk.actuallyCosmetic)
+                                            .collect(Collectors.toList());
                         }
                         nonlegsLeft.removeAll(banned);
                     }
