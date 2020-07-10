@@ -1245,11 +1245,6 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public List<Integer> getEvolutionItems() {
-        return new ArrayList<>();
-    }
-
-    @Override
     public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
         Iterator<Trainer> allTrainers = trainerData.iterator();
         try {
@@ -1306,6 +1301,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         } catch (IOException ex) {
             throw new RandomizerIOException(ex);
         }
+    }
+
+    @Override
+    public List<Integer> getEvolutionItems() {
+        return Gen7Constants.evolutionItems;
     }
 
     @Override
