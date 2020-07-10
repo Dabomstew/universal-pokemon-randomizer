@@ -1,10 +1,13 @@
 package com.dabomstew.pkrandom.constants;
 
+import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Gen7Constants {
 
@@ -471,6 +474,118 @@ public class Gen7Constants {
         }
 
         return list;
+    }
+
+    public static ItemList allowedItemsSM, allowedItemsUSUM, nonBadItems;
+    public static List<Integer> regularShopItems, opShopItems;
+
+    static {
+        setupAllowedItems();
+    }
+
+    private static void setupAllowedItems() {
+        allowedItemsSM = new ItemList(920);
+        // Key items + version exclusives
+        allowedItemsSM.banRange(428, 76);
+        allowedItemsSM.banRange(505,32);
+        allowedItemsSM.banRange(621, 18);
+        allowedItemsSM.banSingles(574, 578, 579, 616, 617);
+        // Unknown blank items or version exclusives
+        allowedItemsSM.banRange(113, 3);
+        allowedItemsSM.banRange(120, 14);
+        // TMs & HMs - tms cant be held in gen5
+        allowedItemsSM.tmRange(328, 92);
+        allowedItemsSM.tmRange(618, 3);
+        allowedItemsSM.banRange(328, 100);
+        allowedItemsSM.banRange(618, 3);
+        // Battle Launcher exclusives
+        allowedItemsSM.banRange(592, 24);
+
+        // Key items (Gen 6)
+        allowedItemsSM.banRange(641,3);
+        allowedItemsSM.banSingles(651, 689);
+        allowedItemsSM.banRange(695,4);
+        allowedItemsSM.banRange(700,4);
+        allowedItemsSM.tmRange(705,3);
+        allowedItemsSM.tmRange(712,3);
+        allowedItemsSM.tmRange(716,2);
+
+        // TMs (Gen 6)
+        allowedItemsSM.tmRange(690,5);
+        allowedItemsSM.banRange(690,5);
+
+        // Key items and an HM
+        allowedItemsSM.banRange(718,33);
+        allowedItemsSM.banRange(765,2);
+        allowedItemsSM.banRange(771,5);
+
+        // Z-Crystals
+        allowedItemsSM.banRange(776,19);
+        allowedItemsSM.banRange(798,39);
+
+        // Key Items (Gen 7)
+        allowedItemsSM.banSingles(797, 845, 847, 850, 857, 858, 860);
+        allowedItemsSM.banRange(841,3);
+
+        // Unused
+        allowedItemsSM.banSingles(848, 859);
+        allowedItemsSM.banRange(837,4);
+        allowedItemsSM.banRange(861,18);
+        allowedItemsSM.banRange(885,19);
+
+        allowedItemsUSUM = allowedItemsSM.copy(959);
+
+        // Z-Crystals
+        allowedItemsUSUM.banRange(921,12);
+
+        // Key Items
+        allowedItemsUSUM.banRange(933,16);
+
+        // ROTO LOTO
+        allowedItemsUSUM.banRange(949,11);
+
+        // non-bad items
+        // ban specific pokemon hold items, berries, apricorns, mail
+        nonBadItems = allowedItemsSM.copy();
+
+        nonBadItems.banSingles(0x6F, 0x70, 0xE1, 0xEC, 0x9B, 0x112, 0x2BB, 0x2C0, 0x34C);
+        nonBadItems.banRange(0x5F, 4); // mulch
+        nonBadItems.banRange(0x87, 2); // orbs
+        nonBadItems.banRange(0x89, 12); // mails
+        nonBadItems.banRange(0x9F, 25); // berries without useful battle effects
+        nonBadItems.banRange(0x100, 4); // pokemon specific
+        nonBadItems.banRange(0x104, 5); // contest scarves
+        nonBadItems.banRange(0x28C,4); // more mulch
+        nonBadItems.banRange(0x388,17); // Memories
+
+        regularShopItems = new ArrayList<>();
+
+        regularShopItems.addAll(IntStream.rangeClosed(2,4).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(0x11,0x1D).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(0x4C,0x4F).boxed().collect(Collectors.toList()));
+
+        opShopItems = new ArrayList<>();
+
+        // "Money items" etc
+        opShopItems.add(0x2A);
+        opShopItems.add(0x2B);
+        opShopItems.add(0x32);
+        opShopItems.add(0x36);
+        opShopItems.addAll(IntStream.rangeClosed(0x41,0x47).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(0x56,0x5C).boxed().collect(Collectors.toList()));
+        opShopItems.add(0x6A);
+        opShopItems.addAll(IntStream.rangeClosed(0xCE,0xD4).boxed().collect(Collectors.toList()));
+        opShopItems.add(0xE7);
+        opShopItems.add(0x23B);
+        opShopItems.addAll(IntStream.rangeClosed(0x244,0x24F).boxed().collect(Collectors.toList()));
+    }
+
+    public static ItemList getAllowedItems(int romType) {
+        if (romType == Type_SM) {
+            return allowedItemsSM;
+        } else {
+            return allowedItemsUSUM;
+        }
     }
 
     public static void tagTrainersSM(List<Trainer> trs) {

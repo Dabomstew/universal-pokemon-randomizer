@@ -1845,22 +1845,22 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public ItemList getAllowedItems() {
-        return null;
+        return Gen7Constants.getAllowedItems(romEntry.romType);
     }
 
     @Override
     public ItemList getNonBadItems() {
-        return null;
+        return Gen7Constants.nonBadItems;
     }
 
     @Override
     public List<Integer> getRegularShopItems() {
-        return null;
+        return Gen7Constants.regularShopItems;
     }
 
     @Override
     public List<Integer> getOPShopItems() {
-        return null;
+        return Gen7Constants.opShopItems;
     }
 
     @Override

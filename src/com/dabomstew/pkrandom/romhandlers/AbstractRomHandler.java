@@ -3456,7 +3456,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeWildHeldItems(boolean banBadItems) {
-        List<Pokemon> pokemon = allPokemonWithoutNull();
+        List<Pokemon> pokemon = allPokemonInclFormesWithoutNull();
         ItemList possibleItems = banBadItems ? this.getNonBadItems() : this.getAllowedItems();
         for (Pokemon pk : pokemon) {
             if (pk.guaranteedHeldItem == -1 && pk.commonHeldItem == -1 && pk.rareHeldItem == -1
