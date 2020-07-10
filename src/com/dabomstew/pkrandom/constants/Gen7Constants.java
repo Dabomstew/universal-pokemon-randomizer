@@ -62,6 +62,9 @@ public class Gen7Constants {
 
     public static final String[] fastestTextPrefixes = new String[]{"1080BDE80E000500F0412DE9", "34019FE50060A0E3"};
 
+    public static final List<Integer> evolutionItems = Arrays.asList(80,81,82,83,84,85,107,108,109,
+            110,221,226,227,233,235,252,321,322,323,324,325,326,327,646,647,849);
+
     private static final List<Boolean> relevantEncounterFilesSM = setupRelevantEncounterFiles(Type_SM);
     private static final List<Boolean> relevantEncounterFilesUSUM = setupRelevantEncounterFiles(Type_USUM);
 

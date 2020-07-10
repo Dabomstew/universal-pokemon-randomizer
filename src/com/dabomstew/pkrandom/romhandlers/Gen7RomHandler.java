@@ -1168,13 +1168,13 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public List<Integer> getEvolutionItems() {
-        return new ArrayList<>();
+    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
+        // do nothing for now
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
-        // do nothing for now
+    public List<Integer> getEvolutionItems() {
+        return Gen7Constants.evolutionItems;
     }
 
     @Override
