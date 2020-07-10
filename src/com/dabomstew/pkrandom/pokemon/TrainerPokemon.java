@@ -39,6 +39,16 @@ public class TrainerPokemon {
     public int forme;
     public String formeSuffix = "";
     public int absolutePokeNumber = 0;
+
+    public int mysteryFlag;
+    public byte nature;
+    public byte hpEVs;
+    public byte atkEVs;
+    public byte defEVs;
+    public byte spatkEVs;
+    public byte spdefEVs;
+    public byte speedEVs;
+    public int IVs;
     
     public boolean resetMoves = false;
 

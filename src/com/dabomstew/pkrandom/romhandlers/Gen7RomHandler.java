@@ -1199,10 +1199,21 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     // this allows fixed teams with mixed genders.
 
                     // int secondbyte = trpoke[pokeOffs + 1] & 0xFF;
+                    int abilityAndFlag = trpoke[pokeOffs];
                     int level = readWord(trpoke, pokeOffs + 14);
                     int species = readWord(trpoke, pokeOffs + 16);
                     int formnum = readWord(trpoke, pokeOffs + 18);
                     TrainerPokemon tpk = new TrainerPokemon();
+                    tpk.ability = (abilityAndFlag >>> 4) & 0xF;
+                    tpk.mysteryFlag = (abilityAndFlag & 0xF);
+                    tpk.nature = trpoke[pokeOffs + 1];
+                    tpk.hpEVs = trpoke[pokeOffs + 2];
+                    tpk.atkEVs = trpoke[pokeOffs + 3];
+                    tpk.defEVs = trpoke[pokeOffs + 4];
+                    tpk.spatkEVs = trpoke[pokeOffs + 5];
+                    tpk.spdefEVs = trpoke[pokeOffs + 6];
+                    tpk.speedEVs = trpoke[pokeOffs + 7];
+                    tpk.IVs = FileFunctions.readFullIntLittleEndian(trpoke, pokeOffs + 8);
                     tpk.level = level;
                     if (romEntry.romType == Gen7Constants.Type_USUM) {
                         if (i == 78) {
@@ -1276,7 +1287,16 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 Iterator<TrainerPokemon> tpokes = tr.pokemon.iterator();
                 for (int poke = 0; poke < numPokes; poke++) {
                     TrainerPokemon tp = tpokes.next();
-                    // no gender or ability info, so no byte 1
+                    byte abilityAndFlag = (byte)((tp.ability << 4) | tp.mysteryFlag);
+                    trpoke[pokeOffs] = abilityAndFlag;
+                    trpoke[pokeOffs + 1] = tp.nature;
+                    trpoke[pokeOffs + 2] = tp.hpEVs;
+                    trpoke[pokeOffs + 3] = tp.atkEVs;
+                    trpoke[pokeOffs + 4] = tp.defEVs;
+                    trpoke[pokeOffs + 5] = tp.spatkEVs;
+                    trpoke[pokeOffs + 6] = tp.spdefEVs;
+                    trpoke[pokeOffs + 7] = tp.speedEVs;
+                    FileFunctions.writeFullIntLittleEndian(trpoke, pokeOffs + 8, tp.IVs);
                     writeWord(trpoke, pokeOffs + 14, tp.level);
                     writeWord(trpoke, pokeOffs + 16, tp.pokemon.number);
                     writeWord(trpoke, pokeOffs + 18, tp.forme);
