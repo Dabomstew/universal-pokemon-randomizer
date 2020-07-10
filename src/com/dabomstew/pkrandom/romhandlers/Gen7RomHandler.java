@@ -1204,6 +1204,13 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     int formnum = readWord(trpoke, pokeOffs + 18);
                     TrainerPokemon tpk = new TrainerPokemon();
                     tpk.level = level;
+                    if (romEntry.romType == Gen7Constants.Type_USUM) {
+                        if (i == 78) {
+                            if (poke == 3 && tpk.level == 16 && tr.pokemon.get(0).level == 16) {
+                                tpk.level = 14;
+                            }
+                        }
+                    }
                     tpk.pokemon = pokes[species];
                     tpk.AILevel = trainerAILevel;
                     tpk.ability = trpoke[pokeOffs + 1] & 0xFF;
