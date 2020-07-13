@@ -47,7 +47,7 @@ public class Settings {
 
     public static final int VERSION = Version.VERSION;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 42;
+    public static final int LENGTH_OF_SETTINGS_DATA = 44;
 
     private CustomNamesSet customNames;
 
@@ -200,6 +200,26 @@ public class Settings {
 
     private boolean allowStaticAltFormes;
     private boolean swapStaticMegaEvos;
+
+    public enum TotemPokemonMod {
+        UNCHANGED, RANDOM, SIMILAR_STRENGTH
+    }
+
+    public enum AllyPokemonMod {
+        UNCHANGED, RANDOM, SIMILAR_STRENGTH
+    }
+
+    public enum AuraMod {
+        UNCHANGED, RANDOM, SAME_STRENGTH
+    }
+
+    private TotemPokemonMod totemPokemonMod = TotemPokemonMod.UNCHANGED;
+    private AllyPokemonMod allyPokemonMod = AllyPokemonMod.UNCHANGED;
+    private AuraMod auraMod = AuraMod.UNCHANGED;
+    private boolean randomizeTotemHeldItems;
+    private boolean totemLevelsModified;
+    private int totemLevelModifier = 0;
+    private boolean allowTotemAltFormes;
 
     public enum TMsMod {
         UNCHANGED, RANDOM
@@ -480,7 +500,23 @@ public class Settings {
 
         out.write((doubleBattleMode ? 0x1 : 0) | (additionalBossTrainerPokemon << 1) | (additionalImportantTrainerPokemon << 4)); // There's one bit left here
 
-        out.write(additionalRegularTrainerPokemon);
+        out.write(additionalRegularTrainerPokemon |
+                ((auraMod == AuraMod.UNCHANGED) ? 0x8 : 0) |
+                ((auraMod == AuraMod.RANDOM) ? 0x10 : 0) |
+                ((auraMod == AuraMod.SAME_STRENGTH) ? 0x20 : 0));
+
+        out.write(makeByteSelected(
+                totemPokemonMod == TotemPokemonMod.UNCHANGED,
+                totemPokemonMod == TotemPokemonMod.RANDOM,
+                totemPokemonMod == TotemPokemonMod.SIMILAR_STRENGTH,
+                allyPokemonMod == AllyPokemonMod.UNCHANGED,
+                allyPokemonMod == AllyPokemonMod.RANDOM,
+                allyPokemonMod == AllyPokemonMod.SIMILAR_STRENGTH,
+                randomizeTotemHeldItems,
+                allowTotemAltFormes
+        ));
+
+        out.write((totemLevelsModified ? 0x80 : 0) | (totemLevelModifier+50));
         
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -726,6 +762,14 @@ public class Settings {
         settings.setAdditionalBossTrainerPokemon((data[40] & 0xE) >> 1);
         settings.setAdditionalImportantTrainerPokemon((data[40] & 0x70) >> 4);
         settings.setAdditionalRegularTrainerPokemon((data[41] & 0x7));
+        settings.setAuraMod(restoreEnum(AuraMod.class,data[41],3,4,5)); // 6, 7 still unused
+
+        settings.setTotemPokemonMod(restoreEnum(TotemPokemonMod.class,data[42],0,1,2));
+        settings.setAllyPokemonMod(restoreEnum(AllyPokemonMod.class,data[42],3,4,5));
+        settings.setRandomizeTotemHeldItems(restoreState(data[42],6));
+        settings.setAllowTotemAltFormes(restoreState(data[42],7));
+        settings.setTotemLevelsModified(restoreState(data[43],7));
+        settings.setTotemLevelModifier((data[43] & 0x7F) - 50);
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1619,6 +1663,74 @@ public class Settings {
 
     public void setSwapStaticMegaEvos(boolean swapStaticMegaEvos) {
         this.swapStaticMegaEvos = swapStaticMegaEvos;
+    }
+
+    public TotemPokemonMod getTotemPokemonMod() {
+        return totemPokemonMod;
+    }
+
+    public void setTotemPokemonMod(boolean... bools) {
+        setTotemPokemonMod(getEnum(TotemPokemonMod.class, bools));
+    }
+
+    private void setTotemPokemonMod(TotemPokemonMod totemPokemonMod) {
+        this.totemPokemonMod = totemPokemonMod;
+    }
+
+    public AllyPokemonMod getAllyPokemonMod() {
+        return allyPokemonMod;
+    }
+
+    public void setAllyPokemonMod(boolean... bools) {
+        setAllyPokemonMod(getEnum(AllyPokemonMod.class, bools));
+    }
+
+    private void setAllyPokemonMod(AllyPokemonMod allyPokemonMod) {
+        this.allyPokemonMod = allyPokemonMod;
+    }
+
+    public AuraMod getAuraMod() {
+        return auraMod;
+    }
+
+    public void setAuraMod(boolean... bools) {
+        setAuraMod(getEnum(AuraMod.class, bools));
+    }
+
+    private void setAuraMod(AuraMod auraMod) {
+        this.auraMod = auraMod;
+    }
+
+    public boolean isRandomizeTotemHeldItems() {
+        return randomizeTotemHeldItems;
+    }
+
+    public void setRandomizeTotemHeldItems(boolean randomizeTotemHeldItems) {
+        this.randomizeTotemHeldItems = randomizeTotemHeldItems;
+    }
+
+    public boolean isTotemLevelsModified() {
+        return totemLevelsModified;
+    }
+
+    public void setTotemLevelsModified(boolean totemLevelsModified) {
+        this.totemLevelsModified = totemLevelsModified;
+    }
+
+    public int getTotemLevelModifier() {
+        return totemLevelModifier;
+    }
+
+    public void setTotemLevelModifier(int totemLevelModifier) {
+        this.totemLevelModifier = totemLevelModifier;
+    }
+
+    public boolean isAllowTotemAltFormes() {
+        return allowTotemAltFormes;
+    }
+
+    public void setAllowTotemAltFormes(boolean allowTotemAltFormes) {
+        this.allowTotemAltFormes = allowTotemAltFormes;
     }
 
     public TMsMod getTmsMod() {

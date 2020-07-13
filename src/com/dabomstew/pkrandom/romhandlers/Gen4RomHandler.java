@@ -2196,6 +2196,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public List<TotemPokemon> getTotemPokemon() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public void setTotemPokemon(List<TotemPokemon> totemPokemon) {
+
+    }
+
+    @Override
     public boolean canChangeStarters() {
         return true;
     }
@@ -2422,6 +2432,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     @Override
     public List<Integer> getMainGameShops() {
         return new ArrayList<>();
+    }
+
+    @Override
+    public int randomHeldItem() {
+        return 0;
     }
 
     @Override

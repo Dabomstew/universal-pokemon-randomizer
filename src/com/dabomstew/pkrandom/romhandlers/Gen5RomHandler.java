@@ -1398,6 +1398,16 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public List<TotemPokemon> getTotemPokemon() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public void setTotemPokemon(List<TotemPokemon> totemPokemon) {
+
+    }
+
+    @Override
     public List<StaticEncounter> getStaticPokemon() {
         List<StaticEncounter> sp = new ArrayList<>();
         if (!romEntry.staticPokemonSupport) {
@@ -2686,6 +2696,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     public List<Integer> getMainGameShops() {
         return Gen5Constants.getMainGameShops(romEntry.romType);
+    }
+
+    @Override
+    public int randomHeldItem() {
+        return 0;
     }
 
     @Override

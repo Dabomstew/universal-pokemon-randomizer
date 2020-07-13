@@ -1105,6 +1105,16 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return Collections.singletonList(pokes[Gen2Constants.unownIndex]); // Unown banned
     }
 
+    @Override
+    public List<TotemPokemon> getTotemPokemon() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public void setTotemPokemon(List<TotemPokemon> totemPokemon) {
+
+    }
+
     private void writePaddedPokemonName(String name, int length, int offset) {
         String paddedName = String.format("%-" + length + "s", name);
         byte[] rawData = translateString(paddedName);
@@ -1437,6 +1447,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public List<Integer> getMainGameShops() {
         return new ArrayList<>();
+    }
+
+    @Override
+    public int randomHeldItem() {
+        return 0;
     }
 
     @Override

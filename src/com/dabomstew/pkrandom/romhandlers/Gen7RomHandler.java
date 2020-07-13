@@ -141,6 +141,18 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         } else if (r[0].endsWith("Offset") || r[0].endsWith("Count") || r[0].endsWith("Number")) {
                             int offs = parseRIInt(r[1]);
                             current.numbers.put(r[0], offs);
+                        } else if (r[1].startsWith("[") && r[1].endsWith("]")) {
+                            String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
+                            if (offsets.length == 1 && offsets[0].trim().isEmpty()) {
+                                current.arrayEntries.put(r[0], new int[0]);
+                            } else {
+                                int[] offs = new int[offsets.length];
+                                int c = 0;
+                                for (String off : offsets) {
+                                    offs[c++] = parseRIInt(off);
+                                }
+                                current.arrayEntries.put(r[0], offs);
+                            }
                         } else if (r[0].equals("CopyFrom")) {
                             for (RomEntry otherEntry : roms) {
                                 if (r[1].equalsIgnoreCase(otherEntry.romCode)) {
@@ -293,7 +305,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 pokes[i].name = pokeNames[realBaseForme];
                 pokes[i].baseForme = pokes[fi.baseForme];
                 pokes[i].formeNumber = fi.formeNumber;
-                pokes[i].formeSuffix = Gen7Constants.getFormeSuffixByBaseForme(fi.baseForme,fi.formeNumber);
+                if (pokes[i].actuallyCosmetic) {
+                    pokes[i].formeSuffix = pokes[i].baseForme.formeSuffix;
+                } else {
+                    pokes[i].formeSuffix = Gen7Constants.getFormeSuffixByBaseForme(fi.baseForme,fi.formeNumber);
+                }
                 if (realBaseForme == prevSpecies) {
                     formNum++;
                     currentMap.put(formNum,i);
@@ -654,7 +670,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     if (toPK.formeNumber > 0) {
                         toPK = toPK.baseForme;
                     }
-                    writeWord(evoEntry, evosWritten * 8, evo.type.toIndex(5));
+                    writeWord(evoEntry, evosWritten * 8, evo.type.toIndex(7));
                     writeWord(evoEntry, evosWritten * 8 + 2, evo.type.usesLevel() ? 0 : evo.extraInfo);
                     writeWord(evoEntry, evosWritten * 8 + 4, toPK.number);
                     evoEntry[evosWritten * 8 + 6] = (byte)evo.forme;
@@ -734,7 +750,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     @Override
     public Pokemon getAltFormeOfPokemon(Pokemon pk, int forme) {
         int pokeNum = absolutePokeNumByBaseForme.getOrDefault(pk.number,dummyAbsolutePokeNums).getOrDefault(forme,0);
-        return pokeNum != 0 ? pokes[pokeNum] : pk;
+        return pokeNum != 0 && !pokes[pokeNum].actuallyCosmetic ? pokes[pokeNum] : pk;
     }
 
     @Override
@@ -1402,10 +1418,121 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public List<TotemPokemon> getTotemPokemon() {
+        List<TotemPokemon> totems = new ArrayList<>();
+        try {
+            GARCArchive staticGarc = readGARC(romEntry.getString("StaticPokemon"), true);
+            List<Integer> totemIndices =
+                    Arrays.stream(romEntry.arrayEntries.get("TotemPokemonIndices")).boxed().collect(Collectors.toList());
+
+            // Static encounters
+            byte[] staticEncountersFile = staticGarc.files.get(1).get(0);
+            for (int i: totemIndices) {
+                int offset = i * 0x38;
+                TotemPokemon totem = new TotemPokemon();
+                int species = FileFunctions.read2ByteInt(staticEncountersFile, offset);
+                Pokemon pokemon = pokes[species];
+                int forme = staticEncountersFile[offset + 2];
+                if (forme > pokemon.cosmeticForms && forme != 30 && forme != 31) {
+                    int speciesWithForme = absolutePokeNumByBaseForme
+                            .getOrDefault(species, dummyAbsolutePokeNums)
+                            .getOrDefault(forme, 0);
+                    pokemon = pokes[speciesWithForme];
+                }
+                totem.pkmn = pokemon;
+                totem.forme = forme;
+                totem.formeSuffix = Gen7Constants.getFormeSuffixByBaseForme(species, forme);
+                totem.level = staticEncountersFile[offset + 3];
+                int heldItem = FileFunctions.read2ByteInt(staticEncountersFile, offset + 4);
+                if (heldItem == 0xFFFF) {
+                    heldItem = 0;
+                }
+                totem.heldItem = heldItem;
+                totem.aura = new Aura(staticEncountersFile[offset + 0x25]);
+                int allies = staticEncountersFile[offset + 0x27];
+                for (int j = 0; j < allies; j++) {
+                    int allyIndex = (staticEncountersFile[offset + 0x28 + 4*j] - 1) & 0xFF;
+                    totem.allies.put(allyIndex,readStaticEncounter(staticEncountersFile, allyIndex * 0x38));
+                }
+                totems.add(totem);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+        return totems;
+    }
+
+    @Override
+    public void setTotemPokemon(List<TotemPokemon> totemPokemon) {
+        try {
+            GARCArchive staticGarc = readGARC(romEntry.getString("StaticPokemon"), true);
+            List<Integer> totemIndices =
+                    Arrays.stream(romEntry.arrayEntries.get("TotemPokemonIndices")).boxed().collect(Collectors.toList());
+            Iterator<TotemPokemon> totemIter = totemPokemon.iterator();
+
+            // Static encounters
+            byte[] staticEncountersFile = staticGarc.files.get(1).get(0);
+            for (int i: totemIndices) {
+                int offset = i * 0x38;
+                TotemPokemon totem = totemIter.next();
+                if (totem.pkmn.formeNumber > 0) {
+                    totem.forme = totem.pkmn.formeNumber;
+                    totem.pkmn = totem.pkmn.baseForme;
+                }
+                writeWord(staticEncountersFile, offset, totem.pkmn.number);
+                staticEncountersFile[offset + 2] = (byte) totem.forme;
+                staticEncountersFile[offset + 3] = (byte) totem.level;
+                if (totem.heldItem == 0) {
+                    writeWord(staticEncountersFile, offset + 4, -1);
+                } else {
+                    writeWord(staticEncountersFile, offset + 4, totem.heldItem);
+                }
+                if (totem.resetMoves) {
+                    writeWord(staticEncountersFile, offset + 12, 0);
+                    writeWord(staticEncountersFile, offset + 14, 0);
+                    writeWord(staticEncountersFile, offset + 16, 0);
+                    writeWord(staticEncountersFile, offset + 18, 0);
+                }
+                staticEncountersFile[offset + 0x25] = totem.aura.toByte();
+                for (Integer allyIndex: totem.allies.keySet()) {
+                    offset = allyIndex * 0x38;
+                    StaticEncounter ally = totem.allies.get(allyIndex);
+                    if (ally.pkmn.formeNumber > 0) {
+                        ally.forme = ally.pkmn.formeNumber;
+                        ally.pkmn = ally.pkmn.baseForme;
+                    }
+                    writeWord(staticEncountersFile, offset, ally.pkmn.number);
+                    staticEncountersFile[offset + 2] = (byte) ally.forme;
+                    staticEncountersFile[offset + 3] = (byte) ally.level;
+                    if (ally.heldItem == 0) {
+                        writeWord(staticEncountersFile, offset + 4, -1);
+                    } else {
+                        writeWord(staticEncountersFile, offset + 4, ally.heldItem);
+                    }
+                    if (ally.resetMoves) {
+                        writeWord(staticEncountersFile, offset + 12, 0);
+                        writeWord(staticEncountersFile, offset + 14, 0);
+                        writeWord(staticEncountersFile, offset + 16, 0);
+                        writeWord(staticEncountersFile, offset + 18, 0);
+                    }
+                }
+            }
+
+            writeGARC(romEntry.getString("StaticPokemon"), staticGarc);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+
+    }
+
+    @Override
     public List<StaticEncounter> getStaticPokemon() {
         List<StaticEncounter> statics = new ArrayList<>();
         try {
             GARCArchive staticGarc = readGARC(romEntry.getString("StaticPokemon"), true);
+            List<Integer> skipIndices =
+                    Arrays.stream(romEntry.arrayEntries.get("TotemPokemonIndices")).boxed().collect(Collectors.toList());
+            skipIndices.addAll(Arrays.stream(romEntry.arrayEntries.get("AllyPokemonIndices")).boxed().collect(Collectors.toList()));
 
             // Gifts, start at 3 to skip the starters
             byte[] giftsFile = staticGarc.files.get(0).get(0);
@@ -1434,27 +1561,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             byte[] staticEncountersFile = staticGarc.files.get(1).get(0);
             int numberOfStaticEncounters = staticEncountersFile.length / 0x38;
             for (int i = 0; i < numberOfStaticEncounters; i++) {
+                if (skipIndices.contains(i)) continue;
                 int offset = i * 0x38;
-                StaticEncounter se = new StaticEncounter();
-                int species = FileFunctions.read2ByteInt(staticEncountersFile, offset);
-                Pokemon pokemon = pokes[species];
-                int forme = staticEncountersFile[offset + 2];
-                if (forme > pokemon.cosmeticForms && forme != 30 && forme != 31) {
-                    int speciesWithForme = absolutePokeNumByBaseForme
-                            .getOrDefault(species, dummyAbsolutePokeNums)
-                            .getOrDefault(forme, 0);
-                    pokemon = pokes[speciesWithForme];
-                }
-                se.pkmn = pokemon;
-                se.forme = forme;
-                se.formeSuffix = Gen7Constants.getFormeSuffixByBaseForme(species, forme);
-                se.level = staticEncountersFile[offset + 3];
-                int heldItem = FileFunctions.read2ByteInt(staticEncountersFile, offset + 4);
-                if (heldItem == 0xFFFF) {
-                    heldItem = 0;
-                }
-                se.heldItem = heldItem;
-                // TODO: Aura? It's a byte at offset + 0x25
+                StaticEncounter se = readStaticEncounter(staticEncountersFile, offset);
                 statics.add(se);
             }
         } catch (IOException e) {
@@ -1463,10 +1572,36 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         return statics;
     }
 
+    private StaticEncounter readStaticEncounter(byte[] staticEncountersFile, int offset) {
+        StaticEncounter se = new StaticEncounter();
+        int species = FileFunctions.read2ByteInt(staticEncountersFile, offset);
+        Pokemon pokemon = pokes[species];
+        int forme = staticEncountersFile[offset + 2];
+        if (forme > pokemon.cosmeticForms && forme != 30 && forme != 31) {
+            int speciesWithForme = absolutePokeNumByBaseForme
+                    .getOrDefault(species, dummyAbsolutePokeNums)
+                    .getOrDefault(forme, 0);
+            pokemon = pokes[speciesWithForme];
+        }
+        se.pkmn = pokemon;
+        se.forme = forme;
+        se.formeSuffix = Gen7Constants.getFormeSuffixByBaseForme(species, forme);
+        se.level = staticEncountersFile[offset + 3];
+        int heldItem = FileFunctions.read2ByteInt(staticEncountersFile, offset + 4);
+        if (heldItem == 0xFFFF) {
+            heldItem = 0;
+        }
+        se.heldItem = heldItem;
+        return se;
+    }
+
     @Override
     public boolean setStaticPokemon(List<StaticEncounter> staticPokemon) {
         try {
             GARCArchive staticGarc = readGARC(romEntry.getString("StaticPokemon"), true);
+            List<Integer> skipIndices =
+                    Arrays.stream(romEntry.arrayEntries.get("TotemPokemonIndices")).boxed().collect(Collectors.toList());
+            skipIndices.addAll(Arrays.stream(romEntry.arrayEntries.get("AllyPokemonIndices")).boxed().collect(Collectors.toList()));
             Iterator<StaticEncounter> staticIter = staticPokemon.iterator();
 
             // Gifts, start at 3 to skip the starters
@@ -1485,6 +1620,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             byte[] staticEncountersFile = staticGarc.files.get(1).get(0);
             int numberOfStaticEncounters = staticEncountersFile.length / 0x38;
             for (int i = 0; i < numberOfStaticEncounters; i++) {
+                if (skipIndices.contains(i)) continue;
                 int offset = i * 0x38;
                 StaticEncounter se = staticIter.next();
                 writeWord(staticEncountersFile, offset, se.pkmn.number);
@@ -1494,6 +1630,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     writeWord(staticEncountersFile, offset + 4, -1);
                 } else {
                     writeWord(staticEncountersFile, offset + 4, se.heldItem);
+                }
+                if (se.resetMoves) {
+                    writeWord(staticEncountersFile, offset + 12, 0);
+                    writeWord(staticEncountersFile, offset + 14, 0);
+                    writeWord(staticEncountersFile, offset + 16, 0);
+                    writeWord(staticEncountersFile, offset + 18, 0);
                 }
             }
 
@@ -2035,6 +2177,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     @Override
     public List<Integer> getMainGameShops() {
         return new ArrayList<>();
+    }
+
+    @Override
+    public int randomHeldItem() {
+        return Gen7Constants.validConsumableHeldItems.get(this.random.nextInt(Gen7Constants.validConsumableHeldItems.size()));
     }
 
     @Override

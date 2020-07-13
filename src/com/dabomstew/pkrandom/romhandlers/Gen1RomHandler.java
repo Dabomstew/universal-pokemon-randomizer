@@ -1264,6 +1264,16 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public List<TotemPokemon> getTotemPokemon() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public void setTotemPokemon(List<TotemPokemon> totemPokemon) {
+
+    }
+
+    @Override
     public List<Integer> getTMMoves() {
         List<Integer> tms = new ArrayList<>();
         int offset = romEntry.getValue("TMMovesOffset");
@@ -1481,6 +1491,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     @Override
     public List<Integer> getMainGameShops() {
         return new ArrayList<>();
+    }
+
+    @Override
+    public int randomHeldItem() {
+        return 0;
     }
 
     private List<String> getTrainerClassesForText() {

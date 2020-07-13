@@ -258,6 +258,16 @@ public interface RomHandler {
 
     List<Pokemon> bannedForStaticPokemon();
 
+    // Randomizer: Totem Pokemon
+
+    List<TotemPokemon> getTotemPokemon();
+
+    void setTotemPokemon(List<TotemPokemon> totemPokemon);
+
+    void randomizeTotemPokemon(boolean randomizeTotem, boolean similarStrengthTotem, boolean randomizeAllies,
+                               boolean similarStrengthAllies, boolean randomizeAuras, boolean similarStrengthAuras,
+                               boolean randomizeHeldItems, int levelModifier, boolean allowAltFormes);
+
     // Randomizer: TMs/HMs
 
     List<Integer> getTMMoves();
@@ -443,6 +453,8 @@ public interface RomHandler {
     void setShopPrices();
 
     List<Integer> getMainGameShops();
+
+    int randomHeldItem();
 
     // stats stuff
     void minimumCatchRate(int rateNonLegendary, int rateLegendary);

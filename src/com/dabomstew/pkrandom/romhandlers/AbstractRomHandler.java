@@ -2727,6 +2727,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     newStatic.pkmn = newPK;
                     setFormeForStaticEncounter(newStatic, newPK);
                     newStatic.level = old.level;
+                    newStatic.resetMoves = true;
 
                     if (legendariesLeft.size() == 0) {
                         legendariesLeft.addAll(onlyLegendaryList);
@@ -2749,6 +2750,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                     newStatic.pkmn = newPK;
                     setFormeForStaticEncounter(newStatic, newPK);
                     newStatic.level = old.level;
+                    newStatic.resetMoves = true;
+
                     if (nonlegsLeft.size() == 0) {
                         nonlegsLeft.addAll(noLegendaryList);
                         if (allowAltFormes) {
@@ -2795,6 +2798,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     newStatic.pkmn = newPK;
                     setFormeForStaticEncounter(newStatic, newPK);
                     newStatic.level = old.level;
+                    newStatic.resetMoves = true;
                 } else {
 
                     if ((oldPK.number == 638 || oldPK.number == 639 || oldPK.number == 640) && limitMusketeers) {
@@ -2846,6 +2850,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     newStatic.pkmn = newPK;
                     setFormeForStaticEncounter(newStatic, newPK);
                     newStatic.level = old.level;
+                    newStatic.resetMoves = true;
                 }
 
                 if (pokemonLeft.size() == 0) {
@@ -2881,6 +2886,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     newStatic.pkmn = newPK;
                     setFormeForStaticEncounter(newStatic, newPK);
                     newStatic.level = old.level;
+                    newStatic.resetMoves = true;
                 }
                 if (pokemonLeft.size() == 0) {
                     pokemonLeft.addAll(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
@@ -3956,7 +3962,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (picked.formeNumber > 0) {
                         newEvo.forme = picked.formeNumber;
                         newEvo.formeSuffix = picked.formeSuffix;
-                        newEvo.to = picked.baseForme;
                         checkCosmetics = false;
                     }
                     if (checkCosmetics && newEvo.to.cosmeticForms > 0) {
@@ -4908,6 +4913,131 @@ public abstract class AbstractRomHandler implements RomHandler {
             expandRounds++;
         }
         return canPick.get(this.random.nextInt(canPick.size()));
+    }
+
+    @Override
+    public void randomizeTotemPokemon(boolean randomizeTotem, boolean similarStrengthTotem, boolean randomizeAllies,
+                                      boolean similarStrengthAllies, boolean randomizeAuras,
+                                      boolean similarStrengthAuras, boolean randomizeHeldItems, int levelModifier,
+                                      boolean allowAltFormes) {
+        checkPokemonRestrictions();
+        List<TotemPokemon> currentTotemPokemon = this.getTotemPokemon();
+        List<TotemPokemon> replacements = new ArrayList<>();
+        List<Pokemon> banned = this.bannedForStaticPokemon();
+        List<Pokemon> listInclFormesExclCosmetics =
+                mainPokemonListInclFormes
+                        .stream()
+                        .filter(pk -> !pk.actuallyCosmetic)
+                        .collect(Collectors.toList());
+        List<Pokemon> pokemonLeft = new ArrayList<>(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
+        pokemonLeft.removeAll(banned);
+        for (TotemPokemon old : currentTotemPokemon) {
+            TotemPokemon newTotem = new TotemPokemon();
+            newTotem.heldItem = old.heldItem;
+            if (randomizeTotem) {
+                Pokemon newPK;
+                Pokemon oldPK = old.pkmn;
+                if (old.forme > 0) {
+                    oldPK = getAltFormeOfPokemon(oldPK, old.forme);
+                }
+
+                if (similarStrengthTotem) {
+                    newPK = pickStaticPowerLvlReplacement(
+                            pokemonLeft,
+                            oldPK,
+                            true,
+                            replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
+                            false);
+                } else {
+                    newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
+                }
+
+                pokemonLeft.remove(newPK);
+                newTotem.pkmn = newPK;
+                setFormeForStaticEncounter(newTotem, newPK);
+                newTotem.resetMoves = true;
+                newTotem.level = old.level;
+
+                if (levelModifier != 0) {
+                    newTotem.level = Math.min(100, (int) Math.round(newTotem.level * (1 + levelModifier / 100.0)));
+                }
+                if (pokemonLeft.size() == 0) {
+                    pokemonLeft.addAll(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
+                    pokemonLeft.removeAll(banned);
+                }
+            } else {
+                newTotem.pkmn = old.pkmn;
+                newTotem.level = old.level;
+                if (levelModifier != 0) {
+                    newTotem.level = Math.min(100, (int) Math.round(newTotem.level * (1 + levelModifier / 100.0)));
+                }
+            }
+
+            if (randomizeAllies) {
+                for (Integer oldAllyIndex: old.allies.keySet()) {
+                    StaticEncounter oldAlly = old.allies.get(oldAllyIndex);
+                    StaticEncounter newAlly = new StaticEncounter();
+                    Pokemon newAllyPK;
+                    Pokemon oldAllyPK = oldAlly.pkmn;
+                    if (oldAlly.forme > 0) {
+                        oldAllyPK = getAltFormeOfPokemon(oldAllyPK, oldAlly.forme);
+                    }
+                    if (similarStrengthAllies) {
+                        newAllyPK = pickStaticPowerLvlReplacement(
+                                pokemonLeft,
+                                oldAllyPK,
+                                true,
+                                replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
+                                false);
+                    } else {
+                        newAllyPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
+                    }
+
+                    pokemonLeft.remove(newAllyPK);
+                    newAlly.pkmn = newAllyPK;
+                    setFormeForStaticEncounter(newAlly, newAllyPK);
+                    newAlly.resetMoves = true;
+                    newAlly.level = oldAlly.level;
+                    if (levelModifier != 0) {
+                        newAlly.level = Math.min(100, (int) Math.round(newAlly.level * (1 + levelModifier / 100.0)));
+                    }
+
+                    newTotem.allies.put(oldAllyIndex,newAlly);
+                    if (pokemonLeft.size() == 0) {
+                        pokemonLeft.addAll(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
+                        pokemonLeft.removeAll(banned);
+                    }
+                }
+            } else {
+                newTotem.allies = old.allies;
+                for (StaticEncounter ally: newTotem.allies.values()) {
+                    if (levelModifier != 0) {
+                        ally.level = Math.min(100, (int) Math.round(ally.level * (1 + levelModifier / 100.0)));
+                    }
+                }
+            }
+
+            if (randomizeAuras) {
+                if (similarStrengthAuras) {
+                    newTotem.aura = Aura.randomAuraSimilarStrength(this.random, old.aura);
+                } else {
+                    newTotem.aura = Aura.randomAura(this.random);
+                }
+            } else {
+                newTotem.aura = old.aura;
+            }
+
+            if (randomizeHeldItems) {
+                if (old.heldItem != 0) {
+                    newTotem.heldItem = randomHeldItem();
+                }
+            }
+
+            replacements.add(newTotem);
+        }
+
+        // Save
+        this.setTotemPokemon(replacements);
     }
 
     /* Helper methods used by subclasses and/or this class */

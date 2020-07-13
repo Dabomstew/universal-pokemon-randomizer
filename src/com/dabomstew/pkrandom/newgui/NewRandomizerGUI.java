@@ -10,6 +10,8 @@ import com.dabomstew.pkrandom.romhandlers.*;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -219,6 +221,22 @@ public class NewRandomizerGUI {
     private JCheckBox peAllowAltFormesCheckBox;
     private JCheckBox miscSOSBattlesCheckBox;
     private JCheckBox tpRandomShinyTrainerPokemonCheckBox;
+    private JRadioButton totpUnchangedRadioButton;
+    private JRadioButton totpRandomRadioButton;
+    private JRadioButton totpRandomSimilarStrengthRadioButton;
+    private JRadioButton totpAllyUnchangedRadioButton;
+    private JRadioButton totpAllyRandomRadioButton;
+    private JRadioButton totpAllyRandomSimilarStrengthRadioButton;
+    private JPanel totpAllyPanel;
+    private JPanel totpAuraPanel;
+    private JRadioButton totpAuraUnchangedRadioButton;
+    private JRadioButton totpAuraRandomRadioButton;
+    private JRadioButton totpAuraRandomSameStrengthRadioButton;
+    private JCheckBox totpPercentageLevelModifierCheckBox;
+    private JSlider totpPercentageLevelModifierSlider;
+    private JCheckBox totpRandomizeHeldItemsCheckBox;
+    private JCheckBox totpAllowAltFormesCheckBox;
+    private JPanel totpPanel;
 
     private static JFrame frame;
 
@@ -361,6 +379,13 @@ public class NewRandomizerGUI {
         tpBossTrainersCheckBox.addActionListener(e -> enableOrDisableSubControls());
         tpImportantTrainersCheckBox.addActionListener(e -> enableOrDisableSubControls());
         tpRegularTrainersCheckBox.addActionListener(e -> enableOrDisableSubControls());
+        totpUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        totpRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        totpRandomSimilarStrengthRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        totpAllyUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        totpAllyRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        totpAllyRandomSimilarStrengthRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        totpPercentageLevelModifierCheckBox.addActionListener(e -> enableOrDisableSubControls());
     }
 
     private void initFileChooserDirectories() {
@@ -959,6 +984,20 @@ public class NewRandomizerGUI {
         tpRegularTrainersSpinner.setValue(settings.getAdditionalRegularTrainerPokemon() > 0 ? settings.getAdditionalRegularTrainerPokemon() : 1);
         tpRandomShinyTrainerPokemonCheckBox.setSelected(settings.isShinyChance());
 
+        totpUnchangedRadioButton.setSelected(settings.getTotemPokemonMod() == Settings.TotemPokemonMod.UNCHANGED);
+        totpRandomRadioButton.setSelected(settings.getTotemPokemonMod() == Settings.TotemPokemonMod.RANDOM);
+        totpRandomSimilarStrengthRadioButton.setSelected(settings.getTotemPokemonMod() == Settings.TotemPokemonMod.SIMILAR_STRENGTH);
+        totpAllyUnchangedRadioButton.setSelected(settings.getAllyPokemonMod() == Settings.AllyPokemonMod.UNCHANGED);
+        totpAllyRandomRadioButton.setSelected(settings.getAllyPokemonMod() == Settings.AllyPokemonMod.RANDOM);
+        totpAllyRandomSimilarStrengthRadioButton.setSelected(settings.getAllyPokemonMod() == Settings.AllyPokemonMod.SIMILAR_STRENGTH);
+        totpAuraUnchangedRadioButton.setSelected(settings.getAuraMod() == Settings.AuraMod.UNCHANGED);
+        totpAuraRandomRadioButton.setSelected(settings.getAuraMod() == Settings.AuraMod.RANDOM);
+        totpAuraRandomSameStrengthRadioButton.setSelected(settings.getAuraMod() == Settings.AuraMod.SAME_STRENGTH);
+        totpRandomizeHeldItemsCheckBox.setSelected(settings.isRandomizeTotemHeldItems());
+        totpAllowAltFormesCheckBox.setSelected(settings.isAllowTotemAltFormes());
+        totpPercentageLevelModifierCheckBox.setSelected(settings.isTotemLevelsModified());
+        totpPercentageLevelModifierSlider.setValue(settings.getTotemLevelModifier());
+
         wpARCatchEmAllModeRadioButton
                 .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL);
         wpArea1To1RadioButton.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.AREA_MAPPING);
@@ -1150,6 +1189,14 @@ public class NewRandomizerGUI {
         settings.setAdditionalImportantTrainerPokemon(tpImportantTrainersCheckBox.isVisible() && tpImportantTrainersCheckBox.isSelected() ? (int)tpImportantTrainersSpinner.getValue() : 0);
         settings.setAdditionalRegularTrainerPokemon(tpRegularTrainersCheckBox.isVisible() && tpRegularTrainersCheckBox.isSelected() ? (int)tpRegularTrainersSpinner.getValue() : 0);
         settings.setShinyChance(tpRandomShinyTrainerPokemonCheckBox.isVisible() && tpRandomShinyTrainerPokemonCheckBox.isSelected());
+
+        settings.setTotemPokemonMod(totpUnchangedRadioButton.isSelected(), totpRandomRadioButton.isSelected(), totpRandomSimilarStrengthRadioButton.isSelected());
+        settings.setAllyPokemonMod(totpAllyUnchangedRadioButton.isSelected(), totpAllyRandomRadioButton.isSelected(), totpAllyRandomSimilarStrengthRadioButton.isSelected());
+        settings.setAuraMod(totpAuraUnchangedRadioButton.isSelected(), totpAuraRandomRadioButton.isSelected(), totpAuraRandomSameStrengthRadioButton.isSelected());
+        settings.setRandomizeTotemHeldItems(totpRandomizeHeldItemsCheckBox.isSelected());
+        settings.setAllowTotemAltFormes(totpAllowAltFormesCheckBox.isSelected());
+        settings.setTotemLevelsModified(totpPercentageLevelModifierCheckBox.isSelected());
+        settings.setTotemLevelModifier(totpPercentageLevelModifierSlider.getValue());
 
         settings.setWildPokemonMod(wpUnchangedRadioButton.isSelected(), wpRandomRadioButton.isSelected(), wpArea1To1RadioButton.isSelected(),
                 wpGlobal1To1RadioButton.isSelected());
@@ -1638,6 +1685,48 @@ public class NewRandomizerGUI {
         tpAdditionalPokemonForLabel.setVisible(true);
         tpRandomShinyTrainerPokemonCheckBox.setVisible(true);
         tpRandomShinyTrainerPokemonCheckBox.setEnabled(false);
+        totpPanel.setVisible(true);
+        totpAllyPanel.setVisible(true);
+        totpAuraPanel.setVisible(true);
+        totpUnchangedRadioButton.setVisible(true);
+        totpUnchangedRadioButton.setEnabled(false);
+        totpUnchangedRadioButton.setSelected(true);
+        totpRandomRadioButton.setVisible(true);
+        totpRandomRadioButton.setEnabled(false);
+        totpRandomRadioButton.setSelected(false);
+        totpRandomSimilarStrengthRadioButton.setVisible(true);
+        totpRandomSimilarStrengthRadioButton.setEnabled(false);
+        totpRandomSimilarStrengthRadioButton.setSelected(false);
+        totpAllyUnchangedRadioButton.setVisible(true);
+        totpAllyUnchangedRadioButton.setEnabled(false);
+        totpAllyUnchangedRadioButton.setSelected(true);
+        totpAllyRandomRadioButton.setVisible(true);
+        totpAllyRandomRadioButton.setEnabled(false);
+        totpAllyRandomRadioButton.setSelected(false);
+        totpAllyRandomSimilarStrengthRadioButton.setVisible(true);
+        totpAllyRandomSimilarStrengthRadioButton.setEnabled(false);
+        totpAllyRandomSimilarStrengthRadioButton.setSelected(false);
+        totpAuraUnchangedRadioButton.setVisible(true);
+        totpAuraUnchangedRadioButton.setEnabled(false);
+        totpAuraUnchangedRadioButton.setSelected(true);
+        totpAuraRandomRadioButton.setVisible(true);
+        totpAuraRandomRadioButton.setEnabled(false);
+        totpAuraRandomRadioButton.setSelected(false);
+        totpAuraRandomSameStrengthRadioButton.setVisible(true);
+        totpAuraRandomSameStrengthRadioButton.setEnabled(false);
+        totpAuraRandomSameStrengthRadioButton.setSelected(false);
+        totpPercentageLevelModifierCheckBox.setVisible(true);
+        totpPercentageLevelModifierCheckBox.setEnabled(false);
+        totpPercentageLevelModifierCheckBox.setSelected(false);
+        totpPercentageLevelModifierSlider.setVisible(true);
+        totpPercentageLevelModifierSlider.setEnabled(false);
+        totpPercentageLevelModifierSlider.setValue(0);
+        totpRandomizeHeldItemsCheckBox.setVisible(true);
+        totpRandomizeHeldItemsCheckBox.setEnabled(false);
+        totpRandomizeHeldItemsCheckBox.setSelected(false);
+        totpAllowAltFormesCheckBox.setVisible(true);
+        totpAllowAltFormesCheckBox.setEnabled(false);
+        totpAllowAltFormesCheckBox.setSelected(false);
         wpUnchangedRadioButton.setVisible(true);
         wpUnchangedRadioButton.setEnabled(false);
         wpUnchangedRadioButton.setSelected(false);
@@ -2028,6 +2117,28 @@ public class NewRandomizerGUI {
             tpNoEarlyWonderGuardCheckBox.setVisible(pokemonGeneration >= 3);
             tpRandomShinyTrainerPokemonCheckBox.setVisible(pokemonGeneration >= 7);
 
+            totpPanel.setVisible(pokemonGeneration == 7);
+            if (totpPanel.isVisible()) {
+                totpUnchangedRadioButton.setEnabled(true);
+                totpRandomRadioButton.setEnabled(true);
+                totpRandomSimilarStrengthRadioButton.setEnabled(true);
+
+                totpAllyPanel.setVisible(pokemonGeneration == 7);
+                totpAllyUnchangedRadioButton.setEnabled(true);
+                totpAllyRandomRadioButton.setEnabled(true);
+                totpAllyRandomSimilarStrengthRadioButton.setEnabled(true);
+
+                totpAuraPanel.setVisible(pokemonGeneration == 7);
+                totpAuraUnchangedRadioButton.setEnabled(true);
+                totpAuraRandomRadioButton.setEnabled(true);
+                totpAuraRandomSameStrengthRadioButton.setEnabled(true);
+
+                totpRandomizeHeldItemsCheckBox.setEnabled(true);
+                totpAllowAltFormesCheckBox.setEnabled(false);
+                totpPercentageLevelModifierCheckBox.setEnabled(true);
+                totpPercentageLevelModifierSlider.setEnabled(false);
+            }
+
             // Wild Pokemon
             wpUnchangedRadioButton.setEnabled(true);
             wpUnchangedRadioButton.setSelected(true);
@@ -2372,6 +2483,20 @@ public class NewRandomizerGUI {
         } else {
             tpWeightTypesCheckBox.setEnabled(false);
             tpWeightTypesCheckBox.setSelected(false);
+        }
+
+        if (!totpUnchangedRadioButton.isSelected() || !totpAllyUnchangedRadioButton.isSelected()) {
+            totpAllowAltFormesCheckBox.setEnabled(true);
+        } else {
+            totpAllowAltFormesCheckBox.setEnabled(false);
+            totpAllowAltFormesCheckBox.setSelected(false);
+        }
+
+        if (totpPercentageLevelModifierCheckBox.isSelected()) {
+            totpPercentageLevelModifierSlider.setEnabled(true);
+        } else {
+            totpPercentageLevelModifierSlider.setEnabled(false);
+            totpPercentageLevelModifierSlider.setValue(0);
         }
 
         if (wpRandomRadioButton.isSelected()) {

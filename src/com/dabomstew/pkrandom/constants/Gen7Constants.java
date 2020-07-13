@@ -588,6 +588,48 @@ public class Gen7Constants {
         }
     }
 
+    public static List<Integer> validConsumableHeldItems = Arrays.asList(
+            0x95,
+            0x96,
+            0x97,
+            0x98,
+            0x99,
+            0x9A,
+            0x9B,
+            0x9C,
+            0x9D,
+            0x9E,
+            0x9F,
+            0xA0,
+            0xA1,
+            0xA2,
+            0xA3,
+            0xC8,
+            0xC9,
+            0xCA,
+            0xCB,
+            0xCC,
+            0xCD,
+            0xCE,
+            0xCF,
+            0xD0,
+            0xD1,
+            0xD2,
+            0xD3,
+            0xD4,
+            0xD6,
+            0x113,
+            0x21D,
+            0x21E,
+            0x221,
+            0x222,
+            0x27F,
+            0x288,
+            0x289,
+            0x2AF,
+            0x2B0
+    );
+
     public static void tagTrainersSM(List<Trainer> trs) {
 
         tag(trs,"ELITE1", 23, 152, 349); // Hala

@@ -255,8 +255,14 @@ public class SettingsUpdater {
             // double battle mode + boss/important extra pokemon
             insertExtraByte(40, (byte) 0);
 
-            // regular extra pokemon
-            insertExtraByte(41, (byte) 0);
+            // regular extra pokemon + aura mod
+            insertExtraByte(41, (byte) 8);
+
+            // Totem/Ally mod + totem items/alt formes
+            insertExtraByte(42, (byte) 9);
+
+            // totem level modifier
+            insertExtraByte(43, (byte) 50);
         }
 
         // fix checksum

@@ -6,6 +6,7 @@ public class StaticEncounter {
     public String formeSuffix = "";
     public int level;
     public int heldItem;
+    public boolean resetMoves = false;
 
     public StaticEncounter() {
 
@@ -17,7 +18,7 @@ public class StaticEncounter {
 
     @Override
     public String toString() {
-        return pkmn.name + formeSuffix;
+        return pkmn.fullName();
     }
 
     public boolean canMegaEvolve() {

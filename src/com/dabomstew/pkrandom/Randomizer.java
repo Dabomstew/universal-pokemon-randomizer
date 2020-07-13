@@ -388,6 +388,10 @@ public class Randomizer {
         // Static Pokemon
         checkValue = maybeChangeAndLogStaticPokemon(log, romHandler, checkValue);
 
+        if (romHandler.generationOfPokemon() == 7) {
+            checkValue = maybeChangeAndLogTotemPokemon(log, romHandler, checkValue);
+        }
+
         // Wild Pokemon
         if (settings.isUseMinimumCatchRate()) {
             boolean gen5 = romHandler instanceof Gen5RomHandler;
@@ -918,6 +922,53 @@ public class Randomizer {
                 log.println();
             }
         }
+        return checkValue;
+    }
+
+    private int maybeChangeAndLogTotemPokemon(final PrintStream log, final RomHandler romHandler, int checkValue) {
+        if (settings.getTotemPokemonMod() != Settings.TotemPokemonMod.UNCHANGED ||
+                settings.getAllyPokemonMod() != Settings.AllyPokemonMod.UNCHANGED ||
+                settings.getAuraMod() != Settings.AuraMod.UNCHANGED ||
+                settings.isRandomizeTotemHeldItems() ||
+                settings.isWildLevelsModified()) {
+
+            List<TotemPokemon> oldTotems = romHandler.getTotemPokemon();
+            boolean randomizeTotems =
+                    settings.getTotemPokemonMod() == Settings.TotemPokemonMod.RANDOM ||
+                            settings.getTotemPokemonMod() == Settings.TotemPokemonMod.SIMILAR_STRENGTH;
+            boolean randomizeAllies =
+                    settings.getAllyPokemonMod() == Settings.AllyPokemonMod.RANDOM ||
+                            settings.getAllyPokemonMod() == Settings.AllyPokemonMod.SIMILAR_STRENGTH;
+            boolean randomizeAuras =
+                    settings.getAuraMod() == Settings.AuraMod.RANDOM ||
+                            settings.getAuraMod() == Settings.AuraMod.SAME_STRENGTH;
+            romHandler.randomizeTotemPokemon(
+                    randomizeTotems,
+                    settings.getTotemPokemonMod() == Settings.TotemPokemonMod.SIMILAR_STRENGTH,
+                    randomizeAllies,
+                    settings.getAllyPokemonMod() == Settings.AllyPokemonMod.SIMILAR_STRENGTH,
+                    randomizeAuras,
+                    settings.getAuraMod() == Settings.AuraMod.SAME_STRENGTH,
+                    settings.isRandomizeTotemHeldItems(),
+                    settings.isTotemLevelsModified() ? settings.getTotemLevelModifier() : 0,
+                    settings.isAllowTotemAltFormes()
+            );
+            List<TotemPokemon> newTotems = romHandler.getTotemPokemon();
+
+            String[] itemNames = romHandler.getItemNames();
+            log.println("--Totem Pokemon--");
+            for (int i = 0; i < oldTotems.size(); i++) {
+                TotemPokemon oldP = oldTotems.get(i);
+                TotemPokemon newP = newTotems.get(i);
+                checkValue = addToCV(checkValue, newP.pkmn.number);
+                log.println(oldP.pkmn.fullName() + " =>");
+                log.printf(newP.toString(),itemNames[newP.heldItem]);
+            }
+            log.println();
+        } else {
+            log.println("Totem Pokemon: Unchanged." + NEWLINE);
+        }
+
         return checkValue;
     }
 

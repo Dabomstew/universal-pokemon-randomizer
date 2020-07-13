@@ -2397,6 +2397,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    public int randomHeldItem() {
+        return 0;
+    }
+
+    @Override
     public boolean canChangeTrainerText() {
         return true;
     }
@@ -2494,6 +2499,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     @Override
     public boolean hasStaticAltFormes() {
         return false;
+    }
+
+    @Override
+    public List<TotemPokemon> getTotemPokemon() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public void setTotemPokemon(List<TotemPokemon> totemPokemon) {
+
     }
 
     @Override

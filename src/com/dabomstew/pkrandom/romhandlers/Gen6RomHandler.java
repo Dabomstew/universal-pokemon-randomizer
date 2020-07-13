@@ -1961,6 +1961,16 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public List<TotemPokemon> getTotemPokemon() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public void setTotemPokemon(List<TotemPokemon> totemPokemon) {
+
+    }
+
+    @Override
     public void removeTradeEvolutions(boolean changeMoveEvos) {
         Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
         log("--Removing Trade Evolutions--");
@@ -2567,6 +2577,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     @Override
     public List<Integer> getMainGameShops() {
         return Gen6Constants.getMainGameShops(romEntry.romType);
+    }
+
+    @Override
+    public int randomHeldItem() {
+        return 0;
     }
 
     @Override
