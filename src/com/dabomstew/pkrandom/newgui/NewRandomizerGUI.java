@@ -2160,7 +2160,10 @@ public class NewRandomizerGUI {
             tmUnchangedRadioButton.setEnabled(true);
             tmUnchangedRadioButton.setSelected(true);
             tmRandomRadioButton.setEnabled(true);
-            tmFullHMCompatibilityCheckBox.setEnabled(true);
+            tmFullHMCompatibilityCheckBox.setVisible(pokemonGeneration < 7);
+            if (tmFullHMCompatibilityCheckBox.isVisible()) {
+                tmFullHMCompatibilityCheckBox.setEnabled(true);
+            }
 
             thcUnchangedRadioButton.setEnabled(true);
             thcUnchangedRadioButton.setSelected(true);
