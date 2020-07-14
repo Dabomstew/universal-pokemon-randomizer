@@ -28,6 +28,7 @@ import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen7Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
+import com.dabomstew.pkrandom.ctr.BFLIM;
 import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.Mini;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -2186,7 +2187,17 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public BufferedImage getMascotImage() {
-        return null;
+        try {
+            GARCArchive pokespritesGARC = this.readGARC(romEntry.getString("PokemonGraphics"), false);
+            // int pkIndex = this.random.nextInt(pokespritesGARC.files.size() - 2) + 1;
+            int pkIndex = 5;
+
+            byte[] iconBytes = pokespritesGARC.files.get(pkIndex).get(0);
+            BFLIM icon = new BFLIM(iconBytes);
+            return icon.getImage();
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     private class ZoneData {
