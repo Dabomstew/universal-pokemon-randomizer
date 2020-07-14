@@ -2189,9 +2189,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     public BufferedImage getMascotImage() {
         try {
             GARCArchive pokespritesGARC = this.readGARC(romEntry.getString("PokemonGraphics"), false);
-            // int pkIndex = this.random.nextInt(pokespritesGARC.files.size() - 2) + 1;
-            int pkIndex = 5;
-
+            int pkIndex = this.random.nextInt(pokespritesGARC.files.size() - 2) + 1;
             byte[] iconBytes = pokespritesGARC.files.get(pkIndex).get(0);
             BFLIM icon = new BFLIM(iconBytes);
             return icon.getImage();

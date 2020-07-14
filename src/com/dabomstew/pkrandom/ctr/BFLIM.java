@@ -52,13 +52,14 @@ public class BFLIM {
         // Swap width and height, because the image is rendered on its side
         int swappedWidth = height;
         int swappedHeight = width;
-        byte[] decodedImageData = decodeBlock(imageData, swappedWidth, swappedHeight);
+        int[] decodedImageData = decodeBlock(imageData, swappedWidth, swappedHeight);
         int[] colorData = convertToColorData(decodedImageData);
         int[] correctedColorData = rearrangeImage(colorData, width, height);
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                image.setRGB(x, y, correctedColorData[x + (y * this.width)]);
+                int color = correctedColorData[x + (y * this.width)];
+                image.setRGB(x, y, color);
             }
         }
         return image;
@@ -75,8 +76,8 @@ public class BFLIM {
             52, 53, 60, 61, 54, 55, 62, 63
     };
 
-    private byte[] decodeBlock(byte[] data, int width, int height) {
-        byte[] output = new byte[width * height * 4];
+    private int[] decodeBlock(byte[] data, int width, int height) {
+        int[] output = new int[width * height * 4];
         int inputOffset = 0;
         for (int ty = 0; ty < height; ty += 8) {
             for (int tx = 0; tx < width; tx += 8) {
@@ -93,14 +94,14 @@ public class BFLIM {
         return output;
     }
 
-    private int[] convertToColorData(byte[] decodedImageData) {
+    private int[] convertToColorData(int[] decodedImageData) {
         int[] output = new int[decodedImageData.length / 4];
         for (int i = 0; i < decodedImageData.length; i += 4) {
             int a = decodedImageData[i];
-            int r = decodedImageData[i + 1];
+            int b = decodedImageData[i + 1];
             int g = decodedImageData[i + 2];
-            int b = decodedImageData[i + 3];
-            int color = (a << 24) | (r << 16) | (g << 8) | b;
+            int r = decodedImageData[i + 3];
+            int color = (a << 24) | (b << 16) | (g << 8) | r;
             output[i / 4] = color;
         }
         return output;
@@ -120,15 +121,18 @@ public class BFLIM {
         return output;
     }
 
-    private static void decodeRGBA5551(byte[] output, int outputOffset, int value) {
+    private static void decodeRGBA5551(int[] output, int outputOffset, int value) {
         int R = ((value >> 1) & 0x1f) << 3;
         int G = ((value >> 6) & 0x1f) << 3;
         int B = ((value >> 11) & 0x1f) << 3;
-        int A = value & 1;
-        output[outputOffset] = (byte) A;
-        output[outputOffset + 1] = (byte) R;
-        output[outputOffset + 2] = (byte) G;
-        output[outputOffset + 3] = (byte) B;
+        int A = (value & 1) * 0xFF;
+        R = R | (R >> 5);
+        G = G | (G >> 5);
+        B = B | (B >> 5);
+        output[outputOffset] = A;
+        output[outputOffset + 1] = B;
+        output[outputOffset + 2] = G;
+        output[outputOffset + 3] = R;
     }
 
     private class Header {
