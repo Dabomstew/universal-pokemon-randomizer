@@ -65,13 +65,8 @@ public class Gen7Constants {
     public static final String itemPalettesPrefix = "070000000000000000010100";
 
     public static final int tutorsOffset = 0x54DE;
+    public static final String tutorsPrefix = "5F6F6E5F6F6666FF";
     public static final int tutorMoveCount = 67;
-    public static final List<Integer> tutorCompatibilityOrdering = Arrays.asList(450, 343,
-            162, 530, 324, 442, 402, 529, 340, 67, 441, 253, 9, 7, 8, 277, 335, 414, 492,
-            356, 393, 334, 387, 276, 527, 196, 401, 428, 406, 304, 231, 20, 173, 282, 235,
-            257, 272, 215, 366, 143, 220, 202, 409, 264, 351, 352, 380, 388, 180, 495, 270,
-            271, 478, 472, 283, 200, 278, 289, 446, 285, 477, 502, 432, 710, 707, 675, 673
-    );
 
     public static final String[] fastestTextPrefixes = new String[]{"1080BDE80E000500F0412DE9", "34019FE50060A0E3"};
 
