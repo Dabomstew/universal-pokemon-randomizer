@@ -86,7 +86,13 @@ public class BFLIM {
                     int y = (SwizzleLUT[px] - x) >> 3;
                     int outputOffset = (tx + x + ((height - 1 - (ty + y)) * width)) * 4;
                     int value = FileFunctions.read2ByteInt(data, inputOffset);
-                    decodeRGBA5551(output, outputOffset, value);
+                    if (image.format == 7) {
+                        decodeRGBA5551(output, outputOffset, value);
+                    } else if (image.format == 8) {
+                        decodeRGBA4(output, outputOffset, value);
+                    } else {
+                        throw new IllegalArgumentException("Unsupported BFLIM: unsupported image format");
+                    }
                     inputOffset += 2;
                 }
             }
@@ -129,6 +135,20 @@ public class BFLIM {
         R = R | (R >> 5);
         G = G | (G >> 5);
         B = B | (B >> 5);
+        output[outputOffset] = A;
+        output[outputOffset + 1] = B;
+        output[outputOffset + 2] = G;
+        output[outputOffset + 3] = R;
+    }
+
+    private static void decodeRGBA4(int[] output, int outputOffset, int value) {
+        int R = ((value >> 4) & 0xf);
+        int G = ((value >> 8) & 0xf);
+        int B = ((value >> 12) & 0xf);
+        int A = (value & 1) | (value << 4);
+        R = R | (R << 4);
+        G = G | (G << 4);
+        B = B | (B << 4);
         output[outputOffset] = A;
         output[outputOffset + 1] = B;
         output[outputOffset + 2] = G;
