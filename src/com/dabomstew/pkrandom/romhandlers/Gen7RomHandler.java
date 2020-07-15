@@ -201,6 +201,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     private List<MegaEvolution> megaEvolutions;
     private List<AreaData> areaDataList;
     private Move[] moves;
+    private List<Integer> originalMoveTutorList;
     private RomEntry romEntry;
     private byte[] code;
     private List<String> itemNames;
@@ -244,6 +245,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             stringsGarc = readGARC(romEntry.getString("TextStrings"), true);
             storyTextGarc = readGARC(romEntry.getString("StoryText"), true);
             areaDataList = getAreaData();
+            if (romEntry.romType == Gen7Constants.Type_USUM) {
+                originalMoveTutorList = getMoveTutorMoves();
+            }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
@@ -1837,27 +1841,101 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public boolean hasMoveTutors() {
-        return false;
+        return romEntry.romType == Gen7Constants.Type_USUM;
     }
 
     @Override
     public List<Integer> getMoveTutorMoves() {
-        return new ArrayList<>();
+        try {
+            byte[] tutorCRO = readFile(romEntry.getString("ShopsAndTutors"));
+            List<Integer> mtMoves = new ArrayList<>();
+            for (int i = 0; i < Gen7Constants.tutorMoveCount; i++) {
+                int offset = Gen7Constants.tutorsOffset + i * 4;
+                int move = FileFunctions.read2ByteInt(tutorCRO, offset);
+                mtMoves.add(move);
+            }
+            return mtMoves;
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     @Override
     public void setMoveTutorMoves(List<Integer> moves) {
-        // do nothing for now
+        try {
+            byte[] tutorCRO = readFile(romEntry.getString("ShopsAndTutors"));
+            for (int i = 0; i < Gen7Constants.tutorMoveCount; i++) {
+                int offset = Gen7Constants.tutorsOffset + i * 4;
+                FileFunctions.write2ByteInt(tutorCRO, offset, moves.get(i));
+            }
+            writeFile(romEntry.getString("ShopsAndTutors"), tutorCRO);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     @Override
     public Map<Pokemon, boolean[]> getMoveTutorCompatibility() {
-        return new TreeMap<>();
+        Map<Pokemon, boolean[]> compat = new TreeMap<>();
+        int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
+        int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
+        for (int i = 1; i <= pokemonCount + formeCount; i++) {
+            byte[] data;
+            data = pokeGarc.files.get(i).get(0);
+            Pokemon pkmn = pokes[i];
+            boolean[] flags = new boolean[Gen7Constants.tutorMoveCount + 1];
+            for (int j = 0; j < 10; j++) {
+                readByteIntoFlags(data, flags, j * 8 + 1, Gen7Constants.bsMTCompatOffset + j);
+            }
+            boolean[] correctedFlags = convertFlagsToMoveOrder(flags);
+            compat.put(pkmn, correctedFlags);
+        }
+        return compat;
     }
 
     @Override
     public void setMoveTutorCompatibility(Map<Pokemon, boolean[]> compatData) {
-        // do nothing for now
+        if (!hasMoveTutors()) return;
+        int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
+        int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
+        for (int i = 1; i <= pokemonCount + formeCount; i++) {
+            byte[] data;
+            data = pokeGarc.files.get(i).get(0);
+            Pokemon pkmn = pokes[i];
+            boolean[] flags = compatData.get(pkmn);
+            boolean[] correctedFlags = convertFlagsToPersonalOrder(flags);
+            for (int j = 0; j < 10; j++) {
+                data[Gen7Constants.bsMTCompatOffset + j] = getByteFromFlags(correctedFlags, j * 8 + 1);
+            }
+        }
+    }
+
+    // The reason this method needs to exist is because the move tutor moves are ordered one way
+    // in the move tutor CRO but are ordered a completely different way in the compatibility
+    // flags on a Pokemon's personal data. This converts the latter order to the former. The
+    // "Prefer Same Type" setting does not work correctly if we don't do this.
+    private boolean[] convertFlagsToMoveOrder(boolean[] personalOrderCompatibilityFlags) {
+        boolean[] moveOrderCompatibilityFlags = new boolean[personalOrderCompatibilityFlags.length];
+        for (int i = 1; i < moveOrderCompatibilityFlags.length; i++) {
+            int move = originalMoveTutorList.get(i - 1);
+            int index = Gen7Constants.tutorCompatibilityOrdering.indexOf(move) + 1;
+            boolean isCompatible = personalOrderCompatibilityFlags[index];
+            moveOrderCompatibilityFlags[i] = isCompatible;
+        }
+        return moveOrderCompatibilityFlags;
+    }
+
+    // Likewise, this method performs the opposite conversion of the above one; it converts from
+    // the move tutor CRO order to the order expected in a Pokemon's personal data.
+    private boolean[] convertFlagsToPersonalOrder(boolean[] moveOrderCompatibilityFlags) {
+        boolean[] personalOrderCompatibilityFlags = new boolean[moveOrderCompatibilityFlags.length];
+        for (int i = 1; i < personalOrderCompatibilityFlags.length; i++) {
+            int move = originalMoveTutorList.get(i - 1);
+            int index = Gen7Constants.tutorCompatibilityOrdering.indexOf(move) + 1;
+            boolean isCompatible = moveOrderCompatibilityFlags[i];
+            personalOrderCompatibilityFlags[index] = isCompatible;
+        }
+        return personalOrderCompatibilityFlags;
     }
 
     @Override
