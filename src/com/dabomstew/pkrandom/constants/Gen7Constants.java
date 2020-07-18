@@ -510,9 +510,9 @@ public class Gen7Constants {
         allowedItemsSM.banSingles(651, 689);
         allowedItemsSM.banRange(695,4);
         allowedItemsSM.banRange(700,4);
-        allowedItemsSM.tmRange(705,3);
-        allowedItemsSM.tmRange(712,3);
-        allowedItemsSM.tmRange(716,2);
+        allowedItemsSM.banRange(705,3);
+        allowedItemsSM.banRange(712,3);
+        allowedItemsSM.banRange(716,2);
 
         // TMs (Gen 6)
         allowedItemsSM.tmRange(690,5);
@@ -552,7 +552,7 @@ public class Gen7Constants {
         // ban specific pokemon hold items, berries, apricorns, mail
         nonBadItems = allowedItemsSM.copy();
 
-        nonBadItems.banSingles(0x6F, 0x70, 0xE1, 0xEC, 0x9B, 0x112, 0x2BB, 0x2C0, 0x34C);
+        nonBadItems.banSingles(0x6F, 0x70, 0xE1, 0xEC, 0x9B, 0x112, 0x23F, 0x2BB, 0x2C0, 0x34C);
         nonBadItems.banRange(0x5F, 4); // mulch
         nonBadItems.banRange(0x87, 2); // orbs
         nonBadItems.banRange(0x89, 12); // mails
@@ -560,6 +560,9 @@ public class Gen7Constants {
         nonBadItems.banRange(0x100, 4); // pokemon specific
         nonBadItems.banRange(0x104, 5); // contest scarves
         nonBadItems.banRange(0x28C,4); // more mulch
+        nonBadItems.banRange(0x290, 30); // Mega Stones, part 1
+        nonBadItems.banRange(0x2F0, 13); // Mega Stones, part 2
+        nonBadItems.banRange(0x2FF, 4); // Mega Stones, part 3
         nonBadItems.banRange(0x388,17); // Memories
 
         regularShopItems = new ArrayList<>();
