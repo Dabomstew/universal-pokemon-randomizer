@@ -642,7 +642,7 @@ public class Gen6Constants {
         // ban specific pokemon hold items, berries, apricorns, mail
         nonBadItems = allowedItemsXY.copy();
 
-        nonBadItems.banSingles(0x6F, 0x70, 0xE1, 0xEC, 0x9B, 0x112, 0x2BB, 0x2C0);
+        nonBadItems.banSingles(0x6F, 0x70, 0xE1, 0xEC, 0x9B, 0x112, 0x23F, 0x2BB, 0x2C0);
         nonBadItems.banRange(0x5F, 4); // mulch
         nonBadItems.banRange(0x87, 2); // orbs
         nonBadItems.banRange(0x89, 12); // mails
