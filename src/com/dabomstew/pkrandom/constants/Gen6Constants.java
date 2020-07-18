@@ -624,9 +624,9 @@ public class Gen6Constants {
         allowedItemsXY.banSingles(651, 689);
         allowedItemsXY.banRange(695,4);
         allowedItemsXY.banRange(700,4);
-        allowedItemsXY.tmRange(705,3);
-        allowedItemsXY.tmRange(712,3);
-        allowedItemsXY.tmRange(716,2);
+        allowedItemsXY.banRange(705,3);
+        allowedItemsXY.banRange(712,3);
+        allowedItemsXY.banRange(716,2);
 
         // TMs (Gen 6)
         allowedItemsXY.tmRange(690,5);
