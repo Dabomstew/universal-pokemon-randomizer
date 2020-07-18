@@ -470,7 +470,7 @@ public class Gen7Constants {
         List<Boolean> list = new ArrayList<>();
 
         for (int i = 0; i < fileCount; i++) {
-            if ((i - 9) % 11 == 0) {
+            if (((i - 9) % 11 == 0) || (i % 11 == 0)) {
                 list.add(true);
             } else {
                 list.add(false);
@@ -633,6 +633,40 @@ public class Gen7Constants {
             0x2AF,
             0x2B0
     );
+
+    private static final List<Integer> requiredFieldTMsSM = Arrays.asList(
+            5, 64, 62, 100, 31, 46, 88, 57, 41, 59, 73, 53, 61, 39, 86, 93, 84, 74, 72, 3, 13, 36, 91, 79, 24, 97, 50,
+            99, 35, 2, 26, 6
+    );
+
+    private static final List<Integer> requiredFieldTMsUSUM = Arrays.asList(
+            5, 64, 23, 100, 79, 24, 31, 46, 88, 41, 59, 32, 53, 61, 39, 86, 62, 80, 74, 73, 72, 3, 84, 13, 36, 91, 55,
+            97, 50, 93, 99, 35, 2, 26, 6
+    );
+
+    public static List<Integer> getRequiredFieldTMs(int romType) {
+        if (romType == Type_SM) {
+            return requiredFieldTMsSM;
+        } else {
+            return requiredFieldTMsUSUM;
+        }
+    }
+
+    private static final List<Integer> duplicateFieldTMsSM = Arrays.asList(
+            19, 32
+    );
+
+    private static final List<Integer> duplicateFieldTMsUSUM = Arrays.asList(
+            21, 30, 36
+    );
+
+    public static List<Integer> getDuplicateFieldTMs(int romType) {
+        if (romType == Type_SM) {
+            return duplicateFieldTMsSM;
+        } else {
+            return duplicateFieldTMsUSUM;
+        }
+    }
 
     public static void tagTrainersSM(List<Trainer> trs) {
 

@@ -589,6 +589,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         saveMoves();
         try {
             writeCode(code);
+            writeGARC(romEntry.getString("WildPokemon"), encounterGarc);
             writeGARC(romEntry.getString("TextStrings"), stringsGarc);
             writeGARC(romEntry.getString("StoryText"), storyTextGarc);
         } catch (IOException e) {
@@ -1116,7 +1117,6 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 encounterGarc.setFile(areaData.fileNumber, newEncounterData);
             }
         }
-        writeGARC(romEntry.getString("WildPokemon"), encounterGarc);
     }
 
     private List<String> createGoodLocationList() {
@@ -2082,29 +2082,188 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         return true;
     }
 
+    private int tmFromIndex(int index) {
+
+        if (index >= Gen7Constants.tmBlockOneOffset
+                && index < Gen7Constants.tmBlockOneOffset + Gen7Constants.tmBlockOneCount) {
+            return index - (Gen7Constants.tmBlockOneOffset - 1);
+        } else if (index >= Gen7Constants.tmBlockTwoOffset
+                && index < Gen7Constants.tmBlockTwoOffset + Gen7Constants.tmBlockTwoCount) {
+            return (index + Gen7Constants.tmBlockOneCount) - (Gen7Constants.tmBlockTwoOffset - 1);
+        } else {
+            return (index + Gen7Constants.tmBlockOneCount + Gen7Constants.tmBlockTwoCount) - (Gen7Constants.tmBlockThreeOffset - 1);
+        }
+    }
+
+    private int indexFromTM(int tm) {
+        if (tm >= 1 && tm <= Gen7Constants.tmBlockOneCount) {
+            return tm + (Gen7Constants.tmBlockOneOffset - 1);
+        } else if (tm > Gen7Constants.tmBlockOneCount && tm <= Gen7Constants.tmBlockOneCount + Gen7Constants.tmBlockTwoCount) {
+            return tm + (Gen7Constants.tmBlockTwoOffset - 1 - Gen7Constants.tmBlockOneCount);
+        } else {
+            return tm + (Gen7Constants.tmBlockThreeOffset - 1 - (Gen7Constants.tmBlockOneCount + Gen7Constants.tmBlockTwoCount));
+        }
+    }
+
     @Override
     public List<Integer> getCurrentFieldTMs() {
-        return new ArrayList<>();
+        List<Integer> fieldItems = this.getFieldItems();
+        List<Integer> fieldTMs = new ArrayList<>();
+
+        ItemList allowedItems = Gen7Constants.getAllowedItems(romEntry.romType);
+        for (int item : fieldItems) {
+            if (allowedItems.isTM(item)) {
+                fieldTMs.add(tmFromIndex(item));
+            }
+        }
+
+        return fieldTMs;
     }
 
     @Override
     public void setFieldTMs(List<Integer> fieldTMs) {
-        // do nothing for now
+        List<Integer> fieldItems = this.getFieldItems();
+        int fiLength = fieldItems.size();
+        Iterator<Integer> iterTMs = fieldTMs.iterator();
+        List<Integer> duplicateFieldTMs = Gen7Constants.getDuplicateFieldTMs(romEntry.romType);
+
+        int placed = 0;
+        int savedTM = 0;
+        ItemList allowedItems = Gen7Constants.getAllowedItems(romEntry.romType);
+        for (int i = 0; i < fiLength; i++) {
+            int oldItem = fieldItems.get(i);
+            if (allowedItems.isTM(oldItem)) {
+                if (savedTM != 0) {
+                    fieldItems.set(i, savedTM);
+                    savedTM = 0;
+                } else {
+                    int newItem = indexFromTM(iterTMs.next());
+                    fieldItems.set(i, newItem);
+                    if (duplicateFieldTMs.contains(placed)) {
+                        savedTM = newItem;
+                    }
+                }
+                placed++;
+            }
+        }
+
+        this.setFieldItems(fieldItems);
     }
 
     @Override
     public List<Integer> getRegularFieldItems() {
-        return new ArrayList<>();
+        List<Integer> fieldItems = this.getFieldItems();
+        List<Integer> fieldRegItems = new ArrayList<>();
+
+        ItemList allowedItems = Gen7Constants.getAllowedItems(romEntry.romType);
+        for (int item : fieldItems) {
+            if (allowedItems.isAllowed(item) && !(allowedItems.isTM(item))) {
+                fieldRegItems.add(item);
+            }
+        }
+
+        return fieldRegItems;
     }
 
     @Override
     public void setRegularFieldItems(List<Integer> items) {
-        // do nothing for now
+        List<Integer> fieldItems = this.getFieldItems();
+        int fiLength = fieldItems.size();
+        Iterator<Integer> iterNewItems = items.iterator();
+
+        ItemList allowedItems = Gen7Constants.getAllowedItems(romEntry.romType);
+        for (int i = 0; i < fiLength; i++) {
+            int oldItem = fieldItems.get(i);
+            if (!(allowedItems.isTM(oldItem)) && allowedItems.isAllowed(oldItem)) {
+                int newItem = iterNewItems.next();
+                fieldItems.set(i, newItem);
+            }
+        }
+
+        this.setFieldItems(fieldItems);
     }
 
     @Override
     public List<Integer> getRequiredFieldTMs() {
-        return new ArrayList<>();
+        return Gen7Constants.getRequiredFieldTMs(romEntry.romType);
+    }
+
+    public List<Integer> getFieldItems() {
+        List<Integer> fieldItems = new ArrayList<>();
+        int numberOfAreas = encounterGarc.files.size() / 11;
+        for (int i = 0; i < numberOfAreas; i++) {
+            byte[][] environmentData = Mini.UnpackMini(encounterGarc.getFile(i * 11),"ED");
+            if (environmentData == null) continue;
+            byte[] itemData = Mini.UnpackMini(environmentData[10],"EI")[0];
+            byte[] berryPileData = Mini.UnpackMini(environmentData[11],"EB")[0];
+
+            // Field/hidden items
+            if (itemData.length > 0) {
+                int itemCount = itemData[0];
+
+                for (int j = 0; j < itemCount; j++) {
+                    fieldItems.add(FileFunctions.read2ByteInt(itemData,(j * 64) + 52));
+                }
+            }
+
+            // Berry piles
+            if (berryPileData.length > 0) {
+                int pileCount = berryPileData[0];
+                for (int j = 0; j < pileCount; j++) {
+                    for (int k = 0; k < 7; k++) {
+                        fieldItems.add(FileFunctions.read2ByteInt(berryPileData,4 + j*68 + 54 + k*2));
+                    }
+                }
+            }
+        }
+        return fieldItems;
+    }
+
+    public void setFieldItems(List<Integer> items) {
+        try {
+            int numberOfAreas = encounterGarc.files.size() / 11;
+            Iterator<Integer> iterItems = items.iterator();
+            for (int i = 0; i < numberOfAreas; i++) {
+                byte[][] environmentData = Mini.UnpackMini(encounterGarc.getFile(i * 11),"ED");
+                if (environmentData == null) continue;
+
+                byte[][] itemDataFull = Mini.UnpackMini(environmentData[10],"EI");
+                byte[] itemData = itemDataFull[0];
+
+                byte[][] berryPileDataFull = Mini.UnpackMini(environmentData[11],"EB");
+                byte[] berryPileData = berryPileDataFull[0];
+
+                // Field/hidden items
+                if (itemData.length > 0) {
+                    int itemCount = itemData[0];
+
+                    for (int j = 0; j < itemCount; j++) {
+                        FileFunctions.write2ByteInt(itemData,(j * 64) + 52,iterItems.next());
+                    }
+                }
+
+                byte[] itemDataPacked = Mini.PackMini(itemDataFull,"EI");
+                environmentData[10] = itemDataPacked;
+
+                // Berry piles
+                if (berryPileData.length > 0) {
+                    int pileCount = berryPileData[0];
+
+                    for (int j = 0; j < pileCount; j++) {
+                        for (int k = 0; k < 7; k++) {
+                            FileFunctions.write2ByteInt(berryPileData,4 + j*68 + 54 + k*2,iterItems.next());
+                        }
+                    }
+                }
+
+                byte[] berryPileDataPacked = Mini.PackMini(berryPileDataFull,"EB");
+                environmentData[11] = berryPileDataPacked;
+
+                encounterGarc.setFile(i * 11, Mini.PackMini(environmentData,"ED"));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

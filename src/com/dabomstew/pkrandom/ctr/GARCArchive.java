@@ -55,6 +55,10 @@ public class GARCArchive {
     }
 
     private boolean readFrames(byte[] data) {
+        if (data.length <= 0) {
+            System.out.println("Empty GARC");
+            return false;
+        }
         ByteBuffer bbuf = ByteBuffer.wrap(data);
         bbuf.order(ByteOrder.LITTLE_ENDIAN);
         // GARC
