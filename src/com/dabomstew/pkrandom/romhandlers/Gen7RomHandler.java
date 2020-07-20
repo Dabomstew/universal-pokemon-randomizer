@@ -2043,7 +2043,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public int internalStringLength(String string) {
-        return 0;
+        return string.length();
     }
 
     @Override
