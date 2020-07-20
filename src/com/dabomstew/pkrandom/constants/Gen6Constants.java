@@ -607,7 +607,7 @@ public class Gen6Constants {
         allowedItemsXY.banRange(428, 76);
         allowedItemsXY.banRange(505,32);
         allowedItemsXY.banRange(621, 18);
-        allowedItemsXY.banSingles(574, 578, 579, 616, 617);
+        allowedItemsXY.banSingles(216, 574, 578, 579, 616, 617);
         // Unknown blank items or version exclusives
         allowedItemsXY.banRange(113, 3);
         allowedItemsXY.banRange(120, 14);
@@ -1092,7 +1092,7 @@ public class Gen6Constants {
             {213, 300}, // BrightPowder
             {214, 100}, // White Herb
             {215, 300}, // Macho Brace
-            {216, 600}, // Exp. Share
+            {216, 0}, // Exp. Share
             {217, 450}, // Quick Claw
             {218, 100}, // Soothe Bell
             {219, 100}, // Mental Herb
@@ -1380,7 +1380,7 @@ public class Gen6Constants {
             {501, 0}, // Photo Album
             {502, 0}, // GB Sounds
             {503, 0}, // Tidal Bell
-            {504, 1500}, // RageCandyBar
+            {504, 15}, // RageCandyBar
             {505, 0}, // Data Card 01
             {506, 0}, // Data Card 02
             {507, 0}, // Data Card 03
