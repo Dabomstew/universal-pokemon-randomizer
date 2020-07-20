@@ -1952,12 +1952,119 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public void removeTradeEvolutions(boolean changeMoveEvos) {
-        // do nothing for now
+        Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
+        log("--Removing Trade Evolutions--");
+        Set<Evolution> extraEvolutions = new HashSet<>();
+        for (Pokemon pkmn : pokes) {
+            if (pkmn != null) {
+                extraEvolutions.clear();
+                for (Evolution evo : pkmn.evolutionsFrom) {
+                    if (changeMoveEvos && evo.type == EvolutionType.LEVEL_WITH_MOVE) {
+                        // read move
+                        int move = evo.extraInfo;
+                        int levelLearntAt = 1;
+                        for (MoveLearnt ml : movesets.get(evo.from.number)) {
+                            if (ml.move == move) {
+                                levelLearntAt = ml.level;
+                                break;
+                            }
+                        }
+                        if (levelLearntAt == 1) {
+                            // override for piloswine
+                            levelLearntAt = 45;
+                        }
+                        // change to pure level evo
+                        evo.type = EvolutionType.LEVEL;
+                        evo.extraInfo = levelLearntAt;
+                        logEvoChangeLevel(evo.from.fullName(), evo.to.fullName(), levelLearntAt);
+                    }
+                    // Pure Trade
+                    if (evo.type == EvolutionType.TRADE) {
+                        // Replace w/ level 37
+                        evo.type = EvolutionType.LEVEL;
+                        evo.extraInfo = 37;
+                        logEvoChangeLevel(evo.from.fullName(), evo.to.fullName(), 37);
+                    }
+                    // Trade w/ Item
+                    if (evo.type == EvolutionType.TRADE_ITEM) {
+                        // Get the current item & evolution
+                        int item = evo.extraInfo;
+                        if (evo.from.number == Gen7Constants.slowpokeIndex) {
+                            // Slowpoke is awkward - he already has a level evo
+                            // So we can't do Level up w/ Held Item for him
+                            // Put Water Stone instead
+                            evo.type = EvolutionType.STONE;
+                            evo.extraInfo = Gen7Constants.waterStoneIndex; // water
+                            // stone
+                            logEvoChangeStone(evo.from.fullName(), evo.to.fullName(), itemNames.get(Gen7Constants.waterStoneIndex));
+                        } else {
+                            logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
+                            // Replace, for this entry, w/
+                            // Level up w/ Held Item at Day
+                            evo.type = EvolutionType.LEVEL_ITEM_DAY;
+                            // now add an extra evo for
+                            // Level up w/ Held Item at Night
+                            Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                    EvolutionType.LEVEL_ITEM_NIGHT, item);
+                            extraEvolutions.add(extraEntry);
+                        }
+                    }
+                    if (evo.type == EvolutionType.TRADE_SPECIAL) {
+                        // This is the karrablast <-> shelmet trade
+                        // Replace it with Level up w/ Other Species in Party
+                        // (22)
+                        // Based on what species we're currently dealing with
+                        evo.type = EvolutionType.LEVEL_WITH_OTHER;
+                        evo.extraInfo = (evo.from.number == Gen7Constants.karrablastIndex ? Gen7Constants.shelmetIndex
+                                : Gen7Constants.karrablastIndex);
+                        logEvoChangeLevelWithPkmn(evo.from.fullName(), evo.to.fullName(),
+                                pokes[(evo.from.number == Gen7Constants.karrablastIndex ? Gen7Constants.shelmetIndex
+                                        : Gen7Constants.karrablastIndex)].fullName());
+                    }
+                    // TBD: Pancham, Sliggoo? Sylveon?
+                }
+
+                pkmn.evolutionsFrom.addAll(extraEvolutions);
+                for (Evolution ev : extraEvolutions) {
+                    ev.to.evolutionsTo.add(ev);
+                }
+            }
+        }
+        logBlankLine();
     }
 
     @Override
-    public void removePartyEvolutions() {
-        // do nothing for now
+    public void makeEvolutionsEasier(boolean wildsRandomized) {
+        for (Pokemon pkmn : pokes) {
+            if (pkmn != null) {
+                for (Evolution evo : pkmn.evolutionsFrom) {
+                    if (wildsRandomized) {
+                        if (evo.type == EvolutionType.LEVEL_WITH_OTHER) {
+                            // Replace w/ level 35
+                            evo.type = EvolutionType.LEVEL;
+                            evo.extraInfo = 35;
+                            log(String.format("%s now evolves into %s at minimum level %d", evo.from.fullName(), evo.to.fullName(),
+                                    evo.extraInfo));
+                        }
+                    }
+                    if (romEntry.romType == Gen7Constants.Type_SM) {
+                        if (evo.type == EvolutionType.LEVEL_SNOWY) {
+                            evo.type = EvolutionType.LEVEL;
+                            evo.extraInfo = 35;
+                            log(String.format("%s now evolves into %s at minimum level %d", evo.from.fullName(), evo.to.fullName(),
+                                    evo.extraInfo));
+                        } else if (evo.type == EvolutionType.LEVEL_ELECTRIFIED_AREA) {
+                            evo.type = EvolutionType.LEVEL;
+                            evo.extraInfo = 35;
+                            log(String.format("%s now evolves into %s at minimum level %d", evo.from.fullName(), evo.to.fullName(),
+                                    evo.extraInfo));
+                        }
+                    }
+                }
+            }
+        }
+        logBlankLine();
+
     }
 
     @Override
@@ -1967,7 +2074,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public boolean canChangeTrainerText() {
-        return false;
+        return true;
     }
 
     @Override
@@ -2023,7 +2130,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getDoublesTrainerClasses() {
-        return new ArrayList<>();
+        int[] doublesClasses = romEntry.arrayEntries.get("DoublesTrainerClasses");
+        List<Integer> doubles = new ArrayList<>();
+        for (int tClass : doublesClasses) {
+            doubles.add(tClass);
+        }
+        return doubles;
     }
 
     @Override

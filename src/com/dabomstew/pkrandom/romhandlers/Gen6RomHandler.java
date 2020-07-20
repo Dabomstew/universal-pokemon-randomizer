@@ -2041,7 +2041,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                                 pokes[(evo.from.number == Gen6Constants.karrablastIndex ? Gen6Constants.shelmetIndex
                                         : Gen6Constants.karrablastIndex)].fullName());
                     }
-                    // TBD: Inkay, Pancham, Sliggoo? Sylveon?
+                    // TBD: Pancham, Sliggoo? Sylveon?
                 }
 
                 pkmn.evolutionsFrom.addAll(extraEvolutions);
@@ -2054,21 +2054,23 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void removePartyEvolutions() {
-        for (Pokemon pkmn : pokes) {
-            if (pkmn != null) {
-                for (Evolution evo : pkmn.evolutionsFrom) {
-                    if (evo.type == EvolutionType.LEVEL_WITH_OTHER) {
-                        // Replace w/ level 35
-                        evo.type = EvolutionType.LEVEL;
-                        evo.extraInfo = 35;
-                        log(String.format("%s now evolves into %s at minimum level %d", evo.from.fullName(), evo.to.fullName(),
-                                evo.extraInfo));
+    public void makeEvolutionsEasier(boolean wildsRandomized) {
+        if (wildsRandomized) {
+            for (Pokemon pkmn : pokes) {
+                if (pkmn != null) {
+                    for (Evolution evo : pkmn.evolutionsFrom) {
+                        if (evo.type == EvolutionType.LEVEL_WITH_OTHER) {
+                            // Replace w/ level 35
+                            evo.type = EvolutionType.LEVEL;
+                            evo.extraInfo = 35;
+                            log(String.format("%s now evolves into %s at minimum level %d", evo.from.fullName(), evo.to.fullName(),
+                                    evo.extraInfo));
+                        }
                     }
                 }
             }
+            logBlankLine();
         }
-        logBlankLine();
     }
 
     @Override

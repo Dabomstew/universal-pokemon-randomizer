@@ -1464,7 +1464,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void removePartyEvolutions() {
+    public void makeEvolutionsEasier(boolean wildsRandomized) {
         // No such thing
     }
 
