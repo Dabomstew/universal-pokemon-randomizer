@@ -64,11 +64,22 @@ public class Gen7Constants {
             tmBlockOneOffset = 328, tmBlockTwoOffset = 618, tmBlockThreeOffset = 690;
     public static final String itemPalettesPrefix = "070000000000000000010100";
 
+    public static final int shopItemsOffsetSM = 0x50A8;
+    public static final int shopItemsOffsetUSUM = 0x50BC;
+
     public static final int tutorsOffset = 0x54DE;
     public static final String tutorsPrefix = "5F6F6E5F6F6666FF";
     public static final int tutorMoveCount = 67;
 
     public static final String[] fastestTextPrefixes = new String[]{"1080BDE80E000500F0412DE9", "34019FE50060A0E3"};
+
+    private static final List<Integer> mainGameShopsSM = Arrays.asList(
+            8, 9, 10, 11, 14, 15, 17, 20, 21, 22, 23
+    );
+
+    private static final List<Integer> mainGameShopsUSUM = Arrays.asList(
+            8, 9, 10, 11, 14, 15, 17, 20, 21, 22, 23, 24, 25, 26, 27
+    );
 
     public static final List<Integer> evolutionItems = Arrays.asList(80,81,82,83,84,85,107,108,109,
             110,221,226,227,233,235,252,321,322,323,324,325,326,327,646,647,849);
@@ -104,6 +115,65 @@ public class Gen7Constants {
             return pokemonCountUSUM;
         }
         return pokemonCountSM;
+    }
+
+    public static List<Integer> getRegularShopItems(int romType) {
+        if (romType == Type_SM) {
+            return regularShopItemsSM;
+        } else {
+            return regularShopItemsUSUM;
+        }
+    }
+
+    public static List<String> getShopNames(int romType) {
+        List<String> shopNames = new ArrayList<>();
+        shopNames.add("Primary 0 Trials");
+        shopNames.add("Primary 1 Trials");
+        shopNames.add("Primary 2 Trials");
+        shopNames.add("Primary 3 Trials");
+        shopNames.add("Primary 4 Trials");
+        shopNames.add("Primary 5 Trials");
+        shopNames.add("Primary 6 Trials");
+        shopNames.add("Primary 7 Trials");
+        shopNames.add("Konikoni City Incenses");
+        shopNames.add("Konikoni City Herbs");
+        shopNames.add("Hau'oli City Secondary");
+        shopNames.add("Route 2 Secondary");
+        shopNames.add("Heahea City Secondary (TMs)");
+        shopNames.add("Royal Avenue Secondary (TMs)");
+        shopNames.add("Route 8 Secondary");
+        shopNames.add("Paniola Town Secondary");
+        shopNames.add("Malie City Secondary (TMs)");
+        shopNames.add("Mount Hokulani Secondary");
+        shopNames.add("Seafolk Village Secondary (TMs)");
+        shopNames.add("Konikoni City TMs");
+        shopNames.add("Konikoni City Stones");
+        shopNames.add("Thrifty Megamart, Center-Left");
+        shopNames.add("Thrifty Megamart, Center-Right");
+        shopNames.add("Thrifty Megamart, Right");
+        if (romType == Type_USUM) {
+            shopNames.add("Route 5 Secondary");
+            shopNames.add("Konikoni City Secondary");
+            shopNames.add("Tapu Village Secondary");
+            shopNames.add("Mount Lanakila Secondary");
+        }
+        return shopNames;
+    }
+
+    public static List<Integer> getMainGameShops(int romType) {
+        if (romType == Type_SM) {
+            return mainGameShopsSM;
+        } else {
+            return mainGameShopsUSUM;
+        }
+    }
+
+    public static int getShopItemsOffset(int romType) {
+        if (romType == Type_SM) {
+            return shopItemsOffsetSM;
+        } else {
+            return shopItemsOffsetUSUM;
+        }
     }
 
     public static int getFormeCount(int romType) {
@@ -481,7 +551,7 @@ public class Gen7Constants {
     }
 
     public static ItemList allowedItemsSM, allowedItemsUSUM, nonBadItems;
-    public static List<Integer> regularShopItems, opShopItems;
+    public static List<Integer> regularShopItemsSM, regularShopItemsUSUM, opShopItems;
 
     static {
         setupAllowedItems();
@@ -565,11 +635,16 @@ public class Gen7Constants {
         nonBadItems.banRange(0x2FF, 4); // Mega Stones, part 3
         nonBadItems.banRange(0x388,17); // Memories
 
-        regularShopItems = new ArrayList<>();
+        regularShopItemsSM = new ArrayList<>();
 
-        regularShopItems.addAll(IntStream.rangeClosed(2,4).boxed().collect(Collectors.toList()));
-        regularShopItems.addAll(IntStream.rangeClosed(0x11,0x1D).boxed().collect(Collectors.toList()));
-        regularShopItems.addAll(IntStream.rangeClosed(0x4C,0x4F).boxed().collect(Collectors.toList()));
+        regularShopItemsSM.addAll(IntStream.rangeClosed(2,4).boxed().collect(Collectors.toList()));
+        regularShopItemsSM.addAll(IntStream.rangeClosed(0x11,0x1D).boxed().collect(Collectors.toList()));
+        regularShopItemsSM.addAll(IntStream.rangeClosed(0x4C,0x4F).boxed().collect(Collectors.toList()));
+        regularShopItemsSM.add(0x5E); // Honey
+        regularShopItemsSM.add(0x34E); // Adrenaline Orb
+
+        regularShopItemsUSUM = new ArrayList<>(regularShopItemsSM);
+        regularShopItemsUSUM.add(0x241); // Poke Toy
 
         opShopItems = new ArrayList<>();
 

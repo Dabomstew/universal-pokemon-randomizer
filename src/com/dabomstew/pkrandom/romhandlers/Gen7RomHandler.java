@@ -204,6 +204,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     private RomEntry romEntry;
     private byte[] code;
     private List<String> itemNames;
+    private List<String> shopNames;
     private List<String> abilityNames;
 
     private GARCArchive pokeGarc, moveGarc, encounterGarc, stringsGarc, storyTextGarc;
@@ -256,6 +257,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
         itemNames = getStrings(false,romEntry.getInt("ItemNamesTextOffset"));
         abilityNames = getStrings(false,romEntry.getInt("AbilityNamesTextOffset"));
+        shopNames = Gen7Constants.getShopNames(romEntry.romType);
     }
 
     private List<String> getStrings(boolean isStoryText, int index) {
@@ -1953,7 +1955,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public boolean hasShopRandomization() {
-        return false;
+        return true;
     }
 
     @Override
@@ -2054,7 +2056,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getRegularShopItems() {
-        return Gen7Constants.regularShopItems;
+        return Gen7Constants.getRegularShopItems(romEntry.romType);
     }
 
     @Override
@@ -2069,7 +2071,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public String[] getShopNames() {
-        return new String[0];
+        return shopNames.toArray(new String[0]);
     }
 
     @Override
@@ -2377,12 +2379,86 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public Map<Integer, List<Integer>> getShopItems() {
-        return new TreeMap<>();
+        int[] tmShops = romEntry.arrayEntries.get("TMShops");
+        int[] regularShops = romEntry.arrayEntries.get("RegularShops");
+        int[] shopItemSizes = romEntry.arrayEntries.get("ShopItemSizes");
+        int shopCount = romEntry.getInt("ShopCount");
+        Map<Integer,List<Integer>> shopItemsMap = new TreeMap<>();
+        try {
+            byte[] shopsCRO = readFile(romEntry.getString("ShopsAndTutors"));
+            int offset = Gen7Constants.getShopItemsOffset(romEntry.romType);
+            for (int i = 0; i < shopCount; i++) {
+                boolean badShop = false;
+                for (int tmShop : tmShops) {
+                    if (i == tmShop) {
+                        badShop = true;
+                        offset += (shopItemSizes[i] * 2);
+                        break;
+                    }
+                }
+                for (int regularShop : regularShops) {
+                    if (badShop) break;
+                    if (i == regularShop) {
+                        badShop = true;
+                        offset += (shopItemSizes[i] * 2);
+                        break;
+                    }
+                }
+                if (!badShop) {
+                    List<Integer> items = new ArrayList<>();
+                    for (int j = 0; j < shopItemSizes[i]; j++) {
+                        items.add(FileFunctions.read2ByteInt(shopsCRO, offset));
+                        offset += 2;
+                    }
+                    shopItemsMap.put(i, items);
+                }
+            }
+            return shopItemsMap;
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     @Override
     public void setShopItems(Map<Integer, List<Integer>> shopItems) {
-        // do nothing for now
+        int[] tmShops = romEntry.arrayEntries.get("TMShops");
+        int[] regularShops = romEntry.arrayEntries.get("RegularShops");
+        int[] shopItemSizes = romEntry.arrayEntries.get("ShopItemSizes");
+        int shopCount = romEntry.getInt("ShopCount");
+        try {
+            byte[] shopsCRO = readFile(romEntry.getString("ShopsAndTutors"));
+            int offset = Gen7Constants.getShopItemsOffset(romEntry.romType);
+            for (int i = 0; i < shopCount; i++) {
+                boolean badShop = false;
+                for (int tmShop : tmShops) {
+                    if (i == tmShop) {
+                        badShop = true;
+                        offset += (shopItemSizes[i] * 2);
+                        break;
+                    }
+                }
+                for (int regularShop : regularShops) {
+                    if (badShop) break;
+                    if (i == regularShop) {
+                        badShop = true;
+                        offset += (shopItemSizes[i] * 2);
+                        break;
+                    }
+                }
+                if (!badShop) {
+                    List<Integer> shopContents = shopItems.get(i);
+                    Iterator<Integer> iterItems = shopContents.iterator();
+                    for (int j = 0; j < shopItemSizes[i]; j++) {
+                        Integer item = iterItems.next();
+                        FileFunctions.write2ByteInt(shopsCRO, offset, item);
+                        offset += 2;
+                    }
+                }
+            }
+            writeFile(romEntry.getString("ShopsAndTutors"), shopsCRO);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     @Override
@@ -2392,7 +2468,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getMainGameShops() {
-        return new ArrayList<>();
+        return Gen7Constants.getMainGameShops(romEntry.romType);
     }
 
     @Override
