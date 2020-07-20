@@ -2470,7 +2470,15 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public void setShopPrices() {
-        // do nothing for now
+        try {
+            GARCArchive itemPriceGarc = this.readGARC(romEntry.getString("ItemData"),true);
+            for (int i = 1; i < itemPriceGarc.files.size(); i++) {
+                writeWord(itemPriceGarc.files.get(i).get(0),0, Gen7Constants.balancedItemPrices.get(i));
+            }
+            writeGARC(romEntry.getString("ItemData"),itemPriceGarc);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     @Override
