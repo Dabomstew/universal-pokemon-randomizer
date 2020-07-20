@@ -569,7 +569,7 @@ public class Gen7Constants {
         allowedItemsSM.banRange(428, 76);
         allowedItemsSM.banRange(505,32);
         allowedItemsSM.banRange(621, 18);
-        allowedItemsSM.banSingles(574, 578, 579, 616, 617);
+        allowedItemsSM.banSingles(216, 574, 578, 579, 616, 617);
         // Unknown blank items or version exclusives
         allowedItemsSM.banRange(113, 3);
         allowedItemsSM.banRange(120, 14);
@@ -900,10 +900,10 @@ public class Gen7Constants {
             {35, 120}, // Energy Root
             {36, 30}, // Heal Powder
             {37, 280}, // Revival Herb
-            {38, 120}, // Ether
-            {39, 200}, // Max Ether
-            {40, 300}, // Elixir
-            {41, 450}, // Max Elixir
+            {38, 300}, // Ether
+            {39, 450}, // Max Ether
+            {40, 1500}, // Elixir
+            {41, 1800}, // Max Elixir
             {42, 35}, // Lava Cookie
             {43, 20}, // Berry Juice
             {44, 500}, // Sacred Ash
@@ -915,7 +915,7 @@ public class Gen7Constants {
             {50, 1000}, // Rare Candy
             {51, 1000}, // PP Up
             {52, 1000}, // Zinc
-            {53, 1000}, // PP Max
+            {53, 2500}, // PP Max
             {54, 35}, // Old Gateau
             {55, 150}, // Guard Spec.
             {56, 100}, // Dire Hit
@@ -955,7 +955,7 @@ public class Gen7Constants {
             {90, 300}, // Stardust
             {91, 1200}, // Star Piece
             {92, 1000}, // Nugget
-            {93, 10}, // Heart Scale
+            {93, 500}, // Heart Scale
             {94, 30}, // Honey
             {95, 20}, // Growth Mulch
             {96, 20}, // Damp Mulch
@@ -996,7 +996,7 @@ public class Gen7Constants {
             {131, 0}, // unknown
             {132, 0}, // unknown
             {133, 0}, // unknown
-            {134, 300}, // Sweet Heart
+            {134, 15}, // Sweet Heart
             {135, 1000}, // Adamant Orb
             {136, 1000}, // Lustrous Orb
             {137, 5}, // Greet Mail
@@ -1078,46 +1078,46 @@ public class Gen7Constants {
             {213, 400}, // BrightPowder
             {214, 400}, // White Herb
             {215, 300}, // Macho Brace
-            {216, 600}, // Exp. Share
-            {217, 400}, // Quick Claw
-            {218, 400}, // Soothe Bell
-            {219, 400}, // Mental Herb
-            {220, 400}, // Choice Band
+            {216, 0}, // Exp. Share
+            {217, 450}, // Quick Claw
+            {218, 100}, // Soothe Bell
+            {219, 100}, // Mental Herb
+            {220, 1000}, // Choice Band
             {221, 500}, // King's Rock
-            {222, 100}, // SilverPowder
-            {223, 1000}, // Amulet Coin
-            {224, 500}, // Cleanse Tag
+            {222, 200}, // SilverPowder
+            {223, 1500}, // Amulet Coin
+            {224, 100}, // Cleanse Tag
             {225, 20}, // Soul Dew
-            {226, 200}, // DeepSeaTooth
-            {227, 200}, // DeepSeaScale
+            {226, 300}, // DeepSeaTooth
+            {227, 300}, // DeepSeaScale
             {228, 400}, // Smoke Ball
             {229, 300}, // Everstone
-            {230, 400}, // Focus Band
+            {230, 300}, // Focus Band
             {231, 1000}, // Lucky Egg
-            {232, 400}, // Scope Lens
-            {233, 200}, // Metal Coat
-            {234, 400}, // Leftovers
-            {235, 200}, // Dragon Scale
+            {232, 500}, // Scope Lens
+            {233, 300}, // Metal Coat
+            {234, 1000}, // Leftovers
+            {235, 300}, // Dragon Scale
             {236, 100}, // Light Ball
-            {237, 100}, // Soft Sand
-            {238, 100}, // Hard Stone
-            {239, 100}, // Miracle Seed
-            {240, 100}, // BlackGlasses
-            {241, 100}, // Black Belt
-            {242, 100}, // Magnet
-            {243, 100}, // Mystic Water
-            {244, 100}, // Sharp Beak
-            {245, 100}, // Poison Barb
-            {246, 100}, // NeverMeltIce
-            {247, 100}, // Spell Tag
-            {248, 100}, // TwistedSpoon
-            {249, 100}, // Charcoal
-            {250, 100}, // Dragon Fang
-            {251, 100}, // Silk Scarf
-            {252, 200}, // Up-Grade
-            {253, 400}, // Shell Bell
+            {237, 200}, // Soft Sand
+            {238, 200}, // Hard Stone
+            {239, 200}, // Miracle Seed
+            {240, 200}, // BlackGlasses
+            {241, 200}, // Black Belt
+            {242, 200}, // Magnet
+            {243, 200}, // Mystic Water
+            {244, 200}, // Sharp Beak
+            {245, 200}, // Poison Barb
+            {246, 200}, // NeverMeltIce
+            {247, 200}, // Spell Tag
+            {248, 200}, // TwistedSpoon
+            {249, 200}, // Charcoal
+            {250, 200}, // Dragon Fang
+            {251, 200}, // Silk Scarf
+            {252, 300}, // Up-Grade
+            {253, 600}, // Shell Bell
             {254, 200}, // Sea Incense
-            {255, 500}, // Lax Incense
+            {255, 300}, // Lax Incense
             {256, 100}, // Lucky Punch
             {257, 100}, // Metal Powder
             {258, 100}, // Thick Club
@@ -1127,67 +1127,67 @@ public class Gen7Constants {
             {262, 10}, // Pink Scarf
             {263, 10}, // Green Scarf
             {264, 10}, // Yellow Scarf
-            {265, 400}, // Wide Lens
-            {266, 400}, // Muscle Band
-            {267, 400}, // Wise Glasses
-            {268, 400}, // Expert Belt
-            {269, 400}, // Light Clay
-            {270, 400}, // Life Orb
-            {271, 400}, // Power Herb
-            {272, 400}, // Toxic Orb
-            {273, 400}, // Flame Orb
+            {265, 150}, // Wide Lens
+            {266, 200}, // Muscle Band
+            {267, 200}, // Wise Glasses
+            {268, 600}, // Expert Belt
+            {269, 150}, // Light Clay
+            {270, 1000}, // Life Orb
+            {271, 100}, // Power Herb
+            {272, 150}, // Toxic Orb
+            {273, 150}, // Flame Orb
             {274, 100}, // Quick Powder
-            {275, 400}, // Focus Sash
-            {276, 400}, // Zoom Lens
-            {277, 400}, // Metronome
-            {278, 400}, // Iron Ball
-            {279, 400}, // Lagging Tail
-            {280, 400}, // Destiny Knot
-            {281, 400}, // Black Sludge
-            {282, 400}, // Icy Rock
-            {283, 400}, // Smooth Rock
-            {284, 400}, // Heat Rock
-            {285, 400}, // Damp Rock
-            {286, 400}, // Grip Claw
-            {287, 400}, // Choice Scarf
-            {288, 400}, // Sticky Barb
+            {275, 200}, // Focus Sash
+            {276, 150}, // Zoom Lens
+            {277, 300}, // Metronome
+            {278, 100}, // Iron Ball
+            {279, 100}, // Lagging Tail
+            {280, 150}, // Destiny Knot
+            {281, 500}, // Black Sludge
+            {282, 20}, // Icy Rock
+            {283, 20}, // Smooth Rock
+            {284, 20}, // Heat Rock
+            {285, 20}, // Damp Rock
+            {286, 150}, // Grip Claw
+            {287, 1000}, // Choice Scarf
+            {288, 150}, // Sticky Barb
             {289, 300}, // Power Bracer
             {290, 300}, // Power Belt
             {291, 300}, // Power Lens
             {292, 300}, // Power Band
             {293, 300}, // Power Anklet
             {294, 300}, // Power Weight
-            {295, 400}, // Shed Shell
-            {296, 400}, // Big Root
-            {297, 400}, // Choice Specs
-            {298, 100}, // Flame Plate
-            {299, 100}, // Splash Plate
-            {300, 100}, // Zap Plate
-            {301, 100}, // Meadow Plate
-            {302, 100}, // Icicle Plate
-            {303, 100}, // Fist Plate
-            {304, 100}, // Toxic Plate
-            {305, 100}, // Earth Plate
-            {306, 100}, // Sky Plate
-            {307, 100}, // Mind Plate
-            {308, 100}, // Insect Plate
-            {309, 100}, // Stone Plate
-            {310, 100}, // Spooky Plate
-            {311, 100}, // Draco Plate
-            {312, 100}, // Dread Plate
-            {313, 100}, // Iron Plate
+            {295, 50}, // Shed Shell
+            {296, 150}, // Big Root
+            {297, 1000}, // Choice Specs
+            {298, 200}, // Flame Plate
+            {299, 200}, // Splash Plate
+            {300, 200}, // Zap Plate
+            {301, 200}, // Meadow Plate
+            {302, 200}, // Icicle Plate
+            {303, 200}, // Fist Plate
+            {304, 200}, // Toxic Plate
+            {305, 200}, // Earth Plate
+            {306, 200}, // Sky Plate
+            {307, 200}, // Mind Plate
+            {308, 200}, // Insect Plate
+            {309, 200}, // Stone Plate
+            {310, 200}, // Spooky Plate
+            {311, 200}, // Draco Plate
+            {312, 200}, // Dread Plate
+            {313, 200}, // Iron Plate
             {314, 200}, // Odd Incense
             {315, 200}, // Rock Incense
-            {316, 500}, // Full Incense
+            {316, 100}, // Full Incense
             {317, 200}, // Wave Incense
             {318, 200}, // Rose Incense
-            {319, 1100}, // Luck Incense
-            {320, 600}, // Pure Incense
-            {321, 200}, // Protector
-            {322, 200}, // Electirizer
-            {323, 200}, // Magmarizer
-            {324, 200}, // Dubious Disc
-            {325, 200}, // Reaper Cloth
+            {319, 1500}, // Luck Incense
+            {320, 100}, // Pure Incense
+            {321, 300}, // Protector
+            {322, 300}, // Electirizer
+            {323, 300}, // Magmarizer
+            {324, 300}, // Dubious Disc
+            {325, 300}, // Reaper Cloth
             {326, 500}, // Razor Claw
             {327, 500}, // Razor Fang
             {328, 1000}, // TM01 Work Up
@@ -1196,28 +1196,28 @@ public class Gen7Constants {
             {331, 1000}, // TM04 Calm Mind
             {332, 1000}, // TM05 Roar
             {333, 1000}, // TM06 Toxic
-            {334, 5000}, // TM07 Hail
+            {334, 2000}, // TM07 Hail
             {335, 1000}, // TM08 Bulk Up
             {336, 1000}, // TM09 Venoshock
             {337, 1000}, // TM10 Hidden Power
-            {338, 5000}, // TM11 Sunny Day
+            {338, 2000}, // TM11 Sunny Day
             {339, 1000}, // TM12 Taunt
             {340, 1000}, // TM13 Ice Beam
-            {341, 3000}, // TM14 Blizzard
-            {342, 5000}, // TM15 Hyper Beam
+            {341, 2000}, // TM14 Blizzard
+            {342, 2000}, // TM15 Hyper Beam
             {343, 1000}, // TM16 Light Screen
             {344, 1000}, // TM17 Protect
-            {345, 5000}, // TM18 Rain Dance
+            {345, 2000}, // TM18 Rain Dance
             {346, 1000}, // TM19 Roost
             {347, 1000}, // TM20 Safeguard
             {348, 1000}, // TM21 Frustration
             {349, 1000}, // TM22 Solar Beam
             {350, 1000}, // TM23 Smack Down
             {351, 1000}, // TM24 Thunderbolt
-            {352, 3000}, // TM25 Thunder
+            {352, 2000}, // TM25 Thunder
             {353, 1000}, // TM26 Earthquake
             {354, 1000}, // TM27 Return
-            {355, 3000}, // TM28 Leech Life
+            {355, 2000}, // TM28 Leech Life
             {356, 1000}, // TM29 Psychic
             {357, 1000}, // TM30 Shadow Ball
             {358, 1000}, // TM31 Brick Break
@@ -1226,8 +1226,8 @@ public class Gen7Constants {
             {361, 1000}, // TM34 Sludge Wave
             {362, 1000}, // TM35 Flamethrower
             {363, 1000}, // TM36 Sludge Bomb
-            {364, 5000}, // TM37 Sandstorm
-            {365, 3000}, // TM38 Fire Blast
+            {364, 2000}, // TM37 Sandstorm
+            {365, 2000}, // TM38 Fire Blast
             {366, 1000}, // TM39 Rock Tomb
             {367, 1000}, // TM40 Aerial Ace
             {368, 1000}, // TM41 Torment
@@ -1239,16 +1239,16 @@ public class Gen7Constants {
             {374, 1000}, // TM47 Low Sweep
             {375, 1000}, // TM48 Round
             {376, 1000}, // TM49 Echoed Voice
-            {377, 8000}, // TM50 Overheat
+            {377, 2000}, // TM50 Overheat
             {378, 1000}, // TM51 Steel Wing
-            {379, 3000}, // TM52 Focus Blast
+            {379, 2000}, // TM52 Focus Blast
             {380, 1000}, // TM53 Energy Ball
             {381, 1000}, // TM54 False Swipe
             {382, 1000}, // TM55 Scald
             {383, 1000}, // TM56 Fling
             {384, 1000}, // TM57 Charge Beam
             {385, 1000}, // TM58 Sky Drop
-            {386, 3000}, // TM59 Brutal Swing
+            {386, 2000}, // TM59 Brutal Swing
             {387, 1000}, // TM60 Quash
             {388, 1000}, // TM61 Will-O-Wisp
             {389, 1000}, // TM62 Acrobatics
@@ -1257,10 +1257,10 @@ public class Gen7Constants {
             {392, 1000}, // TM65 Shadow Claw
             {393, 1000}, // TM66 Payback
             {394, 1000}, // TM67 Smart Strike
-            {395, 5000}, // TM68 Giga Impact
+            {395, 2000}, // TM68 Giga Impact
             {396, 1000}, // TM69 Rock Polish
-            {397, 3000}, // TM70 Aurora Veil
-            {398, 3000}, // TM71 Stone Edge
+            {397, 2000}, // TM70 Aurora Veil
+            {398, 2000}, // TM71 Stone Edge
             {399, 1000}, // TM72 Volt Switch
             {400, 500}, // TM73 Thunder Wave
             {401, 1000}, // TM74 Gyro Ball
@@ -1399,34 +1399,34 @@ public class Gen7Constants {
             {534, 0}, // Red Orb
             {535, 0}, // Blue Orb
             {536, 0}, // Enigma Stone
-            {537, 200}, // Prism Scale
-            {538, 400}, // Eviolite
-            {539, 400}, // Float Stone
-            {540, 400}, // Rocky Helmet
-            {541, 400}, // Air Balloon
-            {542, 400}, // Red Card
-            {543, 400}, // Ring Target
-            {544, 400}, // Binding Band
-            {545, 400}, // Absorb Bulb
-            {546, 400}, // Cell Battery
-            {547, 400}, // Eject Button
-            {548, 20}, // Fire Gem
-            {549, 20}, // Water Gem
-            {550, 20}, // Electric Gem
-            {551, 20}, // Grass Gem
-            {552, 20}, // Ice Gem
-            {553, 20}, // Fighting Gem
-            {554, 20}, // Poison Gem
-            {555, 20}, // Ground Gem
-            {556, 20}, // Flying Gem
-            {557, 20}, // Psychic Gem
-            {558, 20}, // Bug Gem
-            {559, 20}, // Rock Gem
-            {560, 20}, // Ghost Gem
-            {561, 20}, // Dragon Gem
-            {562, 20}, // Dark Gem
-            {563, 20}, // Steel Gem
-            {564, 400}, // Normal Gem
+            {537, 300}, // Prism Scale
+            {538, 1000}, // Eviolite
+            {539, 100}, // Float Stone
+            {540, 600}, // Rocky Helmet
+            {541, 100}, // Air Balloon
+            {542, 100}, // Red Card
+            {543, 100}, // Ring Target
+            {544, 200}, // Binding Band
+            {545, 100}, // Absorb Bulb
+            {546, 100}, // Cell Battery
+            {547, 100}, // Eject Button
+            {548, 100}, // Fire Gem
+            {549, 100}, // Water Gem
+            {550, 100}, // Electric Gem
+            {551, 100}, // Grass Gem
+            {552, 100}, // Ice Gem
+            {553, 100}, // Fighting Gem
+            {554, 100}, // Poison Gem
+            {555, 100}, // Ground Gem
+            {556, 100}, // Flying Gem
+            {557, 100}, // Psychic Gem
+            {558, 100}, // Bug Gem
+            {559, 100}, // Rock Gem
+            {560, 100}, // Ghost Gem
+            {561, 100}, // Dragon Gem
+            {562, 100}, // Dark Gem
+            {563, 100}, // Steel Gem
+            {564, 100}, // Normal Gem
             {565, 30}, // Health Wing
             {566, 30}, // Muscle Wing
             {567, 30}, // Resist Wing
@@ -1480,8 +1480,8 @@ public class Gen7Constants {
             {615, 0}, // Dire Hit 3
             {616, 0}, // Light Stone
             {617, 0}, // Dark Stone
-            {618, 5000}, // TM93 Wild Charge
-            {619, 3000}, // TM94 Surf
+            {618, 2000}, // TM93 Wild Charge
+            {619, 2000}, // TM94 Surf
             {620, 1000}, // TM95 Snarl
             {621, 0}, // Xtransceiver
             {622, 0}, // God Stone
@@ -1501,18 +1501,18 @@ public class Gen7Constants {
             {636, 0}, // Dropped Item
             {637, 0}, // Dropped Item
             {638, 0}, // Reveal Glass
-            {639, 100}, // Weakness Policy
-            {640, 100}, // Assault Vest
+            {639, 200}, // Weakness Policy
+            {640, 600}, // Assault Vest
             {641, 0}, // Holo Caster
             {642, 0}, // Prof’s Letter
             {643, 0}, // Roller Skates
-            {644, 100}, // Pixie Plate
-            {645, 1000}, // Ability Capsule
-            {646, 200}, // Whipped Dream
-            {647, 200}, // Sachet
-            {648, 400}, // Luminous Moss
-            {649, 400}, // Snowball
-            {650, 400}, // Safety Goggles
+            {644,200}, // Pixie Plate
+            {645,500}, // Ability Capsule
+            {646,300}, // Whipped Dream
+            {647,300}, // Sachet
+            {648,20}, // Luminous Moss
+            {649,20}, // Snowball
+            {650,300}, // Safety Goggles
             {651, 0}, // Poké Flute
             {652, 20}, // Rich Mulch
             {653, 20}, // Surprise Mulch
@@ -1548,13 +1548,13 @@ public class Gen7Constants {
             {683, 2000}, // Garchompite
             {684, 2000}, // Latiasite
             {685, 2000}, // Latiosite
-            {686, 20}, // Roseli Berry
-            {687, 20}, // Kee Berry
-            {688, 20}, // Maranga Berry
+            {686, 100}, // Roseli Berry
+            {687, 100}, // Kee Berry
+            {688, 100}, // Maranga Berry
             {689, 0}, // Sprinklotad
             {690, 1000}, // TM96 Nature Power
             {691, 1000}, // TM97 Dark Pulse
-            {692, 3000}, // TM98 Waterfall
+            {692, 2000}, // TM98 Waterfall
             {693, 1000}, // TM99 Dazzling Gleam
             {694, 500}, // TM100 Confide
             {695, 0}, // Power Plant Pass
@@ -1577,7 +1577,7 @@ public class Gen7Constants {
             {712, 0}, // Looker Ticket
             {713, 0}, // Bike
             {714, 0}, // Holo Caster
-            {715, 20}, // Fairy Gem
+            {715, 100}, // Fairy Gem
             {716, 0}, // Mega Charm
             {717, 0}, // Mega Glove
             {718, 0}, // Mach Bike
@@ -1742,11 +1742,11 @@ public class Gen7Constants {
             {877, 0}, // ???
             {878, 0}, // ???
             {879, 400}, // Terrain Extender
-            {880, 400}, // Protective Pads
-            {881, 400}, // Electric Seed
-            {882, 400}, // Psychic Seed
-            {883, 400}, // Misty Seed
-            {884, 400}, // Grassy Seed
+            {880, 300}, // Protective Pads
+            {881, 100}, // Electric Seed
+            {882, 100}, // Psychic Seed
+            {883, 100}, // Misty Seed
+            {884, 100}, // Grassy Seed
             {885, 0}, // ???
             {886, 0}, // ???
             {887, 0}, // ???
