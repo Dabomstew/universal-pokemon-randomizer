@@ -32,7 +32,7 @@ public class Evolution implements Comparable<Evolution> {
     public int extraInfo;
     public int forme;
     public String formeSuffix = "";
-    public int level;
+    public int level = 0;
 
     public Evolution(Pokemon from, Pokemon to, boolean carryStats, EvolutionType type, int extra) {
         this.from = from;

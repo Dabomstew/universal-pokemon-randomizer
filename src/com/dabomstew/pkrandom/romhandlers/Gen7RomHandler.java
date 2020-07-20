@@ -2006,6 +2006,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             // Level up w/ Held Item at Night
                             Evolution extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.LEVEL_ITEM_NIGHT, item);
+                            extraEntry.forme = evo.forme;
                             extraEvolutions.add(extraEntry);
                         }
                     }
