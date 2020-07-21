@@ -2441,8 +2441,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
 
                 if (!GlobalConstants.bannedForDamagingMove[mv.number]) {
-                    if (mv.power >= 2 * GlobalConstants.MIN_DAMAGING_MOVE_POWER
-                            || (mv.power >= GlobalConstants.MIN_DAMAGING_MOVE_POWER && mv.hitratio >= 90)) {
+                    if ((mv.power * mv.hitCount) >= 2 * GlobalConstants.MIN_DAMAGING_MOVE_POWER
+                            || ((mv.power * mv.hitCount) >= GlobalConstants.MIN_DAMAGING_MOVE_POWER && mv.hitratio >= 90)) {
                         validDamagingMoves.add(mv);
                         if (mv.type != null) {
                             if (!validTypeDamagingMoves.containsKey(mv.type)) {
