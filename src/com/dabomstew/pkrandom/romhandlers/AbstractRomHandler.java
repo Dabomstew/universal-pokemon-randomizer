@@ -2515,13 +2515,16 @@ public abstract class AbstractRomHandler implements RomHandler {
                 Type typeOfMove = null;
                 if (typeThemed) {
                     double picked = random.nextDouble();
-                    if (pkmn.primaryType == Type.NORMAL && pkmn.secondaryType != null) {
+                    if ((pkmn.primaryType == Type.NORMAL && pkmn.secondaryType != null) ||
+                            (pkmn.secondaryType == Type.NORMAL)) {
+
+                        Type otherType = pkmn.primaryType == Type.NORMAL ? pkmn.secondaryType : pkmn.primaryType;
 
                         // Normal/OTHER: 10% normal, 30% other, 60% random
                         if (picked < 0.1) {
                             typeOfMove = Type.NORMAL;
                         } else if (picked < 0.4) {
-                            typeOfMove = pkmn.secondaryType;
+                            typeOfMove = otherType;
                         }
                         // else random
                     } else if (pkmn.secondaryType != null) {
