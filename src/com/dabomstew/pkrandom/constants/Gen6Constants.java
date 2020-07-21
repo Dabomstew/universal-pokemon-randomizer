@@ -185,6 +185,9 @@ public class Gen6Constants {
 
     public static final List<Integer> fieldMoves = Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 230, 291);
 
+    public static final int fallingEncounterOffset = 0xF4270, fallingEncounterSize = 0x3C, fallingEncounterCount = 55;
+    public static final Map<Integer, String> fallingEncounterNameMap = constructFallingEncounterNameMap();
+
     public static String getIngameTradesPrefix(int romType) {
         if (romType == Type_XY) {
             return ingameTradesPrefixXY;
@@ -872,6 +875,19 @@ public class Gen6Constants {
                 allTrainers.get(num - 1).tag = tag;
             }
         }
+    }
+
+    private static Map<Integer, String> constructFallingEncounterNameMap() {
+        Map<Integer, String> map = new TreeMap<>();
+        map.put(0, "Glittering Cave Ceiling Encounter");
+        map.put(4, "Reflection Cave Ceiling Encounter");
+        map.put(20, "Victory Road Outside 2 Sky Encounter");
+        map.put(24, "Victory Road Inside 2 Encounter");
+        map.put(28, "Victory Road Outside 3 Sky Encounter");
+        map.put(32, "Victory Road Inside 3 Ceiling Encounter");
+        map.put(36, "Victory Road Outside 4 Sky Encounter");
+        map.put(46, "Terminus Cave Ceiling Encounter");
+        return map;
     }
 
 

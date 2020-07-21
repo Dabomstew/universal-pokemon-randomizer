@@ -940,6 +940,22 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 encounters.add(hordeRareEncounters);
             }
         }
+
+        // The ceiling/flying encounters are hardcoded in the Field CRO
+        byte[] fieldCRO = readFile(romEntry.getString("Field"));
+        String currentName = Gen6Constants.fallingEncounterNameMap.get(0);
+        int startingOffsetOfCurrentName = 0;
+        for (int i = 0; i < Gen6Constants.fallingEncounterCount; i++) {
+            int offset = Gen6Constants.fallingEncounterOffset + i * Gen6Constants.fallingEncounterSize;
+            EncounterSet fallingEncounter = readFallingEncounter(fieldCRO, offset);
+            if (Gen6Constants.fallingEncounterNameMap.containsKey(i)) {
+                currentName = Gen6Constants.fallingEncounterNameMap.get(i);
+                startingOffsetOfCurrentName = i;
+            }
+            int encounterNumber = (i - startingOffsetOfCurrentName) + 1;
+            fallingEncounter.displayName = currentName + " #" + encounterNumber;
+            encounters.add(fallingEncounter);
+        }
         return encounters;
     }
 
@@ -1073,6 +1089,23 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         return es;
     }
 
+    private EncounterSet readFallingEncounter(byte[] data, int offset) {
+        EncounterSet es = new EncounterSet();
+        for (int i = 0; i < 7; i++) {
+            int species = readWord(data, offset + 4 + i * 8);
+            int level = data[offset + 8 + i * 8];
+            if (species != 0) {
+                Encounter e = new Encounter();
+                e.pokemon = pokes[species];
+                e.formeNumber = 0;
+                e.level = level;
+                e.maxLevel = level;
+                es.encounters.add(e);
+            }
+        }
+        return es;
+    }
+
     @Override
     public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encountersList) {
         try {
@@ -1166,6 +1199,17 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
         // Save
         writeGARC(encountersFile, encounterGarc);
+
+        // Now write the falling encounters hardcoded in the Field CRO
+        byte[] fieldCRO = readFile(romEntry.getString("Field"));
+        for (int i = 0; i < Gen6Constants.fallingEncounterCount; i++) {
+            int offset = Gen6Constants.fallingEncounterOffset + i * Gen6Constants.fallingEncounterSize;
+            EncounterSet fallingEncounter = encounters.next();
+            writeFallingEncounter(fieldCRO, offset, fallingEncounter.encounters);
+        }
+
+        // Save
+        writeFile(romEntry.getString("Field"), fieldCRO);
     }
 
     private void setEncountersORAS(List<EncounterSet> encountersList) throws IOException {
@@ -1260,6 +1304,17 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             writeWord(data, offset + i * 4, speciesAndFormeData);
             data[offset + 2 + i * 4] = (byte) encounter.level;
             data[offset + 3 + i * 4] = (byte) encounter.maxLevel;
+        }
+    }
+
+    private void writeFallingEncounter(byte[] data, int offset, List<Encounter> encounters) {
+        for (int i = 0; i < encounters.size(); i++) {
+            Encounter encounter = encounters.get(i);
+            if (encounter.pokemon.formeNumber > 0) { // Failsafe if we need to write encounters without modifying species
+                encounter.pokemon = encounter.pokemon.baseForme;
+            }
+            writeWord(data, offset + 4 + i * 8, encounter.pokemon.number);
+            data[offset + 8 + i * 8] = (byte) encounter.level;
         }
     }
 

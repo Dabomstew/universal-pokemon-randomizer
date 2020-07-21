@@ -224,11 +224,10 @@ public class GlobalConstants {
     // To be tested (Gen 8): Gulp Missile, Ice Face, Hunger Switch
 
     public static final List<Integer> badAbilities = Arrays.asList(
-            58, 57, 107, 108, 119, 118, 132, 131, 140, 180, 217,
+            58, 57, 107, 108, 119, 118, 132, 131, 140, 180, 188, 217,
             222, 223);
-    // Minus, Plus, Anticipation, Forewarn, Frisk, Honey Gather, Friend Guard, Healer, Telepathy, Symbiosis, Battery,
-    // Receiver, Power of Alchemy
-    // TBD: Aura Break
+    // Minus, Plus, Anticipation, Forewarn, Frisk, Honey Gather, Friend Guard, Healer, Telepathy, Symbiosis, Aura Break,
+    // Battery, Receiver, Power of Alchemy
 
     public static final int WONDER_GUARD_INDEX = 25;
 
