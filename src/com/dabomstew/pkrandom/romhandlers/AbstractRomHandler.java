@@ -1763,7 +1763,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void rivalCarriesStarter() {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
-        rivalCarriesStarterUpdate(currentTrainers, "RIVAL", 1);
+        rivalCarriesStarterUpdate(currentTrainers, "RIVAL", isORAS ? 0 : 1);
         rivalCarriesStarterUpdate(currentTrainers, "FRIEND", 2);
         this.setTrainers(currentTrainers, false);
     }
