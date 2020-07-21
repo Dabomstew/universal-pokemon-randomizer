@@ -236,7 +236,7 @@ public interface RomHandler {
     List<Integer> getMovesBannedFromLevelup();
 
     void randomizeMovesLearnt(boolean typeThemed, boolean noBroken, boolean forceStartingMoves,
-                              int forceStartingMoveCount, double goodDamagingProbability);
+                              int forceStartingMoveCount, double goodDamagingProbability, boolean evolutionMovesForAll);
 
     void orderDamagingMovesByDamage();
 

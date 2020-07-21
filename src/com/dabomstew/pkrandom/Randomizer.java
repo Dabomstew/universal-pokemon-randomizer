@@ -254,9 +254,11 @@ public class Randomizer {
         double msGoodDamagingProb = settings.isMovesetsForceGoodDamaging() ? settings.getMovesetsGoodDamagingPercent() / 100.0
                 : 0;
         if (settings.getMovesetsMod() == Settings.MovesetsMod.RANDOM_PREFER_SAME_TYPE) {
-            romHandler.randomizeMovesLearnt(true, noBrokenMovesetMoves, forceLv1s, forceLv1Count, msGoodDamagingProb);
+            romHandler.randomizeMovesLearnt(true, noBrokenMovesetMoves, forceLv1s, forceLv1Count, msGoodDamagingProb,
+                    settings.isEvolutionMovesForAll());
         } else if (settings.getMovesetsMod() == Settings.MovesetsMod.COMPLETELY_RANDOM) {
-            romHandler.randomizeMovesLearnt(false, noBrokenMovesetMoves, forceLv1s, forceLv1Count, msGoodDamagingProb);
+            romHandler.randomizeMovesLearnt(false, noBrokenMovesetMoves, forceLv1s, forceLv1Count, msGoodDamagingProb,
+                    settings.isEvolutionMovesForAll());
         }
 
         if (settings.isReorderDamagingMoves()) {
@@ -296,7 +298,11 @@ public class Randomizer {
                 List<MoveLearnt> data = moveData.get(pkmn.number);
                 for (MoveLearnt ml : data) {
                     try {
-                        sb.append("Level ").append(String.format("%-2d", ml.level)).append(": ").append(moves.get(ml.move).name).append(System.getProperty("line.separator"));
+                        if (ml.level == 0) {
+                            sb.append("Learned upon evolution: ").append(moves.get(ml.move).name).append(System.getProperty("line.separator"));
+                        } else {
+                            sb.append("Level ").append(String.format("%-2d", ml.level)).append(": ").append(moves.get(ml.move).name).append(System.getProperty("line.separator"));
+                        }
                     } catch (NullPointerException ex) {
                         sb.append("invalid move at level").append(ml.level);
                     }

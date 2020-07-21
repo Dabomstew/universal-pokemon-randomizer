@@ -237,6 +237,7 @@ public class NewRandomizerGUI {
     private JCheckBox totpRandomizeHeldItemsCheckBox;
     private JCheckBox totpAllowAltFormesCheckBox;
     private JPanel totpPanel;
+    private JCheckBox pmsEvolutionMovesCheckBox;
 
     private static JFrame frame;
 
@@ -958,6 +959,7 @@ public class NewRandomizerGUI {
         pmsForceGoodDamagingCheckBox.setSelected(settings.isMovesetsForceGoodDamaging());
         pmsForceGoodDamagingSlider.setValue(settings.getMovesetsGoodDamagingPercent());
         pmsNoGameBreakingMovesCheckBox.setSelected(settings.isBlockBrokenMovesetMoves());
+        pmsEvolutionMovesCheckBox.setSelected(settings.isEvolutionMovesForAll());
 
         tpSimilarStrengthCheckBox.setSelected(settings.isTrainersUsePokemonOfSimilarStrength());
         tpRandomRadioButton.setSelected(settings.getTrainersMod() == Settings.TrainersMod.RANDOM);
@@ -1171,6 +1173,7 @@ public class NewRandomizerGUI {
         settings.setMovesetsForceGoodDamaging(pmsForceGoodDamagingCheckBox.isSelected());
         settings.setMovesetsGoodDamagingPercent(pmsForceGoodDamagingSlider.getValue());
         settings.setBlockBrokenMovesetMoves(pmsNoGameBreakingMovesCheckBox.isSelected());
+        settings.setEvolutionMovesForAll(pmsEvolutionMovesCheckBox.isSelected());
 
         settings.setTrainersMod(tpUnchangedRadioButton.isSelected(), tpRandomRadioButton.isSelected(), tpRandomEvenDistributionRadioButton.isSelected(), tpRandomEvenDistributionMainRadioButton.isSelected(), tpTypeThemedRadioButton.isSelected());
         settings.setTrainersUsePokemonOfSimilarStrength(tpSimilarStrengthCheckBox.isSelected());
@@ -1607,6 +1610,9 @@ public class NewRandomizerGUI {
         pmsForceGoodDamagingSlider.setVisible(true);
         pmsForceGoodDamagingSlider.setEnabled(false);
         pmsForceGoodDamagingSlider.setValue(pmsForceGoodDamagingSlider.getMinimum());
+        pmsEvolutionMovesCheckBox.setVisible(true);
+        pmsEvolutionMovesCheckBox.setEnabled(false);
+        pmsEvolutionMovesCheckBox.setSelected(false);
         tpUnchangedRadioButton.setVisible(true);
         tpUnchangedRadioButton.setEnabled(false);
         tpUnchangedRadioButton.setSelected(false);
@@ -2083,6 +2089,7 @@ public class NewRandomizerGUI {
 
             pmsGuaranteedLevel1MovesCheckBox.setVisible(romHandler.supportsFourStartingMoves());
             pmsGuaranteedLevel1MovesSlider.setVisible(romHandler.supportsFourStartingMoves());
+            pmsEvolutionMovesCheckBox.setVisible(pokemonGeneration >= 7);
 
             tpUnchangedRadioButton.setEnabled(true);
             tpUnchangedRadioButton.setSelected(true);
@@ -2389,11 +2396,14 @@ public class NewRandomizerGUI {
             pmsReorderDamagingMovesCheckBox.setSelected(false);
             pmsNoGameBreakingMovesCheckBox.setEnabled(false);
             pmsNoGameBreakingMovesCheckBox.setSelected(false);
+            pmsEvolutionMovesCheckBox.setEnabled(false);
+            pmsEvolutionMovesCheckBox.setSelected(false);
         } else {
             pmsGuaranteedLevel1MovesCheckBox.setEnabled(true);
             pmsForceGoodDamagingCheckBox.setEnabled(true);
             pmsReorderDamagingMovesCheckBox.setEnabled(true);
             pmsNoGameBreakingMovesCheckBox.setEnabled(true);
+            pmsEvolutionMovesCheckBox.setEnabled(true);
         }
 
         if (pmsGuaranteedLevel1MovesCheckBox.isSelected()) {

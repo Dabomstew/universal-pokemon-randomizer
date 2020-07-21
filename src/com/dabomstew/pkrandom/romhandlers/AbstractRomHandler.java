@@ -2411,7 +2411,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeMovesLearnt(boolean typeThemed, boolean noBroken, boolean forceStartingMoves,
-                                     int forceStartingMoveCount, double goodDamagingProbability) {
+                                     int forceStartingMoveCount, double goodDamagingProbability,
+                                     boolean evolutionMovesForAll) {
         // Get current sets
         Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
         List<Integer> hms = this.getHMMoves();
@@ -2474,6 +2475,15 @@ public abstract class AbstractRomHandler implements RomHandler {
                         fakeLv1.move = 0;
                         moves.add(0, fakeLv1);
                     }
+                }
+            }
+
+            if (evolutionMovesForAll) {
+                if (moves.get(0).level != 0) {
+                    MoveLearnt fakeEvoMove = new MoveLearnt();
+                    fakeEvoMove.level = 0;
+                    fakeEvoMove.move = 0;
+                    moves.add(0, fakeEvoMove);
                 }
             }
 

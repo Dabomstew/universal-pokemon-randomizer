@@ -144,6 +144,7 @@ public class Settings {
     private boolean movesetsForceGoodDamaging;
     private int movesetsGoodDamagingPercent = 0;
     private boolean blockBrokenMovesetMoves;
+    private boolean evolutionMovesForAll;
 
     public enum TrainersMod {
         UNCHANGED, RANDOM, DISTRIBUTED, MAINPLAYTHROUGH, TYPE_THEMED
@@ -503,7 +504,8 @@ public class Settings {
         out.write(additionalRegularTrainerPokemon |
                 ((auraMod == AuraMod.UNCHANGED) ? 0x8 : 0) |
                 ((auraMod == AuraMod.RANDOM) ? 0x10 : 0) |
-                ((auraMod == AuraMod.SAME_STRENGTH) ? 0x20 : 0));
+                ((auraMod == AuraMod.SAME_STRENGTH) ? 0x20 : 0) |
+                (evolutionMovesForAll ? 0x40 : 0));
 
         out.write(makeByteSelected(
                 totemPokemonMod == TotemPokemonMod.UNCHANGED,
@@ -762,7 +764,8 @@ public class Settings {
         settings.setAdditionalBossTrainerPokemon((data[40] & 0xE) >> 1);
         settings.setAdditionalImportantTrainerPokemon((data[40] & 0x70) >> 4);
         settings.setAdditionalRegularTrainerPokemon((data[41] & 0x7));
-        settings.setAuraMod(restoreEnum(AuraMod.class,data[41],3,4,5)); // 6, 7 still unused
+        settings.setAuraMod(restoreEnum(AuraMod.class,data[41],3,4,5));
+        settings.setEvolutionMovesForAll(restoreState(data[41],6)); // 7 still unused
 
         settings.setTotemPokemonMod(restoreEnum(TotemPokemonMod.class,data[42],0,1,2));
         settings.setAllyPokemonMod(restoreEnum(AllyPokemonMod.class,data[42],3,4,5));
@@ -1340,6 +1343,14 @@ public class Settings {
 
     public void setBlockBrokenMovesetMoves(boolean blockBrokenMovesetMoves) {
         this.blockBrokenMovesetMoves = blockBrokenMovesetMoves;
+    }
+
+    public boolean isEvolutionMovesForAll() {
+        return evolutionMovesForAll;
+    }
+
+    public void setEvolutionMovesForAll(boolean evolutionMovesForAll) {
+        this.evolutionMovesForAll = evolutionMovesForAll;
     }
 
     public TrainersMod getTrainersMod() {
