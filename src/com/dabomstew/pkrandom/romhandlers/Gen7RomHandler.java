@@ -482,6 +482,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         switch (et) {
                             case LEVEL_GAME:
                                 evol.type = EvolutionType.LEVEL;
+                                evol.to = pokes[romEntry.getInt("CosmoemEvolutionNumber")];
                                 break;
                             case LEVEL_DAY_GAME:
                                 evol.type = EvolutionType.LEVEL_DAY;
