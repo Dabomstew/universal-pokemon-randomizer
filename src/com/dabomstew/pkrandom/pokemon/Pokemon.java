@@ -252,7 +252,7 @@ public class Pokemon implements Comparable<Pokemon> {
             719, 720, 721, 785, 786, 787, 788, 789, 790, 791, 792, 800, 801, 802, 807);
 
     private static final List<Integer> strongLegendaries = Arrays.asList(150, 249, 250, 382, 383, 384, 483, 484, 486,
-            487, 493, 643, 644, 646, 716, 717, 791, 792);
+            487, 493, 643, 644, 646, 716, 717, 789, 790, 791, 792);
 
     public boolean isLegendary() {
         return formeNumber == 0 ? legendaries.contains(this.number) : legendaries.contains(this.baseForme.number);
