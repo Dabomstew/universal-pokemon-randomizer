@@ -459,9 +459,6 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     if (method >= 1 && method <= Gen7Constants.evolutionMethodCount && species >= 1) {
                         EvolutionType et = EvolutionType.fromIndex(7, method);
                         if (et.skipSplitEvo()) continue; // Remove Feebas "split" evolution
-                        if (et.equals(EvolutionType.LEVEL_FEMALE_ESPURR)) {
-                            et = EvolutionType.LEVEL_FEMALE_ONLY;
-                        }
                         if (skipNext) {
                             skipNext = false;
                             continue;
@@ -2060,15 +2057,21 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     }
                     if (romEntry.romType == Gen7Constants.Type_SM) {
                         if (evo.type == EvolutionType.LEVEL_SNOWY) {
-                            evo.type = EvolutionType.LEVEL;
-                            evo.extraInfo = 35;
-                            log(String.format("%s now evolves into %s at minimum level %d", evo.from.fullName(), evo.to.fullName(),
+                            log(String.format("%s now also evolves into %s at minimum level %d", evo.from.fullName(), evo.to.fullName(),
                                     evo.extraInfo));
+                            Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                    EvolutionType.LEVEL, 35);
+                            extraEntry.forme = evo.forme;
+                            pkmn.evolutionsFrom.add(extraEntry);
+                            evo.to.evolutionsTo.add(extraEntry);
                         } else if (evo.type == EvolutionType.LEVEL_ELECTRIFIED_AREA) {
-                            evo.type = EvolutionType.LEVEL;
-                            evo.extraInfo = 35;
-                            log(String.format("%s now evolves into %s at minimum level %d", evo.from.fullName(), evo.to.fullName(),
+                            log(String.format("%s now also evolves into %s at minimum level %d", evo.from.fullName(), evo.to.fullName(),
                                     evo.extraInfo));
+                            Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                    EvolutionType.LEVEL, 35);
+                            extraEntry.forme = evo.forme;
+                            pkmn.evolutionsFrom.add(extraEntry);
+                            evo.to.evolutionsTo.add(extraEntry);
                         }
                     }
                 }

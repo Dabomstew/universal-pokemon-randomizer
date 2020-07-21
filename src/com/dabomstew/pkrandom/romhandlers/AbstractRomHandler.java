@@ -3811,8 +3811,8 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (Pokemon pk : pokemonPool) {
                 for (Evolution ev : pk.evolutionsFrom) {
                     oldEvoPairs.add(new EvolutionPair(ev.from, ev.to));
-                    if (ev.from.number == 790) { // Special case for Cosmoem to add Lunala since we remove the split evo
-                        oldEvoPairs.add(new EvolutionPair(ev.from, pokemonPool.get(ev.from.number + 1)));
+                    if (ev.from.number == 790) { // Special case for Cosmoem to add Lunala/Solgaleo since we remove the split evo
+                        oldEvoPairs.add(new EvolutionPair(ev.from, pokemonPool.get(ev.from.number + (ev.to.number % 791))));
                     }
                 }
             }
@@ -3968,6 +3968,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                         newEvo.forme = newEvo.to.getCosmeticFormNumber(this.random.nextInt(newEvo.to.cosmeticForms));
                     } else if (!checkCosmetics && picked.cosmeticForms > 0) {
                         newEvo.forme += picked.getCosmeticFormNumber(this.random.nextInt(picked.cosmeticForms));
+                    }
+                    if (newEvo.type == EvolutionType.LEVEL_FEMALE_ESPURR) {
+                        newEvo.type = EvolutionType.LEVEL_FEMALE_ONLY;
                     }
                     fromPK.evolutionsFrom.add(newEvo);
                     picked.evolutionsTo.add(newEvo);

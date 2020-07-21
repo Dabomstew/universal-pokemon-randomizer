@@ -426,9 +426,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                     if (method >= 1 && method <= Gen6Constants.evolutionMethodCount && species >= 1) {
                         EvolutionType et = EvolutionType.fromIndex(6, method);
                         if (et.equals(EvolutionType.LEVEL_HIGH_BEAUTY)) continue; // Remove Feebas "split" evolution
-                        if (et.equals(EvolutionType.LEVEL_FEMALE_ESPURR)) {
-                            et = EvolutionType.LEVEL_FEMALE_ONLY;
-                        }
                         int extraInfo = readWord(evoEntry, evo * 6 + 2);
                         Evolution evol = new Evolution(pk, pokes[species], true, et, extraInfo);
                         if (!pk.evolutionsFrom.contains(evol)) {
