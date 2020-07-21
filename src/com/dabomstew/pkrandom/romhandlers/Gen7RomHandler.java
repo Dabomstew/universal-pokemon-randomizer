@@ -206,6 +206,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     private List<String> itemNames;
     private List<String> shopNames;
     private List<String> abilityNames;
+    private ItemList allowedItems, nonBadItems;
 
     private GARCArchive pokeGarc, moveGarc, encounterGarc, stringsGarc, storyTextGarc;
 
@@ -258,6 +259,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         itemNames = getStrings(false,romEntry.getInt("ItemNamesTextOffset"));
         abilityNames = getStrings(false,romEntry.getInt("AbilityNamesTextOffset"));
         shopNames = Gen7Constants.getShopNames(romEntry.romType);
+
+        allowedItems = Gen7Constants.getAllowedItems(romEntry.romType).copy();
+        nonBadItems = Gen7Constants.nonBadItems.copy();
     }
 
     private List<String> getStrings(boolean isStoryText, int index) {
@@ -1661,6 +1665,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     public int miscTweaksAvailable() {
         int available = 0;
         available |= MiscTweak.FASTEST_TEXT.getValue();
+        available |= MiscTweak.BAN_LUCKY_EGG.getValue();
         available |= MiscTweak.SOS_BATTLES_FOR_ALL.getValue();
         return available;
     }
@@ -1669,6 +1674,10 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     public void applyMiscTweak(MiscTweak tweak) {
         if (tweak == MiscTweak.FASTEST_TEXT) {
             applyFastestText();
+        }
+        if (tweak == MiscTweak.BAN_LUCKY_EGG) {
+            allowedItems.banSingles(Gen7Constants.luckyEggIndex);
+            nonBadItems.banSingles(Gen7Constants.luckyEggIndex);
         }
         if (tweak == MiscTweak.SOS_BATTLES_FOR_ALL) {
             positiveCallRates();
@@ -2166,12 +2175,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public ItemList getAllowedItems() {
-        return Gen7Constants.getAllowedItems(romEntry.romType);
+        return allowedItems;
     }
 
     @Override
     public ItemList getNonBadItems() {
-        return Gen7Constants.nonBadItems;
+        return nonBadItems;
     }
 
     @Override
