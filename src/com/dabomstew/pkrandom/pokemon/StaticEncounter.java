@@ -18,7 +18,7 @@ public class StaticEncounter {
 
     @Override
     public String toString() {
-        return pkmn.fullName() + formeSuffix;
+        return pkmn.fullName();
     }
 
     public boolean canMegaEvolve() {
