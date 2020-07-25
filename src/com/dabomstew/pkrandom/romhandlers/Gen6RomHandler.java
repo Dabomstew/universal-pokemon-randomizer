@@ -726,8 +726,17 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             for (int i = 0; i < count; i++) {
                 if (!starterIndices.contains(i)) continue;
                 StaticEncounter se = new StaticEncounter();
-                se.pkmn = pokes[FileFunctions.read2ByteInt(staticCRO,offset+i*size)];
-                se.forme = staticCRO[offset+i*size + 4];
+                int species = FileFunctions.read2ByteInt(staticCRO,offset+i*size);
+                Pokemon pokemon = pokes[species];
+                int forme = staticCRO[offset+i*size + 4];
+                if (forme > pokemon.cosmeticForms && forme != 30 && forme != 31) {
+                    int speciesWithForme = absolutePokeNumByBaseForme
+                            .getOrDefault(species, dummyAbsolutePokeNums)
+                            .getOrDefault(forme, 0);
+                    pokemon = pokes[speciesWithForme];
+                }
+                se.pkmn = pokemon;
+                se.forme = forme;
                 se.level = staticCRO[offset+i*size + 5];
                 int heldItem = FileFunctions.readFullIntLittleEndian(staticCRO,offset+i*size + 12);
                 if (heldItem < 0) {
