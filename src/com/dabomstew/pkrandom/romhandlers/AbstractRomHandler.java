@@ -3824,7 +3824,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (Pokemon pk : pokemonPool) {
                 for (Evolution ev : pk.evolutionsFrom) {
                     oldEvoPairs.add(new EvolutionPair(ev.from, ev.to));
-                    if (ev.from.number == 790) { // Special case for Cosmoem to add Lunala/Solgaleo since we remove the split evo
+                    if (generationOfPokemon() >= 7 && ev.from.number == 790) { // Special case for Cosmoem to add Lunala/Solgaleo since we remove the split evo
                         oldEvoPairs.add(new EvolutionPair(ev.from, pokemonPool.get(ev.from.number + (ev.to.number % 791))));
                     }
                 }

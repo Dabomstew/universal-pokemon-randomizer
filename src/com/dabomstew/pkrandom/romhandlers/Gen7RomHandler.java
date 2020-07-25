@@ -2045,6 +2045,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     public void makeEvolutionsEasier(boolean wildsRandomized) {
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
+                Evolution extraEntry = null;
                 for (Evolution evo : pkmn.evolutionsFrom) {
                     if (wildsRandomized) {
                         if (evo.type == EvolutionType.LEVEL_WITH_OTHER) {
@@ -2059,21 +2060,21 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         if (evo.type == EvolutionType.LEVEL_SNOWY) {
                             log(String.format("%s now also evolves into %s at minimum level %d", evo.from.fullName(), evo.to.fullName(),
                                     evo.extraInfo));
-                            Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                            extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.LEVEL, 35);
                             extraEntry.forme = evo.forme;
-                            pkmn.evolutionsFrom.add(extraEntry);
-                            evo.to.evolutionsTo.add(extraEntry);
                         } else if (evo.type == EvolutionType.LEVEL_ELECTRIFIED_AREA) {
                             log(String.format("%s now also evolves into %s at minimum level %d", evo.from.fullName(), evo.to.fullName(),
                                     evo.extraInfo));
-                            Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                            extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.LEVEL, 35);
                             extraEntry.forme = evo.forme;
-                            pkmn.evolutionsFrom.add(extraEntry);
-                            evo.to.evolutionsTo.add(extraEntry);
                         }
                     }
+                }
+                if (extraEntry != null) {
+                    pkmn.evolutionsFrom.add(extraEntry);
+                    extraEntry.to.evolutionsTo.add(extraEntry);
                 }
             }
         }
