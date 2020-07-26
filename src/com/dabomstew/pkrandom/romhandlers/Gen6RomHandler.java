@@ -1459,9 +1459,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 trainer[offset+3] = (byte) numPokes;
 
                 if (doubleBattleMode) {
-                    if (trainer[offset+2] == 0) {
-                        trainer[offset+2] = 1;
-                        trainer[offset+12] |= 0x80; // Flag that needs to be set for trainers not to attack their own pokes
+                    if (!tr.skipImportant()) {
+                        if (trainer[offset+2] == 0) {
+                            trainer[offset+2] = 1;
+                            trainer[offset+12] |= 0x80; // Flag that needs to be set for trainers not to attack their own pokes
+                        }
                     }
                 }
 
