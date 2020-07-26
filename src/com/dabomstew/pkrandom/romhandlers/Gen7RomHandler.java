@@ -2255,7 +2255,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             }
         }
 
-        return fieldTMs;
+        return fieldTMs.stream().distinct().collect(Collectors.toList());
     }
 
     @Override
@@ -2263,25 +2263,19 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         List<Integer> fieldItems = this.getFieldItems();
         int fiLength = fieldItems.size();
         Iterator<Integer> iterTMs = fieldTMs.iterator();
-        List<Integer> duplicateFieldTMs = Gen7Constants.getDuplicateFieldTMs(romEntry.romType);
+        Map<Integer,Integer> tmMap = new HashMap<>();
 
-        int placed = 0;
-        int savedTM = 0;
         ItemList allowedItems = Gen7Constants.getAllowedItems(romEntry.romType);
         for (int i = 0; i < fiLength; i++) {
             int oldItem = fieldItems.get(i);
             if (allowedItems.isTM(oldItem)) {
-                if (savedTM != 0) {
-                    fieldItems.set(i, savedTM);
-                    savedTM = 0;
-                } else {
-                    int newItem = indexFromTM(iterTMs.next());
-                    fieldItems.set(i, newItem);
-                    if (duplicateFieldTMs.contains(placed)) {
-                        savedTM = newItem;
-                    }
+                if (tmMap.get(oldItem) != null) {
+                    fieldItems.set(i,tmMap.get(oldItem));
+                    continue;
                 }
-                placed++;
+                int newItem = indexFromTM(iterTMs.next());
+                fieldItems.set(i, newItem);
+                tmMap.put(oldItem,newItem);
             }
         }
 
@@ -2332,24 +2326,34 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         for (int i = 0; i < numberOfAreas; i++) {
             byte[][] environmentData = Mini.UnpackMini(encounterGarc.getFile(i * 11),"ED");
             if (environmentData == null) continue;
-            byte[] itemData = Mini.UnpackMini(environmentData[10],"EI")[0];
-            byte[] berryPileData = Mini.UnpackMini(environmentData[11],"EB")[0];
+
+            byte[][] itemDataFull = Mini.UnpackMini(environmentData[10],"EI");
+
+            byte[][] berryPileDataFull = Mini.UnpackMini(environmentData[11],"EB");
 
             // Field/hidden items
-            if (itemData.length > 0) {
-                int itemCount = itemData[0];
+            for (byte[] itemData: itemDataFull) {
+                if (itemData.length > 0) {
+                    int itemCount = itemData[0];
 
-                for (int j = 0; j < itemCount; j++) {
-                    fieldItems.add(FileFunctions.read2ByteInt(itemData,(j * 64) + 52));
+                    for (int j = 0; j < itemCount; j++) {
+                        String itemName = itemNames.get(FileFunctions.read2ByteInt(itemData,(j * 64) + 52));
+                        if (itemName.startsWith("TM")) {
+                            System.out.println(itemName);
+                        }
+                        fieldItems.add(FileFunctions.read2ByteInt(itemData,(j * 64) + 52));
+                    }
                 }
             }
 
             // Berry piles
-            if (berryPileData.length > 0) {
-                int pileCount = berryPileData[0];
-                for (int j = 0; j < pileCount; j++) {
-                    for (int k = 0; k < 7; k++) {
-                        fieldItems.add(FileFunctions.read2ByteInt(berryPileData,4 + j*68 + 54 + k*2));
+            for (byte[] berryPileData: berryPileDataFull) {
+                if (berryPileData.length > 0) {
+                    int pileCount = berryPileData[0];
+                    for (int j = 0; j < pileCount; j++) {
+                        for (int k = 0; k < 7; k++) {
+                            fieldItems.add(FileFunctions.read2ByteInt(berryPileData,4 + j*68 + 54 + k*2));
+                        }
                     }
                 }
             }
@@ -2366,17 +2370,17 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 if (environmentData == null) continue;
 
                 byte[][] itemDataFull = Mini.UnpackMini(environmentData[10],"EI");
-                byte[] itemData = itemDataFull[0];
 
                 byte[][] berryPileDataFull = Mini.UnpackMini(environmentData[11],"EB");
-                byte[] berryPileData = berryPileDataFull[0];
 
                 // Field/hidden items
-                if (itemData.length > 0) {
-                    int itemCount = itemData[0];
+                for (byte[] itemData: itemDataFull) {
+                    if (itemData.length > 0) {
+                        int itemCount = itemData[0];
 
-                    for (int j = 0; j < itemCount; j++) {
-                        FileFunctions.write2ByteInt(itemData,(j * 64) + 52,iterItems.next());
+                        for (int j = 0; j < itemCount; j++) {
+                            FileFunctions.write2ByteInt(itemData,(j * 64) + 52,iterItems.next());
+                        }
                     }
                 }
 
@@ -2384,12 +2388,14 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 environmentData[10] = itemDataPacked;
 
                 // Berry piles
-                if (berryPileData.length > 0) {
-                    int pileCount = berryPileData[0];
+                for (byte[] berryPileData: berryPileDataFull) {
+                    if (berryPileData.length > 0) {
+                        int pileCount = berryPileData[0];
 
-                    for (int j = 0; j < pileCount; j++) {
-                        for (int k = 0; k < 7; k++) {
-                            FileFunctions.write2ByteInt(berryPileData,4 + j*68 + 54 + k*2,iterItems.next());
+                        for (int j = 0; j < pileCount; j++) {
+                            for (int k = 0; k < 7; k++) {
+                                FileFunctions.write2ByteInt(berryPileData,4 + j*68 + 54 + k*2,iterItems.next());
+                            }
                         }
                     }
                 }

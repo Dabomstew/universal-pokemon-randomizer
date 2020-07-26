@@ -719,36 +719,20 @@ public class Gen7Constants {
     );
 
     private static final List<Integer> requiredFieldTMsSM = Arrays.asList(
-            5, 64, 62, 100, 31, 46, 88, 57, 41, 59, 73, 53, 61, 39, 86, 93, 84, 74, 72, 3, 13, 36, 91, 79, 24, 97, 50,
-            99, 35, 2, 26, 6
+            80, 49, 5, 83, 64, 62, 100, 31, 46, 88, 57, 41, 59, 73, 53, 61, 28, 39, 55, 86, 30, 93, 81, 84, 74, 85, 72,
+            3, 3, 13, 36, 91, 79, 24, 97, 50, 99, 35, 2, 26, 6, 6
     );
 
     private static final List<Integer> requiredFieldTMsUSUM = Arrays.asList(
-            5, 64, 23, 100, 79, 24, 31, 46, 88, 41, 59, 32, 53, 61, 39, 86, 62, 80, 74, 73, 72, 3, 84, 13, 36, 91, 55,
-            97, 50, 93, 99, 35, 2, 26, 6
+            49, 5, 83, 64, 23, 100, 79, 24, 31, 46, 88, 41, 59, 32, 53, 61, 28, 39, 57, 86, 30, 62, 81, 80, 74, 85, 73,
+            72, 3, 3, 84, 13, 36, 91, 55, 97, 50, 93, 93, 99, 35, 2, 26, 6, 6
     );
 
     public static List<Integer> getRequiredFieldTMs(int romType) {
         if (romType == Type_SM) {
-            return requiredFieldTMsSM;
+            return requiredFieldTMsSM.stream().distinct().collect(Collectors.toList());
         } else {
-            return requiredFieldTMsUSUM;
-        }
-    }
-
-    private static final List<Integer> duplicateFieldTMsSM = Arrays.asList(
-            19, 32
-    );
-
-    private static final List<Integer> duplicateFieldTMsUSUM = Arrays.asList(
-            21, 30, 36
-    );
-
-    public static List<Integer> getDuplicateFieldTMs(int romType) {
-        if (romType == Type_SM) {
-            return duplicateFieldTMsSM;
-        } else {
-            return duplicateFieldTMsUSUM;
+            return requiredFieldTMsUSUM.stream().distinct().collect(Collectors.toList());
         }
     }
 
