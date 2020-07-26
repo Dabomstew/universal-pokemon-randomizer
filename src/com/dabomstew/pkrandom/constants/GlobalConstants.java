@@ -111,7 +111,7 @@ public class GlobalConstants {
             654, // Black Hole Eclipse (Physical)
             655, // Black Hole Eclipse (Special)
             656, // Twinkle Tackle (Physical)
-            656 // Twinkle Tackle (Special)
+            657 // Twinkle Tackle (Special)
             );
 
     public static final List<Integer> fixedPowerZMoves = Arrays.asList(
