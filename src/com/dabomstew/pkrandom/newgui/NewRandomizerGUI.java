@@ -289,6 +289,8 @@ public class NewRandomizerGUI {
             checkCustomNames();
         }
 
+        frame.setTitle(String.format(bundle.getString("GUI.windowTitle"),Version.VERSION_STRING));
+
         openROMButton.addActionListener(e -> loadROM());
         pbsUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         pbsShuffleRadioButton.addActionListener(e -> enableOrDisableSubControls());
