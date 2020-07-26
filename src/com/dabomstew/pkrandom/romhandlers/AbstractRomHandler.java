@@ -1842,7 +1842,16 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             for (int i = 0; i < additional; i++) {
                 if (t.pokemon.size() == 6) break;
-                t.pokemon.add(potentialPokes.get(i % potentialPokes.size()).copy());
+
+                // We want to preserve the original last Pokemon because the order is sometimes used to
+                // determine the rival's starter
+                int secondToLastIndex = t.pokemon.size() - 1;
+                TrainerPokemon newPokemon = potentialPokes.get(i % potentialPokes.size()).copy();
+
+                // Clear out the held item because we only want one Pokemon with a mega stone if we're
+                // swapping mega evolvables
+                newPokemon.heldItem = 0;
+                t.pokemon.add(secondToLastIndex, newPokemon);
             }
         }
         this.setTrainers(currentTrainers, false);
