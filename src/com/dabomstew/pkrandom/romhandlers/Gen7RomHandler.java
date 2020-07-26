@@ -2624,7 +2624,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     public BufferedImage getMascotImage() {
         try {
             GARCArchive pokespritesGARC = this.readGARC(romEntry.getString("PokemonGraphics"), false);
-            int pkIndex = this.random.nextInt(pokespritesGARC.files.size() - 2) + 1;
+            int pkIndex = this.random.nextInt(pokespritesGARC.files.size() - 1) + 1;
+            if (romEntry.romType == Gen7Constants.Type_SM) {
+                while (pkIndex == 1109 || pkIndex == 1117) {
+                    pkIndex = this.random.nextInt(pokespritesGARC.files.size() - 1) + 1;
+                }
+            }
             byte[] iconBytes = pokespritesGARC.files.get(pkIndex).get(0);
             BFLIM icon = new BFLIM(iconBytes);
             return icon.getImage();
