@@ -34,6 +34,7 @@ import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.Mini;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.*;
+import jdk.nashorn.internal.objects.Global;
 import pptxt.N3DSTxtHandler;
 
 import java.awt.*;
@@ -821,6 +822,20 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     @Override
     public int starterCount() {
         return romEntry.romType == Gen6Constants.Type_XY ? 6 : 12;
+    }
+
+    @Override
+    public Map<Integer, StatChange> getUpdatedPokemonStats(int generation) {
+        Map<Integer, StatChange> map = GlobalConstants.getStatChanges(generation);
+        switch(generation) {
+            case 7:
+                map.put(781,new StatChange(Stat.SPDEF.val,105));
+                break;
+            case 8:
+                map.put(776,new StatChange(Stat.ATK.val | Stat.SPATK.val,140,140));
+                break;
+        }
+        return map;
     }
 
     @Override

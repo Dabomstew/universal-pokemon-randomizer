@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.newgui;
 
 import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
@@ -238,6 +239,7 @@ public class NewRandomizerGUI {
     private JCheckBox totpAllowAltFormesCheckBox;
     private JPanel totpPanel;
     private JCheckBox pmsEvolutionMovesCheckBox;
+    private JComboBox<String> pbsUpdateComboBox;
 
     private static JFrame frame;
 
@@ -389,6 +391,7 @@ public class NewRandomizerGUI {
         totpAllyRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
         totpAllyRandomSimilarStrengthRadioButton.addActionListener(e -> enableOrDisableSubControls());
         totpPercentageLevelModifierCheckBox.addActionListener(e -> enableOrDisableSubControls());
+        pbsUpdateBaseStatsCheckBox.addActionListener(e -> enableOrDisableSubControls());
     }
 
     private void initFileChooserDirectories() {
@@ -901,6 +904,7 @@ public class NewRandomizerGUI {
         pbsUnchangedRadioButton.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.UNCHANGED);
         pbsFollowEvolutionsCheckBox.setSelected(settings.isBaseStatsFollowEvolutions());
         pbsUpdateBaseStatsCheckBox.setSelected(settings.isUpdateBaseStats());
+        pbsUpdateComboBox.setSelectedIndex(settings.getUpdateBaseStatsToGeneration() - 6);
         pbsStandardizeEXPCurvesCheckBox.setSelected(settings.isStandardizeEXPCurves());
         pbsLegendariesSlowRadioButton.setSelected(settings.getExpCurveMod() == Settings.ExpCurveMod.LEGENDARIES);
         pbsStrongLegendariesSlowRadioButton.setSelected(settings.getExpCurveMod() == Settings.ExpCurveMod.STRONG_LEGENDARIES);
@@ -1123,6 +1127,7 @@ public class NewRandomizerGUI {
                 pbsRandomRadioButton.isSelected());
         settings.setBaseStatsFollowEvolutions(pbsFollowEvolutionsCheckBox.isSelected());
         settings.setUpdateBaseStats(pbsUpdateBaseStatsCheckBox.isSelected() && pbsUpdateBaseStatsCheckBox.isVisible());
+        settings.setUpdateBaseStatsToGeneration(pbsUpdateComboBox.getSelectedIndex() + 6);
         settings.setStandardizeEXPCurves(pbsStandardizeEXPCurvesCheckBox.isSelected());
         settings.setExpCurveMod(pbsLegendariesSlowRadioButton.isSelected(), pbsStrongLegendariesSlowRadioButton.isSelected(),
                 pbsAllMediumFastRadioButton.isSelected());
@@ -1420,6 +1425,10 @@ public class NewRandomizerGUI {
         pbsFollowMegaEvosCheckBox.setVisible(true);
         pbsFollowMegaEvosCheckBox.setEnabled(false);
         pbsFollowMegaEvosCheckBox.setSelected(false);
+        pbsUpdateComboBox.setVisible(true);
+        pbsUpdateComboBox.setEnabled(false);
+        pbsUpdateComboBox.setSelectedIndex(0);
+        pbsUpdateComboBox.setModel(new DefaultComboBoxModel<>(new String[] { "--" }));
         ptUnchangedRadioButton.setVisible(true);
         ptUnchangedRadioButton.setEnabled(false);
         ptUnchangedRadioButton.setSelected(false);
@@ -1976,8 +1985,9 @@ public class NewRandomizerGUI {
 
             pbsStandardizeEXPCurvesCheckBox.setEnabled(true);
             pbsLegendariesSlowRadioButton.setSelected(true);
-            pbsUpdateBaseStatsCheckBox.setEnabled(pokemonGeneration < 6);
+            pbsUpdateBaseStatsCheckBox.setEnabled(pokemonGeneration < 8);
             pbsFollowMegaEvosCheckBox.setVisible(romHandler.hasMegaEvolutions());
+            pbsUpdateComboBox.setVisible(pokemonGeneration < 8);
 
             // Pokemon Types
             ptUnchangedRadioButton.setEnabled(true);
@@ -2295,6 +2305,12 @@ public class NewRandomizerGUI {
             pbsLegendariesSlowRadioButton.setSelected(true);
             pbsStrongLegendariesSlowRadioButton.setEnabled(false);
             pbsAllMediumFastRadioButton.setEnabled(false);
+        }
+
+        if (pbsUpdateBaseStatsCheckBox.isSelected()) {
+            pbsUpdateComboBox.setEnabled(true);
+        } else {
+            pbsUpdateComboBox.setEnabled(false);
         }
 
         if (ptUnchangedRadioButton.isSelected()) {
@@ -2811,6 +2827,14 @@ public class NewRandomizerGUI {
             spComboBox3.setModel(new DefaultComboBoxModel<>(pokeNames));
             spComboBox3.setSelectedIndex(allPokes.indexOf(currentStarters.get(2)) - 1);
         }
+
+        String[] generationNumbers = new String[Math.min(3, GlobalConstants.HIGHEST_POKEMON_GEN - romHandler.generationOfPokemon())];
+        int j = Math.max(6,romHandler.generationOfPokemon() + 1);
+        for (int i = 0; i < generationNumbers.length; i++) {
+            generationNumbers[i] = String.valueOf(j);
+            j++;
+        }
+        pbsUpdateComboBox.setModel(new DefaultComboBoxModel<>(generationNumbers));
     }
 
     private ImageIcon makeMascotIcon() {

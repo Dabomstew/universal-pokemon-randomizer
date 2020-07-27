@@ -726,6 +726,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public Map<Integer, StatChange> getUpdatedPokemonStats(int generation) {
+        return GlobalConstants.getStatChanges(generation);
+    }
+
+    @Override
     public List<Integer> getStarterHeldItems() {
         // do nothing
         return new ArrayList<>();

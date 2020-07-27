@@ -107,7 +107,9 @@ public interface RomHandler {
     void randomizePokemonStats(boolean evolutionSanity, boolean megaEvolutionSanity);
 
     // Update base stats to gen6
-    void updatePokemonStats();
+    void updatePokemonStats(int generation);
+
+    Map<Integer,StatChange> getUpdatedPokemonStats(int generation);
 
     // Give a random Pokemon who's in this game
     Pokemon randomPokemon();

@@ -1129,6 +1129,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    public Map<Integer, StatChange> getUpdatedPokemonStats(int generation) {
+        return GlobalConstants.getStatChanges(generation);
+    }
+
+    @Override
     public List<Integer> getStarterHeldItems() {
         List<Integer> sHeldItems = new ArrayList<>();
         if (romEntry.romType == Gen3Constants.RomType_FRLG) {

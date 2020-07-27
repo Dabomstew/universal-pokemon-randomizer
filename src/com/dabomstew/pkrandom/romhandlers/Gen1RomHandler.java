@@ -720,6 +720,21 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public Map<Integer, StatChange> getUpdatedPokemonStats(int generation) {
+        Map<Integer,StatChange> map = GlobalConstants.getStatChanges(generation);
+        switch(generation) {
+            case 6:
+                map.put(12,new StatChange(Stat.SPECIAL.val,90));
+                map.put(36,new StatChange(Stat.SPECIAL.val,95));
+                map.put(45,new StatChange(Stat.SPECIAL.val,110));
+                break;
+            default:
+                break;
+        }
+        return map;
+    }
+
+    @Override
     public List<Integer> getStarterHeldItems() {
         // do nothing
         return new ArrayList<>();

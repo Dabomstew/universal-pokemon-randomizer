@@ -2220,6 +2220,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         return 3;
     }
 
+    @Override
+    public Map<Integer, StatChange> getUpdatedPokemonStats(int generation) {
+        return GlobalConstants.getStatChanges(generation);
+    }
+
     private void populateEvolutions() {
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {

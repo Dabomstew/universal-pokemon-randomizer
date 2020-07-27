@@ -512,6 +512,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public Map<Integer, StatChange> getUpdatedPokemonStats(int generation) {
+        return null;
+    }
+
+    @Override
     public List<Integer> getStarterHeldItems() {
         List<Integer> sHeldItems = new ArrayList<>();
         int[] shiOffsets = romEntry.arrayEntries.get("StarterHeldItems");

@@ -145,7 +145,7 @@ public class Randomizer {
         }
 
         if (settings.isUpdateBaseStats()) {
-            romHandler.updatePokemonStats();
+            romHandler.updatePokemonStats(settings.getUpdateBaseStatsToGeneration());
         }
 
         if (settings.isStandardizeEXPCurves()) {

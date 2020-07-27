@@ -7,11 +7,12 @@ public enum Stat {
     SPATK(1 << 3),
     SPDEF(1 << 4),
     SPEED(1 << 5),
-    POWER(1 << 6),
-    ACCURACY(1 << 7),
-    PP(1 << 8),
-    TYPE(1 << 9),
-    CATEGORY(1 << 10);
+    SPECIAL(1 << 6),
+    POWER(1 << 7),
+    ACCURACY(1 << 8),
+    PP(1 << 9),
+    TYPE(1 << 10),
+    CATEGORY(1 << 11);
 
     public final int val;
 

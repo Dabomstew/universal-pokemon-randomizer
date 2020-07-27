@@ -74,6 +74,7 @@ public class Settings {
     private boolean baseStatsFollowEvolutions;
     private boolean baseStatsFollowMegaEvolutions;
     private boolean updateBaseStats;
+    private int updateBaseStatsToGeneration;
     private boolean standardizeEXPCurves;
     private ExpCurveMod expCurveMod = ExpCurveMod.LEGENDARIES;
 
@@ -1074,6 +1075,14 @@ public class Settings {
 
     public void setUpdateBaseStats(boolean updateBaseStats) {
         this.updateBaseStats = updateBaseStats;
+    }
+
+    public int getUpdateBaseStatsToGeneration() {
+        return updateBaseStatsToGeneration;
+    }
+
+    public void setUpdateBaseStatsToGeneration(int generation) {
+        this.updateBaseStatsToGeneration = generation;
     }
 
     public AbilitiesMod getAbilitiesMod() {

@@ -137,11 +137,7 @@ public class GlobalConstants {
     public static final List<Integer> zMoves = Stream.concat(fixedPowerZMoves.stream(),
             varyingPowerZMoves.stream()).collect(Collectors.toList());
 
-    public static final Map<Integer,StatChange> gen6StatChanges = setupStatChanges(6);
-    public static final Map<Integer,StatChange> gen7StatChanges = setupStatChanges(7);
-    public static final Map<Integer,StatChange> gen8StatChanges = setupStatChanges(8);
-
-    private static Map<Integer,StatChange> setupStatChanges(int generation) {
+    public static Map<Integer,StatChange> getStatChanges(int generation) {
         Map<Integer,StatChange> map = new TreeMap<>();
 
         switch(generation) {
@@ -177,7 +173,6 @@ public class GlobalConstants {
             case 7:
                 map.put(24,new StatChange(Stat.ATK.val,95));
                 map.put(51,new StatChange(Stat.ATK.val,100));
-//                map.put(65,new StatChange(Stat.SPDEF.val,105)); // Should be Mega Alakazam
                 map.put(83,new StatChange(Stat.ATK.val,90));
                 map.put(85,new StatChange(Stat.SPEED.val,110));
                 map.put(101,new StatChange(Stat.SPEED.val,150));
@@ -204,7 +199,6 @@ public class GlobalConstants {
                 break;
             case 8:
                 map.put(681,new StatChange(Stat.DEF.val | Stat.SPDEF.val,140,140));
-//                map.put(681,new StatChange(Stat.ATK.val | Stat.SPATK.val,140,140)); // Should be Aegislash Blade Forme
                 break;
         }
         return map;
@@ -236,5 +230,7 @@ public class GlobalConstants {
     public static final int METRONOME_MOVE = 118;
 
     public static final int TRIPLE_KICK_INDEX = 167;
+
+    public static final int HIGHEST_POKEMON_GEN = 8;
 
 }
