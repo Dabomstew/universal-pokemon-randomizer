@@ -667,7 +667,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     private void writeEvolutions() {
         try {
             GARCArchive evoGARC = readGARC(romEntry.getString("PokemonEvolutions"),true);
-            for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.romType); i++) {
+            for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.romType) + Gen7Constants.getFormeCount(romEntry.romType); i++) {
                 byte[] evoEntry = evoGARC.files.get(i).get(0);
                 Pokemon pk = pokes[i];
                 int evosWritten = 0;
