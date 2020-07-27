@@ -2337,10 +2337,6 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     int itemCount = itemData[0];
 
                     for (int j = 0; j < itemCount; j++) {
-                        String itemName = itemNames.get(FileFunctions.read2ByteInt(itemData,(j * 64) + 52));
-                        if (itemName.startsWith("TM")) {
-                            System.out.println(itemName);
-                        }
                         fieldItems.add(FileFunctions.read2ByteInt(itemData,(j * 64) + 52));
                     }
                 }
