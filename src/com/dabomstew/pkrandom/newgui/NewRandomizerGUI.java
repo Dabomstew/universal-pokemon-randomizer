@@ -241,6 +241,7 @@ public class NewRandomizerGUI {
     private JCheckBox pmsEvolutionMovesCheckBox;
     private JComboBox<String> pbsUpdateComboBox;
     private JComboBox<String> mdUpdateComboBox;
+    private JLabel wikiLinkLabel;
 
     private static JFrame frame;
 
@@ -366,6 +367,17 @@ public class NewRandomizerGUI {
                 }
             }
         });
+        wikiLinkLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                Desktop desktop = java.awt.Desktop.getDesktop();
+                try {
+                    desktop.browse(new URI(SysConstants.WIKI_URL_ZX));
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
         randomizeSaveButton.addActionListener(e -> saveROM());
         premadeSeedButton.addActionListener(e -> presetLoader());
         loadSettingsButton.addActionListener(e -> loadQS());
@@ -418,6 +430,7 @@ public class NewRandomizerGUI {
         baseTweaksPanel.add(liveTweaksPanel);
         liveTweaksPanel.setVisible(false);
         websiteLinkLabel.setCursor(new java.awt.Cursor(Cursor.HAND_CURSOR));
+        wikiLinkLabel.setCursor(new java.awt.Cursor(Cursor.HAND_CURSOR));
 
         romOpenChooser.setFileFilter(new ROMFilter());
 
