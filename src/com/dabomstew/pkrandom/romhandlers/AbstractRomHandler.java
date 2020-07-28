@@ -2080,7 +2080,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Explosion => 250 power (gen1)
         updateMovePower(moves, 153, 250);
 
-        if (generation >= 3) {
+        if (generation >= 3 && generationOfPokemon() < 3) {
             // Razor Wind => 100% accuracy (gen1/2)
             updateMoveAccuracy(moves, 13, 100);
             // Move 67, Low Kick, has weight-based power in gen3+
@@ -2088,7 +2088,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             updateMoveAccuracy(moves, 67, 100);
         }
 
-        if (generation >= 4) {
+        if (generation >= 4 && generationOfPokemon() < 4) {
             // Fly => 90 power (gen1/2/3)
             updateMovePower(moves, 19, 90);
             // Vine Whip => 15 pp (gen1/2/3)
@@ -2117,7 +2117,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        if (generation >= 5) {
+        if (generation >= 5 && generationOfPokemon() < 5) {
             // Bind => 85% accuracy (gen1-4)
             updateMoveAccuracy(moves, 20, 85);
             // Jump Kick => 10 pp, 100 power (gen1-4)
@@ -2198,7 +2198,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 updateMoveAccuracy(moves, 353, 100);
             }
 
-            if (generationOfPokemon() >= 4) {
+            if (generationOfPokemon() == 4) {
                 // Feint => 30 pow
                 updateMovePower(moves, 364, 30);
                 // Last Resort => 140 pow
@@ -2211,10 +2211,12 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        if (generation >= 6) {
+        if (generation >= 6 && generationOfPokemon() < 6) {
             // gen 1
             // Swords Dance 20 PP
             updateMovePP(moves, 14, 20);
+            // Whirlwind can't miss
+            updateMoveAccuracy(moves, 18, perfectAccuracy);
             // Vine Whip 25 PP, 45 Power
             updateMovePP(moves, 22, 25);
             updateMovePower(moves, 22, 45);
@@ -2334,7 +2336,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 updateMovePower(moves, 463, 100);
             }
 
-            if (generationOfPokemon() >= 5) {
+            if (generationOfPokemon() == 5) {
                 // Storm Throw 60 Power
                 updateMovePower(moves, 480, 60);
                 // Synchronoise 120 Power
@@ -2363,7 +2365,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        if (generation >= 7) {
+        if (generation >= 7 && generationOfPokemon() < 7) {
 
             // Leech Life 80 Power, 10 PP
             updateMovePower(moves, 141, 80);
@@ -2392,7 +2394,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 updateMovePower(moves, 389, 70);
             }
 
-            if (generationOfPokemon() >= 6) {
+            if (generationOfPokemon() == 6) {
                 // Aromatic Mist can't miss
                 updateMoveAccuracy(moves, 597, perfectAccuracy);
                 // Fell Stinger 50 Power
@@ -2412,13 +2414,13 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        if (generation >= 8) {
+        if (generation >= 8 && generationOfPokemon() < 8) {
             if (generationOfPokemon() >= 2) {
                 // Rapid Spin 50 Power
                 updateMovePower(moves, 229, 50);
             }
 
-            if (generationOfPokemon() >= 7) {
+            if (generationOfPokemon() == 7) {
                 // Multi-Attack 120 Power
                 updateMovePower(moves, 718, 120);
             }
