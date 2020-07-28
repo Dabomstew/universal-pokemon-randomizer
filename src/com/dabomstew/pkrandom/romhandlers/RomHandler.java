@@ -215,13 +215,7 @@ public interface RomHandler {
 
     void randomizeMoveCategory();
 
-    // Update all moves to gen5 definitions as much as possible
-    // e.g. change typing, power, accuracy, but don't try to
-    // stuff around with effects.
-    void updateMovesToGen5();
-
-    // same for gen6
-    void updateMovesToGen6();
+    void updateMoves(int generation);
 
     // stuff for printing move changes
     void initMoveUpdates();

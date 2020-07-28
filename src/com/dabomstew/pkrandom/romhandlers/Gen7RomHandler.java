@@ -574,6 +574,10 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 moves[i].type = Gen7Constants.typeTable[moveData[0] & 0xFF];
                 moves[i].category = Gen7Constants.moveCategoryIndices[moveData[2] & 0xFF];
 
+                if (i == GlobalConstants.SWIFT_INDEX) {
+                    perfectAccuracy = (int)moves[i].hitratio;
+                }
+
                 if (GlobalConstants.normalMultihitMoves.contains(i)) {
                     moves[i].hitCount = 19 / 6.0;
                 } else if (GlobalConstants.doubleHitMoves.contains(i)) {

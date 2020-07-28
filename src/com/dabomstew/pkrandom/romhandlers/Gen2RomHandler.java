@@ -378,6 +378,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             moves[i].pp = rom[offs + (i - 1) * 7 + 5] & 0xFF;
             moves[i].type = Gen2Constants.typeTable[rom[offs + (i - 1) * 7 + 3]];
 
+            if (i == GlobalConstants.SWIFT_INDEX) {
+                perfectAccuracy = (int)moves[i].hitratio;
+            }
+
             if (GlobalConstants.normalMultihitMoves.contains(i)) {
                 moves[i].hitCount = 3;
             } else if (GlobalConstants.doubleHitMoves.contains(i)) {

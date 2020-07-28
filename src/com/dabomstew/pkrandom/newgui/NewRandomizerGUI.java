@@ -240,6 +240,7 @@ public class NewRandomizerGUI {
     private JPanel totpPanel;
     private JCheckBox pmsEvolutionMovesCheckBox;
     private JComboBox<String> pbsUpdateComboBox;
+    private JComboBox<String> mdUpdateComboBox;
 
     private static JFrame frame;
 
@@ -392,6 +393,7 @@ public class NewRandomizerGUI {
         totpAllyRandomSimilarStrengthRadioButton.addActionListener(e -> enableOrDisableSubControls());
         totpPercentageLevelModifierCheckBox.addActionListener(e -> enableOrDisableSubControls());
         pbsUpdateBaseStatsCheckBox.addActionListener(e -> enableOrDisableSubControls());
+        mdUpdateMovesCheckBox.addActionListener(e -> enableOrDisableSubControls());
     }
 
     private void initFileChooserDirectories() {
@@ -895,7 +897,7 @@ public class NewRandomizerGUI {
 
         peChangeImpossibleEvosCheckBox.setSelected(settings.isChangeImpossibleEvolutions());
         mdUpdateMovesCheckBox.setSelected(settings.isUpdateMoves());
-        mdLegacyCheckBox.setSelected(settings.isUpdateMovesLegacy());
+        mdUpdateComboBox.setSelectedIndex(Math.max(0,settings.getUpdateBaseStatsToGeneration() - (romHandler.generationOfPokemon()+1)));
         tpRandomizeTrainerNamesCheckBox.setSelected(settings.isRandomizeTrainerNames());
         tpRandomizeTrainerClassNamesCheckBox.setSelected(settings.isRandomizeTrainerClassNames());
 
@@ -904,7 +906,7 @@ public class NewRandomizerGUI {
         pbsUnchangedRadioButton.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.UNCHANGED);
         pbsFollowEvolutionsCheckBox.setSelected(settings.isBaseStatsFollowEvolutions());
         pbsUpdateBaseStatsCheckBox.setSelected(settings.isUpdateBaseStats());
-        pbsUpdateComboBox.setSelectedIndex(settings.getUpdateBaseStatsToGeneration() - 6);
+        pbsUpdateComboBox.setSelectedIndex(Math.max(0,settings.getUpdateBaseStatsToGeneration() - (Math.max(6,romHandler.generationOfPokemon()+1))));
         pbsStandardizeEXPCurvesCheckBox.setSelected(settings.isStandardizeEXPCurves());
         pbsLegendariesSlowRadioButton.setSelected(settings.getExpCurveMod() == Settings.ExpCurveMod.LEGENDARIES);
         pbsStrongLegendariesSlowRadioButton.setSelected(settings.getExpCurveMod() == Settings.ExpCurveMod.STRONG_LEGENDARIES);
@@ -1119,7 +1121,7 @@ public class NewRandomizerGUI {
 
         settings.setChangeImpossibleEvolutions(peChangeImpossibleEvosCheckBox.isSelected() && peChangeImpossibleEvosCheckBox.isVisible());
         settings.setUpdateMoves(mdUpdateMovesCheckBox.isSelected() && mdUpdateMovesCheckBox.isVisible());
-        settings.setUpdateMovesLegacy(mdLegacyCheckBox.isSelected() && mdLegacyCheckBox.isVisible());
+        settings.setUpdateMovesToGeneration(mdUpdateComboBox.getSelectedIndex() + (romHandler.generationOfPokemon()+1));
         settings.setRandomizeTrainerNames(tpRandomizeTrainerNamesCheckBox.isSelected());
         settings.setRandomizeTrainerClassNames(tpRandomizeTrainerClassNamesCheckBox.isSelected());
 
@@ -1127,7 +1129,7 @@ public class NewRandomizerGUI {
                 pbsRandomRadioButton.isSelected());
         settings.setBaseStatsFollowEvolutions(pbsFollowEvolutionsCheckBox.isSelected());
         settings.setUpdateBaseStats(pbsUpdateBaseStatsCheckBox.isSelected() && pbsUpdateBaseStatsCheckBox.isVisible());
-        settings.setUpdateBaseStatsToGeneration(pbsUpdateComboBox.getSelectedIndex() + 6);
+        settings.setUpdateBaseStatsToGeneration(pbsUpdateComboBox.getSelectedIndex() + (Math.max(6,romHandler.generationOfPokemon()+1)));
         settings.setStandardizeEXPCurves(pbsStandardizeEXPCurvesCheckBox.isSelected());
         settings.setExpCurveMod(pbsLegendariesSlowRadioButton.isSelected(), pbsStrongLegendariesSlowRadioButton.isSelected(),
                 pbsAllMediumFastRadioButton.isSelected());
@@ -1588,9 +1590,10 @@ public class NewRandomizerGUI {
         mdUpdateMovesCheckBox.setVisible(true);
         mdUpdateMovesCheckBox.setEnabled(false);
         mdUpdateMovesCheckBox.setSelected(false);
-        mdLegacyCheckBox.setVisible(true);
-        mdLegacyCheckBox.setEnabled(false);
-        mdLegacyCheckBox.setSelected(false);
+        mdUpdateComboBox.setVisible(true);
+        mdUpdateComboBox.setEnabled(false);
+        mdUpdateComboBox.setSelectedIndex(0);
+        mdUpdateComboBox.setModel(new DefaultComboBoxModel<>(new String[] { "--" }));
         pmsUnchangedRadioButton.setVisible(true);
         pmsUnchangedRadioButton.setEnabled(false);
         pmsUnchangedRadioButton.setSelected(false);
@@ -2088,9 +2091,8 @@ public class NewRandomizerGUI {
             mdRandomizeMoveTypesCheckBox.setEnabled(true);
             mdRandomizeMoveCategoryCheckBox.setEnabled(romHandler.hasPhysicalSpecialSplit());
             mdRandomizeMoveCategoryCheckBox.setVisible(romHandler.hasPhysicalSpecialSplit());
-            mdUpdateMovesCheckBox.setEnabled(pokemonGeneration < 6);
-            mdUpdateMovesCheckBox.setVisible(pokemonGeneration < 6);
-            mdLegacyCheckBox.setVisible(pokemonGeneration < 5);
+            mdUpdateMovesCheckBox.setEnabled(pokemonGeneration < 8);
+            mdUpdateMovesCheckBox.setVisible(pokemonGeneration < 8);
 
             // Pokemon Movesets
             pmsUnchangedRadioButton.setEnabled(true);
@@ -2403,6 +2405,12 @@ public class NewRandomizerGUI {
             igtRandomizeIVsCheckBox.setEnabled(true);
             igtRandomizeNicknamesCheckBox.setEnabled(true);
             igtRandomizeOTsCheckBox.setEnabled(true);
+        }
+
+        if (mdUpdateMovesCheckBox.isSelected()) {
+            mdUpdateComboBox.setEnabled(true);
+        } else {
+            mdUpdateComboBox.setEnabled(false);
         }
 
         if (pmsMetronomeOnlyModeRadioButton.isSelected() || pmsUnchangedRadioButton.isSelected()) {
@@ -2828,13 +2836,22 @@ public class NewRandomizerGUI {
             spComboBox3.setSelectedIndex(allPokes.indexOf(currentStarters.get(2)) - 1);
         }
 
-        String[] generationNumbers = new String[Math.min(3, GlobalConstants.HIGHEST_POKEMON_GEN - romHandler.generationOfPokemon())];
+        String[] baseStatGenerationNumbers = new String[Math.min(3, GlobalConstants.HIGHEST_POKEMON_GEN - romHandler.generationOfPokemon())];
         int j = Math.max(6,romHandler.generationOfPokemon() + 1);
-        for (int i = 0; i < generationNumbers.length; i++) {
-            generationNumbers[i] = String.valueOf(j);
+        for (int i = 0; i < baseStatGenerationNumbers.length; i++) {
+            baseStatGenerationNumbers[i] = String.valueOf(j);
             j++;
         }
-        pbsUpdateComboBox.setModel(new DefaultComboBoxModel<>(generationNumbers));
+        pbsUpdateComboBox.setModel(new DefaultComboBoxModel<>(baseStatGenerationNumbers));
+
+        String[] moveGenerationNumbers = new String[GlobalConstants.HIGHEST_POKEMON_GEN - romHandler.generationOfPokemon()];
+        j = romHandler.generationOfPokemon() + 1;
+        for (int i = 0; i < moveGenerationNumbers.length; i++) {
+            moveGenerationNumbers[i] = String.valueOf(j);
+            j++;
+        }
+        mdUpdateComboBox.setModel(new DefaultComboBoxModel<>(moveGenerationNumbers));
+
     }
 
     private ImageIcon makeMascotIcon() {

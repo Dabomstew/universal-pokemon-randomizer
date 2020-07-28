@@ -47,7 +47,7 @@ public class Settings {
 
     public static final int VERSION = Version.VERSION;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 44;
+    public static final int LENGTH_OF_SETTINGS_DATA = 46;
 
     private CustomNamesSet customNames;
 
@@ -132,6 +132,7 @@ public class Settings {
     private boolean randomizeMoveTypes;
     private boolean randomizeMoveCategory;
     private boolean updateMoves;
+    private int updateMovesToGeneration;
     private boolean updateMovesLegacy;
 
     public enum MovesetsMod {
@@ -520,7 +521,12 @@ public class Settings {
         ));
 
         out.write((totemLevelsModified ? 0x80 : 0) | (totemLevelModifier+50));
-        
+
+        // These two get a byte each for future proofing
+        out.write(updateBaseStatsToGeneration);
+
+        out.write(updateMovesToGeneration);
+
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
             out.write(romName.length);
@@ -775,6 +781,10 @@ public class Settings {
         settings.setTotemLevelsModified(restoreState(data[43],7));
         settings.setTotemLevelModifier((data[43] & 0x7F) - 50);
 
+        settings.setUpdateBaseStatsToGeneration(data[44]);
+
+        settings.setUpdateMovesToGeneration(data[45]);
+
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
         settings.setRomName(romName);
@@ -969,6 +979,14 @@ public class Settings {
 
     public void setUpdateMovesLegacy(boolean updateMovesLegacy) {
         this.updateMovesLegacy = updateMovesLegacy;
+    }
+
+    public int getUpdateMovesToGeneration() {
+        return updateMovesToGeneration;
+    }
+
+    public void setUpdateMovesToGeneration(int generation) {
+        updateMovesToGeneration = generation;
     }
 
     public boolean isChangeImpossibleEvolutions() {

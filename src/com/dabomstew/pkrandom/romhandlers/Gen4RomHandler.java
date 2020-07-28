@@ -329,6 +329,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 moves[i].type = Gen4Constants.typeTable[moveData[4] & 0xFF];
                 moves[i].category = Gen4Constants.moveCategoryIndices[moveData[2] & 0xFF];
 
+                if (i == GlobalConstants.SWIFT_INDEX) {
+                    perfectAccuracy = (int)moves[i].hitratio;
+                }
+
                 if (GlobalConstants.normalMultihitMoves.contains(i)) {
                     moves[i].hitCount = 3;
                 } else if (GlobalConstants.doubleHitMoves.contains(i)) {
@@ -1498,7 +1502,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 int numPokes = trainer[3] & 0xFF;
                 int pokeOffs = 0;
                 tr.fullDisplayName = tclasses.get(tr.trainerclass) + " " + tnames.get(i - 1);
-                System.out.println("a");
                 // printBA(trpoke);
                 for (int poke = 0; poke < numPokes; poke++) {
                     int ailevel = trpoke[pokeOffs] & 0xFF;

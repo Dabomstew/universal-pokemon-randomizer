@@ -263,6 +263,12 @@ public class SettingsUpdater {
 
             // totem level modifier
             insertExtraByte(43, (byte) 50);
+
+            // base stat generation
+            insertExtraByte(44, (byte) 0);
+
+            // move generation
+            insertExtraByte(45, (byte) 0);
         }
 
         // fix checksum

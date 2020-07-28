@@ -1191,15 +1191,16 @@
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.mdUpdateMovesCheckBox.toolTipText"/>
                     </properties>
                   </component>
-                  <component id="b2dda" class="javax.swing.JCheckBox" binding="mdLegacyCheckBox">
+                  <component id="19338" class="javax.swing.JComboBox" binding="mdUpdateComboBox">
                     <constraints>
-                      <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                      <gridbag weightx="0.0" weighty="0.0"/>
+                      <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag top="0" left="5" bottom="0" right="0" weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
                       <enabled value="false"/>
-                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.mdLegacyCheckBox.text"/>
-                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.mdLegacyCheckBox.toolTipText"/>
+                      <model>
+                        <item value="--"/>
+                      </model>
                     </properties>
                   </component>
                 </children>

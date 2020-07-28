@@ -389,6 +389,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 moves[i].type = Gen5Constants.typeTable[moveData[0] & 0xFF];
                 moves[i].category = Gen5Constants.moveCategoryIndices[moveData[2] & 0xFF];
 
+                if (i == GlobalConstants.SWIFT_INDEX) {
+                    perfectAccuracy = (int)moves[i].hitratio;
+                }
+
                 if (GlobalConstants.normalMultihitMoves.contains(i)) {
                     moves[i].hitCount = 19 / 6.0;
                 } else if (GlobalConstants.doubleHitMoves.contains(i)) {

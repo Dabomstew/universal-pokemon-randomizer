@@ -92,12 +92,13 @@ public class Randomizer {
         // Move updates & data changes
         if (settings.isUpdateMoves()) {
             romHandler.initMoveUpdates();
-            if (!(romHandler instanceof Gen5RomHandler)) {
-                romHandler.updateMovesToGen5();
-            }
-            if (!settings.isUpdateMovesLegacy()) {
-                romHandler.updateMovesToGen6();
-            }
+            romHandler.updateMoves(settings.getUpdateMovesToGeneration());
+//            if (!(romHandler instanceof Gen5RomHandler)) {
+//                romHandler.updateMovesToGen5();
+//            }
+//            if (!settings.isUpdateMovesLegacy()) {
+//                romHandler.updateMovesToGen6();
+//            }
             romHandler.printMoveUpdates();
         }
 

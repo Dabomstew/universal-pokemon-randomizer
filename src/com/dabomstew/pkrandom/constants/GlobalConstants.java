@@ -231,6 +231,8 @@ public class GlobalConstants {
 
     public static final int TRIPLE_KICK_INDEX = 167;
 
+    public static final int SWIFT_INDEX = 129;
+
     public static final int HIGHEST_POKEMON_GEN = 8;
 
 }

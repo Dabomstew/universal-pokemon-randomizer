@@ -441,6 +441,10 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 moves[trueMoveIndex].pp = rom[movesOffset + (i - 1) * 6 + 5] & 0xFF;
                 moves[trueMoveIndex].type = idToType(rom[movesOffset + (i - 1) * 6 + 3] & 0xFF);
 
+                if (moves[trueMoveIndex].name.equals("Swift")) {
+                    perfectAccuracy = (int)moves[trueMoveIndex].hitratio;
+                }
+
                 if (GlobalConstants.normalMultihitMoves.contains(i)) {
                     moves[trueMoveIndex].hitCount = 3;
                 } else if (GlobalConstants.doubleHitMoves.contains(i)) {

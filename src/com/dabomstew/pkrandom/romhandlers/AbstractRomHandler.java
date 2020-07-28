@@ -56,6 +56,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private Map<Integer, Integer> itemPlacementHistory = new HashMap<>();
     boolean ptGiratina = false;
     boolean isORAS = false;
+    int perfectAccuracy = 100;
 
     /* Constructor */
 
@@ -2051,367 +2052,376 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void updateMovesToGen5() {
+    public void updateMoves(int generation) {
         List<Move> moves = this.getMoves();
 
         // gen1
         // Karate Chop => FIGHTING (gen1)
         updateMoveType(moves, 2, Type.FIGHTING);
-        // Razor Wind => 100% accuracy (gen1/2)
-        updateMoveAccuracy(moves, 13, 100);
         // Gust => FLYING (gen1)
         updateMoveType(moves, 16, Type.FLYING);
         // Wing Attack => 60 power (gen1)
         updateMovePower(moves, 17, 60);
-        // Whirlwind => 100 accuracy
+        // Whirlwind => 100 accuracy (gen1)
         updateMoveAccuracy(moves, 18, 100);
-        // Fly => 90 power (gen1/2/3)
-        updateMovePower(moves, 19, 90);
-        // Bind => 85% accuracy (gen1-4)
-        updateMoveAccuracy(moves, 20, 85);
-        // Vine Whip => 15 pp (gen1/2/3)
-        updateMovePP(moves, 22, 15);
-        // Jump Kick => 10 pp, 100 power (gen1-4)
-        updateMovePP(moves, 26, 10);
-        updateMovePower(moves, 26, 100);
         // Sand Attack => GROUND (gen1)
         updateMoveType(moves, 28, Type.GROUND);
-        // Tackle => 50 power, 100% accuracy , gen1-4
-        updateMovePower(moves, 33, 50);
-        updateMoveAccuracy(moves, 33, 100);
-        // Wrap => 90% accuracy (gen1-4)
-        updateMoveAccuracy(moves, 35, 90);
-        // Thrash => 120 power, 10pp (gen1-4)
-        updateMovePP(moves, 37, 10);
-        updateMovePower(moves, 37, 120);
         // Double-Edge => 120 power (gen1)
         updateMovePower(moves, 38, 120);
         // Move 44, Bite, becomes dark (but doesn't exist anyway)
-        // Disable => 100% accuracy (gen1-4)
-        updateMoveAccuracy(moves, 50, 100);
         // Blizzard => 70% accuracy (gen1)
         updateMoveAccuracy(moves, 59, 70);
-        // Move 67, Low Kick, has weight-based power in gen3+
-        // Low Kick => 100% accuracy (gen1)
-        updateMoveAccuracy(moves, 67, 100);
-        // Absorb => 25pp (gen1/2/3)
-        updateMovePP(moves, 71, 25);
-        // Mega Drain => 15pp (gen1/2/3)
-        updateMovePP(moves, 72, 15);
-        // Petal Dance => 120power, 10pp (gen1-4)
-        updateMovePP(moves, 80, 10);
-        updateMovePower(moves, 80, 120);
-        // Fire Spin => 35 power, 85% acc (gen1-4)
-        updateMoveAccuracy(moves, 83, 85);
-        updateMovePower(moves, 83, 35);
         // Rock Throw => 90% accuracy (gen1)
         updateMoveAccuracy(moves, 88, 90);
-        // Dig => 80 power (gen1/2/3)
-        updateMovePower(moves, 91, 80);
-        // Toxic => 90% accuracy (gen1-4)
-        updateMoveAccuracy(moves, 92, 90);
-        // Hypnosis => 60% accuracy
+        // Hypnosis => 60% accuracy (gen1)
         updateMoveAccuracy(moves, 95, 60);
-        // Recover => 10pp (gen1/2/3)
-        updateMovePP(moves, 105, 10);
         // SelfDestruct => 200power (gen1)
         updateMovePower(moves, 120, 200);
-        // Clamp => 85% acc (gen1-4)
-        updateMoveAccuracy(moves, 128, 85);
-        updateMovePP(moves, 128, 15);
-        // HJKick => 130 power, 10pp (gen1-4)
-        updateMovePP(moves, 136, 10);
-        updateMovePower(moves, 136, 130);
-        // Glare => 90% acc (gen1-4)
-        updateMoveAccuracy(moves, 137, 90);
-        // Poison Gas => 80% acc (gen1-4)
-        updateMoveAccuracy(moves, 139, 80);
-        // Flash => 100% acc (gen1/2/3)
-        updateMoveAccuracy(moves, 148, 100);
-        // Crabhammer => 90% acc (gen1-4)
-        updateMoveAccuracy(moves, 152, 90);
         // Explosion => 250 power (gen1)
         updateMovePower(moves, 153, 250);
-        // GEN2+ moves only from here
-        if (moves.size() >= 251) {
-            // Curse => GHOST (gen2-4)
-            updateMoveType(moves, 174, Type.GHOST);
-            // Cotton Spore => 100% acc (gen2-4)
-            updateMoveAccuracy(moves, 178, 100);
-            // Scary Face => 100% acc (gen2-4)
-            updateMoveAccuracy(moves, 184, 100);
-            // Zap Cannon => 120 power (gen2-3)
-            updateMovePower(moves, 192, 120);
-            // Bone Rush => 90% acc (gen2-4)
-            updateMoveAccuracy(moves, 198, 90);
-            // Outrage => 120 power (gen2-3)
-            updateMovePower(moves, 200, 120);
-            updateMovePP(moves, 200, 10);
-            // Giga Drain => 10pp (gen2-3), 75 power (gen2-4)
-            updateMovePP(moves, 202, 10);
-            updateMovePower(moves, 202, 75);
-            // Fury Cutter => 20 power (gen2-4)
-            updateMovePower(moves, 210, 20);
-            // Future Sight => 10 pp, 100 power, 100% acc (gen2-4)
-            updateMovePP(moves, 248, 10);
-            updateMovePower(moves, 248, 100);
-            updateMoveAccuracy(moves, 248, 100);
-            // Rock Smash => 40 power (gen2-3)
-            updateMovePower(moves, 249, 40);
-            // Whirlpool => 35 pow, 85% acc (gen2-4)
-            updateMovePower(moves, 250, 35);
-            updateMoveAccuracy(moves, 250, 85);
-        }
-        // GEN3+ only moves from here
-        if (moves.size() >= 354) {
-            // Uproar => 90 power (gen3-4)
-            updateMovePower(moves, 253, 90);
-            updateMovePP(moves, 254, 20);
-            updateMovePower(moves, 291, 80);
-            // Sand Tomb => 35 pow, 85% acc (gen3-4)
-            updateMovePower(moves, 328, 35);
-            updateMoveAccuracy(moves, 328, 85);
-            // Bullet Seed => 25 power (gen3-4)
-            updateMovePower(moves, 331, 25);
-            // Icicle Spear => 25 power (gen3-4)
-            updateMovePower(moves, 333, 25);
-            // Covet => 60 power (gen3-4)
-            updateMovePower(moves, 343, 60);
-            updateMovePower(moves, 348, 90);
-            // Rock Blast => 90% acc (gen3-4)
-            updateMoveAccuracy(moves, 350, 90);
-            // Doom Desire => 140 pow, 100% acc, gen3-4
-            updateMovePower(moves, 353, 140);
-            updateMoveAccuracy(moves, 353, 100);
-        }
-        // GEN4+ only moves from here
-        if (moves.size() >= 467) {
-            // Feint => 30 pow
-            updateMovePower(moves, 364, 30);
-            // Last Resort => 140 pow
-            updateMovePower(moves, 387, 140);
-            // Drain Punch => 10 pp, 75 pow
-            updateMovePP(moves, 409, 10);
-            updateMovePower(moves, 409, 75);
-            // Magma Storm => 75% acc
-            updateMoveAccuracy(moves, 463, 75);
-        }
-    }
 
-    @Override
-    public void updateMovesToGen6() {
-        List<Move> moves = this.getMoves();
-
-        // gen 1
-        // Swords Dance 20 PP
-        updateMovePP(moves, 14, 20);
-
-        // Vine Whip 25 PP, 45 Power
-        updateMovePP(moves, 22, 25);
-        updateMovePower(moves, 22, 45);
-
-        // Pin Missile 25 Power, 95% Accuracy
-        updateMovePower(moves, 42, 25);
-        updateMoveAccuracy(moves, 42, 95);
-
-        // Flamethrower 90 Power
-        updateMovePower(moves, 53, 90);
-
-        // Hydro Pump 110 Power
-        updateMovePower(moves, 56, 110);
-
-        // Surf 90 Power
-        updateMovePower(moves, 57, 90);
-
-        // Ice Beam 90 Power
-        updateMovePower(moves, 58, 90);
-
-        // Blizzard 110 Power
-        updateMovePower(moves, 59, 110);
-
-        // Growth 20 PP
-        updateMovePP(moves, 74, 20);
-
-        // Thunderbolt 90 Power
-        updateMovePower(moves, 85, 90);
-
-        // Thunder 110 Power
-        updateMovePower(moves, 87, 110);
-
-        // Minimize 10 PP
-        updateMovePP(moves, 107, 10);
-
-        // Barrier 20 PP
-        updateMovePP(moves, 112, 20);
-
-        // Lick 30 Power
-        updateMovePower(moves, 122, 30);
-
-        // Smog 30 Power
-        updateMovePower(moves, 123, 30);
-
-        // Fire Blast 110 Power
-        updateMovePower(moves, 126, 110);
-
-        // Skull Bash 10 PP, 130 Power
-        updateMovePP(moves, 130, 10);
-        updateMovePower(moves, 130, 130);
-
-        // Glare 100% Accuracy
-        updateMoveAccuracy(moves, 137, 100);
-
-        // Poison Gas 90% Accuracy
-        updateMoveAccuracy(moves, 139, 90);
-
-        // Bubble 40 Power
-        updateMovePower(moves, 145, 40);
-
-        // Psywave 100% Accuracy
-        updateMoveAccuracy(moves, 149, 100);
-
-        // Acid Armor 20 PP
-        updateMovePP(moves, 151, 20);
-
-        // Crabhammer 100 Power
-        updateMovePower(moves, 152, 100);
-
-        // Gen2+ only
-        if (moves.size() >= 251) {
-            // Thief 25 PP, 60 Power
-            updateMovePP(moves, 168, 25);
-            updateMovePower(moves, 168, 60);
-
-            // Snore 50 Power
-            updateMovePower(moves, 173, 50);
-
-            // Fury Cutter 40 Power
-            updateMovePower(moves, 210, 40);
-
-            // Future Sight 120 Power
-            updateMovePower(moves, 248, 120);
+        if (generation >= 3) {
+            // Razor Wind => 100% accuracy (gen1/2)
+            updateMoveAccuracy(moves, 13, 100);
+            // Move 67, Low Kick, has weight-based power in gen3+
+            // Low Kick => 100% accuracy (gen1)
+            updateMoveAccuracy(moves, 67, 100);
         }
 
-        // Gen3+ only
-        if (moves.size() >= 354) {
-            // Heat Wave 95 Power
-            updateMovePower(moves, 257, 95);
+        if (generation >= 4) {
+            // Fly => 90 power (gen1/2/3)
+            updateMovePower(moves, 19, 90);
+            // Vine Whip => 15 pp (gen1/2/3)
+            updateMovePP(moves, 22, 15);
+            // Absorb => 25pp (gen1/2/3)
+            updateMovePP(moves, 71, 25);
+            // Mega Drain => 15pp (gen1/2/3)
+            updateMovePP(moves, 72, 15);
+            // Dig => 80 power (gen1/2/3)
+            updateMovePower(moves, 91, 80);
+            // Recover => 10pp (gen1/2/3)
+            updateMovePP(moves, 105, 10);
+            // Flash => 100% acc (gen1/2/3)
+            updateMoveAccuracy(moves, 148, 100);
 
-            // Will-o-Wisp 85% Accuracy
-            updateMoveAccuracy(moves, 261, 85);
-
-            // Smellingsalt 70 Power
-            updateMovePower(moves, 265, 70);
-
-            // Knock off 65 Power
-            updateMovePower(moves, 282, 65);
-
-            // Meteor Mash 90 Power, 90% Accuracy
-            updateMovePower(moves, 309, 90);
-            updateMoveAccuracy(moves, 309, 90);
-
-            // Air Cutter 60 Power
-            updateMovePower(moves, 314, 60);
-
-            // Overheat 130 Power
-            updateMovePower(moves, 315, 130);
-
-            // Rock Tomb 15 PP, 60 Power, 95% Accuracy
-            updateMovePP(moves, 317, 15);
-            updateMovePower(moves, 317, 60);
-            updateMoveAccuracy(moves, 317, 95);
-
-            // Extrasensory 20 PP
-            updateMovePP(moves, 326, 20);
-
-            // Muddy Water 90 Power
-            updateMovePower(moves, 330, 90);
-
-            // Covet 25 PP
-            updateMovePP(moves, 343, 25);
+            if (generationOfPokemon() >= 2) {
+                // Zap Cannon => 120 power (gen2-3)
+                updateMovePower(moves, 192, 120);
+                // Outrage => 120 power (gen2-3)
+                updateMovePower(moves, 200, 120);
+                updateMovePP(moves, 200, 10);
+                // Giga Drain => 10pp (gen2-3)
+                updateMovePP(moves, 202, 10);
+                // Rock Smash => 40 power (gen2-3)
+                updateMovePower(moves, 249, 40);
+            }
         }
 
-        // Gen4+ only
-        if (moves.size() >= 467) {
-            // Wake-Up Slap 70 Power
-            updateMovePower(moves, 358, 70);
+        if (generation >= 5) {
+            // Bind => 85% accuracy (gen1-4)
+            updateMoveAccuracy(moves, 20, 85);
+            // Jump Kick => 10 pp, 100 power (gen1-4)
+            updateMovePP(moves, 26, 10);
+            updateMovePower(moves, 26, 100);
+            // Tackle => 50 power, 100% accuracy , gen1-4
+            updateMovePower(moves, 33, 50);
+            updateMoveAccuracy(moves, 33, 100);
+            // Wrap => 90% accuracy (gen1-4)
+            updateMoveAccuracy(moves, 35, 90);
+            // Thrash => 120 power, 10pp (gen1-4)
+            updateMovePP(moves, 37, 10);
+            updateMovePower(moves, 37, 120);
+            // Disable => 100% accuracy (gen1-4)
+            updateMoveAccuracy(moves, 50, 100);
+            // Petal Dance => 120power, 10pp (gen1-4)
+            updateMovePP(moves, 80, 10);
+            updateMovePower(moves, 80, 120);
+            // Fire Spin => 35 power, 85% acc (gen1-4)
+            updateMoveAccuracy(moves, 83, 85);
+            updateMovePower(moves, 83, 35);
+            // Toxic => 90% accuracy (gen1-4)
+            updateMoveAccuracy(moves, 92, 90);
+            // Clamp => 15pp, 85% acc (gen1-4)
+            updateMoveAccuracy(moves, 128, 85);
+            updateMovePP(moves, 128, 15);
+            // HJKick => 130 power, 10pp (gen1-4)
+            updateMovePP(moves, 136, 10);
+            updateMovePower(moves, 136, 130);
+            // Glare => 90% acc (gen1-4)
+            updateMoveAccuracy(moves, 137, 90);
+            // Poison Gas => 80% acc (gen1-4)
+            updateMoveAccuracy(moves, 139, 80);
+            // Crabhammer => 90% acc (gen1-4)
+            updateMoveAccuracy(moves, 152, 90);
 
-            // Tailwind 15 PP
-            updateMovePP(moves, 366, 15);
+            if (generationOfPokemon() >= 2) {
+                // Curse => GHOST (gen2-4)
+                updateMoveType(moves, 174, Type.GHOST);
+                // Cotton Spore => 100% acc (gen2-4)
+                updateMoveAccuracy(moves, 178, 100);
+                // Scary Face => 100% acc (gen2-4)
+                updateMoveAccuracy(moves, 184, 100);
+                // Bone Rush => 90% acc (gen2-4)
+                updateMoveAccuracy(moves, 198, 90);
+                // Giga Drain => 75 power (gen2-4)
+                updateMovePower(moves, 202, 75);
+                // Fury Cutter => 20 power (gen2-4)
+                updateMovePower(moves, 210, 20);
+                // Future Sight => 10 pp, 100 power, 100% acc (gen2-4)
+                updateMovePP(moves, 248, 10);
+                updateMovePower(moves, 248, 100);
+                updateMoveAccuracy(moves, 248, 100);
+                // Whirlpool => 35 pow, 85% acc (gen2-4)
+                updateMovePower(moves, 250, 35);
+                updateMoveAccuracy(moves, 250, 85);
+            }
 
-            // Assurance 60 Power
-            updateMovePower(moves, 372, 60);
+            if (generationOfPokemon() >= 3) {
+                // Uproar => 90 power (gen3-4)
+                updateMovePower(moves, 253, 90);
+                updateMovePP(moves, 254, 20);
+                updateMovePower(moves, 291, 80);
+                // Sand Tomb => 35 pow, 85% acc (gen3-4)
+                updateMovePower(moves, 328, 35);
+                updateMoveAccuracy(moves, 328, 85);
+                // Bullet Seed => 25 power (gen3-4)
+                updateMovePower(moves, 331, 25);
+                // Icicle Spear => 25 power (gen3-4)
+                updateMovePower(moves, 333, 25);
+                // Covet => 60 power (gen3-4)
+                updateMovePower(moves, 343, 60);
+                updateMovePower(moves, 348, 90);
+                // Rock Blast => 90% acc (gen3-4)
+                updateMoveAccuracy(moves, 350, 90);
+                // Doom Desire => 140 pow, 100% acc, gen3-4
+                updateMovePower(moves, 353, 140);
+                updateMoveAccuracy(moves, 353, 100);
+            }
 
-            // Psycho Shift 100% Accuracy
-            updateMoveAccuracy(moves, 375, 100);
-
-            // Aura Sphere 80 Power
-            updateMovePower(moves, 396, 80);
-
-            // Air Slash 15 PP
-            updateMovePP(moves, 403, 15);
-
-            // Dragon Pulse 85 Power
-            updateMovePower(moves, 406, 85);
-
-            // Power Gem 80 Power
-            updateMovePower(moves, 408, 80);
-
-            // Energy Ball 90 Power
-            updateMovePower(moves, 412, 90);
-
-            // Draco Meteor 130 Power
-            updateMovePower(moves, 434, 130);
-
-            // Leaf Storm 130 Power
-            updateMovePower(moves, 437, 130);
-
-            // Gunk Shot 80% Accuracy
-            updateMoveAccuracy(moves, 441, 80);
-
-            // Chatter 65 Power
-            updateMovePower(moves, 448, 65);
-
-            // Magma Storm 100 Power
-            updateMovePower(moves, 463, 100);
+            if (generationOfPokemon() >= 4) {
+                // Feint => 30 pow
+                updateMovePower(moves, 364, 30);
+                // Last Resort => 140 pow
+                updateMovePower(moves, 387, 140);
+                // Drain Punch => 10 pp, 75 pow
+                updateMovePP(moves, 409, 10);
+                updateMovePower(moves, 409, 75);
+                // Magma Storm => 75% acc
+                updateMoveAccuracy(moves, 463, 75);
+            }
         }
 
-        // Gen5+ only
-        if (moves.size() >= 559) {
-            // Storm Throw 60 Power
-            updateMovePower(moves, 480, 60);
+        if (generation >= 6) {
+            // gen 1
+            // Swords Dance 20 PP
+            updateMovePP(moves, 14, 20);
+            // Vine Whip 25 PP, 45 Power
+            updateMovePP(moves, 22, 25);
+            updateMovePower(moves, 22, 45);
+            // Pin Missile 25 Power, 95% Accuracy
+            updateMovePower(moves, 42, 25);
+            updateMoveAccuracy(moves, 42, 95);
+            // Flamethrower 90 Power
+            updateMovePower(moves, 53, 90);
+            // Hydro Pump 110 Power
+            updateMovePower(moves, 56, 110);
+            // Surf 90 Power
+            updateMovePower(moves, 57, 90);
+            // Ice Beam 90 Power
+            updateMovePower(moves, 58, 90);
+            // Blizzard 110 Power
+            updateMovePower(moves, 59, 110);
+            // Growth 20 PP
+            updateMovePP(moves, 74, 20);
+            // Thunderbolt 90 Power
+            updateMovePower(moves, 85, 90);
+            // Thunder 110 Power
+            updateMovePower(moves, 87, 110);
+            // Minimize 10 PP
+            updateMovePP(moves, 107, 10);
+            // Barrier 20 PP
+            updateMovePP(moves, 112, 20);
+            // Lick 30 Power
+            updateMovePower(moves, 122, 30);
+            // Smog 30 Power
+            updateMovePower(moves, 123, 30);
+            // Fire Blast 110 Power
+            updateMovePower(moves, 126, 110);
+            // Skull Bash 10 PP, 130 Power
+            updateMovePP(moves, 130, 10);
+            updateMovePower(moves, 130, 130);
+            // Glare 100% Accuracy
+            updateMoveAccuracy(moves, 137, 100);
+            // Poison Gas 90% Accuracy
+            updateMoveAccuracy(moves, 139, 90);
+            // Bubble 40 Power
+            updateMovePower(moves, 145, 40);
+            // Psywave 100% Accuracy
+            updateMoveAccuracy(moves, 149, 100);
+            // Acid Armor 20 PP
+            updateMovePP(moves, 151, 20);
+            // Crabhammer 100 Power
+            updateMovePower(moves, 152, 100);
 
-            // Synchronoise 120 Power
-            updateMovePower(moves, 485, 120);
+            if (generationOfPokemon() >= 2) {
+                // Thief 25 PP, 60 Power
+                updateMovePP(moves, 168, 25);
+                updateMovePower(moves, 168, 60);
+                // Snore 50 Power
+                updateMovePower(moves, 173, 50);
+                // Fury Cutter 40 Power
+                updateMovePower(moves, 210, 40);
+                // Future Sight 120 Power
+                updateMovePower(moves, 248, 120);
+            }
 
-            // Low Sweep 65 Power
-            updateMovePower(moves, 490, 65);
+            if (generationOfPokemon() >= 3) {
+                // Heat Wave 95 Power
+                updateMovePower(moves, 257, 95);
+                // Will-o-Wisp 85% Accuracy
+                updateMoveAccuracy(moves, 261, 85);
+                // Smellingsalt 70 Power
+                updateMovePower(moves, 265, 70);
+                // Knock off 65 Power
+                updateMovePower(moves, 282, 65);
+                // Meteor Mash 90 Power, 90% Accuracy
+                updateMovePower(moves, 309, 90);
+                updateMoveAccuracy(moves, 309, 90);
+                // Air Cutter 60 Power
+                updateMovePower(moves, 314, 60);
+                // Overheat 130 Power
+                updateMovePower(moves, 315, 130);
+                // Rock Tomb 15 PP, 60 Power, 95% Accuracy
+                updateMovePP(moves, 317, 15);
+                updateMovePower(moves, 317, 60);
+                updateMoveAccuracy(moves, 317, 95);
+                // Extrasensory 20 PP
+                updateMovePP(moves, 326, 20);
+                // Muddy Water 90 Power
+                updateMovePower(moves, 330, 90);
+                // Covet 25 PP
+                updateMovePP(moves, 343, 25);
+            }
 
-            // Hex 65 Power
-            updateMovePower(moves, 506, 65);
+            if (generationOfPokemon() >= 4) {
+                // Wake-Up Slap 70 Power
+                updateMovePower(moves, 358, 70);
+                // Tailwind 15 PP
+                updateMovePP(moves, 366, 15);
+                // Assurance 60 Power
+                updateMovePower(moves, 372, 60);
+                // Psycho Shift 100% Accuracy
+                updateMoveAccuracy(moves, 375, 100);
+                // Aura Sphere 80 Power
+                updateMovePower(moves, 396, 80);
+                // Air Slash 15 PP
+                updateMovePP(moves, 403, 15);
+                // Dragon Pulse 85 Power
+                updateMovePower(moves, 406, 85);
+                // Power Gem 80 Power
+                updateMovePower(moves, 408, 80);
+                // Energy Ball 90 Power
+                updateMovePower(moves, 412, 90);
+                // Draco Meteor 130 Power
+                updateMovePower(moves, 434, 130);
+                // Leaf Storm 130 Power
+                updateMovePower(moves, 437, 130);
+                // Gunk Shot 80% Accuracy
+                updateMoveAccuracy(moves, 441, 80);
+                // Chatter 65 Power
+                updateMovePower(moves, 448, 65);
+                // Magma Storm 100 Power
+                updateMovePower(moves, 463, 100);
+            }
 
-            // Incinerate 60 Power
-            updateMovePower(moves, 510, 60);
+            if (generationOfPokemon() >= 5) {
+                // Storm Throw 60 Power
+                updateMovePower(moves, 480, 60);
+                // Synchronoise 120 Power
+                updateMovePower(moves, 485, 120);
+                // Low Sweep 65 Power
+                updateMovePower(moves, 490, 65);
+                // Hex 65 Power
+                updateMovePower(moves, 506, 65);
+                // Incinerate 60 Power
+                updateMovePower(moves, 510, 60);
+                // Pledges 80 Power
+                updateMovePower(moves, 518, 80);
+                updateMovePower(moves, 519, 80);
+                updateMovePower(moves, 520, 80);
+                // Struggle Bug 50 Power
+                updateMovePower(moves, 522, 50);
+                // Frost Breath 45 Power
+                // crits are 2x in these games
+                updateMovePower(moves, 524, 45);
+                // Sacred Sword 15 PP
+                updateMovePP(moves, 533, 15);
+                // Hurricane 110 Power
+                updateMovePower(moves, 542, 110);
+                // Techno Blast 120 Power
+                updateMovePower(moves, 546, 120);
+            }
+        }
 
-            // Pledges 80 Power
-            updateMovePower(moves, 518, 80);
-            updateMovePower(moves, 519, 80);
-            updateMovePower(moves, 520, 80);
+        if (generation >= 7) {
 
-            // Struggle Bug 50 Power
-            updateMovePower(moves, 522, 50);
+            // Leech Life 80 Power, 10 PP
+            updateMovePower(moves, 141, 80);
+            updateMovePP(moves, 141, 10);
+            // Submission 20 PP
+            updateMovePP(moves, 66, 20);
+            // Tackle 40 Power
+            updateMovePower(moves, 33, 40);
+            // Thunder Wave 90% Accuracy
+            updateMoveAccuracy(moves, 86, 90);
 
-            // Frost Breath 45 Power
-            // crits are 2x in these games
-            updateMovePower(moves, 524, 45);
+            if (generationOfPokemon() >= 2) {
+                // Swagger 85% Accuracy
+                updateMoveAccuracy(moves, 207, 85);
+            }
 
-            // Sacred Sword 15 PP
-            updateMovePP(moves, 533, 15);
+            if (generationOfPokemon() >= 3) {
+                // Knock Off 20 PP
+                updateMovePP(moves, 282, 20);
+            }
 
-            // Hurricane 110 Power
-            updateMovePower(moves, 542, 110);
+            if (generationOfPokemon() >= 4) {
+                // Dark Void 50% Accuracy
+                updateMoveAccuracy(moves, 464, 50);
+                // Sucker Punch 70 Power
+                updateMovePower(moves, 389, 70);
+            }
 
-            // Techno Blast 120 Power
-            updateMovePower(moves, 546, 120);
+            if (generationOfPokemon() >= 6) {
+                // Aromatic Mist can't miss
+                updateMoveAccuracy(moves, 597, perfectAccuracy);
+                // Fell Stinger 50 Power
+                updateMovePower(moves, 565, 50);
+                // Flying Press 100 Power
+                updateMovePower(moves, 560, 100);
+                // Mat Block 10 PP
+                updateMovePP(moves, 561, 10);
+                // Mystical Fire 75 Power
+                updateMovePower(moves, 595, 75);
+                // Parabolic Charge 65 Power
+                updateMovePower(moves, 570, 65);
+                // Topsy-Turvy can't miss
+                updateMoveAccuracy(moves, 576, perfectAccuracy);
+                // Water Shuriken Special
+                updateMoveCategory(moves, 594, MoveCategory.SPECIAL);
+            }
+        }
+
+        if (generation >= 8) {
+            if (generationOfPokemon() >= 2) {
+                // Rapid Spin 50 Power
+                updateMovePower(moves, 229, 50);
+            }
+
+            if (generationOfPokemon() >= 7) {
+                // Multi-Attack 120 Power
+                updateMovePower(moves, 718, 120);
+            }
         }
     }
 
@@ -2445,6 +2455,15 @@ public abstract class AbstractRomHandler implements RomHandler {
                 logStr += " be " + mv.type + "-type";
                 if (nonTypeChanges.size() > 0) {
                     logStr += " and";
+                }
+            }
+            if (changes[4]) {
+                if (mv.category == MoveCategory.PHYSICAL) {
+                    logStr += " a Physical move";
+                } else if (mv.category == MoveCategory.SPECIAL) {
+                    logStr += " a Special move";
+                } else if (mv.category == MoveCategory.STATUS) {
+                    logStr += " a Status move";
                 }
             }
             if (nonTypeChanges.size() > 0) {
@@ -4263,9 +4282,17 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
+    private void updateMoveCategory(List<Move> moves, int moveNum, MoveCategory category) {
+        Move mv = moves.get(moveNum);
+        if (mv.category != category) {
+            mv.category = category;
+            addMoveUpdate(moveNum, 4);
+        }
+    }
+
     private void addMoveUpdate(int moveNum, int updateType) {
         if (!moveUpdates.containsKey(moveNum)) {
-            boolean[] updateField = new boolean[4];
+            boolean[] updateField = new boolean[5];
             updateField[updateType] = true;
             moveUpdates.put(moveNum, updateField);
         } else {
