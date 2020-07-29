@@ -708,7 +708,6 @@ public class Gen7Constants {
             0xD6,
             0x113,
             0x21D,
-            0x21E,
             0x221,
             0x222,
             0x27F,
