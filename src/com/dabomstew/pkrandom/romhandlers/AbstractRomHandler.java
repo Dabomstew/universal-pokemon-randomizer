@@ -1824,6 +1824,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (newPokemon != tp.pokemon) {
                         tp.pokemon = newPokemon;
                         tp.absolutePokeNumber = newPokemon.number;
+                        setFormeForTrainerPokemon(tp, newPokemon);
                         tp.resetMoves = true;
                     }
                 }
