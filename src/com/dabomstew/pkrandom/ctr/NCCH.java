@@ -535,6 +535,8 @@ public class NCCH {
         File layeredFSRootDir = new File(layeredFSRootPath);
         if (!layeredFSRootDir.exists()) {
             layeredFSRootDir.mkdir();
+        } else {
+            purgeDirectory(layeredFSRootDir);
         }
         String romfsRootPath = layeredFSRootPath + "romfs" + File.separator;
         File romfsDir = new File(romfsRootPath);
@@ -554,6 +556,15 @@ public class NCCH {
             if (file.fileChanged) {
                 writeRomfsFileToLayeredFS(file, romfsRootPath);
             }
+        }
+    }
+
+    private void purgeDirectory(File directory) {
+        for (File file : directory.listFiles()) {
+            if (file.isDirectory()) {
+                purgeDirectory(file);
+            }
+            file.delete();
         }
     }
 
