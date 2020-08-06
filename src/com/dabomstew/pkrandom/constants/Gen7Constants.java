@@ -114,6 +114,9 @@ public class Gen7Constants {
             0x319  // Fairy
     );
 
+    private static final String saveLoadFormeReversionPrefixSM = "7E2001EB0C0094E5", saveLoadFormeReversionPrefixUSUM = "372C01EB0C0094E5";
+    public static final String afterBattleFormeReversionPrefix = "0055E10B00001A0010A0E30700A0E1";
+
     public static int getPokemonCount(int romType) {
         if (romType == Type_SM) {
             return pokemonCountSM;
@@ -222,6 +225,14 @@ public class Gen7Constants {
             return relevantEncounterFilesSM;
         } else {
             return relevantEncounterFilesUSUM;
+        }
+    }
+
+    public static String getSaveLoadFormeReversionPrefix(int romType) {
+        if (romType == Type_SM) {
+            return saveLoadFormeReversionPrefixSM;
+        } else {
+            return saveLoadFormeReversionPrefixUSUM;
         }
     }
 

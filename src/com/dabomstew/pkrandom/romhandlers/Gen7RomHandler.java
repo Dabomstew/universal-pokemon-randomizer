@@ -596,6 +596,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         savePokemonStats();
         saveMoves();
         try {
+            patchFormeReversion();
             writeCode(code);
             writeGARC(romEntry.getString("WildPokemon"), encounterGarc);
             writeGARC(romEntry.getString("TextStrings"), stringsGarc);
@@ -727,6 +728,65 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             this.writeGARC(romEntry.getString("MoveData"), moveGarc);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
+        }
+    }
+
+    private void patchFormeReversion() throws IOException {
+        // Upon loading a save, all Mega Pokemon, all Primal Reversions,
+        // all Greninja-A, all Zygarde-C, and all Necrozma-U in the player's
+        // party are set back to their base forme. This patches .code such
+        // that this reversion does not happen.
+        String saveLoadFormeReversionPrefix = Gen7Constants.getSaveLoadFormeReversionPrefix(romEntry.romType);
+        int offset = find(code, saveLoadFormeReversionPrefix);
+        if (offset > 0) {
+            offset += saveLoadFormeReversionPrefix.length() / 2; // because it was a prefix
+
+            // Stubs the call to the function that checks for Primal Reversions and
+            // Mega Pokemon
+            code[offset] = 0x00;
+            code[offset + 1] = 0x00;
+            code[offset + 2] = 0x00;
+            code[offset + 3] = 0x00;
+
+            if (romEntry.romType == Gen7Constants.Type_USUM) {
+                // In Sun/Moon, Greninja-A and Zygarde-C are treated as Mega Pokemon
+                // and handled by the function above. In USUM, they are handled by a
+                // different function, along with Necrozma-U. This stubs the call
+                // to that function.
+                code[offset + 8] = 0x00;
+                code[offset + 9] = 0x00;
+                code[offset + 10] = 0x00;
+                code[offset + 11] = 0x00;
+            }
+        }
+
+        // Additionally, upon completing a battle, Kyogre-P, Groudon-P,
+        // and Wishiwashi-S are forcibly returned to their base forme.
+        // This patches the Battle CRO to prevent this from happening.
+        byte[] battleCRO = readFile(romEntry.getString("Battle"));
+        offset = find(battleCRO, Gen7Constants.afterBattleFormeReversionPrefix);
+        if (offset > 0) {
+            offset += Gen7Constants.afterBattleFormeReversionPrefix.length() / 2; // because it was a prefix
+
+            // Stubs the call to pml::pokepara::CoreParam::ChangeFormNo for Kyogre
+            battleCRO[offset] = 0x00;
+            battleCRO[offset + 1] = 0x00;
+            battleCRO[offset + 2] = 0x00;
+            battleCRO[offset + 3] = 0x00;
+
+            // Stubs the call to pml::pokepara::CoreParam::ChangeFormNo for Groudon
+            battleCRO[offset + 60] = 0x00;
+            battleCRO[offset + 61] = 0x00;
+            battleCRO[offset + 62] = 0x00;
+            battleCRO[offset + 63] = 0x00;
+
+            // Stubs the call to pml::pokepara::CoreParam::ChangeFormNo for Wishiwashi
+            battleCRO[offset + 92] = 0x00;
+            battleCRO[offset + 93] = 0x00;
+            battleCRO[offset + 94] = 0x00;
+            battleCRO[offset + 95] = 0x00;
+
+            writeFile("Battle.cro", battleCRO);
         }
     }
 
