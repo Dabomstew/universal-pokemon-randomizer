@@ -786,7 +786,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             battleCRO[offset + 94] = 0x00;
             battleCRO[offset + 95] = 0x00;
 
-            writeFile("Battle.cro", battleCRO);
+            writeFile(romEntry.getString("Battle"), battleCRO);
         }
     }
 
