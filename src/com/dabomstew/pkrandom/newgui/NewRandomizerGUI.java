@@ -11,8 +11,6 @@ import com.dabomstew.pkrandom.romhandlers.*;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -521,7 +519,7 @@ public class NewRandomizerGUI {
                             NewRandomizerGUI.this.romHandler.loadRom(fh.getAbsolutePath());
                             romLoaded = true;
                         } catch (Exception ex) {
-                            attemptToLogException(ex, "GUI.loadFailed", "GUI.loadFailedNoLog");
+                            attemptToLogException(ex, "GUI.loadFailed", "GUI.loadFailedNoLog", null, null);
                         }
                         final boolean loadSuccess = romLoaded;
                         SwingUtilities.invokeLater(() -> {
@@ -693,12 +691,12 @@ public class NewRandomizerGUI {
                     succeededSave = true;
                 } catch (RandomizationException ex) {
                     attemptToLogException(ex, "GUI.saveFailedMessage",
-                            "GUI.saveFailedMessageNoLog", true);
+                            "GUI.saveFailedMessageNoLog", true, settings.toString(), Long.toString(seed));
                     if (verboseLog != null) {
                         verboseLog.close();
                     }
                 } catch (Exception ex) {
-                    attemptToLogException(ex, "GUI.saveFailedIO", "GUI.saveFailedIONoLog");
+                    attemptToLogException(ex, "GUI.saveFailedIO", "GUI.saveFailedIONoLog", settings.toString(), Long.toString(seed));
                     if (verboseLog != null) {
                         verboseLog.close();
                     }
@@ -768,7 +766,7 @@ public class NewRandomizerGUI {
             });
             t.start();
         } catch (Exception ex) {
-            attemptToLogException(ex, "GUI.saveFailed", "GUI.saveFailedNoLog");
+            attemptToLogException(ex, "GUI.saveFailed", "GUI.saveFailedNoLog", settings.toString(), Long.toString(seed));
             if (verboseLog != null) {
                 verboseLog.close();
             }
@@ -1306,11 +1304,13 @@ public class NewRandomizerGUI {
         return createSettingsFromState(FileFunctions.getCustomNames());
     }
 
-    private void attemptToLogException(Exception ex, String baseMessageKey, String noLogMessageKey) {
-        attemptToLogException(ex, baseMessageKey, noLogMessageKey, false);
+    private void attemptToLogException(Exception ex, String baseMessageKey, String noLogMessageKey,
+                                       String settingsString, String seedString) {
+        attemptToLogException(ex, baseMessageKey, noLogMessageKey, false, settingsString, seedString);
     }
 
-    private void attemptToLogException(Exception ex, String baseMessageKey, String noLogMessageKey, boolean showMessage) {
+    private void attemptToLogException(Exception ex, String baseMessageKey, String noLogMessageKey, boolean showMessage,
+                                       String settingsString, String seedString) {
 
         // Make sure the operation dialog doesn't show up over the error
         // dialog
@@ -1321,7 +1321,13 @@ public class NewRandomizerGUI {
         try {
             String errlog = "error_" + ft.format(now) + ".txt";
             PrintStream ps = new PrintStream(new FileOutputStream(errlog));
-            ps.println("Randomizer Version: " + SysConstants.UPDATE_VERSION);
+            ps.println("Randomizer Version: " + Version.VERSION_STRING);
+            if (seedString != null) {
+                ps.println("Seed: " + seedString);
+            }
+            if (settingsString != null) {
+                ps.println("Settings String: " + settingsString);
+            }
             PrintStream e1 = System.err;
             System.setErr(ps);
             if (this.romHandler != null) {
@@ -2285,7 +2291,7 @@ public class NewRandomizerGUI {
                 ((Abstract3DSRomHandler) romHandler).closeInnerRom();
             }
         } catch (Exception e) {
-            attemptToLogException(e, "GUI.processFailed","GUI.processFailedNoLog");
+            attemptToLogException(e, "GUI.processFailed","GUI.processFailedNoLog", null, null);
             romHandler = null;
             initialState();
         }
