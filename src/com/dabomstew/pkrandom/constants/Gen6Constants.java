@@ -188,6 +188,8 @@ public class Gen6Constants {
     public static final int fallingEncounterOffset = 0xF4270, fallingEncounterSize = 0x3C, fallingEncounterCount = 55;
     public static final Map<Integer, String> fallingEncounterNameMap = constructFallingEncounterNameMap();
 
+    private static final String saveLoadFormeReversionPrefixXY = "292907EB140094E500F020E3", saveLoadFormeReversionPrefixORAS = "9A3907EB140094E500F020E3";
+
     public static String getIngameTradesPrefix(int romType) {
         if (romType == Type_XY) {
             return ingameTradesPrefixXY;
@@ -375,6 +377,14 @@ public class Gen6Constants {
                 return 0x11;
             default:
                 return 0; // normal by default
+        }
+    }
+
+    public static String getSaveLoadFormeReversionPrefix(int romType) {
+        if (romType == Type_XY) {
+            return saveLoadFormeReversionPrefixXY;
+        } else {
+            return saveLoadFormeReversionPrefixORAS;
         }
     }
 

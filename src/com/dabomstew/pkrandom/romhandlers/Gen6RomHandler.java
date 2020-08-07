@@ -34,7 +34,6 @@ import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.Mini;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.*;
-import jdk.nashorn.internal.objects.Global;
 import pptxt.N3DSTxtHandler;
 
 import java.awt.*;
@@ -552,6 +551,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         savePokemonStats();
         saveMoves();
         try {
+            patchFormeReversion();
             writeCode(code);
             writeGARC(romEntry.getString("TextStrings"), stringsGarc);
         } catch (IOException e) {
@@ -685,6 +685,24 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             this.writeGARC(romEntry.getString("MoveData"), moveGarc);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
+        }
+    }
+
+    private void patchFormeReversion() throws IOException {
+        // Upon loading a save, all Mega Pokemon and all Primal Reversions
+        // in the player's party are set back to their base forme. This
+        // patches .code such that this reversion does not happen.
+        String saveLoadFormeReversionPrefix = Gen6Constants.getSaveLoadFormeReversionPrefix(romEntry.romType);
+        int offset = find(code, saveLoadFormeReversionPrefix);
+        if (offset > 0) {
+            offset += saveLoadFormeReversionPrefix.length() / 2; // because it was a prefix
+
+            // Stubs the call to the function that checks for Primal Reversions and
+            // Mega Pokemon
+            code[offset] = 0x00;
+            code[offset + 1] = 0x00;
+            code[offset + 2] = 0x00;
+            code[offset + 3] = 0x00;
         }
     }
 
