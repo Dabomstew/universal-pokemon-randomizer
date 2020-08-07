@@ -124,7 +124,7 @@ public class Gen5Constants {
     }
 
     public static Integer getAbsolutePokeNumByBaseForme(int baseForme, int formNum) {
-        return absolutePokeNumsByBaseForme.getOrDefault(baseForme,dummyAbsolutePokeNums).getOrDefault(formNum,0);
+        return absolutePokeNumsByBaseForme.getOrDefault(baseForme,dummyAbsolutePokeNums).getOrDefault(formNum,baseForme);
     }
 
     public static final List<Integer> emptyPlaythroughTrainers = Arrays.asList(new Integer[] { });
@@ -607,7 +607,7 @@ public class Gen5Constants {
 
     private static Map<Integer,Integer> setupDummyAbsolutePokeNums() {
         Map<Integer,Integer> m = new HashMap<>();
-        m.put(0,0);
+        m.put(255,0);
         return m;
     }
 
