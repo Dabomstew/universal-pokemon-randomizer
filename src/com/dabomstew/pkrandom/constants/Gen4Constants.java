@@ -90,7 +90,7 @@ public class Gen4Constants {
     }
 
     public static Integer getAbsolutePokeNumByBaseForme(int baseForme, int formNum) {
-        return absolutePokeNumsByBaseForme.getOrDefault(baseForme,dummyAbsolutePokeNums).getOrDefault(formNum,0);
+        return absolutePokeNumsByBaseForme.getOrDefault(baseForme,dummyAbsolutePokeNums).getOrDefault(formNum,baseForme);
     }
 
     // The original slot each of the 20 "alternate" slots is mapped to
@@ -369,7 +369,7 @@ public class Gen4Constants {
 
     private static Map<Integer,Integer> setupDummyAbsolutePokeNums() {
         Map<Integer,Integer> m = new HashMap<>();
-        m.put(0,0);
+        m.put(255,0);
         return m;
     }
 

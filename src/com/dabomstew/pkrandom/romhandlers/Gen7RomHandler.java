@@ -297,7 +297,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
             absolutePokeNumByBaseForme = new HashMap<>();
             dummyAbsolutePokeNums = new HashMap<>();
-            dummyAbsolutePokeNums.put(0,0);
+            dummyAbsolutePokeNums.put(255,0);
 
             int i = pokemonCount + 1;
             int formNum = 1;
@@ -1325,7 +1325,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     tpk.formeSuffix = Gen7Constants.getFormeSuffixByBaseForme(species,formnum);
                     tpk.absolutePokeNumber = absolutePokeNumByBaseForme
                             .getOrDefault(species,dummyAbsolutePokeNums)
-                            .getOrDefault(formnum,0);
+                            .getOrDefault(formnum,species);
                     pokeOffs += 20;
                     tpk.heldItem = readWord(trpoke, pokeOffs);
                     pokeOffs += 4;
