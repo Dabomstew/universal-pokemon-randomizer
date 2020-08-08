@@ -2065,6 +2065,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public List<Integer> getMovesBannedFromLevelup() {
+        return Gen6Constants.bannedMoves;
+    }
+
+    @Override
     public boolean hasWildAltFormes() {
         return true;
     }

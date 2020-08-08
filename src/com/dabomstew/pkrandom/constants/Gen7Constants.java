@@ -63,6 +63,10 @@ public class Gen7Constants {
         }
     }
 
+    public static List<Integer> bannedMoves = Arrays.asList(
+            464, 621 // Ban Dark Void, Hyperspace Fury
+    );
+
     public static final Type[] typeTable = constructTypeTable();
 
     private static final String tmDataPrefixSM = "034003410342034303",  tmDataPrefixUSUM = "03BC03BD03BE03BF03";

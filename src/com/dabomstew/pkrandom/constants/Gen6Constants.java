@@ -56,6 +56,10 @@ public class Gen6Constants {
         }
     }
 
+    public static List<Integer> bannedMoves = Collections.singletonList(
+            621 // Ban Hyperspace Fury
+    );
+
     public static final Type[] typeTable = constructTypeTable();
 
     // Copied from pk3DS. "Dark Grass Held Item" should probably be renamed

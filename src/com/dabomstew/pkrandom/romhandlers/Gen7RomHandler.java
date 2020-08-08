@@ -2030,6 +2030,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public List<Integer> getMovesBannedFromLevelup() {
+        return Gen7Constants.bannedMoves;
+    }
+
+    @Override
     public boolean hasWildAltFormes() {
         return true;
     }
