@@ -647,7 +647,7 @@ public class Gen6Constants {
 
         allowedItemsORAS = allowedItemsXY.copy(775);
         // Key items and an HM
-        allowedItemsORAS.banRange(718,33);
+        allowedItemsORAS.banRange(718,34);
         allowedItemsORAS.banRange(765,2);
         allowedItemsORAS.banRange(771,5);
 
@@ -662,6 +662,7 @@ public class Gen6Constants {
         nonBadItems.banRange(0x9F, 25); // berries without useful battle effects
         nonBadItems.banRange(0x100, 4); // pokemon specific
         nonBadItems.banRange(0x104, 5); // contest scarves
+        nonBadItems.banRange(0x248,7); // relic items
         nonBadItems.banRange(0x28C,4); // more mulch
 
         regularShopItems = new ArrayList<>();
@@ -1482,10 +1483,10 @@ public class Gen6Constants {
             {577, 100}, // Poké Toy
             {578, 0}, // Prop Case
             {579, 0}, // Dragon Skull
-            {580, 0}, // BalmMushroom
-            {581, 0}, // Big Nugget
-            {582, 0}, // Pearl String
-            {583, 0}, // Comet Shard
+            {580, 1250}, // BalmMushroom
+            {581, 2000}, // Big Nugget
+            {582, 1500}, // Pearl String
+            {583, 3000}, // Comet Shard
             {584, 0}, // Relic Copper
             {585, 0}, // Relic Silver
             {586, 0}, // Relic Gold

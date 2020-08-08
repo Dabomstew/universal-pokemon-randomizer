@@ -606,7 +606,7 @@ public class Gen7Constants {
         allowedItemsSM.banRange(690,5);
 
         // Key items and an HM
-        allowedItemsSM.banRange(718,33);
+        allowedItemsSM.banRange(718,34);
         allowedItemsSM.banRange(765,2);
         allowedItemsSM.banRange(771,5);
 
@@ -651,6 +651,7 @@ public class Gen7Constants {
         nonBadItems.banRange(0x2F0, 13); // Mega Stones, part 2
         nonBadItems.banRange(0x2FF, 4); // Mega Stones, part 3
         nonBadItems.banRange(0x388,17); // Memories
+        nonBadItems.banRange(0x248,7); // relic items
 
         regularShopItemsSM = new ArrayList<>();
 
@@ -1436,10 +1437,10 @@ public class Gen7Constants {
             {577, 10}, // Poké Toy
             {578, 0}, // Prop Case
             {579, 0}, // Dragon Skull
-            {580, 0}, // BalmMushroom
-            {581, 0}, // Big Nugget
-            {582, 0}, // Pearl String
-            {583, 0}, // Comet Shard
+            {580, 1500}, // BalmMushroom
+            {581, 4000}, // Big Nugget
+            {582, 3000}, // Pearl String
+            {583, 6000}, // Comet Shard
             {584, 0}, // Relic Copper
             {585, 0}, // Relic Silver
             {586, 0}, // Relic Gold
