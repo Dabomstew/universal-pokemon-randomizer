@@ -1929,10 +1929,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         }
                     }
                 }
-                // split evos don't carry stats
+                // Split evos shouldn't carry stats unless the evo is Nincada's
+                // In that case, we should have Ninjask carry stats
                 if (pk.evolutionsFrom.size() > 1) {
                     for (Evolution e : pk.evolutionsFrom) {
-                        e.carryStats = false;
+                        if (e.type != EvolutionType.LEVEL_CREATE_EXTRA) {
+                            e.carryStats = false;
+                        }
                     }
                 }
             }
