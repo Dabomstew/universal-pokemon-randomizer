@@ -193,6 +193,7 @@ public class Gen6Constants {
     public static final Map<Integer, String> fallingEncounterNameMap = constructFallingEncounterNameMap();
 
     private static final String saveLoadFormeReversionPrefixXY = "292907EB140094E500F020E3", saveLoadFormeReversionPrefixORAS = "9A3907EB140094E500F020E3";
+    public static final String ninjaskSpeciesPrefix = "241094E5B810D1E1", shedinjaSpeciesPrefix = "C2FFFFEB0040A0E10020A0E3";
 
     public static String getIngameTradesPrefix(int romType) {
         if (romType == Type_XY) {
