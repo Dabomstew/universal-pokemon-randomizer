@@ -121,6 +121,8 @@ public class Gen7Constants {
     private static final String saveLoadFormeReversionPrefixSM = "7E2001EB0C0094E5", saveLoadFormeReversionPrefixUSUM = "372C01EB0C0094E5";
     public static final String afterBattleFormeReversionPrefix = "0055E10B00001A0010A0E30700A0E1";
 
+    public static final String ninjaskSpeciesPrefix = "11FF2FE11CD08DE2F080BDE8", shedinjaSpeciesPrefix = "94FDFFEB0040A0E10020A0E3";
+
     public static int getPokemonCount(int romType) {
         if (romType == Type_SM) {
             return pokemonCountSM;
