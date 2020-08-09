@@ -264,7 +264,7 @@ public class Gen5Constants {
 
 
     public static final List<Integer> evolutionItems = Arrays.asList(80,81,82,83,84,85,107,108,109,
-            110,221,226,227,233,235,252,321,322,323,324,325,326,327);
+            110,221,226,227,233,235,252,321,322,323,324,325,326,327,537);
 
     
     public static final List<Integer> bw1RequiredFieldTMs = Arrays.asList(2, 3, 5, 6, 9, 12, 13, 19,

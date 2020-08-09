@@ -178,7 +178,7 @@ public class Gen6Constants {
 
 
     public static final List<Integer> evolutionItems = Arrays.asList(80,81,82,83,84,85,107,108,109,
-            110,221,226,227,233,235,252,321,322,323,324,325,326,327,646,647);
+            110,221,226,227,233,235,252,321,322,323,324,325,326,327,537,646,647);
 
     private static final List<Integer> requiredFieldTMsXY = Arrays.asList(
             1, 9, 40, 19, 65, 73, 69, 74, 81, 57, 61, 97, 95, 71, 79, 30, 31, 36, 53, 29, 22, 3, 2, 80, 26);
