@@ -434,10 +434,23 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         }
                     }
                 }
-                // split evos don't carry stats
+                // Nincada's Shedinja evo is hardcoded into the game's executable,
+                // so if the Pokemon is Nincada, then let's and put it as one of its evolutions
+                if (pk.number == 290) {
+                    Pokemon shedinja = pokes[292];
+                    Evolution evol = new Evolution(pk, shedinja, false, EvolutionType.LEVEL_IS_EXTRA, 20);
+                    evol.forme = -1;
+                    evol.level = 20;
+                    pk.evolutionsFrom.add(evol);
+                }
+
+                // Split evos shouldn't carry stats unless the evo is Nincada's
+                // In that case, we should have Ninjask carry stats
                 if (pk.evolutionsFrom.size() > 1) {
                     for (Evolution e : pk.evolutionsFrom) {
-                        e.carryStats = false;
+                        if (e.type != EvolutionType.LEVEL_CREATE_EXTRA) {
+                            e.carryStats = false;
+                        }
                     }
                 }
             }
@@ -629,6 +642,9 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             for (int i = 1; i <= Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.romType); i++) {
                 byte[] evoEntry = evoGARC.files.get(i).get(0);
                 Pokemon pk = pokes[i];
+                if (pk.number == 290) {
+                    handleShedinjaEvolution();
+                }
                 int evosWritten = 0;
                 for (Evolution evo : pk.evolutionsFrom) {
                     writeWord(evoEntry, evosWritten * 6, evo.type.toIndex(6));
@@ -650,6 +666,37 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+    }
+
+    private void handleShedinjaEvolution() throws IOException {
+        Pokemon nincada = pokes[290];
+        Pokemon primaryEvolution = nincada.evolutionsFrom.get(0).to;
+        Pokemon extraEvolution = nincada.evolutionsFrom.get(1).to;
+        byte[] evolutionCRO = readFile(romEntry.getString("Evolution"));
+        int offset = find(evolutionCRO, Gen6Constants.ninjaskSpeciesPrefix);
+        if (offset > 0) {
+            offset += Gen6Constants.ninjaskSpeciesPrefix.length() / 2; // because it was a prefix
+            int primaryEvoLower = primaryEvolution.number & 0x00FF;
+            int primaryEvoUpper = (primaryEvolution.number & 0xFF00) >> 8;
+            evolutionCRO[offset] = (byte) primaryEvoUpper;
+            evolutionCRO[offset + 4] = (byte) primaryEvoLower;
+        }
+
+        offset = find(code, Gen6Constants.shedinjaSpeciesPrefix);
+        if (offset > 0) {
+            offset += Gen6Constants.shedinjaSpeciesPrefix.length() / 2; // because it was a prefix
+            int extraEvoLower = extraEvolution.number & 0x00FF;
+            int extraEvoUpper = (extraEvolution.number & 0xFF00) >> 8;
+            code[offset] = (byte) extraEvoLower;
+            code[offset + 1] = (byte) (0x10 + extraEvoUpper);
+            code[offset + 2] = 0x00;
+            code[offset + 3] = (byte) 0xE3;
+        }
+
+        // Now that we've handled the hardcoded Shedinja evolution, delete it so that
+        // we do *not* handle it in WriteEvolutions
+        nincada.evolutionsFrom.remove(1);
+        writeFile(romEntry.getString("Evolution"), evolutionCRO);
     }
 
     private void saveMoves() {
