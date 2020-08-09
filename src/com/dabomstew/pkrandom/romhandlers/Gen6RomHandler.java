@@ -643,7 +643,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 byte[] evoEntry = evoGARC.files.get(i).get(0);
                 Pokemon pk = pokes[i];
                 if (pk.number == 290) {
-                    handleShedinjaEvolution();
+                    writeShedinjaEvolution();
                 }
                 int evosWritten = 0;
                 for (Evolution evo : pk.evolutionsFrom) {
@@ -668,10 +668,20 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
     }
 
-    private void handleShedinjaEvolution() throws IOException {
+    private void writeShedinjaEvolution() throws IOException {
         Pokemon nincada = pokes[290];
         Pokemon primaryEvolution = nincada.evolutionsFrom.get(0).to;
         Pokemon extraEvolution = nincada.evolutionsFrom.get(1).to;
+
+        // In the CRO that handles the evolution cutscene, there's a hardcoded check to
+        // see if the Pokemon that just evolved is now a Ninjask after evolving. It
+        // performs that check using the following instructions:
+        // sub    r0, r1, #0x100
+        // subs   r0, r0, #0x23
+        // bne    skipMakingShedinja
+        // The below code tweaks these instructions to use the species ID of Nincada's
+        // new primary evolution; that way, evolving Nincada will still produce an "extra"
+        // Pokemon like in older generations.
         byte[] evolutionCRO = readFile(romEntry.getString("Evolution"));
         int offset = find(evolutionCRO, Gen6Constants.ninjaskSpeciesPrefix);
         if (offset > 0) {
@@ -682,6 +692,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             evolutionCRO[offset + 4] = (byte) primaryEvoLower;
         }
 
+        // In the game's executable, there's a hardcoded value to indicate what "extra"
+        // Pokemon to create. It produces a Shedinja using the following instruction:
+        // mov r1, #0x124, where 0x124 = 292 in decimal, which is Shedinja's species ID.
+        // The below code tweaks this instruction to use the species ID of Nincada's
+        // new extra evolution.
         offset = find(code, Gen6Constants.shedinjaSpeciesPrefix);
         if (offset > 0) {
             offset += Gen6Constants.shedinjaSpeciesPrefix.length() / 2; // because it was a prefix

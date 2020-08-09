@@ -690,7 +690,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 byte[] evoEntry = evoGARC.files.get(i).get(0);
                 Pokemon pk = pokes[i];
                 if (pk.number == 290) {
-                    handleShedinjaEvolution();
+                    writeShedinjaEvolution();
                 }
                 int evosWritten = 0;
                 for (Evolution evo : pk.evolutionsFrom) {
@@ -722,16 +722,28 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         }
     }
 
-    private void handleShedinjaEvolution() {
+    private void writeShedinjaEvolution() {
         Pokemon nincada = pokes[290];
         Pokemon primaryEvolution = nincada.evolutionsFrom.get(0).to;
         Pokemon extraEvolution = nincada.evolutionsFrom.get(1).to;
+
+        // In the game's executable, there's a hardcoded check to see if the Pokemon
+        // that just evolved is now a Ninjask after evolving; if it is, then we start
+        // going down the path of creating a Shedinja. To accomplish this check, they
+        // hardcoded Ninjask's species ID as a constant. We replace this constant
+        // with the species ID of Nincada's new primary evolution; that way, evolving
+        // Nincada will still produce an "extra" Pokemon like in older generations.
         int offset = find(code, Gen7Constants.ninjaskSpeciesPrefix);
         if (offset > 0) {
             offset += Gen7Constants.ninjaskSpeciesPrefix.length() / 2; // because it was a prefix
             FileFunctions.writeFullIntLittleEndian(code, offset, primaryEvolution.number);
         }
 
+        // In the game's executable, there's a hardcoded value to indicate what "extra"
+        // Pokemon to create. It produces a Shedinja using the following instruction:
+        // mov r1, #0x124, where 0x124 = 292 in decimal, which is Shedinja's species ID.
+        // The below code tweaks this instruction to use the species ID of Nincada's
+        // new extra evolution.
         offset = find(code, Gen7Constants.shedinjaSpeciesPrefix);
         if (offset > 0) {
             offset += Gen7Constants.shedinjaSpeciesPrefix.length() / 2; // because it was a prefix
