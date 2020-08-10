@@ -427,7 +427,7 @@ public interface RomHandler {
 
     // Evos
 
-    void removeTradeEvolutions(boolean changeMoveEvos);
+    void removeImpossibleEvolutions(boolean changeMoveEvos);
 
     void condenseLevelEvolutions(int maxLevel, int maxIntermediateLevel);
 

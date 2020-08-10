@@ -231,7 +231,7 @@ public class Randomizer {
 
         // Trade evolutions removal
         if (settings.isChangeImpossibleEvolutions()) {
-            romHandler.removeTradeEvolutions(!(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED));
+            romHandler.removeImpossibleEvolutions(!(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED));
         }
 
         // Easier evolutions
