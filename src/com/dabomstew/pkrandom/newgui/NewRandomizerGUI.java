@@ -15,7 +15,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -290,6 +292,35 @@ public class NewRandomizerGUI {
         if (!haveCheckedCustomNames) {
             checkCustomNames();
         }
+
+        String latestVersionString = "???";
+
+        try {
+
+            URL url = new URL(SysConstants.API_URL_ZX);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setConnectTimeout(2000);
+            conn.setReadTimeout(2000);
+
+            BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+
+            String output;
+            while ((output = br.readLine()) != null) {
+                String[] a = output.split("tag_name\":\"");
+                if (a.length > 1) {
+                    latestVersionString = a[1].split("\",")[0];
+                }
+            }
+
+            conn.disconnect();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        websiteLinkLabel.setText(String.format(bundle.getString("GUI.websiteLinkLabel.text"),latestVersionString));
 
         frame.setTitle(String.format(bundle.getString("GUI.windowTitle"),Version.VERSION_STRING));
 
