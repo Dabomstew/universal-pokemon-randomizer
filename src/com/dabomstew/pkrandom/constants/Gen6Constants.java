@@ -189,8 +189,10 @@ public class Gen6Constants {
 
     public static final List<Integer> fieldMoves = Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 230, 291);
 
-    public static final int fallingEncounterOffset = 0xF4270, fallingEncounterSize = 0x3C, fallingEncounterCount = 55;
+    public static final int fallingEncounterOffset = 0xF4270, fallingEncounterCount = 55, fieldEncounterSize = 0x3C,
+                            rustlingBushEncounterOffset = 0xF40CC, rustlingBushEncounterCount = 7;
     public static final Map<Integer, String> fallingEncounterNameMap = constructFallingEncounterNameMap();
+    public static final Map<Integer, String> rustlingBushEncounterNameMap = constructRustlingBushEncounterNameMap();
 
     private static final String saveLoadFormeReversionPrefixXY = "292907EB140094E500F020E3", saveLoadFormeReversionPrefixORAS = "9A3907EB140094E500F020E3";
     public static final String ninjaskSpeciesPrefix = "241094E5B810D1E1", shedinjaSpeciesPrefix = "C2FFFFEB0040A0E10020A0E3";
@@ -906,6 +908,12 @@ public class Gen6Constants {
         return map;
     }
 
+    private static Map<Integer, String> constructRustlingBushEncounterNameMap() {
+        Map<Integer, String> map = new TreeMap<>();
+        map.put(0, "Route 6 Rustling Bush Encounter");
+        map.put(3, "Route 18 Rustling Bush Encounter");
+        return map;
+    }
 
     public static final Map<Integer,Integer> balancedItemPrices = Stream.of(new Integer[][] {
             // Skip item index 0. All prices divided by 10

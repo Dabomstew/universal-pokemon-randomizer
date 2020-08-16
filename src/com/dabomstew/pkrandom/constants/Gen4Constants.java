@@ -144,6 +144,8 @@ public class Gen4Constants {
 
     public static ItemList allowedItems, nonBadItems;
 
+    public static final String shedinjaSpeciesLocator = "492080000090281C0521";
+
     static {
         setupAllowedItems();
     }

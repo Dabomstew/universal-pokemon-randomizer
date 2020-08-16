@@ -1046,13 +1046,13 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             }
         }
 
-        // The ceiling/flying encounters are hardcoded in the Field CRO
+        // The ceiling/flying/rustling bush encounters are hardcoded in the Field CRO
         byte[] fieldCRO = readFile(romEntry.getString("Field"));
         String currentName = Gen6Constants.fallingEncounterNameMap.get(0);
         int startingOffsetOfCurrentName = 0;
         for (int i = 0; i < Gen6Constants.fallingEncounterCount; i++) {
-            int offset = Gen6Constants.fallingEncounterOffset + i * Gen6Constants.fallingEncounterSize;
-            EncounterSet fallingEncounter = readFallingEncounter(fieldCRO, offset);
+            int offset = Gen6Constants.fallingEncounterOffset + i * Gen6Constants.fieldEncounterSize;
+            EncounterSet fallingEncounter = readFieldEncounter(fieldCRO, offset);
             if (Gen6Constants.fallingEncounterNameMap.containsKey(i)) {
                 currentName = Gen6Constants.fallingEncounterNameMap.get(i);
                 startingOffsetOfCurrentName = i;
@@ -1060,6 +1060,19 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             int encounterNumber = (i - startingOffsetOfCurrentName) + 1;
             fallingEncounter.displayName = currentName + " #" + encounterNumber;
             encounters.add(fallingEncounter);
+        }
+        currentName = Gen6Constants.rustlingBushEncounterNameMap.get(0);
+        startingOffsetOfCurrentName = 0;
+        for (int i = 0; i < Gen6Constants.rustlingBushEncounterCount; i++) {
+            int offset = Gen6Constants.rustlingBushEncounterOffset + i * Gen6Constants.fieldEncounterSize;
+            EncounterSet rustlingBushEncounter = readFieldEncounter(fieldCRO, offset);
+            if (Gen6Constants.rustlingBushEncounterNameMap.containsKey(i)) {
+                currentName = Gen6Constants.rustlingBushEncounterNameMap.get(i);
+                startingOffsetOfCurrentName = i;
+            }
+            int encounterNumber = (i - startingOffsetOfCurrentName) + 1;
+            rustlingBushEncounter.displayName = currentName + " #" + encounterNumber;
+            encounters.add(rustlingBushEncounter);
         }
         return encounters;
     }
@@ -1194,7 +1207,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         return es;
     }
 
-    private EncounterSet readFallingEncounter(byte[] data, int offset) {
+    private EncounterSet readFieldEncounter(byte[] data, int offset) {
         EncounterSet es = new EncounterSet();
         for (int i = 0; i < 7; i++) {
             int species = readWord(data, offset + 4 + i * 8);
@@ -1305,12 +1318,17 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         // Save
         writeGARC(encountersFile, encounterGarc);
 
-        // Now write the falling encounters hardcoded in the Field CRO
+        // Now write the encounters hardcoded in the Field CRO
         byte[] fieldCRO = readFile(romEntry.getString("Field"));
         for (int i = 0; i < Gen6Constants.fallingEncounterCount; i++) {
-            int offset = Gen6Constants.fallingEncounterOffset + i * Gen6Constants.fallingEncounterSize;
+            int offset = Gen6Constants.fallingEncounterOffset + i * Gen6Constants.fieldEncounterSize;
             EncounterSet fallingEncounter = encounters.next();
-            writeFallingEncounter(fieldCRO, offset, fallingEncounter.encounters);
+            writeFieldEncounter(fieldCRO, offset, fallingEncounter.encounters);
+        }
+        for (int i = 0; i < Gen6Constants.rustlingBushEncounterCount; i++) {
+            int offset = Gen6Constants.rustlingBushEncounterOffset + i * Gen6Constants.fieldEncounterSize;
+            EncounterSet rustlingBushEncounter = encounters.next();
+            writeFieldEncounter(fieldCRO, offset, rustlingBushEncounter.encounters);
         }
 
         // Save
@@ -1412,7 +1430,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
     }
 
-    private void writeFallingEncounter(byte[] data, int offset, List<Encounter> encounters) {
+    private void writeFieldEncounter(byte[] data, int offset, List<Encounter> encounters) {
         for (int i = 0; i < encounters.size(); i++) {
             Encounter encounter = encounters.get(i);
             if (encounter.pokemon.formeNumber > 0) { // Failsafe if we need to write encounters without modifying species

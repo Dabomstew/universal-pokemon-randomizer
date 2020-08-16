@@ -2275,8 +2275,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             NARCArchive evoNARC = readNARC(romEntry.getString("PokemonEvolutions"));
             for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
                 byte[] evoEntry = evoNARC.files.get(i);
-                int evosWritten = 0;
                 Pokemon pk = pokes[i];
+                if (pk.number == 290) {
+                    writeShedinjaEvolution();
+                }
+                int evosWritten = 0;
                 for (Evolution evo : pk.evolutionsFrom) {
                     writeWord(evoEntry, evosWritten * 6, evo.type.toIndex(4));
                     writeWord(evoEntry, evosWritten * 6 + 2, evo.extraInfo);
@@ -2296,6 +2299,39 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             writeNARC(romEntry.getString("PokemonEvolutions"), evoNARC);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
+        }
+    }
+
+    private void writeShedinjaEvolution() {
+        Pokemon nincada = pokes[290];
+        Pokemon extraEvolution = nincada.evolutionsFrom.get(1).to;
+
+        // In all the Gen 4 games, the game is hardcoded to check for
+        // the LEVEL_IS_EXTRA evolution method; if it the Pokemon has it,
+        // then a harcoded Shedinja is generated after every evolution
+        // by using the following instructions:
+        // mov r0, #0x49
+        // lsl r0, r0, #2
+        // The below code tweaks this instruction to load the species ID of Nincada's
+        // new extra evolution into r0 using an 8-bit addition. Since Gen 4 has fewer
+        // than 510 species in it, this will always succeed.
+        int offset = find(arm9, Gen4Constants.shedinjaSpeciesLocator);
+        if (offset > 0) {
+            int lowByte, highByte;
+            if (extraEvolution.number < 256) {
+                lowByte = extraEvolution.number;
+                highByte = 0;
+            } else {
+                lowByte = 255;
+                highByte = extraEvolution.number - 255;
+            }
+
+            // mov r0, lowByte
+            // add r0, r0, highByte
+            arm9[offset] = (byte) lowByte;
+            arm9[offset + 1] = 0x20;
+            arm9[offset + 2] = (byte) highByte;
+            arm9[offset + 3] = 0x30;
         }
     }
 
