@@ -282,6 +282,8 @@ public class Gen5Constants {
 
     public static final List<Integer> fieldMoves = Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 230, 291);
 
+    public static final String shedinjaFunctionLocator = "F8B582B0061C30680F1C";
+
     private static Type[] constructTypeTable() {
         Type[] table = new Type[256];
         table[0x00] = Type.NORMAL;
