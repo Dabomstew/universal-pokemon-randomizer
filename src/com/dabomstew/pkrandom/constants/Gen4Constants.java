@@ -146,6 +146,10 @@ public class Gen4Constants {
 
     public static final String shedinjaSpeciesLocator = "492080000090281C0521";
 
+    public static final int ilexForestScriptFile = 92, ilexForestStringsFile = 115, headbuttTutorLongTextIndex = 16;
+    public static final List<Integer> headbuttTutorScriptOffsets = Arrays.asList(0xF55, 0xFC5, 0x100A),
+            headbuttTutorTextIndices = Arrays.asList(16, 17, 19, 23, 25, 26);
+
     static {
         setupAllowedItems();
     }
