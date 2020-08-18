@@ -1950,6 +1950,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             for (int i = 1; i <= Gen5Constants.pokemonCount; i++) {
                 byte[] evoEntry = evoNARC.files.get(i);
                 Pokemon pk = pokes[i];
+                if (pk.number == 290) {
+                    writeShedinjaEvolution();
+                }
                 int evosWritten = 0;
                 for (Evolution evo : pk.evolutionsFrom) {
                     writeWord(evoEntry, evosWritten * 6, evo.type.toIndex(5));
@@ -1970,6 +1973,53 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             writeNARC(romEntry.getString("PokemonEvolutions"), evoNARC);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
+        }
+    }
+
+    private void writeShedinjaEvolution() throws IOException {
+        Pokemon nincada = pokes[290];
+        Pokemon extraEvolution = nincada.evolutionsFrom.get(1).to;
+
+        // In all the Gen 5 games, the evolution overlay is hardcoded to generate
+        // a Shedinja by loading its species ID using the following instructions:
+        // mov r1, #0x49
+        // lsl r1, r1, #2
+        // Since Gen 5 has more than 510 species, we cannot use 8-bit addition to
+        // load any Pokemon; instead, we nop out a useless load of a string, then
+        // use the space that used to store the address of that string to instead
+        // store Nincada's new extra evolution's species ID.
+        byte[] evolutionOverlay = readOverlay(romEntry.getInt("EvolutionOvlNumber"));
+        int functionOffset = find(evolutionOverlay, Gen5Constants.shedinjaFunctionLocator);
+        if (functionOffset > 0) {
+            int[] patchOffsets = romEntry.arrayEntries.get("ShedinjaCodePatchOffsets");
+
+            // First, nop the instruction that loads a pointer to the string
+            // "shinka_demo.c" into a register; this has seemingly no effect on
+            // the game and was probably used strictly for debugging.
+            evolutionOverlay[functionOffset + patchOffsets[0]] = 0x00;
+            evolutionOverlay[functionOffset + patchOffsets[0] + 1] = 0x00;
+
+            // In the space that used to hold the address of the "shinka_demo.c" string,
+            // we're going to instead store a species ID. We need to write a pc-relative
+            // load to that space. However, the original Shedinja instructions are
+            // misaligned to do a load; there's an "add r0, r4, #0x0" between the move
+            // and the shift that is correctly-aligned. So we first move this add up one
+            // instruction, then we write out the load ("ldr r1, [pc #pcRelativeOffset]")
+            // in the correctly-aligned space, then we nop out the shift.
+            int pcRelativeOffset = patchOffsets[2] - patchOffsets[1] - 6;
+            evolutionOverlay[functionOffset + patchOffsets[1]] = 0x20;
+            evolutionOverlay[functionOffset + patchOffsets[1] + 1] = 0x1c;
+            evolutionOverlay[functionOffset + patchOffsets[1] + 2] = (byte) (pcRelativeOffset / 4);
+            evolutionOverlay[functionOffset + patchOffsets[1] + 3] = 0x49;
+            evolutionOverlay[functionOffset + patchOffsets[1] + 4] = 0x00;
+            evolutionOverlay[functionOffset + patchOffsets[1] + 5] = 0x00;
+
+            // Finally, we replace what used to store the address of "shinka_demo.c"
+            // with the species ID of Nincada's new extra evolution.
+            int newSpeciesIDOffset = functionOffset + patchOffsets[2];
+            FileFunctions.writeFullIntLittleEndian(evolutionOverlay, newSpeciesIDOffset, extraEvolution.number);
+
+            writeOverlay(romEntry.getInt("EvolutionOvlNumber"), evolutionOverlay);
         }
     }
 

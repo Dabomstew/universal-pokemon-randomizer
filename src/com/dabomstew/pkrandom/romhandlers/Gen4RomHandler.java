@@ -2037,9 +2037,37 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 writeWord(mtFile, baseOffset + i * bytesPer, moves.get(i));
             }
             writeOverlay(romEntry.getInt("MoveTutorMovesOvlNumber"), mtFile);
+
+            // In HGSS, Headbutt is the last tutor move, but the tutor teaches it
+            // to you via a hardcoded script rather than looking at this data
+            if (romEntry.romType == Gen4Constants.Type_HGSS) {
+                setHGSSHeadbuttTutor(moves.get(moves.size() - 1));
+            }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+    }
+
+    private void setHGSSHeadbuttTutor(int headbuttReplacement) {
+        byte[] ilexForestScripts = scriptNarc.files.get(Gen4Constants.ilexForestScriptFile);
+        for (int offset : Gen4Constants.headbuttTutorScriptOffsets) {
+            writeWord(ilexForestScripts, offset, headbuttReplacement);
+        }
+        List<String> ilexForestStrings = getStrings(Gen4Constants.ilexForestStringsFile);
+
+        // For longer moves, the original string used when the Pokemon cannot learn
+        // the tutor's move can scroll past the end of the text box. To fix this, we
+        // simply relocate the newline character so the row containing the move name
+        // has more room
+        String longText = "Sorry...That Pokémon\\ncannot learn Headbutt.\\p";
+        ilexForestStrings.set(Gen4Constants.headbuttTutorLongTextIndex, longText);
+
+        String replacementName = moves[headbuttReplacement].name;
+        for (int index : Gen4Constants.headbuttTutorTextIndices) {
+            String text = ilexForestStrings.get(index).replace("Headbutt", replacementName);
+            ilexForestStrings.set(index, text);
+        }
+        setStrings(Gen4Constants.ilexForestStringsFile, ilexForestStrings);
     }
 
     @Override
