@@ -89,6 +89,7 @@ public class Settings {
     private boolean banTrappingAbilities;
     private boolean banNegativeAbilities;
     private boolean banBadAbilities;
+    private boolean weighDuplicateAbilitiesTogether;
 
     public enum StartersMod {
         UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS
@@ -501,7 +502,10 @@ public class Settings {
                 allowTrainerAlternateFormes,
                 allowWildAltFormes));
 
-        out.write((doubleBattleMode ? 0x1 : 0) | (additionalBossTrainerPokemon << 1) | (additionalImportantTrainerPokemon << 4)); // There's one bit left here
+        out.write((doubleBattleMode ? 0x1 : 0) |
+                (additionalBossTrainerPokemon << 1) |
+                (additionalImportantTrainerPokemon << 4) |
+                (weighDuplicateAbilitiesTogether ? 0x80 : 0));
 
         out.write(additionalRegularTrainerPokemon |
                 ((auraMod == AuraMod.UNCHANGED) ? 0x8 : 0) |
@@ -770,6 +774,8 @@ public class Settings {
         settings.setDoubleBattleMode(restoreState(data[40], 0));
         settings.setAdditionalBossTrainerPokemon((data[40] & 0xE) >> 1);
         settings.setAdditionalImportantTrainerPokemon((data[40] & 0x70) >> 4);
+        settings.setWeighDuplicateAbilitiesTogether(restoreState(data[40], 7));
+
         settings.setAdditionalRegularTrainerPokemon((data[41] & 0x7));
         settings.setAuraMod(restoreEnum(AuraMod.class,data[41],3,4,5));
         settings.setEvolutionMovesForAll(restoreState(data[41],6)); // 7 still unused
@@ -1161,6 +1167,14 @@ public class Settings {
 
     public void setBanBadAbilities(boolean banBadAbilities) {
         this.banBadAbilities = banBadAbilities;
+    }
+
+    public boolean isWeighDuplicateAbilitiesTogether() {
+        return weighDuplicateAbilitiesTogether;
+    }
+
+    public void setWeighDuplicateAbilitiesTogether(boolean weighDuplicateAbilitiesTogether) {
+        this.weighDuplicateAbilitiesTogether = weighDuplicateAbilitiesTogether;
     }
 
     public StartersMod getStartersMod() {
