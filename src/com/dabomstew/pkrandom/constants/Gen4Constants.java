@@ -67,6 +67,20 @@ public class Gen4Constants {
 
     public static final int highestAbilityIndex = 123;
 
+    public static final Map<Integer,List<Integer>> abilityVariations = setupAbilityVariations();
+
+    private static Map<Integer,List<Integer>> setupAbilityVariations() {
+        Map<Integer,List<Integer>> map = new HashMap<>();
+        map.put(15,Arrays.asList(15,72)); // Insomnia/Vital Spirit
+        map.put(29,Arrays.asList(29,73)); // Clear Body/White Smoke
+        map.put(37,Arrays.asList(37,74)); // Huge Power/Pure Power
+        map.put(4,Arrays.asList(4,75)); // Battle Armor/Shell Armor
+        map.put(13,Arrays.asList(13,76)); // Cloud Nine/Air Lock
+        map.put(111,Arrays.asList(111,116)); // Filter/Solid Rock
+
+        return map;
+    }
+
     public static final int dpptSetVarScript = 0x28, hgssSetVarScript = 0x29;
 
     public static final int scriptListTerminator = 0xFD13;

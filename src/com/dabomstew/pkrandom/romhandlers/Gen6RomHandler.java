@@ -27,6 +27,7 @@ import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.constants.Gen6Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.ctr.AMX;
@@ -2405,6 +2406,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     @Override
     public String abilityName(int number) {
         return abilityNames.get(number);
+    }
+
+    @Override
+    public Map<Integer, List<Integer>> getAbilityVariations() {
+        return Gen5Constants.abilityVariations;
     }
 
     @Override

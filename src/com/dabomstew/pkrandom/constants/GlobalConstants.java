@@ -223,6 +223,13 @@ public class GlobalConstants {
     // Minus, Plus, Anticipation, Forewarn, Frisk, Honey Gather, Friend Guard, Healer, Telepathy, Symbiosis, Aura Break,
     // Battery, Receiver, Power of Alchemy
 
+    public static final List<Integer> duplicateAbilities = Arrays.asList(
+            72, 73, 74, 75, 76, 116, 160, 163, 164, 194, 219, 221, 223, 230, 231, 232, 236, 242
+    );
+    // Vital Spirit, White Smoke, Pure Power, Shell Armor, Air Lock, Solid Rock, Iron Barbs, Turboblaze, Teravolt,
+    // Emergency Exit, Dazzling, Tangling Hair, Power of Alchemy, Full Metal Body, Shadow Shield, Prism Armor, Libero,
+    // Stalwart
+
     public static final int WONDER_GUARD_INDEX = 25;
 
     public static final int MIN_DAMAGING_MOVE_POWER = 50;

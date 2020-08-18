@@ -218,7 +218,7 @@ public class Randomizer {
         if (romHandler.abilitiesPerPokemon() > 0 && settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE) {
             romHandler.randomizeAbilities(settings.isAbilitiesFollowEvolutions(), settings.isAllowWonderGuard(),
                     settings.isBanTrappingAbilities(), settings.isBanNegativeAbilities(), settings.isBanBadAbilities(),
-                    settings.isAbilitiesFollowMegaEvolutions());
+                    settings.isAbilitiesFollowMegaEvolutions(), true);
         }
 
         maybeLogBaseStatAndTypeChanges(log, romHandler);

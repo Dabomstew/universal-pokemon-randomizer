@@ -2233,6 +2233,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public Map<Integer, List<Integer>> getAbilityVariations() {
+        return Gen5Constants.abilityVariations;
+    }
+
+    @Override
     public boolean hasMegaEvolutions() {
         return false;
     }

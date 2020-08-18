@@ -1677,6 +1677,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public Map<Integer, List<Integer>> getAbilityVariations() {
+        return new HashMap<>();
+    }
+
+    @Override
     public boolean hasMegaEvolutions() {
         return false;
     }

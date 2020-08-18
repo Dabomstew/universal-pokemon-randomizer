@@ -533,7 +533,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeAbilities(boolean evolutionSanity, boolean allowWonderGuard, boolean banTrappingAbilities,
-                                   boolean banNegativeAbilities, boolean banBadAbilities, boolean megaEvolutionSanity) {
+                                   boolean banNegativeAbilities, boolean banBadAbilities, boolean megaEvolutionSanity,
+                                   boolean weighDuplicatesTogether) {
         // Abilities don't exist in some games...
         if (this.abilitiesPerPokemon() == 0) {
             return;
@@ -559,6 +560,13 @@ public abstract class AbstractRomHandler implements RomHandler {
             bannedAbilities.addAll(GlobalConstants.badAbilities);
         }
 
+        if (weighDuplicatesTogether) {
+            bannedAbilities.addAll(GlobalConstants.duplicateAbilities);
+            if (generationOfPokemon() == 3) {
+                bannedAbilities.add(77); // Special case for Cacophony in gen 3
+            }
+        }
+
         final int maxAbility = this.highestAbilityIndex();
 
         if (evolutionSanity) {
@@ -570,12 +578,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                         && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX
                         && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX) {
                     // Pick first ability
-                    pk.ability1 = pickRandomAbility(maxAbility, bannedAbilities);
+                    pk.ability1 = pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether);
 
                     // Second ability?
                     if (AbstractRomHandler.this.random.nextDouble() < 0.5) {
                         // Yes, second ability
-                        pk.ability2 = pickRandomAbility(maxAbility, bannedAbilities, pk.ability1);
+                        pk.ability2 = pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether,
+                                pk.ability1);
                     } else {
                         // Nope
                         pk.ability2 = 0;
@@ -583,7 +592,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                     // Third ability?
                     if (hasDWAbilities) {
-                        pk.ability3 = pickRandomAbility(maxAbility, bannedAbilities, pk.ability1, pk.ability2);
+                        pk.ability3 = pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether,
+                                pk.ability1, pk.ability2);
                     }
                 }
             }, (evFrom, evTo, toMonIsFinalEvo) -> {
@@ -607,12 +617,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                         && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX
                         && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX) {
                     // Pick first ability
-                    pk.ability1 = this.pickRandomAbility(maxAbility, bannedAbilities);
+                    pk.ability1 = this.pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether);
 
                     // Second ability?
                     if (this.random.nextDouble() < 0.5) {
                         // Yes, second ability
-                        pk.ability2 = this.pickRandomAbility(maxAbility, bannedAbilities, pk.ability1);
+                        pk.ability2 = this.pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether,
+                                pk.ability1);
                     } else {
                         // Nope
                         pk.ability2 = 0;
@@ -620,7 +631,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                     // Third ability?
                     if (hasDWAbilities) {
-                        pk.ability3 = pickRandomAbility(maxAbility, bannedAbilities, pk.ability1, pk.ability2);
+                        pk.ability3 = pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether,
+                                pk.ability1, pk.ability2);
                     }
                 }
             }
@@ -644,7 +656,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
-    private int pickRandomAbility(int maxAbility, List<Integer> bannedAbilities, int... alreadySetAbilities) {
+    private int pickRandomAbility(int maxAbility, List<Integer> bannedAbilities, boolean useVariations,
+                                  int... alreadySetAbilities) {
         int newAbility;
 
         while (true) {
@@ -663,6 +676,16 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
 
             if (!repeat) {
+                if (useVariations) {
+                    Map<Integer,List<Integer>> abilityVariations = getAbilityVariations();
+                    for (int baseAbility: abilityVariations.keySet()) {
+                        if (newAbility == baseAbility) {
+                            List<Integer> variationsForThisAbility = abilityVariations.get(newAbility);
+                            newAbility = variationsForThisAbility.get(this.random.nextInt(variationsForThisAbility.size()));
+                            break;
+                        }
+                    }
+                }
                 break;
             }
         }

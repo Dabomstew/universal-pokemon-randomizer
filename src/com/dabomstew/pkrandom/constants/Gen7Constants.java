@@ -118,6 +118,27 @@ public class Gen7Constants {
             0x319  // Fairy
     );
 
+    public static final Map<Integer,List<Integer>> abilityVariations = setupAbilityVariations();
+
+    private static Map<Integer,List<Integer>> setupAbilityVariations() {
+        Map<Integer,List<Integer>> map = new HashMap<>();
+        map.put(15,Arrays.asList(15,72)); // Insomnia/Vital Spirit
+        map.put(29,Arrays.asList(29,73,230)); // Clear Body/White Smoke/Full Metal Body
+        map.put(37,Arrays.asList(37,74)); // Huge Power/Pure Power
+        map.put(4,Arrays.asList(4,75)); // Battle Armor/Shell Armor
+        map.put(13,Arrays.asList(13,76)); // Cloud Nine/Air Lock
+        map.put(111,Arrays.asList(111,116,232)); // Filter/Solid Rock/Prism Armor
+        map.put(24,Arrays.asList(24,160)); // Rough Skin/Iron Barbs
+        map.put(104,Arrays.asList(104,163,164)); // Mold Breaker/Turboblaze/Teravolt
+        map.put(193,Arrays.asList(193,194)); // Wimp Out/Emergency Exit
+        map.put(214,Arrays.asList(214,219)); // Queenly Majesty/Dazzling
+        map.put(183,Arrays.asList(183,221)); // Gooey/Tangling Hair
+        map.put(222,Arrays.asList(222,223)); // Receiver/Power of Alchemy
+        map.put(136,Arrays.asList(136,231)); // Multiscale/Shadow Shield
+
+        return map;
+    }
+
     private static final String saveLoadFormeReversionPrefixSM = "7E2001EB0C0094E5", saveLoadFormeReversionPrefixUSUM = "372C01EB0C0094E5";
     public static final String afterBattleFormeReversionPrefix = "0055E10B00001A0010A0E30700A0E1";
 

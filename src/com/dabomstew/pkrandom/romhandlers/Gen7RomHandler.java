@@ -2351,6 +2351,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public Map<Integer, List<Integer>> getAbilityVariations() {
+        return Gen7Constants.abilityVariations;
+    }
+
+    @Override
     public boolean hasMegaEvolutions() {
         return true;
     }

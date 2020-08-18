@@ -149,7 +149,10 @@ public interface RomHandler {
     String abilityName(int number);
 
     void randomizeAbilities(boolean evolutionSanity, boolean allowWonderGuard, boolean banTrappingAbilities,
-                            boolean banNegativeAbilities, boolean banBadAbilities, boolean megaEvolutionSanity);
+                            boolean banNegativeAbilities, boolean banBadAbilities, boolean megaEvolutionSanity,
+                            boolean weighDuplicatesTogether);
+
+    Map<Integer,List<Integer>> getAbilityVariations();
 
     boolean hasMegaEvolutions();
 

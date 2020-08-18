@@ -1,8 +1,6 @@
 package com.dabomstew.pkrandom.constants;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Trainer;
@@ -140,6 +138,20 @@ public class Gen3Constants {
 
     public static final int highestAbilityIndex = 77;
 
+    public static final Map<Integer,List<Integer>> abilityVariations = setupAbilityVariations();
+
+    private static Map<Integer,List<Integer>> setupAbilityVariations() {
+        Map<Integer,List<Integer>> map = new HashMap<>();
+        map.put(15,Arrays.asList(15,72)); // Insomnia/Vital Spirit
+        map.put(29,Arrays.asList(29,73)); // Clear Body/White Smoke
+        map.put(37,Arrays.asList(37,74)); // Huge Power/Pure Power
+        map.put(4,Arrays.asList(4,75)); // Battle Armor/Shell Armor
+        map.put(43,Arrays.asList(43,76)); // Soundproof/Cacophony
+        map.put(13,Arrays.asList(13,77)); // Cloud Nine/Air Lock
+
+        return map;
+    }
+
     public static final int frlgMapLabelsStart = 0x58;
 
     public static final List<Integer> rsRequiredFieldTMs = Arrays.asList(1, 2, 6, 7, 11, 18, 22, 23,
@@ -161,6 +173,7 @@ public class Gen3Constants {
     public static final List<Integer> frlgEarlyRequiredHMMoves = Collections.singletonList(15);
     
     public static final int luckyEggIndex = 0xC5;
+
 
     private static Type[] constructTypeTable() {
         Type[] table = new Type[256];

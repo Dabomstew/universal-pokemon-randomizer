@@ -2624,6 +2624,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public Map<Integer, List<Integer>> getAbilityVariations() {
+        return Gen4Constants.abilityVariations;
+    }
+
+    @Override
     public boolean hasMegaEvolutions() {
         return false;
     }

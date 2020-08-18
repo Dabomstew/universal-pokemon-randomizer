@@ -2553,6 +2553,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    public Map<Integer, List<Integer>> getAbilityVariations() {
+        return Gen3Constants.abilityVariations;
+    }
+
+    @Override
     public boolean hasMegaEvolutions() {
         return false;
     }
