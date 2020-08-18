@@ -317,7 +317,7 @@ public class NewRandomizerGUI {
 
             conn.disconnect();
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
