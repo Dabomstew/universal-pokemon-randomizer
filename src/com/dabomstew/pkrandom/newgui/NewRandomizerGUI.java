@@ -608,7 +608,7 @@ public class NewRandomizerGUI {
                     }
                 }
             }
-        } else {
+        } else if (outputType == SaveType.DIRECTORY) {
             romSaveChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             int returnVal = romSaveChooser.showSaveDialog(frame);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -852,7 +852,7 @@ public class NewRandomizerGUI {
                     this.romHandler = null;
                     initialState();
                 }
-            } else {
+            } else if (outputType == SaveType.DIRECTORY) {
                 romSaveChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                 int returnVal = romSaveChooser.showSaveDialog(frame);
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -875,7 +875,7 @@ public class NewRandomizerGUI {
     }
 
     private enum SaveType {
-        FILE, DIRECTORY
+        FILE, DIRECTORY, INVALID
     }
 
     private SaveType askForSaveType() {
@@ -890,7 +890,11 @@ public class NewRandomizerGUI {
                     null,
                     options3DS,
                     null);
-            saveType = SaveType.values()[returnVal3DS];
+            if (returnVal3DS < 0) {
+                saveType = SaveType.INVALID;
+            } else {
+                saveType = SaveType.values()[returnVal3DS];
+            }
         }
         return saveType;
     }
