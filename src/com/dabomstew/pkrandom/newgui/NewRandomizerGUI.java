@@ -887,8 +887,23 @@ public class NewRandomizerGUI {
         SaveType saveType = SaveType.FILE;
         if (romHandler.generationOfPokemon() == 6 || romHandler.generationOfPokemon() == 7) {
             Object[] options3DS = {"CXI", "LayeredFS"};
+            String question = "Would you like to output your 3DS game as a CXI file or as a LayeredFS directory?";
+            JLabel label = new JLabel("<html><a href=\"https://github.com/Ajarmar/universal-pokemon-randomizer-zx/wiki/Randomizing-the-3DS-games#changes-to-saving-a-rom-when-working-with-3ds-games\">For more information, click here.</a>");
+            label.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    Desktop desktop = java.awt.Desktop.getDesktop();
+                    try {
+                        desktop.browse(new URI("https://github.com/Ajarmar/universal-pokemon-randomizer-zx/wiki/Randomizing-the-3DS-games#changes-to-saving-a-rom-when-working-with-3ds-games"));
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
+            label.setCursor(new java.awt.Cursor(Cursor.HAND_CURSOR));
+            Object[] messages = {question,label};
             int returnVal3DS = JOptionPane.showOptionDialog(frame,
-                    "Would you like to output your 3DS game as a CXI file or as a LayeredFS directory?",
+                    messages,
                     "3DS Output Choice",
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE,
