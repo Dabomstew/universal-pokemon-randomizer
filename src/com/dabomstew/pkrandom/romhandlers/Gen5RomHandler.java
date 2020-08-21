@@ -75,13 +75,14 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         private String name;
         private String romCode;
         private int romType;
-        private boolean staticPokemonSupport = false, copyStaticPokemon = false;
+        private boolean staticPokemonSupport = false, copyStaticPokemon = false, copyTradeScripts = false;
         private Map<String, String> strings = new HashMap<>();
         private Map<String, Integer> numbers = new HashMap<>();
         private Map<String, String> tweakFiles = new HashMap<>();
         private Map<String, int[]> arrayEntries = new HashMap<>();
         private Map<String, OffsetWithinEntry[]> offsetArrayEntries = new HashMap<>();
         private List<StaticPokemon> staticPokemon = new ArrayList<>();
+        private List<TradeScript> tradeScripts = new ArrayList<>();
         
 
         private int getInt(String key) {
@@ -153,6 +154,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                                     } else {
                                         current.staticPokemonSupport = false;
                                     }
+                                    if (current.copyTradeScripts) {
+                                        current.tradeScripts.addAll(otherEntry.tradeScripts);
+                                    }
                                 }
                             }
                         } else if (r[0].equals("StaticPokemon[]")) {
@@ -178,12 +182,32 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                                 sp.files = new int[] { files };
                                 sp.offsets = new int[] { offs };
                             }
+                        } else if (r[0].equals("TradeScript[]")) {
+                            String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
+                            int[] reqOffs = new int[offsets.length];
+                            int[] givOffs = new int[offsets.length];
+                            int file = 0;
+                            int c = 0;
+                            for (String off : offsets) {
+                                String[] parts = off.split(":");
+                                file = parseRIInt(parts[0]);
+                                reqOffs[c] = parseRIInt(parts[1]);
+                                givOffs[c++] = parseRIInt(parts[2]);
+                            }
+                            TradeScript ts = new TradeScript();
+                            ts.fileNum = file;
+                            ts.requestedOffsets = reqOffs;
+                            ts.givenOffsets = givOffs;
+                            current.tradeScripts.add(ts);
                         } else if (r[0].equals("StaticPokemonSupport")) {
                             int spsupport = parseRIInt(r[1]);
                             current.staticPokemonSupport = (spsupport > 0);
                         } else if (r[0].equals("CopyStaticPokemon")) {
                             int csp = parseRIInt(r[1]);
                             current.copyStaticPokemon = (csp > 0);
+                        } else if (r[0].equals("CopyTradeScripts")) {
+                            int cts = parseRIInt(r[1]);
+                            current.copyTradeScripts = (cts > 0);
                         } else if (r[0].startsWith("StarterOffsets") || r[0].equals("StaticPokemonFormValues")) {
                             String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
                             OffsetWithinEntry[] offs = new OffsetWithinEntry[offsets.length];
@@ -1396,6 +1420,22 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
     }
 
+    private static class TradeScript {
+        private int fileNum;
+        private int[] requestedOffsets;
+        private int[] givenOffsets;
+
+        public void setPokemon(Gen5RomHandler parent, NARCArchive scriptNARC, Pokemon requested, Pokemon given) {
+            int req = requested.number;
+            int giv = given.number;
+            for (int i = 0; i < requestedOffsets.length; i++) {
+                byte[] file = scriptNARC.files.get(fileNum);
+                parent.writeWord(file, requestedOffsets[i], req);
+                parent.writeWord(file, givenOffsets[i], giv);
+            }
+        }
+    }
+
     @Override
     public boolean canChangeStaticPokemon() {
         return romEntry.staticPokemonSupport;
@@ -2556,6 +2596,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public void setIngameTrades(List<IngameTrade> trades) {
         // info
         int tradeOffset = 0;
+        List<IngameTrade> oldTrades = this.getIngameTrades();
         try {
             NARCArchive tradeNARC = this.readNARC(romEntry.getString("InGameTrades"));
             List<String> tradeStrings = getStrings(false, romEntry.getInt("IngameTradesTextOffset"));
@@ -2580,12 +2621,52 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 writeWord(tfile, 0x34, trade.otId);
                 writeLong(tfile, 0x4C, trade.item);
                 writeLong(tfile, 0x5C, trade.requestedPokemon.number);
+                if (romEntry.tradeScripts.size() > 0) {
+                    romEntry.tradeScripts.get(i - unusedOffset).setPokemon(this,scriptNarc,trade.requestedPokemon,trade.givenPokemon);
+                }
             }
             this.writeNARC(romEntry.getString("InGameTrades"), tradeNARC);
             this.setStrings(false, romEntry.getInt("IngameTradesTextOffset"), tradeStrings);
+            // update what the people say when they talk to you
+            unusedOffset = 0;
+            if (romEntry.arrayEntries.containsKey("IngameTradePersonTextOffsets")) {
+                int[] textOffsets = romEntry.arrayEntries.get("IngameTradePersonTextOffsets");
+                for (int tr = 0; tr < textOffsets.length; tr++) {
+                    if (unusedOffset < unused.length && unused[unusedOffset] == tr+24) {
+                        unusedOffset++;
+                        continue;
+                    }
+                    if (textOffsets[tr] > 0) {
+                        if (tr+24 >= oldTrades.size() || tr+24 >= trades.size()) {
+                            break;
+                        }
+                        IngameTrade oldTrade = oldTrades.get(tr+24);
+                        IngameTrade newTrade = trades.get(tr+24);
+                        Map<String, String> replacements = new TreeMap<>();
+                        replacements.put(oldTrade.givenPokemon.name, newTrade.givenPokemon.name);
+                        if (oldTrade.requestedPokemon != newTrade.requestedPokemon) {
+                            replacements.put(oldTrade.requestedPokemon.name, newTrade.requestedPokemon.name);
+                        }
+                        replaceAllStringsInEntry(textOffsets[tr], replacements);
+                    }
+                }
+            }
         } catch (IOException ex) {
             throw new RandomizerIOException(ex);
         }
+    }
+
+    private void replaceAllStringsInEntry(int entry, Map<String, String> replacements) {
+        List<String> thisTradeStrings = this.getStrings(true, entry);
+        int ttsCount = thisTradeStrings.size();
+        for (int strNum = 0; strNum < ttsCount; strNum++) {
+            String newString = thisTradeStrings.get(strNum);
+            for (String old: replacements.keySet()) {
+                newString = newString.replaceAll(old,replacements.get(old));
+            }
+            thisTradeStrings.set(strNum, newString);
+        }
+        this.setStrings(true, entry, thisTradeStrings);
     }
 
     @Override
