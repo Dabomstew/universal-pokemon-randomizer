@@ -6,7 +6,7 @@ import java.io.IOException;
 public class Launcher {
     public static void main(String[] args) {
         try {
-            ProcessBuilder pb = new ProcessBuilder("java", "-Xmx4096M", "-jar", "rando.jar");
+            ProcessBuilder pb = new ProcessBuilder("java", "-Xmx4096M", "-jar", "PokeRandoZX.jar");
             pb.redirectErrorStream(true);
             File log = new File("launcher-log.txt");
             pb.redirectOutput(ProcessBuilder.Redirect.to(log));

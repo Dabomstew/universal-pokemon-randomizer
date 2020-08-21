@@ -6,7 +6,7 @@ The launcher program and the randomizer program must be in the same folder.
 
 The only thing the launcher does is run the following command:
 
-java -Xmx4096M -jar rando.jar
+java -Xmx4096M -jar PokeRandoZX.jar
 
 This starts the randomizer application with a maximum Java heap size of 4 gigabytes. This is necessary for being able to randomize Generation 7 games.
 
@@ -18,4 +18,4 @@ Some potential issues that could occur:
 
 - You don't have java in your PATH environment variable. Try googling "java path environment variable" + your operating system to find out how to set it. (The log will probably say something like "java is not recognized as a command..".)
 - You can't set the heap space to 4 gigabytes. This may occur if you have a 32-bit version of Java. Consider updating to a 64-bit version.
-- The launcher can't execute its command due to operating system differences (shouldn't occur on Windows). Try running "java -Xmx4096M -jar rando.jar" directly from the command line instead.
+- The launcher can't execute its command due to operating system differences (shouldn't occur on Windows). Try running "java -Xmx4096M -jar PokeRandoZX.jar" directly from the command line instead.
