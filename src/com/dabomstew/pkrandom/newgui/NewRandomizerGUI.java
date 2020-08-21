@@ -295,34 +295,39 @@ public class NewRandomizerGUI {
             checkCustomNames();
         }
 
-        String latestVersionString = "???";
+        new Thread(() -> {
+            String latestVersionString = "???";
 
-        try {
+            try {
 
-            URL url = new URL(SysConstants.API_URL_ZX);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("Accept", "application/json");
-            conn.setConnectTimeout(2000);
-            conn.setReadTimeout(2000);
+                URL url = new URL(SysConstants.API_URL_ZX);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setConnectTimeout(2000);
+                conn.setReadTimeout(2000);
 
-            BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+                BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
 
-            String output;
-            while ((output = br.readLine()) != null) {
-                String[] a = output.split("tag_name\":\"");
-                if (a.length > 1) {
-                    latestVersionString = a[1].split("\",")[0];
+                String output;
+                while ((output = br.readLine()) != null) {
+                    String[] a = output.split("tag_name\":\"");
+                    if (a.length > 1) {
+                        latestVersionString = a[1].split("\",")[0];
+                    }
                 }
+
+                conn.disconnect();
+
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
-            conn.disconnect();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        websiteLinkLabel.setText(String.format(bundle.getString("GUI.websiteLinkLabel.text"),latestVersionString));
+            String finalLatestVersionString = latestVersionString;
+            SwingUtilities.invokeLater(() -> {
+                websiteLinkLabel.setText(String.format(bundle.getString("GUI.websiteLinkLabel.text"), finalLatestVersionString));
+            });
+        }).run();
 
         frame.setTitle(String.format(bundle.getString("GUI.windowTitle"),Version.VERSION_STRING));
 
