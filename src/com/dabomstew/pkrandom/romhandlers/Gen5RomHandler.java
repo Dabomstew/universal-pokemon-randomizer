@@ -1504,6 +1504,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
         available |= MiscTweak.NO_FREE_LUCKY_EGG.getValue();
         available |= MiscTweak.BAN_BIG_MANIAC_ITEMS.getValue();
+        if (romEntry.romType == Gen5Constants.Type_BW) {
+            available |= MiscTweak.BALANCE_STATIC_LEVELS.getValue();
+        }
         return available;
     }
 
@@ -1530,6 +1533,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             // Rare berries
             allowedItems.banRange(0xCE, 7);
             nonBadItems.banRange(0xCE, 7);
+        } else if (tweak == MiscTweak.BALANCE_STATIC_LEVELS) {
+            byte[] fossilFile = scriptNarc.files.get(Gen5Constants.fossilPokemonFile);
+            writeWord(fossilFile,Gen5Constants.fossilPokemonLevelOffset,20);
         }
     }
 

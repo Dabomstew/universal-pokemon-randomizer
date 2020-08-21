@@ -83,6 +83,9 @@ public class Gen5Constants {
 
     public static final int highestAbilityIndex = 164;
 
+    public static final int fossilPokemonFile = 877;
+    public static final int fossilPokemonLevelOffset = 0x3F7;
+
     public static final Map<Integer,List<Integer>> abilityVariations = setupAbilityVariations();
 
     private static Map<Integer,List<Integer>> setupAbilityVariations() {

@@ -243,6 +243,7 @@ public class NewRandomizerGUI {
     private JComboBox<String> mdUpdateComboBox;
     private JLabel wikiLinkLabel;
     private JCheckBox paWeighDuplicatesTogetherCheckBox;
+    private JCheckBox miscBalanceStaticLevelsCheckBox;
 
     private static JFrame frame;
 
@@ -646,22 +647,24 @@ public class NewRandomizerGUI {
                 Settings settings = Settings.read(fis);
                 fis.close();
 
-                // load settings
-                initialState();
-                romLoaded();
-                Settings.TweakForROMFeedback feedback = settings.tweakForRom(this.romHandler);
-                if (feedback.isChangedStarter() && settings.getStartersMod() == Settings.StartersMod.CUSTOM) {
-                    JOptionPane.showMessageDialog(frame, bundle.getString("GUI.starterUnavailable"));
-                }
-                this.restoreStateFromSettings(settings);
+                SwingUtilities.invokeLater(() -> {
+                    // load settings
+                    initialState();
+                    romLoaded();
+                    Settings.TweakForROMFeedback feedback = settings.tweakForRom(this.romHandler);
+                    if (feedback.isChangedStarter() && settings.getStartersMod() == Settings.StartersMod.CUSTOM) {
+                        JOptionPane.showMessageDialog(frame, bundle.getString("GUI.starterUnavailable"));
+                    }
+                    this.restoreStateFromSettings(settings);
 
-                if (settings.isUpdatedFromOldVersion()) {
-                    // show a warning dialog, but load it
-                    JOptionPane.showMessageDialog(frame, bundle.getString("GUI.settingsFileOlder"));
-                }
+                    if (settings.isUpdatedFromOldVersion()) {
+                        // show a warning dialog, but load it
+                        JOptionPane.showMessageDialog(frame, bundle.getString("GUI.settingsFileOlder"));
+                    }
 
-                JOptionPane.showMessageDialog(frame,
-                        String.format(bundle.getString("GUI.settingsLoaded"), fh.getName()));
+                    JOptionPane.showMessageDialog(frame,
+                            String.format(bundle.getString("GUI.settingsLoaded"), fh.getName()));
+                });
             } catch (UnsupportedOperationException ex) {
                 ex.printStackTrace();
                 JOptionPane.showMessageDialog(frame, ex.getMessage());
@@ -2006,6 +2009,9 @@ public class NewRandomizerGUI {
         miscBanBigMoneyManiacCheckBox.setSelected(false);
         mtNoExistLabel.setVisible(false);
         mtNoneAvailableLabel.setVisible(false);
+
+        liveTweaksPanel.setVisible(false);
+        miscTweaksPanel.setVisible(true);
     }
 
     private void romLoaded() {
@@ -2300,18 +2306,7 @@ public class NewRandomizerGUI {
             }
 
             if (usableCheckBoxes.size() > 0) {
-                mtNoneAvailableLabel.setVisible(false);
-                miscTweaksPanel.setVisible(false);
-                baseTweaksPanel.remove(liveTweaksPanel);
-                makeTweaksLayout(usableCheckBoxes);
-                GridBagConstraints c = new GridBagConstraints();
-                c.fill = GridBagConstraints.BOTH;
-                c.weightx = 0.1;
-                c.weighty = 0.1;
-                c.gridx = 1;
-                c.gridy = 1;
-                baseTweaksPanel.add(liveTweaksPanel,c);
-                liveTweaksPanel.setVisible(true);
+                setTweaksPanel(usableCheckBoxes);
                 //tabbedPane1.setComponentAt(7,makeTweaksLayout(usableCheckBoxes));
                 //miscTweaksPanel.setLayout(makeTweaksLayout(usableCheckBoxes));
             } else {
@@ -2333,6 +2328,21 @@ public class NewRandomizerGUI {
             romHandler = null;
             initialState();
         }
+    }
+
+    private void setTweaksPanel(List<JCheckBox> usableCheckBoxes) {
+        mtNoneAvailableLabel.setVisible(false);
+        miscTweaksPanel.setVisible(false);
+        baseTweaksPanel.remove(liveTweaksPanel);
+        makeTweaksLayout(usableCheckBoxes);
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.BOTH;
+        c.weightx = 0.1;
+        c.weighty = 0.1;
+        c.gridx = 1;
+        c.gridy = 1;
+        baseTweaksPanel.add(liveTweaksPanel,c);
+        liveTweaksPanel.setVisible(true);
     }
 
     private void enableOrDisableSubControls() {
@@ -2838,40 +2848,6 @@ public class NewRandomizerGUI {
 
         liveTweaksPanel.add(new JSeparator(SwingConstants.HORIZONTAL),horizontalC);
         liveTweaksPanel.add(new JSeparator(SwingConstants.VERTICAL),verticalC);
-
-        // Handle columns
-//        GroupLayout.SequentialGroup columnsGroup = gl.createSequentialGroup().addContainerGap();
-//        GroupLayout.ParallelGroup[] colGroups = new GroupLayout.ParallelGroup[numCols];
-//        for (int col = 0; col < numCols; col++) {
-//            if (col > 0) {
-//                columnsGroup.addGap(18, 18, 18);
-//            }
-//            colGroups[col] = gl.createParallelGroup(GroupLayout.Alignment.LEADING);
-//            columnsGroup.addGroup(colGroups[col]);
-//        }
-//        for (int tweak = 0; tweak < numTweaks; tweak++) {
-//            colGroups[tweak % numCols].addComponent(tweaks.get(tweak));
-//        }
-//        columnsGroup.addContainerGap();
-//        gl.setHorizontalGroup(gl.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(columnsGroup));
-//
-//        // And rows
-//        GroupLayout.SequentialGroup rowsGroup = gl.createSequentialGroup().addContainerGap();
-//        int numRows = (numTweaks - 1) / numCols + 1;
-//        GroupLayout.ParallelGroup[] rowGroups = new GroupLayout.ParallelGroup[numRows];
-//        for (int row = 0; row < numRows; row++) {
-//            if (row > 0) {
-//                rowsGroup.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED);
-//            }
-//            rowGroups[row] = gl.createParallelGroup(GroupLayout.Alignment.BASELINE);
-//            rowsGroup.addGroup(rowGroups[row]);
-//        }
-//        for (int tweak = 0; tweak < numTweaks; tweak++) {
-//            rowGroups[tweak / numCols].addComponent(tweaks.get(tweak));
-//        }
-//        rowsGroup.addContainerGap();
-//        gl.setVerticalGroup(gl.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(rowsGroup));
-//        return gl;
     }
 
     private void populateDropdowns() {
