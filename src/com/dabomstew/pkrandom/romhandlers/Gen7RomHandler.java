@@ -610,7 +610,6 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         savePokemonStats();
         saveMoves();
         try {
-            patchFormeReversion();
             writeCode(code);
             writeGARC(romEntry.getString("WildPokemon"), encounterGarc);
             writeGARC(romEntry.getString("TextStrings"), stringsGarc);
@@ -1797,6 +1796,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         available |= MiscTweak.FASTEST_TEXT.getValue();
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
         available |= MiscTweak.SOS_BATTLES_FOR_ALL.getValue();
+        available |= MiscTweak.RETAIN_ALT_FORMES.getValue();
         return available;
     }
 
@@ -1811,6 +1811,13 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         }
         if (tweak == MiscTweak.SOS_BATTLES_FOR_ALL) {
             positiveCallRates();
+        }
+        if (tweak == MiscTweak.RETAIN_ALT_FORMES) {
+            try {
+                patchFormeReversion();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

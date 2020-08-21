@@ -244,6 +244,7 @@ public class NewRandomizerGUI {
     private JLabel wikiLinkLabel;
     private JCheckBox paWeighDuplicatesTogetherCheckBox;
     private JCheckBox miscBalanceStaticLevelsCheckBox;
+    private JCheckBox miscRetainAltFormesCheckBox;
 
     private static JFrame frame;
 

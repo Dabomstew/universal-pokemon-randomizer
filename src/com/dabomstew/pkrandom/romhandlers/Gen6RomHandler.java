@@ -565,7 +565,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         savePokemonStats();
         saveMoves();
         try {
-            patchFormeReversion();
             writeCode(code);
             writeGARC(romEntry.getString("TextStrings"), stringsGarc);
         } catch (IOException e) {
@@ -751,7 +750,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
     }
 
-    private void patchFormeReversion() throws IOException {
+    private void patchFormeReversion() {
         // Upon loading a save, all Mega Pokemon and all Primal Reversions
         // in the player's party are set back to their base forme. This
         // patches .code such that this reversion does not happen.
@@ -1842,6 +1841,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         int available = 0;
         available |= MiscTweak.FASTEST_TEXT.getValue();
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
+        available |= MiscTweak.RETAIN_ALT_FORMES.getValue();
         return available;
     }
 
@@ -1852,6 +1852,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
             allowedItems.banSingles(Gen6Constants.luckyEggIndex);
             nonBadItems.banSingles(Gen6Constants.luckyEggIndex);
+        } else if (tweak == MiscTweak.RETAIN_ALT_FORMES) {
+            patchFormeReversion();
         }
     }
 
