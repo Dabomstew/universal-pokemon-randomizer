@@ -265,10 +265,12 @@ public class NewRandomizerGUI {
     private JFileChooser qsOpenChooser = new JFileChooser();
     private JFileChooser qsSaveChooser = new JFileChooser();
     private JFileChooser qsUpdateChooser = new JFileChooser();
+    private JFileChooser patchChooser = new JFileChooser();
 
     private JPopupMenu settingsMenu;
     private JMenuItem customNamesEditorMenuItem;
     private JMenuItem updateOldSettingsMenuItem;
+    private JMenuItem applyPatchMenuItem;
 
     private ImageIcon emptyIcon = new ImageIcon(getClass().getResource("/com/dabomstew/pkrandom/newgui/emptyIcon.png"));
     private boolean haveCheckedCustomNames;
@@ -422,6 +424,7 @@ public class NewRandomizerGUI {
         settingsButton.addActionListener(e -> settingsMenu.show(settingsButton,0,settingsButton.getHeight()));
         updateOldSettingsMenuItem.addActionListener(e -> updateOldSettingsMenuItemActionPerformed());
         customNamesEditorMenuItem.addActionListener(e -> new CustomNamesEditorDialog(frame));
+        applyPatchMenuItem.addActionListener(e -> applyPatchMenuItemActionPerformed());
         limitPokemonButton.addActionListener(e -> {
             GenerationLimitDialog gld = new GenerationLimitDialog(frame, currentRestrictions,
                     romHandler.generationOfPokemon());
@@ -513,6 +516,10 @@ public class NewRandomizerGUI {
         updateOldSettingsMenuItem = new JMenuItem();
         updateOldSettingsMenuItem.setText(bundle.getString("GUI.updateOldSettingsMenuItem.text"));
         settingsMenu.add(updateOldSettingsMenuItem);
+
+        applyPatchMenuItem = new JMenuItem();
+        applyPatchMenuItem.setText(bundle.getString("GUI.applyPatchMenuItem.text"));
+        settingsMenu.add(applyPatchMenuItem);
     }
 
     private void loadROM() {
@@ -953,6 +960,24 @@ public class NewRandomizerGUI {
             } catch (IOException ex) {
                 ex.printStackTrace();
                 JOptionPane.showMessageDialog(frame, bundle.getString("GUI.settingsLoadFailed"));
+            }
+        }
+    }
+
+    private void applyPatchMenuItemActionPerformed() {
+
+        if (romHandler == null) return;
+
+        patchChooser.setSelectedFile(null);
+        int returnVal = patchChooser.showOpenDialog(frame);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File fh = patchChooser.getSelectedFile();
+            try {
+                // Do stuff
+                JOptionPane.showMessageDialog(frame, String.format(bundle.getString("GUI.patchApplied"),romHandler.getROMName()));
+            } catch (IllegalArgumentException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(frame, bundle.getString("GUI.invalidSettingsFile")); // Change this
             }
         }
     }
@@ -2339,6 +2364,12 @@ public class NewRandomizerGUI {
                 liveTweaksPanel.setVisible(false);
                 miscTweaksPanel.setVisible(true);
                 //miscTweaksPanel.setLayout(noTweaksLayout);
+            }
+
+            if (romHandler.generationOfPokemon() < 6) {
+                applyPatchMenuItem.setVisible(false);
+            } else {
+                applyPatchMenuItem.setVisible(true);
             }
 
             gameMascotLabel.setIcon(makeMascotIcon());
