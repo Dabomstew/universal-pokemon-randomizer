@@ -271,6 +271,7 @@ public class NewRandomizerGUI {
     private JMenuItem customNamesEditorMenuItem;
     private JMenuItem updateOldSettingsMenuItem;
     private JMenuItem applyGameUpdateMenuItem;
+    private JMenuItem removeGameUpdateMenuItem;
 
     private ImageIcon emptyIcon = new ImageIcon(getClass().getResource("/com/dabomstew/pkrandom/newgui/emptyIcon.png"));
     private boolean haveCheckedCustomNames;
@@ -521,6 +522,10 @@ public class NewRandomizerGUI {
         applyGameUpdateMenuItem = new JMenuItem();
         applyGameUpdateMenuItem.setText(bundle.getString("GUI.applyGameUpdateMenuItem.text"));
         settingsMenu.add(applyGameUpdateMenuItem);
+
+        removeGameUpdateMenuItem = new JMenuItem();
+        removeGameUpdateMenuItem.setText(bundle.getString("GUI.removeGameUpdateMenuItem.text"));
+        settingsMenu.add(removeGameUpdateMenuItem);
     }
 
     private void loadROM() {
@@ -993,12 +998,18 @@ public class NewRandomizerGUI {
                 gameUpdates.put(ctrRomHandler.getROMCode(), fh.getAbsolutePath());
                 attemptWriteConfig();
                 romHandler.loadGameUpdate(fh.getAbsolutePath());
+                removeGameUpdateMenuItem.setVisible(true);
                 JOptionPane.showMessageDialog(frame, String.format(bundle.getString("GUI.gameUpdateApplied"), romHandler.getROMName()));
             } else {
                 // Error: update is not for the correct game
                 JOptionPane.showMessageDialog(frame, String.format(bundle.getString("GUI.nonMatchingGameUpdate"), fh.getName(), romHandler.getROMName()));
             }
         }
+    }
+
+    private void removeGameUpdateMenuItemActionPerformed() {
+
+        if (romHandler == null) return;
     }
 
     private void restoreStateFromSettings(Settings settings) {
@@ -2389,6 +2400,12 @@ public class NewRandomizerGUI {
                 applyGameUpdateMenuItem.setVisible(false);
             } else {
                 applyGameUpdateMenuItem.setVisible(true);
+            }
+
+            if (romHandler.hasGameUpdateLoaded()) {
+                removeGameUpdateMenuItem.setVisible(true);
+            } else {
+                removeGameUpdateMenuItem.setVisible(false);
             }
 
             gameMascotLabel.setIcon(makeMascotIcon());
