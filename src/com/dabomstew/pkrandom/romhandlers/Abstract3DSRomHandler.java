@@ -136,6 +136,13 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
         this.loadedROM(baseRom.getProductCode(), baseRom.getTitleId());
     }
 
+    protected abstract String getGameVersion();
+
+    @Override
+    public String getGameUpdateVersion() {
+        return getGameVersion();
+    }
+
     public void closeInnerRom() throws IOException {
         baseRom.closeROM();
     }
@@ -172,7 +179,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 
     protected byte[] readFile(String location) throws IOException {
         if (gameUpdate != null && gameUpdate.hasFile(location)) {
-            gameUpdate.getFile(location);
+            return gameUpdate.getFile(location);
         }
         return baseRom.getFile(location);
     }

@@ -850,6 +850,16 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    protected String getGameVersion() {
+        List<String> titleScreenText = getStrings(false, romEntry.getInt("TitleScreenTextOffset"));
+        if (titleScreenText.size() > romEntry.getInt("UpdateStringOffset")) {
+            return titleScreenText.get(romEntry.getInt("UpdateStringOffset"));
+        }
+        // This shouldn't be seen by users, but is correct assuming we accidentally show it to them.
+        return "Unpatched";
+    }
+
+    @Override
     public List<Pokemon> getPokemon() {
         return pokemonList;
     }

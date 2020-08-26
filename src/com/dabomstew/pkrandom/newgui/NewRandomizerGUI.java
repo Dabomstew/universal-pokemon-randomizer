@@ -1000,7 +1000,7 @@ public class NewRandomizerGUI {
                 attemptWriteConfig();
                 romHandler.loadGameUpdate(fh.getAbsolutePath());
                 removeGameUpdateMenuItem.setVisible(true);
-                romNameLabel.setText(romHandler.getROMName() + " (Game Update Loaded)");
+                romNameLabel.setText(romHandler.getROMName() + " (" + romHandler.getGameUpdateVersion() + ")");
                 JOptionPane.showMessageDialog(frame, String.format(bundle.getString("GUI.gameUpdateApplied"), romHandler.getROMName()));
             } else {
                 // Error: update is not for the correct game
@@ -2108,7 +2108,7 @@ public class NewRandomizerGUI {
             int pokemonGeneration = romHandler.generationOfPokemon();
 
             if (romHandler.hasGameUpdateLoaded()) {
-                romNameLabel.setText(romHandler.getROMName() + " (Game Update Loaded)");
+                romNameLabel.setText(romHandler.getROMName() + " (" + romHandler.getGameUpdateVersion() + ")");
             } else {
                 romNameLabel.setText(romHandler.getROMName());
             }

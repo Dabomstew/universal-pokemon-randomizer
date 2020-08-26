@@ -577,6 +577,16 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         return romEntry.acronym;
     }
 
+    @Override
+    protected String getGameVersion() {
+        List<String> titleScreenText = getStrings(false, romEntry.getInt("TitleScreenTextOffset"));
+        if (titleScreenText.size() > romEntry.getInt("UpdateStringOffset")) {
+            return titleScreenText.get(romEntry.getInt("UpdateStringOffset"));
+        }
+        // This shouldn't be seen by users, but is correct assuming we accidentally show it to them.
+        return "Unpatched";
+    }
+
     private void savePokemonStats() {
         int k = Gen6Constants.getBsSize(romEntry.romType);
         byte[] duplicateData = pokeGarc.files.get(Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.romType) + 1).get(0);

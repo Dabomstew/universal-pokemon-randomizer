@@ -113,6 +113,12 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         // do nothing, as DS games don't have external game updates
     }
 
+    @Override
+    public String getGameUpdateVersion() {
+        // do nothing, as DS games don't have external game updates
+        return null;
+    }
+
     public void closeInnerRom() throws IOException {
         baseRom.closeROM();
     }

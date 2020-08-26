@@ -65,6 +65,8 @@ public interface RomHandler {
 
     void removeGameUpdate();
 
+    String getGameUpdateVersion();
+
     // Log stuff
 
     void setLog(PrintStream logStream);

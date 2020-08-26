@@ -96,6 +96,12 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     }
 
     @Override
+    public String getGameUpdateVersion() {
+        // do nothing, as DS games don't have external game updates
+        return null;
+    }
+
+    @Override
     public boolean canChangeStaticPokemon() {
         return true;
     }
