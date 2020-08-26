@@ -996,7 +996,7 @@ public class NewRandomizerGUI {
             baseGameTitleIdChars[7] = 'E';
             String expectedUpdateTitleId = String.valueOf(baseGameTitleIdChars);
             if (actualUpdateTitleId.equals(expectedUpdateTitleId)) {
-                gameUpdates.put(ctrRomHandler.getROMCode(), fh.getAbsolutePath());
+                gameUpdates.put(romHandler.getROMCode(), fh.getAbsolutePath());
                 attemptWriteConfig();
                 romHandler.loadGameUpdate(fh.getAbsolutePath());
                 removeGameUpdateMenuItem.setVisible(true);
@@ -1012,6 +1012,12 @@ public class NewRandomizerGUI {
     private void removeGameUpdateMenuItemActionPerformed() {
 
         if (romHandler == null) return;
+
+        gameUpdates.remove(romHandler.getROMCode());
+        attemptWriteConfig();
+        romHandler.removeGameUpdate();
+        removeGameUpdateMenuItem.setVisible(false);
+        romNameLabel.setText(romHandler.getROMName());
     }
 
     private void restoreStateFromSettings(Settings settings) {

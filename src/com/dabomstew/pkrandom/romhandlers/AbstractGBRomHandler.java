@@ -91,6 +91,11 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     }
 
     @Override
+    public void removeGameUpdate() {
+        // do nothing, as GB games don't have external game updates
+    }
+
+    @Override
     public boolean canChangeStaticPokemon() {
         return true;
     }

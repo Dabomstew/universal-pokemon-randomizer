@@ -130,6 +130,12 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
         return true;
     }
 
+    @Override
+    public void removeGameUpdate() {
+        gameUpdate = null;
+        this.loadedROM(baseRom.getProductCode(), baseRom.getTitleId());
+    }
+
     public void closeInnerRom() throws IOException {
         baseRom.closeROM();
     }

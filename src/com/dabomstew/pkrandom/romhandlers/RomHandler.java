@@ -63,6 +63,8 @@ public interface RomHandler {
 
     boolean loadGameUpdate(String filename);
 
+    void removeGameUpdate();
+
     // Log stuff
 
     void setLog(PrintStream logStream);
