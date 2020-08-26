@@ -110,11 +110,6 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    public boolean supportsGameUpdates() {
-        return true;
-    }
-
-    @Override
     public boolean hasGameUpdateLoaded() {
         return gameUpdate != null;
     }

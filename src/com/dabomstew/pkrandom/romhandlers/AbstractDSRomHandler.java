@@ -98,11 +98,6 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    public boolean supportsGameUpdates() {
-        return false;
-    }
-
-    @Override
     public boolean hasGameUpdateLoaded() {
         return false;
     }

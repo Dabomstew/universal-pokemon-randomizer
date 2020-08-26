@@ -80,11 +80,6 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    public boolean supportsGameUpdates() {
-        return false;
-    }
-
-    @Override
     public boolean hasGameUpdateLoaded() {
         return false;
     }
