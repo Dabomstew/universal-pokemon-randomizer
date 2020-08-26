@@ -563,17 +563,20 @@ public class NewRandomizerGUI {
                         boolean romLoaded = false;
                         SwingUtilities.invokeLater(() -> opDialog.setVisible(true));
                         try {
-                            NewRandomizerGUI.this.romHandler.loadRom(fh.getAbsolutePath());
+                            this.romHandler.loadRom(fh.getAbsolutePath());
+                            if (gameUpdates.containsKey(this.romHandler.getROMCode())) {
+                                this.romHandler.loadGameUpdate(gameUpdates.get(this.romHandler.getROMCode()));
+                            }
                             romLoaded = true;
                         } catch (Exception ex) {
                             attemptToLogException(ex, "GUI.loadFailed", "GUI.loadFailedNoLog", null, null);
                         }
                         final boolean loadSuccess = romLoaded;
                         SwingUtilities.invokeLater(() -> {
-                            NewRandomizerGUI.this.opDialog.setVisible(false);
-                            NewRandomizerGUI.this.initialState();
+                            this.opDialog.setVisible(false);
+                            this.initialState();
                             if (loadSuccess) {
-                                NewRandomizerGUI.this.romLoaded();
+                                this.romLoaded();
                             }
                         });
                     });
@@ -984,8 +987,9 @@ public class NewRandomizerGUI {
             baseGameTitleIdChars[7] = 'E';
             String expectedUpdateTitleId = String.valueOf(baseGameTitleIdChars);
             if (actualUpdateTitleId.equals(expectedUpdateTitleId)) {
-                gameUpdates.put(baseGameTitleId, fh.getAbsolutePath());
+                gameUpdates.put(ctrRomHandler.getROMCode(), fh.getAbsolutePath());
                 attemptWriteConfig();
+                romHandler.loadGameUpdate(fh.getAbsolutePath());
                 JOptionPane.showMessageDialog(frame, String.format(bundle.getString("GUI.gameUpdateApplied"), romHandler.getROMName()));
             } else {
                 // Error: update is not for the correct game
@@ -3063,6 +3067,7 @@ public class NewRandomizerGUI {
                 ps.println("[Game Updates]");
                 for (Map.Entry<String, String> update : gameUpdates.entrySet()) {
                     ps.format("%s=%s", update.getKey(), update.getValue());
+                    ps.println();
                 }
             }
             ps.close();

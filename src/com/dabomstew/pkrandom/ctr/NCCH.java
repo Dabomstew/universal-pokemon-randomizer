@@ -38,6 +38,7 @@ public class NCCH {
     private String romFilename;
     private RandomAccessFile baseRom;
     private long ncchStartingOffset;
+    private String productCode;
     private String titleId;
     private long exefsOffset, romfsOffset, fileDataOffset;
     private ExefsFileHeader codeFileHeader;
@@ -60,10 +61,11 @@ public class NCCH {
     private static final int level3_header_size = 0x28;
     private static final int metadata_unused = 0xFFFFFFFF;
 
-    public NCCH(String filename, long ncchStartingOffset, String titleId) throws IOException {
+    public NCCH(String filename, long ncchStartingOffset, String productCode, String titleId) throws IOException {
         this.romFilename = filename;
         this.baseRom = new RandomAccessFile(filename, "r");
         this.ncchStartingOffset = ncchStartingOffset;
+        this.productCode = productCode;
         this.titleId = titleId;
         this.romOpen = true;
         // TMP folder?
@@ -661,6 +663,10 @@ public class NCCH {
         }
     }
 
+    public boolean hasFile(String filename) {
+        return romfsFiles.containsKey(filename);
+    }
+
     // returns null if file doesn't exist
     public byte[] getFile(String filename) throws IOException {
         if (romfsFiles.containsKey(filename)) {
@@ -686,6 +692,10 @@ public class NCCH {
 
     public boolean isWritingEnabled() {
         return writingEnabled;
+    }
+
+    public String getProductCode() {
+        return productCode;
     }
 
     public String getTitleId() {

@@ -41,6 +41,7 @@ import java.util.Random;
 public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 
     private NCCH baseRom;
+    private NCCH gameUpdate;
     private String loadedFN;
 
     private static final int ncch_magic = 0x4E434348;
@@ -61,7 +62,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
         }
         // Load inner rom
         try {
-            baseRom = new NCCH(filename, getCXIOffsetInFile(filename), titleId);
+            baseRom = new NCCH(filename, getCXIOffsetInFile(filename), productCode, titleId);
             if (!baseRom.isDecrypted()) {
                 return false;
             }
@@ -108,6 +109,22 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
         return true;
     }
 
+    @Override
+    public boolean loadGameUpdate(String filename) {
+        String productCode = getProductCodeFromFile(filename);
+        String titleId = getTitleIdFromFile(filename);
+        try {
+            gameUpdate = new NCCH(filename, getCXIOffsetInFile(filename), productCode, titleId);
+            if (!gameUpdate.isDecrypted()) {
+                return false;
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+        this.loadedROM(baseRom.getProductCode(), baseRom.getTitleId());
+        return true;
+    }
+
     public void closeInnerRom() throws IOException {
         baseRom.closeROM();
     }
@@ -120,6 +137,9 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
     }
 
     protected byte[] readCode() throws IOException {
+        if (gameUpdate != null) {
+            return gameUpdate.getCode();
+        }
         return baseRom.getCode();
     }
 
@@ -140,6 +160,9 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
     }
 
     protected byte[] readFile(String location) throws IOException {
+        if (gameUpdate != null && gameUpdate.hasFile(location)) {
+            gameUpdate.getFile(location);
+        }
         return baseRom.getFile(location);
     }
 

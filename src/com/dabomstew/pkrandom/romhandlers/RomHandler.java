@@ -57,6 +57,8 @@ public interface RomHandler {
 
     String loadedFilename();
 
+    boolean loadGameUpdate(String filename);
+
     // Log stuff
 
     void setLog(PrintStream logStream);
