@@ -98,6 +98,16 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     }
 
     @Override
+    public boolean supportsGameUpdates() {
+        return false;
+    }
+
+    @Override
+    public boolean hasGameUpdateLoaded() {
+        return false;
+    }
+
+    @Override
     public boolean loadGameUpdate(String filename) {
         // do nothing, as DS games don't have external game updates
         return true;

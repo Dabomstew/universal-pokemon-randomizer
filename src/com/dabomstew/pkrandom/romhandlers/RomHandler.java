@@ -57,6 +57,12 @@ public interface RomHandler {
 
     String loadedFilename();
 
+    // Methods relating to game updates for the 3DS and Switch games
+
+    boolean supportsGameUpdates();
+
+    boolean hasGameUpdateLoaded();
+
     boolean loadGameUpdate(String filename);
 
     // Log stuff
