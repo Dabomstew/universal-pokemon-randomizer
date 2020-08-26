@@ -192,6 +192,10 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
         baseRom.writeFile(location, data);
     }
 
+    public String getTitleIdFromLoadedROM() {
+        return baseRom.getTitleId();
+    }
+
     // At the bare minimum, a 3DS game consists of what's known as a CXI file, which
     // is just an NCCH that contains executable code. However, 3DS games are packaged
     // in various containers that can hold other NCCH files like the game manual and
@@ -259,7 +263,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
         }
     }
 
-    protected static String getTitleIdFromFile(String filename) {
+    public static String getTitleIdFromFile(String filename) {
         try {
             long ncchStartingOffset = getCXIOffsetInFile(filename);
             if (ncchStartingOffset == -1) {

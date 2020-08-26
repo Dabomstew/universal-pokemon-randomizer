@@ -688,6 +688,10 @@ public class NCCH {
         return writingEnabled;
     }
 
+    public String getTitleId() {
+        return titleId;
+    }
+
     public static int alignInt(int num, int alignment) {
         int mask = ~(alignment - 1);
         return (num + (alignment - 1)) & mask;

@@ -265,15 +265,16 @@ public class NewRandomizerGUI {
     private JFileChooser qsOpenChooser = new JFileChooser();
     private JFileChooser qsSaveChooser = new JFileChooser();
     private JFileChooser qsUpdateChooser = new JFileChooser();
-    private JFileChooser patchChooser = new JFileChooser();
+    private JFileChooser gameUpdateChooser = new JFileChooser();
 
     private JPopupMenu settingsMenu;
     private JMenuItem customNamesEditorMenuItem;
     private JMenuItem updateOldSettingsMenuItem;
-    private JMenuItem applyPatchMenuItem;
+    private JMenuItem applyGameUpdateMenuItem;
 
     private ImageIcon emptyIcon = new ImageIcon(getClass().getResource("/com/dabomstew/pkrandom/newgui/emptyIcon.png"));
     private boolean haveCheckedCustomNames;
+    private Map<String, String> gameUpdates = new TreeMap<>();
 
     public NewRandomizerGUI() {
         ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
@@ -424,7 +425,7 @@ public class NewRandomizerGUI {
         settingsButton.addActionListener(e -> settingsMenu.show(settingsButton,0,settingsButton.getHeight()));
         updateOldSettingsMenuItem.addActionListener(e -> updateOldSettingsMenuItemActionPerformed());
         customNamesEditorMenuItem.addActionListener(e -> new CustomNamesEditorDialog(frame));
-        applyPatchMenuItem.addActionListener(e -> applyPatchMenuItemActionPerformed());
+        applyGameUpdateMenuItem.addActionListener(e -> applyGameUpdateMenuItemActionPerformed());
         limitPokemonButton.addActionListener(e -> {
             GenerationLimitDialog gld = new GenerationLimitDialog(frame, currentRestrictions,
                     romHandler.generationOfPokemon());
@@ -517,9 +518,9 @@ public class NewRandomizerGUI {
         updateOldSettingsMenuItem.setText(bundle.getString("GUI.updateOldSettingsMenuItem.text"));
         settingsMenu.add(updateOldSettingsMenuItem);
 
-        applyPatchMenuItem = new JMenuItem();
-        applyPatchMenuItem.setText(bundle.getString("GUI.applyPatchMenuItem.text"));
-        settingsMenu.add(applyPatchMenuItem);
+        applyGameUpdateMenuItem = new JMenuItem();
+        applyGameUpdateMenuItem.setText(bundle.getString("GUI.applyGameUpdateMenuItem.text"));
+        settingsMenu.add(applyGameUpdateMenuItem);
     }
 
     private void loadROM() {
@@ -964,20 +965,31 @@ public class NewRandomizerGUI {
         }
     }
 
-    private void applyPatchMenuItemActionPerformed() {
+    private void applyGameUpdateMenuItemActionPerformed() {
 
         if (romHandler == null) return;
 
-        patchChooser.setSelectedFile(null);
-        int returnVal = patchChooser.showOpenDialog(frame);
+        gameUpdateChooser.setSelectedFile(null);
+        gameUpdateChooser.setFileFilter(new GameUpdateFilter());
+        int returnVal = gameUpdateChooser.showOpenDialog(frame);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File fh = patchChooser.getSelectedFile();
-            try {
-                // Do stuff
-                JOptionPane.showMessageDialog(frame, String.format(bundle.getString("GUI.patchApplied"),romHandler.getROMName()));
-            } catch (IllegalArgumentException ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(frame, bundle.getString("GUI.invalidSettingsFile")); // Change this
+            File fh = gameUpdateChooser.getSelectedFile();
+
+            // On the 3DS, the update has the same title ID as the base game, save for the 8th character,
+            // which is 'E' instead of '0'. We can use this to detect if the update matches the game.
+            String actualUpdateTitleId = Abstract3DSRomHandler.getTitleIdFromFile(fh.getAbsolutePath());
+            Abstract3DSRomHandler ctrRomHandler = (Abstract3DSRomHandler) romHandler;
+            String baseGameTitleId = ctrRomHandler.getTitleIdFromLoadedROM();
+            char[] baseGameTitleIdChars = baseGameTitleId.toCharArray();
+            baseGameTitleIdChars[7] = 'E';
+            String expectedUpdateTitleId = String.valueOf(baseGameTitleIdChars);
+            if (actualUpdateTitleId.equals(expectedUpdateTitleId)) {
+                gameUpdates.put(baseGameTitleId, fh.getAbsolutePath());
+                attemptWriteConfig();
+                JOptionPane.showMessageDialog(frame, String.format(bundle.getString("GUI.gameUpdateApplied"), romHandler.getROMName()));
+            } else {
+                // Error: update is not for the correct game
+                JOptionPane.showMessageDialog(frame, String.format(bundle.getString("GUI.nonMatchingGameUpdate"), fh.getName(), romHandler.getROMName()));
             }
         }
     }
@@ -2367,9 +2379,9 @@ public class NewRandomizerGUI {
             }
 
             if (romHandler.generationOfPokemon() < 6) {
-                applyPatchMenuItem.setVisible(false);
+                applyGameUpdateMenuItem.setVisible(false);
             } else {
-                applyPatchMenuItem.setVisible(true);
+                applyGameUpdateMenuItem.setVisible(true);
             }
 
             gameMascotLabel.setIcon(makeMascotIcon());
@@ -3005,19 +3017,29 @@ public class NewRandomizerGUI {
 
         try {
             Scanner sc = new Scanner(fh, "UTF-8");
+            boolean isReadingUpdates = false;
             while (sc.hasNextLine()) {
                 String q = sc.nextLine().trim();
                 if (q.contains("//")) {
                     q = q.substring(0, q.indexOf("//")).trim();
                 }
+                if (q.equals("[Game Updates]")) {
+                    isReadingUpdates = true;
+                    continue;
+                }
                 if (!q.isEmpty()) {
                     String[] tokens = q.split("=", 2);
                     if (tokens.length == 2) {
                         String key = tokens[0].trim();
+                        if (isReadingUpdates) {
+                            gameUpdates.put(key, tokens[1]);
+                        }
                         if (key.equalsIgnoreCase("checkedcustomnames172")) {
                             haveCheckedCustomNames = Boolean.parseBoolean(tokens[1].trim());
                         }
                     }
+                } else if (isReadingUpdates) {
+                    isReadingUpdates = false;
                 }
             }
             sc.close();
@@ -3036,6 +3058,13 @@ public class NewRandomizerGUI {
             PrintStream ps = new PrintStream(new FileOutputStream(fh), true, "UTF-8");
             ps.println("checkedcustomnames=true");
             ps.println("checkedcustomnames172=" + haveCheckedCustomNames);
+            if (gameUpdates.size() > 0) {
+                ps.println();
+                ps.println("[Game Updates]");
+                for (Map.Entry<String, String> update : gameUpdates.entrySet()) {
+                    ps.format("%s=%s", update.getKey(), update.getValue());
+                }
+            }
             ps.close();
             return true;
         } catch (IOException e) {
