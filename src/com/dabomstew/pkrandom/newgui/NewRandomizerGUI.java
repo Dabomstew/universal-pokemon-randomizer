@@ -427,6 +427,7 @@ public class NewRandomizerGUI {
         updateOldSettingsMenuItem.addActionListener(e -> updateOldSettingsMenuItemActionPerformed());
         customNamesEditorMenuItem.addActionListener(e -> new CustomNamesEditorDialog(frame));
         applyGameUpdateMenuItem.addActionListener(e -> applyGameUpdateMenuItemActionPerformed());
+        removeGameUpdateMenuItem.addActionListener(e -> removeGameUpdateMenuItemActionPerformed());
         limitPokemonButton.addActionListener(e -> {
             GenerationLimitDialog gld = new GenerationLimitDialog(frame, currentRestrictions,
                     romHandler.generationOfPokemon());
