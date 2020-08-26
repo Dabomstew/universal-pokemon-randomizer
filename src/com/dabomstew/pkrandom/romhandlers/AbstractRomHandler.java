@@ -2103,6 +2103,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         updateMovePower(moves, 120, 200);
         // Explosion => 250 power (gen1)
         updateMovePower(moves, 153, 250);
+        // Dig => 60 power (gen1)
+        updateMovePower(moves, 91, 60);
 
         if (generation >= 3 && generationOfPokemon() < 3) {
             // Razor Wind => 100% accuracy (gen1/2)
@@ -2127,6 +2129,14 @@ public abstract class AbstractRomHandler implements RomHandler {
             updateMovePP(moves, 105, 10);
             // Flash => 100% acc (gen1/2/3)
             updateMoveAccuracy(moves, 148, 100);
+            // Petal Dance => 90 power (gen1/2/3)
+            updateMovePower(moves, 80, 90);
+            // Disable => 100% accuracy (gen1-4)
+            updateMoveAccuracy(moves, 50, 80);
+            // Jump Kick => 85 power
+            updateMovePower(moves, 26, 85);
+            // Hi Jump Kick => 100 power
+            updateMovePower(moves, 136, 100);
 
             if (generationOfPokemon() >= 2) {
                 // Zap Cannon => 120 power (gen2-3)
