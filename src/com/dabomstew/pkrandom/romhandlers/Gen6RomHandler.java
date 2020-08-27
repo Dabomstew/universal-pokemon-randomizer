@@ -214,6 +214,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     private List<String> abilityNames;
     private boolean loadedWildMapNames;
     private Map<Integer, String> wildMapNames;
+    private int moveTutorMovesOffset;
     private List<String> itemNames;
     private List<String> shopNames;
     private ItemList allowedItems, nonBadItems;
@@ -2059,9 +2060,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     public List<Integer> getMoveTutorMoves() {
         List<Integer> mtMoves = new ArrayList<>();
 
-        int mtOffset = find(code,Gen6Constants.tutorsPrefix);
+        int mtOffset = getMoveTutorMovesOffset();
         if (mtOffset > 0) {
-            mtOffset += Gen6Constants.tutorsPrefix.length() / 2;
             int val = 0;
             while (val != 0xFFFF) {
                 val = FileFunctions.read2ByteInt(code,mtOffset);
@@ -2077,18 +2077,16 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     @Override
     public void setMoveTutorMoves(List<Integer> moves) {
 
-        int mtOffset = find(code,Gen6Constants.shopItemsPrefix);
+        int mtOffset = find(code, Gen6Constants.tutorsShopPrefix);
         if (mtOffset > 0) {
-            mtOffset += Gen6Constants.shopItemsPrefix.length() / 2;
-            mtOffset += Gen6Constants.tutorsOffset;
+            mtOffset += Gen6Constants.tutorsShopPrefix.length() / 2; // because it was a prefix
             for (int i = 0; i < Gen6Constants.tutorMoveCount; i++) {
                 FileFunctions.write2ByteInt(code,mtOffset + i*8, moves.get(i));
             }
         }
 
-        mtOffset = find(code,Gen6Constants.tutorsPrefix);
+        mtOffset = getMoveTutorMovesOffset();
         if (mtOffset > 0) {
-            mtOffset += Gen6Constants.tutorsPrefix.length() / 2;
             for (int move: moves) {
                 int val = FileFunctions.read2ByteInt(code,mtOffset);
                 if (val == 0x26E) mtOffset += 2;
@@ -2096,6 +2094,15 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 mtOffset += 2;
             }
         }
+    }
+
+    private int getMoveTutorMovesOffset() {
+        int offset = moveTutorMovesOffset;
+        if (offset == 0) {
+            offset = find(code, Gen6Constants.tutorsLocator);
+            moveTutorMovesOffset = offset;
+        }
+        return offset;
     }
 
     @Override
