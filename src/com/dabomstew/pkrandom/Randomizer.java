@@ -593,7 +593,7 @@ public class Randomizer {
         
         // Shops
         if ((settings.getShopItemsMod() == Settings.ShopItemsMod.RANDOM || settings.getShopItemsMod() == Settings.ShopItemsMod.SHUFFLE)
-                && this.romHandler.generationOfPokemon() >= 5) {
+                && this.romHandler.generationOfPokemon() >= 4) {
             maybeLogShops(log, romHandler);
         }
         // Test output for placement history

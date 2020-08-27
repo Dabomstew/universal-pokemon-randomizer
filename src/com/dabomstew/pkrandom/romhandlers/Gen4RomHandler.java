@@ -38,6 +38,8 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.dabomstew.pkrandom.pokemon.*;
 import thenewpoketext.PokeTextData;
@@ -1560,12 +1562,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     @Override
     public String[] getShopNames() {
-        return null;
+        return Gen4Constants.getShopNames(romEntry.romType).toArray(new String[0]);
     }
+
     @Override
     public List<Integer> getEvolutionItems() {
-        return null;
+        return Gen4Constants.evolutionItems;
     }
+
     @Override
     public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
         Iterator<Trainer> allTrainers = trainerData.iterator();
@@ -2488,27 +2492,95 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     @Override
     public boolean hasShopRandomization() {
-        return false;
+        return true;
     }
 
     @Override
     public Map<Integer, List<Integer>> getShopItems() {
-        return null; // Not implemented
+        List<Integer> skipShops =
+                Arrays.stream(romEntry.arrayEntries.get("SkipShops"))
+                .boxed()
+                .collect(Collectors.toList());
+        int shopCount = romEntry.getInt("ShopCount");
+        Map<Integer,List<Integer>> shopItemsMap = new TreeMap<>();
+        int offset = find(arm9,Gen4Constants.getShopDataPrefix(romEntry.romType));
+        offset += Gen4Constants.getShopDataPrefix(romEntry.romType).length() / 2;
+
+        for (int i = 0; i < shopCount; i++) {
+            if (!skipShops.contains(i)) {
+                List<Integer> items = new ArrayList<>();
+                int val = (FileFunctions.read2ByteInt(arm9, offset));
+                while ((val & 0xFFFF) != 0xFFFF) {
+                    if (val != 0) {
+                        items.add(val);
+                    }
+                    offset += 2;
+                    val = (FileFunctions.read2ByteInt(arm9, offset));
+                }
+                offset += 2;
+                shopItemsMap.put(i,items);
+            } else {
+                while ((FileFunctions.read2ByteInt(arm9, offset) & 0xFFFF) != 0xFFFF) {
+                    offset += 2;
+                }
+                offset += 2;
+            }
+        }
+        return shopItemsMap;
     }
 
     @Override
     public void setShopItems(Map<Integer, List<Integer>> shopItems) {
-        // Not available
+
+        int shopCount = romEntry.getInt("ShopCount");
+        int offset = find(arm9,Gen4Constants.getShopDataPrefix(romEntry.romType));
+        offset += Gen4Constants.getShopDataPrefix(romEntry.romType).length() / 2;
+
+        for (int i = 0; i < shopCount; i++) {
+            List<Integer> thisShopItems = shopItems.get(i);
+            if (thisShopItems == null) {
+                while ((FileFunctions.read2ByteInt(arm9, offset) & 0xFFFF) != 0xFFFF) {
+                    offset += 2;
+                }
+                offset += 2;
+                continue;
+            }
+            Iterator<Integer> iterItems = thisShopItems.iterator();
+            int val = (FileFunctions.read2ByteInt(arm9, offset));
+            while ((val & 0xFFFF) != 0xFFFF) {
+                if (val != 0) {
+                    FileFunctions.write2ByteInt(arm9,offset,iterItems.next());
+                }
+                offset += 2;
+                val = (FileFunctions.read2ByteInt(arm9, offset));
+            }
+            offset += 2;
+        }
     }
 
     @Override
     public void setShopPrices() {
-        // Not implemented
+        try {
+            NARCArchive itemPriceNarc = this.readNARC(romEntry.getString("ItemData"));
+            int j = 1;
+            for (int i = 1; i < itemPriceNarc.files.size(); i++) {
+                writeWord(itemPriceNarc.files.get(i),0,Gen4Constants.balancedItemPrices.get(j) * 10);
+                j++;
+                if (j == 112) {
+                    j += 23;
+                }
+            }
+            writeNARC(romEntry.getString("ItemData"),itemPriceNarc);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     @Override
     public List<Integer> getMainGameShops() {
-        return new ArrayList<>();
+        return Arrays.stream(romEntry.arrayEntries.get("MainGameShops"))
+                .boxed()
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -2633,12 +2705,12 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     @Override
     public List<Integer> getRegularShopItems() {
-        return null; // Not implemented
+        return Gen4Constants.regularShopItems;
     }
 
     @Override
     public List<Integer> getOPShopItems() {
-        return null; // Not implemented
+        return Gen4Constants.opShopItems;
     }
 
     @Override
