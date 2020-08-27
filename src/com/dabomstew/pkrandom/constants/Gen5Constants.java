@@ -672,7 +672,7 @@ public class Gen5Constants {
         regularShopItems = new ArrayList<>();
 
         regularShopItems.addAll(IntStream.rangeClosed(2,4).boxed().collect(Collectors.toList()));
-        regularShopItems.addAll(IntStream.rangeClosed(0x11,0x1D).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(0x11,0x1C).boxed().collect(Collectors.toList()));
         regularShopItems.addAll(IntStream.rangeClosed(0x4C,0x4F).boxed().collect(Collectors.toList()));
 
         opShopItems = new ArrayList<>();
@@ -795,7 +795,7 @@ public class Gen5Constants {
             {100, 500}, // Claw Fossil
             {101, 500}, // Helix Fossil
             {102, 500}, // Dome Fossil
-            {103, 700}, // Old Amber
+            {103, 800}, // Old Amber
             {104, 500}, // Armor Fossil
             {105, 500}, // Skull Fossil
             {106, 1000}, // Rare Bone
