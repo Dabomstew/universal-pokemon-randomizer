@@ -194,7 +194,7 @@ public class Gen6Constants {
     public static final Map<Integer, String> fallingEncounterNameMap = constructFallingEncounterNameMap();
     public static final Map<Integer, String> rustlingBushEncounterNameMap = constructRustlingBushEncounterNameMap();
 
-    private static final String saveLoadFormeReversionPrefixXY = "292907EB140094E500F020E3", saveLoadFormeReversionPrefixORAS = "9A3907EB140094E500F020E3";
+    private static final String saveLoadFormeReversionPrefixXY = "09EB000094E5141094E54A0B80E2", saveLoadFormeReversionPrefixORAS = "09EB000094E5141094E5120A80E2";
     public static final String ninjaskSpeciesPrefix = "241094E5B810D1E1", shedinjaSpeciesPrefix = "C2FFFFEB0040A0E10020A0E3";
 
     public static String getIngameTradesPrefix(int romType) {

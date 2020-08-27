@@ -435,8 +435,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         }
                     }
                 }
-                // Nincada's Shedinja evo is hardcoded into the game's executable,
-                // so if the Pokemon is Nincada, then let's and put it as one of its evolutions
+                // Nincada's Shedinja evo is hardcoded into the game's executable, so
+                // if the Pokemon is Nincada, then let's put it as one of its evolutions
                 if (pk.number == 290) {
                     Pokemon shedinja = pokes[292];
                     Evolution evol = new Evolution(pk, shedinja, false, EvolutionType.LEVEL_IS_EXTRA, 20);
@@ -768,6 +768,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         int offset = find(code, saveLoadFormeReversionPrefix);
         if (offset > 0) {
             offset += saveLoadFormeReversionPrefix.length() / 2; // because it was a prefix
+
+            // The actual offset of the code we want to patch is 0x10 bytes from the end of
+            // the prefix. We have to do this because these 0x10 bytes differ between the
+            // base game and all game updates, so we cannot use them as part of our prefix.
+            offset += 0x10;
 
             // Stubs the call to the function that checks for Primal Reversions and
             // Mega Pokemon
