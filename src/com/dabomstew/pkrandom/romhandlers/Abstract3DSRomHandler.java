@@ -231,6 +231,9 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
             data = newData;
         }
         baseRom.writeFile(location, data);
+        if (gameUpdate != null && gameUpdate.hasFile(location)) {
+            gameUpdate.writeFile(location, data);
+        }
     }
 
     public String getTitleIdFromLoadedROM() {
