@@ -214,6 +214,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     private List<String> abilityNames;
     private boolean loadedWildMapNames;
     private Map<Integer, String> wildMapNames;
+    private int moveTutorMovesOffset;
     private List<String> itemNames;
     private List<String> shopNames;
     private ItemList allowedItems, nonBadItems;
@@ -435,8 +436,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         }
                     }
                 }
-                // Nincada's Shedinja evo is hardcoded into the game's executable,
-                // so if the Pokemon is Nincada, then let's and put it as one of its evolutions
+                // Nincada's Shedinja evo is hardcoded into the game's executable, so
+                // if the Pokemon is Nincada, then let's put it as one of its evolutions
                 if (pk.number == 290) {
                     Pokemon shedinja = pokes[292];
                     Evolution evol = new Evolution(pk, shedinja, false, EvolutionType.LEVEL_IS_EXTRA, 20);
@@ -768,6 +769,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         int offset = find(code, saveLoadFormeReversionPrefix);
         if (offset > 0) {
             offset += saveLoadFormeReversionPrefix.length() / 2; // because it was a prefix
+
+            // The actual offset of the code we want to patch is 0x10 bytes from the end of
+            // the prefix. We have to do this because these 0x10 bytes differ between the
+            // base game and all game updates, so we cannot use them as part of our prefix.
+            offset += 0x10;
 
             // Stubs the call to the function that checks for Primal Reversions and
             // Mega Pokemon
@@ -2054,9 +2060,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     public List<Integer> getMoveTutorMoves() {
         List<Integer> mtMoves = new ArrayList<>();
 
-        int mtOffset = find(code,Gen6Constants.tutorsPrefix);
+        int mtOffset = getMoveTutorMovesOffset();
         if (mtOffset > 0) {
-            mtOffset += Gen6Constants.tutorsPrefix.length() / 2;
             int val = 0;
             while (val != 0xFFFF) {
                 val = FileFunctions.read2ByteInt(code,mtOffset);
@@ -2072,18 +2077,16 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     @Override
     public void setMoveTutorMoves(List<Integer> moves) {
 
-        int mtOffset = find(code,Gen6Constants.shopItemsPrefix);
+        int mtOffset = find(code, Gen6Constants.tutorsShopPrefix);
         if (mtOffset > 0) {
-            mtOffset += Gen6Constants.shopItemsPrefix.length() / 2;
-            mtOffset += Gen6Constants.tutorsOffset;
+            mtOffset += Gen6Constants.tutorsShopPrefix.length() / 2; // because it was a prefix
             for (int i = 0; i < Gen6Constants.tutorMoveCount; i++) {
                 FileFunctions.write2ByteInt(code,mtOffset + i*8, moves.get(i));
             }
         }
 
-        mtOffset = find(code,Gen6Constants.tutorsPrefix);
+        mtOffset = getMoveTutorMovesOffset();
         if (mtOffset > 0) {
-            mtOffset += Gen6Constants.tutorsPrefix.length() / 2;
             for (int move: moves) {
                 int val = FileFunctions.read2ByteInt(code,mtOffset);
                 if (val == 0x26E) mtOffset += 2;
@@ -2091,6 +2094,15 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 mtOffset += 2;
             }
         }
+    }
+
+    private int getMoveTutorMovesOffset() {
+        int offset = moveTutorMovesOffset;
+        if (offset == 0) {
+            offset = find(code, Gen6Constants.tutorsLocator);
+            moveTutorMovesOffset = offset;
+        }
+        return offset;
     }
 
     @Override

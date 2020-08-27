@@ -100,10 +100,9 @@ public class Gen6Constants {
     public static final String shopItemsPrefix = "00726F6D3A2F446C6C53746172744D656E752E63726F00";
     public static final String shopItemsPrefixPatched = "00726F6D323A2F446C6C53746172744D656E752E63726F00FF";
 
-    public static final int tutorsOffset = 0x35E;
     public static final int tutorMoveCount = 60;
-    public static final String tutorsPrefix = "00466F726D617454797065000045646765494400FF";
-    public static final String tutorsPrefixPatched = "00466F726D61745479706500004564676549440000633A5C7265766973696F6E315F73616E676F5C73616E676F5F70726F6A6563745C70726F675C7372632F73797374656D2F6D6F74696F6E2F4D6F74696F6E2E6370700000"; // lol
+    public static final String tutorsLocator = "C2015701A20012024401BA01";
+    public static final String tutorsShopPrefix = "8A02000030000000";
 
     public static final int[] tutorSize = new int[]{15, 17, 16, 15};
 
@@ -194,7 +193,7 @@ public class Gen6Constants {
     public static final Map<Integer, String> fallingEncounterNameMap = constructFallingEncounterNameMap();
     public static final Map<Integer, String> rustlingBushEncounterNameMap = constructRustlingBushEncounterNameMap();
 
-    private static final String saveLoadFormeReversionPrefixXY = "292907EB140094E500F020E3", saveLoadFormeReversionPrefixORAS = "9A3907EB140094E500F020E3";
+    private static final String saveLoadFormeReversionPrefixXY = "09EB000094E5141094E54A0B80E2", saveLoadFormeReversionPrefixORAS = "09EB000094E5141094E5120A80E2";
     public static final String ninjaskSpeciesPrefix = "241094E5B810D1E1", shedinjaSpeciesPrefix = "C2FFFFEB0040A0E10020A0E3";
 
     public static String getIngameTradesPrefix(int romType) {
