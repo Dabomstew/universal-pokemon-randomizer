@@ -683,7 +683,7 @@ public class Gen7Constants {
         regularShopItemsSM = new ArrayList<>();
 
         regularShopItemsSM.addAll(IntStream.rangeClosed(2,4).boxed().collect(Collectors.toList()));
-        regularShopItemsSM.addAll(IntStream.rangeClosed(0x11,0x1D).boxed().collect(Collectors.toList()));
+        regularShopItemsSM.addAll(IntStream.rangeClosed(0x11,0x1C).boxed().collect(Collectors.toList()));
         regularShopItemsSM.addAll(IntStream.rangeClosed(0x4C,0x4F).boxed().collect(Collectors.toList()));
         regularShopItemsSM.add(0x5E); // Honey
         regularShopItemsSM.add(0x34E); // Adrenaline Orb
