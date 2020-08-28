@@ -97,8 +97,7 @@ public class Gen6Constants {
     public static final int hiddenItemCountORAS = 170;
     public static final String hiddenItemsPrefixORAS = "A100A200A300A400A5001400010053004A0084000900";
     public static final String itemPalettesPrefix = "6F7461746500FF920A063F";
-    public static final String shopItemsPrefix = "00726F6D3A2F446C6C53746172744D656E752E63726F00";
-    public static final String shopItemsPrefixPatched = "00726F6D323A2F446C6C53746172744D656E752E63726F00FF";
+    private static final String shopItemsLocatorXY = "0400110004000300", shopItemsLocatorORAS = "04001100120004000300";
 
     public static final int tutorMoveCount = 60;
     public static final String tutorsLocator = "C2015701A20012024401BA01";
@@ -315,6 +314,15 @@ public class Gen6Constants {
             return giftPokemonSizeORAS;
         }
         return giftPokemonSizeXY;
+    }
+
+    public static String getShopItemsLocator(int romType) {
+        if (romType == Type_XY) {
+            return shopItemsLocatorXY;
+        } else if (romType == Type_ORAS) {
+            return shopItemsLocatorORAS;
+        }
+        return shopItemsLocatorXY;
     }
 
     private static Type[] constructTypeTable() {

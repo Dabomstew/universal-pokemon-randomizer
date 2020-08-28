@@ -217,6 +217,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     private int moveTutorMovesOffset;
     private List<String> itemNames;
     private List<String> shopNames;
+    private int shopItemsOffset;
     private ItemList allowedItems, nonBadItems;
 
     private GARCArchive pokeGarc, moveGarc, stringsGarc, storyTextGarc;
@@ -2718,10 +2719,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         int shopCount = romEntry.getInt("ShopCount");
         Map<Integer,List<Integer>> shopItemsMap = new TreeMap<>();
 
-        int offset = find(code,Gen6Constants.shopItemsPrefix);
-        if (offset > 0) {
-            offset += Gen6Constants.shopItemsPrefix.length() / 2;
-        } else {
+        int offset = getShopItemsOffset();
+        if (offset <= 0) {
             return shopItemsMap;
         }
         for (int i = 0; i < shopCount; i++) {
@@ -2760,10 +2759,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         int[] regularShops = romEntry.arrayEntries.get("RegularShops");
         int shopCount = romEntry.getInt("ShopCount");
 
-        int offset = find(code,Gen6Constants.shopItemsPrefix);
-        if (offset > 0) {
-            offset += Gen6Constants.shopItemsPrefix.length() / 2;
-        } else {
+        int offset = getShopItemsOffset();
+        if (offset <= 0) {
             return;
         }
         for (int i = 0; i < shopCount; i++) {
@@ -2794,6 +2791,16 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
             }
         }
+    }
+
+    private int getShopItemsOffset() {
+        int offset = shopItemsOffset;
+        if (offset == 0) {
+            String locator = Gen6Constants.getShopItemsLocator(romEntry.romType);
+            offset = find(code, locator);
+            shopItemsOffset = offset;
+        }
+        return offset;
     }
 
     @Override
