@@ -9,10 +9,13 @@ import java.util.Arrays;
 import com.dabomstew.pkrandom.FileFunctions;
 
 /*----------------------------------------------------------------------------*/
-/*--  blz.c - Bottom LZ coding for Nintendo GBA/DS                          --*/
-/*--  Copyright (C) 2011 CUE                                                --*/
+/*--  BLZCoder.java - Bottom LZ coding for Nintendo GBA/DS/3DS              --*/
 /*--                                                                        --*/
-/*--  Ported to Java by Dabomstew under the terms of the GPL:               --*/
+/*--  Contains code based on "pk3DS", copyright (C) Kaphotics               --*/
+/*--  Contains code based on "pokemon-x-y-icons", copyright (C) CatTrinket  --*/
+/*--  Contains code based on "blz.c", copyright (C) 2011 CUE                --*/
+/*--  Above-listed code ported to Java by Dabomstew and UPR-ZX team under   --*/
+/*--  the terms of the GPL:                                                 --*/
 /*--                                                                        --*/
 /*--  This program is free software: you can redistribute it and/or modify  --*/
 /*--  it under the terms of the GNU General Public License as published by  --*/
