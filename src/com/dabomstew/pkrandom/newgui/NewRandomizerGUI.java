@@ -36,6 +36,8 @@ import com.dabomstew.pkrandom.romhandlers.*;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -281,6 +283,7 @@ public class NewRandomizerGUI {
     private RomHandler romHandler;
 
     private boolean presetMode = false;
+    private boolean initialPopup = true;
 
     private List<JCheckBox> tweakCheckBoxes;
     private JPanel liveTweaksPanel = new JPanel();
@@ -474,6 +477,50 @@ public class NewRandomizerGUI {
         totpPercentageLevelModifierCheckBox.addActionListener(e -> enableOrDisableSubControls());
         pbsUpdateBaseStatsCheckBox.addActionListener(e -> enableOrDisableSubControls());
         mdUpdateMovesCheckBox.addActionListener(e -> enableOrDisableSubControls());
+        frame.addComponentListener(new ComponentListener() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+                showInitialPopup();
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+
+            }
+        });
+    }
+
+    private void showInitialPopup() {
+        if (initialPopup) {
+            String message = String.format(bundle.getString("GUI.firstStart"),Version.VERSION_STRING);
+            JLabel label = new JLabel("<html><a href=\"https://github.com/Ajarmar/universal-pokemon-randomizer-zx/wiki/Important-Information\">Checking out the \"Important Information\" page on the Wiki is highly recommended.</a>");
+            label.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    Desktop desktop = java.awt.Desktop.getDesktop();
+                    try {
+                        desktop.browse(new URI("https://github.com/Ajarmar/universal-pokemon-randomizer-zx/wiki/Important-Information"));
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
+            label.setCursor(new java.awt.Cursor(Cursor.HAND_CURSOR));
+            Object[] messages = {message,label};
+            JOptionPane.showMessageDialog(frame, messages);
+            initialPopup = false;
+            attemptWriteConfig();
+        }
     }
 
     private void initFileChooserDirectories() {
@@ -3098,6 +3145,12 @@ public class NewRandomizerGUI {
                         if (key.equalsIgnoreCase("checkedcustomnames172")) {
                             haveCheckedCustomNames = Boolean.parseBoolean(tokens[1].trim());
                         }
+                        if (key.equals("firststart")) {
+                            String val = tokens[1];
+                            if (val.equals(Version.VERSION_STRING)) {
+                                initialPopup = false;
+                            }
+                        }
                     }
                 } else if (isReadingUpdates) {
                     isReadingUpdates = false;
@@ -3119,6 +3172,9 @@ public class NewRandomizerGUI {
             PrintStream ps = new PrintStream(new FileOutputStream(fh), true, "UTF-8");
             ps.println("checkedcustomnames=true");
             ps.println("checkedcustomnames172=" + haveCheckedCustomNames);
+            if (!initialPopup) {
+                ps.println("firststart=" + Version.VERSION_STRING);
+            }
             if (gameUpdates.size() > 0) {
                 ps.println();
                 ps.println("[Game Updates]");
