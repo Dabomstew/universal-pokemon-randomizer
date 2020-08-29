@@ -4,13 +4,19 @@ Just double click launcher.jar and it will start the randomizer program.
 DO NOT change the name of the randomizer program as this will cause the launcher to fail.
 The launcher program and the randomizer program must be in the same folder.
 
+
+
+2. TECHNICAL DETAILS
+
 The only thing the launcher does is run the following command:
 
 java -Xmx4096M -jar PokeRandoZX.jar
 
 This starts the randomizer application with a maximum Java heap size of 4 gigabytes. This is necessary for being able to randomize Generation 7 games.
 
-2. TROUBLESHOOTING
+
+
+3. TROUBLESHOOTING
 
 When running the launcher, output will be redirected to a log file named "launcher-log.txt". It may be of interest to look at if you have issues running the launcher.
 
