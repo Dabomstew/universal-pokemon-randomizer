@@ -39,7 +39,7 @@ import java.util.zip.CRC32;
 import javax.xml.bind.DatatypeConverter;
 
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
-import com.dabomstew.pkrandom.gui.RandomizerGUI;
+import com.dabomstew.pkrandom.newgui.NewRandomizerGUI;
 
 public class Utils {
 
@@ -116,7 +116,7 @@ public class Utils {
     }
 
     public static File getExecutionLocation() throws UnsupportedEncodingException {
-        URL location = RandomizerGUI.class.getProtectionDomain().getCodeSource().getLocation();
+        URL location = NewRandomizerGUI.class.getProtectionDomain().getCodeSource().getLocation();
         return new File(java.net.URLDecoder.decode(location.getFile(), "UTF-8"));
     }
 
