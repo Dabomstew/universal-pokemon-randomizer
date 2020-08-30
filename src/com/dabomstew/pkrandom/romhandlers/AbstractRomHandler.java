@@ -3076,6 +3076,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Integer> oldTMs = this.getTMMoves();
         @SuppressWarnings("unchecked")
         List<Integer> banned = new ArrayList<Integer>(noBroken ? this.getGameBreakingMoves() : Collections.EMPTY_LIST);
+        banned.addAll(getMovesBannedFromLevelup());
         // field moves?
         List<Integer> fieldMoves = this.getFieldMoves();
         int preservedFieldMoveCount = 0;
@@ -3240,6 +3241,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Integer> hms = this.getHMMoves();
         @SuppressWarnings("unchecked")
         List<Integer> banned = new ArrayList<Integer>(noBroken ? this.getGameBreakingMoves() : Collections.EMPTY_LIST);
+        banned.addAll(getMovesBannedFromLevelup());
 
         // field moves?
         List<Integer> fieldMoves = this.getFieldMoves();
