@@ -46,6 +46,8 @@ public class Gen6Constants {
             737, // Cherrim
             743, // Keldeo
             749, 750, 751, 752, 753, 754, 755, 756, 757, // Furfrou
+            788, 789, 790, // Pumpkaboo
+            791, 792, 793, // Gourgeist
             794, 795, 796, 797, // Floette (non-Eternal)
             815, 816, 817, 818, 819, 820 // Cosplay Pikachu
     );
