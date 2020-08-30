@@ -976,7 +976,7 @@ public class NewRandomizerGUI {
     private SaveType askForSaveType() {
         SaveType saveType = SaveType.FILE;
         if (romHandler.hasGameUpdateLoaded()) {
-            JOptionPane.showMessageDialog(frame, "You've supplied a game update, so we can only output your game as a LayeredFS directory");
+            JOptionPane.showMessageDialog(frame, "You've supplied a game update, so your game can only be output as a LayeredFS directory.");
             saveType = SaveType.DIRECTORY;
         } else if (romHandler.generationOfPokemon() == 6 || romHandler.generationOfPokemon() == 7) {
             Object[] options3DS = {"CXI", "LayeredFS"};
