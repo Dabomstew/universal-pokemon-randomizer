@@ -379,7 +379,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                     for (int i = 1; i < formeCount; i++) {
                         altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.number,i,FileFunctions.read2ByteInt(stats,Gen6Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
                         if (Gen6Constants.actuallyCosmeticForms.contains(firstFormeOffset+i-1)) {
-                            if (pkmn.number != 421) { // No Cherrim
+                            if (pkmn.number != 25 && pkmn.number != 421) { // No Pikachu/Cherrim
                                 pkmn.cosmeticForms += 1;
                             }
                         }
