@@ -300,6 +300,7 @@ public class NewRandomizerGUI {
     private JMenuItem updateOldSettingsMenuItem;
     private JMenuItem applyGameUpdateMenuItem;
     private JMenuItem removeGameUpdateMenuItem;
+    private JMenuItem loadGetSettingsMenuItem;
 
     private ImageIcon emptyIcon = new ImageIcon(getClass().getResource("/com/dabomstew/pkrandom/newgui/emptyIcon.png"));
     private boolean haveCheckedCustomNames;
@@ -456,6 +457,7 @@ public class NewRandomizerGUI {
         customNamesEditorMenuItem.addActionListener(e -> new CustomNamesEditorDialog(frame));
         applyGameUpdateMenuItem.addActionListener(e -> applyGameUpdateMenuItemActionPerformed());
         removeGameUpdateMenuItem.addActionListener(e -> removeGameUpdateMenuItemActionPerformed());
+        loadGetSettingsMenuItem.addActionListener(e -> loadGetSettingsMenuItemActionPerformed());
         limitPokemonButton.addActionListener(e -> {
             GenerationLimitDialog gld = new GenerationLimitDialog(frame, currentRestrictions,
                     romHandler.generationOfPokemon());
@@ -591,6 +593,10 @@ public class NewRandomizerGUI {
         updateOldSettingsMenuItem = new JMenuItem();
         updateOldSettingsMenuItem.setText(bundle.getString("GUI.updateOldSettingsMenuItem.text"));
         settingsMenu.add(updateOldSettingsMenuItem);
+
+        loadGetSettingsMenuItem = new JMenuItem();
+        loadGetSettingsMenuItem.setText(bundle.getString("GUI.loadGetSettingsMenuItem.text"));
+        settingsMenu.add(loadGetSettingsMenuItem);
 
         applyGameUpdateMenuItem = new JMenuItem();
         applyGameUpdateMenuItem.setText(bundle.getString("GUI.applyGameUpdateMenuItem.text"));
@@ -916,7 +922,7 @@ public class NewRandomizerGUI {
                 settings = Settings.fromString(config);
                 settings.tweakForRom(this.romHandler);
                 this.restoreStateFromSettings(settings);
-            } catch (UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException | IllegalArgumentException e) {
                 // settings load failed
                 e.printStackTrace();
                 this.romHandler = null;
@@ -1090,6 +1096,61 @@ public class NewRandomizerGUI {
         romHandler.removeGameUpdate();
         removeGameUpdateMenuItem.setVisible(false);
         romNameLabel.setText(romHandler.getROMName());
+    }
+
+    private void loadGetSettingsMenuItemActionPerformed() {
+
+        if (romHandler == null) return;
+
+        String currentSettingsString = "Current Settings String:";
+        JTextField currentSettingsStringField = new JTextField();
+        currentSettingsStringField.setEditable(false);
+        try {
+            String theSettingsString = Version.VERSION + getCurrentSettings().toString();
+            currentSettingsStringField.setColumns(Settings.LENGTH_OF_SETTINGS_DATA * 2);
+            currentSettingsStringField.setText(theSettingsString);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String loadSettingsString = "Load Settings String:";
+        JTextField loadSettingsStringField = new JTextField();
+        Object[] messages = {currentSettingsString,currentSettingsStringField,loadSettingsString,loadSettingsStringField};
+        Object[] options = {"Load","Cancel"};
+        int choice = JOptionPane.showOptionDialog(
+                frame,
+                messages,
+                "Get/Load Settings String",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                null
+        );
+        if (choice == 0) {
+            String configString = loadSettingsStringField.getText().trim();
+            if (configString.length() > 0) {
+                if (configString.length() < 3) {
+                    JOptionPane.showMessageDialog(frame,bundle.getString("GUI.invalidSettingsString"));
+                } else {
+                    try {
+                        int settingsStringVersionNumber = Integer.parseInt(configString.substring(0, 3));
+                        if (settingsStringVersionNumber < Version.VERSION) {
+                            JOptionPane.showMessageDialog(frame,String.format(bundle.getString("GUI.settingsStringTooOld"),Version.oldVersions.get(settingsStringVersionNumber)));
+                        } else if (settingsStringVersionNumber > Version.VERSION) {
+                            JOptionPane.showMessageDialog(frame,bundle.getString("GUI.settingsStringTooNew"));
+                        } else {
+                            Settings settings = Settings.fromString(configString.substring(3));
+                            settings.tweakForRom(this.romHandler);
+                            restoreStateFromSettings(settings);
+                            JOptionPane.showMessageDialog(frame,bundle.getString("GUI.settingsStringLoaded"));
+                        }
+                    } catch (UnsupportedEncodingException | IllegalArgumentException ex) {
+                        JOptionPane.showMessageDialog(frame,bundle.getString("GUI.invalidSettingsString"));
+                    }
+                }
+
+            }
+        }
     }
 
     private void restoreStateFromSettings(Settings settings) {
