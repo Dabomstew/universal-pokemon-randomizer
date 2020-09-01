@@ -554,7 +554,7 @@ public class Settings {
         return Base64.getEncoder().encodeToString(out.toByteArray());
     }
 
-    public static Settings fromString(String settingsString) throws UnsupportedEncodingException {
+    public static Settings fromString(String settingsString) throws UnsupportedEncodingException, IllegalArgumentException {
         byte[] data = Base64.getDecoder().decode(settingsString);
         checkChecksum(data);
 
