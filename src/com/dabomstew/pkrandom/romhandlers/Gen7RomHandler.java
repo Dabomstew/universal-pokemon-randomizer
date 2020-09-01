@@ -795,6 +795,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         if (offset > 0) {
             offset += saveLoadFormeReversionPrefix.length() / 2; // because it was a prefix
 
+            // The actual offset of the code we want to patch is 8 bytes from the end of
+            // the prefix. We have to do this because these 8 bytes differ between the
+            // base game and all game updates, so we cannot use them as part of our prefix.
+            offset += 8;
+
             // Stubs the call to the function that checks for Primal Reversions and
             // Mega Pokemon
             code[offset] = 0x00;
