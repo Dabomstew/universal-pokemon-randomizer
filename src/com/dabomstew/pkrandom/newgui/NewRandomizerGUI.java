@@ -982,7 +982,9 @@ public class NewRandomizerGUI {
     private SaveType askForSaveType() {
         SaveType saveType = SaveType.FILE;
         if (romHandler.hasGameUpdateLoaded()) {
-            JOptionPane.showMessageDialog(frame, "You've supplied a game update, so your game can only be output as a LayeredFS directory.");
+            String text = bundle.getString("GUI.savingWithGameUpdate");
+            String url = "https://github.com/Ajarmar/universal-pokemon-randomizer-zx/wiki/Randomizing-the-3DS-games#managing-game-updates";
+            showMessageDialogWithLink(text, url);
             saveType = SaveType.DIRECTORY;
         } else if (romHandler.generationOfPokemon() == 6 || romHandler.generationOfPokemon() == 7) {
             Object[] options3DS = {"CXI", "LayeredFS"};
@@ -1079,7 +1081,9 @@ public class NewRandomizerGUI {
                 romHandler.loadGameUpdate(fh.getAbsolutePath());
                 removeGameUpdateMenuItem.setVisible(true);
                 romNameLabel.setText(romHandler.getROMName() + " (" + romHandler.getGameUpdateVersion() + ")");
-                JOptionPane.showMessageDialog(frame, String.format(bundle.getString("GUI.gameUpdateApplied"), romHandler.getROMName()));
+                String text = String.format(bundle.getString("GUI.gameUpdateApplied"), romHandler.getROMName());
+                String url = "https://github.com/Ajarmar/universal-pokemon-randomizer-zx/wiki/Randomizing-the-3DS-games#3ds-game-updates";
+                showMessageDialogWithLink(text, url);
             } else {
                 // Error: update is not for the correct game
                 JOptionPane.showMessageDialog(frame, String.format(bundle.getString("GUI.nonMatchingGameUpdate"), fh.getName(), romHandler.getROMName()));
@@ -1151,6 +1155,24 @@ public class NewRandomizerGUI {
 
             }
         }
+    }
+
+    private void showMessageDialogWithLink(String text, String url) {
+        JLabel label = new JLabel("<html><a href=\"" + url + "\">For more information, click here.</a>");
+        label.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                Desktop desktop = java.awt.Desktop.getDesktop();
+                try {
+                    desktop.browse(new URI(url));
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+        label.setCursor(new java.awt.Cursor(Cursor.HAND_CURSOR));
+        Object[] messages = {text,label};
+        JOptionPane.showMessageDialog(frame, messages);
     }
 
     private void restoreStateFromSettings(Settings settings) {
