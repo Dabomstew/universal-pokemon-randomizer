@@ -74,7 +74,7 @@ public class NCCH {
         // remove nonsensical chars
         dataFolder = dataFolder.replaceAll("[^A-Za-z0-9_]+", "");
         File tmpFolder = new File(SysConstants.ROOT_PATH + dataFolder);
-        tmpFolder.mkdir();
+        tmpFolder.mkdirs();
         if (tmpFolder.canWrite()) {
             writingEnabled = true;
             this.tmpFolder = SysConstants.ROOT_PATH + dataFolder + File.separator;
@@ -536,14 +536,14 @@ public class NCCH {
         String layeredFSRootPath = outputPath + File.separator + titleId + File.separator;
         File layeredFSRootDir = new File(layeredFSRootPath);
         if (!layeredFSRootDir.exists()) {
-            layeredFSRootDir.mkdir();
+            layeredFSRootDir.mkdirs();
         } else {
             purgeDirectory(layeredFSRootDir);
         }
         String romfsRootPath = layeredFSRootPath + "romfs" + File.separator;
         File romfsDir = new File(romfsRootPath);
         if (!romfsDir.exists()) {
-            romfsDir.mkdir();
+            romfsDir.mkdirs();
         }
 
         if (codeChanged) {
@@ -578,7 +578,7 @@ public class NCCH {
             buffer.append(File.separator);
             File currentDir = new File(buffer.toString());
             if (!currentDir.exists()) {
-                currentDir.mkdir();
+                currentDir.mkdirs();
             }
         }
         buffer.append(romfsPathComponents[romfsPathComponents.length - 1]);
