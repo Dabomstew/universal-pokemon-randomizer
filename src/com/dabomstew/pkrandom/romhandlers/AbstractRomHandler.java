@@ -32,10 +32,7 @@ import java.io.PrintStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.dabomstew.pkrandom.CustomNamesSet;
-import com.dabomstew.pkrandom.MiscTweak;
-import com.dabomstew.pkrandom.RomFunctions;
-import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.*;
@@ -50,6 +47,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<Pokemon> noLegendaryListInclFormes, onlyLegendaryListInclFormes;
     private List<Pokemon> noLegendaryAltsList, onlyLegendaryAltsList;
     protected final Random random;
+    private final Random cosmeticRandom;
     protected PrintStream logStream;
     private List<Pokemon> alreadyPicked = new ArrayList<>();
     private List<Pokemon> giratinaPicks;
@@ -63,6 +61,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     public AbstractRomHandler(Random random, PrintStream logStream) {
         this.random = random;
+        this.cosmeticRandom = RandomSource.cosmeticInstance();
         this.logStream = logStream;
     }
 
@@ -3470,7 +3469,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     int ctl = intStrLen;
                     if (pickFrom != null && pickFrom.size() > 0 && intStrLen > 1) {
                         int innerTries = 0;
-                        changeTo = pickFrom.get(this.random.nextInt(pickFrom.size()));
+                        changeTo = pickFrom.get(this.cosmeticRandom.nextInt(pickFrom.size()));
                         ctl = this.internalStringLength(changeTo);
                         while ((mode == TrainerNameMode.MAX_LENGTH && ctl > maxLength)
                                 || (mode == TrainerNameMode.MAX_LENGTH_WITH_CLASS && ctl + tcNameLengths.get(tnIndex) > maxLength)) {
@@ -3480,7 +3479,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 ctl = intStrLen;
                                 break;
                             }
-                            changeTo = pickFrom.get(this.random.nextInt(pickFrom.size()));
+                            changeTo = pickFrom.get(this.cosmeticRandom.nextInt(pickFrom.size()));
                             ctl = this.internalStringLength(changeTo);
                         }
                     }
@@ -3570,9 +3569,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 String changeTo = trainerClassName;
                 if (pickFrom != null && pickFrom.size() > 0) {
-                    changeTo = pickFrom.get(this.random.nextInt(pickFrom.size()));
+                    changeTo = pickFrom.get(this.cosmeticRandom.nextInt(pickFrom.size()));
                     while (changeTo.length() > maxLength) {
-                        changeTo = pickFrom.get(this.random.nextInt(pickFrom.size()));
+                        changeTo = pickFrom.get(this.cosmeticRandom.nextInt(pickFrom.size()));
                     }
                 }
                 translation.put(trainerClassName, changeTo);

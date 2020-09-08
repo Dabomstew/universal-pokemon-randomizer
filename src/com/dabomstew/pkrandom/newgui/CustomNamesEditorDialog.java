@@ -125,7 +125,7 @@ public class CustomNamesEditorDialog extends javax.swing.JDialog {
         cns.setPokemonNicknames(getNameList(nicknamesText));
         try {
             byte[] data = cns.getBytes();
-            FileFunctions.writeBytesToFile(SysConstants.customNamesFile, data);
+            FileFunctions.writeBytesToFile(SysConstants.ROOT_PATH + SysConstants.customNamesFile, data);
             pendingChanges = false;
             JOptionPane.showMessageDialog(this, "Custom names saved.");
             return true;

@@ -1645,8 +1645,8 @@ public class NewRandomizerGUI {
         } catch (InvalidSupplementFilesException e) {
             switch (e.getType()) {
                 case CUSTOM_NAMES:
-                    JOptionPane.showMessageDialog(null, bundle.getString("GUI.presetFailTrainerNames"));
-                    throw e;
+                    JOptionPane.showMessageDialog(null, bundle.getString("GUI.presetDifferentCustomNames"));
+                    break;
                 default:
                     throw e;
             }
