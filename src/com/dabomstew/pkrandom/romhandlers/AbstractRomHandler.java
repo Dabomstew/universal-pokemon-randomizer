@@ -1625,6 +1625,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private void setFormeForTrainerPokemon(TrainerPokemon tp, Pokemon pk) {
         boolean checkCosmetics = true;
+        tp.formeSuffix = "";
         tp.forme = 0;
         if (pk.formeNumber > 0) {
             tp.forme = pk.formeNumber;
@@ -4757,6 +4758,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 bestPoke.pokemon = starter;
                 bestPoke.absolutePokeNumber = starter.number;
+                setFormeForTrainerPokemon(bestPoke,starter);
                 bestPoke.resetMoves = true;
             }
         }
