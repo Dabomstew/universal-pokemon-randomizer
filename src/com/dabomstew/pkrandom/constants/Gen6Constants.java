@@ -927,6 +927,22 @@ public class Gen6Constants {
         }
     }
 
+    public static void setCouldBeDoubleXY(List<Trainer> trs) {
+        setCouldBeDouble(trs, 108, 111, 348, 350, 438, 439, 470, 472, 476, 610, 611, 612);
+    }
+
+    public static void setCouldBeDoubleORAS(List<Trainer> trs) {
+        setCouldBeDouble(trs, 683, 687, 688, 691, 694, 698, 900, 901, 902, 903, 904, 905);
+    }
+
+    private static void setCouldBeDouble(List<Trainer> allTrainers, int... numbers) {
+        for (int num : numbers) {
+            if (allTrainers.size() > (num - 1)) {
+                allTrainers.get(num - 1).couldBeDouble = true;
+            }
+        }
+    }
+
     private static Map<Integer, String> constructFallingEncounterNameMap() {
         Map<Integer, String> map = new TreeMap<>();
         map.put(0, "Glittering Cave Ceiling Encounter");

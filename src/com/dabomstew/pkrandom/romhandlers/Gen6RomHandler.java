@@ -1557,8 +1557,10 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             }
             if (romEntry.romType == Gen6Constants.Type_XY) {
                 Gen6Constants.tagTrainersXY(allTrainers);
+                Gen6Constants.setCouldBeDoubleXY(allTrainers);
             } else {
                 Gen6Constants.tagTrainersORAS(allTrainers);
+                Gen6Constants.setCouldBeDoubleORAS(allTrainers);
             }
         } catch (IOException ex) {
             throw new RandomizerIOException(ex);

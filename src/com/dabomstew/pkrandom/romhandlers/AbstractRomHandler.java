@@ -1910,8 +1910,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
 
+            int maxPokemon = t.couldBeDouble ? 3 : 6;
             for (int i = 0; i < additional; i++) {
-                if (t.pokemon.size() == 6) break;
+                if (t.pokemon.size() == maxPokemon) break;
 
                 // We want to preserve the original last Pokemon because the order is sometimes used to
                 // determine the rival's starter
