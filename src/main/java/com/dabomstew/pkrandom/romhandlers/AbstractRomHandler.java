@@ -551,7 +551,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             t = Type.randomType(this.random);
         }
         return t;
-        }
+    }
 
     @Override
     public void randomizePokemonTypes(boolean evolutionSanity) {
@@ -681,15 +681,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                 }
             }, new EvolvedPokemonAction() {
-                public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
-                    // No difference in evo types so copy the prior evo                 
-                    if(evTo.evolutionsTo.size() == 1 && evTo.evolutionsTo.get(0).typesDiffer == 0){
-                        evTo.primaryType = evFrom.primaryType;
-                        evTo.secondaryType = evFrom.secondaryType;
-                        evTo.typeChanged = evFrom.typeChanged;
-                    } 
+                 public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
                     // Type difference in evos (ex: Scyther into Scizor)
-                    else if(evTo.evolutionsTo.size() == 1) {
+                    if(evTo.evolutionsTo.size() == 1) {
                         // Special case for Eevee
                         if(evFrom.number == 133) {
                             Set<Type> typeList = new HashSet<Type>();
@@ -706,47 +700,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                             evTo.primaryType = typeList2.get(AbstractRomHandler.this.random.nextInt(typeList2.size()-1));
                             return;
                         }
-                        switch(evTo.evolutionsTo.get(0).typesDiffer) {
-                        case 1:           
-                            evTo.primaryType = evFrom.typeChanged == 1 ? randomType() : evTo.primaryType;
-                            evTo.secondaryType = evFrom.typeChanged == 2 ? evFrom.secondaryType : evTo.secondaryType;
-                            evTo.typeChanged = evFrom.typeChanged;
-                            while(evTo.primaryType == evTo.secondaryType) {
-                                evTo.primaryType = evTo.typeChanged == 1 ? randomType() : evTo.primaryType;
-                                evTo.secondaryType = evTo.typeChanged == 2 ? randomType() : evTo.secondaryType;
-                            }
-                            break;
-                        case 2:
-                            evTo.primaryType = evFrom.typeChanged == 1 ? evFrom.primaryType : evTo.primaryType;
-                            evTo.secondaryType = evFrom.typeChanged == 2 && evTo.secondaryType != null ? 
-                                    randomType() : evTo.secondaryType;
-                            evTo.typeChanged = evTo.secondaryType != null ? evFrom.typeChanged : 1;
-                            while(evTo.primaryType == evTo.secondaryType) {
-                                evTo.primaryType = evTo.typeChanged == 1 ? randomType() : evTo.primaryType;
-                                evTo.secondaryType = evTo.typeChanged == 2 ? randomType() : evTo.secondaryType;
-                            }
-                            break;
-                        case 3:
-                            evTo.primaryType = evFrom.typeChanged == 1 ? evTo.primaryType : randomType();
-                            evTo.secondaryType = evFrom.typeChanged == 1 ? evFrom.primaryType : evTo.secondaryType;
-                            evTo.typeChanged = evFrom.typeChanged == 1 ? 2 : 1;
-                            while(evTo.primaryType == evTo.secondaryType) {
-                                evTo.primaryType = evTo.typeChanged == 1 ? randomType() : evTo.primaryType;
-                                evTo.secondaryType = evTo.typeChanged == 2 ? randomType() : evTo.secondaryType;
-                            }
-                            break;
-                        case 4:
-                            evTo.primaryType = evFrom.typeChanged == 1 ? evFrom.secondaryType: evFrom.secondaryType;
-                            evTo.secondaryType = evFrom.typeChanged == 1 && evTo.secondaryType != null ? 
-                                    randomType() : evTo.secondaryType;
-                            evTo.typeChanged = evFrom.typeChanged == 1 && evTo.secondaryType != null ? 
-                                    2 : 1;
-                            while(evTo.primaryType == evTo.secondaryType) {
-                                evTo.primaryType = evTo.typeChanged == 1 ? randomType() : evTo.primaryType;
-                                evTo.secondaryType = evTo.typeChanged == 2 ? randomType() : evTo.secondaryType;
-                            }
-                            break;
-                        }
+                        // All other cases
+                        evTo.assignTypeByReference(evFrom, evTo.evolutionsTo.get(0).typesDiffer, () -> randomType());
                     } else {
                         // Multiple evo paths merge here. Check for similarity
                         int similar = -1;
@@ -824,7 +779,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (pkmn != null) {
                     pkmn.typeChanged = 1; //default to PrimaryType
                     // Replace secondary type
-                    if (pkmn.secondaryType != null && this.random.nextDouble() < 0.5) {
+                    if (pkmn.secondaryType != null && AbstractRomHandler.this.random.nextDouble() < 0.5) {
                         pkmn.typeChanged = 2; // SecondaryType
                         pkmn.secondaryType = randomType();
                     } 

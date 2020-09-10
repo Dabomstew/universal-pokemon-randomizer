@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Supplier;
 
 public class Pokemon implements Comparable<Pokemon> {
 
@@ -89,6 +90,66 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public Pokemon() {
         shuffledStatsOrder = Arrays.asList(0, 1, 2, 3, 4, 5);
+    }
+    
+    // Select a type from the ones on this pokemon
+    public Type randomOfTypes(Random random) {
+        if (secondaryType == null) {
+            return primaryType;
+        }
+        
+        return random.nextBoolean() ? primaryType : secondaryType;
+    }
+    
+    public void assignTypeByReference(Pokemon ref, int typesDiffer, Supplier<Type> defaultFunction) {
+        switch(typesDiffer) {
+        case 0:
+            this.primaryType = ref.primaryType;
+            this.secondaryType = ref.secondaryType;
+            this.typeChanged = ref.typeChanged;
+            break;
+        case 1:           
+            this.primaryType = ref.typeChanged == 1 ? defaultFunction.get() : this.primaryType;
+            this.secondaryType = ref.typeChanged == 2 ? ref.secondaryType : this.secondaryType;
+            this.typeChanged = ref.typeChanged;
+            while(this.primaryType == this.secondaryType) {
+                this.primaryType = this.typeChanged == 1 ? defaultFunction.get() : this.primaryType;
+                this.secondaryType = this.typeChanged == 2 ? defaultFunction.get() : this.secondaryType;
+            }
+            break;
+        case 2:
+            this.primaryType = ref.typeChanged == 1 ? ref.primaryType : 
+                    this.secondaryType != null ? this.primaryType : ref.secondaryType;
+            this.secondaryType = ref.typeChanged == 2 && this.secondaryType != null ? 
+                    defaultFunction.get() : this.secondaryType;
+            this.typeChanged = this.secondaryType != null ? ref.typeChanged : 1;
+            while(this.primaryType == this.secondaryType) {
+                this.primaryType = this.typeChanged == 1 ? defaultFunction.get() : this.primaryType;
+                this.secondaryType = this.typeChanged == 2 ? defaultFunction.get() : this.secondaryType;
+            }
+            break;
+        case 3:
+            this.primaryType = ref.typeChanged == 1 ? this.primaryType : defaultFunction.get();
+            this.secondaryType = ref.typeChanged == 1 ? ref.primaryType : this.secondaryType;
+            this.typeChanged = ref.typeChanged == 1 ? 2 : 1;
+            while(this.primaryType == this.secondaryType) {
+                this.primaryType = this.typeChanged == 1 ? defaultFunction.get() : this.primaryType;
+                this.secondaryType = this.typeChanged == 2 ? defaultFunction.get() : this.secondaryType;
+            }
+            break;
+        case 4:
+            this.primaryType = ref.typeChanged == 2 ? ref.secondaryType : 
+                    this.secondaryType != null ? ref.secondaryType: ref.primaryType;
+            this.secondaryType = ref.typeChanged == 1 && this.secondaryType != null ? 
+                    defaultFunction.get() : this.secondaryType;
+            this.typeChanged = ref.typeChanged == 1 && this.secondaryType != null ? 
+                    2 : 1;
+            while(this.primaryType == this.secondaryType) {
+                this.primaryType = this.typeChanged == 1 ? defaultFunction.get() : this.primaryType;
+                this.secondaryType = this.typeChanged == 2 ? defaultFunction.get() : this.secondaryType;
+            }
+            break;
+        }
     }
 
     public int minimumLevel() {

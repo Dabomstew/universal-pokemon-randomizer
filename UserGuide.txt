@@ -1,6 +1,6 @@
-Universal Pokemon Randomizer 1.8.1
+Universal Pokemon Randomizer 1.8.2
 by Dabomstew, 2012-16
-by brentspector, 2019
+by brentspector, 2019-20
 
 Homepage: http://pokehacks.dabomstew.com/randomizer/index.php
 Source: https://github.com/brentspector/universal-pokemon-randomizer
