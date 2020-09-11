@@ -1413,8 +1413,10 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             }
             if (romEntry.romType == Gen7Constants.Type_SM) {
                 Gen7Constants.tagTrainersSM(allTrainers);
+                Gen7Constants.setCouldBeMultiBattleSM(allTrainers);
             } else {
                 Gen7Constants.tagTrainersUSUM(allTrainers);
+                Gen7Constants.setCouldBeMultiBattleUSUM(allTrainers);
             }
         } catch (IOException ex) {
             throw new RandomizerIOException(ex);

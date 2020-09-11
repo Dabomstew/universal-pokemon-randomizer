@@ -910,6 +910,79 @@ public class Gen7Constants {
         }
     }
 
+    public static void setCouldBeMultiBattleSM(List<Trainer> trs) {
+        // All Double Battles in Gen 7 are internally treated as a Multi Battle
+        // 92 + 93: Rising Star Duo Justin and Lauren
+        // 97 + 98: Twins Isa and Nico
+        // 134 + 136: Aether Foundation Employees in Secret Lab B w/ Hau
+        // 141 + 227: Team Skull Grunts on Route 17
+        // 241 + 442: Faba and Aether Foundation Employee w/ Hau
+        // 262 + 265: Ace Duo Aimee and Kent
+        // 270 + 299: Swimmers Jake and Yumi
+        // 278 + 280: Honeymooners Noriko and Devin
+        // 303 + 307: Veteran Duo Tsunekazu and Nobuko
+        // 315 + 316: Team Skull Grunts in Po Town
+        // 331 + 332: Karate Family Guy and Samuel
+        // 371 + 372: Twins Harper and Sarah
+        // 373 + 374: Swimmer Girls Ashlyn and Kylie
+        // 375 + 376: Golf Buddies Tara and Tina
+        // 421 + 422: Athletic Siblings Alyssa and Sho
+        // 425 + 426: Punk Pair Lane and Yoko
+        // 429 + 430: Punk Pair Troy and Marie
+        // 443 + 444: Team Skull Grunts in Diglett's Tunnel w/ Hau
+        // 453 + 454: Aether Foundation Employees w/ Hau
+        // 455 + 456: Aether Foundation Employees w/ Gladion
+        setCouldBeMultiBattle(trs, 92, 93, 97, 98, 134, 136, 141, 227, 241, 262, 265, 270, 278, 280, 299,
+                303, 307, 315, 316, 331, 332, 371, 372, 373, 374, 375, 376, 421, 422, 425, 426, 429, 430, 442, 443,
+                444, 453, 454, 455, 456);
+    }
+
+    public static void setCouldBeMultiBattleUSUM(List<Trainer> trs) {
+        // All Double Battles in Gen 7 are internally treated as a Multi Battle
+        // 92 + 93: Rising Star Duo Justin and Lauren
+        // 97 + 98: Twins Isa and Nico
+        // 134 + 136: Aether Foundation Employees in Secret Lab B w/ Hau
+        // 141 + 227: Team Skull Grunts on Route 17
+        // 178 + 511: Capoeira Couple Cara and Douglas
+        // 241 + 442: Faba and Aether Foundation Employee w/ Hau
+        // 262 + 265: Ace Duo Aimee and Kent
+        // 270 + 299: Swimmers Jake and Yumi
+        // 278 + 280: Honeymooners Noriko and Devin
+        // 303 + 307: Veteran Duo Tsunekazu and Nobuko
+        // 315 + 316: Team Skull Grunts in Po Town
+        // 331 + 332: Karate Family Guy and Samuel
+        // 371 + 372: Twins Harper and Sarah
+        // 373 + 374: Swimmer Girls Ashlyn and Kylie
+        // 375 + 376: Golf Buddies Tara and Tina
+        // 421 + 422: Athletic Siblings Alyssa and Sho
+        // 425 + 426: Punk Pair Lane and Yoko
+        // 429 + 430: Punk Pair Troy and Marie
+        // 443 + 444: Team Skull Grunts in Diglett's Tunnel w/ Hau
+        // 453 + 454: Aether Foundation Employees w/ Hau
+        // 455 + 456: Aether Foundation Employees w/ Gladion
+        // 514 + 521: Tourist Couple Yuriko and Landon
+        // 515 + 534: Tourist Couple Steve and Reika
+        // 529 + 530: Dancing Family Jen and Fumiko
+        // 554 + 561: Aether Foundation Employee and Faba w/ Lillie
+        // 557 + 578: GAME FREAK Iwao and Morimoto
+        // 586 + 595: Team Rainbow Rocket Grunts w/ Guzma
+        // 613 + 626: Master & Apprentice Kaimana and Breon
+        // 617 + 618: Sparring Partners Allon and Eimar
+        // 619 + 620: Sparring Partners Craig and Jason
+        setCouldBeMultiBattle(trs, 92, 93, 97, 98, 134, 136, 141, 178, 227, 241, 262, 265, 270, 278, 280,
+                299, 303, 307, 315, 316, 331, 332, 371, 372, 373, 374, 375, 376, 421, 422, 425, 426, 429, 430, 442,
+                443, 444, 453, 454, 455, 456, 511, 514, 515, 521, 529, 530, 534, 544, 557, 561, 578, 586, 595, 613,
+                617, 618, 619, 620, 626);
+    }
+
+    private static void setCouldBeMultiBattle(List<Trainer> allTrainers, int... numbers) {
+        for (int num : numbers) {
+            if (allTrainers.size() > (num - 1)) {
+                allTrainers.get(num - 1).couldBeMultiBattle = true;
+            }
+        }
+    }
+
     public static final Map<Integer,Integer> balancedItemPrices = Stream.of(new Integer[][] {
             // Skip item index 0. All prices divided by 10
             {1, 300}, // Master Ball

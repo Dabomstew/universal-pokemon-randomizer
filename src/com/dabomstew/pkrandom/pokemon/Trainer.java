@@ -36,7 +36,7 @@ public class Trainer implements Comparable<Trainer> {
     public String name;
     public int trainerclass;
     public String fullDisplayName;
-    public boolean couldBeDouble;
+    public boolean couldBeMultiBattle;
 
     public String toString() {
         StringBuilder sb = new StringBuilder("[");
