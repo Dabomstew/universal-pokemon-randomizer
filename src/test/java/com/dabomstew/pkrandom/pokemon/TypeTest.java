@@ -356,7 +356,7 @@ public class TypeTest {
         prior.primaryType = newType;
         prior.secondaryType = sharedType;
         latter.primaryType = sharedType;
-        latter.secondaryType = null;
+        latter.secondaryType = null; 
         prior.typeChanged = 1;
         latter.assignTypeByReference(prior, typesDiffer, () -> randomType(null));
         assertEquals(latter.typeChanged, 1);
