@@ -1550,6 +1550,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 Gen4Constants.setCouldBeMultiBattlePt(allTrainers);
             } else {
                 Gen4Constants.tagTrainersHGSS(allTrainers);
+                Gen4Constants.setCouldBeMultiBattleHGSS(allTrainers);
             }
         } catch (IOException ex) {
             throw new RandomizerIOException(ex);

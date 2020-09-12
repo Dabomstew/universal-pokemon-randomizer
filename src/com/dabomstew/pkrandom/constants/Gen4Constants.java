@@ -1456,7 +1456,23 @@ public class Gen4Constants {
                 836, 848, 849, 921, 922);
     }
 
-        private static void setCouldBeMultiBattle(List<Trainer> allTrainers, int... numbers) {
+    public static void setCouldBeMultiBattleHGSS(List<Trainer> trs) {
+        // 120 + 417: Double Battle with Ace Trainer Irene and Ace Trainer Jenn
+        // 147 + 151: Potential Double Battle with Camper Ted and Picnicker Erin
+        // 354 + 355: Potential Double Battle with Lass Laura and Lass Shannon
+        // 423: Potential Double Battle with Pokéfan Jeremy. His potential teammate (Pokéfan Georgia) has more than
+        // three Pokemon in the vanilla game, so we leave her be.
+        // 479 + 499: Multi Battle with Executive Ariana and Team Rocket Grunt in Team Rocket HQ
+        // 564 + 567: Potential Double Battle with Teacher Clarice and School Kid Torin
+        // 575 + 576: Potential Double Battle with Biker Dan and Biker Theron
+        // 577 + 579: Potential Double Battle with Biker Markey and Biker Teddy
+        // 679 + 680: Double Battle with Beauty Callie and Beauty Kassandra
+        // 733 + 734: Multi Battle with Champion Lance and Leader Clair in the Dragon's Den
+        setCouldBeMultiBattle(trs, 120, 147, 151, 354, 355, 417, 423, 479, 499, 564, 567, 575, 576, 577,
+                579, 679, 680, 733, 734);
+    }
+
+    private static void setCouldBeMultiBattle(List<Trainer> allTrainers, int... numbers) {
         for (int num : numbers) {
             if (allTrainers.size() > (num - 1)) {
                 allTrainers.get(num - 1).couldBeMultiBattle = true;
