@@ -2525,7 +2525,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         ItemList allowedItems = Gen6Constants.getAllowedItems(romEntry.romType);
         for (int i = 0; i < fiLength; i++) {
             int oldItem = fieldItems.get(i);
-            if (!(allowedItems.isTM(oldItem)) && allowedItems.isAllowed(oldItem)) {
+            if (!(allowedItems.isTM(oldItem)) && allowedItems.isAllowed(oldItem) && oldItem != Gen6Constants.masterBallIndex) {
                 int newItem = iterNewItems.next();
                 fieldItems.set(i, newItem);
             }

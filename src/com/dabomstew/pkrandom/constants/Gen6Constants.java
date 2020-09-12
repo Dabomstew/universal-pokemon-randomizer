@@ -124,6 +124,8 @@ public class Gen6Constants {
     public static final String itemPalettesPrefix = "6F7461746500FF920A063F";
     private static final String shopItemsLocatorXY = "0400110004000300", shopItemsLocatorORAS = "04001100120004000300";
 
+    public static final int masterBallIndex = 1;
+
     public static final int tutorMoveCount = 60;
     public static final String tutorsLocator = "C2015701A20012024401BA01";
     public static final String tutorsShopPrefix = "8A02000030000000";
