@@ -1387,4 +1387,81 @@ public class Gen4Constants {
 
     }
 
+    public static void setCouldBeMultiBattleDP(List<Trainer> trs) {
+        // 34 + 35: Potential Double Battle with Camper Anthony and Picnicker Lauren
+        // 82 + 83: Potential Double Battle with Rich Boy Jason and Lady Melissa
+        // 84 + 85: Potential Double Battle with Gentleman Jeremy and Socialite Reina
+        // 95 + 96: Potential Double Battle with PKMN Ranger Jeffrey and PKMN Ranger Allison
+        // 104 + 106: Potential Double Battle with Swimmer Evan and Swimmer Mary
+        // 160 + 494: Potential Double Battle with Swimmer Erik and Swimmer Claire
+        // 186 + 191: Potential Double Battle with Swimmer Colton and Swimmer Paige
+        // 201 + 204: Potential Double Battle with Bug Catcher Jack and Lass Briana
+        // 202 + 203: Potential Double Battle with Bug Catcher Phillip and Bug Catcher Donald
+        // 205 + 206: Potential Double Battle with Psychic Elijah and Psychic Lindsey
+        // 278 + 287: Potential Double Battle with Ace Trainer Maya and Ace Trainer Dennis
+        // 337 + 359: Potential Double Battle with Sailor Marc and Tuber Conner
+        // 358 + 360: Potential Double Battle with Tuber Trenton and Tuber Mariel
+        // 372 + 445: Potential Double Battle with Battle Girl Tyler and Black Belt Kendal
+        // 373 + 386: Potential Double Battle with Bird Keeper Autumn and Dragon Tamer Joe
+        // 379 + 459: Potential Double Battle with Camper Diego and Picnicker Ana
+        // 383 + 443: Potential Double Battle with Collector Terry and Ruin Maniac Gerald
+        // 388 + 392: Potential Double Battle with Ace Trainer Jonah and Ace Trainer Brenda
+        // 389 + 393: Potential Double Battle with Ace Trainer Micah and Ace Trainer Brandi
+        // 390 + 394: Potential Double Battle with Ace Trainer Arthur and Ace Trainer Clarice
+        // 395 + 398: Potential Double Battle with Psychic Kody and Psychic Rachael
+        // 396 + 399: Potential Double Battle with Psychic Landon and Psychic Desiree
+        // 397 + 400: Potential Double Battle with Psychic Deandre and Psychic Kendra
+        // 407 + 528: Commander Mars and Commander Jupiter Multi Battle on Spear Pillar
+        // 414 + 415: Galactic Grunts in Jubilife City
+        // 419 + 426: Galactic Grunts in Lake Verity
+        // 420 + 427: Galactic Grunts in Lake Verity
+        // 446 + 499: Potential Double Battle with Black Belt Eddie and Veteran Terrell
+        // 447 + 500: Potential Double Battle with Black Belt Willie and Veteran Brenden
+        // 450 + 496: Potential Double Battle with Lass Cassidy and Youngster Wayne
+        // 452 + 453: Potential Double Battle with Hiker Damon and Hiker Maurice
+        // 454 + 455: Potential Double Battle with Hiker Reginald and Hiker Lorenzo
+        // 505 + 506: Potential Double Battle with Worker Brendon and Worker Quentin
+        // 521 + 527: Galactic Grunts on Spear Pillar
+        // 555 + 560: Potential Double Battle with Bird Keeper Geneva and Dragon Tamer Stanley
+        // 556 + 589: Potential Double Battle with Bird Keeper Krystal and Black Belt Ray
+        // 562 + 606: Potential Double Battle with Dragon Tamer Kenny and Veteran Harlan
+        // 566 + 575: Potential Double Battle with Ace Trainer Felix and Ace Trainer Dana
+        // 569 + 579: Potential Double Battle with Ace Trainer Keenan and Ace Trainer Kassandra
+        // 570 + 580: Potential Double Battle with Ace Trainer Stefan and Ace Trainer Jasmin
+        // 571 + 581: Potential Double Battle with Ace Trainer Skylar and Ace Trainer Natasha
+        // 572 + 582: Potential Double Battle with Ace Trainer Abel and Ace Trainer Monique
+        // 584 + 586: Potential Double Battle with Psychic Sterling and Psychic Chelsey
+        // 561 + 590: Potential Double Battle with Dragon Tamer Drake and Black Belt Jarrett
+        // 591 + 596: Potential Double Battle with PKMN Ranger Kyler and PKMN Ranger Krista
+        // 594 + 554/585: Potential Double Battle with PKMN Ranger Ashlee and either Bird Keeper Audrey or Psychic Daisy
+        // 599 + 602: Potential Double Battle with Swimmer Sam and Swimmer Sophia
+        // 835 + 836: Galactic Grunts in Iron Island
+        // 848 + 849: Galactic Grunts in Veilstone City
+        setCouldBeMultiBattle(trs, 34, 35, 82, 83, 84, 85, 95, 96, 104, 106, 160, 186, 191, 201, 202, 203,
+                204, 205, 206, 278, 287, 337, 358, 359, 360, 372, 373, 379, 383, 386, 388, 389, 390, 392, 393, 394,
+                395, 396, 397, 398, 399, 400, 407, 414, 415, 419, 420, 426, 427, 443, 445, 446, 447, 450, 452, 453,
+                454, 455, 459, 494, 496, 499, 500, 505, 506, 521, 527, 528, 554, 555, 556, 560, 561, 562, 566, 569,
+                570, 571, 572, 575, 579, 580, 581, 582, 584, 585, 586, 589, 590, 591, 594, 596, 599, 602, 606, 835,
+                836, 848, 849);
+    }
+
+    public static void setCouldBeMultiBattlePt(List<Trainer> trs) {
+        // In addition to every single trainer listed in setCouldBeMultiBattleDP...
+        // 921 + 922: Elite Four Flint and Leader Volkner Multi Battle in the Fight Area
+        setCouldBeMultiBattle(trs, 34, 35, 82, 83, 84, 85, 95, 96, 104, 106, 160, 186, 191, 201, 202, 203,
+                204, 205, 206, 278, 287, 337, 358, 359, 360, 372, 373, 379, 383, 386, 388, 389, 390, 392, 393, 394,
+                395, 396, 397, 398, 399, 400, 407, 414, 415, 419, 420, 426, 427, 443, 445, 446, 447, 450, 452, 453,
+                454, 455, 459, 494, 496, 499, 500, 505, 506, 521, 527, 528, 554, 555, 556, 560, 561, 562, 566, 569,
+                570, 571, 572, 575, 579, 580, 581, 582, 584, 585, 586, 589, 590, 591, 594, 596, 599, 602, 606, 835,
+                836, 848, 849, 921, 922);
+    }
+
+        private static void setCouldBeMultiBattle(List<Trainer> allTrainers, int... numbers) {
+        for (int num : numbers) {
+            if (allTrainers.size() > (num - 1)) {
+                allTrainers.get(num - 1).couldBeMultiBattle = true;
+            }
+        }
+    }
+
 }
