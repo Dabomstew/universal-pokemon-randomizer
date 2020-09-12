@@ -1910,8 +1910,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
 
+            // If a trainer can appear in a Multi Battle (i.e., a Double Battle where the enemy consists
+            // of two independent trainers), we want to be aware of that so we don't give them a team of
+            // six Pokemon and have a 6v12 battle
+            int maxPokemon = t.couldBeMultiBattle ? 3 : 6;
             for (int i = 0; i < additional; i++) {
-                if (t.pokemon.size() == 6) break;
+                if (t.pokemon.size() == maxPokemon) break;
 
                 // We want to preserve the original last Pokemon because the order is sometimes used to
                 // determine the rival's starter

@@ -1668,4 +1668,38 @@ public class Gen5Constants {
         }
     }
 
+    public static void setCouldBeMultiBattleBW(List<Trainer> trs) {
+        // 62 + 63: Multi Battle with Team Plasma Grunts in Wellspring Cave w/ Cheren
+        // 401 + 402: Double Battle with Preschooler Sarah and Preschooler Billy
+        setCouldBeMultiBattle(trs, 62, 63, 401, 402);
+    }
+
+    public static void setCouldBeMultiBattleBW2(List<Trainer> trs) {
+        // 342 + 356: Multi Battle with Team Plasma Grunts in Castelia Sewers w/ Hugh
+        // 347 + 797: Multi Battle with Team Plasma Zinzolin and Team Plasma Grunt w/ Hugh
+        // 374 + 375: Multi Battle with Team Plasma Grunts on Plasma Frigate w/ Cheren
+        // 376 + 377: Multi Battle with Team Plasma Grunts on Plasma Frigate w/ Hugh
+        // 494 + 495 + 496: Cilan, Chili, and Cress all participate in a Multi Battle
+        // 513/788 + 522: Potential Double Battle with Backpacker Kiyo (513 in B2, 788 in W2) and Hiker Markus
+        // 514/789 + 521: Potential Double Battle with Backpacker Kumiko (514 in W2, 789 in B2) and Hiker Jared
+        // 519/786 + 520/787: Potential Double Battle with Ace Trainer Ray (519 in W2, 786 in B2) and Ace Trainer Cora (520 in B2, 787 in W2)
+        // 602 + 603: Potential Double Battle with Ace Trainer Webster and Ace Trainer Shanta
+        // 614 + 615: Double Battle with Veteran Claude and Veteran Cecile
+        // 643 + 644: Double Battle with Veteran Sinan and Veteran Rosaline
+        // 790 + 791: Potential Double Battle with Nursery Aide Rosalyn and Preschooler Ike
+        // 792 + 793: Potential Double Battle with Youngster Henley and Lass Helia
+        // 798 + 799: Multi Battle with Team Plasma Grunts on Plasma Frigate w/ Hugh
+        // 807 + 809: Double Battle with Team Plasma Grunts on Plasma Frigate
+        setCouldBeMultiBattle(trs, 342, 347, 356, 374, 375, 376, 377, 494, 495, 496, 513, 514, 519, 520, 521,
+                522, 602, 603, 614, 615, 643, 644, 786, 787, 788, 789, 790, 791, 792, 793, 797, 798, 799, 807, 809);
+    }
+
+    private static void setCouldBeMultiBattle(List<Trainer> allTrainers, int... numbers) {
+        for (int num : numbers) {
+            if (allTrainers.size() > (num - 1)) {
+                allTrainers.get(num - 1).couldBeMultiBattle = true;
+            }
+        }
+    }
+
 }

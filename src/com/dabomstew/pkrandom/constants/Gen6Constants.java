@@ -927,6 +927,32 @@ public class Gen6Constants {
         }
     }
 
+    public static void setCouldBeMultiBattleXY(List<Trainer> trs) {
+        // 108 + 111: Team Flare Grunts in Glittering Cave
+        // 348 + 350: Team Flare Celosia and Bryony fight in Poké Ball Factory
+        // 438 + 439: Tierno and Trevor fight on Route 7
+        // 470 + 611, 472 + 610, 476 + 612: Team Flare Admin and Grunt fights in Team Flare Secret HQ
+        setCouldBeMultiBattle(trs, 108, 111, 348, 350, 438, 439, 470, 472, 476, 610, 611, 612);
+    }
+
+    public static void setCouldBeMultiBattleORAS(List<Trainer> trs) {
+        // 683 + 904: Aqua Admin Matt and Team Aqua Grunt fight on the Southern Island
+        // 687 + 905: Aqua Admin Matt and Team Aqua Grunt fight at the Mossdeep Space Center
+        // 688 + 903: Aqua Admin Shelly and Team Aqua Grunt fight in Meteor Falls
+        // 691 + 902: Magma Admin Tabitha and Team Magma Grunt fight in Meteor Falls
+        // 694 + 900: Magma Admin Courtney and Team Magma Grunt fight on the Southern Island
+        // 698 + 901: Magma Admin Courtney and Team Magma Grunt fight at the Mossdeep Space Center
+        setCouldBeMultiBattle(trs, 683, 687, 688, 691, 694, 698, 900, 901, 902, 903, 904, 905);
+    }
+
+    private static void setCouldBeMultiBattle(List<Trainer> allTrainers, int... numbers) {
+        for (int num : numbers) {
+            if (allTrainers.size() > (num - 1)) {
+                allTrainers.get(num - 1).couldBeMultiBattle = true;
+            }
+        }
+    }
+
     private static Map<Integer, String> constructFallingEncounterNameMap() {
         Map<Integer, String> map = new TreeMap<>();
         map.put(0, "Glittering Cave Ceiling Encounter");

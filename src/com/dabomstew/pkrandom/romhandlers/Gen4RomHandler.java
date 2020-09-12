@@ -1544,10 +1544,13 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             }
             if (romEntry.romType == Gen4Constants.Type_DP) {
                 Gen4Constants.tagTrainersDP(allTrainers);
+                Gen4Constants.setCouldBeMultiBattleDP(allTrainers);
             } else if (romEntry.romType == Gen4Constants.Type_Plat) {
                 Gen4Constants.tagTrainersPt(allTrainers);
+                Gen4Constants.setCouldBeMultiBattlePt(allTrainers);
             } else {
                 Gen4Constants.tagTrainersHGSS(allTrainers);
+                Gen4Constants.setCouldBeMultiBattleHGSS(allTrainers);
             }
         } catch (IOException ex) {
             throw new RandomizerIOException(ex);
