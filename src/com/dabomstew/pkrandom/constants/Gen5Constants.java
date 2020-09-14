@@ -1622,7 +1622,7 @@ public class Gen5Constants {
         tag(trs, "GYM11-LEADER", 0x1ef); // Cress
 
         // Themed Trainers
-        tag(trs, "THEMED:ZINZOLIN-STRONG", 0x2c0, 0x248, 0x15b);
+        tag(trs, "THEMED:ZINZOLIN-STRONG", 0x2c0, 0x248, 0x15b, 0x1f1);
         tag(trs, "THEMED:COLRESS-STRONG", 0x166, 0x158, 0x32d, 0x32f);
         tag(trs, "THEMED:SHADOW1", 0x247, 0x15c, 0x2af);
         tag(trs, "THEMED:SHADOW2", 0x1f2, 0x2b0);
