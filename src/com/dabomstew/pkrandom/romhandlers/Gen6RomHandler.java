@@ -813,6 +813,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public boolean hasFunctionalFormes() {
+        return true;
+    }
+
+    @Override
     public List<Pokemon> getStarters() {
         List<StaticEncounter> starters = new ArrayList<>();
         try {

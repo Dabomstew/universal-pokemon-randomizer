@@ -425,7 +425,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         pkmn.darkGrassHeldItem = -1;
 
         int cosmeticForms = Gen4Constants.cosmeticForms.getOrDefault(pkmn.number,0);
-        if (cosmeticForms > 0) {
+        if (cosmeticForms > 0 && romEntry.romType != Gen4Constants.Type_DP) {
             pkmn.cosmeticForms = cosmeticForms;
         }
     }
@@ -585,6 +585,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     public Pokemon getAltFormeOfPokemon(Pokemon pk, int forme) {
         int pokeNum = Gen4Constants.getAbsolutePokeNumByBaseForme(pk.number,forme);
         return pokeNum != 0 ? pokes[pokeNum] : pk;
+    }
+
+    @Override
+    public boolean hasFunctionalFormes() {
+        return romEntry.romType != Gen4Constants.Type_DP;
     }
 
     @Override

@@ -84,6 +84,8 @@ public interface RomHandler {
 
     Pokemon getAltFormeOfPokemon(Pokemon pk, int forme);
 
+    boolean hasFunctionalFormes();
+
     // Setup Gen Restrictions.
     void setPokemonPool(GenRestrictions restrictions);
 

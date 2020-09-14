@@ -972,6 +972,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public boolean hasFunctionalFormes() {
+        return false;
+    }
+
+    @Override
     public Map<Integer, List<MoveLearnt>> getMovesLearnt() {
         Map<Integer, List<MoveLearnt>> movesets = new TreeMap<>();
         int pointersOffset = romEntry.getValue("PokemonMovesetsTableOffset");

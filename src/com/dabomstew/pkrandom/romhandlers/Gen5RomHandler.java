@@ -637,6 +637,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public boolean hasFunctionalFormes() {
+        return true;
+    }
+
+    @Override
     public List<Pokemon> getStarters() {
         NARCArchive scriptNARC = scriptNarc;
         List<Pokemon> starters = new ArrayList<>();

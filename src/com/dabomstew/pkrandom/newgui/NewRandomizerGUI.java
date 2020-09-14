@@ -2423,7 +2423,7 @@ public class NewRandomizerGUI {
             tpRandomEvenDistributionRadioButton.setVisible(true);
             tpRandomEvenDistributionMainRadioButton.setEnabled(pokemonGeneration == 5);
             tpRandomEvenDistributionMainRadioButton.setVisible(pokemonGeneration == 5);
-            tpAllowAlternateFormesCheckBox.setVisible(pokemonGeneration >= 4);
+            tpAllowAlternateFormesCheckBox.setVisible(romHandler.hasFunctionalFormes());
             tpForceFullyEvolvedAtCheckBox.setEnabled(true);
             tpPercentageLevelModifierCheckBox.setEnabled(true);
             tpSwapMegaEvosCheckBox.setVisible(romHandler.hasMegaEvolutions());
