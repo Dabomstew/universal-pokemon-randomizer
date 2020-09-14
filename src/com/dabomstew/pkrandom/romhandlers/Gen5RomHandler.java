@@ -1351,7 +1351,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         try {
             NARCArchive movesLearnt = this.readNARC(romEntry.getString("PokemonMovesets"));
             int formeCount = Gen5Constants.getFormeCount(romEntry.romType);
-            int formeOffset = Gen5Constants.getFormeMovesetOffset(romEntry.romType);
+            int formeOffset = Gen5Constants.getFormeOffset(romEntry.romType);
             for (int i = 1; i <= Gen5Constants.pokemonCount + formeCount; i++) {
                 Pokemon pkmn = pokes[i];
                 byte[] movedata;
@@ -1384,7 +1384,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         try {
             NARCArchive movesLearnt = readNARC(romEntry.getString("PokemonMovesets"));
             int formeCount = Gen5Constants.getFormeCount(romEntry.romType);
-            int formeOffset = Gen5Constants.getFormeMovesetOffset(romEntry.romType);
+            int formeOffset = Gen5Constants.getFormeOffset(romEntry.romType);
             for (int i = 1; i <= Gen5Constants.pokemonCount + formeCount; i++) {
                 Pokemon pkmn = pokes[i];
                 List<MoveLearnt> learnt = movesets.get(pkmn.number);
