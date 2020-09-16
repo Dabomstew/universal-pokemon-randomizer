@@ -1943,7 +1943,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
 
-            if (t.pokemon.size() != 1 || (t.tag != null && (t.tag.startsWith("RIVAL1-") || t.tag.startsWith("FRIEND1-") || t.tag.startsWith("NOTSTRONG")))) {
+            if (t.pokemon.size() != 1 || t.couldBeMultiBattle || (t.tag != null && (t.tag.startsWith("RIVAL1-") || t.tag.startsWith("FRIEND1-") || t.tag.startsWith("NOTSTRONG")))) {
                 continue;
             }
 
