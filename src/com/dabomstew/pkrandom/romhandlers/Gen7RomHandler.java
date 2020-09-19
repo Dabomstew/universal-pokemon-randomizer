@@ -821,6 +821,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
         // Additionally, upon completing a battle, Kyogre-P, Groudon-P,
         // and Wishiwashi-S are forcibly returned to their base forme.
+        // Minior is also forcibly set to the "correct" Core forme.
         // This patches the Battle CRO to prevent this from happening.
         byte[] battleCRO = readFile(romEntry.getString("Battle"));
         offset = find(battleCRO, Gen7Constants.afterBattleFormeReversionPrefix);
@@ -844,6 +845,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             battleCRO[offset + 93] = 0x00;
             battleCRO[offset + 94] = 0x00;
             battleCRO[offset + 95] = 0x00;
+
+            // Stubs the call to pml::pokepara::CoreParam::ChangeFormNo for Minior
+            battleCRO[offset + 148] = 0x00;
+            battleCRO[offset + 149] = 0x00;
+            battleCRO[offset + 150] = 0x00;
+            battleCRO[offset + 151] = 0x00;
 
             writeFile(romEntry.getString("Battle"), battleCRO);
         }
