@@ -1348,9 +1348,11 @@ public class Gen4Constants {
         tag(trs, 0x2DD, "CHAMPION");
 
         // Themed
-        tag(trs, "THEMED:ARIANA-STRONG", 0x1df, 0x1de);
+        tag(trs, "THEMED:ARIANA-STRONG", 0x1df);
+        tag(trs, "THEMED:ARIANA-NOTSTRONG", 0x1de);
         tag(trs, "THEMED:PETREL-STRONG", 0x1e8, 0x1e7);
-        tag(trs, "THEMED:PROTON-STRONG", 0x1e6, 0x2c2);
+        tag(trs, "THEMED:PROTON-STRONG", 0x1e6);
+        tag(trs, "THEMED:PROTON-NOTSTRONG", 0x2c2);
         tag(trs, "THEMED:SPROUTTOWER", 0x2b, 0x33, 0x34, 0x35, 0x36, 0x37, 0x122);
 
         tag(trs,"LEADER",485); // Archer

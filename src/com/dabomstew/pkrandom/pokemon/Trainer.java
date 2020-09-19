@@ -100,6 +100,6 @@ public class Trainer implements Comparable<Trainer> {
     }
 
     public boolean skipImportant() {
-        return ((tag != null) && (tag.startsWith("RIVAL1-") || tag.startsWith("FRIEND1-") || tag.startsWith("NOTSTRONG")));
+        return ((tag != null) && (tag.startsWith("RIVAL1-") || tag.startsWith("FRIEND1-") || tag.endsWith("NOTSTRONG")));
     }
 }

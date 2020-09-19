@@ -813,6 +813,8 @@ public class Gen6Constants {
         tag(trs,"GYM7-LEADER", 25);
         tag(trs,"GYM8-LEADER", 26);
 
+        tag(trs, 188, "NOTSTRONG"); // Successor Korrina
+
         // Elite 4
         tag(trs, 269, "ELITE1"); // Malva
         tag(trs, 271, "ELITE2"); // Siebold
