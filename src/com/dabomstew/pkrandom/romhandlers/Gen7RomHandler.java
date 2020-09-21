@@ -743,15 +743,27 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         // mov r1, #0x124, where 0x124 = 292 in decimal, which is Shedinja's species ID.
         // The below code tweaks this instruction to use the species ID of Nincada's
         // new extra evolution.
-        offset = find(code, Gen7Constants.shedinjaSpeciesPrefix);
+        offset = find(code, Gen7Constants.shedinjaPrefix);
         if (offset > 0) {
-            offset += Gen7Constants.shedinjaSpeciesPrefix.length() / 2; // because it was a prefix
-            int extraEvoLower = extraEvolution.number & 0x00FF;
-            int extraEvoUpper = (extraEvolution.number & 0xFF00) >> 8;
-            code[offset] = (byte) extraEvoLower;
-            code[offset + 1] = (byte) (0x10 + extraEvoUpper);
-            code[offset + 2] = 0x00;
-            code[offset + 3] = (byte) 0xE3;
+            offset += Gen7Constants.shedinjaPrefix.length() / 2; // because it was a prefix
+            int extraEvoSpecies = extraEvolution.number;
+            int extraEvoForme = extraEvolution.formeNumber;
+            if (extraEvoForme != 0) {
+                extraEvoSpecies = extraEvolution.baseForme.number;
+            }
+
+            // Second parameter of pml::pokepara::CoreParam::ChangeMonsNo is the
+            // new forme number
+            code[offset] = (byte) extraEvoForme;
+
+            // First parameter of pml::pokepara::CoreParam::ChangeMonsNo is the
+            // new species number
+            int extraEvoLower = extraEvoSpecies & 0x00FF;
+            int extraEvoUpper = (extraEvoSpecies & 0xFF00) >> 8;
+            code[offset + 4] = (byte) extraEvoLower;
+            code[offset + 5] = (byte) (0x10 + extraEvoUpper);
+            code[offset + 6] = 0x00;
+            code[offset + 7] = (byte) 0xE3;
         }
 
         // Now that we've handled the hardcoded Shedinja evolution, delete it so that
