@@ -36,10 +36,7 @@ import com.dabomstew.pkrandom.romhandlers.*;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -500,6 +497,9 @@ public class NewRandomizerGUI {
 
             }
         });
+        ptUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        ptRandomFollowEvolutionsRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        ptRandomCompletelyRadioButton.addActionListener(e -> enableOrDisableSubControls());
     }
 
     private void showInitialPopup() {
