@@ -1429,6 +1429,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             } else {
                 Gen7Constants.tagTrainersUSUM(allTrainers);
                 Gen7Constants.setCouldBeMultiBattleUSUM(allTrainers);
+                Gen7Constants.setForcedRivalStarterPositionsUSUM(allTrainers);
             }
         } catch (IOException ex) {
             throw new RandomizerIOException(ex);

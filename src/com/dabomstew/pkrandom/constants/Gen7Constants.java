@@ -983,6 +983,19 @@ public class Gen7Constants {
         }
     }
 
+    public static void setForcedRivalStarterPositionsUSUM(List<Trainer> allTrainers) {
+
+        // Hau 3
+        allTrainers.get(12 - 1).forceStarterPosition = 0;
+        allTrainers.get(13 - 1).forceStarterPosition = 0;
+        allTrainers.get(14 - 1).forceStarterPosition = 0;
+
+        // Hau 6
+        allTrainers.get(217 - 1).forceStarterPosition = 0;
+        allTrainers.get(218 - 1).forceStarterPosition = 0;
+        allTrainers.get(219 - 1).forceStarterPosition = 0;
+    }
+
     public static final Map<Integer,Integer> balancedItemPrices = Stream.of(new Integer[][] {
             // Skip item index 0. All prices divided by 10
             {1, 300}, // Master Ball

@@ -4748,16 +4748,22 @@ public abstract class AbstractRomHandler implements RomHandler {
     private void changeStarterWithTag(List<Trainer> currentTrainers, String tag, Pokemon starter) {
         for (Trainer t : currentTrainers) {
             if (t.tag != null && t.tag.equals(tag)) {
+
                 // Bingo
-                // Change the highest level pokemon, not the last.
-                // BUT: last gets +2 lvl priority (effectively +1)
-                // same as above, equal priority = earlier wins
                 TrainerPokemon bestPoke = t.pokemon.get(0);
-                int trainerPkmnCount = t.pokemon.size();
-                for (int i = 1; i < trainerPkmnCount; i++) {
-                    int levelBonus = (i == trainerPkmnCount - 1) ? 2 : 0;
-                    if (t.pokemon.get(i).level + levelBonus > bestPoke.level) {
-                        bestPoke = t.pokemon.get(i);
+
+                if (t.forceStarterPosition >= 0) {
+                    bestPoke = t.pokemon.get(t.forceStarterPosition);
+                } else {
+                    // Change the highest level pokemon, not the last.
+                    // BUT: last gets +2 lvl priority (effectively +1)
+                    // same as above, equal priority = earlier wins
+                    int trainerPkmnCount = t.pokemon.size();
+                    for (int i = 1; i < trainerPkmnCount; i++) {
+                        int levelBonus = (i == trainerPkmnCount - 1) ? 2 : 0;
+                        if (t.pokemon.get(i).level + levelBonus > bestPoke.level) {
+                            bestPoke = t.pokemon.get(i);
+                        }
                     }
                 }
                 bestPoke.pokemon = starter;
