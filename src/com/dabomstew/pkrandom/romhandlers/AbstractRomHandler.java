@@ -1052,7 +1052,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 for (Pokemon areaPk : inArea) {
                     Pokemon picked = pickWildPowerLvlReplacement(localAllowed, areaPk, false, usedPks, 100);
-                    if (picked.actuallyCosmetic) {
+                    while (picked.actuallyCosmetic) {
                         picked = pickWildPowerLvlReplacement(localAllowed, areaPk, false, usedPks, 100);
                     }
                     areaMap.put(areaPk, picked);
