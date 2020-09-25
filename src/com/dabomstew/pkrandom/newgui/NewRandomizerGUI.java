@@ -27,6 +27,7 @@ package com.dabomstew.pkrandom.newgui;
 
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
+import com.dabomstew.pkrandom.exceptions.EncryptedROMException;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
@@ -652,6 +653,9 @@ public class NewRandomizerGUI {
                                 this.romHandler.loadGameUpdate(gameUpdates.get(this.romHandler.getROMCode()));
                             }
                             romLoaded = true;
+                        } catch (EncryptedROMException ex) {
+                            JOptionPane.showMessageDialog(mainPanel,
+                                    String.format(bundle.getString("GUI.encryptedRom"), ex.getMessage()));
                         } catch (Exception ex) {
                             attemptToLogException(ex, "GUI.loadFailed", "GUI.loadFailedNoLog", null, null);
                         }
@@ -1078,7 +1082,12 @@ public class NewRandomizerGUI {
             if (actualUpdateTitleId.equals(expectedUpdateTitleId)) {
                 gameUpdates.put(romHandler.getROMCode(), fh.getAbsolutePath());
                 attemptWriteConfig();
-                romHandler.loadGameUpdate(fh.getAbsolutePath());
+                try {
+                    romHandler.loadGameUpdate(fh.getAbsolutePath());
+                } catch (EncryptedROMException ex) {
+                    JOptionPane.showMessageDialog(mainPanel,
+                            String.format(bundle.getString("GUI.encryptedRom"), ex.getMessage()));
+                }
                 removeGameUpdateMenuItem.setVisible(true);
                 romNameLabel.setText(romHandler.getROMName() + " (" + romHandler.getGameUpdateVersion() + ")");
                 String text = String.format(bundle.getString("GUI.gameUpdateApplied"), romHandler.getROMName());
