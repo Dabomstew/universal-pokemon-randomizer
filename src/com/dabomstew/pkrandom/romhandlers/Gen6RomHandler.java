@@ -2197,6 +2197,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public boolean forceSwapStaticMegaEvos() {
+        return romEntry.romType == Gen6Constants.Type_XY;
+    }
+
+    @Override
     public List<TotemPokemon> getTotemPokemon() {
         return new ArrayList<>();
     }

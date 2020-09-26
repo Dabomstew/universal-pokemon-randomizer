@@ -2807,6 +2807,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<StaticEncounter> currentStaticPokemon = this.getStaticPokemon();
         List<StaticEncounter> replacements = new ArrayList<>();
         List<Pokemon> banned = this.bannedForStaticPokemon();
+        boolean reallySwapMegaEvos = forceSwapStaticMegaEvos() || swapMegaEvos;
         if (swapLegendaries) {
             List<Pokemon> legendariesLeft = new ArrayList<>(onlyLegendaryList);
             if (allowAltFormes) {
@@ -2844,7 +2845,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         legendariesLeft.removeAll(banned);
                     }
                 } else if (old.pkmn.isLegendary()) {
-                    if (swapMegaEvos && old.canMegaEvolve()) {
+                    if (reallySwapMegaEvos && old.canMegaEvolve()) {
                         newPK = getMegaEvoPokemon(onlyLegendaryList, legendariesLeft, newStatic);
                     } else {
                         newPK = legendariesLeft.remove(this.random.nextInt(legendariesLeft.size()));
@@ -2868,7 +2869,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         legendariesLeft.removeAll(banned);
                     }
                 } else {
-                    if (swapMegaEvos && old.canMegaEvolve()) {
+                    if (reallySwapMegaEvos && old.canMegaEvolve()) {
                         newPK = getMegaEvoPokemon(noLegendaryList, nonlegsLeft, newStatic);
                     } else {
                         newPK = nonlegsLeft.remove(this.random.nextInt(nonlegsLeft.size()));
@@ -2916,7 +2917,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     pokemonLeft.remove(newPK);
                     newStatic.pkmn = newPK;
                 } else if (oldBST >= 600 && limit600) {
-                    if (swapMegaEvos && old.canMegaEvolve()) {
+                    if (reallySwapMegaEvos && old.canMegaEvolve()) {
                         newPK = getMegaEvoPokemon(mainPokemonList, pokemonLeft, newStatic);
                     } else {
                         newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
@@ -2935,7 +2936,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
                                 true);
                     } else {
-                        if (swapMegaEvos && old.canMegaEvolve()) {
+                        if (reallySwapMegaEvos && old.canMegaEvolve()) {
                             List<Pokemon> megaEvoPokemonLeft =
                                     getMegaEvolutions()
                                             .stream()
@@ -3003,7 +3004,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     pokemonLeft.remove(newPK);
                     newStatic.pkmn = newPK;
                 } else {
-                    if (swapMegaEvos && old.canMegaEvolve()) {
+                    if (reallySwapMegaEvos && old.canMegaEvolve()) {
                         newPK = getMegaEvoPokemon(mainPokemonList, pokemonLeft, newStatic);
                     } else {
                         newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
@@ -5411,6 +5412,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public List<Pokemon> bannedForStaticPokemon() {
         return (List<Pokemon>) Collections.EMPTY_LIST;
+    }
+
+    @Override
+    public boolean forceSwapStaticMegaEvos() {
+        return false;
     }
 
     @Override

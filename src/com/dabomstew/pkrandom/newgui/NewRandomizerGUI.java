@@ -2384,7 +2384,7 @@ public class NewRandomizerGUI {
                 stpRandomSimilarStrengthRadioButton.setEnabled(true);
                 stpLimitMusketeersCheckBox.setVisible(pokemonGeneration == 5);
                 stpAllowAltFormesCheckBox.setVisible(romHandler.hasStaticAltFormes());
-                stpSwapMegaEvosCheckBox.setVisible(pokemonGeneration == 6);
+                stpSwapMegaEvosCheckBox.setVisible(pokemonGeneration == 6 && !romHandler.forceSwapStaticMegaEvos());
             } else {
                 stpSwapLegendariesSwapStandardsRadioButton.setVisible(false);
                 stpRandomCompletelyRadioButton.setVisible(false);

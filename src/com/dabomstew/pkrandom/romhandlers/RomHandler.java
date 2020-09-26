@@ -270,6 +270,8 @@ public interface RomHandler {
 
     List<Pokemon> bannedForStaticPokemon();
 
+    boolean forceSwapStaticMegaEvos();
+
     // Randomizer: Totem Pokemon
 
     List<TotemPokemon> getTotemPokemon();
