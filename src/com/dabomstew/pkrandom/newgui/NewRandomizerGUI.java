@@ -655,7 +655,7 @@ public class NewRandomizerGUI {
                             romLoaded = true;
                         } catch (EncryptedROMException ex) {
                             JOptionPane.showMessageDialog(mainPanel,
-                                    String.format(bundle.getString("GUI.encryptedRom"), ex.getMessage()));
+                                    String.format(bundle.getString("GUI.encryptedRom"), fh.getAbsolutePath()));
                         } catch (Exception ex) {
                             attemptToLogException(ex, "GUI.loadFailed", "GUI.loadFailedNoLog", null, null);
                         }
@@ -1086,7 +1086,7 @@ public class NewRandomizerGUI {
                     romHandler.loadGameUpdate(fh.getAbsolutePath());
                 } catch (EncryptedROMException ex) {
                     JOptionPane.showMessageDialog(mainPanel,
-                            String.format(bundle.getString("GUI.encryptedRom"), ex.getMessage()));
+                            String.format(bundle.getString("GUI.encryptedRom"), fh.getAbsolutePath()));
                 }
                 removeGameUpdateMenuItem.setVisible(true);
                 romNameLabel.setText(romHandler.getROMName() + " (" + romHandler.getGameUpdateVersion() + ")");
