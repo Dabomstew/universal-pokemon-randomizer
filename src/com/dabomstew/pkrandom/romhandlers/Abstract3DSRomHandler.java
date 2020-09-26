@@ -27,6 +27,7 @@ package com.dabomstew.pkrandom.romhandlers;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.NCCH;
+import com.dabomstew.pkrandom.exceptions.EncryptedROMException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.Type;
 
@@ -64,7 +65,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
         try {
             baseRom = new NCCH(filename, getCXIOffsetInFile(filename), productCode, titleId);
             if (!baseRom.isDecrypted()) {
-                return false;
+                throw new EncryptedROMException(filename);
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
@@ -121,7 +122,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
         try {
             gameUpdate = new NCCH(filename, getCXIOffsetInFile(filename), productCode, titleId);
             if (!gameUpdate.isDecrypted()) {
-                return false;
+                throw new EncryptedROMException(filename);
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
