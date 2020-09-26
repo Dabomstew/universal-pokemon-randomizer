@@ -95,8 +95,7 @@ public class NCCH {
         } catch (Exception ex) {
             if (!this.isDecrypted()) {
                 throw new EncryptedROMException(ex);
-            }
-            else {
+            } else {
                 throw ex;
             }
         }
@@ -614,10 +613,10 @@ public class NCCH {
         }
 
         // However, some poorly-decrypted ROMs don't set this flag. So our heuristic for detecting
-        // if they're decrypted is to check whether the file "a/0/0/0" exists, since all 3DS Pokemon
-        // games have this file. If the game is *really* encrypted, then the odds of us successfully
-        // extracting this exact path from the metadata tables is like one in a billion.
-        return romfsFiles != null && romfsFiles.containsKey("a/0/0/0");
+        // if they're decrypted is to check whether the battle CRO exists, since all 3DS Pokemon
+        // games and updates have this file. If the game is *really* encrypted, then the odds of us
+        // successfully extracting this exact name from the metadata tables is like one in a billion.
+        return romfsFiles != null && (romfsFiles.containsKey("DllBattle.cro") || romfsFiles.containsKey("Battle.cro"));
     }
 
     // Retrieves a decompressed version of .code (the game's executable).
