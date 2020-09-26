@@ -2569,13 +2569,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     @Override
     public void setShopPrices() {
         try {
+            // In Diamond and Pearl, item IDs 112 through 134 are unused. In Platinum and HGSS, item ID 112 is used for
+            // the Griseous Orb. So we need to skip through the unused IDs at different points depending on the game.
+            int startOfUnusedIndices = romEntry.romType == Gen4Constants.Type_DP ? 112 : 113;
             NARCArchive itemPriceNarc = this.readNARC(romEntry.getString("ItemData"));
             int j = 1;
             for (int i = 1; i < itemPriceNarc.files.size(); i++) {
                 writeWord(itemPriceNarc.files.get(i),0,Gen4Constants.balancedItemPrices.get(j) * 10);
                 j++;
-                if (j == 112) {
-                    j += 23;
+                if (j == startOfUnusedIndices) {
+                    j = 135;
                 }
             }
             writeNARC(romEntry.getString("ItemData"),itemPriceNarc);
