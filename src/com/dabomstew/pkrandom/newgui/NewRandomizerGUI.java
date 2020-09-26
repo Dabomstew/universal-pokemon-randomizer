@@ -2109,6 +2109,9 @@ public class NewRandomizerGUI {
         tmRandomRadioButton.setVisible(true);
         tmRandomRadioButton.setEnabled(false);
         tmRandomRadioButton.setSelected(false);
+        tmNoGameBreakingMovesCheckBox.setVisible(true);
+        tmNoGameBreakingMovesCheckBox.setEnabled(false);
+        tmNoGameBreakingMovesCheckBox.setSelected(false);
         tmFullHMCompatibilityCheckBox.setVisible(true);
         tmFullHMCompatibilityCheckBox.setEnabled(false);
         tmFullHMCompatibilityCheckBox.setSelected(false);
@@ -2142,6 +2145,9 @@ public class NewRandomizerGUI {
         mtRandomRadioButton.setVisible(true);
         mtRandomRadioButton.setEnabled(false);
         mtRandomRadioButton.setSelected(false);
+        mtNoGameBreakingMovesCheckBox.setVisible(true);
+        mtNoGameBreakingMovesCheckBox.setEnabled(false);
+        mtNoGameBreakingMovesCheckBox.setSelected(false);
         mtLevelupMoveSanityCheckBox.setVisible(true);
         mtLevelupMoveSanityCheckBox.setEnabled(false);
         mtLevelupMoveSanityCheckBox.setSelected(false);
