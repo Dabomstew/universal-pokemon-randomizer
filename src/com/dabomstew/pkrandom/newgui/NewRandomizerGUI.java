@@ -501,6 +501,7 @@ public class NewRandomizerGUI {
         ptUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         ptRandomFollowEvolutionsRadioButton.addActionListener(e -> enableOrDisableSubControls());
         ptRandomCompletelyRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        spRandomizeStarterHeldItemsCheckBox.addActionListener(e -> enableOrDisableSubControls());
     }
 
     private void showInitialPopup() {
@@ -2721,6 +2722,13 @@ public class NewRandomizerGUI {
             spAllowAltFormesCheckBox.setSelected(false);
         } else {
             spAllowAltFormesCheckBox.setEnabled(true);
+        }
+
+        if (spRandomizeStarterHeldItemsCheckBox.isSelected()) {
+            spBanBadItemsCheckBox.setEnabled(true);
+        } else {
+            spBanBadItemsCheckBox.setEnabled(false);
+            spBanBadItemsCheckBox.setSelected(false);
         }
 
         if (stpUnchangedRadioButton.isSelected()) {
