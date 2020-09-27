@@ -23,6 +23,7 @@ package com.dabomstew.pkrandom.ctr;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.SysConstants;
+import com.dabomstew.pkrandom.exceptions.EncryptedROMException;
 import cuecompressors.BLZCoder;
 
 import java.io.*;
@@ -82,7 +83,22 @@ public class NCCH {
         } else {
             writingEnabled = false;
         }
-        readFileSystem();
+
+        // The below code handles things "wrong" with regards to encrypted ROMs. We just
+        // blindly treat the ROM as decrypted and try to parse all of its data, when we
+        // *should* be looking at the header of the ROM to determine if the ROM is encrypted.
+        // Unfortunately, many people have poorly-decrypted ROMs that do not properly set
+        // the bytes on the NCCH header, so we can't assume that the header is telling the
+        // truth. If we read the whole ROM without crashing, then it's probably decrypted.
+        try {
+            readFileSystem();
+        } catch (Exception ex) {
+            if (!this.isDecrypted()) {
+                throw new EncryptedROMException(ex);
+            } else {
+                throw ex;
+            }
+        }
     }
 
     public void reopenROM() throws IOException {
@@ -101,9 +117,6 @@ public class NCCH {
     }
 
     private void readFileSystem() throws IOException {
-        if (!this.isDecrypted()) {
-            return;
-        }
         exefsOffset = ncchStartingOffset + FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x1A0) * media_unit_size;
         romfsOffset = ncchStartingOffset + FileFunctions.readLittleEndianIntFromFile(baseRom, ncchStartingOffset + 0x1B0) * media_unit_size;
         baseRom.seek(ncchStartingOffset + 0x20D);
@@ -589,11 +602,21 @@ public class NCCH {
     }
 
     public boolean isDecrypted() throws IOException {
+        // This is the way you're *supposed* to tell if a ROM is decrypted. Specifically, this
+        // is checking the noCrypto flag on the NCCH bitflags.
         long ncchFlagOffset = ncchStartingOffset + 0x188;
         byte[] ncchFlags = new byte[8];
         baseRom.seek(ncchFlagOffset);
         baseRom.readFully(ncchFlags);
-        return (ncchFlags[7] & 0x4) != 0;
+        if ((ncchFlags[7] & 0x4) != 0) {
+            return true;
+        }
+
+        // However, some poorly-decrypted ROMs don't set this flag. So our heuristic for detecting
+        // if they're decrypted is to check whether the battle CRO exists, since all 3DS Pokemon
+        // games and updates have this file. If the game is *really* encrypted, then the odds of us
+        // successfully extracting this exact name from the metadata tables is like one in a billion.
+        return romfsFiles != null && (romfsFiles.containsKey("DllBattle.cro") || romfsFiles.containsKey("Battle.cro"));
     }
 
     // Retrieves a decompressed version of .code (the game's executable).
