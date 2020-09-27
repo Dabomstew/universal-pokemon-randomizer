@@ -23,5 +23,5 @@ When running the launcher, output will be redirected to a log file named "launch
 Some potential issues that could occur:
 
 - You don't have java in your PATH environment variable. Try googling "java path environment variable" + your operating system to find out how to set it. (The log will probably say something like "java is not recognized as a command..".)
-- You can't set the heap space to 4 gigabytes. This may occur if you have a 32-bit version of Java. Consider updating to a 64-bit version.
+- You can't set the heap space to 4 gigabytes. This may occur if you have a 32-bit version of Java. Consider updating to a 64-bit version. (The log will probably say something like "Invalid maximum heap size..")
 - The launcher can't execute its command due to operating system differences (shouldn't occur on Windows). Try running "java -Xmx4096M -jar PokeRandoZX.jar" directly from the command line instead.
