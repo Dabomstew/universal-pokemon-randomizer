@@ -1657,6 +1657,22 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             }
             this.writeNARC(romEntry.getString("TrainerData"), trainers);
             this.writeNARC(romEntry.getString("TrainerPokemon"), trpokes);
+
+            // In Gen 4, the game prioritizes showing the special double battle intro over almost any
+            // other kind of intro. Since the trainer music is tied to the intro, this results in the
+            // vast majority of "special" trainers losing their intro and music in double battle mode.
+            // To fix this, the below code patches the executable to skip the case for the special
+            // double battle intro (by changing a beq to an unconditional branch); this slightly breaks
+            // battles that are double battles in the original game, but the trade-off is worth it.
+            // game, but the
+            if (doubleBattleMode) {
+                String doubleBattleFixPrefix = Gen4Constants.getDoubleBattleFixPrefix(romEntry.romType);
+                int offset = find(arm9, doubleBattleFixPrefix);
+                if (offset > 0) {
+                    offset += doubleBattleFixPrefix.length() / 2; // because it was a prefix
+                    arm9[offset] = (byte) 0xE0;
+                }
+            }
         } catch (IOException ex) {
             throw new RandomizerIOException(ex);
         }

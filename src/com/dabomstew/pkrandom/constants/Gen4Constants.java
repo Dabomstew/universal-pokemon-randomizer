@@ -327,6 +327,9 @@ public class Gen4Constants {
     public static final List<Integer> headbuttTutorScriptOffsets = Arrays.asList(0xF55, 0xFC5, 0x100A),
             headbuttTutorTextIndices = Arrays.asList(16, 17, 19, 23, 25, 26);
 
+    private static String doubleBattleFixPrefixDP = "022912D90221214201", doubleBattleFixPrefixPt = "022919D90221214205",
+            doubleBattleFixPrefixHGSS = "2C2815D00221214201";
+
     static {
         setupAllowedItems();
     }
@@ -368,6 +371,16 @@ public class Gen4Constants {
         opShopItems.addAll(IntStream.rangeClosed(0x56,0x5C).boxed().collect(Collectors.toList()));
         opShopItems.add(0x6A);
         opShopItems.add(0xE7);
+    }
+
+    public static String getDoubleBattleFixPrefix(int romType) {
+        if (romType == Gen4Constants.Type_DP) {
+            return doubleBattleFixPrefixDP;
+        } else if (romType == Gen4Constants.Type_Plat) {
+            return doubleBattleFixPrefixPt;
+        } else {
+            return doubleBattleFixPrefixHGSS;
+        }
     }
 
     public static final Map<Integer,Integer> balancedItemPrices = Stream.of(new Integer[][] {
