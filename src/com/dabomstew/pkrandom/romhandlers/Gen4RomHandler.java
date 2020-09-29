@@ -1664,7 +1664,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             // To fix this, the below code patches the executable to skip the case for the special
             // double battle intro (by changing a beq to an unconditional branch); this slightly breaks
             // battles that are double battles in the original game, but the trade-off is worth it.
-            // game, but the
             if (doubleBattleMode) {
                 String doubleBattleFixPrefix = Gen4Constants.getDoubleBattleFixPrefix(romEntry.romType);
                 int offset = find(arm9, doubleBattleFixPrefix);
