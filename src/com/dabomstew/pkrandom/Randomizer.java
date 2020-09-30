@@ -614,8 +614,12 @@ public class Randomizer {
         }
 
         // Log tail
+        String gameName = romHandler.getROMName();
+        if (romHandler.hasGameUpdateLoaded()) {
+            gameName = gameName + " (" + romHandler.getGameUpdateVersion() + ")";
+        }
         log.println("------------------------------------------------------------------");
-        log.println("Randomization of " + romHandler.getROMName() + " completed.");
+        log.println("Randomization of " + gameName + " completed.");
         log.println("Time elapsed: " + (System.currentTimeMillis() - startTime) + "ms");
         log.println("RNG Calls: " + RandomSource.callsSinceSeed());
         log.println("------------------------------------------------------------------");
