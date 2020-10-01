@@ -650,6 +650,9 @@ public class Gen5Constants {
     public static ItemList allowedItems, nonBadItems;
     public static List<Integer> regularShopItems, opShopItems;
 
+    public static String blackBoxLegendaryCheckPrefix1 = "79F6BAEF07B0F0BDC046", blackBoxLegendaryCheckPrefix2 = "DEDB0020C04302B0F8BDC046",
+        whiteBoxLegendaryCheckPrefix1 = "00F0FEF8002070BD", whiteBoxLegendaryCheckPrefix2 = "64F62EF970BD0000";
+
     static {
         setupAllowedItems();
     }

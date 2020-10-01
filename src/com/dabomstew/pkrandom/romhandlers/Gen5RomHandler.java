@@ -76,7 +76,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         private String name;
         private String romCode;
         private int romType;
-        private boolean staticPokemonSupport = false, copyStaticPokemon = false, copyTradeScripts = false;
+        private boolean staticPokemonSupport = false, copyStaticPokemon = false, copyTradeScripts = false, isBlack = false;
         private Map<String, String> strings = new HashMap<>();
         private Map<String, Integer> numbers = new HashMap<>();
         private Map<String, String> tweakFiles = new HashMap<>();
@@ -223,6 +223,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                             current.offsetArrayEntries.put(r[0], offs);
                         } else if (r[0].endsWith("Tweak")) {
                             current.tweakFiles.put(r[0], r[1]);
+                        } else if (r[0].equals("IsBlack")) {
+                            int isBlack = parseRIInt(r[1]);
+                            current.isBlack = (isBlack > 0);
                         } else {
                             if (r[1].startsWith("[") && r[1].endsWith("]")) {
                                 String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
@@ -285,7 +288,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private List<Integer> opShopItems;
     
     private NARCArchive pokeNarc, moveNarc, stringsNarc, storyTextNarc, scriptNarc, shopNarc;
-    private byte [] shopItemOverlay;
+    private byte[] shopItemAndBoxLegendaryOverlay;
 
     @Override
     protected boolean detectNDSRom(String ndsCode) {
@@ -330,7 +333,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             throw new RandomizerIOException(e);
         }
         try {
-            shopItemOverlay = readOverlay(romEntry.getInt("ShopItemOvlNumber"));
+            shopItemAndBoxLegendaryOverlay = readOverlay(romEntry.getInt("ShopItemAndBoxLegendaryOvlNumber"));
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
@@ -522,6 +525,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         try {
             writeNARC(romEntry.getString("Scripts"), scriptNarc);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+
+        try {
+            writeOverlay(romEntry.getInt("ShopItemAndBoxLegendaryOvlNumber"), shopItemAndBoxLegendaryOverlay);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
@@ -1503,7 +1512,88 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
         }
 
+        // In Black/White, the game has multiple hardcoded checks for Reshiram/Zekrom's species
+        // ID in order to properly move it out of a box and into the first slot of the player's
+        // party. We need to replace these checks with the species ID of whatever occupies
+        // Reshiram/Zekrom's static encounter for the game to still function properly.
+        if (romEntry.romType == Gen5Constants.Type_BW) {
+            int boxLegendaryIndex = romEntry.getInt("BoxLegendaryOffset");
+            try {
+                int boxLegendarySpecies = staticPokemon.get(boxLegendaryIndex).pkmn.number;
+                fixBoxLegendaryBW1(boxLegendarySpecies);
+            } catch (IOException e) {
+                throw new RandomizerIOException(e);
+            }
+        }
+
         return true;
+    }
+
+    private void fixBoxLegendaryBW1(int boxLegendarySpecies) throws IOException {
+        if (romEntry.isBlack) {
+            // In Black, Reshiram's species ID is always retrieved via a pc-relative
+            // load to some constant. All we need to is replace these constants with
+            // the new species ID.
+            int firstConstantOffset = find(shopItemAndBoxLegendaryOverlay, Gen5Constants.blackBoxLegendaryCheckPrefix1);
+            if (firstConstantOffset > 0) {
+                firstConstantOffset += Gen5Constants.blackBoxLegendaryCheckPrefix1.length() / 2; // because it was a prefix
+                FileFunctions.writeFullIntLittleEndian(shopItemAndBoxLegendaryOverlay, firstConstantOffset, boxLegendarySpecies);
+            }
+            int secondConstantOffset = find(shopItemAndBoxLegendaryOverlay, Gen5Constants.blackBoxLegendaryCheckPrefix2);
+            if (secondConstantOffset > 0) {
+                secondConstantOffset += Gen5Constants.blackBoxLegendaryCheckPrefix2.length() / 2; // because it was a prefix
+                FileFunctions.writeFullIntLittleEndian(shopItemAndBoxLegendaryOverlay, secondConstantOffset, boxLegendarySpecies);
+            }
+        } else {
+            // In White, Zekrom's species ID is always loaded by loading 161 into a register
+            // and then shifting left by 2. Thus, we need to be more clever with how we
+            // modify code in order to set up some pc-relative loads.
+            int firstFunctionOffset = find(shopItemAndBoxLegendaryOverlay, Gen5Constants.whiteBoxLegendaryCheckPrefix1);
+            if (firstFunctionOffset > 0) {
+                firstFunctionOffset += Gen5Constants.whiteBoxLegendaryCheckPrefix1.length() / 2; // because it was a prefix
+
+                // First, nop the instruction that loads a pointer to the string
+                // "scrcmd_pokemon_fld.c" into a register; this has seemingly no
+                // effect on the game and was probably used strictly for debugging.
+                shopItemAndBoxLegendaryOverlay[firstFunctionOffset + 66] = 0x00;
+                shopItemAndBoxLegendaryOverlay[firstFunctionOffset + 67] = 0x00;
+
+                // In the space that used to hold the address of the "scrcmd_pokemon_fld.c"
+                // string, we're going to instead store the species ID of the box legendary
+                // so that we can do a pc-relative load to it.
+                FileFunctions.writeFullIntLittleEndian(shopItemAndBoxLegendaryOverlay, firstFunctionOffset + 320, boxLegendarySpecies);
+
+                // Zekrom's species ID is originally loaded by doing a mov into r1 and then a shift
+                // on that same register four instructions later. This nops out the first instruction
+                // and replaces the left shift with a pc-relative load to the constant we stored above.
+                shopItemAndBoxLegendaryOverlay[firstFunctionOffset + 18] = 0x00;
+                shopItemAndBoxLegendaryOverlay[firstFunctionOffset + 19] = 0x00;
+                shopItemAndBoxLegendaryOverlay[firstFunctionOffset + 26] = 0x49;
+                shopItemAndBoxLegendaryOverlay[firstFunctionOffset + 27] = 0x49;
+            }
+
+            int secondFunctionOffset = find(shopItemAndBoxLegendaryOverlay, Gen5Constants.whiteBoxLegendaryCheckPrefix2);
+            if (secondFunctionOffset > 0) {
+                secondFunctionOffset += Gen5Constants.whiteBoxLegendaryCheckPrefix2.length() / 2; // because it was a prefix
+
+                // For whatever reason, a completely unrelated function below this one decides to
+                // pc-relative load 0x00000000 into r4 instead of just doing a mov. We're going to
+                // take advantage of this by using the space for this weird constant to instead store
+                // a species ID. Start by replacing the pc-relative load with a simple mov.
+                shopItemAndBoxLegendaryOverlay[secondFunctionOffset + 504] = 0x00;
+                shopItemAndBoxLegendaryOverlay[secondFunctionOffset + 505] = 0x24;
+
+                // Now replace the 0x00000000 constant with the species ID
+                FileFunctions.writeFullIntLittleEndian(shopItemAndBoxLegendaryOverlay, secondFunctionOffset + 556, boxLegendarySpecies);
+
+                // Lastly, replace the mov and lsl that originally puts Zekrom's species ID into r1
+                // with a pc-relative of the above constant and a nop.
+                shopItemAndBoxLegendaryOverlay[secondFunctionOffset + 78] = 0x77;
+                shopItemAndBoxLegendaryOverlay[secondFunctionOffset + 79] = 0x49;
+                shopItemAndBoxLegendaryOverlay[secondFunctionOffset + 80] = 0x00;
+                shopItemAndBoxLegendaryOverlay[secondFunctionOffset + 81] = 0x00;
+            }
+        }
     }
 
     @Override
@@ -2789,7 +2879,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         List<Integer> items = new ArrayList<>();
                         if (romEntry.romType == Gen5Constants.Type_BW) {
                             for (int j = 0; j < shopItemSizes[i]; j++) {
-                                items.add(readWord(shopItemOverlay,shopItemOffsets[i] + j * 2));
+                                items.add(readWord(shopItemAndBoxLegendaryOverlay,shopItemOffsets[i] + j * 2));
                             }
                         } else if (romEntry.romType == Gen5Constants.Type_BW2) {
                             byte[] shop = shopNarc.files.get(i);
@@ -2827,7 +2917,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         if (romEntry.romType == Gen5Constants.Type_BW) {
                             for (int j = 0; j < shopItemSizes[i]; j++) {
                                 Integer item = iterItems.next();
-                                writeWord(shopItemOverlay,shopItemOffsets[i] + j * 2, item);
+                                writeWord(shopItemAndBoxLegendaryOverlay,shopItemOffsets[i] + j * 2, item);
                             }
                         } else if (romEntry.romType == Gen5Constants.Type_BW2) {
                             byte[] shop = shopNarc.files.get(i);
@@ -2840,9 +2930,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     
                 });
         try {
-            if (romEntry.romType == Gen5Constants.Type_BW) {
-                writeOverlay(romEntry.getInt("ShopItemOvlNumber"),shopItemOverlay);
-            } else if (romEntry.romType == Gen5Constants.Type_BW2) {
+            if (romEntry.romType == Gen5Constants.Type_BW2) {
                 writeNARC(romEntry.getString("ShopItems"),shopNarc);
             }
         } catch (IOException e) {
