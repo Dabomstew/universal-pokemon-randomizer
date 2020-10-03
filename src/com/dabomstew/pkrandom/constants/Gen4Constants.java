@@ -1360,6 +1360,12 @@ public class Gen4Constants {
         tag(trs, 0x2DE, "GYM8");
         tag(trs, 0x2DD, "CHAMPION");
 
+        tag(trs, 0xa0, "KIMONO1-STRONG");
+        tag(trs, 0xa1, "KIMONO2-STRONG");
+        tag(trs, 0xa2, "KIMONO3-STRONG");
+        tag(trs, 0xa3, "KIMONO4-STRONG");
+        tag(trs, 0xa4, "KIMONO5-STRONG");
+
         // Themed
         tag(trs, "THEMED:ARIANA-STRONG", 0x1df);
         tag(trs, "THEMED:ARIANA-NOTSTRONG", 0x1de);
