@@ -1854,10 +1854,56 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
             }
             writeFile(romEntry.getString("StaticPokemon"),staticCRO);
+
+            if (romEntry.romType == Gen6Constants.Type_ORAS) {
+                StaticEncounter rayquazaEncounter = staticPokemon.get(romEntry.getInt("RayquazaEncounterNumber"));
+                fixRayquazaORAS(rayquazaEncounter.pkmn.number);
+            }
+
             return true;
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+    }
+
+    private void fixRayquazaORAS(int rayquazaEncounterSpecies) throws IOException {
+        // We need to edit the script file or otherwise the text will still say "Rayquaza"
+        int rayquazaScriptFile = romEntry.getInt("RayquazaEncounterScriptNumber");
+        int speciesUpper = rayquazaEncounterSpecies & 0x00FF;
+        int speciesLower = (rayquazaEncounterSpecies & 0xFF00) >> 8;
+        GARCArchive scriptGarc = readGARC(romEntry.getString("Scripts"), true);
+        AMX rayquazaAMX = new AMX(scriptGarc.files.get(rayquazaScriptFile).get(0));
+        byte[] data = rayquazaAMX.decData;
+        for (int i = 0; i < Gen6Constants.rayquazaScriptOffsetsORAS.length; i++) {
+            data[Gen6Constants.rayquazaScriptOffsetsORAS[i]] = (byte) speciesUpper;
+            data[Gen6Constants.rayquazaScriptOffsetsORAS[i] + 1] = (byte) speciesLower;
+        }
+        scriptGarc.setFile(rayquazaScriptFile, rayquazaAMX.getBytes());
+        writeGARC(romEntry.getString("Scripts"), scriptGarc);
+
+        // We also need to edit DllField.cro so that the hardcoded checks for Rayquaza's species
+        // ID will instead be checks for our randomized species ID.
+        byte[] staticCRO = readFile(romEntry.getString("StaticPokemon"));
+        int functionOffset = find(staticCRO, Gen6Constants.rayquazaFunctionPrefixORAS);
+        if (functionOffset > 0) {
+            functionOffset += Gen6Constants.rayquazaFunctionPrefixORAS.length() / 2; // because it was a prefix
+
+            // Every Rayquaza check consists of "cmp r0, #0x180" followed by a nop. Replace
+            // all three checks with a sub and subs instructions so that we can write any
+            // random species ID.
+            for (int i = 0; i < Gen6Constants.rayquazaCodeOffsetsORAS.length; i++) {
+                int codeOffset = functionOffset + Gen6Constants.rayquazaCodeOffsetsORAS[i];
+                staticCRO[codeOffset] = (byte) speciesLower;
+                staticCRO[codeOffset + 1] = 0x0C;
+                staticCRO[codeOffset + 2] = 0x40;
+                staticCRO[codeOffset + 3] = (byte) 0xE2;
+                staticCRO[codeOffset + 4] = (byte) speciesUpper;
+                staticCRO[codeOffset + 5] = 0x00;
+                staticCRO[codeOffset + 6] = 0x50;
+                staticCRO[codeOffset + 7] = (byte) 0xE2;
+            }
+        }
+        writeFile(romEntry.getString("StaticPokemon"), staticCRO);
     }
 
     @Override

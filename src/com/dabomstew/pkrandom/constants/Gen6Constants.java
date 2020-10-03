@@ -221,6 +221,8 @@ public class Gen6Constants {
 
     private static final String saveLoadFormeReversionPrefixXY = "09EB000094E5141094E54A0B80E2", saveLoadFormeReversionPrefixORAS = "09EB000094E5141094E5120A80E2";
     public static final String ninjaskSpeciesPrefix = "241094E5B810D1E1", shedinjaSpeciesPrefix = "C2FFFFEB0040A0E10020A0E3";
+    public static final String rayquazaFunctionPrefixORAS = "0900A0E1F08FBDE8";
+    public static final int[] rayquazaScriptOffsetsORAS = new int[]{ 3334, 14734 }, rayquazaCodeOffsetsORAS = new int[]{ 136, 292, 576 };
 
     public static String getIngameTradesPrefix(int romType) {
         if (romType == Type_XY) {
