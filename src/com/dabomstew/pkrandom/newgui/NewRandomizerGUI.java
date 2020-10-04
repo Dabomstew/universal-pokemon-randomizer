@@ -1622,6 +1622,7 @@ public class NewRandomizerGUI {
             if (settingsString != null) {
                 ps.println("Settings String: " + Version.VERSION_STRING + settingsString);
             }
+            ps.println("Java Version: " + System.getProperty("java.version") + ", " + System.getProperty("java.vm.name"));
             PrintStream e1 = System.err;
             System.setErr(ps);
             if (this.romHandler != null) {
