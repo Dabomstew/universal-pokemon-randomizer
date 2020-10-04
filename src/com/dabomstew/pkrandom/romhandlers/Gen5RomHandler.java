@@ -2118,6 +2118,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     private void writeShedinjaEvolution() throws IOException {
         Pokemon nincada = pokes[290];
+
+        // When the "Limit Pokemon" setting is enabled, we clear out the evolutions of
+        // everything *not* in the pool, which could include Nincada. In that case,
+        // there's no point in even worrying about Shedinja, so just return.
+        if (nincada.evolutionsFrom.size() == 0) {
+            return;
+        }
         Pokemon extraEvolution = nincada.evolutionsFrom.get(1).to;
 
         // In all the Gen 5 games, the evolution overlay is hardcoded to generate
