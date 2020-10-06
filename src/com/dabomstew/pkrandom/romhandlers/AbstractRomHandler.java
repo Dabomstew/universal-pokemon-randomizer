@@ -4249,7 +4249,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void minimumCatchRate(int rateNonLegendary, int rateLegendary) {
-        List<Pokemon> pokes = getPokemon();
+        List<Pokemon> pokes = getPokemonInclFormes();
         for (Pokemon pkmn : pokes) {
             if (pkmn == null) {
                 continue;
