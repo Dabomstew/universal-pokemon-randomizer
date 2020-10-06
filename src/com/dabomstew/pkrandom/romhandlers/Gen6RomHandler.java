@@ -762,7 +762,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
     }
 
-    private void patchFormeReversion() {
+    private void patchFormeReversion() throws IOException {
         // Upon loading a save, all Mega Pokemon and all Primal Reversions
         // in the player's party are set back to their base forme. This
         // patches .code such that this reversion does not happen.
@@ -782,6 +782,26 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             code[offset + 1] = 0x00;
             code[offset + 2] = 0x00;
             code[offset + 3] = 0x00;
+        }
+
+        // In ORAS, the game also has hardcoded checks to revert Primal Groudon and Primal Kyogre
+        // immediately after catching them.
+        if (romEntry.romType == Gen6Constants.Type_ORAS) {
+            byte[] battleCRO = readFile(romEntry.getString("Battle"));
+            offset = find(battleCRO, Gen6Constants.afterBattleFormeReversionPrefix);
+            if (offset > 0) {
+                offset += Gen6Constants.afterBattleFormeReversionPrefix.length() / 2; // because it was a prefix
+
+                // The game checks for Primal Kyogre and Primal Groudon by pc-relative loading 0x17E,
+                // which is Kyogre's species ID. The call to pml::pokepara::CoreParam::ChangeFormNo
+                // is used by other species which we probably don't want to break, so instead of
+                // stubbing the call to the function, just break the hardcoded species ID check by
+                // making the game pc-relative load a total nonsense ID.
+                battleCRO[offset] = (byte) 0xFF;
+                battleCRO[offset + 1] = (byte) 0xFF;
+
+                writeFile(romEntry.getString("Battle"), battleCRO);
+            }
         }
     }
 
@@ -1923,7 +1943,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             allowedItems.banSingles(Gen6Constants.luckyEggIndex);
             nonBadItems.banSingles(Gen6Constants.luckyEggIndex);
         } else if (tweak == MiscTweak.RETAIN_ALT_FORMES) {
-            patchFormeReversion();
+            try {
+                patchFormeReversion();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
