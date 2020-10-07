@@ -167,6 +167,8 @@ public class Gen7Constants {
 
     public static final String ninjaskSpeciesPrefix = "11FF2FE11CD08DE2F080BDE8", shedinjaPrefix = "A0E194FDFFEB0040A0E1";
 
+    private static final int miniorCoreStartingIndexSM = 937, miniorCoreStartingIndexUSUM = 944;
+
     public static int getPokemonCount(int romType) {
         if (romType == Type_SM) {
             return pokemonCountSM;
@@ -507,6 +509,14 @@ public class Gen7Constants {
             return ignoreFormsSM;
         } else {
             return ignoreFormsUSUM;
+        }
+    }
+
+    public static int getMiniorCoreStartingIndex(int romType) {
+        if (romType == Type_SM) {
+            return miniorCoreStartingIndexSM;
+        } else {
+            return miniorCoreStartingIndexUSUM;
         }
     }
 

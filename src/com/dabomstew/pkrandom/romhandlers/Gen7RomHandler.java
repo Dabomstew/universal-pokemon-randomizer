@@ -1347,6 +1347,17 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public List<Pokemon> bannedForWildEncounters() {
+        // Ban Minior-C from appearing in the wild because it just spawns regular Minior.
+        int miniorCoreStartingIndex = Gen7Constants.getMiniorCoreStartingIndex(romEntry.romType);
+        List<Pokemon> miniorCoreList = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            miniorCoreList.add(pokes[miniorCoreStartingIndex + i]);
+        }
+        return miniorCoreList;
+    }
+
+    @Override
     public List<Trainer> getTrainers() {
         List<Trainer> allTrainers = new ArrayList<>();
         try {
