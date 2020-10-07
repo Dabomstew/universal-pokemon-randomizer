@@ -1828,6 +1828,14 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             throw new RandomizerIOException(e);
         }
 
+        // In XY, there are two Xerneas/Yveltal encounters; one for when you
+        // first encounter them, and another for every time after that. For
+        // multiple reasons, we don't want these to be different, so delete
+        // the second one.
+        if (romEntry.romType == Gen6Constants.Type_XY) {
+            int[] boxLegendaryOffsets = romEntry.arrayEntries.get("BoxLegendaryOffsets");
+            statics.remove(boxLegendaryOffsets[1]);
+        }
         return statics;
     }
 
@@ -1836,6 +1844,13 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         // Static Pokemon
         try {
             byte[] staticCRO = readFile(romEntry.getString("StaticPokemon"));
+
+            // To match what we did in getStaticPokemon, we have to add the
+            // second Xerneas/Yveltal encounter back into the list of statics.
+            if (romEntry.romType == Gen6Constants.Type_XY) {
+                int[] boxLegendaryOffsets = romEntry.arrayEntries.get("BoxLegendaryOffsets");
+                staticPokemon.add(boxLegendaryOffsets[1], staticPokemon.get(boxLegendaryOffsets[0]));
+            }
 
             Iterator<StaticEncounter> staticIter = staticPokemon.iterator();
 
@@ -1875,7 +1890,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             }
             writeFile(romEntry.getString("StaticPokemon"),staticCRO);
 
-            if (romEntry.romType == Gen6Constants.Type_ORAS) {
+            if (romEntry.romType == Gen6Constants.Type_XY) {
+                int[] boxLegendaryOffsets = romEntry.arrayEntries.get("BoxLegendaryOffsets");
+                StaticEncounter boxLegendaryEncounter = staticPokemon.get(boxLegendaryOffsets[0]);
+                fixBoxLegendariesXY(boxLegendaryEncounter.pkmn.number);
+            } else {
                 StaticEncounter rayquazaEncounter = staticPokemon.get(romEntry.getInt("RayquazaEncounterNumber"));
                 fixRayquazaORAS(rayquazaEncounter.pkmn.number);
             }
@@ -1886,17 +1905,62 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
     }
 
+    private void fixBoxLegendariesXY(int boxLegendarySpecies) throws IOException {
+        // We need to edit the script file or otherwise the text will still say "Xerneas" or "Yveltal"
+        GARCArchive encounterGarc = readGARC(romEntry.getString("WildPokemon"), false);
+        byte[] boxLegendaryRoomData = encounterGarc.getFile(Gen6Constants.boxLegendaryEncounterFileXY);
+        AMX localScript = new AMX(boxLegendaryRoomData, 1);
+        byte[] data = localScript.decData;
+        int[] boxLegendaryScriptOffsets = romEntry.arrayEntries.get("BoxLegendaryScriptOffsets");
+        for (int i = 0; i < boxLegendaryScriptOffsets.length; i++) {
+            FileFunctions.write2ByteInt(data, boxLegendaryScriptOffsets[i], boxLegendarySpecies);
+        }
+        byte[] modifiedScript = localScript.getBytes();
+        System.arraycopy(modifiedScript, 0, boxLegendaryRoomData, Gen6Constants.boxLegendaryLocalScriptOffsetXY, modifiedScript.length);
+        encounterGarc.setFile(Gen6Constants.boxLegendaryEncounterFileXY, boxLegendaryRoomData);
+        writeGARC(romEntry.getString("WildPokemon"), encounterGarc);
+
+        // We also need to edit DllField.cro so that the hardcoded checks for
+        // Xerneas's/Yveltal's ID will instead be checks for our randomized species ID.
+        byte[] staticCRO = readFile(romEntry.getString("StaticPokemon"));
+        int functionOffset = find(staticCRO, Gen6Constants.boxLegendaryFunctionPrefixXY);
+        if (functionOffset > 0) {
+            functionOffset += Gen6Constants.boxLegendaryFunctionPrefixXY.length() / 2; // because it was a prefix
+
+            // At multiple points in the function, the game calls pml::pokepara::CoreParam::GetMonNo
+            // and compares the result to r8; every single one of these comparisons is followed by a
+            // nop. However, the way in which the species ID is loaded into r8 differs depending on
+            // the game. We'd prefer to write the same assembly for both games, and there's a trick
+            // we can abuse to do so. Since the species ID is never used outside of this comparison,
+            // we can feel free to mutate it however we please. The below code allows us to write any
+            // arbitrary species ID and make the proper comparison like this:
+            // sub r0, r0, (speciesLower x 0x100)
+            // subs r0, r0, speciesUpper
+            int speciesUpper = boxLegendarySpecies & 0x00FF;
+            int speciesLower = (boxLegendarySpecies & 0xFF00) >> 8;
+            for (int i = 0; i < Gen6Constants.boxLegendaryCodeOffsetsXY.length; i++) {
+                int codeOffset = functionOffset + Gen6Constants.boxLegendaryCodeOffsetsXY[i];
+                staticCRO[codeOffset] = (byte) speciesLower;
+                staticCRO[codeOffset + 1] = 0x0C;
+                staticCRO[codeOffset + 2] = 0x40;
+                staticCRO[codeOffset + 3] = (byte) 0xE2;
+                staticCRO[codeOffset + 4] = (byte) speciesUpper;
+                staticCRO[codeOffset + 5] = 0x00;
+                staticCRO[codeOffset + 6] = 0x50;
+                staticCRO[codeOffset + 7] = (byte) 0xE2;
+            }
+        }
+        writeFile(romEntry.getString("StaticPokemon"), staticCRO);
+    }
+
     private void fixRayquazaORAS(int rayquazaEncounterSpecies) throws IOException {
         // We need to edit the script file or otherwise the text will still say "Rayquaza"
         int rayquazaScriptFile = romEntry.getInt("RayquazaEncounterScriptNumber");
-        int speciesUpper = rayquazaEncounterSpecies & 0x00FF;
-        int speciesLower = (rayquazaEncounterSpecies & 0xFF00) >> 8;
         GARCArchive scriptGarc = readGARC(romEntry.getString("Scripts"), true);
         AMX rayquazaAMX = new AMX(scriptGarc.files.get(rayquazaScriptFile).get(0));
         byte[] data = rayquazaAMX.decData;
         for (int i = 0; i < Gen6Constants.rayquazaScriptOffsetsORAS.length; i++) {
-            data[Gen6Constants.rayquazaScriptOffsetsORAS[i]] = (byte) speciesUpper;
-            data[Gen6Constants.rayquazaScriptOffsetsORAS[i] + 1] = (byte) speciesLower;
+            FileFunctions.write2ByteInt(data, Gen6Constants.rayquazaScriptOffsetsORAS[i], rayquazaEncounterSpecies);
         }
         scriptGarc.setFile(rayquazaScriptFile, rayquazaAMX.getBytes());
         writeGARC(romEntry.getString("Scripts"), scriptGarc);
@@ -1911,6 +1975,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             // Every Rayquaza check consists of "cmp r0, #0x180" followed by a nop. Replace
             // all three checks with a sub and subs instructions so that we can write any
             // random species ID.
+            int speciesUpper = rayquazaEncounterSpecies & 0x00FF;
+            int speciesLower = (rayquazaEncounterSpecies & 0xFF00) >> 8;
             for (int i = 0; i < Gen6Constants.rayquazaCodeOffsetsORAS.length; i++) {
                 int codeOffset = functionOffset + Gen6Constants.rayquazaCodeOffsetsORAS[i];
                 staticCRO[codeOffset] = (byte) speciesLower;

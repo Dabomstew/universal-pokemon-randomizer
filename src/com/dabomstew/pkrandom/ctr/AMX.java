@@ -4,6 +4,7 @@ package com.dabomstew.pkrandom.ctr;
 /*--  AMX.java - class for handling AMX script archives                     --*/
 /*--                                                                        --*/
 /*--  Contains code based on "pk3DS", copyright (C) Kaphotics               --*/
+/*--  Contains code based on "pkNX", copyright (C) Kaphotics                --*/
 /*--  Contains code based on "poketools", copyright (C) FireyFly            --*/
 /*--  Additional contributions by the UPR-ZX team                           --*/
 /*--                                                                        --*/
@@ -22,12 +23,16 @@ package com.dabomstew.pkrandom.ctr;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class AMX {
 
@@ -151,103 +156,73 @@ public class AMX {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream(compLength);
 
-        while (inBuf.position() < data.length) {
-            compressBytes(inBuf,out);
+        try {
+            while (inBuf.position() < data.length) {
+                compressBytes(inBuf, out);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
         }
 
         return out.toByteArray();
     }
 
-    // Modified version of the AMX script compression algorithm from pk3DS
-    private void compressBytes(ByteBuffer inBuf, ByteArrayOutputStream out) {
-        short cmd = inBuf.getShort(inBuf.position());
-        short val = inBuf.getShort(inBuf.position()+2);
+    // Modified version of the AMX script compression algorithm from pkNX
+    private void compressBytes(ByteBuffer inBuf, ByteArrayOutputStream out) throws IOException {
+        List<Byte> bytes = new ArrayList<>();
+        int instructionTemp = inBuf.getInt(inBuf.position());
+        long instruction = Integer.toUnsignedLong(instructionTemp);
+        boolean sign = (instruction & 0x80000000) > 0;
 
-        short b1 = (short)(cmd & 0xFF);
-        short b2 = (short)((cmd >>> 8) & 0xFF);
-        short b3 = (short)(val & 0xFF);
-        short b4 = (short)((val >>> 8) & 0xFF);
+        // Signed (negative) values are handled opposite of unsigned (positive) values.
+        // Positive values are "done" when we've shifted the value down to zero, but
+        // we don't need to store the highest 1s in a signed value. We handle this by
+        // tracking the loop via a NOTed shadow copy of the instruction if it's signed.
+        int shadowTemp = sign ? ~instructionTemp : instructionTemp;
+        long shadow = Integer.toUnsignedLong(shadowTemp);
+        do
+        {
+            long least7 = instruction & 0b01111111;
+            byte byteVal = (byte)least7;
 
-        boolean sign4 = val < 0 && cmd < 0 && b1 >= 0xC0 && ((cmd >>> 7) & 0x7F) == 0x7F;
-        boolean sign3 = val < 0 && cmd < 0 && ((b2 & 0xE0) == 0xE0) && ((b3 & 0xF) == 0xF);
-        boolean sign2 = val < 0 && (b3 & 0xF0) == 0xF0 && (b4 & 0xFF) == 0xFF;
-        boolean sign1 = val < 0 && ((b3 & 0x10) == 0 || (val & 0xFE) != 0xFE) && (b4 & 0x8) == 0x8;
-        boolean sign0 = val < 0 && cmd > 0 && ((b4 & 0x8) == 0 || (b4 & 0xF0) != 0xF0);
-        boolean manyb = cmd >= 0x40 || (((b2 >>> 6) & 0x3) | ((val << 2) & 0x7C)) > 0;
-        boolean literal = cmd >= 0 && cmd < 0x40;
-
-        if (sign4) {
-            int dev = 0x40 + inBuf.getInt(inBuf.position());
-            if (dev < 0) {
-                inBuf.position(inBuf.position()+4);
-                return;
+            if (bytes.size() > 0)
+            {
+                // Continuation bit on all but the lowest byte
+                byteVal |= 0x80;
             }
-            out.write((dev & 0x3F) | 0x40);
-        } else if (sign3) {
-            byte first = (byte)(((cmd >>> 7) & 0x7F) | 0x80);
-            byte second = (byte)(b1 & 0x7F);
-            out.write(first);
-            out.write(second);
-        } else if (sign2) {
-            byte first = (byte)((((b2 >>> 6) & 0x3) | ((val << 2) & 0x7C)) | 0x80);
-            byte second = (byte)(((cmd >>> 7) & 0x7F) | 0x80);
-            byte third = (byte)(b1 & 0x7F);
-            out.write(first);
-            out.write(second);
-            out.write(third);
-        } else if (sign1) {
-            byte first = (byte)(((val >> 5) & 0x7F) | 0x80);
-            byte second = (byte)((((b2 >>> 6) & 0x3) | ((val << 2) & 0x7C)) | 0x80);
-            byte third = (byte)(((cmd >>> 7) & 0x7F) | 0x80);
-            byte fourth = (byte)(b1 & 0x7F);
-            out.write(first);
-            out.write(second);
-            out.write(third);
-            out.write(fourth);
-        } else if (sign0) {
-            byte first = (byte)(((b4 >> 4) & 0xF) | 0x80);
-            byte second = (byte)(((val >> 5) & 0x7F) | 0x80);
-            byte third = (byte)((((b2 >>> 6) & 0x3) | ((val << 2) & 0x7C)) | 0x80);
-            byte fourth = (byte)(((cmd >>> 7) & 0x7F) | 0x80);
-            byte fifth = (byte)(b1 & 0x7F);
-            out.write(first);
-            out.write(second);
-            out.write(third);
-            out.write(fourth);
-            out.write(fifth);
-        } else if (manyb) {
-            long bitStorage = 0;
 
-            int dv = inBuf.getInt(inBuf.position());
-            int ctr = 0;
+            bytes.add(byteVal);
 
-            while (dv != 0 || ctr < 2) {
-                byte bits = (byte)((byte)dv & 0x7F);
-                dv >>>= 7;
-                bitStorage |= ((long)bits << (ctr++*8));
-                if (ctr != 1) {
-                    bitStorage |= (((long)1 << (7 + ((ctr-1)*8))) & (mask << ((ctr-1)*8)));
-                }
-                if (dv == 0 && ((bits >>> 6) & 1) != 0) {
-                    long operand = ((long)1 << (7 + ((ctr)*8))) & (mask << (ctr*8));
-                    bitStorage |= operand;
-                }
-            }
-            boolean skip = true;
-            for (int i = 0; i < 8; i++) {
-                byte bitsPart = (byte)((bitStorage >>> (7 - i)*8) & 0xFF);
-                if (skip) {
-                    if (bitsPart != 0) {
-                        skip = false;
-                        out.write(bitsPart);
-                    }
-                } else {
-                    out.write(bitsPart);
-                }
-            }
-        } else if (literal) {
-            out.write(cmd & 0xFF);
+            instruction >>= 7;
+            shadow >>= 7;
         }
-        inBuf.position(inBuf.position()+4);
+        while (shadow != 0);
+
+        if (bytes.size() < 5)
+        {
+            // Ensure "sign bit" (bit just to the right of highest continuation bit) is
+            // correct. Add an extra empty continuation byte if we need to. Values can't
+            // be longer than 5 bytes, though.
+
+            int signBit = sign ? 0x40 : 0x00;
+
+            if ((bytes.get(bytes.size() - 1) & 0x40) != signBit)
+                bytes.add((byte)(sign ? 0xFF : 0x80));
+        }
+
+        // Reverse for endianess
+        for (int i = 0; i < bytes.size() / 2; i++) {
+            byte temp = bytes.get(i);
+            bytes.set(i, bytes.get(bytes.size() - i - 1));
+            bytes.set(bytes.size() - i - 1,  temp);
+        }
+
+        byte[] ret = new byte[bytes.size()];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = bytes.get(i);
+        }
+
+        inBuf.position(inBuf.position() + 4);
+        out.write(ret);
     }
 }
