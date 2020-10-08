@@ -1620,7 +1620,7 @@ public class NewRandomizerGUI {
                 ps.println("Seed: " + seedString);
             }
             if (settingsString != null) {
-                ps.println("Settings String: " + Version.VERSION_STRING + settingsString);
+                ps.println("Settings String: " + Version.VERSION + settingsString);
             }
             ps.println("Java Version: " + System.getProperty("java.version") + ", " + System.getProperty("java.vm.name"));
             PrintStream e1 = System.err;
