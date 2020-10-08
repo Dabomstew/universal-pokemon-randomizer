@@ -518,7 +518,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public Map<Integer, StatChange> getUpdatedPokemonStats(int generation) {
-        return null;
+        return GlobalConstants.getStatChanges(generation);
     }
 
     @Override
