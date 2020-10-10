@@ -330,7 +330,7 @@ public class Gen4Constants {
     private static final String doubleBattleFixPrefixDP = "022912D90221214201", doubleBattleFixPrefixPt = "022919D90221214205",
             doubleBattleFixPrefixHGSS = "2C2815D00221214201";
 
-    public static final String feebasLevelPrefixDPPt = "019813B0F0BD";
+    public static final String feebasLevelPrefixDPPt = "019813B0F0BD", honeyTreeLevelPrefixDPPt = "F0BDF0B589B0051C0C1C";
 
     static {
         setupAllowedItems();
