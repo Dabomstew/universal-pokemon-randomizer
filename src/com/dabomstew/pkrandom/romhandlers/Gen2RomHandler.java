@@ -784,8 +784,9 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                     EncounterSet encset = areas.next();
                     Iterator<Encounter> encountersHere = encset.encounters.iterator();
                     for (int j = 0; j < Gen2Constants.landEncounterSlots; j++) {
-                        rom[offset + 5 + (i * Gen2Constants.landEncounterSlots * 2) + (j * 2) + 1] = (byte) encountersHere
-                                .next().pokemon.number;
+                        Encounter enc = encountersHere.next();
+                        rom[offset + 5 + (i * Gen2Constants.landEncounterSlots * 2) + (j * 2)] = (byte) enc.level;
+                        rom[offset + 5 + (i * Gen2Constants.landEncounterSlots * 2) + (j * 2) + 1] = (byte) enc.pokemon.number;
                     }
                 }
             } else {
@@ -794,8 +795,9 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 for (int i = 0; i < 3; i++) {
                     Iterator<Encounter> encountersHere = encset.encounters.iterator();
                     for (int j = 0; j < Gen2Constants.landEncounterSlots; j++) {
-                        rom[offset + 5 + (i * Gen2Constants.landEncounterSlots * 2) + (j * 2) + 1] = (byte) encountersHere
-                                .next().pokemon.number;
+                        Encounter enc = encountersHere.next();
+                        rom[offset + 5 + (i * Gen2Constants.landEncounterSlots * 2) + (j * 2)] = (byte) enc.level;
+                        rom[offset + 5 + (i * Gen2Constants.landEncounterSlots * 2) + (j * 2) + 1] = (byte) enc.pokemon.number;
                     }
                 }
             }
@@ -809,7 +811,9 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             EncounterSet encset = areas.next();
             Iterator<Encounter> encountersHere = encset.encounters.iterator();
             for (int j = 0; j < Gen2Constants.seaEncounterSlots; j++) {
-                rom[offset + 3 + (j * 2) + 1] = (byte) encountersHere.next().pokemon.number;
+                Encounter enc = encountersHere.next();
+                rom[offset + 3 + (j * 2)] = (byte) enc.level;
+                rom[offset + 3 + (j * 2) + 1] = (byte) enc.pokemon.number;
             }
             offset += 3 + Gen2Constants.seaEncounterSlots * 2;
         }
