@@ -43,7 +43,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     protected List<Pokemon> mainPokemonList;
     private List<Pokemon> mainPokemonListInclFormes;
     private List<Pokemon> altFormesList;
-    private List<Pokemon> noLegendaryList, onlyLegendaryList;
+    private List<Pokemon> noLegendaryList, onlyLegendaryList, ultraBeastList;
     private List<Pokemon> noLegendaryListInclFormes, onlyLegendaryListInclFormes;
     private List<Pokemon> noLegendaryAltsList, onlyLegendaryAltsList;
     protected final Random random;
@@ -140,10 +140,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         noLegendaryAltsList = new ArrayList<>();
         onlyLegendaryAltsList = new ArrayList<>();
         giratinaPicks = new ArrayList<>();
+        ultraBeastList = new ArrayList<>();
 
         for (Pokemon p : mainPokemonList) {
             if (p.isLegendary()) {
                 onlyLegendaryList.add(p);
+            } else if (p.isUltraBeast()) {
+                ultraBeastList.add(p);
             } else {
                 noLegendaryList.add(p);
             }
@@ -157,7 +160,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (Pokemon p : mainPokemonListInclFormes) {
             if (p.isLegendary()) {
                 onlyLegendaryListInclFormes.add(p);
-            } else {
+            } else if (!ultraBeastList.contains(p)) {
                 noLegendaryListInclFormes.add(p);
             }
         }
@@ -2827,8 +2830,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 .filter(pk -> !pk.actuallyCosmetic)
                                 .collect(Collectors.toList());
             }
+            List<Pokemon> ultraBeastsLeft = new ArrayList<>(ultraBeastList);
             legendariesLeft.removeAll(banned);
             nonlegsLeft.removeAll(banned);
+            ultraBeastsLeft.removeAll(banned);
             for (StaticEncounter old : currentStaticPokemon) {
                 StaticEncounter newStatic = new StaticEncounter();
                 newStatic.heldItem = old.heldItem;
@@ -2868,6 +2873,17 @@ public abstract class AbstractRomHandler implements RomHandler {
                         }
                         legendariesLeft.removeAll(banned);
                     }
+                } else if (ultraBeastList.contains(old.pkmn)) {
+                    newPK = ultraBeastsLeft.remove(this.random.nextInt(ultraBeastsLeft.size()));
+
+                    newStatic.pkmn = newPK;
+                    setFormeForStaticEncounter(newStatic, newPK);
+                    newStatic.level = old.level;
+                    newStatic.resetMoves = true;
+
+                    if (ultraBeastsLeft.size() == 0) {
+                        ultraBeastsLeft.addAll(ultraBeastList);
+                    }
                 } else {
                     if (reallySwapMegaEvos && old.canMegaEvolve()) {
                         newPK = getMegaEvoPokemon(noLegendaryList, nonlegsLeft, newStatic);
@@ -2894,8 +2910,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 replacements.add(newStatic);
             }
-        }
-        else if (similarStrength) {
+        } else if (similarStrength) {
             List<Pokemon> listInclFormesExclCosmetics =
                     mainPokemonListInclFormes
                             .stream()
@@ -2986,8 +3001,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 replacements.add(newStatic);
             }
-        }
-        else { // Completely random
+        } else { // Completely random
             List<Pokemon> listInclFormesExclCosmetics =
                     mainPokemonListInclFormes
                             .stream()

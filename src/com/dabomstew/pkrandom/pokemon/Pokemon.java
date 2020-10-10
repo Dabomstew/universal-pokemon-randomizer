@@ -25,6 +25,8 @@ package com.dabomstew.pkrandom.pokemon;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import com.dabomstew.pkrandom.constants.Gen7Constants;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -255,12 +257,22 @@ public class Pokemon implements Comparable<Pokemon> {
     private static final List<Integer> strongLegendaries = Arrays.asList(150, 249, 250, 382, 383, 384, 483, 484, 486,
             487, 493, 643, 644, 646, 716, 717, 789, 790, 791, 792);
 
+    private static final List<Integer> ultraBeasts = Arrays.asList(793, 794, 795, 796, 797, 798, 799, 803, 804, 805, 806);
+
     public boolean isLegendary() {
         return formeNumber == 0 ? legendaries.contains(this.number) : legendaries.contains(this.baseForme.number);
     }
 
     public boolean isStrongLegendary() {
         return formeNumber == 0 ? strongLegendaries.contains(this.number) : strongLegendaries.contains(this.baseForme.number);
+    }
+
+    // This method can only be used in contexts where alt formes are NOT involved; otherwise, some alt formes
+    // will be considered as Ultra Beasts in SM.
+    // In contexts where formes are involved, use "if (ultraBeastList.contains(...))" instead,
+    // assuming "checkPokemonRestrictions" has been used at some point beforehand.
+    public boolean isUltraBeast() {
+        return ultraBeasts.contains(this.number);
     }
 
     public int getCosmeticFormNumber(int num) {
