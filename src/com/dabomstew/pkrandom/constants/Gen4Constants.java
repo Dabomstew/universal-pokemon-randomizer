@@ -327,8 +327,10 @@ public class Gen4Constants {
     public static final List<Integer> headbuttTutorScriptOffsets = Arrays.asList(0xF55, 0xFC5, 0x100A),
             headbuttTutorTextIndices = Arrays.asList(16, 17, 19, 23, 25, 26);
 
-    private static String doubleBattleFixPrefixDP = "022912D90221214201", doubleBattleFixPrefixPt = "022919D90221214205",
+    private static final String doubleBattleFixPrefixDP = "022912D90221214201", doubleBattleFixPrefixPt = "022919D90221214205",
             doubleBattleFixPrefixHGSS = "2C2815D00221214201";
+
+    public static final String feebasLevelPrefixDPPt = "019813B0F0BD";
 
     static {
         setupAllowedItems();

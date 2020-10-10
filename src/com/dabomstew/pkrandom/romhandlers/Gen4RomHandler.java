@@ -934,6 +934,15 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         // Feebas tiles
         byte[] feebasData = extraEncounterData.files.get(0);
         EncounterSet feebasEncounters = readExtraEncountersDPPt(feebasData, 0, 1);
+        byte[] encounterOverlay = readOverlay(romEntry.getInt("EncounterOvlNumber"));
+        int offset = find(encounterOverlay, Gen4Constants.feebasLevelPrefixDPPt);
+        if (offset > 0) {
+            offset += Gen4Constants.feebasLevelPrefixDPPt.length() / 2; // because it was a prefix
+            for (Encounter enc : feebasEncounters.encounters) {
+                enc.maxLevel = encounterOverlay[offset];
+                enc.level = encounterOverlay[offset + 4];
+            }
+        }
         feebasEncounters.displayName = "Mt. Coronet Feebas Tiles";
         encounters.add(feebasEncounters);
 
@@ -1260,7 +1269,17 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         // Feebas tiles
         byte[] feebasData = extraEncounterData.files.get(0);
         EncounterSet feebasEncounters = encounters.next();
+        byte[] encounterOverlay = readOverlay(romEntry.getInt("EncounterOvlNumber"));
+        int offset = find(encounterOverlay, Gen4Constants.feebasLevelPrefixDPPt);
+        if (offset > 0) {
+            offset += Gen4Constants.feebasLevelPrefixDPPt.length() / 2; // because it was a prefix
+            for (Encounter enc : feebasEncounters.encounters) {
+                encounterOverlay[offset] = (byte) enc.maxLevel;
+                encounterOverlay[offset + 4] = (byte) enc.level;
+            }
+        }
         writeExtraEncountersDPPt(feebasData, 0, feebasEncounters.encounters);
+        writeOverlay(romEntry.getInt("EncounterOvlNumber"), encounterOverlay);
 
         // Honey trees
         int[] honeyTreeOffsets = romEntry.arrayEntries.get("HoneyTreeOffsets");
