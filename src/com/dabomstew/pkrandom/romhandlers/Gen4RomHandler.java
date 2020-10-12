@@ -934,6 +934,15 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         // Feebas tiles
         byte[] feebasData = extraEncounterData.files.get(0);
         EncounterSet feebasEncounters = readExtraEncountersDPPt(feebasData, 0, 1);
+        byte[] encounterOverlay = readOverlay(romEntry.getInt("EncounterOvlNumber"));
+        int offset = find(encounterOverlay, Gen4Constants.feebasLevelPrefixDPPt);
+        if (offset > 0) {
+            offset += Gen4Constants.feebasLevelPrefixDPPt.length() / 2; // because it was a prefix
+            for (Encounter enc : feebasEncounters.encounters) {
+                enc.maxLevel = encounterOverlay[offset];
+                enc.level = encounterOverlay[offset + 4];
+            }
+        }
         feebasEncounters.displayName = "Mt. Coronet Feebas Tiles";
         encounters.add(feebasEncounters);
 
@@ -942,6 +951,25 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         for (int i = 0; i < honeyTreeOffsets.length; i++) {
             byte[] honeyTreeData = extraEncounterData.files.get(honeyTreeOffsets[i]);
             EncounterSet honeyTreeEncounters = readExtraEncountersDPPt(honeyTreeData, 0, 6);
+            offset = find(encounterOverlay, Gen4Constants.honeyTreeLevelPrefixDPPt);
+            if (offset > 0) {
+                offset += Gen4Constants.honeyTreeLevelPrefixDPPt.length() / 2; // because it was a prefix
+
+                // To make different min levels work, we rewrite some assembly code in
+                // setEncountersDPPt, which has the side effect of making reading the min
+                // level easier. In case the original code is still there, just hardcode
+                // the min level used in the vanilla game, since extracting it is hard.
+                byte level;
+                if (encounterOverlay[offset + 46] == 0x0B && encounterOverlay[offset + 47] == 0x2E) {
+                    level = 5;
+                } else {
+                    level = encounterOverlay[offset + 46];
+                }
+                for (Encounter enc : honeyTreeEncounters.encounters) {
+                    enc.maxLevel = encounterOverlay[offset + 102];
+                    enc.level = level;
+                }
+            }
             honeyTreeEncounters.displayName = "Honey Tree Group " + (i + 1);
             encounters.add(honeyTreeEncounters);
         }
@@ -1260,6 +1288,13 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         // Feebas tiles
         byte[] feebasData = extraEncounterData.files.get(0);
         EncounterSet feebasEncounters = encounters.next();
+        byte[] encounterOverlay = readOverlay(romEntry.getInt("EncounterOvlNumber"));
+        int offset = find(encounterOverlay, Gen4Constants.feebasLevelPrefixDPPt);
+        if (offset > 0) {
+            offset += Gen4Constants.feebasLevelPrefixDPPt.length() / 2; // because it was a prefix
+            encounterOverlay[offset] = (byte) feebasEncounters.encounters.get(0).maxLevel;
+            encounterOverlay[offset + 4] = (byte) feebasEncounters.encounters.get(0).level;
+        }
         writeExtraEncountersDPPt(feebasData, 0, feebasEncounters.encounters);
 
         // Honey trees
@@ -1267,6 +1302,40 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         for (int i = 0; i < honeyTreeOffsets.length; i++) {
             byte[] honeyTreeData = extraEncounterData.files.get(honeyTreeOffsets[i]);
             EncounterSet honeyTreeEncounters = encounters.next();
+            offset = find(encounterOverlay, Gen4Constants.honeyTreeLevelPrefixDPPt);
+            if (offset > 0) {
+                offset += Gen4Constants.honeyTreeLevelPrefixDPPt.length() / 2; // because it was a prefix
+                int level = honeyTreeEncounters.encounters.get(0).level;
+                int maxLevel = honeyTreeEncounters.encounters.get(0).maxLevel;
+
+                // The original code makes it impossible for certain min levels
+                // from being used in the assembly, but there's also a hardcoded
+                // check for the original level range that we don't want. So we
+                // can use that space to just do "mov r0, level", nop out the rest
+                // of the check, then change "mov r0, r6, #5" to "mov r0, r0, r6".
+                encounterOverlay[offset + 46] = (byte) level;
+                encounterOverlay[offset + 47] = 0x20;
+                encounterOverlay[offset + 48] = 0x00;
+                encounterOverlay[offset + 49] = 0x00;
+                encounterOverlay[offset + 50] = 0x00;
+                encounterOverlay[offset + 51] = 0x00;
+                encounterOverlay[offset + 52] = 0x00;
+                encounterOverlay[offset + 53] = 0x00;
+                encounterOverlay[offset + 54] = (byte) 0x80;
+                encounterOverlay[offset + 55] = 0x19;
+
+                encounterOverlay[offset + 102] = (byte) maxLevel;
+
+                // In the above comment, r6 is a random number between 0 and
+                // (maxLevel - level). To calculate this number, the game rolls
+                // a random number between 0 and 0xFFFF and then divides it by
+                // 0x1746; this produces values between 0 and 10, the original
+                // level range. We need to replace the 0x1746 with our own
+                // constant that has the same effect.
+                int newRange = maxLevel - level;
+                int divisor = (0xFFFF / (newRange + 1)) + 1;
+                FileFunctions.writeFullIntLittleEndian(encounterOverlay, offset + 148, divisor);
+            }
             writeExtraEncountersDPPt(honeyTreeData, 0, honeyTreeEncounters.encounters);
         }
 
@@ -1279,6 +1348,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         }
 
         // Save
+        writeOverlay(romEntry.getInt("EncounterOvlNumber"), encounterOverlay);
         writeNARC(extraEncountersFile, extraEncounterData);
 
     }
