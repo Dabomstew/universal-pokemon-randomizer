@@ -1104,7 +1104,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         checkPokemonRestrictions();
         // Build the full 1-to-1 map
         Map<Pokemon, Pokemon> translateMap = new TreeMap<>();
-        List<Pokemon> remainingLeft = allowAltFormes ? allPokemonInclFormesWithoutNull() : allPokemonWithoutNull();
+        List<Pokemon> remainingLeft = allPokemonInclFormesWithoutNull();
         remainingLeft.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
         List<Pokemon> remainingRight;
         if (allowAltFormes) {
@@ -1162,7 +1162,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // Map remaining to themselves just in case
-        List<Pokemon> allPokes = allowAltFormes ? allPokemonInclFormesWithoutNull() : allPokemonWithoutNull();
+        List<Pokemon> allPokes = allPokemonInclFormesWithoutNull();
         for (Pokemon poke : allPokes) {
             if (!translateMap.containsKey(poke)) {
                 translateMap.put(poke, poke);
