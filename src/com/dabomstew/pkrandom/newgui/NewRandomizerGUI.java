@@ -3140,7 +3140,7 @@ public class NewRandomizerGUI {
     private void populateDropdowns() {
         List<Pokemon> currentStarters = romHandler.getStarters();
         List<Pokemon> allPokes =
-                romHandler.generationOfPokemon() == 6 ?
+                romHandler.generationOfPokemon() >= 6 ?
                         romHandler.getPokemonInclFormes()
                                 .stream()
                                 .filter(pk -> pk == null || !pk.actuallyCosmetic)
