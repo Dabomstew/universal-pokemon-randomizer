@@ -697,15 +697,15 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-                                 boolean noLegendaries, boolean balanceShakingGrass, int levelModifier, boolean allowAltFormes) {
+    public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
+                                 boolean usePowerLevels, boolean noLegendaries, boolean balanceShakingGrass,
+                                 int levelModifier, boolean allowAltFormes, boolean abilitiesAreRandomized) {
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
 
-        // For now, treat this as Area 1-to-1 and we'll fix it later.
         if (isORAS) {
             List<EncounterSet> collapsedEncounters = collapseAreasORAS(currentEncounters);
-            area1to1EncountersImpl(collapsedEncounters, useTimeOfDay, catchEmAll, typeThemed,
-                    usePowerLevels, noLegendaries, levelModifier, allowAltFormes);
+            area1to1EncountersImpl(collapsedEncounters, catchEmAll, typeThemed, usePowerLevels,
+                    noLegendaries, levelModifier, allowAltFormes, abilitiesAreRandomized);
             enhanceRandomEncountersORAS(collapsedEncounters, catchEmAll, typeThemed, usePowerLevels, noLegendaries, allowAltFormes);
             setEncounters(useTimeOfDay, currentEncounters);
             return;
@@ -720,6 +720,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         Collections.shuffle(scrambledEncounters, this.random);
 
         List<Pokemon> banned = this.bannedForWildEncounters();
+        if (!abilitiesAreRandomized) {
+            List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
+            banned.addAll(abilityDependentFormes);
+        }
         // Assume EITHER catch em all OR type themed OR match strength for now
         if (catchEmAll) {
 
@@ -887,25 +891,31 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
-                                   boolean usePowerLevels, boolean noLegendaries, int levelModifier, boolean allowAltformes) {
+                                   boolean usePowerLevels, boolean noLegendaries, int levelModifier,
+                                   boolean allowAltformes, boolean abilitiesAreRandomized) {
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
         if (isORAS) {
             List<EncounterSet> collapsedEncounters = collapseAreasORAS(currentEncounters);
-            area1to1EncountersImpl(collapsedEncounters, useTimeOfDay, catchEmAll, typeThemed,
-                    usePowerLevels, noLegendaries, levelModifier, allowAltformes);
+            area1to1EncountersImpl(collapsedEncounters, catchEmAll, typeThemed, usePowerLevels,
+                    noLegendaries, levelModifier, allowAltformes, abilitiesAreRandomized);
             setEncounters(useTimeOfDay, currentEncounters);
             return;
         } else {
-            area1to1EncountersImpl(currentEncounters, useTimeOfDay, catchEmAll, typeThemed,
-                    usePowerLevels, noLegendaries, levelModifier, allowAltformes);
+            area1to1EncountersImpl(currentEncounters, catchEmAll, typeThemed, usePowerLevels,
+                    noLegendaries, levelModifier, allowAltformes, abilitiesAreRandomized);
             setEncounters(useTimeOfDay, currentEncounters);
         }
     }
 
-    private void area1to1EncountersImpl(List<EncounterSet> currentEncounters, boolean useTimeOfDay,
-             boolean catchEmAll, boolean typeThemed, boolean usePowerLevels, boolean noLegendaries, int levelModifier, boolean allowAltFormes) {
+    private void area1to1EncountersImpl(List<EncounterSet> currentEncounters, boolean catchEmAll, boolean typeThemed,
+                                        boolean usePowerLevels, boolean noLegendaries, int levelModifier,
+                                        boolean allowAltFormes, boolean abilitiesAreRandomized) {
         checkPokemonRestrictions();
         List<Pokemon> banned = this.bannedForWildEncounters();
+        if (!abilitiesAreRandomized) {
+            List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
+            banned.addAll(abilityDependentFormes);
+        }
 
         // New: randomize the order encounter sets are randomized in.
         // Leads to less predictable results for various modifiers.
@@ -1100,7 +1110,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries, int levelModifier, boolean allowAltFormes) {
+    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries,
+                                   int levelModifier, boolean allowAltFormes, boolean abilitiesAreRandomized) {
         checkPokemonRestrictions();
         // Build the full 1-to-1 map
         Map<Pokemon, Pokemon> translateMap = new TreeMap<>();
@@ -1116,6 +1127,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                     : new ArrayList<>(mainPokemonList);
         }
         List<Pokemon> banned = this.bannedForWildEncounters();
+        if (!abilitiesAreRandomized) {
+            List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
+            banned.addAll(abilityDependentFormes);
+        }
         // Banned pokemon should be mapped to themselves
         for (Pokemon bannedPK : banned) {
             translateMap.put(bannedPK, bannedPK);
@@ -1506,7 +1521,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
                                       int levelModifier, boolean distributionSetting, boolean mainPlaythroughSetting,
-                                      boolean includeFormes, boolean swapMegaEvos, boolean shinyChance) {
+                                      boolean includeFormes, boolean swapMegaEvos, boolean shinyChance,
+                                      boolean abilitiesAreRandomized) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         // New: randomize the order trainers are randomized in.
@@ -1533,6 +1549,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                         .filter(pk -> !pk.actuallyCosmetic)
                         .collect(Collectors.toList());
         List<Integer> mainPlaythroughTrainers = getMainPlaythroughTrainers();
+
+        List<Pokemon> banned = new ArrayList<>();
+        if (!abilitiesAreRandomized) {
+            List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
+            banned.addAll(abilityDependentFormes);
+        }
+        cachedAllList.removeAll(banned);
 
         // Fully random is easy enough - randomize then worry about rival
         // carrying starter at the end
@@ -1563,7 +1586,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                                         noLegendaries,
                                         wgAllowed,
                                         true,
-                                        swapThisMegaEvo
+                                        swapThisMegaEvo,
+                                        abilitiesAreRandomized
                                 );
                         setPlacementHistory(newPK);
                         tp.absolutePokeNumber = newPK.number;
@@ -1579,7 +1603,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                                         noLegendaries,
                                         wgAllowed,
                                         false,
-                                        swapThisMegaEvo
+                                        swapThisMegaEvo,
+                                        abilitiesAreRandomized
                                 );
                         tp.absolutePokeNumber = newPK.number;
                         tp.pokemon = newPK;
@@ -1594,7 +1619,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                                     noLegendaries,
                                     wgAllowed,
                                     distributionSetting,
-                                    swapThisMegaEvo
+                                    swapThisMegaEvo,
+                                    abilitiesAreRandomized
                             );
                     if (distributionSetting) {
                         setPlacementHistory(newPK);
@@ -1645,7 +1671,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
-                                      boolean noEarlyWonderGuard, int levelModifier, boolean includeFormes, boolean swapMegaEvos, boolean shinyChance) {
+                                      boolean noEarlyWonderGuard, int levelModifier, boolean includeFormes,
+                                      boolean swapMegaEvos, boolean shinyChance, boolean abilitiesAreRandomized) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         cachedReplacementLists = new TreeMap<>();
@@ -1665,6 +1692,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                         .collect(Collectors.toList());
         typeWeightings = new TreeMap<>();
         totalTypeWeighting = 0;
+
+        List<Pokemon> banned = new ArrayList<>();
+        if (!abilitiesAreRandomized) {
+            List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
+            banned.addAll(abilityDependentFormes);
+        }
+        cachedAllList.removeAll(banned);
 
         // Construct groupings for types
         // Anything starting with GYM or ELITE or CHAMPION is a group
@@ -1739,7 +1773,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                                     noLegendaries,
                                     wgAllowed,
                                     false,
-                                    swapThisMegaEvo
+                                    swapThisMegaEvo,
+                                    abilitiesAreRandomized
                             );
                     tp.absolutePokeNumber = newPK.number;
                     tp.pokemon = newPK;
@@ -1801,7 +1836,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                                     noLegendaries,
                                     shedAllowed,
                                     false,
-                                    swapThisMegaEvo
+                                    swapThisMegaEvo,
+                                    abilitiesAreRandomized
                             );
                     tp.absolutePokeNumber = newPK.number;
                     tp.pokemon = newPK;
@@ -2804,12 +2840,17 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMusketeers, boolean limit600, boolean allowAltFormes, boolean swapMegaEvos) {
+    public void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMusketeers,
+                                       boolean limit600, boolean allowAltFormes, boolean swapMegaEvos, boolean abilitiesAreRandomized) {
         // Load
         checkPokemonRestrictions();
         List<StaticEncounter> currentStaticPokemon = this.getStaticPokemon();
         List<StaticEncounter> replacements = new ArrayList<>();
         List<Pokemon> banned = this.bannedForStaticPokemon();
+        if (!abilitiesAreRandomized) {
+            List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
+            banned.addAll(abilityDependentFormes);
+        }
         boolean reallySwapMegaEvos = forceSwapStaticMegaEvos() || swapMegaEvos;
         if (swapLegendaries) {
             List<Pokemon> legendariesLeft = new ArrayList<>(onlyLegendaryList);
@@ -3925,11 +3966,17 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeEvolutions(boolean similarStrength, boolean sameType, boolean limitToThreeStages,
-                                    boolean forceChange, boolean allowAltFormes) {
+                                    boolean forceChange, boolean allowAltFormes, boolean abilitiesAreRandomized) {
         checkPokemonRestrictions();
         List<Pokemon> pokemonPool = new ArrayList<>(mainPokemonListInclFormes);
         List<Pokemon> actuallyCosmeticPokemonPool = new ArrayList<>();
         int stageLimit = limitToThreeStages ? 3 : 10;
+
+        List<Pokemon> banned = new ArrayList<>();
+        if (!abilitiesAreRandomized) {
+            List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
+            banned.addAll(abilityDependentFormes);
+        }
 
         for (int i = 0; i < pokemonPool.size(); i++) {
             Pokemon pk = pokemonPool.get(i);
@@ -3997,6 +4044,11 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                         // Force same EXP curve (mandatory)
                         if (pk.growthCurve != fromPK.growthCurve) {
+                            continue;
+                        }
+
+                        // Prevent evolving into banned Pokemon (mandatory)
+                        if (banned.contains(pk)) {
                             continue;
                         }
 
@@ -4890,7 +4942,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<Pokemon> cachedAllList;
 
     private Pokemon pickReplacement(Pokemon current, boolean usePowerLevels, Type type, boolean noLegendaries,
-                                    boolean wonderGuardAllowed, boolean usePlacementHistory, boolean swapMegaEvos) {
+                                    boolean wonderGuardAllowed, boolean usePlacementHistory, boolean swapMegaEvos,
+                                    boolean abilitiesAreRandomized) {
         List<Pokemon> pickFrom;
         if (swapMegaEvos) {
             pickFrom = getMegaEvolutions()
@@ -4906,7 +4959,12 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (type != null) {
             if (!cachedReplacementLists.containsKey(type)) {
 //                System.out.println(current.name + " using cachedReplacementLists");
-                cachedReplacementLists.put(type, pokemonOfType(type, noLegendaries));
+                List<Pokemon> pokemonOfType = pokemonOfType(type, noLegendaries);
+                if (!abilitiesAreRandomized) {
+                    List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
+                    pokemonOfType.removeAll(abilityDependentFormes);
+                }
+                cachedReplacementLists.put(type, pokemonOfType);
             }
             if (swapMegaEvos) {
                 pickFrom = cachedReplacementLists.get(type)
@@ -5076,14 +5134,42 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public List<Pokemon> getAbilityDependentFormes() {
+        List<Pokemon> abilityDependentFormes = new ArrayList<>();
+        for (int i = 0; i < mainPokemonListInclFormes.size(); i++) {
+            Pokemon pokemon = mainPokemonListInclFormes.get(i);
+            if (pokemon.baseForme != null) {
+                if (pokemon.baseForme.number == 351) {
+                    // All alternate Castform formes
+                    abilityDependentFormes.add(pokemon);
+                } else if (pokemon.baseForme.number == 555 && pokemon.formeNumber == 1) {
+                    // Damanitan-Z
+                    abilityDependentFormes.add(pokemon);
+                } else if (pokemon.baseForme.number == 681) {
+                    // Aegislash-B
+                    abilityDependentFormes.add(pokemon);
+                } else if (pokemon.baseForme.number == 746) {
+                    // Wishiwashi-S
+                    abilityDependentFormes.add(pokemon);
+                }
+            }
+        }
+        return abilityDependentFormes;
+    }
+
+    @Override
     public void randomizeTotemPokemon(boolean randomizeTotem, boolean similarStrengthTotem, boolean randomizeAllies,
                                       boolean similarStrengthAllies, boolean randomizeAuras,
                                       boolean similarStrengthAuras, boolean randomizeHeldItems, int levelModifier,
-                                      boolean allowAltFormes) {
+                                      boolean allowAltFormes, boolean abilitiesAreRandomized) {
         checkPokemonRestrictions();
         List<TotemPokemon> currentTotemPokemon = this.getTotemPokemon();
         List<TotemPokemon> replacements = new ArrayList<>();
         List<Pokemon> banned = this.bannedForStaticPokemon();
+        if (!abilitiesAreRandomized) {
+            List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
+            banned.addAll(abilityDependentFormes);
+        }
         List<Pokemon> listInclFormesExclCosmetics =
                 mainPokemonListInclFormes
                         .stream()
