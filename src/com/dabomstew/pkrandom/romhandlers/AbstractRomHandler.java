@@ -5496,22 +5496,19 @@ public abstract class AbstractRomHandler implements RomHandler {
         return false;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<Pokemon> bannedForWildEncounters() {
-        return (List<Pokemon>) Collections.EMPTY_LIST;
+        return new ArrayList<>();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<Integer> getMovesBannedFromLevelup() {
-        return (List<Integer>) Collections.EMPTY_LIST;
+        return new ArrayList<>();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<Pokemon> bannedForStaticPokemon() {
-        return (List<Pokemon>) Collections.EMPTY_LIST;
+        return new ArrayList<>();
     }
 
     @Override
