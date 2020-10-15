@@ -2955,6 +2955,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                             List<Pokemon> megaEvoPokemonLeft =
                                     getMegaEvolutions()
                                             .stream()
+                                            .filter(mega -> mega.method == 1)
                                             .map(mega -> mega.from)
                                             .distinct()
                                             .filter(pokemonLeft::contains)
@@ -2963,6 +2964,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 megaEvoPokemonLeft =
                                         getMegaEvolutions()
                                                 .stream()
+                                                .filter(mega -> mega.method == 1)
                                                 .map(mega -> mega.from)
                                                 .distinct()
                                                 .filter(mainPokemonList::contains)
@@ -3062,6 +3064,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Pokemon> megaEvoPokemon =
                 megaEvos
                         .stream()
+                        .filter(mega -> mega.method == 1)
                         .map(mega -> mega.from)
                         .distinct()
                         .collect(Collectors.toList());
@@ -4895,6 +4898,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (swapMegaEvos) {
             pickFrom = getMegaEvolutions()
                     .stream()
+                    .filter(mega -> mega.method == 1)
                     .map(mega -> mega.from)
                     .distinct()
                     .collect(Collectors.toList());
