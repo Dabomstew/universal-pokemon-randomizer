@@ -2851,7 +2851,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getFieldMoves() {
-        return Gen6Constants.fieldMoves;
+        if (romEntry.romType == Gen6Constants.Type_XY) {
+            return Gen6Constants.fieldMovesXY;
+        } else {
+            return Gen6Constants.fieldMovesORAS;
+        }
     }
 
     @Override

@@ -176,7 +176,8 @@ public class Randomizer {
         // Applied after type to pick new evos based on new types.
         if (settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM) {
             romHandler.randomizeEvolutions(settings.isEvosSimilarStrength(), settings.isEvosSameTyping(),
-                    settings.isEvosMaxThreeStages(), settings.isEvosForceChange(), settings.isEvosAllowAltFormes());
+                    settings.isEvosMaxThreeStages(), settings.isEvosForceChange(), settings.isEvosAllowAltFormes(),
+                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
 
             log.println("--Randomized Evolutions--");
             List<Pokemon> allPokes = romHandler.getPokemonInclFormes();
@@ -332,23 +333,27 @@ public class Randomizer {
             romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
                     settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, false, false,
-                    settings.isAllowTrainerAlternateFormes(), settings.isSwapTrainerMegaEvos(), settings.isShinyChance());
+                    settings.isAllowTrainerAlternateFormes(), settings.isSwapTrainerMegaEvos(), settings.isShinyChance(),
+                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
         } else if (settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED) {
             romHandler.typeThemeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersMatchTypingDistribution(), settings.isTrainersBlockLegendaries(),
                     settings.isTrainersBlockEarlyWonderGuard(),
                     settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0,
-                    settings.isAllowTrainerAlternateFormes(), settings.isSwapTrainerMegaEvos(), settings.isShinyChance());
+                    settings.isAllowTrainerAlternateFormes(), settings.isSwapTrainerMegaEvos(), settings.isShinyChance(),
+                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
         } else if (settings.getTrainersMod() == Settings.TrainersMod.DISTRIBUTED) {
             romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
                     settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, true, false,
-                    settings.isAllowTrainerAlternateFormes(), settings.isSwapTrainerMegaEvos(), settings.isShinyChance());
+                    settings.isAllowTrainerAlternateFormes(), settings.isSwapTrainerMegaEvos(), settings.isShinyChance(),
+                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
         } else if (settings.getTrainersMod() == Settings.TrainersMod.MAINPLAYTHROUGH) {
             romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
                     settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, true, true,
-                    settings.isAllowTrainerAlternateFormes(), settings.isSwapTrainerMegaEvos(), settings.isShinyChance());
+                    settings.isAllowTrainerAlternateFormes(), settings.isSwapTrainerMegaEvos(), settings.isShinyChance(),
+                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
         } else {
             if (settings.isTrainersLevelModified()) {
                 romHandler.onlyChangeTrainerLevels(settings.getTrainersLevelModifier());
@@ -431,7 +436,8 @@ public class Randomizer {
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
                     settings.isBlockWildLegendaries(),
                     settings.isBalanceShakingGrass(),
-                    settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0, settings.isAllowWildAltFormes());
+                    settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0, settings.isAllowWildAltFormes(),
+                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
             break;
         case AREA_MAPPING:
             romHandler.area1to1Encounters(settings.isUseTimeBasedEncounters(),
@@ -439,13 +445,15 @@ public class Randomizer {
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS,
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
                     settings.isBlockWildLegendaries(),
-                    settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0, settings.isAllowWildAltFormes());
+                    settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0, settings.isAllowWildAltFormes(),
+                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
             break;
         case GLOBAL_MAPPING:
             romHandler.game1to1Encounters(settings.isUseTimeBasedEncounters(),
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
                     settings.isBlockWildLegendaries(),
-                    settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0, settings.isAllowWildAltFormes());
+                    settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0, settings.isAllowWildAltFormes(),
+                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
             break;
         default:
             if (settings.isWildLevelsModified()) {
@@ -769,12 +777,17 @@ public class Randomizer {
                 log.println("--Random Starters--");
                 int starterCount = romHandler.starterCount();
                 List<Pokemon> starters = new ArrayList<>();
+                List<Pokemon> banned = new ArrayList<>();
+                if (settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE) {
+                    List<Pokemon> abilityDependentFormes = romHandler.getAbilityDependentFormes();
+                    banned.addAll(abilityDependentFormes);
+                }
                 for (int i = 0; i < starterCount; i++) {
                     Pokemon pkmn =
                             settings.isAllowStarterAltFormes() ?
                                     romHandler.randomPokemonInclFormes() :
                                     romHandler.randomPokemon();
-                    while (starters.contains(pkmn) || pkmn.actuallyCosmetic) {
+                    while (starters.contains(pkmn) || banned.contains(pkmn) || pkmn.actuallyCosmetic) {
                         pkmn = settings.isAllowStarterAltFormes() ?
                                     romHandler.randomPokemonInclFormes() :
                                     romHandler.randomPokemon();
@@ -789,9 +802,14 @@ public class Randomizer {
                 log.println("--Random 2-Evolution Starters--");
                 int starterCount = romHandler.starterCount();
                 List<Pokemon> starters = new ArrayList<>();
+                List<Pokemon> banned = new ArrayList<>();
+                if (settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE) {
+                    List<Pokemon> abilityDependentFormes = romHandler.getAbilityDependentFormes();
+                    banned.addAll(abilityDependentFormes);
+                }
                 for (int i = 0; i < starterCount; i++) {
                     Pokemon pkmn = romHandler.random2EvosPokemon(settings.isAllowStarterAltFormes());
-                    while (starters.contains(pkmn)) {
+                    while (starters.contains(pkmn) || banned.contains(pkmn)) {
                         pkmn = romHandler.random2EvosPokemon(settings.isAllowStarterAltFormes());
                     }
                     log.println("Set starter " + (i + 1) + " to " + pkmn.fullName());
@@ -901,13 +919,16 @@ public class Randomizer {
             List<StaticEncounter> oldStatics = romHandler.getStaticPokemon();
             if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING) { // Legendary for L
                 romHandler.randomizeStaticPokemon(true, false,settings.isLimitMusketeers(),
-                        settings.isLimit600(), settings.isAllowStaticAltFormes(), settings.isSwapStaticMegaEvos());
+                        settings.isLimit600(), settings.isAllowStaticAltFormes(), settings.isSwapStaticMegaEvos(),
+                        settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
             } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.COMPLETELY_RANDOM) {
                 romHandler.randomizeStaticPokemon(false, false,settings.isLimitMusketeers(),
-                        settings.isLimit600(), settings.isAllowStaticAltFormes(), settings.isSwapStaticMegaEvos());
+                        settings.isLimit600(), settings.isAllowStaticAltFormes(), settings.isSwapStaticMegaEvos(),
+                        settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
             } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.SIMILAR_STRENGTH) {
                 romHandler.randomizeStaticPokemon(false, true,settings.isLimitMusketeers(),
-                        settings.isLimit600(), settings.isAllowStaticAltFormes(), settings.isSwapStaticMegaEvos());
+                        settings.isLimit600(), settings.isAllowStaticAltFormes(), settings.isSwapStaticMegaEvos(),
+                        settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
             }
             List<StaticEncounter> newStatics = romHandler.getStaticPokemon();
             if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED) {
@@ -961,7 +982,8 @@ public class Randomizer {
                     settings.getAuraMod() == Settings.AuraMod.SAME_STRENGTH,
                     settings.isRandomizeTotemHeldItems(),
                     settings.isTotemLevelsModified() ? settings.getTotemLevelModifier() : 0,
-                    settings.isAllowTotemAltFormes()
+                    settings.isAllowTotemAltFormes(),
+                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE
             );
             List<TotemPokemon> newTotems = romHandler.getTotemPokemon();
 

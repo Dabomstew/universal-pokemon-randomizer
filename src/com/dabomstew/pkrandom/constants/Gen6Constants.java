@@ -212,7 +212,8 @@ public class Gen6Constants {
             37, 32, 62, 11, 86, 29, 59, 43, 53, 69, 6, 2, 13, 18, 22, 61, 30, 97, 7, 90, 26, 55, 34, 35, 64, 65, 66,
             74, 79, 80, 81, 84, 89, 91, 93, 95);
 
-    public static final List<Integer> fieldMoves = Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 230, 291);
+    public static final List<Integer> fieldMovesXY = Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 230, 249);
+    public static final List<Integer> fieldMovesORAS = Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 230, 249, 290, 291);
 
     public static final int fallingEncounterOffset = 0xF4270, fallingEncounterCount = 55, fieldEncounterSize = 0x3C,
                             rustlingBushEncounterOffset = 0xF40CC, rustlingBushEncounterCount = 7;

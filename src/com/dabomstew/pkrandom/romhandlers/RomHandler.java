@@ -174,13 +174,16 @@ public interface RomHandler {
 
     void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters);
 
-    void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-                          boolean noLegendaries, boolean balanceShakingGrass, int levelModifier, boolean allowAltFormes);
+    void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
+                          boolean usePowerLevels, boolean noLegendaries, boolean balanceShakingGrass,
+                          int levelModifier, boolean allowAltFormes, boolean abilitiesAreRandomized);
 
     void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
-                            boolean usePowerLevels, boolean noLegendaries, int levelModifier, boolean allowAltformes);
+                            boolean usePowerLevels, boolean noLegendaries, int levelModifier,
+                            boolean allowAltformes, boolean abilitiesAreRandomized);
 
-    void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries, int levelModifier, boolean allowAltFormes);
+    void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries,
+                            int levelModifier, boolean allowAltFormes, boolean abilitiesAreRandomized);
 
     void onlyChangeWildLevels(int levelModifier);
 
@@ -201,11 +204,12 @@ public interface RomHandler {
 
     void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
                                int levelModifier, boolean distributionSetting, boolean mainPlaythroughSetting,
-                               boolean includeFormes, boolean swapMegaEvos, boolean shinyChance);
+                               boolean includeFormes, boolean swapMegaEvos, boolean shinyChance,
+                               boolean abilitiesAreRandomized);
 
     void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
                                boolean noEarlyWonderGuard, int levelModifier, boolean includeFormes,
-                               boolean swapMegaEvos1, boolean shinyChance);
+                               boolean swapMegaEvos1, boolean shinyChance, boolean abilitiesAreRandomized);
 
     void rivalCarriesStarter();
 
@@ -262,7 +266,8 @@ public interface RomHandler {
 
     boolean setStaticPokemon(List<StaticEncounter> staticPokemon);
 
-    void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMusketeers, boolean limit600, boolean allowAltFormes, boolean swapMegaEvos1);
+    void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMusketeers,
+                                boolean limit600, boolean allowAltFormes, boolean swapMegaEvos1, boolean abilitiesAreRandomized);
 
     boolean canChangeStaticPokemon();
 
@@ -280,7 +285,7 @@ public interface RomHandler {
 
     void randomizeTotemPokemon(boolean randomizeTotem, boolean similarStrengthTotem, boolean randomizeAllies,
                                boolean similarStrengthAllies, boolean randomizeAuras, boolean similarStrengthAuras,
-                               boolean randomizeHeldItems, int levelModifier, boolean allowAltFormes);
+                               boolean randomizeHeldItems, int levelModifier, boolean allowAltFormes, boolean abilitiesAreRandomized);
 
     // Randomizer: TMs/HMs
 
@@ -452,7 +457,7 @@ public interface RomHandler {
     void makeEvolutionsEasier(boolean wildsRandomized);
 
     void randomizeEvolutions(boolean similarStrength, boolean sameType, boolean limitToThreeStages,
-                             boolean forceChange, boolean allowAltFormes);
+                             boolean forceChange, boolean allowAltFormes, boolean abilitiesAreRandomized);
 
     boolean hasShopRandomization();
 
@@ -518,5 +523,7 @@ public interface RomHandler {
     void applyMiscTweak(MiscTweak tweak);
 
     void renderPlacementHistory();
+
+    List<Pokemon> getAbilityDependentFormes();
 
 }
