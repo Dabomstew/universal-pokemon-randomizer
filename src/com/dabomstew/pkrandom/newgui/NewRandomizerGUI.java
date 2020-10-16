@@ -2629,8 +2629,6 @@ public class NewRandomizerGUI {
 
         if (limitPokemonCheckBox.isSelected()) {
             limitPokemonButton.setEnabled(true);
-            tpAllowAlternateFormesCheckBox.setEnabled(false);
-            wpAllowAltFormesCheckBox.setEnabled(false);
         } else {
             limitPokemonButton.setEnabled(false);
         }
@@ -2820,14 +2818,7 @@ public class NewRandomizerGUI {
             tpSimilarStrengthCheckBox.setEnabled(true);
             tpDontUseLegendariesCheckBox.setEnabled(true);
             tpNoEarlyWonderGuardCheckBox.setEnabled(true);
-            if (!limitPokemonCheckBox.isSelected()) {
-                tpAllowAlternateFormesCheckBox.setEnabled(true);
-            }
-            if (tpAllowAlternateFormesCheckBox.isSelected()) {
-                limitPokemonCheckBox.setEnabled(false);
-            } else {
-                limitPokemonCheckBox.setEnabled(true);
-            }
+            tpAllowAlternateFormesCheckBox.setEnabled(true);
             tpSwapMegaEvosCheckBox.setEnabled(true);
             tpRandomShinyTrainerPokemonCheckBox.setEnabled(true);
         }

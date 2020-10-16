@@ -80,6 +80,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         altFormesList = this.getAltFormes();
         if (restrictions != null) {
             mainPokemonList = new ArrayList<>();
+            mainPokemonListInclFormes = new ArrayList<>();
             List<Pokemon> allPokemon = this.getPokemon();
 
             if (restrictions.allow_gen1) {
@@ -131,6 +132,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (restrictions.allow_gen5 && allPokemon.size() > 649) {
                 addPokesFromRange(mainPokemonList, allPokemon, 494, 649);
             }
+
+            // Now that mainPokemonList has all the selected Pokemon, update mainPokemonListInclFormes too
+            addAllPokesInclFormes(mainPokemonList, mainPokemonListInclFormes);
         }
 
         noLegendaryList = new ArrayList<>();
@@ -205,6 +209,22 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         pokemonPool.addAll(newPokemon);
+    }
+
+    private void addAllPokesInclFormes(List<Pokemon> pokemonPool, List<Pokemon> pokemonPoolInclFormes) {
+        List<Pokemon> altFormes = this.getAltFormes();
+        for (int i = 0; i < pokemonPool.size(); i++) {
+            Pokemon currentPokemon = pokemonPool.get(i);
+            if (!pokemonPoolInclFormes.contains(currentPokemon)) {
+                pokemonPoolInclFormes.add(currentPokemon);
+            }
+            for (int j = 0; j < altFormes.size(); j++) {
+                Pokemon potentialAltForme = altFormes.get(j);
+                if (potentialAltForme.baseForme != null && potentialAltForme.baseForme.number == currentPokemon.number) {
+                    pokemonPoolInclFormes.add(potentialAltForme);
+                }
+            }
+        }
     }
 
     @Override
@@ -1535,13 +1555,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         cachedAllList = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
                 mainPokemonList);
         if (includeFormes) {
-            cachedAllList = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
-                    mainPokemonList);
-            if (noLegendaries) {
-                cachedAllList.addAll(noLegendaryAltsList);
-            } else {
-                cachedAllList.addAll(altFormesList);
-            }
+            cachedAllList = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes) : new ArrayList<>(
+                    mainPokemonListInclFormes);
         }
         cachedAllList =
                 cachedAllList
@@ -1659,7 +1674,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (pk.formeNumber > 0) {
             tp.forme = pk.formeNumber;
             tp.formeSuffix = pk.formeSuffix;
-            tp.pokemon = mainPokemonList.get(pk.baseForme.number - 1);
+            tp.pokemon = pk.baseForme;
             checkCosmetics = false;
         }
         if (checkCosmetics && tp.pokemon.cosmeticForms > 0) {
@@ -3090,7 +3105,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (pk.formeNumber > 0) {
             newStatic.forme = pk.formeNumber;
             newStatic.formeSuffix = pk.formeSuffix;
-            newStatic.pkmn = mainPokemonList.get(pk.baseForme.number - 1);
+            newStatic.pkmn = pk.baseForme;
             checkCosmetics = false;
         }
         if (checkCosmetics && newStatic.pkmn.cosmeticForms > 0) {
@@ -5066,7 +5081,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         enc.formeNumber = 0;
         if (enc.pokemon.formeNumber > 0) {
             enc.formeNumber = enc.pokemon.formeNumber;
-            enc.pokemon = mainPokemonList.get(enc.pokemon.baseForme.number - 1);
+            enc.pokemon = enc.pokemon.baseForme;
             checkCosmetics = false;
         }
         if (checkCosmetics && enc.pokemon.cosmeticForms > 0) {
