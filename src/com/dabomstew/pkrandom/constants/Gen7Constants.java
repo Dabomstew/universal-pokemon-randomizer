@@ -167,6 +167,9 @@ public class Gen7Constants {
 
     public static final String ninjaskSpeciesPrefix = "11FF2FE11CD08DE2F080BDE8", shedinjaPrefix = "A0E194FDFFEB0040A0E1";
 
+    public static final String beastLusaminePokemonBoostsPrefix = "1D14FFFF";
+    public static final int beastLusamineTrainerIndex = 157;
+
     private static final int miniorCoreStartingIndexSM = 937, miniorCoreStartingIndexUSUM = 944;
 
     public static int getPokemonCount(int romType) {

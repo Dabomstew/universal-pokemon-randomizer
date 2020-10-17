@@ -1536,9 +1536,63 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             }
             this.writeGARC(romEntry.getString("TrainerData"), trainers);
             this.writeGARC(romEntry.getString("TrainerPokemon"), trpokes);
+
+            // In Sun/Moon, Beast Lusamine's Pokemon have aura boosts that are hardcoded.
+            if (romEntry.romType == Gen7Constants.Type_SM) {
+                Trainer beastLusamine = trainerData.get(Gen7Constants.beastLusamineTrainerIndex);
+                setBeastLusaminePokemonBuffs(beastLusamine);
+            }
         } catch (IOException ex) {
             throw new RandomizerIOException(ex);
         }
+    }
+
+    private void setBeastLusaminePokemonBuffs(Trainer beastLusamine) throws IOException {
+        byte[] battleCRO = readFile(romEntry.getString("Battle"));
+        int offset = find(battleCRO, Gen7Constants.beastLusaminePokemonBoostsPrefix);
+        if (offset > 0) {
+            offset += Gen7Constants.beastLusaminePokemonBoostsPrefix.length() / 2; // because it was a prefix
+
+            // The game only has room for five boost entries
+            for (int i = 0; i < 5; i++) {
+                Pokemon boostedPokemon = beastLusamine.pokemon.get(i).pokemon;
+                int speciesNumber = boostedPokemon.number;
+                if (boostedPokemon.baseForme != null) {
+                    speciesNumber = boostedPokemon.baseForme.number;
+                }
+                int auraNumber = getAuraNumberForHighestStat(boostedPokemon);
+                FileFunctions.write2ByteInt(battleCRO, offset + (i * 0x10), speciesNumber);
+                battleCRO[offset + (i * 0x10) + 2] = (byte) auraNumber;
+            }
+            writeFile(romEntry.getString("Battle"), battleCRO);
+        }
+    }
+
+    // Finds the highest stat for the purposes of setting the aura boost on Beast Lusamine's Pokemon.
+    // In the case where two or more stats are tied for the highest stat, it randomly selects one.
+    private int getAuraNumberForHighestStat(Pokemon boostedPokemon) {
+        int currentBestStat = boostedPokemon.attack;
+        int auraNumber = 1;
+        boolean useDefenseAura = boostedPokemon.defense > currentBestStat || (boostedPokemon.defense == currentBestStat && random.nextBoolean());
+        if (useDefenseAura) {
+            currentBestStat = boostedPokemon.defense;
+            auraNumber = 2;
+        }
+        boolean useSpAtkAura = boostedPokemon.spatk > currentBestStat || (boostedPokemon.spatk == currentBestStat && random.nextBoolean());
+        if (useSpAtkAura) {
+            currentBestStat = boostedPokemon.spatk;
+            auraNumber = 3;
+        }
+        boolean useSpDefAura = boostedPokemon.spdef > currentBestStat || (boostedPokemon.spdef == currentBestStat && random.nextBoolean());
+        if (useSpDefAura) {
+            currentBestStat = boostedPokemon.spdef;
+            auraNumber = 4;
+        }
+        boolean useSpeedAura = boostedPokemon.speed > currentBestStat || (boostedPokemon.speed == currentBestStat && random.nextBoolean());
+        if (useSpeedAura) {
+            auraNumber = 5;
+        }
+        return auraNumber;
     }
 
     @Override
