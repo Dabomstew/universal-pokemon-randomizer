@@ -12,7 +12,7 @@ The only thing the launcher does is run the following command:
 
 java -Xmx4096M -jar PokeRandoZX.jar
 
-This starts the randomizer application with a maximum Java heap size of 4 gigabytes. This is necessary for being able to randomize Generation 7 games.
+This starts the randomizer application with a maximum Java heap size of 4 gigabytes. This is necessary for being able to randomize the 3DS games.
 
 
 
