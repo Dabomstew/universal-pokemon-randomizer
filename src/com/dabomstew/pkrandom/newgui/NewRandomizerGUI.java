@@ -40,6 +40,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryPoolMXBean;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -3304,6 +3306,12 @@ public class NewRandomizerGUI {
     }
 
     public static void main(String[] args) {
+        System.out.println(Runtime.getRuntime().maxMemory());
+        for (MemoryPoolMXBean mp : ManagementFactory.getMemoryPoolMXBeans()) {
+            System.out.println("Pool: " + mp.getName() +
+                    " (type " + mp.getType() + ")" +
+                    " = " + mp.getUsage().getMax());
+        }
         SwingUtilities.invokeLater(() -> {
             frame = new JFrame("NewRandomizerGUI");
             try {
