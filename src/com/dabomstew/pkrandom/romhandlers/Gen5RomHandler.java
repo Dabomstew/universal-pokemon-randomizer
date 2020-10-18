@@ -1565,12 +1565,17 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             if (secondFunctionOffset > 0) {
                 secondFunctionOffset += Gen5Constants.whiteBoxLegendaryCheckPrefix2.length() / 2; // because it was a prefix
 
-                // For whatever reason, a completely unrelated function below this one decides to
-                // pc-relative load 0x00000000 into r4 instead of just doing a mov. We're going to
-                // take advantage of this by using the space for this weird constant to instead store
-                // a species ID. Start by replacing the pc-relative load with a simple mov.
-                boxLegendaryOverlay[secondFunctionOffset + 504] = 0x00;
-                boxLegendaryOverlay[secondFunctionOffset + 505] = 0x24;
+                // A completely unrelated function below this one decides to pc-relative load 0x00000000 into r4
+                // instead of just doing a mov. We can replace it with a simple "mov r4, #0x0", but we have to be
+                // careful about where we put it. The original code calls a function, performs an "add r6, r0, #0x0",
+                // then does the load into r4. This means that whether or not the Z bit is set depends on the result
+                // of the function call. If we naively replace the load with our mov, we'll be forcibly setting the Z
+                // bit to 1, which will cause the subsequent beq to potentially take us to the wrong place. To get
+                // around this, we reorder the code so the "mov r4, #0x0" occurs *before* the "add r6, r0, #0x0".
+                boxLegendaryOverlay[secondFunctionOffset + 502] = 0x00;
+                boxLegendaryOverlay[secondFunctionOffset + 503] = 0x24;
+                boxLegendaryOverlay[secondFunctionOffset + 504] = 0x06;
+                boxLegendaryOverlay[secondFunctionOffset + 505] = 0x1C;
 
                 // Now replace the 0x00000000 constant with the species ID
                 FileFunctions.writeFullIntLittleEndian(boxLegendaryOverlay, secondFunctionOffset + 556, boxLegendarySpecies);
