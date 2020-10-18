@@ -1137,6 +1137,30 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 encounters.add(headbuttEncounters);
             }
         }
+
+        // Bug Catching Contest Encounters
+        String bccEncountersFile = romEntry.getString("BCCWilds");
+        byte[] bccEncountersData = readFile(bccEncountersFile);
+        EncounterSet bccEncountersPreNationalDex = readBCCEncountersHGSS(bccEncountersData, 0, 10);
+        bccEncountersPreNationalDex.displayName = "Bug Catching Contest (Pre-National Dex)";
+        if (bccEncountersPreNationalDex.encounters.size() > 0) {
+            encounters.add(bccEncountersPreNationalDex);
+        }
+        EncounterSet bccEncountersPostNationalDexTues = readBCCEncountersHGSS(bccEncountersData, 80, 10);
+        bccEncountersPostNationalDexTues.displayName = "Bug Catching Contest (Post-National Dex, Tuesdays)";
+        if (bccEncountersPostNationalDexTues.encounters.size() > 0) {
+            encounters.add(bccEncountersPostNationalDexTues);
+        }
+        EncounterSet bccEncountersPostNationalDexThurs = readBCCEncountersHGSS(bccEncountersData, 160, 10);
+        bccEncountersPostNationalDexThurs.displayName = "Bug Catching Contest (Post-National Dex, Thursdays)";
+        if (bccEncountersPostNationalDexThurs.encounters.size() > 0) {
+            encounters.add(bccEncountersPostNationalDexThurs);
+        }
+        EncounterSet bccEncountersPostNationalDexSat = readBCCEncountersHGSS(bccEncountersData, 240, 10);
+        bccEncountersPostNationalDexSat.displayName = "Bug Catching Contest (Post-National Dex, Saturdays)";
+        if (bccEncountersPostNationalDexSat.encounters.size() > 0) {
+            encounters.add(bccEncountersPostNationalDexSat);
+        }
         return encounters;
     }
 
@@ -1186,6 +1210,22 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 Encounter enc = new Encounter();
                 enc.level = data[offset + 2 + i * 4];
                 enc.maxLevel = data[offset + 3 + i * 4];
+                enc.pokemon = pokes[pokemon];
+                es.encounters.add(enc);
+            }
+        }
+        return es;
+    }
+
+    private EncounterSet readBCCEncountersHGSS(byte[] data, int offset, int amount) {
+        EncounterSet es = new EncounterSet();
+        es.rate = 1;
+        for (int i = 0; i < amount; i++) {
+            int pokemon = readWord(data, offset + i * 8);
+            if (pokemon != 0) {
+                Encounter enc = new Encounter();
+                enc.level = data[offset + 2 + i * 8];
+                enc.maxLevel = data[offset + 3 + i * 8];
                 enc.pokemon = pokes[pokemon];
                 es.encounters.add(enc);
             }
@@ -1459,7 +1499,21 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
         // Save
         writeNARC(headbuttEncountersFile, headbuttEncounterData);
-        
+
+        // Write Bug Catching Contest encounters
+        String bccEncountersFile = romEntry.getString("BCCWilds");
+        byte[] bccEncountersData = readFile(bccEncountersFile);
+        EncounterSet bccEncountersPreNationalDex = encounters.next();
+        writeBCCEncountersHGSS(bccEncountersData, 0, bccEncountersPreNationalDex.encounters);
+        EncounterSet bccEncountersPostNationalDexTues = encounters.next();
+        writeBCCEncountersHGSS(bccEncountersData, 80, bccEncountersPostNationalDexTues.encounters);
+        EncounterSet bccEncountersPostNationalDexThurs = encounters.next();
+        writeBCCEncountersHGSS(bccEncountersData, 160, bccEncountersPostNationalDexThurs.encounters);
+        EncounterSet bccEncountersPostNationalDexSat = encounters.next();
+        writeBCCEncountersHGSS(bccEncountersData, 240, bccEncountersPostNationalDexSat.encounters);
+
+        // Save
+        writeFile(bccEncountersFile, bccEncountersData);
     }
 
     private void writeOptionalEncountersHGSS(byte[] data, int offset, int amount, Iterator<EncounterSet> encounters) {
@@ -1512,6 +1566,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             writeWord(data, offset + i * 4, enc.pokemon.number);
             data[offset + 2 + i * 4] = (byte) enc.level;
             data[offset + 3 + i * 4] = (byte) enc.maxLevel;
+        }
+    }
+
+    private void writeBCCEncountersHGSS(byte[] data, int offset, List<Encounter> encounters) {
+        int enclength = encounters.size();
+        for (int i = 0; i < enclength; i++) {
+            Encounter enc = encounters.get(i);
+            writeWord(data, offset + i * 8, enc.pokemon.number);
+            data[offset + 2 + i * 8] = (byte) enc.level;
+            data[offset + 3 + i * 8] = (byte) enc.maxLevel;
         }
     }
 
