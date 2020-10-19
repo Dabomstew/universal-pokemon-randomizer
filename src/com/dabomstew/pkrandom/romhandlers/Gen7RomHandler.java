@@ -1196,6 +1196,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
         try {
             saveAreaData();
+            patchMiniorEncounterCode();
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
@@ -1346,15 +1347,15 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         return String.join(" / ", uniqueZoneNames);
     }
 
-    @Override
-    public List<Pokemon> bannedForWildEncounters() {
-        // Ban Minior-C from appearing in the wild because it just spawns regular Minior.
-        int miniorCoreStartingIndex = Gen7Constants.getMiniorCoreStartingIndex(romEntry.romType);
-        List<Pokemon> miniorCoreList = new ArrayList<>();
-        for (int i = 0; i < 7; i++) {
-            miniorCoreList.add(pokes[miniorCoreStartingIndex + i]);
+    private void patchMiniorEncounterCode() {
+        int offset = find(code, Gen7Constants.miniorWildEncounterPatchPrefix);
+        if (offset > 0) {
+            offset += Gen7Constants.miniorWildEncounterPatchPrefix.length() / 2;
+            code[offset] = 0x00;
+            code[offset + 1] = 0x00;
+            code[offset + 2] = 0x00;
+            code[offset + 3] = 0x00;
         }
-        return miniorCoreList;
     }
 
     @Override
