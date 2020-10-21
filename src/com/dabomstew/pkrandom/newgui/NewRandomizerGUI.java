@@ -923,6 +923,9 @@ public class NewRandomizerGUI {
             long seed = pld.getSeed();
             String config = pld.getConfigString();
             this.romHandler = pld.getROM();
+            if (gameUpdates.containsKey(this.romHandler.getROMCode())) {
+                this.romHandler.loadGameUpdate(gameUpdates.get(this.romHandler.getROMCode()));
+            }
             this.romLoaded();
             Settings settings;
             try {
