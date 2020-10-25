@@ -979,6 +979,34 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         for (int i = 0; i < greatMarshOffsets.length; i++) {
             byte[] greatMarshData = extraEncounterData.files.get(greatMarshOffsets[i]);
             EncounterSet greatMarshEncounters = readExtraEncountersDPPt(greatMarshData, 0, 32);
+
+            // Great Marsh rotating Pokemon get their levels from the regular Great Marsh grass encounters,
+            // indices 6 and 7. To make the logs nice, read in these encounters for all areas and set the
+            // level and maxLevel for the rotating encounters appropriately.
+            int level = 100;
+            int maxLevel = 0;
+            List<Integer> marshGrassEncounterIndices = Gen4Constants.getMarshGrassEncounterIndices(romEntry.romType);
+            for (int j = 0; j < marshGrassEncounterIndices.size(); j++) {
+                EncounterSet marshEncounterSet = encounters.get(marshGrassEncounterIndices.get(j));
+                int currentLevel = marshEncounterSet.encounters.get(6).level;
+                if (currentLevel < level) {
+                    level = currentLevel;
+                }
+                if (currentLevel > maxLevel) {
+                    maxLevel = currentLevel;
+                }
+                currentLevel = marshEncounterSet.encounters.get(7).level;
+                if (currentLevel < level) {
+                    level = currentLevel;
+                }
+                if (currentLevel > maxLevel) {
+                    maxLevel = currentLevel;
+                }
+            }
+            for (Encounter enc : greatMarshEncounters.encounters) {
+                enc.level = level;
+                enc.maxLevel = maxLevel;
+            }
             String pokedexStatus = i == 0 ? "(Post-National Dex)" : "(Pre-National Dex)";
             greatMarshEncounters.displayName = "Great Marsh Rotating Pokemon " + pokedexStatus;
             encounters.add(greatMarshEncounters);
