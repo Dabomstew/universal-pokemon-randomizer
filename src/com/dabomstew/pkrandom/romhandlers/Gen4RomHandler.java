@@ -974,6 +974,26 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             encounters.add(honeyTreeEncounters);
         }
 
+        // Trophy Garden rotating Pokemon (Mr. Backlot)
+        byte[] trophyGardenData = extraEncounterData.files.get(8);
+        EncounterSet trophyGardenEncounters = readExtraEncountersDPPt(trophyGardenData, 0, 16);
+
+        // Trophy Garden rotating Pokemon get their levels from the regular Trophy Garden grass encounters,
+        // indices 6 and 7. To make the logs nice, read in these encounters for this area and set the level
+        // and maxLevel for the rotating encounters appropriately.
+        int trophyGardenGrassEncounterIndex = Gen4Constants.getTrophyGardenGrassEncounterIndex(romEntry.romType);
+        EncounterSet trophyGardenGrassEncounterSet = encounters.get(trophyGardenGrassEncounterIndex);
+        int level1 = trophyGardenGrassEncounterSet.encounters.get(6).level;
+        int level2 = trophyGardenGrassEncounterSet.encounters.get(7).level;
+        for (Encounter enc : trophyGardenEncounters.encounters) {
+            enc.level = Math.min(level1, level2);
+            if (level1 != level2) {
+                enc.maxLevel = Math.max(level1, level2);
+            }
+        }
+        trophyGardenEncounters.displayName = "Trophy Garden Rotating Pokemon (via Mr. Backlot)";
+        encounters.add(trophyGardenEncounters);
+
         // Great Marsh rotating Pokemon
         int[] greatMarshOffsets = new int[]{9, 10};
         for (int i = 0; i < greatMarshOffsets.length; i++) {
@@ -987,15 +1007,15 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             int maxLevel = 0;
             List<Integer> marshGrassEncounterIndices = Gen4Constants.getMarshGrassEncounterIndices(romEntry.romType);
             for (int j = 0; j < marshGrassEncounterIndices.size(); j++) {
-                EncounterSet marshEncounterSet = encounters.get(marshGrassEncounterIndices.get(j));
-                int currentLevel = marshEncounterSet.encounters.get(6).level;
+                EncounterSet marshGrassEncounterSet = encounters.get(marshGrassEncounterIndices.get(j));
+                int currentLevel = marshGrassEncounterSet.encounters.get(6).level;
                 if (currentLevel < level) {
                     level = currentLevel;
                 }
                 if (currentLevel > maxLevel) {
                     maxLevel = currentLevel;
                 }
-                currentLevel = marshEncounterSet.encounters.get(7).level;
+                currentLevel = marshGrassEncounterSet.encounters.get(7).level;
                 if (currentLevel < level) {
                     level = currentLevel;
                 }
@@ -1406,6 +1426,19 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             }
             writeExtraEncountersDPPt(honeyTreeData, 0, honeyTreeEncounters.encounters);
         }
+
+        // Trophy Garden rotating Pokemon (Mr. Backlot)
+        byte[] trophyGardenData = extraEncounterData.files.get(8);
+        EncounterSet trophyGardenEncounters = encounters.next();
+
+        // The game will softlock if all the Pokemon here are the same species. As an
+        // emergency mitigation, just randomly pick a different species in case this
+        // happens. This is very unlikely to happen in practice, even with very
+        // restrictive settings, so it should be okay that we're breaking logic here.
+        while (trophyGardenEncounters.encounters.stream().distinct().count() == 1) {
+            trophyGardenEncounters.encounters.get(0).pokemon = randomPokemon();
+        }
+        writeExtraEncountersDPPt(trophyGardenData, 0, trophyGardenEncounters.encounters);
 
         // Great Marsh rotating Pokemon
         int[] greatMarshOffsets = new int[]{9, 10};
