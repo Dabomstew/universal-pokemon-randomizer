@@ -32,6 +32,7 @@ package com.dabomstew.pkrandom.newgui;
 
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
+import com.dabomstew.pkrandom.romhandlers.Abstract3DSRomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 import javax.swing.*;
@@ -269,6 +270,12 @@ public class PresetLoadDialog extends JDialog {
             for (RomHandler.Factory rhf : parentGUI.checkHandlers) {
                 if (rhf.isLoadable(fh.getAbsolutePath())) {
                     final RomHandler checkHandler = rhf.create(RandomSource.instance());
+                    if (!NewRandomizerGUI.usedLauncher && checkHandler instanceof Abstract3DSRomHandler) {
+                        String message = bundle.getString("GUI.pleaseUseTheLauncher");
+                        Object[] messages = {message};
+                        JOptionPane.showMessageDialog(this, messages);
+                        return;
+                    }
                     final JDialog opDialog = new OperationDialog(bundle.getString("GUI.loadingText"), this,
                             true);
                     Thread t = new Thread(() -> {

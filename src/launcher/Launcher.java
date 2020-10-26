@@ -22,20 +22,44 @@ package launcher;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import javax.swing.*;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.io.File;
 import java.io.IOException;
 
 public class Launcher {
+
+    private static JFrame frame;
+
     public static void main(String[] args) {
         try {
-            ProcessBuilder pb = new ProcessBuilder("java", "-Xmx4096M", "-jar", "PokeRandoZX.jar");
+            ProcessBuilder pb = new ProcessBuilder("java", "-Xmx4096M", "-jar", "PokeRandoZX.jar", "please-use-the-launcher");
             pb.redirectErrorStream(true);
             File log = new File("launcher-log.txt");
             pb.redirectOutput(ProcessBuilder.Redirect.to(log));
+
+//            throw new IOException("cool");
             Process p = pb.start();
             p.waitFor();
         } catch (IOException e) {
             e.printStackTrace();
+            SwingUtilities.invokeLater(() -> {
+                frame = new JFrame("Launcher");
+                try {
+                    String lafName = javax.swing.UIManager.getSystemLookAndFeelClassName();
+                    // Only set Native LaF on windows.
+                    if (lafName.equalsIgnoreCase("com.sun.java.swing.plaf.windows.WindowsLookAndFeel")) {
+                        javax.swing.UIManager.setLookAndFeel(lafName);
+                    }
+                } catch (ClassNotFoundException | InstantiationException | UnsupportedLookAndFeelException | IllegalAccessException ex) {
+                    ex.printStackTrace();
+                }
+                String message = e.getMessage();
+                Object[] messages = {message};
+                JOptionPane.showMessageDialog(frame, messages);
+                System.exit(1);
+            });
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

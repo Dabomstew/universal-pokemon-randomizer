@@ -275,6 +275,9 @@ public class NewRandomizerGUI {
 
     private static JFrame frame;
 
+    private static String launcherInput = "";
+    public static boolean usedLauncher = false;
+
     private GenRestrictions currentRestrictions;
     private OperationDialog opDialog;
 
@@ -507,6 +510,11 @@ public class NewRandomizerGUI {
     }
 
     private void showInitialPopup() {
+        if (!usedLauncher) {
+            String message = bundle.getString("GUI.pleaseUseTheLauncher");
+            Object[] messages = {message};
+            JOptionPane.showMessageDialog(frame, messages);
+        }
         if (initialPopup) {
             String message = String.format(bundle.getString("GUI.firstStart"),Version.VERSION_STRING);
             JLabel label = new JLabel("<html><a href=\"https://github.com/Ajarmar/universal-pokemon-randomizer-zx/wiki/Important-Information\">Checking out the \"Important Information\" page on the Wiki is highly recommended.</a>");
@@ -646,6 +654,13 @@ public class NewRandomizerGUI {
             for (RomHandler.Factory rhf : checkHandlers) {
                 if (rhf.isLoadable(fh.getAbsolutePath())) {
                     this.romHandler = rhf.create(RandomSource.instance());
+                    if (!usedLauncher && this.romHandler instanceof Abstract3DSRomHandler) {
+                        String message = bundle.getString("GUI.pleaseUseTheLauncher");
+                        Object[] messages = {message};
+                        JOptionPane.showMessageDialog(frame, messages);
+                        this.romHandler = null;
+                        return;
+                    }
                     opDialog = new OperationDialog(bundle.getString("GUI.loadingText"), frame, true);
                     Thread t = new Thread(() -> {
                         boolean romLoaded = false;
@@ -3312,6 +3327,8 @@ public class NewRandomizerGUI {
                     " (type " + mp.getType() + ")" +
                     " = " + mp.getUsage().getMax());
         }
+        launcherInput = args.length > 0 ? args[0] : "";
+        if (launcherInput.equals("please-use-the-launcher")) usedLauncher = true;
         SwingUtilities.invokeLater(() -> {
             frame = new JFrame("NewRandomizerGUI");
             try {
