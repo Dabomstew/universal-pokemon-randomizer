@@ -332,6 +332,10 @@ public class Gen4Constants {
 
     public static final String feebasLevelPrefixDPPt = "019813B0F0BD", honeyTreeLevelPrefixDPPt = "F0BDF0B589B0051C0C1C";
 
+    private static final int trophyGardenGrassEncounterIndexDP = 304, trophyGardenGrassEncounterIndexPt = 308;
+    private static final List<Integer> marshGrassEncounterIndicesDP = Arrays.asList(76, 82, 88, 94, 100, 102),
+            marshGrassEncounterIndicesPt = Arrays.asList(76, 82, 88, 94, 100, 106);
+
     static {
         setupAllowedItems();
     }
@@ -382,6 +386,22 @@ public class Gen4Constants {
             return doubleBattleFixPrefixPt;
         } else {
             return doubleBattleFixPrefixHGSS;
+        }
+    }
+
+    public static int getTrophyGardenGrassEncounterIndex(int romType) {
+        if (romType == Gen4Constants.Type_DP) {
+            return trophyGardenGrassEncounterIndexDP;
+        } else {
+            return trophyGardenGrassEncounterIndexPt;
+        }
+    }
+
+    public static List<Integer> getMarshGrassEncounterIndices(int romType) {
+        if (romType == Gen4Constants.Type_DP) {
+            return marshGrassEncounterIndicesDP;
+        } else {
+            return marshGrassEncounterIndicesPt;
         }
     }
 

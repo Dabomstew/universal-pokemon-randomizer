@@ -170,7 +170,7 @@ public class Gen7Constants {
     public static final String beastLusaminePokemonBoostsPrefix = "1D14FFFF";
     public static final int beastLusamineTrainerIndex = 157;
 
-    private static final int miniorCoreStartingIndexSM = 937, miniorCoreStartingIndexUSUM = 944;
+    public static final String miniorWildEncounterPatchPrefix = "032C42E2062052E2";
 
     public static int getPokemonCount(int romType) {
         if (romType == Type_SM) {
@@ -512,14 +512,6 @@ public class Gen7Constants {
             return ignoreFormsSM;
         } else {
             return ignoreFormsUSUM;
-        }
-    }
-
-    public static int getMiniorCoreStartingIndex(int romType) {
-        if (romType == Type_SM) {
-            return miniorCoreStartingIndexSM;
-        } else {
-            return miniorCoreStartingIndexUSUM;
         }
     }
 

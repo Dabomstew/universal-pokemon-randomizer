@@ -2625,7 +2625,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (Integer pkmnNum : movesets.keySet()) {
             Set<Integer> learnt = new TreeSet<>();
             List<MoveLearnt> moves = movesets.get(pkmnNum);
-            Pokemon pkmn = mainPokemonListInclFormes.get(pkmnNum - 1);
+            Pokemon pkmn = findPokemonInPoolWithSpeciesID(mainPokemonListInclFormes, pkmnNum);
+            if (pkmn == null) {
+                continue;
+            }
 
             // 4 starting moves?
             if (forceStartingMoves) {
@@ -4454,6 +4457,16 @@ public abstract class AbstractRomHandler implements RomHandler {
             expandRounds++;
         }
         return canPick.get(this.random.nextInt(canPick.size()));
+    }
+
+    // Note that this is slow and somewhat hacky.
+    private Pokemon findPokemonInPoolWithSpeciesID(List<Pokemon> pokemonPool, int speciesID) {
+        for (int i = 0; i < pokemonPool.size(); i++) {
+            if (pokemonPool.get(i).number == speciesID) {
+                return pokemonPool.get(i);
+            }
+        }
+        return null;
     }
 
     private static class EvolutionPair {
