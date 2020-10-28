@@ -24,6 +24,7 @@ package com.dabomstew.pkrandom.ctr;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.SysConstants;
 import com.dabomstew.pkrandom.exceptions.EncryptedROMException;
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import cuecompressors.BLZCoder;
 
 import java.io.*;
@@ -444,18 +445,26 @@ public class NCCH {
         int fileDataOffset = FileFunctions.readFullIntLittleEndian(level3HeaderData, 0x24);
         long endOfFileDataOffset = 0;
         for (FileMetadata metadata : fileMetadataList) {
-            byte[] fileData;
-            if (metadata.file.fileChanged) {
-                fileData = metadata.file.getOverrideContents();
-            } else {
-                fileData = new byte[metadata.file.size];
-                baseRom.seek(metadata.file.offset);
-                baseRom.readFully(fileData);
+            // Users have sent us bug reports with really bizarre errors here that seem to indicate
+            // broken metadata; do this in a try-catch solely so we can log the metadata if we fail
+            try {
+                byte[] fileData;
+                if (metadata.file.fileChanged) {
+                    fileData = metadata.file.getOverrideContents();
+                } else {
+                    fileData = new byte[metadata.file.size];
+                    baseRom.seek(metadata.file.offset);
+                    baseRom.readFully(fileData);
+                }
+                long currentDataOffset = newLevel3Offset + fileDataOffset + metadata.fileDataOffset;
+                fNew.seek(currentDataOffset);
+                fNew.write(fileData);
+                endOfFileDataOffset = currentDataOffset + fileData.length;
+            } catch (Exception e) {
+                String message = String.format("Error when building romfs: File: %s, offset: %s, size: %s",
+                        metadata.file.fullPath, metadata.offset, metadata.file.size);
+                throw new RandomizerIOException(message, e);
             }
-            long currentDataOffset = newLevel3Offset + fileDataOffset + metadata.fileDataOffset;
-            fNew.seek(currentDataOffset);
-            fNew.write(fileData);
-            endOfFileDataOffset = currentDataOffset + fileData.length;
         }
 
         // Now that level 3 (file data) is done, construct level 2 (hashes of file data)
