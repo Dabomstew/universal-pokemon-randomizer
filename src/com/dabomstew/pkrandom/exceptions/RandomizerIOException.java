@@ -33,5 +33,9 @@ public class RandomizerIOException extends RuntimeException {
         super(text);
     }
 
+    public RandomizerIOException(String text, Exception e) {
+        super(text, e);
+    }
+
     private static final long serialVersionUID = -8174099615381353972L;
 }
