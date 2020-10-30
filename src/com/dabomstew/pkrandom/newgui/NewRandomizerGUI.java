@@ -3324,12 +3324,6 @@ public class NewRandomizerGUI {
     }
 
     public static void main(String[] args) {
-        System.out.println(Runtime.getRuntime().maxMemory());
-        for (MemoryPoolMXBean mp : ManagementFactory.getMemoryPoolMXBeans()) {
-            System.out.println("Pool: " + mp.getName() +
-                    " (type " + mp.getType() + ")" +
-                    " = " + mp.getUsage().getMax());
-        }
         launcherInput = args.length > 0 ? args[0] : "";
         if (launcherInput.equals("please-use-the-launcher")) usedLauncher = true;
         SwingUtilities.invokeLater(() -> {

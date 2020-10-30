@@ -23,10 +23,13 @@ package launcher;
 /*----------------------------------------------------------------------------*/
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.io.File;
-import java.io.IOException;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.*;
+import java.net.URI;
 
 public class Launcher {
 
@@ -39,27 +42,55 @@ public class Launcher {
             File log = new File("launcher-log.txt");
             pb.redirectOutput(ProcessBuilder.Redirect.to(log));
 
-//            throw new IOException("cool");
             Process p = pb.start();
             p.waitFor();
+            if (p.exitValue() != 0) {
+                StringBuilder sb = new StringBuilder();
+                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(log)));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line);
+                }
+                String logContentStr = sb.toString();
+
+                SwingUtilities.invokeLater(() -> {
+                    frame = new JFrame("Launcher");
+                    try {
+                        String lafName = javax.swing.UIManager.getSystemLookAndFeelClassName();
+                        // Only set Native LaF on windows.
+                        if (lafName.equalsIgnoreCase("com.sun.java.swing.plaf.windows.WindowsLookAndFeel")) {
+                            javax.swing.UIManager.setLookAndFeel(lafName);
+                        }
+                    } catch (ClassNotFoundException | InstantiationException | UnsupportedLookAndFeelException | IllegalAccessException ex) {
+                        ex.printStackTrace();
+                    }
+                    String message = "The launcher encountered an error. Error message can be found in launcher-log.txt.";
+                    if (logContentStr.contains("Invalid maximum heap size") && logContentStr.contains("exceeds the maximum representable size")) {
+                        String extraMessage = "Most likely, the launcher failed because you have an incompatible version of Java.";
+                        JLabel label = new JLabel("<html><a href=\"https://github.com/Ajarmar/universal-pokemon-randomizer-zx/wiki/About-Java\">For more information about Java requirements, click here.</a>");
+                        label.addMouseListener(new MouseAdapter() {
+                            @Override
+                            public void mouseClicked(MouseEvent e) {
+                                Desktop desktop = java.awt.Desktop.getDesktop();
+                                try {
+                                    desktop.browse(new URI("https://github.com/Ajarmar/universal-pokemon-randomizer-zx/wiki/About-Java"));
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                            }
+                        });
+                        label.setCursor(new java.awt.Cursor(Cursor.HAND_CURSOR));
+                        Object[] messages = {message,extraMessage,label};
+                        JOptionPane.showMessageDialog(frame, messages);
+                    } else {
+                        Object[] messages = {message};
+                        JOptionPane.showMessageDialog(frame, messages);
+                    }
+                    System.exit(1);
+                });
+            }
         } catch (IOException e) {
             e.printStackTrace();
-            SwingUtilities.invokeLater(() -> {
-                frame = new JFrame("Launcher");
-                try {
-                    String lafName = javax.swing.UIManager.getSystemLookAndFeelClassName();
-                    // Only set Native LaF on windows.
-                    if (lafName.equalsIgnoreCase("com.sun.java.swing.plaf.windows.WindowsLookAndFeel")) {
-                        javax.swing.UIManager.setLookAndFeel(lafName);
-                    }
-                } catch (ClassNotFoundException | InstantiationException | UnsupportedLookAndFeelException | IllegalAccessException ex) {
-                    ex.printStackTrace();
-                }
-                String message = e.getMessage();
-                Object[] messages = {message};
-                JOptionPane.showMessageDialog(frame, messages);
-                System.exit(1);
-            });
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
