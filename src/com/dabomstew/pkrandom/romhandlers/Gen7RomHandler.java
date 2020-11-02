@@ -262,6 +262,10 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
         allowedItems = Gen7Constants.getAllowedItems(romEntry.romType).copy();
         nonBadItems = Gen7Constants.nonBadItems.copy();
+
+        if (romEntry.romType == Gen7Constants.Type_SM) {
+            isSM = true;
+        }
     }
 
     private List<String> getStrings(boolean isStoryText, int index) {

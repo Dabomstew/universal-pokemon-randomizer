@@ -55,6 +55,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private Map<Integer, Integer> itemPlacementHistory = new HashMap<>();
     boolean ptGiratina = false;
     boolean isORAS = false;
+    boolean isSM = false;
     int perfectAccuracy = 100;
 
     /* Constructor */
@@ -90,6 +91,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 if (restrictions.assoc_g1_g4 && allPokemon.size() > 493) {
                     addEvosFromRange(mainPokemonList, 1, 151, 387, 493);
+                }
+                if (restrictions.assoc_g1_g6 && allPokemon.size() > 721) {
+                    addEvosFromRange(mainPokemonList, 1, 151, 650, 721);
                 }
             }
 
@@ -131,6 +135,18 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             if (restrictions.allow_gen5 && allPokemon.size() > 649) {
                 addPokesFromRange(mainPokemonList, allPokemon, 494, 649);
+            }
+
+            if (restrictions.allow_gen6 && allPokemon.size() > 721) {
+                addPokesFromRange(mainPokemonList, allPokemon, 650, 721);
+                if (restrictions.assoc_g6_g1) {
+                    addEvosFromRange(mainPokemonList, 650, 721, 1, 151);
+                }
+            }
+
+            int maxGen7SpeciesID = isSM ? 802 : 807;
+            if (restrictions.allow_gen7 && allPokemon.size() > maxGen7SpeciesID) {
+                addPokesFromRange(mainPokemonList, allPokemon, 722, maxGen7SpeciesID);
             }
 
             // Now that mainPokemonList has all the selected Pokemon, update mainPokemonListInclFormes too

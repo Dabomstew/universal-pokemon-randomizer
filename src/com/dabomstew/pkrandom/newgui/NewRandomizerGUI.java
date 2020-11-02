@@ -462,7 +462,7 @@ public class NewRandomizerGUI {
         removeGameUpdateMenuItem.addActionListener(e -> removeGameUpdateMenuItemActionPerformed());
         loadGetSettingsMenuItem.addActionListener(e -> loadGetSettingsMenuItemActionPerformed());
         limitPokemonButton.addActionListener(e -> {
-            GenerationLimitDialog gld = new GenerationLimitDialog(frame, currentRestrictions,
+            NewGenerationLimitDialog gld = new NewGenerationLimitDialog(frame, currentRestrictions,
                     romHandler.generationOfPokemon());
             if (gld.pressedOK()) {
                 currentRestrictions = gld.getChoice();
@@ -2312,16 +2312,9 @@ public class NewRandomizerGUI {
             romSupportLabel.setText(bundle.getString("GUI.romSupportPrefix") + " "
                     + this.romHandler.getSupportLevel());
 
-            if (pokemonGeneration <= 5) {
-                limitPokemonCheckBox.setVisible(true);
-                limitPokemonCheckBox.setEnabled(true);
-                limitPokemonButton.setVisible(true);
-            } else {
-                limitPokemonCheckBox.setEnabled(false);
-                limitPokemonCheckBox.setVisible(false);
-                limitPokemonButton.setEnabled(false);
-                limitPokemonButton.setVisible(false);
-            }
+            limitPokemonCheckBox.setVisible(true);
+            limitPokemonCheckBox.setEnabled(true);
+            limitPokemonButton.setVisible(true);
 
             raceModeCheckBox.setEnabled(true);
 
