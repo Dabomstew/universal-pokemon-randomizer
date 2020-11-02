@@ -52,11 +52,13 @@ public class NewGenerationLimitDialog extends javax.swing.JDialog {
     private JCheckBox gen4AssocGen2CheckBox;
     private JCheckBox gen4AssocGen3CheckBox;
     private JCheckBox gen6AssocGen1CheckBox;
+    private JPanel mainPanel;
 
     private boolean pressedOk;
 
     public NewGenerationLimitDialog(JFrame parent, GenRestrictions current, int generation) {
         super(parent, true);
+        add(mainPanel);
         initComponents();
         initialState(generation);
         if (current != null) {
