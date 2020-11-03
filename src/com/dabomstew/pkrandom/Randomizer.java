@@ -778,7 +778,7 @@ public class Randomizer {
                 int starterCount = romHandler.starterCount();
                 List<Pokemon> starters = new ArrayList<>();
                 List<Pokemon> banned = new ArrayList<>();
-                if (settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE) {
+                if (settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED) {
                     List<Pokemon> abilityDependentFormes = romHandler.getAbilityDependentFormes();
                     banned.addAll(abilityDependentFormes);
                 }
@@ -803,7 +803,7 @@ public class Randomizer {
                 int starterCount = romHandler.starterCount();
                 List<Pokemon> starters = new ArrayList<>();
                 List<Pokemon> banned = new ArrayList<>();
-                if (settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE) {
+                if (settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED) {
                     List<Pokemon> abilityDependentFormes = romHandler.getAbilityDependentFormes();
                     banned.addAll(abilityDependentFormes);
                 }
