@@ -917,7 +917,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 if (starter.formeNumber > 0) {
                     newStatic.forme = starter.formeNumber;
                     newStatic.formeSuffix = starter.formeSuffix;
-                    starter = mainPokemonList.get(starter.baseForme.number - 1);
+                    starter = starter.baseForme;
                 }
                 newStatic.pkmn = starter;
                 if (starter.cosmeticForms > 0) {
