@@ -53,12 +53,15 @@ public class NewGenerationLimitDialog extends javax.swing.JDialog {
     private JCheckBox gen4AssocGen3CheckBox;
     private JCheckBox gen6AssocGen1CheckBox;
     private JPanel mainPanel;
+    private JLabel xyWarningLabel;
 
     private boolean pressedOk;
+    private boolean isXY;
 
-    public NewGenerationLimitDialog(JFrame parent, GenRestrictions current, int generation) {
+    public NewGenerationLimitDialog(JFrame parent, GenRestrictions current, int generation, boolean isXY) {
         super(parent, true);
         add(mainPanel);
+        this.isXY = isXY;
         initComponents();
         initialState(generation);
         if (current != null) {
@@ -181,6 +184,10 @@ public class NewGenerationLimitDialog extends javax.swing.JDialog {
         gen7CheckBox.addActionListener(ev -> enableAndDisableBoxes());
         okButton.addActionListener(evt -> okButtonActionPerformed());
         cancelButton.addActionListener(evt -> cancelButtonActionPerformed());
+        xyWarningLabel.setVisible(isXY);
+        if (isXY) {
+            okButton.setEnabled(false);
+        }
         pack();
     }
 
@@ -261,6 +268,16 @@ public class NewGenerationLimitDialog extends javax.swing.JDialog {
         if (gen6CheckBox.isSelected()) {
             gen1AssocGen6CheckBox.setEnabled(false);
             gen1AssocGen6CheckBox.setSelected(true);
+        }
+
+        // To prevent softlocks on the Successor Korrina fight, only turn
+        // on the OK button for XY if at least one of Gens 1-4 is selected.
+        if (isXY) {
+            if (gen1CheckBox.isSelected() || gen2CheckBox.isSelected() || gen3CheckBox.isSelected() || gen4CheckBox.isSelected()) {
+                okButton.setEnabled(true);
+            } else {
+                okButton.setEnabled(false);
+            }
         }
     }
 

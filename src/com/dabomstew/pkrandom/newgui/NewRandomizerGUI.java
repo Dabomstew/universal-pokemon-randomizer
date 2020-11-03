@@ -463,7 +463,7 @@ public class NewRandomizerGUI {
         loadGetSettingsMenuItem.addActionListener(e -> loadGetSettingsMenuItemActionPerformed());
         limitPokemonButton.addActionListener(e -> {
             NewGenerationLimitDialog gld = new NewGenerationLimitDialog(frame, currentRestrictions,
-                    romHandler.generationOfPokemon());
+                    romHandler.generationOfPokemon(), romHandler.forceSwapStaticMegaEvos());
             if (gld.pressedOK()) {
                 currentRestrictions = gld.getChoice();
             }
