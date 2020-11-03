@@ -43,6 +43,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     protected List<Pokemon> mainPokemonList;
     private List<Pokemon> mainPokemonListInclFormes;
     private List<Pokemon> altFormesList;
+    private List<MegaEvolution> megaEvolutionsList;
     private List<Pokemon> noLegendaryList, onlyLegendaryList, ultraBeastList;
     private List<Pokemon> noLegendaryListInclFormes, onlyLegendaryListInclFormes;
     private List<Pokemon> noLegendaryAltsList, onlyLegendaryAltsList;
@@ -79,9 +80,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         mainPokemonList = this.allPokemonWithoutNull();
         mainPokemonListInclFormes = this.allPokemonInclFormesWithoutNull();
         altFormesList = this.getAltFormes();
+        megaEvolutionsList = this.getMegaEvolutions();
         if (restrictions != null) {
             mainPokemonList = new ArrayList<>();
             mainPokemonListInclFormes = new ArrayList<>();
+            megaEvolutionsList = new ArrayList<>();
             List<Pokemon> allPokemon = this.getPokemon();
 
             if (restrictions.allow_gen1) {
@@ -151,6 +154,14 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             // Now that mainPokemonList has all the selected Pokemon, update mainPokemonListInclFormes too
             addAllPokesInclFormes(mainPokemonList, mainPokemonListInclFormes);
+
+            // Populate megaEvolutionsList with all of the mega evolutions that exist in the pool
+            List<MegaEvolution> allMegaEvolutions = this.getMegaEvolutions();
+            for (MegaEvolution megaEvo : allMegaEvolutions) {
+                if (mainPokemonListInclFormes.contains(megaEvo.to)) {
+                    megaEvolutionsList.add(megaEvo);
+                }
+            }
         }
 
         noLegendaryList = new ArrayList<>();
@@ -3028,7 +3039,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     } else {
                         if (reallySwapMegaEvos && old.canMegaEvolve()) {
                             List<Pokemon> megaEvoPokemonLeft =
-                                    getMegaEvolutions()
+                                    megaEvolutionsList
                                             .stream()
                                             .filter(mega -> mega.method == 1)
                                             .map(mega -> mega.from)
@@ -3037,7 +3048,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                                             .collect(Collectors.toList());
                             if (megaEvoPokemonLeft.isEmpty()) {
                                 megaEvoPokemonLeft =
-                                        getMegaEvolutions()
+                                        megaEvolutionsList
                                                 .stream()
                                                 .filter(mega -> mega.method == 1)
                                                 .map(mega -> mega.from)
@@ -3135,7 +3146,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private Pokemon getMegaEvoPokemon(List<Pokemon> fullList, List<Pokemon> pokemonLeft, StaticEncounter newStatic) {
-        List<MegaEvolution> megaEvos = getMegaEvolutions();
+        List<MegaEvolution> megaEvos = megaEvolutionsList;
         List<Pokemon> megaEvoPokemon =
                 megaEvos
                         .stream()
@@ -4993,7 +5004,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                                     boolean abilitiesAreRandomized) {
         List<Pokemon> pickFrom;
         if (swapMegaEvos) {
-            pickFrom = getMegaEvolutions()
+            pickFrom = megaEvolutionsList
                     .stream()
                     .filter(mega -> mega.method == 1)
                     .map(mega -> mega.from)
