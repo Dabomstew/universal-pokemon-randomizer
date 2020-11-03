@@ -727,6 +727,13 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     private void writeShedinjaEvolution() {
         Pokemon nincada = pokes[290];
+
+        // When the "Limit Pokemon" setting is enabled, we clear out the evolutions of
+        // everything *not* in the pool, which could include Nincada. In that case,
+        // there's no point in even worrying about Shedinja, so just return.
+        if (nincada.evolutionsFrom.size() == 0) {
+            return;
+        }
         Pokemon primaryEvolution = nincada.evolutionsFrom.get(0).to;
         Pokemon extraEvolution = nincada.evolutionsFrom.get(1).to;
 
@@ -963,7 +970,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 boolean checkCosmetics = true;
                 if (starter.formeNumber > 0) {
                     forme = starter.formeNumber;
-                    starter = mainPokemonList.get(starter.baseForme.number - 1);
+                    starter = starter.baseForme;
                     checkCosmetics = false;
                 }
                 if (checkCosmetics && starter.cosmeticForms > 0) {
@@ -2729,7 +2736,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 int forme = 0;
                 if (givenPokemon.formeNumber > 0) {
                     forme = givenPokemon.formeNumber;
-                    givenPokemon = mainPokemonList.get(givenPokemon.baseForme.number - 1);
+                    givenPokemon = givenPokemon.baseForme;
                 }
                 FileFunctions.write2ByteInt(tradesFile, offset, givenPokemon.number);
                 tradesFile[offset + 4] = (byte) forme;
@@ -2761,7 +2768,45 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public void removeEvosForPokemonPool() {
-        // do nothing for now
+        // slightly more complicated than gen2/3
+        // we have to update a "baby table" too
+        List<Pokemon> pokemonIncluded = this.mainPokemonListInclFormes;
+        Set<Evolution> keepEvos = new HashSet<>();
+        for (Pokemon pk : pokes) {
+            if (pk != null) {
+                keepEvos.clear();
+                for (Evolution evol : pk.evolutionsFrom) {
+                    if (pokemonIncluded.contains(evol.from) && pokemonIncluded.contains(evol.to)) {
+                        keepEvos.add(evol);
+                    } else {
+                        evol.to.evolutionsTo.remove(evol);
+                    }
+                }
+                pk.evolutionsFrom.retainAll(keepEvos);
+            }
+        }
+
+        try {
+            // baby pokemon
+            GARCArchive babyGarc = readGARC(romEntry.getString("BabyPokemon"), true);
+            int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
+            byte[] masterFile = babyGarc.getFile(pokemonCount + 1);
+            for (int i = 1; i <= pokemonCount; i++) {
+                byte[] babyFile = babyGarc.getFile(i);
+                Pokemon baby = pokes[i];
+                while (baby.evolutionsTo.size() > 0) {
+                    // Grab the first "to evolution" even if there are multiple
+                    baby = baby.evolutionsTo.get(0).from;
+                }
+                writeWord(babyFile, 0, baby.number);
+                writeWord(masterFile, i * 2, baby.number);
+                babyGarc.setFile(i, babyFile);
+            }
+            babyGarc.setFile(pokemonCount + 1, masterFile);
+            writeGARC(romEntry.getString("BabyPokemon"), babyGarc);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     @Override

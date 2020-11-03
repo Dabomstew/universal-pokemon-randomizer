@@ -41,7 +41,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private boolean restrictionsSet;
     protected List<Pokemon> mainPokemonList;
-    private List<Pokemon> mainPokemonListInclFormes;
+    protected List<Pokemon> mainPokemonListInclFormes;
     private List<Pokemon> altFormesList;
     private List<MegaEvolution> megaEvolutionsList;
     private List<Pokemon> noLegendaryList, onlyLegendaryList, ultraBeastList;

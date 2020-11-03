@@ -107,6 +107,14 @@ public class GenRestrictions {
         }
     }
 
+    public boolean megaEvolutionsAreInPool(boolean isXY) {
+        if (isXY) {
+            return allow_gen1 || allow_gen2 || allow_gen3 || allow_gen4;
+        } else {
+            return allow_gen1 || allow_gen2 || allow_gen3 || allow_gen4 || allow_gen5 || allow_gen6;
+        }
+    }
+
     private int makeIntSelected(boolean... switches) {
         if (switches.length > 32) {
             // No can do
