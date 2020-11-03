@@ -34,6 +34,7 @@ import com.dabomstew.pkrandom.ctr.AMX;
 import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.Mini;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.*;
 import pptxt.N3DSTxtHandler;
 
@@ -682,6 +683,13 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     private void writeShedinjaEvolution() throws IOException {
         Pokemon nincada = pokes[290];
+
+        // When the "Limit Pokemon" setting is enabled, we clear out the evolutions of
+        // everything *not* in the pool, which could include Nincada. In that case,
+        // there's no point in even worrying about Shedinja, so just return.
+        if (nincada.evolutionsFrom.size() == 0) {
+            return;
+        }
         Pokemon primaryEvolution = nincada.evolutionsFrom.get(0).to;
         Pokemon extraEvolution = nincada.evolutionsFrom.get(1).to;
 
@@ -2841,7 +2849,44 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public void removeEvosForPokemonPool() {
-        // do nothing for now
+        // slightly more complicated than gen2/3
+        // we have to update a "baby table" too
+        List<Pokemon> pokemonIncluded = this.mainPokemonList;
+        Set<Evolution> keepEvos = new HashSet<>();
+        for (Pokemon pk : pokes) {
+            if (pk != null) {
+                keepEvos.clear();
+                for (Evolution evol : pk.evolutionsFrom) {
+                    if (pokemonIncluded.contains(evol.from) && pokemonIncluded.contains(evol.to)) {
+                        keepEvos.add(evol);
+                    } else {
+                        evol.to.evolutionsTo.remove(evol);
+                    }
+                }
+                pk.evolutionsFrom.retainAll(keepEvos);
+            }
+        }
+
+        try {
+            // baby pokemon
+            GARCArchive babyGarc = readGARC(romEntry.getString("BabyPokemon"), true);
+            byte[] masterFile = babyGarc.getFile(Gen6Constants.pokemonCount + 1);
+            for (int i = 1; i <= Gen6Constants.pokemonCount; i++) {
+                byte[] babyFile = babyGarc.getFile(i);
+                Pokemon baby = pokes[i];
+                while (baby.evolutionsTo.size() > 0) {
+                    // Grab the first "to evolution" even if there are multiple
+                    baby = baby.evolutionsTo.get(0).from;
+                }
+                writeWord(babyFile, 0, baby.number);
+                writeWord(masterFile, i * 2, baby.number);
+                babyGarc.setFile(i, babyFile);
+            }
+            babyGarc.setFile(Gen6Constants.pokemonCount + 1, masterFile);
+            writeGARC(romEntry.getString("BabyPokemon"), babyGarc);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     @Override
