@@ -4265,7 +4265,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     // Note: If you use this on a game where the amount of randomizable shop items is greater than the amount of
     // possible items, you will get owned by the while loop
     @Override
-    public void randomizeShopItems(boolean banBadItems, boolean banRegularShopItems, boolean banOPShopItems, boolean balancePrices, boolean placeEvolutionItems) {
+    public void randomizeShopItems(boolean banBadItems, boolean banRegularShopItems, boolean banOPShopItems, boolean balancePrices,
+                                   boolean placeEvolutionItems, boolean placeXItems) {
         if (this.getShopItems() == null) return;
         ItemList possibleItems = banBadItems ? this.getNonBadItems() : this.getAllowedItems();
         if (banRegularShopItems) {
@@ -4281,9 +4282,15 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Integer> newItems = new ArrayList<>();
         Map<Integer,List<Integer>> newItemsMap = new TreeMap<>();
         int newItem;
+        List<Integer> guaranteedItems = new ArrayList<>();
         if (placeEvolutionItems) {
-            List<Integer> evolutionItems = getEvolutionItems();
-            newItems.addAll(evolutionItems);
+            guaranteedItems.addAll(getEvolutionItems());
+        }
+        if (placeXItems) {
+            guaranteedItems.addAll(GlobalConstants.xItems);
+        }
+        if (placeEvolutionItems || placeXItems) {
+            newItems.addAll(guaranteedItems);
             shopItemCount = shopItemCount - newItems.size();
 
             for (int i = 0; i < shopItemCount; i++) {
@@ -4310,14 +4317,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
 
-            // Place items in non-main-game shops; skip over evolution items
+            // Place items in non-main-game shops; skip over guaranteed items
             Collections.shuffle(newItems, this.random);
             for (int i: nonMainGameShops) {
                 int j = 0;
                 List<Integer> newShopItems = new ArrayList<>();
                 for (Integer ignored: currentItems.get(i)) {
                     Integer item = newItems.get(j);
-                    while (evolutionItems.contains(item)) {
+                    while (guaranteedItems.contains(item)) {
                         j++;
                         item = newItems.get(j);
                     }

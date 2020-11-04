@@ -195,6 +195,7 @@ public class NewRandomizerGUI {
     private JCheckBox shBanRegularShopItemsCheckBox;
     private JCheckBox shBalanceShopItemPricesCheckBox;
     private JCheckBox shGuaranteeEvolutionItemsCheckBox;
+    private JCheckBox shGuaranteeXItemsCheckBox;
     private JCheckBox miscBWExpPatchCheckBox;
     private JCheckBox miscNerfXAccuracyCheckBox;
     private JCheckBox miscFixCritRateCheckBox;
@@ -1425,6 +1426,7 @@ public class NewRandomizerGUI {
         shBanOverpoweredShopItemsCheckBox.setSelected(settings.isBanOPShopItems());
         shBalanceShopItemPricesCheckBox.setSelected(settings.isBalanceShopPrices());
         shGuaranteeEvolutionItemsCheckBox.setSelected(settings.isGuaranteeEvolutionItems());
+        shGuaranteeXItemsCheckBox.setSelected(settings.isGuaranteeXItems());
 
 
         int mtsSelected = settings.getCurrentMiscTweaks();
@@ -1597,7 +1599,7 @@ public class NewRandomizerGUI {
         settings.setBanOPShopItems(shBanOverpoweredShopItemsCheckBox.isSelected());
         settings.setBalanceShopPrices(shBalanceShopItemPricesCheckBox.isSelected());
         settings.setGuaranteeEvolutionItems(shGuaranteeEvolutionItemsCheckBox.isSelected());
-
+        settings.setGuaranteeXItems(shGuaranteeXItemsCheckBox.isSelected());
 
 
         int currentMiscTweaks = 0;
@@ -2250,6 +2252,9 @@ public class NewRandomizerGUI {
         shGuaranteeEvolutionItemsCheckBox.setVisible(true);
         shGuaranteeEvolutionItemsCheckBox.setEnabled(false);
         shGuaranteeEvolutionItemsCheckBox.setSelected(false);
+        shGuaranteeXItemsCheckBox.setVisible(true);
+        shGuaranteeXItemsCheckBox.setEnabled(false);
+        shGuaranteeXItemsCheckBox.setSelected(false);
         miscBWExpPatchCheckBox.setVisible(true);
         miscBWExpPatchCheckBox.setEnabled(false);
         miscBWExpPatchCheckBox.setSelected(false);
@@ -2836,14 +2841,13 @@ public class NewRandomizerGUI {
             tpDontUseLegendariesCheckBox.setEnabled(true);
             tpNoEarlyWonderGuardCheckBox.setEnabled(true);
             tpAllowAlternateFormesCheckBox.setEnabled(true);
-
-            tpRandomShinyTrainerPokemonCheckBox.setEnabled(true);
             if (currentRestrictions == null || currentRestrictions.megaEvolutionsAreInPool(romHandler.forceSwapStaticMegaEvos())) {
                 tpSwapMegaEvosCheckBox.setEnabled(true);
             } else {
                 tpSwapMegaEvosCheckBox.setEnabled(false);
                 tpSwapMegaEvosCheckBox.setSelected(false);
             }
+            tpRandomShinyTrainerPokemonCheckBox.setEnabled(true);
         }
 
         if (tpForceFullyEvolvedAtCheckBox.isSelected()) {
@@ -3084,6 +3088,7 @@ public class NewRandomizerGUI {
             shBanOverpoweredShopItemsCheckBox.setEnabled(true);
             shBalanceShopItemPricesCheckBox.setEnabled(true);
             shGuaranteeEvolutionItemsCheckBox.setEnabled(true);
+            shGuaranteeXItemsCheckBox.setEnabled(true);
         } else {
             shBanBadItemsCheckBox.setEnabled(false);
             shBanBadItemsCheckBox.setSelected(false);
@@ -3095,6 +3100,8 @@ public class NewRandomizerGUI {
             shBalanceShopItemPricesCheckBox.setSelected(false);
             shGuaranteeEvolutionItemsCheckBox.setEnabled(false);
             shGuaranteeEvolutionItemsCheckBox.setSelected(false);
+            shGuaranteeXItemsCheckBox.setEnabled(false);
+            shGuaranteeXItemsCheckBox.setSelected(false);
         }
     }
 

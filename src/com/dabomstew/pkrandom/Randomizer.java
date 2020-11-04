@@ -596,7 +596,8 @@ public class Randomizer {
         if (settings.getShopItemsMod() == Settings.ShopItemsMod.SHUFFLE) {
             romHandler.shuffleShopItems();
         } else if (settings.getShopItemsMod() == Settings.ShopItemsMod.RANDOM) {
-            romHandler.randomizeShopItems(settings.isBanBadRandomShopItems(),settings.isBanRegularShopItems(),settings.isBanOPShopItems(),settings.isBalanceShopPrices(), settings.isGuaranteeEvolutionItems());
+            romHandler.randomizeShopItems(settings.isBanBadRandomShopItems(), settings.isBanRegularShopItems(), settings.isBanOPShopItems(),
+                    settings.isBalanceShopPrices(), settings.isGuaranteeEvolutionItems(), settings.isGuaranteeXItems());
         }
 
         

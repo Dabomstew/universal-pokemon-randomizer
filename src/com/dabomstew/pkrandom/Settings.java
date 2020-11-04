@@ -288,6 +288,7 @@ public class Settings {
     private boolean banOPShopItems;
     private boolean balanceShopPrices;
     private boolean guaranteeEvolutionItems;
+    private boolean guaranteeXItems;
 
     // to and from strings etc
     public void write(FileOutputStream out) throws IOException {
@@ -512,7 +513,8 @@ public class Settings {
                 ((auraMod == AuraMod.UNCHANGED) ? 0x8 : 0) |
                 ((auraMod == AuraMod.RANDOM) ? 0x10 : 0) |
                 ((auraMod == AuraMod.SAME_STRENGTH) ? 0x20 : 0) |
-                (evolutionMovesForAll ? 0x40 : 0));
+                (evolutionMovesForAll ? 0x40 : 0) |
+                (guaranteeXItems ? 0x80 : 0));
 
         out.write(makeByteSelected(
                 totemPokemonMod == TotemPokemonMod.UNCHANGED,
@@ -779,7 +781,8 @@ public class Settings {
 
         settings.setAdditionalRegularTrainerPokemon((data[41] & 0x7));
         settings.setAuraMod(restoreEnum(AuraMod.class,data[41],3,4,5));
-        settings.setEvolutionMovesForAll(restoreState(data[41],6)); // 7 still unused
+        settings.setEvolutionMovesForAll(restoreState(data[41],6));
+        settings.setGuaranteeXItems(restoreState(data[41],7));
 
         settings.setTotemPokemonMod(restoreEnum(TotemPokemonMod.class,data[42],0,1,2));
         settings.setAllyPokemonMod(restoreEnum(AllyPokemonMod.class,data[42],3,4,5));
@@ -2037,6 +2040,14 @@ public class Settings {
 
     public void setGuaranteeEvolutionItems(boolean guaranteeEvolutionItems) {
         this.guaranteeEvolutionItems = guaranteeEvolutionItems;
+    }
+
+    public boolean isGuaranteeXItems() {
+        return guaranteeXItems;
+    }
+
+    public void setGuaranteeXItems(boolean guaranteeXItems) {
+        this.guaranteeXItems = guaranteeXItems;
     }
 
     private static int makeByteSelected(boolean... bools) {

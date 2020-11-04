@@ -463,7 +463,8 @@ public interface RomHandler {
 
     void shuffleShopItems();
 
-    void randomizeShopItems(boolean banBadItems, boolean banRegularShopItems, boolean banOPShopItems, boolean balancePrices, boolean placeEvolutionItems);
+    void randomizeShopItems(boolean banBadItems, boolean banRegularShopItems, boolean banOPShopItems, boolean balancePrices,
+                            boolean placeEvolutionItems, boolean placeXItems);
 
     Map<Integer, List<Integer>> getShopItems();
 

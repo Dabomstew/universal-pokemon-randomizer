@@ -233,6 +233,8 @@ public class GlobalConstants {
 
     public static final int[] ptSpecialIntros = { 377, 378, 379, 479, 480, 482, 483, 484, 485, 486, 487, 491, 492, 493 };
 
+    public static final List<Integer> xItems = Arrays.asList(55, 56, 57, 58, 59, 60, 61, 62);
+
     public static final List<Integer> battleTrappingAbilities = Arrays.asList(23, 42, 71);
 
     public static final List<Integer> negativeAbilities = Arrays.asList(
