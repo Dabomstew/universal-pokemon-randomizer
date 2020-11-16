@@ -1462,6 +1462,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private Type getTypeForArea(EncounterSet area) {
         Pokemon firstPokemon = area.encounters.get(0).pokemon;
+        if (area.encounters.get(0).formeNumber != 0) {
+            firstPokemon = getAltFormeOfPokemon(firstPokemon, area.encounters.get(0).formeNumber);
+        }
         Type primaryType = firstPokemon.primaryType;
         int primaryCount = 1;
         Type secondaryType = null;
@@ -1472,6 +1475,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         for (int i = 1; i < area.encounters.size(); i++) {
             Pokemon pokemon = area.encounters.get(i).pokemon;
+            if (area.encounters.get(i).formeNumber != 0) {
+                pokemon = getAltFormeOfPokemon(pokemon, area.encounters.get(i).formeNumber);
+            }
             if (pokemon.primaryType == primaryType || pokemon.secondaryType == primaryType) {
                 primaryCount++;
             }
