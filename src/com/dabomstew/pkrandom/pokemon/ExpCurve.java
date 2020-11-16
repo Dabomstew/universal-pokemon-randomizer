@@ -64,4 +64,23 @@ public enum ExpCurve {
         return 0; // default
     }
 
+    @Override
+    public String toString() {
+        switch (this) {
+        case MEDIUM_FAST:
+            return "Medium Fast";
+        case ERRATIC:
+            return "Erratic";
+        case FLUCTUATING:
+            return "Fluctuating";
+        case MEDIUM_SLOW:
+            return "Medium Slow";
+        case FAST:
+            return "Fast";
+        case SLOW:
+            return "Slow";
+        }
+        return null;
+    }
+
 }

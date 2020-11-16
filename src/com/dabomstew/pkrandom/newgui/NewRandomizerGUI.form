@@ -287,6 +287,18 @@
                       </model>
                     </properties>
                   </component>
+                  <component id="7eb1a" class="javax.swing.JComboBox" binding="pbsEXPCurveComboBox">
+                    <constraints>
+                      <grid row="2" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <model>
+                        <item value="Medium Fast"/>
+                      </model>
+                    </properties>
+                  </component>
                 </children>
               </grid>
               <hspacer id="17e6a">

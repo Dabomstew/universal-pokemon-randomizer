@@ -30,6 +30,7 @@ import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.EncryptedROMException;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
+import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.*;
@@ -51,6 +52,9 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import static com.dabomstew.pkrandom.pokemon.ExpCurve.MEDIUM_FAST;
+import static com.dabomstew.pkrandom.pokemon.ExpCurve.MEDIUM_SLOW;
 
 public class NewRandomizerGUI {
     private JTabbedPane tabbedPane1;
@@ -273,6 +277,7 @@ public class NewRandomizerGUI {
     private JCheckBox paWeighDuplicatesTogetherCheckBox;
     private JCheckBox miscBalanceStaticLevelsCheckBox;
     private JCheckBox miscRetainAltFormesCheckBox;
+    private JComboBox pbsEXPCurveComboBox;
 
     private static JFrame frame;
 
@@ -1239,6 +1244,14 @@ public class NewRandomizerGUI {
         pbsLegendariesSlowRadioButton.setSelected(settings.getExpCurveMod() == Settings.ExpCurveMod.LEGENDARIES);
         pbsStrongLegendariesSlowRadioButton.setSelected(settings.getExpCurveMod() == Settings.ExpCurveMod.STRONG_LEGENDARIES);
         pbsAllMediumFastRadioButton.setSelected(settings.getExpCurveMod() == Settings.ExpCurveMod.ALL);
+        ExpCurve[] expCurves = getEXPCurvesForGeneration(romHandler.generationOfPokemon());
+        int index = 0;
+        for (int i = 0; i < expCurves.length; i++) {
+            if (expCurves[i] == settings.getSelectedEXPCurve()) {
+                index = i;
+            }
+        }
+        pbsEXPCurveComboBox.setSelectedIndex(index);
         pbsFollowMegaEvosCheckBox.setSelected(settings.isBaseStatsFollowMegaEvolutions());
 
         paUnchangedRadioButton.setSelected(settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED);
@@ -1463,6 +1476,8 @@ public class NewRandomizerGUI {
         settings.setStandardizeEXPCurves(pbsStandardizeEXPCurvesCheckBox.isSelected());
         settings.setExpCurveMod(pbsLegendariesSlowRadioButton.isSelected(), pbsStrongLegendariesSlowRadioButton.isSelected(),
                 pbsAllMediumFastRadioButton.isSelected());
+        ExpCurve[] expCurves = getEXPCurvesForGeneration(romHandler.generationOfPokemon());
+        settings.setSelectedEXPCurve(expCurves[pbsEXPCurveComboBox.getSelectedIndex()]);
         settings.setBaseStatsFollowMegaEvolutions(pbsFollowMegaEvosCheckBox.isSelected() && pbsFollowMegaEvosCheckBox.isVisible());
 
         settings.setAbilitiesMod(paUnchangedRadioButton.isSelected(), paRandomRadioButton.isSelected());
@@ -1758,6 +1773,10 @@ public class NewRandomizerGUI {
         pbsStandardizeEXPCurvesCheckBox.setVisible(true);
         pbsStandardizeEXPCurvesCheckBox.setEnabled(false);
         pbsStandardizeEXPCurvesCheckBox.setSelected(false);
+        pbsEXPCurveComboBox.setVisible(true);
+        pbsEXPCurveComboBox.setEnabled(false);
+        pbsEXPCurveComboBox.setSelectedIndex(0);
+        pbsEXPCurveComboBox.setModel(new DefaultComboBoxModel<>(new String[] { "Medium Fast" }));
         pbsFollowEvolutionsCheckBox.setVisible(true);
         pbsFollowEvolutionsCheckBox.setEnabled(false);
         pbsFollowEvolutionsCheckBox.setSelected(false);
@@ -2343,6 +2362,13 @@ public class NewRandomizerGUI {
             pbsUpdateBaseStatsCheckBox.setEnabled(pokemonGeneration < 8);
             pbsFollowMegaEvosCheckBox.setVisible(romHandler.hasMegaEvolutions());
             pbsUpdateComboBox.setVisible(pokemonGeneration < 8);
+            ExpCurve[] expCurves = getEXPCurvesForGeneration(pokemonGeneration);
+            String[] expCurveNames = new String[expCurves.length];
+            for (int i = 0; i < expCurves.length; i++) {
+                expCurveNames[i] = expCurves[i].toString();
+            }
+            pbsEXPCurveComboBox.setModel(new DefaultComboBoxModel<>(expCurveNames));
+            pbsEXPCurveComboBox.setSelectedIndex(0);
 
             // Pokemon Types
             ptUnchangedRadioButton.setEnabled(true);
@@ -2669,11 +2695,13 @@ public class NewRandomizerGUI {
             pbsLegendariesSlowRadioButton.setEnabled(true);
             pbsStrongLegendariesSlowRadioButton.setEnabled(true);
             pbsAllMediumFastRadioButton.setEnabled(true);
+            pbsEXPCurveComboBox.setEnabled(true);
         } else {
             pbsLegendariesSlowRadioButton.setEnabled(false);
             pbsLegendariesSlowRadioButton.setSelected(true);
             pbsStrongLegendariesSlowRadioButton.setEnabled(false);
             pbsAllMediumFastRadioButton.setEnabled(false);
+            pbsEXPCurveComboBox.setEnabled(false);
         }
 
         if (pbsUpdateBaseStatsCheckBox.isSelected()) {
@@ -3331,6 +3359,16 @@ public class NewRandomizerGUI {
                     String.format(bundle.getString("GUI.configFileMissing"), e.getMessage()));
             System.exit(1);
         }
+    }
+
+    private ExpCurve[] getEXPCurvesForGeneration(int generation) {
+        ExpCurve[] result;
+        if (generation < 3) {
+            result = new ExpCurve[]{ ExpCurve.MEDIUM_FAST, ExpCurve.MEDIUM_SLOW, ExpCurve.FAST, ExpCurve.SLOW };
+        } else {
+            result = new ExpCurve[]{ ExpCurve.MEDIUM_FAST, ExpCurve.MEDIUM_SLOW, ExpCurve.FAST, ExpCurve.SLOW, ExpCurve.ERRATIC, ExpCurve.FLUCTUATING };
+        }
+        return result;
     }
 
     public static void main(String[] args) {

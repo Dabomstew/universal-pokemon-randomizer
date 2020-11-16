@@ -479,7 +479,7 @@ public interface RomHandler {
     // stats stuff
     void minimumCatchRate(int rateNonLegendary, int rateLegendary);
 
-    void standardizeEXPCurves(Settings.ExpCurveMod mod);
+    void standardizeEXPCurves(Settings.ExpCurveMod mod, ExpCurve expCurve);
 
     // (Mostly) unchanging lists of moves
 

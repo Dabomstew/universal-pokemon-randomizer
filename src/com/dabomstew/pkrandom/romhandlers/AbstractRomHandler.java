@@ -4382,7 +4382,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void standardizeEXPCurves(Settings.ExpCurveMod mod) {
+    public void standardizeEXPCurves(Settings.ExpCurveMod mod, ExpCurve expCurve) {
         List<Pokemon> pokes = getPokemonInclFormes();
         switch (mod) {
             case LEGENDARIES:
@@ -4390,7 +4390,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (pkmn == null) {
                         continue;
                     }
-                    pkmn.growthCurve = pkmn.isLegendary() ? ExpCurve.SLOW : ExpCurve.MEDIUM_FAST;
+                    pkmn.growthCurve = pkmn.isLegendary() ? ExpCurve.SLOW : expCurve;
                 }
                 break;
             case STRONG_LEGENDARIES:
@@ -4398,7 +4398,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (pkmn == null) {
                         continue;
                     }
-                    pkmn.growthCurve = pkmn.isStrongLegendary() ? ExpCurve.SLOW : ExpCurve.MEDIUM_FAST;
+                    pkmn.growthCurve = pkmn.isStrongLegendary() ? ExpCurve.SLOW : expCurve;
                 }
                 break;
             case ALL:
@@ -4406,7 +4406,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (pkmn == null) {
                         continue;
                     }
-                    pkmn.growthCurve = ExpCurve.MEDIUM_FAST;
+                    pkmn.growthCurve = expCurve;
                 }
                 break;
         }

@@ -36,6 +36,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.zip.CRC32;
 
+import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
@@ -48,7 +49,7 @@ public class Settings {
 
     public static final int VERSION = Version.VERSION;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 46;
+    public static final int LENGTH_OF_SETTINGS_DATA = 47;
 
     private CustomNamesSet customNames;
 
@@ -77,6 +78,7 @@ public class Settings {
     private boolean updateBaseStats;
     private int updateBaseStatsToGeneration;
     private boolean standardizeEXPCurves;
+    private ExpCurve selectedEXPCurve;
     private ExpCurveMod expCurveMod = ExpCurveMod.LEGENDARIES;
 
     public enum AbilitiesMod {
@@ -534,6 +536,8 @@ public class Settings {
 
         out.write(updateMovesToGeneration);
 
+        out.write(selectedEXPCurve.toByte());
+
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
             out.write(romName.length);
@@ -794,6 +798,8 @@ public class Settings {
         settings.setUpdateBaseStatsToGeneration(data[44]);
 
         settings.setUpdateMovesToGeneration(data[45]);
+
+        settings.setSelectedEXPCurve(ExpCurve.fromByte(data[46]));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1095,6 +1101,14 @@ public class Settings {
 
     private void setExpCurveMod(ExpCurveMod expCurveMod) {
         this.expCurveMod = expCurveMod;
+    }
+
+    public ExpCurve getSelectedEXPCurve() {
+        return selectedEXPCurve;
+    }
+
+    public void setSelectedEXPCurve(ExpCurve expCurve) {
+        this.selectedEXPCurve = expCurve;
     }
 
     public boolean isUpdateBaseStats() {
