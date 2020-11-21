@@ -830,7 +830,9 @@ public class Randomizer {
             log.println("Wild Pokemon: Unchanged." + NEWLINE);
         } else {
             log.println("--Wild Pokemon--");
-            List<EncounterSet> encounters = romHandler.getEncounters(settings.isUseTimeBasedEncounters());
+            boolean useTimeBasedEncounters = settings.isUseTimeBasedEncounters() ||
+                    (settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED && settings.isWildLevelsModified());
+            List<EncounterSet> encounters = romHandler.getEncounters(useTimeBasedEncounters);
             int idx = 0;
             for (EncounterSet es : encounters) {
                 idx++;
