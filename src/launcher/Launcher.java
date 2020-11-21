@@ -37,7 +37,7 @@ public class Launcher {
 
     public static void main(String[] args) {
         try {
-            ProcessBuilder pb = new ProcessBuilder("java", "-Xmx4096M", "-jar", "PokeRandoZX.jar", "please-use-the-launcher");
+            ProcessBuilder pb = new ProcessBuilder("java", "-Xmx4096M", "-jar", "./PokeRandoZX.jar", "please-use-the-launcher");
             pb.redirectErrorStream(true);
             File log = new File("launcher-log.txt");
             pb.redirectOutput(ProcessBuilder.Redirect.to(log));
