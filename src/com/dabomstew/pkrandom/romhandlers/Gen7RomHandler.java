@@ -1969,11 +1969,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     private void positiveCallRates() {
         for (Pokemon pk: pokes) {
             if (pk == null) continue;
-            if (pk.callRate == 0) {
-                pk.callRate = 3;
-            }
-            if (pk.callRate < 0) {
-                pk.callRate = 3;
+            if (pk.callRate <= 0) {
+                pk.callRate = 5;
             }
         }
     }
