@@ -24,10 +24,11 @@ package com.dabomstew.pkrandom.romhandlers;
  /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
  /*----------------------------------------------------------------------------*/
 import java.awt.image.BufferedImage;
-import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
+import freemarker.template.Template;
 
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
@@ -45,11 +46,7 @@ public interface RomHandler {
 
     public abstract class Factory {
 
-        public RomHandler create(Random random) {
-            return create(random, null);
-        }
-
-        public abstract RomHandler create(Random random, PrintStream log);
+        public abstract RomHandler create(Random random);
 
         public abstract boolean isLoadable(String filename);
     }
@@ -61,8 +58,10 @@ public interface RomHandler {
 
     public String loadedFilename();
 
-    // Log stuff
-    public void setLog(PrintStream logStream);
+    // Log stuff with template
+    public void setTemplate(Template template, Map templateData);
+    public Map getTemplateData();
+    public Template getTemplate();
 
     // Get a List of Pokemon objects in this game.
     // 0 = null 1-whatever = the Pokemon.
@@ -225,9 +224,9 @@ public interface RomHandler {
     public void updateMovesToGen6();
 
     // stuff for printing move changes
-    public void initMoveUpdates();
+    public void initMoveModernization();
 
-    public void printMoveUpdates();
+    public void printMoveModernization();
 
     // return all the moves valid in this game.
     public List<Move> getMoves();
@@ -415,7 +414,7 @@ public interface RomHandler {
     public void standardizeEXPCurves();
 
     // (Mostly) unchanging lists of moves
-    public List<Integer> getGameBreakingMoves();
+    public Map<String, Integer> getGameBreakingMoves();
 
     // includes game or gen-specific moves like Secret Power
     // but NOT healing moves (Softboiled, Milk Drink)

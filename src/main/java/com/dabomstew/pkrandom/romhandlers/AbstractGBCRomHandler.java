@@ -2,7 +2,6 @@ package com.dabomstew.pkrandom.romhandlers;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
-import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,8 +41,8 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     private Map<String, Byte> d;
     private int longestTableToken;
 
-    public AbstractGBCRomHandler(Random random, PrintStream logStream) {
-        super(random, logStream);
+    public AbstractGBCRomHandler(Random random) {
+        super(random);
     }
 
     protected void clearTextTables() {

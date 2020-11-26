@@ -117,7 +117,11 @@ public class FileFunctions {
 
     public static void writeFullInt(byte[] data, int offset, int value) {
         byte[] valueBytes = ByteBuffer.allocate(4).putInt(value).array();
-        System.arraycopy(valueBytes, 0, data, offset, 4);
+        writeArrayIntoBuffer(valueBytes, 0, data, offset, 4);
+    }
+
+    public static void writeArrayIntoBuffer(Object src,  int  srcPos, Object dest, int destPos, int length) {
+        System.arraycopy(src, srcPos, dest, destPos, length);
     }
 
     public static byte[] readFileFullyIntoBuffer(String filename) throws IOException {
@@ -277,7 +281,7 @@ public class FileFunctions {
                     // error
                     throw new IOException("trying to patch data past the end of the ROM file");
                 }
-                System.arraycopy(patch, offset, rom, writeOffset, size);
+                writeArrayIntoBuffer(patch, offset, rom, writeOffset, size);
                 offset += size;
             }
         }

@@ -155,6 +155,15 @@ li {
   border-radius: 4px;
 }
 
+.success {
+  color:green;
+  padding: 3px 10px;
+  border: solid 1px green;
+  font-style: italic;
+  background-color: #ccffcc;
+  border-radius: 4px;
+}
+
 .pk-type {
   font-family: "Lucida Console", Monaco, monospace;
   font-weight: bold;

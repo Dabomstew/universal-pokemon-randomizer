@@ -28,7 +28,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -61,6 +60,7 @@ import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
+
 import compressors.Gen2Decmp;
 
 public class Gen2RomHandler extends AbstractGBCRomHandler {
@@ -68,8 +68,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     public static class Factory extends RomHandler.Factory {
 
         @Override
-        public Gen2RomHandler create(Random random, PrintStream logStream) {
-            return new Gen2RomHandler(random, logStream);
+        public Gen2RomHandler create(Random random) {
+            return new Gen2RomHandler(random);
         }
 
         public boolean isLoadable(String filename) {
@@ -87,11 +87,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     public Gen2RomHandler(Random random) {
-        super(random, null);
-    }
-
-    public Gen2RomHandler(Random random, PrintStream logStream) {
-        super(random, logStream);
+        super(random);
     }
 
     private static class RomEntry {
@@ -266,6 +262,15 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             return 0;
         }
     }
+    
+    public static RomEntry getRomFromSupportedRom(String romName) {
+        for(RomEntry re : roms) {
+            if(romName.equals(re.name)) {
+                return re;
+            }
+        }
+        return null;
+    }
 
     // This ROM's data
     private Pokemon[] pokes;
@@ -278,7 +283,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private String[][] mapNames;
     private String[] landmarkNames;
     private boolean isVietCrystal;
-    private ItemList allowedItems, nonBadItems;
 
     @Override
     public boolean detectRom(byte[] rom) {
@@ -296,12 +300,14 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     public void loadedRom() {
         romEntry = checkRomEntry(this.rom);
         clearTextTables();
+        Gen2Constants.allowedItems.allowSingles(Gen2Constants.luckyEggIndex);
+        Gen2Constants.nonBadItems.allowSingles(Gen2Constants.luckyEggIndex);
         readTextTable("gameboy_jap");
-        if (romEntry.extraTableFile != null && romEntry.extraTableFile.equalsIgnoreCase("none") == false) {
-            readTextTable(romEntry.extraTableFile);
+        if (getRomEntry().extraTableFile != null && getRomEntry().extraTableFile.equalsIgnoreCase("none") == false) {
+            readTextTable(getRomEntry().extraTableFile);
         }
         // VietCrystal override
-        if (romEntry.name.equals("Crystal (J)")
+        if (getRomEntry().name.equals("Crystal (J)")
                 && rom[Gen2Constants.vietCrystalCheckOffset] == Gen2Constants.vietCrystalCheckValue) {
             readTextTable("vietcrystal");
             isVietCrystal = true;
@@ -315,8 +321,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         loadLandmarkNames();
         preprocessMaps();
         loadItemNames();
-        allowedItems = Gen2Constants.allowedItems.copy();
-        nonBadItems = Gen2Constants.nonBadItems.copy();
     }
 
     private static RomEntry checkRomEntry(byte[] rom) {
@@ -350,7 +354,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         pokes = new Pokemon[Gen2Constants.pokemonCount + 1];
         // Fetch our names
         String[] pokeNames = readPokemonNames();
-        int offs = romEntry.getValue("PokemonStatsOffset");
+        int offs = getRomEntry().getValue("PokemonStatsOffset");
         // Get base stats
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
             pokes[i] = new Pokemon();
@@ -367,14 +371,14 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     private void savePokemonStats() {
         // Write pokemon names
-        int offs = romEntry.getValue("PokemonNamesOffset");
-        int len = romEntry.getValue("PokemonNamesLength");
+        int offs = getRomEntry().getValue("PokemonNamesOffset");
+        int len = getRomEntry().getValue("PokemonNamesLength");
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
             int stringOffset = offs + (i - 1) * len;
             writeFixedLengthString(pokes[i].name, stringOffset, len);
         }
         // Write pokemon stats
-        int offs2 = romEntry.getValue("PokemonStatsOffset");
+        int offs2 = getRomEntry().getValue("PokemonStatsOffset");
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
             saveBasicPokeStats(pokes[i], offs2 + (i - 1) * Gen2Constants.baseStatsEntrySize);
         }
@@ -383,7 +387,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private String[] readMoveNames() {
-        int offset = romEntry.getValue("MoveNamesOffset");
+        int offset = getRomEntry().getValue("MoveNamesOffset");
         String[] moveNames = new String[Gen2Constants.moveCount + 1];
         for (int i = 1; i <= Gen2Constants.moveCount; i++) {
             moveNames[i] = readVariableLengthString(offset, false);
@@ -395,7 +399,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private void loadMoves() {
         moves = new Move[Gen2Constants.moveCount + 1];
         String[] moveNames = readMoveNames();
-        int offs = romEntry.getValue("MoveDataOffset");
+        int offs = getRomEntry().getValue("MoveDataOffset");
         for (int i = 1; i <= Gen2Constants.moveCount; i++) {
             moves[i] = new Move();
             moves[i].name = moveNames[i];
@@ -419,7 +423,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private void saveMoves() {
-        int offs = romEntry.getValue("MoveDataOffset");
+        int offs = getRomEntry().getValue("MoveDataOffset");
         for (int i = 1; i <= 251; i++) {
             rom[offs + (i - 1) * 7 + 1] = (byte) moves[i].effectIndex;
             rom[offs + (i - 1) * 7 + 2] = (byte) moves[i].power;
@@ -485,8 +489,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private String[] readPokemonNames() {
-        int offs = romEntry.getValue("PokemonNamesOffset");
-        int len = romEntry.getValue("PokemonNamesLength");
+        int offs = getRomEntry().getValue("PokemonNamesOffset");
+        int len = getRomEntry().getValue("PokemonNamesLength");
         String[] names = new String[Gen2Constants.pokemonCount + 1];
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
             names[i] = readFixedLengthString(offs + (i - 1) * len, len);
@@ -498,9 +502,9 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     public List<Pokemon> getStarters() {
         // Get the starters
         List<Pokemon> starters = new ArrayList<Pokemon>();
-        starters.add(pokes[rom[romEntry.arrayEntries.get("StarterOffsets1")[0]] & 0xFF]);
-        starters.add(pokes[rom[romEntry.arrayEntries.get("StarterOffsets2")[0]] & 0xFF]);
-        starters.add(pokes[rom[romEntry.arrayEntries.get("StarterOffsets3")[0]] & 0xFF]);
+        starters.add(pokes[rom[getRomEntry().arrayEntries.get("StarterOffsets1")[0]] & 0xFF]);
+        starters.add(pokes[rom[getRomEntry().arrayEntries.get("StarterOffsets2")[0]] & 0xFF]);
+        starters.add(pokes[rom[getRomEntry().arrayEntries.get("StarterOffsets3")[0]] & 0xFF]);
         return starters;
     }
 
@@ -514,15 +518,15 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
         for (int i = 0; i < 3; i++) {
             byte starter = (byte) newStarters.get(i).number;
-            int[] offsets = romEntry.arrayEntries.get("StarterOffsets" + (i + 1));
+            int[] offsets = getRomEntry().arrayEntries.get("StarterOffsets" + (i + 1));
             for (int offset : offsets) {
                 rom[offset] = starter;
             }
         }
 
         // Attempt to replace text
-        if (romEntry.getValue("CanChangeStarterText") > 0) {
-            int[] starterTextOffsets = romEntry.arrayEntries.get("StarterTextOffsets");
+        if (getRomEntry().getValue("CanChangeStarterText") > 0) {
+            int[] starterTextOffsets = getRomEntry().arrayEntries.get("StarterTextOffsets");
             for (int i = 0; i < 3 && i < starterTextOffsets.length; i++) {
                 writeVariableLengthString(String.format("%s?\\e", newStarters.get(i).name), starterTextOffsets[i], true);
             }
@@ -533,7 +537,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public List<Integer> getStarterHeldItems() {
         List<Integer> sHeldItems = new ArrayList<Integer>();
-        int[] shiOffsets = romEntry.arrayEntries.get("StarterHeldItems");
+        int[] shiOffsets = getRomEntry().arrayEntries.get("StarterHeldItems");
         for (int offset : shiOffsets) {
             sHeldItems.add(rom[offset] & 0xFF);
         }
@@ -542,7 +546,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void setStarterHeldItems(List<Integer> items) {
-        int[] shiOffsets = romEntry.arrayEntries.get("StarterHeldItems");
+        int[] shiOffsets = getRomEntry().arrayEntries.get("StarterHeldItems");
         if (items.size() != shiOffsets.length) {
             return;
         }
@@ -554,7 +558,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
-        int offset = romEntry.getValue("WildPokemonOffset");
+        int offset = getRomEntry().getValue("WildPokemonOffset");
         List<EncounterSet> areas = new ArrayList<EncounterSet>();
         offset = readLandEncounters(offset, areas, useTimeOfDay); // Johto
         offset = readSeaEncounters(offset, areas); // Johto
@@ -564,7 +568,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         offset = readSeaEncounters(offset, areas); // Specials
 
         // Fishing Data
-        offset = romEntry.getValue("FishingWildsOffset");
+        offset = getRomEntry().getValue("FishingWildsOffset");
         int rootOffset = offset;
         for (int k = 0; k < Gen2Constants.fishingGroupCount; k++) {
             EncounterSet es = new EncounterSet();
@@ -610,8 +614,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
 
         // Headbutt Data
-        offset = romEntry.getValue("HeadbuttWildsOffset");
-        int limit = romEntry.getValue("HeadbuttTableSize");
+        offset = getRomEntry().getValue("HeadbuttWildsOffset");
+        int limit = getRomEntry().getValue("HeadbuttTableSize");
         for (int i = 0; i < limit; i++) {
             EncounterSet es = new EncounterSet();
             es.displayName = "Headbutt Trees Set " + (i + 1);
@@ -629,7 +633,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
 
         // Bug Catching Contest Data
-        offset = romEntry.getValue("BCCWildsOffset");
+        offset = getRomEntry().getValue("BCCWildsOffset");
         EncounterSet bccES = new EncounterSet();
         bccES.displayName = "Bug Catching Contest";
         while ((rom[offset] & 0xFF) != 0xFF) {
@@ -712,7 +716,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         if (!havePatchedFleeing) {
             patchFleeing();
         }
-        int offset = romEntry.getValue("WildPokemonOffset");
+        int offset = getRomEntry().getValue("WildPokemonOffset");
         Iterator<EncounterSet> areas = encounters.iterator();
         offset = writeLandEncounters(offset, areas, useTimeOfDay); // Johto
         offset = writeSeaEncounters(offset, areas); // Johto
@@ -722,7 +726,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         offset = writeSeaEncounters(offset, areas); // Specials
 
         // Fishing Data
-        offset = romEntry.getValue("FishingWildsOffset");
+        offset = getRomEntry().getValue("FishingWildsOffset");
         for (int k = 0; k < Gen2Constants.fishingGroupCount; k++) {
             EncounterSet es = areas.next();
             Iterator<Encounter> encs = es.encounters.iterator();
@@ -758,8 +762,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
 
         // Headbutt Data
-        offset = romEntry.getValue("HeadbuttWildsOffset");
-        int limit = romEntry.getValue("HeadbuttTableSize");
+        offset = getRomEntry().getValue("HeadbuttWildsOffset");
+        int limit = getRomEntry().getValue("HeadbuttTableSize");
         for (int i = 0; i < limit; i++) {
             EncounterSet es = areas.next();
             Iterator<Encounter> encs = es.encounters.iterator();
@@ -773,7 +777,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
 
         // Bug Catching Contest Data
-        offset = romEntry.getValue("BCCWildsOffset");
+        offset = getRomEntry().getValue("BCCWildsOffset");
         EncounterSet bccES = areas.next();
         Iterator<Encounter> bccEncs = bccES.encounters.iterator();
         while ((rom[offset] & 0xFF) != 0xFF) {
@@ -827,9 +831,9 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public List<Trainer> getTrainers() {
-        int traineroffset = romEntry.getValue("TrainerDataTableOffset");
-        int traineramount = romEntry.getValue("TrainerClassAmount");
-        int[] trainerclasslimits = romEntry.arrayEntries.get("TrainerDataClassCounts");
+        int traineroffset = getRomEntry().getValue("TrainerDataTableOffset");
+        int traineramount = getRomEntry().getValue("TrainerClassAmount");
+        int[] trainerclasslimits = getRomEntry().arrayEntries.get("TrainerDataClassCounts");
 
         int[] pointers = new int[traineramount];
         for (int i = 0; i < traineramount; i++) {
@@ -878,7 +882,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
 
         Gen2Constants.universalTrainerTags(allTrainers);
-        if (romEntry.isCrystal) {
+        if (getRomEntry().isCrystal) {
             Gen2Constants.crystalTags(allTrainers);
         } else {
             Gen2Constants.goldSilverTags(allTrainers);
@@ -889,9 +893,9 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void setTrainers(List<Trainer> trainerData) {
-        int traineroffset = romEntry.getValue("TrainerDataTableOffset");
-        int traineramount = romEntry.getValue("TrainerClassAmount");
-        int[] trainerclasslimits = romEntry.arrayEntries.get("TrainerDataClassCounts");
+        int traineroffset = getRomEntry().getValue("TrainerDataTableOffset");
+        int traineramount = getRomEntry().getValue("TrainerClassAmount");
+        int[] trainerclasslimits = getRomEntry().arrayEntries.get("TrainerDataClassCounts");
 
         int[] pointers = new int[traineramount];
         for (int i = 0; i < traineramount; i++) {
@@ -958,7 +962,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public Map<Pokemon, List<MoveLearnt>> getMovesLearnt() {
         Map<Pokemon, List<MoveLearnt>> movesets = new TreeMap<Pokemon, List<MoveLearnt>>();
-        int pointersOffset = romEntry.getValue("PokemonMovesetsTableOffset");
+        int pointersOffset = getRomEntry().getValue("PokemonMovesetsTableOffset");
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
             int pointer = readWord(pointersOffset + (i - 1) * 2);
             int realPointer = calculateOffset(bankOf(pointersOffset), pointer);
@@ -1004,12 +1008,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
 
         public Pokemon getPokemon(Gen2RomHandler rh) {
-            return rh.pokes[rh.rom[offsets[0]] & 0xFF];
+            return rh.getPokemon().get(rh.readByte(offsets[0]) & 0xFF);
         }
 
         public void setPokemon(Gen2RomHandler rh, Pokemon pkmn) {
             for (int offset : offsets) {
-                rh.rom[offset] = (byte) pkmn.number;
+                rh.writeByte(offset, (byte) pkmn.number);
             }
         }
     }
@@ -1025,9 +1029,9 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             // Last offset is a pointer to the name
             int offsetSize = offsets.length;
             for (int i = 0; i < offsetSize - 1; i++) {
-                rh.rom[offsets[i]] = (byte) pkmn.number;
+                rh.writeByte(offsets[i], (byte) pkmn.number);
             }
-            rh.writePaddedPokemonName(pkmn.name, rh.romEntry.getValue("GameCornerPokemonNameLength"),
+            rh.writePaddedPokemonName(pkmn.name, rh.getRomEntry().getValue("GameCornerPokemonNameLength"),
                     offsets[offsetSize - 1]);
         }
     }
@@ -1035,14 +1039,14 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public List<Pokemon> getStaticPokemon() {
         List<Pokemon> statics = new ArrayList<Pokemon>();
-        if (romEntry.getValue("StaticPokemonSupport") > 0) {
-            for (StaticPokemon sp : romEntry.staticPokemon) {
+        if (getRomEntry().getValue("StaticPokemonSupport") > 0) {
+            for (StaticPokemon sp : getRomEntry().staticPokemon) {
                 statics.add(sp.getPokemon(this));
             }
         }
-        if (romEntry.getValue("StaticPokemonOddEggOffset") > 0) {
-            int oeOffset = romEntry.getValue("StaticPokemonOddEggOffset");
-            int oeSize = romEntry.getValue("StaticPokemonOddEggDataSize");
+        if (getRomEntry().getValue("StaticPokemonOddEggOffset") > 0) {
+            int oeOffset = getRomEntry().getValue("StaticPokemonOddEggOffset");
+            int oeSize = getRomEntry().getValue("StaticPokemonOddEggDataSize");
             for (int i = 0; i < Gen2Constants.oddEggPokemonCount; i++) {
                 statics.add(pokes[rom[oeOffset + i * oeSize] & 0xFF]);
             }
@@ -1052,15 +1056,15 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public boolean setStaticPokemon(List<Pokemon> staticPokemon) {
-        if (romEntry.getValue("StaticPokemonSupport") == 0) {
+        if (getRomEntry().getValue("StaticPokemonSupport") == 0) {
             return false;
         }
         if (!havePatchedFleeing) {
             patchFleeing();
         }
 
-        int desiredSize = romEntry.staticPokemon.size();
-        if (romEntry.getValue("StaticPokemonOddEggOffset") > 0) {
+        int desiredSize = getRomEntry().staticPokemon.size();
+        if (getRomEntry().getValue("StaticPokemonOddEggOffset") > 0) {
             desiredSize += Gen2Constants.oddEggPokemonCount;
         }
 
@@ -1069,43 +1073,42 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
 
         Iterator<Pokemon> statics = staticPokemon.iterator();
-        for (StaticPokemon sp : romEntry.staticPokemon) {
+        for (StaticPokemon sp : getRomEntry().staticPokemon) {
             sp.setPokemon(this, statics.next());
         }
 
-        if (romEntry.getValue("StaticPokemonOddEggOffset") > 0) {
-            int oeOffset = romEntry.getValue("StaticPokemonOddEggOffset");
-            int oeSize = romEntry.getValue("StaticPokemonOddEggDataSize");
+        if (getRomEntry().getValue("StaticPokemonOddEggOffset") > 0) {
+            int oeOffset = getRomEntry().getValue("StaticPokemonOddEggOffset");
+            int oeSize = getRomEntry().getValue("StaticPokemonOddEggDataSize");
             for (int i = 0; i < Gen2Constants.oddEggPokemonCount; i++) {
                 rom[oeOffset + i * oeSize] = (byte) statics.next().number;
             }
         }
-
         return true;
     }
 
     @Override
     public boolean canChangeStaticPokemon() {
-        return (romEntry.getValue("StaticPokemonSupport") > 0);
+        return (getRomEntry().getValue("StaticPokemonSupport") > 0);
     }
 
     @Override
     public List<Pokemon> bannedForStaticPokemon() {
-        return Arrays.asList(pokes[Gen2Constants.unownIndex]); // Unown banned
+        return Arrays.asList(getPokemon().get(Gen2Constants.unownIndex)); // Unown banned
     }
 
     private void writePaddedPokemonName(String name, int length, int offset) {
         String paddedName = String.format("%-" + length + "s", name);
         byte[] rawData = translateString(paddedName);
         for (int i = 0; i < length; i++) {
-            rom[offset + i] = rawData[i];
+            writeByte(offset + i, rawData[i]);
         }
     }
 
     @Override
     public List<Integer> getTMMoves() {
         List<Integer> tms = new ArrayList<Integer>();
-        int offset = romEntry.getValue("TMMovesOffset");
+        int offset = getRomEntry().getValue("TMMovesOffset");
         for (int i = 1; i <= Gen2Constants.tmCount; i++) {
             tms.add(rom[offset + (i - 1)] & 0xFF);
         }
@@ -1115,7 +1118,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public List<Integer> getHMMoves() {
         List<Integer> hms = new ArrayList<Integer>();
-        int offset = romEntry.getValue("TMMovesOffset");
+        int offset = getRomEntry().getValue("TMMovesOffset");
         for (int i = 1; i <= Gen2Constants.hmCount; i++) {
             hms.add(rom[offset + Gen2Constants.tmCount + (i - 1)] & 0xFF);
         }
@@ -1124,14 +1127,14 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void setTMMoves(List<Integer> moveIndexes) {
-        int offset = romEntry.getValue("TMMovesOffset");
+        int offset = getRomEntry().getValue("TMMovesOffset");
         for (int i = 1; i <= Gen2Constants.tmCount; i++) {
             rom[offset + (i - 1)] = moveIndexes.get(i - 1).byteValue();
         }
 
         // TM Text
         String[] moveNames = readMoveNames();
-        for (TMTextEntry tte : romEntry.tmTexts) {
+        for (TMTextEntry tte : getRomEntry().tmTexts) {
             String moveName = moveNames[moveIndexes.get(tte.number - 1)];
             String text = tte.template.replace("%m", moveName);
             writeVariableLengthString(text, tte.offset, true);
@@ -1152,7 +1155,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     public Map<Pokemon, boolean[]> getTMHMCompatibility() {
         Map<Pokemon, boolean[]> compat = new TreeMap<Pokemon, boolean[]>();
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
-            int baseStatsOffset = romEntry.getValue("PokemonStatsOffset") + (i - 1) * Gen2Constants.baseStatsEntrySize;
+            int baseStatsOffset = getRomEntry().getValue("PokemonStatsOffset") + (i - 1) * Gen2Constants.baseStatsEntrySize;
             Pokemon pkmn = pokes[i];
             boolean[] flags = new boolean[Gen2Constants.tmCount + Gen2Constants.hmCount + 1];
             for (int j = 0; j < 8; j++) {
@@ -1168,10 +1171,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         for (Map.Entry<Pokemon, boolean[]> compatEntry : compatData.entrySet()) {
             Pokemon pkmn = compatEntry.getKey();
             boolean[] flags = compatEntry.getValue();
-            int baseStatsOffset = romEntry.getValue("PokemonStatsOffset") + (pkmn.number - 1)
+            int baseStatsOffset = getRomEntry().getValue("PokemonStatsOffset") + (pkmn.number - 1)
                     * Gen2Constants.baseStatsEntrySize;
             for (int j = 0; j < 8; j++) {
-                if (!romEntry.isCrystal || j != 7) {
+                if (!getRomEntry().isCrystal || j != 7) {
                     rom[baseStatsOffset + Gen2Constants.bsTMHMCompatOffset + j] = getByteFromFlags(flags, j * 8 + 1);
                 } else {
                     // Move tutor data
@@ -1189,14 +1192,14 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public boolean hasMoveTutors() {
-        return romEntry.isCrystal;
+        return getRomEntry().isCrystal;
     }
 
     @Override
     public List<Integer> getMoveTutorMoves() {
-        if (romEntry.isCrystal) {
+        if (getRomEntry().isCrystal) {
             List<Integer> mtMoves = new ArrayList<Integer>();
-            for (int offset : romEntry.arrayEntries.get("MoveTutorMoves")) {
+            for (int offset : getRomEntry().arrayEntries.get("MoveTutorMoves")) {
                 mtMoves.add(rom[offset] & 0xFF);
             }
             return mtMoves;
@@ -1206,23 +1209,23 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void setMoveTutorMoves(List<Integer> moves) {
-        if (!romEntry.isCrystal) {
+        if (!getRomEntry().isCrystal) {
             return;
         }
         if (moves.size() != 3) {
             return;
         }
         Iterator<Integer> mvList = moves.iterator();
-        for (int offset : romEntry.arrayEntries.get("MoveTutorMoves")) {
+        for (int offset : getRomEntry().arrayEntries.get("MoveTutorMoves")) {
             rom[offset] = mvList.next().byteValue();
         }
 
         // Construct a new menu
-        if (romEntry.getValue("MoveTutorMenuOffset") > 0 && romEntry.getValue("MoveTutorMenuNewSpace") > 0) {
+        if (getRomEntry().getValue("MoveTutorMenuOffset") > 0 && getRomEntry().getValue("MoveTutorMenuNewSpace") > 0) {
             String[] moveNames = readMoveNames();
             String[] names = new String[] { moveNames[moves.get(0)], moveNames[moves.get(1)], moveNames[moves.get(2)],
                     Gen2Constants.mtMenuCancelString };
-            int menuOffset = romEntry.getValue("MoveTutorMenuNewSpace");
+            int menuOffset = getRomEntry().getValue("MoveTutorMenuNewSpace");
             rom[menuOffset++] = Gen2Constants.mtMenuInitByte;
             rom[menuOffset++] = 0x4;
             for (int i = 0; i < 4; i++) {
@@ -1231,19 +1234,19 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 menuOffset += trans.length;
                 rom[menuOffset++] = GBConstants.stringTerminator;
             }
-            int pointerOffset = romEntry.getValue("MoveTutorMenuOffset");
-            writeWord(pointerOffset, makeGBPointer(romEntry.getValue("MoveTutorMenuNewSpace")));
+            int pointerOffset = getRomEntry().getValue("MoveTutorMenuOffset");
+            writeWord(pointerOffset, makeGBPointer(getRomEntry().getValue("MoveTutorMenuNewSpace")));
         }
     }
 
     @Override
     public Map<Pokemon, boolean[]> getMoveTutorCompatibility() {
-        if (!romEntry.isCrystal) {
+        if (!getRomEntry().isCrystal) {
             return new TreeMap<Pokemon, boolean[]>();
         }
         Map<Pokemon, boolean[]> compat = new TreeMap<Pokemon, boolean[]>();
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
-            int baseStatsOffset = romEntry.getValue("PokemonStatsOffset") + (i - 1) * Gen2Constants.baseStatsEntrySize;
+            int baseStatsOffset = getRomEntry().getValue("PokemonStatsOffset") + (i - 1) * Gen2Constants.baseStatsEntrySize;
             Pokemon pkmn = pokes[i];
             boolean[] flags = new boolean[4];
             int mtByte = rom[baseStatsOffset + Gen2Constants.bsMTCompatOffset] & 0xFF;
@@ -1257,13 +1260,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void setMoveTutorCompatibility(Map<Pokemon, boolean[]> compatData) {
-        if (!romEntry.isCrystal) {
+        if (!getRomEntry().isCrystal) {
             return;
         }
         for (Map.Entry<Pokemon, boolean[]> compatEntry : compatData.entrySet()) {
             Pokemon pkmn = compatEntry.getKey();
             boolean[] flags = compatEntry.getValue();
-            int baseStatsOffset = romEntry.getValue("PokemonStatsOffset") + (pkmn.number - 1)
+            int baseStatsOffset = getRomEntry().getValue("PokemonStatsOffset") + (pkmn.number - 1)
                     * Gen2Constants.baseStatsEntrySize;
             int origMtByte = rom[baseStatsOffset + Gen2Constants.bsMTCompatOffset] & 0xFF;
             int mtByte = origMtByte & 0x01;
@@ -1279,12 +1282,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         if (isVietCrystal) {
             return Gen2Constants.vietCrystalROMName;
         }
-        return "Pokemon " + romEntry.name;
+        return "Pokemon " + getRomEntry().name;
     }
 
     @Override
     public String getROMCode() {
-        return romEntry.romCode;
+        return getRomEntry().romCode;
     }
 
     @Override
@@ -1305,7 +1308,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             }
         }
 
-        int pointersOffset = romEntry.getValue("PokemonMovesetsTableOffset");
+        int pointersOffset = getRomEntry().getValue("PokemonMovesetsTableOffset");
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
             int pointer = readWord(pointersOffset + (i - 1) * 2);
             int realPointer = calculateOffset(bankOf(pointersOffset), pointer);
@@ -1359,54 +1362,49 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public void removeTradeEvolutions(boolean changeMoveEvos) {
         // no move evos, so no need to check for those
-        log("<h2>Removing Trade Evolutions</h2><ul>");
-        for (Pokemon pkmn : pokes) {
+        List<Evolution> tradeEvoFixed = new ArrayList<Evolution>();
+        for (Pokemon pkmn : getPokemon()) {
             if (pkmn != null) {
-                for (Evolution evol : pkmn.evolutionsFrom) {
-                    if (evol.type == EvolutionType.TRADE || evol.type == EvolutionType.TRADE_ITEM) {
+                for (Evolution evo : pkmn.evolutionsFrom) {
+                    if (evo.type == EvolutionType.TRADE || evo.type == EvolutionType.TRADE_ITEM) {
                         // change
-                        if (evol.from.number == Gen2Constants.slowpokeIndex) {
+                        if (evo.from.number == Gen2Constants.slowpokeIndex) {
                             // Slowpoke: Make water stone => Slowking
-                            evol.type = EvolutionType.STONE;
-                            evol.extraInfo = 24; // water stone
-                            logEvoChangeStone(evol.from.name, evol.to.name, itemNames[24]);
-                        } else if (evol.from.number == Gen2Constants.seadraIndex) {
+                            evo.type = EvolutionType.STONE;
+                            evo.extraInfo = 24; // water stone
+                        } else if (evo.from.number == Gen2Constants.seadraIndex) {
                             // Seadra: level 40
-                            evol.type = EvolutionType.LEVEL;
-                            evol.extraInfo = 40; // level
-                            logEvoChangeLevel(evol.from.name, evol.to.name, 40);
-                        } else if (evol.from.number == Gen2Constants.poliwhirlIndex || evol.type == EvolutionType.TRADE) {
+                            evo.type = EvolutionType.LEVEL;
+                            evo.extraInfo = 40; // level
+                        } else if (evo.from.number == Gen2Constants.poliwhirlIndex || evo.type == EvolutionType.TRADE) {
                             // Poliwhirl or any of the original 4 trade evos
                             // Level 37
-                            evol.type = EvolutionType.LEVEL;
-                            evol.extraInfo = 37; // level
-                            logEvoChangeLevel(evol.from.name, evol.to.name, 37);
+                            evo.type = EvolutionType.LEVEL;
+                            evo.extraInfo = 37; // level
                         } else {
                             // A new trade evo of a single stage Pokemon
                             // level 30
-                            evol.type = EvolutionType.LEVEL;
-                            evol.extraInfo = 30; // level
-                            logEvoChangeLevel(evol.from.name, evol.to.name, 30);
+                            evo.type = EvolutionType.LEVEL;
+                            evo.extraInfo = 30; // level
                         }
+                        tradeEvoFixed.add(evo);
                     }
                 }
             }
         }
-        log("</ul>");
-        logBlankLine();
-
+        this.getTemplateData().put("removeTradeEvo", tradeEvoFixed);
     }
 
     @Override
     public boolean canChangeTrainerText() {
-        return romEntry.getValue("CanChangeTrainerText") > 0;
+        return getRomEntry().getValue("CanChangeTrainerText") > 0;
     }
 
     @Override
     public List<String> getTrainerNames() {
-        int traineroffset = romEntry.getValue("TrainerDataTableOffset");
-        int traineramount = romEntry.getValue("TrainerClassAmount");
-        int[] trainerclasslimits = romEntry.arrayEntries.get("TrainerDataClassCounts");
+        int traineroffset = getRomEntry().getValue("TrainerDataTableOffset");
+        int traineramount = getRomEntry().getValue("TrainerClassAmount");
+        int[] trainerclasslimits = getRomEntry().arrayEntries.get("TrainerDataClassCounts");
 
         int[] pointers = new int[traineramount];
         for (int i = 0; i < traineramount; i++) {
@@ -1441,10 +1439,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void setTrainerNames(List<String> trainerNames) {
-        if (romEntry.getValue("CanChangeTrainerText") != 0) {
-            int traineroffset = romEntry.getValue("TrainerDataTableOffset");
-            int traineramount = romEntry.getValue("TrainerClassAmount");
-            int[] trainerclasslimits = romEntry.arrayEntries.get("TrainerDataClassCounts");
+        if (getRomEntry().getValue("CanChangeTrainerText") != 0) {
+            int traineroffset = getRomEntry().getValue("TrainerDataTableOffset");
+            int traineramount = getRomEntry().getValue("TrainerClassAmount");
+            int[] trainerclasslimits = getRomEntry().arrayEntries.get("TrainerDataClassCounts");
 
             int[] pointers = new int[traineramount];
             for (int i = 0; i < traineramount; i++) {
@@ -1524,13 +1522,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public int maxSumOfTrainerNameLengths() {
-        return romEntry.getValue("MaxSumOfTrainerNameLengths");
+        return getRomEntry().getValue("MaxSumOfTrainerNameLengths");
     }
 
     @Override
     public List<Integer> getTCNameLengthsByTrainer() {
-        int traineramount = romEntry.getValue("TrainerClassAmount");
-        int[] trainerclasslimits = romEntry.arrayEntries.get("TrainerDataClassCounts");
+        int traineramount = getRomEntry().getValue("TrainerClassAmount");
+        int[] trainerclasslimits = getRomEntry().arrayEntries.get("TrainerDataClassCounts");
         List<String> tcNames = this.getTrainerClassNames();
         List<Integer> tcLengthsByT = new ArrayList<Integer>();
 
@@ -1546,8 +1544,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public List<String> getTrainerClassNames() {
-        int amount = romEntry.getValue("TrainerClassAmount");
-        int offset = romEntry.getValue("TrainerClassNamesOffset");
+        int amount = getRomEntry().getValue("TrainerClassAmount");
+        int offset = getRomEntry().getValue("TrainerClassNamesOffset");
         List<String> trainerClassNames = new ArrayList<String>();
         for (int j = 0; j < amount; j++) {
             String name = readVariableLengthString(offset, false);
@@ -1559,9 +1557,9 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void setTrainerClassNames(List<String> trainerClassNames) {
-        if (romEntry.getValue("CanChangeTrainerText") != 0) {
-            int amount = romEntry.getValue("TrainerClassAmount");
-            int offset = romEntry.getValue("TrainerClassNamesOffset");
+        if (getRomEntry().getValue("CanChangeTrainerText") != 0) {
+            int amount = getRomEntry().getValue("TrainerClassAmount");
+            int offset = getRomEntry().getValue("TrainerClassNamesOffset");
             Iterator<String> trainerClassNamesI = trainerClassNames.iterator();
             for (int j = 0; j < amount; j++) {
                 int len = lengthOfStringAt(offset, false) + 1;
@@ -1579,7 +1577,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public List<Integer> getDoublesTrainerClasses() {
-        int[] doublesClasses = romEntry.arrayEntries.get("DoublesTrainerClasses");
+        int[] doublesClasses = getRomEntry().arrayEntries.get("DoublesTrainerClasses");
         List<Integer> doubles = new ArrayList<Integer>();
         for (int tClass : doublesClasses) {
             doubles.add(tClass);
@@ -1610,13 +1608,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public int miscTweaksAvailable() {
         int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
-        if (romEntry.codeTweaks.get("BWXPTweak") != null) {
+        if (getRomEntry().codeTweaks.get("BWXPTweak") != null) {
             available |= MiscTweak.BW_EXP_PATCH.getValue();
         }
-        if (romEntry.getValue("TextDelayFunctionOffset") != 0) {
+        if (getRomEntry().getValue("TextDelayFunctionOffset") != 0) {
             available |= MiscTweak.FASTEST_TEXT.getValue();
         }
-        if (romEntry.arrayEntries.containsKey("CatchingTutorialOffsets")) {
+        if (getRomEntry().arrayEntries.containsKey("CatchingTutorialOffsets")) {
             available |= MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getValue();
         }
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
@@ -1634,13 +1632,14 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         } else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
             randomizeCatchingTutorial();
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
-            allowedItems.banSingles(Gen2Constants.luckyEggIndex);
-            nonBadItems.banSingles(Gen2Constants.luckyEggIndex);
+            Gen2Constants.allowedItems.banSingles(Gen2Constants.luckyEggIndex);
+            Gen2Constants.nonBadItems.banSingles(Gen2Constants.luckyEggIndex);
+            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap")).put(MiscTweak.BAN_LUCKY_EGG.getTweakName(), true);
         }
     }
 
     private void randomizeCatchingTutorial() {
-        if (romEntry.arrayEntries.containsKey("CatchingTutorialOffsets")) {
+        if (getRomEntry().arrayEntries.containsKey("CatchingTutorialOffsets")) {
             // Pick a pokemon
             int pokemon = this.random.nextInt(Gen2Constants.pokemonCount) + 1;
             while (pokemon == Gen2Constants.unownIndex) {
@@ -1648,30 +1647,33 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 pokemon = this.random.nextInt(Gen2Constants.pokemonCount) + 1;
             }
 
-            int[] offsets = romEntry.arrayEntries.get("CatchingTutorialOffsets");
+            int[] offsets = getRomEntry().arrayEntries.get("CatchingTutorialOffsets");
             for (int offset : offsets) {
-                rom[offset] = (byte) pokemon;
+                writeByte(offset, (byte) pokemon);
             }
+            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap")).put(MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getTweakName(), true);
         }
 
     }
 
     private void applyBWEXPPatch() {
-        String patchName = romEntry.codeTweaks.get("BWXPTweak");
+        String patchName = getRomEntry().codeTweaks.get("BWXPTweak");
         if (patchName == null) {
             return;
         }
 
         try {
             FileFunctions.applyPatch(rom, patchName);
+            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap")).put(MiscTweak.BW_EXP_PATCH.getTweakName(), true);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
     }
 
     private void applyFastestTextPatch() {
-        if (romEntry.getValue("TextDelayFunctionOffset") != 0) {
-            rom[romEntry.getValue("TextDelayFunctionOffset")] = (byte) GBConstants.gbZ80Ret;
+        if (getRomEntry().getValue("TextDelayFunctionOffset") != 0) {
+            writeByte(getRomEntry().getValue("TextDelayFunctionOffset"), (byte) GBConstants.gbZ80Ret);
+            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap")).put(MiscTweak.FASTEST_TEXT.getTweakName(), true);
         }
     }
 
@@ -1686,19 +1688,19 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             pokemon = this.random.nextInt(Gen2Constants.pokemonCount) + 1;
         }
 
-        rom[romEntry.getValue("IntroSpriteOffset")] = (byte) pokemon;
-        rom[romEntry.getValue("IntroCryOffset")] = (byte) pokemon;
+        writeByte(getRomEntry().getValue("IntroSpriteOffset"), (byte) pokemon);
+        writeByte(getRomEntry().getValue("IntroCryOffset"), (byte) pokemon);
 
-    }
-
-    @Override
-    public ItemList getAllowedItems() {
-        return allowedItems;
     }
 
     @Override
     public ItemList getNonBadItems() {
-        return nonBadItems;
+        return Gen2Constants.nonBadItems;
+    }
+    
+    @Override
+    public ItemList getAllowedItems() {
+        return Gen2Constants.allowedItems;
     }
 
     private void loadItemNames() {
@@ -1706,7 +1708,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         itemNames[0] = "glitch";
         // trying to emulate pretty much what the game does here
         // normal items
-        int origOffset = romEntry.getValue("ItemNamesOffset");
+        int origOffset = getRomEntry().getValue("ItemNamesOffset");
         int itemNameOffset = origOffset;
         for (int index = 1; index <= 0x100; index++) {
             if (itemNameOffset / GBConstants.bankSize > origOffset / GBConstants.bankSize) {
@@ -1731,17 +1733,17 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     private void patchFleeing() {
         havePatchedFleeing = true;
-        int offset = romEntry.getValue("FleeingDataOffset");
-        rom[offset] = (byte) 0xFF;
-        rom[offset + Gen2Constants.fleeingSetTwoOffset] = (byte) 0xFF;
-        rom[offset + Gen2Constants.fleeingSetThreeOffset] = (byte) 0xFF;
+        int offset = getRomEntry().getValue("FleeingDataOffset");
+        writeByte(offset, (byte) 0xFF);
+        writeByte(offset + Gen2Constants.fleeingSetTwoOffset, (byte) 0xFF);
+        writeByte(offset + Gen2Constants.fleeingSetThreeOffset, (byte) 0xFF);
     }
 
     private void loadLandmarkNames() {
 
-        int lmOffset = romEntry.getValue("LandmarkTableOffset");
+        int lmOffset = getRomEntry().getValue("LandmarkTableOffset");
         int lmBank = bankOf(lmOffset);
-        int lmCount = romEntry.getValue("LandmarkCount");
+        int lmCount = getRomEntry().getValue("LandmarkCount");
 
         landmarkNames = new String[lmCount];
 
@@ -1755,7 +1757,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private void preprocessMaps() {
         itemOffs = new ArrayList<Integer>();
 
-        int mhOffset = romEntry.getValue("MapHeaders");
+        int mhOffset = getRomEntry().getValue("MapHeaders");
         int mapGroupCount = Gen2Constants.mapGroupCount;
         int mapsInLastGroup = Gen2Constants.mapsInLastGroup;
         int mhBank = bankOf(mhOffset);
@@ -1941,11 +1943,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         List<IngameTrade> trades = new ArrayList<IngameTrade>();
 
         // info
-        int tableOffset = romEntry.getValue("TradeTableOffset");
-        int tableSize = romEntry.getValue("TradeTableSize");
-        int nicknameLength = romEntry.getValue("TradeNameLength");
-        int otLength = romEntry.getValue("TradeOTLength");
-        int[] unused = romEntry.arrayEntries.get("TradesUnused");
+        int tableOffset = getRomEntry().getValue("TradeTableOffset");
+        int tableSize = getRomEntry().getValue("TradeTableSize");
+        int nicknameLength = getRomEntry().getValue("TradeNameLength");
+        int otLength = getRomEntry().getValue("TradeOTLength");
+        int[] unused = getRomEntry().arrayEntries.get("TradesUnused");
         int unusedOffset = 0;
         int entryLength = nicknameLength + otLength + 9;
         if (entryLength % 2 != 0) {
@@ -1978,11 +1980,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public void setIngameTrades(List<IngameTrade> trades) {
         // info
-        int tableOffset = romEntry.getValue("TradeTableOffset");
-        int tableSize = romEntry.getValue("TradeTableSize");
-        int nicknameLength = romEntry.getValue("TradeNameLength");
-        int otLength = romEntry.getValue("TradeOTLength");
-        int[] unused = romEntry.arrayEntries.get("TradesUnused");
+        int tableOffset = getRomEntry().getValue("TradeTableOffset");
+        int tableSize = getRomEntry().getValue("TradeTableSize");
+        int nicknameLength = getRomEntry().getValue("TradeNameLength");
+        int otLength = getRomEntry().getValue("TradeOTLength");
+        int[] unused = getRomEntry().arrayEntries.get("TradesUnused");
         int unusedOffset = 0;
         int entryLength = nicknameLength + otLength + 9;
         if (entryLength % 2 != 0) {
@@ -1999,14 +2001,14 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             int entryOffset = tableOffset + entry * entryLength;
             rom[entryOffset + 1] = (byte) trade.requestedPokemon.number;
             rom[entryOffset + 2] = (byte) trade.givenPokemon.number;
-            if (romEntry.getValue("CanChangeTrainerText") > 0) {
+            if (getRomEntry().getValue("CanChangeTrainerText") > 0) {
                 writeFixedLengthString(trade.nickname, entryOffset + 3, nicknameLength);
             }
             rom[entryOffset + 3 + nicknameLength] = (byte) (trade.ivs[0] << 4 | trade.ivs[1]);
             rom[entryOffset + 4 + nicknameLength] = (byte) (trade.ivs[2] << 4 | trade.ivs[3]);
             rom[entryOffset + 5 + nicknameLength] = (byte) trade.item;
             writeWord(entryOffset + 6 + nicknameLength, trade.otId);
-            if (romEntry.getValue("CanChangeTrainerText") > 0) {
+            if (getRomEntry().getValue("CanChangeTrainerText") > 0) {
                 writeFixedLengthString(trade.otName, entryOffset + 8 + nicknameLength, otLength);
             }
             // remove gender req
@@ -2049,7 +2051,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         // are at the end of the bank
         // which, in every clean G/S/C rom supported, they are
         // specify null to either argument to copy old values
-        int movesEvosStart = romEntry.getValue("PokemonMovesetsTableOffset");
+        int movesEvosStart = getRomEntry().getValue("PokemonMovesetsTableOffset");
         int movesEvosBank = bankOf(movesEvosStart);
         byte[] pointerTable = new byte[Gen2Constants.pokemonCount * 2];
         int startOfNextBank = ((movesEvosStart / GBConstants.bankSize) + 1) * GBConstants.bankSize;
@@ -2150,11 +2152,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public boolean supportsFourStartingMoves() {
-        return (romEntry.getValue("SupportsFourStartingMoves") > 0);
+        return (getRomEntry().getValue("SupportsFourStartingMoves") > 0);
     }
 
     @Override
-    public List<Integer> getGameBreakingMoves() {
+    public Map<String, Integer> getGameBreakingMoves() {
         // add OHKO moves for gen2 because x acc is still broken
         return Gen2Constants.brokenMoves;
     }
@@ -2185,12 +2187,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         // Each Pokemon has a front and back pic with a bank and a pointer
         // (3*2=6)
         // There is no zero-entry.
-        int picPointer = romEntry.getValue("PicPointers") + (mascot.number - 1) * 6;
+        int picPointer = getRomEntry().getValue("PicPointers") + (mascot.number - 1) * 6;
         int picWidth = mascot.picDimensions & 0x0F;
         int picHeight = (mascot.picDimensions >> 4) & 0x0F;
 
         int picBank = (rom[picPointer] & 0xFF);
-        if (romEntry.isCrystal) {
+        if (getRomEntry().isCrystal) {
             // Crystal pic banks are offset by x36 for whatever reason.
             picBank += 0x36;
         } else {
@@ -2214,7 +2216,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         // zero-entry.
         // Black and white are left alone at the start and end of the palette.
         int[] palette = new int[] { 0xFFFFFFFF, 0xFFAAAAAA, 0xFF666666, 0xFF000000 };
-        int paletteOffset = romEntry.getValue("PokemonPalettes") + mascot.number * 8;
+        int paletteOffset = getRomEntry().getValue("PokemonPalettes") + mascot.number * 8;
         if (random.nextInt(10) == 0) {
             // Use shiny instead
             paletteOffset += 4;
@@ -2233,11 +2235,15 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void writeCheckValueToROM(int value) {
-        if (romEntry.getValue("CheckValueOffset") > 0) {
-            int cvOffset = romEntry.getValue("CheckValueOffset");
+        if (getRomEntry().getValue("CheckValueOffset") > 0) {
+            int cvOffset = getRomEntry().getValue("CheckValueOffset");
             for (int i = 0; i < 4; i++) {
                 rom[cvOffset + i] = (byte) ((value >> (3 - i) * 8) & 0xFF);
             }
         }
+    }
+    
+    protected RomEntry getRomEntry() {
+        return romEntry;
     }
 }

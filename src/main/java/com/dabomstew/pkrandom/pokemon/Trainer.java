@@ -54,6 +54,33 @@ public class Trainer implements Comparable<Trainer> {
         }
     }
 
+    public String stringOffset() {
+        return String.format("%X", this.offset);
+    }
+
+    public String getLogName() {
+        if (this.fullDisplayName != null) {
+            return this.fullDisplayName;
+        }
+        return this.name;
+    }
+
+    public int getOffset() {
+        return this.offset;
+    }
+
+    public void setOffset(int offset) {
+        this.offset = offset;
+    }
+
+    public List<TrainerPokemon> getPokemon() {
+        return this.pokemon;
+    }
+
+    public void setPokemon(List<TrainerPokemon> pokemon) {
+        this.pokemon = pokemon;
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder("[");
         if (fullDisplayName != null) {

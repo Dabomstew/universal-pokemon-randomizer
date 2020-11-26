@@ -29,6 +29,34 @@ public class Encounter {
     public int maxLevel;
     public Pokemon pokemon;
 
+    public int maximumLevel() {
+        return Math.max(level, maxLevel);
+    }
+
+    public int getLevel() {
+    	return this.level;
+    }
+
+    public void setLevel(int level) {
+    	this.level = level;
+    }
+
+    public int getMaxLevel() {
+    	return this.maxLevel;
+    }
+
+    public void setMaxLevel(int maxLevel) {
+    	this.maxLevel = maxLevel;
+    }
+
+    public Pokemon getPokemon() {
+    	return this.pokemon;
+    }
+
+    public void setPokemon(Pokemon pokemon) {
+    	this.pokemon = pokemon;
+    }
+
     public String toString() {
         if (pokemon == null) {
             return "ERROR";
@@ -38,9 +66,5 @@ public class Encounter {
         } else {
             return pokemon.name + " Lvs " + level + "-" + maxLevel;
         }
-    }
-
-    public int maximumLevel() {
-        return Math.max(level, maxLevel);
     }
 }

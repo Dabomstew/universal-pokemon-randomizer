@@ -44,7 +44,7 @@ public class TypeTest {
         assertNotEquals(latter.secondaryType, null);
         
         // Prior second type changes
-        newType = randomType(new Type[] {sharedType});
+        newType = randomType(new Type[] {newType});
         prior.secondaryType = newType;
         prior.typeChanged = 2;
         latter.assignTypeByReference(prior, typesDiffer, () -> randomType(null));

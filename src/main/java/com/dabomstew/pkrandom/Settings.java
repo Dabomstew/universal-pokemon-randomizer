@@ -34,8 +34,6 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.zip.CRC32;
 
-import javax.xml.bind.DatatypeConverter;
-
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
@@ -437,11 +435,11 @@ public class Settings {
         }
         
         // Convert to Base64 stream for file stream
-        return DatatypeConverter.printBase64Binary(out.toByteArray());
+        return java.util.Base64.getEncoder().encodeToString(out.toByteArray());
     }
 
     public static Settings fromString(String settingsString) throws UnsupportedEncodingException {
-        byte[] data = DatatypeConverter.parseBase64Binary(settingsString);
+        byte[] data = java.util.Base64.getDecoder().decode(settingsString);
         checkChecksum(data);
 
         Settings settings = new Settings();

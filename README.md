@@ -43,6 +43,12 @@ accomplishes the equivalent of `mvn clean package`, or just run it from the comm
 line. This will build a jar for you under the `target` folder which contains any
 modifications to the code you have made.
 
+Another option is to build in a docker container. You can build by running
+`docker run -it --rm -v "$PWD":/usr/src/mymaven -v "$HOME/.m2":/root/.m2 -w /usr/src/mymaven maven:3.6-jdk-8 mvn clean package`.
+This volume maps the current directory and the local maven repository into a docker container
+and performs a maven build there. Make sure your current directory is the same location as
+`pom.xml` for this command to work. 
+
 This is subject to change. Make sure you're paying attention to which version of Java
 (currently this project is set to use Java 8) and Maven (3.6) you're using.
 

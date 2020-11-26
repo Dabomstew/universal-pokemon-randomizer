@@ -195,4 +195,11 @@ public class NARCArchive {
         data[offset + 3] = (byte) ((value >> 24) & 0xFF);
     }
 
+    public List<byte[]> getFiles() {
+        return this.files;
+    }
+    
+    public void setFiles(List<byte[]> files) {
+        this.files = files;
+    }
 }

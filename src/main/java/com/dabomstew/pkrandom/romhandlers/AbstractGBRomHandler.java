@@ -28,7 +28,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.FileFunctions;
@@ -39,8 +38,8 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     protected byte[] rom;
     private String loadedFN;
 
-    public AbstractGBRomHandler(Random random, PrintStream logStream) {
-        super(random, logStream);
+    public AbstractGBRomHandler(Random random) {
+        super(random);
     }
 
     @Override
@@ -133,12 +132,20 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         return (byte) thisByte;
     }
 
+    protected int readByte(int offset) {
+        return rom[offset];
+    }
+
     protected int readWord(int offset) {
         return readWord(rom, offset);
     }
 
     protected int readWord(byte[] data, int offset) {
         return (data[offset] & 0xFF) + ((data[offset + 1] & 0xFF) << 8);
+    }
+
+    protected void writeByte(int offset, byte value) {
+        rom[offset] = value;
     }
 
     protected void writeWord(int offset, int value) {

@@ -37,4 +37,33 @@ public class IngameTrade {
 
     public int item = 0;
 
+    public Pokemon getRequestedPokemon() {
+    	return this.requestedPokemon;
+    }
+    public void setRequestedPokemon(Pokemon pokemon) {
+    	this.requestedPokemon = pokemon;
+    }
+
+    public Pokemon getGivenPokemon() {
+    	return this.givenPokemon;
+    }
+    public void setGivenPokemon(Pokemon pokemon) {
+    	this.givenPokemon = pokemon;
+    }
+
+    public String getNickname() {
+    	return this.nickname;
+    }
+
+    public void setNickname(String nickname) {
+    	this.nickname = nickname;
+    }
+
+    public int getItem() {
+        return this.item;
+    }
+    
+    public void setItem(int item) {
+        this.item = item;
+    }
 }

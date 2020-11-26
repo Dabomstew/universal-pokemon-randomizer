@@ -28,6 +28,23 @@ public class MoveLearnt {
     public int move;
     public int level;
 
+    public int getMove() {
+    	return this.move;
+    }
+
+    public void setMove(int move) {
+    	this.move = move;
+    }
+
+    public int getLevel() {
+    	return this.level;
+    }
+    
+    public void setLevel(int level) {
+    	this.level = level;
+    }
+
+
     public String toString() {
         return "move " + move + " at level " + level;
     }

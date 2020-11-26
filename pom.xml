@@ -24,6 +24,19 @@
 		    <version>4.13</version>
 		    <scope>test</scope>
 		</dependency>
+		
+		<dependency>
+		  <groupId>org.freemarker</groupId>
+		  <artifactId>freemarker</artifactId>
+		  <version>2.3.30</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.mockito</groupId>
+		    <artifactId>mockito-inline</artifactId>
+		    <version>3.5.10</version>
+		    <scope>test</scope>
+		</dependency>
     </dependencies>
 
     <build>
@@ -33,6 +46,34 @@
                 <directory>src/main/java</directory>
             </resource>
         </resources>
+
+        <plugins>
+        <!-- Plugins that fail when managed -->
+            <plugin>
+                <!-- Builds the randomizer jar -->
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                    <goal>single</goal>
+                    </goals>
+                </execution>
+                </executions>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.dabomstew.pkrandom.gui.RandomizerGUI</mainClass>
+                        </manifest>
+                    </archive>
+                <descriptorRefs>
+                    <descriptorRef>jar-with-dependencies</descriptorRef>
+                </descriptorRefs>
+                <finalName>randomizer</finalName>
+                <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+            </plugin>
+        </plugins>
 
         <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
             <plugins>
@@ -49,30 +90,10 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.7.0</version>
                 </plugin>
-			    <plugin>
-			        <groupId>org.apache.maven.plugins</groupId>
-			        <artifactId>maven-surefire-plugin</artifactId>
-			        <version>2.20.1</version>
-			        <dependencies>
-			            <dependency>
-			                <groupId>org.apache.maven.surefire</groupId>
-			                <artifactId>surefire-junit47</artifactId>
-			                <version>2.20.1</version>
-			            </dependency>
-			        </dependencies>
-			    </plugin>
                 <plugin>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.0.2</version>
-                    <configuration>
-                        <archive>
-                            <manifest>
-                                <mainClass>
-                                    com.dabomstew.pkrandom.gui.RandomizerGUI
-                                </mainClass>
-                            </manifest>
-                        </archive>
-                    </configuration>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.20.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>

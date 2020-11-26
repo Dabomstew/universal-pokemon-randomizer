@@ -1,7 +1,9 @@
 package com.dabomstew.pkrandom.constants;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Trainer;
@@ -82,11 +84,21 @@ public class Gen2Constants {
     // ban thief from levelup moves
     public static final List<Integer> bannedLevelupMoves = Arrays.asList(168);
 
-    public static final List<Integer> brokenMoves = Arrays.asList(49, 82, 32, 90, 12);
-
     public static final int tmBlockOneIndex = 191, tmBlockOneSize = 4, tmBlockTwoIndex = 196, tmBlockTwoSize = 24,
             tmBlockThreeIndex = 221, tmBlockThreeSize = 22;
 
+    public static final Map<String, Integer> brokenMoves = constructBanList();
+
+    private static Map<String, Integer> constructBanList() {
+        Map<String, Integer> bList = new HashMap();
+        bList.put("GUILLOTINE", 12);
+        bList.put("HORN DRILL", 32);
+        bList.put("SONICBOOM", 49);
+        bList.put("DRAGON RAGE", 82);
+        bList.put("FISSURE", 90);
+        return bList;
+    }
+    
     public static final int luckyEggIndex = 0x7E;
 
     private static Type[] constructTypeTable() {

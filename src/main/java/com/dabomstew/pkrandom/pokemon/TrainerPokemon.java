@@ -53,8 +53,20 @@ public class TrainerPokemon {
         this.ability = tp.ability;
     }
 
+    public Pokemon getPokemon() {
+    	return this.pokemon;
+    }
+
+    public void setPokemon(Pokemon pokemon) {
+    	this.pokemon = pokemon;
+    }
+
     public int getLevel() {
-        return level;
+    	return this.level;
+    }
+    
+    public void setLevel(int level) {
+    	this.level = level;
     }
 
     public String toString() {

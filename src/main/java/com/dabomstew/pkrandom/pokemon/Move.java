@@ -35,7 +35,185 @@ public class Move {
     public int effectIndex;
     public MoveCategory category;
     public double hitCount = 1; // not saved, only used in randomized move powers.
+    
+    public Move() {}
+    
+    public Move(Move m) {
+        super();
+        this.name = m.name;
+        this.number = m.number;
+        this.internalId = m.internalId;
+        this.power = m.power;
+        this.pp = m.pp;
+        this.hitratio = m.hitratio;
+        this.type = m.type;
+        this.effectIndex = m.effectIndex;
+        this.category = m.category;
+        this.hitCount = m.hitCount;
+    }
 
+
+
+    public String getName() {
+        return name;
+    }
+
+
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+
+
+    public int getNumber() {
+        return number;
+    }
+
+
+
+    public void setNumber(int number) {
+        this.number = number;
+    }
+
+
+
+    public int getInternalId() {
+        return internalId;
+    }
+
+
+
+    public void setInternalId(int internalId) {
+        this.internalId = internalId;
+    }
+
+
+
+    public int getPower() {
+        return power;
+    }
+
+
+
+    public void setPower(int power) {
+        this.power = power;
+    }
+
+
+
+    public int getPp() {
+        return pp;
+    }
+
+
+
+    public void setPp(int pp) {
+        this.pp = pp;
+    }
+
+
+
+    public double getHitratio() {
+        return hitratio;
+    }
+
+
+
+    public void setHitratio(double hitratio) {
+        this.hitratio = hitratio;
+    }
+
+
+
+    public Type getType() {
+        return type;
+    }
+
+
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+
+
+    public int getEffectIndex() {
+        return effectIndex;
+    }
+
+
+
+    public void setEffectIndex(int effectIndex) {
+        this.effectIndex = effectIndex;
+    }
+
+
+
+    public MoveCategory getCategory() {
+        return category;
+    }
+
+
+
+    public void setCategory(MoveCategory category) {
+        this.category = category;
+    }
+
+
+
+    public double getHitCount() {
+        return hitCount;
+    }
+
+
+
+    public void setHitCount(double hitCount) {
+        this.hitCount = hitCount;
+    }
+
+    public boolean isBigMove() {
+        return power > 95;
+    }
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Move other = (Move) obj;
+        if (number != other.number) {
+            return false;
+        }
+        if (power != other.power) {
+            return false;
+        }
+        if (pp != other.pp) {
+            return false;
+        }
+        if (hitratio != other.hitratio) {
+            return false;
+        }
+        if (type != other.type) {
+            return false;
+        }
+        if (effectIndex != other.effectIndex) {
+            return false;
+        }
+        if (category != other.category) {
+            return false;
+        }
+        if (hitCount != other.hitCount) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public String toString() {
         return "#" + number + " " + name + " - Power: " + power + ", Base PP: " + pp + ", Type: " + type + ", Hit%: "
                 + (hitratio) + ", Effect: " + effectIndex;

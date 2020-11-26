@@ -39,3 +39,6 @@ build_eclipse.xml
 .idea
 /target
 /dist/
+
+# VSCode
+.vscode

@@ -107,4 +107,8 @@ public class GlobalConstants {
 
     public static final int TRIPLE_KICK_INDEX = 167;
 
+    public static final int MAXIMUM_EVO_LEVEL = 40;
+
+    public static final int MAXIMUM_INTERMEDIATE_EVO_LEVEL = 30;
+
 }

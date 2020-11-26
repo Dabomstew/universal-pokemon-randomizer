@@ -30,21 +30,24 @@ import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.LayoutManager;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -65,6 +68,12 @@ import javax.swing.ToolTipManager;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.xml.bind.DatatypeConverter;
+
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.TemplateExceptionHandler;
+import freemarker.template.Version;
 
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.FileFunctions;
@@ -2113,16 +2122,16 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private void performRandomization(final String filename, final long seed, CustomNamesSet customNames) {
         final Settings settings = createSettingsFromState(customNames);
         final boolean raceMode = settings.isRaceMode();
-        // Setup verbose log
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream log;
-        try {
-            log = new PrintStream(baos, false, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            log = new PrintStream(baos);
-        }
 
-        final PrintStream verboseLog = log;
+        Configuration cfg = new Configuration(new Version("2.3.30"));
+        
+        cfg.setClassForTemplateLoading(RandomizerGUI.class, "/com/dabomstew/pkrandom/gui/");
+        cfg.setDefaultEncoding("UTF-8");
+        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+        cfg.setBooleanFormat("c");
+        cfg.setWhitespaceStripping(true);
+        
+        Map<String, Object> templateData = new HashMap<String, Object>();
 
         try {
             final AtomicInteger finishedCV = new AtomicInteger(0);
@@ -2138,30 +2147,22 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     });
                     boolean succeededSave = false;
                     try {
-                        RandomizerGUI.this.romHandler.setLog(verboseLog);
+                        Template template = cfg.getTemplate("randomization_log.ftl");
+                        RandomizerGUI.this.romHandler.setTemplate(template, templateData);
                         finishedCV.set(new Randomizer(settings, RandomizerGUI.this.romHandler).randomize(filename,
-                                verboseLog, seed));
+                                seed));
                         succeededSave = true;
                     } catch (RandomizationException ex) {
                         attemptToLogException(ex, "RandomizerGUI.saveFailedMessage",
                                 "RandomizerGUI.saveFailedMessageNoLog", true);
-                        if (verboseLog != null) {
-                            verboseLog.close();
-                        }
                     } catch (Exception ex) {
                         attemptToLogException(ex, "RandomizerGUI.saveFailedIO", "RandomizerGUI.saveFailedIONoLog");
-                        if (verboseLog != null) {
-                            verboseLog.close();
-                        }
                     }
                     if (succeededSave) {
                         SwingUtilities.invokeLater(new Runnable() {
                             @Override
                             public void run() {
                                 RandomizerGUI.this.opDialog.setVisible(false);
-                                // Log?
-                                verboseLog.close();
-                                byte[] out = baos.toByteArray();
 
                                 if (raceMode) {
                                     JOptionPane.showMessageDialog(RandomizerGUI.this,
@@ -2173,14 +2174,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
                                             bundle.getString("RandomizerGUI.saveLogDialog.title"),
                                             JOptionPane.YES_NO_OPTION);
                                     if (response == JOptionPane.YES_OPTION) {
+                                                // Print ftl log
                                         try {
-                                            FileOutputStream fos = new FileOutputStream(filename + ".log.htm");
-                                            fos.write(0xEF);
-                                            fos.write(0xBB);
-                                            fos.write(0xBF);
-                                            fos.write(out);
-                                            fos.close();
-                                        } catch (IOException e) {
+                                            Writer file = new FileWriter (new File(filename + ".log.htm"));
+                                            romHandler.getTemplate().process(romHandler.getTemplateData(), file); 
+                                        } catch (IOException | TemplateException e) {
                                             JOptionPane.showMessageDialog(RandomizerGUI.this,
                                                     bundle.getString("RandomizerGUI.logSaveFailed"));
                                             return;
@@ -2227,9 +2225,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
             t.start();
         } catch (Exception ex) {
             attemptToLogException(ex, "RandomizerGUI.saveFailed", "RandomizerGUI.saveFailedNoLog");
-            if (verboseLog != null) {
-                verboseLog.close();
-            }
         }
     }
 

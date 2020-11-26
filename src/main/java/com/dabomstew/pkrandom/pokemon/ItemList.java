@@ -51,6 +51,12 @@ public class ItemList {
         }
         return items[index];
     }
+    
+    public void allowSingles(int... indexes) {
+        for (int index : indexes) {
+            items[index] = true;
+        }
+    }
 
     public void banSingles(int... indexes) {
         for (int index : indexes) {
