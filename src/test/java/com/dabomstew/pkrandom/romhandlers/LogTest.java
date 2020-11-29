@@ -739,6 +739,24 @@ public class LogTest {
         assertEquals(romhandler.getTemplateData().get("updateEffectiveness"), true);
     }
 
+    @Test
+    public void TestTableOfContents() {
+        RomHandler romhandler = spy(new Gen1RomHandler(new Random()));
+        resetDataModel(romhandler, 250);
+        romhandler.generateTableOfContents();
+        // Sanity Check - Should be empty at the start
+        assertEquals(((ArrayList)romhandler.getTemplateData().get("toc")).size(), 0);
+        // Spot Check
+        romhandler.condenseLevelEvolutions(GlobalConstants.MAXIMUM_EVO_LEVEL, GlobalConstants.MAXIMUM_INTERMEDIATE_EVO_LEVEL);
+        romhandler.generateTableOfContents();
+        assertArrayEquals(((ArrayList<String[]>)romhandler.getTemplateData().get("toc")).get(0), 
+            new String[]{"cle", "Condensed Evos"});
+        romhandler.randomStarterPokemon(false, false, false, 999);
+        romhandler.generateTableOfContents();
+        assertArrayEquals(((ArrayList<String[]>)romhandler.getTemplateData().get("toc")).get(1), 
+            new String[]{"rs", "Starters"});
+    }
+
 
     /**
      * Function for granular modification of data model

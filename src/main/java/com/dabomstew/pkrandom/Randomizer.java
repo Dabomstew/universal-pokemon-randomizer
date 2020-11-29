@@ -460,6 +460,7 @@ public class Randomizer {
         romHandler.getTemplateData().put("rngCalls", RandomSource.callsSinceSeed());
         romHandler.getTemplateData().put("rngSeed", RandomSource.getSeed());
         romHandler.getTemplateData().put("settingsString", Settings.VERSION + settings.toString());
+        romHandler.generateTableOfContents();
                 
         return checkValue;
     }

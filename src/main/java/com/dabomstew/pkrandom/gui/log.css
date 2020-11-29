@@ -59,6 +59,10 @@ td {
   text-align: center;
 }
 
+ul#toc li {
+  display:inline;
+}
+
 li {
   margin-top: 4px;
   margin-bottom: 4px;

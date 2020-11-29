@@ -449,6 +449,8 @@ public interface RomHandler {
 
     public void writeCheckValueToROM(int value);
 
+    public void generateTableOfContents();
+
     // code tweaks
     public int miscTweaksAvailable();
 

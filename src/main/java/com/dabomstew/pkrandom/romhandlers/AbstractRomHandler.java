@@ -4121,6 +4121,85 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public void generateTableOfContents() {
+        try {
+        List<String[]> toc = new ArrayList<String[]>();
+        if (this.getTemplateData().get("isModernMoves") != null &&
+            (Boolean)this.getTemplateData().get("isModernMoves")) {
+            toc.add(new String[]{"mm", "Move Modernization"});
+        }
+        if (((Map)this.getTemplateData().get("tweakMap")).size() > 0) {
+            toc.add(new String[]{"pa", "Patches Applied"});
+        }
+        if (this.getTemplateData().get("shuffledTypes") != null) {
+            toc.add(new String[]{"st", "Shuffled Types"});
+        }
+        Object fte = this.getTemplateData().get("updateEffectiveness");
+        if (fte != null && (Boolean)fte) {
+            toc.add(new String[]{"fte", "Fixed Type Effectiveness"});
+        }
+        if ((Boolean)this.getTemplateData().get("logEvolutions") != null &&
+            (Boolean)this.getTemplateData().get("logEvolutions")) {
+            toc.add(new String[]{"re", "Randomized Evolutions"});
+            toc.add(new String[]{"ep", "Evolution Paths"});
+        }
+        if ((Boolean)this.getTemplateData().get("logPokemon") != null &&
+            (Boolean)this.getTemplateData().get("logPokemon")) {
+            toc.add(new String[]{"ps", "Pokemon Stats"});
+        }
+        if (this.getTemplateData().get("removeTradeEvo") != null &&
+            ((List)this.getTemplateData().get("removeTradeEvo")).size() > 0) {
+            toc.add(new String[]{"rte", "Impossible Evos"});
+        }
+        if (this.getTemplateData().get("condensedEvos") != null &&
+            ((TreeSet)this.getTemplateData().get("condensedEvos")).size() > 0) {
+            toc.add(new String[]{"cle", "Condensed Evos"});
+        }
+        if (this.getTemplateData().get("logStarters") != null) {
+            toc.add(new String[]{"rs", "Starters"});
+        }
+        if (this.getTemplateData().get("logMoves") != null &&
+            (Boolean)this.getTemplateData().get("logMoves")) {
+            toc.add(new String[]{"md", "Move Data"});
+        }
+        if (this.getTemplateData().get("gameBreakingMoves") != null &&
+            (Boolean)this.getTemplateData().get("gameBreakingMoves")) {
+            toc.add(new String[]{"gbm", "Game Breaking Moves"});
+        }
+        if (this.getTemplateData().get("logPokemonMoves") != null) {
+            toc.add(new String[]{"pm", "Pokemon Moves"});
+        }
+        if (this.getTemplateData().get("originalTrainers") != null &&
+            ((List)this.getTemplateData().get("originalTrainers")).size() > 0) {
+            toc.add(new String[]{"tp", "Trainer Pokemon"});
+        }
+        if (this.getTemplateData().get("staticPokemon") != null &&
+            ((Map)this.getTemplateData().get("staticPokemon")).size() > 0) {
+            toc.add(new String[]{"sp", "Static Pokemon"});
+        }
+        if (this.getTemplateData().get("wildPokemon") != null &&
+            ((List)this.getTemplateData().get("wildPokemon")).size() > 0) {
+            toc.add(new String[]{"wp", "Wild Pokemon"});
+        }
+        if(this.getTemplateData().get("logTMMoves") != null &&
+            !((String) this.getTemplateData().get("logTMMoves")).isEmpty()) {
+            toc.add(new String[]{"tm", "TM Moves"});
+        }
+        if(this.getTemplateData().get("logTutorMoves") != null) {
+            toc.add(new String[]{"mt", "Tutor Moves"});
+        }
+        if (this.getTemplateData().get("oldTrades") != null &&
+            ((List)this.getTemplateData().get("oldTrades")).size() > 0) {
+            toc.add(new String[]{"igt", "In-Game Trades"});
+        }
+                    
+        this.getTemplateData().put("toc", toc);
+    } catch (Throwable t) {
+        t.printStackTrace();
+    }
+    }
+
+    @Override
     public int miscTweaksAvailable() {
         // default: none
         return 0;

@@ -1,7 +1,15 @@
 <!DOCTYPE html>
     <body>
+		<ul id="toc">
+			<#list toc as tocElement>
+			<li class="pk-type flying"><a href="#${tocElement[0]}">${tocElement[1]}</a></li>
+			</#list>
+		</ul>
+
+		<!--====================================================================================-->
+
     	<#if isModernMoves>
-    	<h2>Move Modernization</h2>
+    	<h2 id="mm">Move Modernization</h2>
     	<ul>
     		<#list moveUpdates as moveId, changes>
     		<#assign move = movesMod[moveId?index]>
@@ -52,7 +60,7 @@
 		<!--====================================================================================-->
 
     	<#list tweakMap>
-    	<h2>Patches Applied</h2>
+    	<h2 id="pa">Patches Applied</h2>
     	<div>
     	<#items as patch, result>
 	    	<#if result>
@@ -89,7 +97,7 @@
 		<!--====================================================================================-->
 
     	<#if shuffledTypes??>
-    		<h2>Shuffled Types</h2>
+    		<h2 id="st">Shuffled Types</h2>
     		<table class="pk-table">
     		<tr><th>Old Type</th><th>New Type</th></tr>
     		<#list typeList as fmrType>
@@ -104,7 +112,7 @@
 		<!--====================================================================================-->
 
 		<#if updateEffectiveness??>
-			<h2>Fixing Type Effectiveness</h2>
+			<h2 id="fte">Fixing Type Effectiveness</h2>
 			<ul>
 				<li><strong>Replaced:</strong> <span class="pk-type poison">Poison</span> <em>super effective</em> vs <span class="pk-type bug">Bug</span> 
 				=> <span class="pk-type ice">Ice</span> <em>not very effective</em> vs <span class="pk-type fire">Fire</span></li>
@@ -118,7 +126,7 @@
 		<!--====================================================================================-->
 
     	<#if logEvolutions?? && logEvolutions>
-    		<h2>Randomized Evolutions</h2>
+    		<h2 id="re">Randomized Evolutions</h2>
     		<ul>
     		<#list romHandler.getPokemon() as pkmn>
     		<#if pkmn?? && pkmn.evolutionsFrom?size gt 0>
@@ -133,7 +141,7 @@
     		</#if>
     		</#list>
     		</ul>
-    		<h2>New Evolution Paths</h2>
+    		<h2 id="ep">New Evolution Paths</h2>
     		<table class="pk-table">
     		<#list basePokes as pkmn>
     			<tr>
@@ -164,7 +172,7 @@
 		<!--====================================================================================-->
 
     	<#if logPokemon?? && logPokemon>
-    		<h2>Pokemon Base Stats & Types</h2>
+    		<h2 id="ps">Pokemon Base Stats & Types</h2>
     		<table class="pk-table">
 				<tr><th>NUM</th><th>NAME</th><th>TYPE</th><th>HP</th><th>ATK</th><th>DEF</th><th>SPE</th>
 				<#if gen1>
@@ -260,14 +268,14 @@
 				</#list> 
     		</table>
     	<#else>
-    		<h2>Pokemon Base Stats & Types</h2>
+    		<h2 id="ps">Pokemon Base Stats & Types</h2>
     		<p>Unchanged.</p>
     	</#if>
 
 		<!--====================================================================================-->
 
 		<#if removeTradeEvo??>
-			<h2>Removing Trade Evolutions</h2>
+			<h2 id="rte">Removing Trade Evolutions</h2>
 			<ul>
 			<#list removeTradeEvo as evo>
 			<#if evo.type.name() == "LEVEL">
@@ -288,7 +296,7 @@
 		<!--====================================================================================-->
 
 		<#if condensedEvos??>
-			<h2>Condensed Level Evolutions</h2>
+			<h2 id="cle">Condensed Level Evolutions</h2>
 			<ul>
 			<#list condensedEvos as evo>
 				<li><strong>${evo.from.name}</strong> now evolves into <strong>${evo.to.name}</strong> at minimum level <strong>${evo.extraInfo}</strong></li>
@@ -301,16 +309,16 @@
     	<#if logStarters??>
     	<#switch logStarters>
     		<#case "custom">
-    			<h2>Custom Starters</h2>
+    			<h2 id="rs">Custom Starters</h2>
     		<#break>
     		<#case "random">
-    			<h2>Random Starters</h2>
+    			<h2 id="rs">Random Starters</h2>
     		<#break>
     		<#case "1or2evo">
-    			<h2>Random 1/2-Evolution Starters</h2>
+    			<h2 id="rs">Random 1/2-Evolution Starters</h2>
     		<#break>
     		<#case "2evo">
-    			<h2>Random 2-Evolution Starters</h2>
+    			<h2 id="rs">Random 2-Evolution Starters</h2>
     		<#break>
     	</#switch>
     	   <ul>
@@ -323,7 +331,7 @@
 		<!--====================================================================================-->
 
 		<#if logMoves?? && logMoves>
-			<h2>Move Data</h2>
+			<h2 id="md">Move Data</h2>
 			<table class="moves-table">
 				<tr><th>NUM</th><th>NAME</th><th>TYPE</th><th>POWER</th><th>ACC.</th><th>PP</th>
 				<#if romHandler.hasPhysicalSpecialSplit()>
@@ -361,14 +369,14 @@
 				</#list>
 			</table>
 		<#else>
-			<h2>Move Data</h2>
+			<h2 id="md">Move Data</h2>
 			<p>Unchanged.</p>
 		</#if>
 
 		<!--====================================================================================-->
 
 		<#if gameBreakingMoves??>
-				<h2>Removed Game-Breaking Moves</h2>
+				<h2 id="gbm">Removed Game-Breaking Moves</h2>
 				<ul>
 				<#list romHandler.getGameBreakingMoves()?keys as name>
 					<li>${name}</li>
@@ -381,11 +389,11 @@
 		<#if logPokemonMoves??>
 			<#switch logPokemonMoves>
 			<#case "metronome">
-				<h2>Pokemon Movesets</h2>
+				<h2 id="pm">Pokemon Movesets</h2>
 				<p>Metronome Only.</p>
 				<#break>
 			<#default>
-				<h2>Pokemon Movesets</h2>
+				<h2 id="pm">Pokemon Movesets</h2>
 				<#list romHandler.getMovesLearnt() as pkmn, moveList>
 					<h3>${pkmn.number?string["000"]} ${pkmn.name}</h3>
 					<ul class="moveset">
@@ -402,14 +410,14 @@
 				</#list>
 			</#switch>
 		<#else>
-			<h2>Pokemon Movesets</h2>
+			<h2 id="pm">Pokemon Movesets</h2>
 			<p>Unchanged.</p>
 		</#if>
 
 		<!--====================================================================================-->
 
 		<#if originalTrainers??>
-			<h2>Trainers Pokemon</h2>
+			<h2 id="tp">Trainers Pokemon</h2>
 			<#list romHandler.getTrainers() as trainer>
 			<div class="trainer-box">
 				<div class="trainer">
@@ -435,28 +443,28 @@
 			<!-- Preserves spacing between trainer divs. Intentionally left empty -->
 			<div class="clear"></div>
 		<#else>
-			<h2>Trainers</h2>
+			<h2 id="tp">Trainers</h2>
 			<p>Unchanged.</p>
 		</#if>
 
 		<!--====================================================================================-->
 
 		<#if staticPokemon??>
-			<h2>Static Pokemon</h2>
+			<h2 id="sp">Static Pokemon</h2>
 			<ul>
 			<#list staticPokemon as oldPoke, newPoke>
 				<li>${oldPoke} => ${newPoke}</li>
 			</#list>
 			</ul>
 		<#else>
-			<h2>Static Pokemon</h2>
+			<h2 id="sp">Static Pokemon</h2>
 			<p>Unchanged.</p>
 		</#if>
 
 		<!--====================================================================================-->
 
 		<#if wildPokemon??>
-			<h2>Wild Pokemon</h2>
+			<h2 id="wp">Wild Pokemon</h2>
 			<ul>
 			<#list wildPokemon as encounterSet>
 				<div class="wild-pk-set ${encounterSet.getDivClass()}">
@@ -480,7 +488,7 @@
 			</#list>
 			</ul>
 		<#else>
-			<h2>Wild Pokemon</h2>
+			<h2 id="wp">Wild Pokemon</h2>
 			<p>Unchanged.</p>
 		</#if>
 
@@ -492,11 +500,11 @@
 			</#if>
 			<#switch logTMMoves>
 			<#case "metronome">
-				<h2>TM Moves</h2>
+				<h2 id="tm">TM Moves</h2>
 				<p>Metronome Only.</p>
 				<#break>
 			<#default>
-				<h2>TM Moves</h2>
+				<h2 id="tm">TM Moves</h2>
 				<ul class="tm-list">
 				<#list romHandler.getTMMoves() as tm>
 					<li><strong>TM${tm?counter?string["00"]}</strong> ${romHandler.getMoves()[tm].name}</li>
@@ -504,7 +512,7 @@
 				</ul>
 			</#switch>
 		<#else>
-			<h2>TM Moves</h2>
+			<h2 id="tm">TM Moves</h2>
 			<p>Unchanged.</p>
 		</#if>
 
@@ -516,11 +524,11 @@
 			</#if>
 			<#switch logTutorMoves>
 			<#case "metronome">
-				<h2>Move Tutor Moves</h2>
+				<h2 id="mt">Move Tutor Moves</h2>
 				<p>Metronome Only.</p>
 				<#break>
 			<#default>
-				<h2>Move Tutor Moves</h2>
+				<h2 id="mt">Move Tutor Moves</h2>
 				<ul class>
 				<#list romHandler.getMoveTutorMoves() as tutor>
 					<li>${romHandler.getMoves()[oldTutorMoves[tutor?index]].name} => ${romHandler.getMoves()[tutor].name}</li>
@@ -528,14 +536,14 @@
 				</ul>
 			</#switch>
 		<#else>
-			<h2>Move Tutor Moves</h2>
+			<h2 id="mt">Move Tutor Moves</h2>
 			<p>Unchanged.</p>
 		</#if>
 
 		<!--====================================================================================-->
 
 		<#if oldTrades??>
-			<h2>In-Game Trades</h2>
+			<h2 id="igt">In-Game Trades</h2>
 			<p>Trades are shown in pairs. New trades in <strong>bold</strong> on top, old trades below in <em>italics</em>.</p>
 			<table class="trades-table">
 				<tr><th>Requested</th><th>Given</th><th>Held Item</th></tr>

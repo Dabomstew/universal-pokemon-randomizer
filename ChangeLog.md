@@ -45,3 +45,4 @@
  * Added code tests to ensure new features do not break existing features.
  * Pokemon with BST above 490 are now tagged as BIG in the logs when randomizing a Gen 1 game due to there only being 5 stats instead of the usual 6 for Gen 2 onwards.
  * Log generation has been consolidated into one area of the code. This should make future log enhancements easier, as well as improve code readability.
+ * Table of Contents added to top of log to jump to section of interest
