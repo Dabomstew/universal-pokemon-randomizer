@@ -2015,13 +2015,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 for (Evolution evo : pkmn.evolutionsFrom) {
                     // new 160 other impossible evolutions:
                     if (getRomEntry().romType == Gen4Constants.Type_HGSS) {
-                        // beauty milotic
-                        if (evo.type == EvolutionType.LEVEL_HIGH_BEAUTY) {
-                            // Replace w/ level 35
-                            evo.type = EvolutionType.LEVEL;
-                            evo.extraInfo = 35;
-                            tradeEvoFixed.add(evo);
-                        }
                         // mt.coronet (magnezone/probopass)
                         if (evo.type == EvolutionType.LEVEL_ELECTRIFIED_AREA) {
                             // Replace w/ level 40
@@ -2062,6 +2055,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                         evo.type = EvolutionType.LEVEL;
                         evo.extraInfo = levelLearntAt;
                         tradeEvoFixed.add(evo);
+                    }
+                    // beauty milotic
+                    if (evo.type == EvolutionType.LEVEL_HIGH_BEAUTY) {
+                        // add alternate of happiness
+                        Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                        EvolutionType.HAPPINESS, 0);
+                        extraEvolutions.add(extraEntry);
+                        tradeEvoFixed.add(extraEntry);
                     }
                     // Pure Trade
                     if (evo.type == EvolutionType.TRADE) {

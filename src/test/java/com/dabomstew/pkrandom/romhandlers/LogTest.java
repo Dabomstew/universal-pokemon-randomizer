@@ -543,7 +543,10 @@ public class LogTest {
             doReturn(Gen3RomHandler.getRomFromSupportedRom("Emerald (U)")).when(romhandler).getRomEntry();
             resetDataModel(romhandler, 250);
             romhandler.removeTradeEvolutions(true);
-            assertEquals(((ArrayList)romhandler.getTemplateData().get("removeTradeEvo")).size(), 1);
+            assertEquals(((ArrayList)romhandler.getTemplateData().get("removeTradeEvo")).size(), 2);
+
+            // Test high beauty adds a happiness evo
+            assertTrue("High beauty happiness evo", pokemonList.get(0).evolutionsFrom.stream().anyMatch(ev -> ev.type == EvolutionType.HAPPINESS));
         }
     }
 
@@ -560,7 +563,10 @@ public class LogTest {
         doReturn(mock_arch).when(romhandler).readNARC(anyString());
         resetDataModel(romhandler, 250);
         romhandler.removeTradeEvolutions(true);
-        assertEquals(((ArrayList)romhandler.getTemplateData().get("removeTradeEvo")).size(), 1);
+        assertEquals(((ArrayList)romhandler.getTemplateData().get("removeTradeEvo")).size(), 2);
+
+        // Test high beauty adds a happiness evo
+        assertTrue("High beauty happiness evo", pokemonList.get(0).evolutionsFrom.stream().anyMatch(ev -> ev.type == EvolutionType.HAPPINESS));
     }
 
     @Test
@@ -780,8 +786,10 @@ public class LogTest {
         Pokemon evPk = new Pokemon();
         Evolution ev = new Evolution(pokemonList.get(0), evPk, false, EvolutionType.TRADE, 0);
         Evolution ev2 = new Evolution(pokemonList.get(0), evPk, false, EvolutionType.LEVEL, 50);
+        Evolution ev3 = new Evolution(pokemonList.get(0), evPk, false, EvolutionType.LEVEL_HIGH_BEAUTY, 0);
         pokemonList.get(0).evolutionsFrom.add(ev);
         pokemonList.get(0).evolutionsFrom.add(ev2);
+        pokemonList.get(0).evolutionsFrom.add(ev3);
     }
     
     /**

@@ -280,6 +280,8 @@
 			<#list removeTradeEvo as evo>
 			<#if evo.type.name() == "LEVEL">
 				<li>Made <strong>${evo.from.name}</strong> evolve into <strong>${evo.to.name}</strong> at level <strong>${evo.extraInfo}</strong></li>
+			<#elseif evo.type.name() == "HAPPINESS">
+				<li>Made <strong>${evo.from.name}</strong> evolve into <strong>${evo.to.name}</strong> by leveling up at high happiness</li>
 			<#elseif evo.type.name() == "STONE">
 				<li>Made <strong>${evo.from.name}</strong> evolve into <strong>${evo.to.name}</strong> using a <strong>${romHandler.getItemNames()[evo.extraInfo]}</strong></li>
 			<#elseif evo.type.name() == "LEVEL_ITEM_DAY">

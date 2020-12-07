@@ -2274,6 +2274,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     public void removeTradeEvolutions(boolean changeMoveEvos) {
         attemptObedienceEvolutionPatches();
         List<Evolution> tradeEvoFixed = new ArrayList<Evolution>();
+        Set<Evolution> extraEvolutions = new HashSet<Evolution>();
         for (Pokemon pkmn : getPokemon()) {
             if (pkmn != null) {
                 for (Evolution evo : pkmn.evolutionsFrom) {
@@ -2290,11 +2291,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         evo.extraInfo = Gen3Constants.moonStoneIndex; // moon stone
                         tradeEvoFixed.add(evo);
                     }
-                    if (evo.type == EvolutionType.LEVEL_HIGH_BEAUTY && getRomEntry().romType == Gen3Constants.RomType_FRLG) {
-                        // beauty change to level 35
-                        evo.type = EvolutionType.LEVEL;
-                        evo.extraInfo = 35;
-                        tradeEvoFixed.add(evo);
+                    if (evo.type == EvolutionType.LEVEL_HIGH_BEAUTY) {
+                        // beauty add alternate of happiness
+                        Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                        EvolutionType.HAPPINESS, 0);
+                        extraEvolutions.add(extraEntry);
+                        tradeEvoFixed.add(extraEntry);
                     }
                     // Pure Trade
                     if (evo.type == EvolutionType.TRADE) {
@@ -2335,6 +2337,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         }
                         tradeEvoFixed.add(evo);
                     }
+                }
+                pkmn.evolutionsFrom.addAll(extraEvolutions);
+                for (Evolution ev : extraEvolutions) {
+                    ev.to.evolutionsTo.add(ev);
                 }
             }
         }
