@@ -67,8 +67,8 @@ public class Gen5Constants {
 
     public static final int bw2StarterTextOffset = 37, bw2RivalTextOffset = 60;
 
-    public static final int perSeasonEncounterDataLength = 232, bw2AreaDataEntryLength = 345,
-            bw2EncounterAreaCount = 85;
+    public static final int perSeasonEncounterDataLength = 232;
+    private static final int bw1AreaDataEntryLength = 249, bw2AreaDataEntryLength = 345, bw1EncounterAreaCount = 61, bw2EncounterAreaCount = 85;
 
     public static final int[] encountersOfEachType = { 12, 12, 12, 5, 5, 5, 5 };
 
@@ -391,6 +391,33 @@ public class Gen5Constants {
         default:
             return 0; // normal by default
         }
+    }
+
+    public static int getAreaDataEntryLength(int romType) {
+        if (romType == Type_BW) {
+            return bw1AreaDataEntryLength;
+        } else if (romType == Type_BW2) {
+            return bw2AreaDataEntryLength;
+        }
+        return 0;
+    }
+
+    public static int getEncounterAreaCount(int romType) {
+        if (romType == Type_BW) {
+            return bw1EncounterAreaCount;
+        } else if (romType == Type_BW2) {
+            return bw2EncounterAreaCount;
+        }
+        return 0;
+    }
+
+    public static int[] getWildFileToAreaMap(int romType) {
+        if (romType == Type_BW) {
+            return bw1WildFileToAreaMap;
+        } else if (romType == Type_BW2) {
+            return bw2WildFileToAreaMap;
+        }
+        return new int[0];
     }
 
     public static List<Integer> getMainGameShops(int romType) {
@@ -1413,8 +1440,55 @@ public class Gen5Constants {
         { 122 }, // Route 14
         { 20, 21, 22 }, // Chargestone Cave
     };
+
+    private static final int[] bw1WildFileToAreaMap = {
+        2,
+        6,
+        8,
+        18, 18,
+        19, 19,
+        20, 20,
+        21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, // lol
+        22,
+        23, 23, 23,
+        24, 24, 24, 24,
+        25, 25, 25, 25,
+        26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
+        27, 27, 27, 27,
+        29,
+        36,
+        57,
+        59,
+        60,
+        38,
+        39,
+        40,
+        30, 30,
+        41,
+        42,
+        43,
+        31, 31, 31,
+        44,
+        33, 33, 33, 33,
+        45,
+        34,
+        46,
+        32, 32, 32,
+        47, 47,
+        48,
+        49,
+        50,
+        51,
+        35,
+        52,
+        53,
+        37,
+        55,
+        12,
+        54,
+    };
     
-    public static final int[] wildFileToAreaMap = {
+    private static final int[] bw2WildFileToAreaMap = {
         2,
         4,
         8,
@@ -1475,7 +1549,6 @@ public class Gen5Constants {
         52,
         68,
     };
-    /* @formatter:on */
 
     public static void tagTrainersBW(List<Trainer> trs) {
         // We use different Gym IDs to cheat the system for the 3 n00bs

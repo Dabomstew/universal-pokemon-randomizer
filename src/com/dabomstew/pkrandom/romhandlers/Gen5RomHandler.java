@@ -893,7 +893,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             // Save
             writeNARC(romEntry.getString("WildPokemon"), encounterNARC);
 
-            // Habitat List / Area Data?
+            this.updatePokedexAreaData(encounterNARC);
+
+            // Habitat List
             if (romEntry.romType == Gen5Constants.Type_BW2) {
                 // disabled: habitat list changes cause a crash if too many
                 // entries for now.
@@ -936,9 +938,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 // // Save habitat
                 // this.writeNARC(romEntry.getString("HabitatList"),
                 // habitatNARC);
-
-                // Area Data
-                this.updatePokedexAreaData(encounterNARC);
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
@@ -948,9 +947,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     private void updatePokedexAreaData(NARCArchive encounterNARC) throws IOException {
         NARCArchive areaNARC = this.readNARC(romEntry.getString("PokedexAreaData"));
+        int areaDataEntryLength = Gen5Constants.getAreaDataEntryLength(romEntry.romType);
+        int encounterAreaCount = Gen5Constants.getEncounterAreaCount(romEntry.romType);
         List<byte[]> newFiles = new ArrayList<>();
         for (int i = 0; i < Gen5Constants.pokemonCount; i++) {
-            byte[] nf = new byte[Gen5Constants.bw2AreaDataEntryLength];
+            byte[] nf = new byte[areaDataEntryLength];
             newFiles.add(nf);
         }
         // Get data now
@@ -971,22 +972,22 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             byte[] file = newFiles.get(i);
             for (int season = 0; season < 4; season++) {
                 boolean unobtainable = true;
-                for (int enc = 0; enc < Gen5Constants.bw2EncounterAreaCount; enc++) {
-                    if (file[season * (Gen5Constants.bw2EncounterAreaCount + 1) + enc + 2] != 0) {
+                for (int enc = 0; enc < encounterAreaCount; enc++) {
+                    if (file[season * (encounterAreaCount + 1) + enc + 2] != 0) {
                         unobtainable = false;
                         break;
                     }
                 }
                 if (unobtainable) {
-                    file[season * (Gen5Constants.bw2EncounterAreaCount + 1) + 1] = 1;
+                    file[season * (encounterAreaCount + 1) + 1] = 1;
                 }
             }
             boolean seasonalDependent = false;
-            for (int enc = 0; enc < Gen5Constants.bw2EncounterAreaCount; enc++) {
+            for (int enc = 0; enc < encounterAreaCount; enc++) {
                 byte springEnc = file[enc + 2];
-                byte summerEnc = file[(Gen5Constants.bw2EncounterAreaCount + 1) + enc + 2];
-                byte autumnEnc = file[2 * (Gen5Constants.bw2EncounterAreaCount + 1) + enc + 2];
-                byte winterEnc = file[3 * (Gen5Constants.bw2EncounterAreaCount + 1) + enc + 2];
+                byte summerEnc = file[(encounterAreaCount + 1) + enc + 2];
+                byte autumnEnc = file[2 * (encounterAreaCount + 1) + enc + 2];
+                byte winterEnc = file[3 * (encounterAreaCount + 1) + enc + 2];
                 boolean allSeasonsAreTheSame = springEnc == summerEnc && springEnc == autumnEnc && springEnc == winterEnc;
                 if (!allSeasonsAreTheSame) {
                     seasonalDependent = true;
@@ -999,11 +1000,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             areaNARC.files.set(i, file);
         }
         // Save
-        this.writeNARC(romEntry.getString("PokemonAreaData"), areaNARC);
+        this.writeNARC(romEntry.getString("PokedexAreaData"), areaNARC);
     }
 
     private void updateAreaDataFromEncounterEntry(byte[] entry, int startOffset, List<byte[]> areaData, int season, int fileNumber) {
         int[] amounts = Gen5Constants.encountersOfEachType;
+        int encounterAreaCount = Gen5Constants.getEncounterAreaCount(romEntry.romType);
+        int[] wildFileToAreaMap = Gen5Constants.getWildFileToAreaMap(romEntry.romType);
 
         int offset = 8;
         for (int i = 0; i < 7; i++) {
@@ -1013,16 +1016,16 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     Pokemon pkmn = pokes[((entry[startOffset + offset + e * 4] & 0xFF) + ((entry[startOffset + offset
                             + 1 + e * 4] & 0x03) << 8))];
                     byte[] pokeFile = areaData.get(pkmn.number - 1);
-                    int areaIndex = Gen5Constants.wildFileToAreaMap[fileNumber];
+                    int areaIndex = wildFileToAreaMap[fileNumber];
                     // Route 4?
-                    if (areaIndex == Gen5Constants.bw2Route4AreaIndex) {
+                    if (romEntry.romType == Gen5Constants.Type_BW2 && areaIndex == Gen5Constants.bw2Route4AreaIndex) {
                         if ((fileNumber == Gen5Constants.b2Route4EncounterFile && romEntry.romCode.charAt(2) == 'D')
                                 || (fileNumber == Gen5Constants.w2Route4EncounterFile && romEntry.romCode.charAt(2) == 'E')) {
                             areaIndex = -1; // wrong version
                         }
                     }
                     // Victory Road?
-                    if (areaIndex == Gen5Constants.bw2VictoryRoadAreaIndex) {
+                    if (romEntry.romType == Gen5Constants.Type_BW2 && areaIndex == Gen5Constants.bw2VictoryRoadAreaIndex) {
                         if (romEntry.romCode.charAt(2) == 'D') {
                             // White 2
                             if (fileNumber == Gen5Constants.b2VRExclusiveRoom1
@@ -1038,7 +1041,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         }
                     }
                     // Reversal Mountain?
-                    if (areaIndex == Gen5Constants.bw2ReversalMountainAreaIndex) {
+                    if (romEntry.romType == Gen5Constants.Type_BW2 && areaIndex == Gen5Constants.bw2ReversalMountainAreaIndex) {
                         if (romEntry.romCode.charAt(2) == 'D') {
                             // White 2
                             if (fileNumber >= Gen5Constants.b2ReversalMountainStart
@@ -1055,7 +1058,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     }
                     // Skip stuff that isn't on the map or is wrong version
                     if (areaIndex != -1) {
-                        pokeFile[season * (Gen5Constants.bw2EncounterAreaCount + 1) + 2 + areaIndex] |= (1 << i);
+                        pokeFile[season * (encounterAreaCount + 1) + 2 + areaIndex] |= (1 << i);
                     }
                 }
             }
