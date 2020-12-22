@@ -938,45 +938,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 // habitatNARC);
 
                 // Area Data
-                NARCArchive areaNARC = this.readNARC(romEntry.getString("PokemonAreaData"));
-                List<byte[]> newFiles = new ArrayList<>();
-                for (int i = 0; i < Gen5Constants.pokemonCount; i++) {
-                    byte[] nf = new byte[Gen5Constants.bw2AreaDataEntryLength];
-                    nf[0] = 1;
-                    newFiles.add(nf);
-                }
-                // Get data now
-                for (int i = 0; i < encounterNARC.files.size(); i++) {
-                    byte[] encEntry = encounterNARC.files.get(i);
-                    if (encEntry.length > Gen5Constants.perSeasonEncounterDataLength) {
-                        for (int s = 0; s < 4; s++) {
-                            parseAreaData(encEntry, s * Gen5Constants.perSeasonEncounterDataLength, newFiles, s, i);
-                        }
-                    } else {
-                        for (int s = 0; s < 4; s++) {
-                            parseAreaData(encEntry, 0, newFiles, s, i);
-                        }
-                    }
-                }
-                // Now update unobtainables & save
-                for (int i = 0; i < Gen5Constants.pokemonCount; i++) {
-                    byte[] file = newFiles.get(i);
-                    for (int s = 0; s < 4; s++) {
-                        boolean unobtainable = true;
-                        for (int e = 0; e < Gen5Constants.bw2EncounterAreaCount; e++) {
-                            if (file[s * (Gen5Constants.bw2EncounterAreaCount + 1) + e + 2] != 0) {
-                                unobtainable = false;
-                                break;
-                            }
-                        }
-                        if (unobtainable) {
-                            file[s * (Gen5Constants.bw2EncounterAreaCount + 1) + 1] = 1;
-                        }
-                    }
-                    areaNARC.files.set(i, file);
-                }
-                // Save
-                this.writeNARC(romEntry.getString("PokemonAreaData"), areaNARC);
+                this.updatePokedexAreaData(encounterNARC);
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
@@ -984,7 +946,63 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     }
 
-    private void parseAreaData(byte[] entry, int startOffset, List<byte[]> areaData, int season, int fileNumber) {
+    private void updatePokedexAreaData(NARCArchive encounterNARC) throws IOException {
+        NARCArchive areaNARC = this.readNARC(romEntry.getString("PokedexAreaData"));
+        List<byte[]> newFiles = new ArrayList<>();
+        for (int i = 0; i < Gen5Constants.pokemonCount; i++) {
+            byte[] nf = new byte[Gen5Constants.bw2AreaDataEntryLength];
+            newFiles.add(nf);
+        }
+        // Get data now
+        for (int i = 0; i < encounterNARC.files.size(); i++) {
+            byte[] encEntry = encounterNARC.files.get(i);
+            if (encEntry.length > Gen5Constants.perSeasonEncounterDataLength) {
+                for (int season = 0; season < 4; season++) {
+                    updateAreaDataFromEncounterEntry(encEntry, season * Gen5Constants.perSeasonEncounterDataLength, newFiles, season, i);
+                }
+            } else {
+                for (int season = 0; season < 4; season++) {
+                    updateAreaDataFromEncounterEntry(encEntry, 0, newFiles, season, i);
+                }
+            }
+        }
+        // Now update unobtainables, check for seasonal-dependent entries, & save
+        for (int i = 0; i < Gen5Constants.pokemonCount; i++) {
+            byte[] file = newFiles.get(i);
+            for (int season = 0; season < 4; season++) {
+                boolean unobtainable = true;
+                for (int enc = 0; enc < Gen5Constants.bw2EncounterAreaCount; enc++) {
+                    if (file[season * (Gen5Constants.bw2EncounterAreaCount + 1) + enc + 2] != 0) {
+                        unobtainable = false;
+                        break;
+                    }
+                }
+                if (unobtainable) {
+                    file[season * (Gen5Constants.bw2EncounterAreaCount + 1) + 1] = 1;
+                }
+            }
+            boolean seasonalDependent = false;
+            for (int enc = 0; enc < Gen5Constants.bw2EncounterAreaCount; enc++) {
+                byte springEnc = file[enc + 2];
+                byte summerEnc = file[(Gen5Constants.bw2EncounterAreaCount + 1) + enc + 2];
+                byte autumnEnc = file[2 * (Gen5Constants.bw2EncounterAreaCount + 1) + enc + 2];
+                byte winterEnc = file[3 * (Gen5Constants.bw2EncounterAreaCount + 1) + enc + 2];
+                boolean allSeasonsAreTheSame = springEnc == summerEnc && springEnc == autumnEnc && springEnc == winterEnc;
+                if (!allSeasonsAreTheSame) {
+                    seasonalDependent = true;
+                    break;
+                }
+            }
+            if (!seasonalDependent) {
+                file[0] = 1;
+            }
+            areaNARC.files.set(i, file);
+        }
+        // Save
+        this.writeNARC(romEntry.getString("PokemonAreaData"), areaNARC);
+    }
+
+    private void updateAreaDataFromEncounterEntry(byte[] entry, int startOffset, List<byte[]> areaData, int season, int fileNumber) {
         int[] amounts = Gen5Constants.encountersOfEachType;
 
         int offset = 8;
