@@ -30,21 +30,46 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.*;
 import java.net.URI;
+import java.nio.file.Files;
 
 public class Launcher {
 
     private static JFrame frame;
+    private static boolean logEnabled = false;
 
     public static void main(String[] args) {
         try {
             ProcessBuilder pb = new ProcessBuilder("java", "-Xmx4096M", "-jar", "./PokeRandoZX.jar", "please-use-the-launcher");
-            pb.redirectErrorStream(true);
             File log = new File("launcher-log.txt");
-            pb.redirectOutput(ProcessBuilder.Redirect.to(log));
+            if (!log.exists()) {
+                log.createNewFile();
+            }
+            if (Files.isWritable(log.toPath())) {
+                pb.redirectErrorStream(true);
+                pb.redirectOutput(ProcessBuilder.Redirect.to(log));
+                logEnabled = true;
+            } else {
+                SwingUtilities.invokeLater(() -> {
+                    frame = new JFrame("Launcher");
+                    try {
+                        String lafName = javax.swing.UIManager.getSystemLookAndFeelClassName();
+                        // Only set Native LaF on windows.
+                        if (lafName.equalsIgnoreCase("com.sun.java.swing.plaf.windows.WindowsLookAndFeel")) {
+                            javax.swing.UIManager.setLookAndFeel(lafName);
+                        }
+                    } catch (ClassNotFoundException | InstantiationException | UnsupportedLookAndFeelException | IllegalAccessException ex) {
+                        ex.printStackTrace();
+                    }
+                    String message = "The launcher is not capable of writing to launcher-log.txt. It will not be able to log or alert any errors";
+                    String subMessage = "It will still attempt to launch the randomizer, but please check to see if an antivirus program is preventing launcher.jar from writing files.";
+                    Object[] messages = {message, subMessage};
+                    JOptionPane.showMessageDialog(frame, messages);
+                });
+            }
 
             Process p = pb.start();
             p.waitFor();
-            if (p.exitValue() != 0) {
+            if (p.exitValue() != 0 && logEnabled) {
                 StringBuilder sb = new StringBuilder();
                 BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(log)));
                 String line;
