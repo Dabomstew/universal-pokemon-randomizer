@@ -1015,6 +1015,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 for (int e = 0; e < amounts[i]; e++) {
                     Pokemon pkmn = pokes[((entry[startOffset + offset + e * 4] & 0xFF) + ((entry[startOffset + offset
                             + 1 + e * 4] & 0x03) << 8))];
+                    while (pkmn.baseForme != null) {
+                        pkmn = pkmn.baseForme;
+                    }
                     byte[] pokeFile = areaData.get(pkmn.number - 1);
                     int areaIndex = wildFileToAreaMap[fileNumber];
                     // Route 4?
