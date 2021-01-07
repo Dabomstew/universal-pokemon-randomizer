@@ -463,7 +463,9 @@ public class Randomizer {
         }
 
         maybeLogWildPokemonChanges(log, romHandler);
-        List<EncounterSet> encounters = romHandler.getEncounters(settings.isUseTimeBasedEncounters());
+        boolean useTimeBasedEncounters = settings.isUseTimeBasedEncounters() ||
+                (settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED && settings.isWildLevelsModified());
+        List<EncounterSet> encounters = romHandler.getEncounters(useTimeBasedEncounters);
         for (EncounterSet es : encounters) {
             for (Encounter e : es.encounters) {
                 checkValue = addToCV(checkValue, e.level, e.pokemon.number);
