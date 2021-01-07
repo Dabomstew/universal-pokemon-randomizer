@@ -1112,8 +1112,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         es.rate = 1;
         for (int i = 0; i < 10; i++) {
             int offset = 0xC + (i * 4);
-            int species = readWord(encounterTable, offset) & 0x7FF;
-            int forme = readWord(encounterTable, offset) >> 11;
+            int speciesAndFormeData = readWord(encounterTable, offset);
+            int species = speciesAndFormeData & 0x7FF;
+            int forme = speciesAndFormeData >> 11;
             if (species != 0) {
                 Encounter e = new Encounter();
                 e.pokemon = getPokemonForEncounter(species, forme);
@@ -1222,12 +1223,18 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         for (int i = 0; i < numberOfEncounterSlots; i++) {
             int currentOffset = offset + 0xC + (i * 4);
             Encounter enc = encounter.next();
+            if (enc.pokemon.formeNumber > 0) { // Failsafe if we need to write encounters without modifying species
+                enc.pokemon = enc.pokemon.baseForme;
+            }
             int speciesAndFormeData = (enc.formeNumber << 11) + enc.pokemon.number;
             writeWord(encounterTable, currentOffset, speciesAndFormeData);
 
             // SOS encounters for this encounter
             for (int j = 1; j < 8; j++) {
                 Encounter sosEncounter = encounter.next();
+                if (sosEncounter.pokemon.formeNumber > 0) { // Failsafe if we need to write encounters without modifying species
+                    sosEncounter.pokemon = sosEncounter.pokemon.baseForme;
+                }
                 speciesAndFormeData = (sosEncounter.formeNumber << 11) + sosEncounter.pokemon.number;
                 writeWord(encounterTable, currentOffset + (40 * j), speciesAndFormeData);
             }
@@ -1238,6 +1245,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             for (int i = 0; i < 6; i++) {
                 int currentOffset = offset + 0x14C + (i * 4);
                 Encounter weatherSOSEncounter = encounter.next();
+                if (weatherSOSEncounter.pokemon.formeNumber > 0) { // Failsafe if we need to write encounters without modifying species
+                    weatherSOSEncounter.pokemon = weatherSOSEncounter.pokemon.baseForme;
+                }
                 int speciesAndFormeData = (weatherSOSEncounter.formeNumber << 11) + weatherSOSEncounter.pokemon.number;
                 writeWord(encounterTable, currentOffset, speciesAndFormeData);
             }
