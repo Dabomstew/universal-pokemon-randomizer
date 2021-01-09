@@ -270,16 +270,24 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     private List<String> getStrings(boolean isStoryText, int index) {
         GARCArchive baseGARC = isStoryText ? storyTextGarc : stringsGarc;
-        byte[] rawFile = baseGARC.files.get(index).get(0);
+        return getStrings(baseGARC, index);
+    }
+
+    private List<String> getStrings(GARCArchive textGARC, int index) {
+        byte[] rawFile = textGARC.files.get(index).get(0);
         return new ArrayList<>(N3DSTxtHandler.readTexts(rawFile,true,romEntry.romType));
     }
 
     private void setStrings(boolean isStoryText, int index, List<String> strings) {
         GARCArchive baseGARC = isStoryText ? storyTextGarc : stringsGarc;
-        byte[] oldRawFile = baseGARC.files.get(index).get(0);
+        setStrings(baseGARC, index, strings);
+    }
+
+    private void setStrings(GARCArchive textGARC, int index, List<String> strings) {
+        byte[] oldRawFile = textGARC.files.get(index).get(0);
         try {
             byte[] newRawFile = N3DSTxtHandler.saveEntry(oldRawFile, strings, romEntry.romType);
-            baseGARC.setFile(index, newRawFile);
+            textGARC.setFile(index, newRawFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -2388,6 +2396,21 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         List<String> newTNames = new ArrayList<>(trainerNames);
         newTNames.add(0, tnames.get(0)); // the 0-entry, preserve it
         setStrings(false, romEntry.getInt("TrainerNamesTextOffset"), newTNames);
+        try {
+            writeStringsForAllLanguages(newTNames, romEntry.getInt("TrainerNamesTextOffset"));
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+
+    private void writeStringsForAllLanguages(List<String> strings, int index) throws IOException {
+        List<String> nonEnglishLanguages = Arrays.asList("JaKana", "JaKanji", "Fr", "It", "De", "Es", "Ko", "ZhSimplified", "ZhTraditional");
+        for (String nonEnglishLanguage : nonEnglishLanguages) {
+            String key = "TextStrings" + nonEnglishLanguage;
+            GARCArchive stringsGarcForLanguage = readGARC(romEntry.getString(key),true);
+            setStrings(stringsGarcForLanguage, index, strings);
+            writeGARC(romEntry.getString(key), stringsGarcForLanguage);
+        }
     }
 
     @Override
@@ -2408,6 +2431,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     @Override
     public void setTrainerClassNames(List<String> trainerClassNames) {
         setStrings(false, romEntry.getInt("TrainerClassesTextOffset"), trainerClassNames);
+        try {
+            writeStringsForAllLanguages(trainerClassNames, romEntry.getInt("TrainerClassesTextOffset"));
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     @Override
