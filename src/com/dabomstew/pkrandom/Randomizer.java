@@ -780,7 +780,7 @@ public class Randomizer {
                 log.println("--Random Starters--");
                 int starterCount = romHandler.starterCount();
                 List<Pokemon> starters = new ArrayList<>();
-                List<Pokemon> banned = new ArrayList<>();
+                List<Pokemon> banned = romHandler.getBannedFormes();
                 if (settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED) {
                     List<Pokemon> abilityDependentFormes = romHandler.getAbilityDependentFormes();
                     banned.addAll(abilityDependentFormes);
@@ -805,7 +805,7 @@ public class Randomizer {
                 log.println("--Random 2-Evolution Starters--");
                 int starterCount = romHandler.starterCount();
                 List<Pokemon> starters = new ArrayList<>();
-                List<Pokemon> banned = new ArrayList<>();
+                List<Pokemon> banned = romHandler.getBannedFormes();
                 if (settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED) {
                     List<Pokemon> abilityDependentFormes = romHandler.getAbilityDependentFormes();
                     banned.addAll(abilityDependentFormes);

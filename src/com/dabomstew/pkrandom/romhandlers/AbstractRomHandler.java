@@ -767,6 +767,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         Collections.shuffle(scrambledEncounters, this.random);
 
         List<Pokemon> banned = this.bannedForWildEncounters();
+        banned.addAll(this.getBannedFormes());
         if (!abilitiesAreRandomized) {
             List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
             banned.addAll(abilityDependentFormes);
@@ -959,6 +960,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                                         boolean allowAltFormes, boolean abilitiesAreRandomized) {
         checkPokemonRestrictions();
         List<Pokemon> banned = this.bannedForWildEncounters();
+        banned.addAll(this.getBannedFormes());
         if (!abilitiesAreRandomized) {
             List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
             banned.addAll(abilityDependentFormes);
@@ -1174,6 +1176,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     : new ArrayList<>(mainPokemonList);
         }
         List<Pokemon> banned = this.bannedForWildEncounters();
+        banned.addAll(this.getBannedFormes());
         if (!abilitiesAreRandomized) {
             List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
             banned.addAll(abilityDependentFormes);
@@ -1598,7 +1601,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         .collect(Collectors.toList());
         List<Integer> mainPlaythroughTrainers = getMainPlaythroughTrainers();
 
-        List<Pokemon> banned = new ArrayList<>();
+        List<Pokemon> banned = this.getBannedFormes();
         if (!abilitiesAreRandomized) {
             List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
             banned.addAll(abilityDependentFormes);
@@ -1741,7 +1744,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         typeWeightings = new TreeMap<>();
         totalTypeWeighting = 0;
 
-        List<Pokemon> banned = new ArrayList<>();
+        List<Pokemon> banned = this.getBannedFormes();
         if (!abilitiesAreRandomized) {
             List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
             banned.addAll(abilityDependentFormes);
@@ -2898,6 +2901,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<StaticEncounter> currentStaticPokemon = this.getStaticPokemon();
         List<StaticEncounter> replacements = new ArrayList<>();
         List<Pokemon> banned = this.bannedForStaticPokemon();
+        banned.addAll(this.getBannedFormes());
         if (!abilitiesAreRandomized) {
             List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
             banned.addAll(abilityDependentFormes);
@@ -4026,7 +4030,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Pokemon> actuallyCosmeticPokemonPool = new ArrayList<>();
         int stageLimit = limitToThreeStages ? 3 : 10;
 
-        List<Pokemon> banned = new ArrayList<>();
+        List<Pokemon> banned = this.getBannedFormes();
         if (!abilitiesAreRandomized) {
             List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
             banned.addAll(abilityDependentFormes);
@@ -5032,6 +5036,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (!cachedReplacementLists.containsKey(type)) {
 //                System.out.println(current.name + " using cachedReplacementLists");
                 List<Pokemon> pokemonOfType = pokemonOfType(type, noLegendaries);
+                pokemonOfType.removeAll(this.getBannedFormes());
                 if (!abilitiesAreRandomized) {
                     List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
                     pokemonOfType.removeAll(abilityDependentFormes);
@@ -5230,6 +5235,27 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public List<Pokemon> getBannedFormes() {
+        List<Pokemon> bannedFormes = new ArrayList<>();
+        for (int i = 0; i < mainPokemonListInclFormes.size(); i++) {
+            Pokemon pokemon = mainPokemonListInclFormes.get(i);
+            if (pokemon.baseForme != null) {
+                if (pokemon.baseForme.number == 487) {
+                    // Giratina-O is banned because it reverts back to Altered Forme if
+                    // equipped with any item that isn't the Griseous Orb.
+                    bannedFormes.add(pokemon);
+                } else if (pokemon.baseForme.number == 492) {
+                    // Shaymin-S is banned because it reverts back to its original forme
+                    // under a variety of circumstances, and can only be changed back
+                    // with the Gracidea.
+                    bannedFormes.add(pokemon);
+                }
+            }
+        }
+        return bannedFormes;
+    }
+
+    @Override
     public void randomizeTotemPokemon(boolean randomizeTotem, boolean similarStrengthTotem, boolean randomizeAllies,
                                       boolean similarStrengthAllies, boolean randomizeAuras,
                                       boolean similarStrengthAuras, boolean randomizeHeldItems, int levelModifier,
@@ -5238,6 +5264,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<TotemPokemon> currentTotemPokemon = this.getTotemPokemon();
         List<TotemPokemon> replacements = new ArrayList<>();
         List<Pokemon> banned = this.bannedForStaticPokemon();
+        banned.addAll(this.getBannedFormes());
         if (!abilitiesAreRandomized) {
             List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
             banned.addAll(abilityDependentFormes);
