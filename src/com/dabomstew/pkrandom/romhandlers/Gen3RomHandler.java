@@ -25,10 +25,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.*;
 import java.util.zip.CRC32;
 
@@ -82,6 +79,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         private Map<String, int[]> arrayEntries = new HashMap<>();
         private List<StaticPokemon> staticPokemon = new ArrayList<>();
         private List<TMOrMTTextEntry> tmmtTexts = new ArrayList<>();
+        private Map<String, String> codeTweaks = new HashMap<String, String>();
 
         public RomEntry() {
 
@@ -98,6 +96,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             this.arrayEntries.putAll(toCopy.arrayEntries);
             this.staticPokemon.addAll(toCopy.staticPokemon);
             this.tmmtTexts.addAll(toCopy.tmmtTexts);
+            this.codeTweaks.putAll(toCopy.codeTweaks);
         }
 
         private int getValue(String key) {
@@ -211,6 +210,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         } else if (r[0].equals("CopyStaticPokemon")) {
                             int csp = parseRIInt(r[1]);
                             current.copyStaticPokemon = (csp > 0);
+                        } else if (r[0].endsWith("Tweak")) {
+                            current.codeTweaks.put(r[0], r[1]);
                         } else if (r[0].equals("CopyFrom")) {
                             for (RomEntry otherEntry : roms) {
                                 if (r[1].equalsIgnoreCase(otherEntry.name)) {
@@ -3070,7 +3071,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         if (romEntry.getValue("RunIndoorsTweakOffset") > 0) {
             available |= MiscTweak.RUNNING_SHOES_INDOORS.getValue();
         }
-        if (romEntry.getValue("TextSpeedValuesOffset") > 0) {
+        if (romEntry.getValue("TextSpeedValuesOffset") > 0 || romEntry.codeTweaks.get("InstantTextTweak") != null) {
             available |= MiscTweak.FASTEST_TEXT.getValue();
         }
         if (romEntry.getValue("CatchingTutorialOpponentMonOffset") > 0
@@ -3164,7 +3165,13 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void applyFastestTextPatch() {
-        if (romEntry.getValue("TextSpeedValuesOffset") > 0) {
+        if(romEntry.codeTweaks.get("InstantTextTweak") != null) {
+            try {
+                FileFunctions.applyPatch(rom, romEntry.codeTweaks.get("InstantTextTweak"));
+            } catch (IOException e) {
+                throw new RandomizerIOException(e);
+            }
+        } else if (romEntry.getValue("TextSpeedValuesOffset") > 0) {
             int tsvOffset = romEntry.getValue("TextSpeedValuesOffset");
             rom[tsvOffset] = 4; // slow = medium
             rom[tsvOffset + 1] = 1; // medium = fast
