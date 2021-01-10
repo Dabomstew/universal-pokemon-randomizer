@@ -1892,10 +1892,15 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public void setTMHMCompatibility(Map<Pokemon, boolean[]> compatData) {
+        int formeOffset = Gen5Constants.getFormeOffset(romEntry.romType);
         for (Map.Entry<Pokemon, boolean[]> compatEntry : compatData.entrySet()) {
             Pokemon pkmn = compatEntry.getKey();
             boolean[] flags = compatEntry.getValue();
-            byte[] data = pokeNarc.files.get(pkmn.number);
+            int number = pkmn.number;
+            if (number > Gen5Constants.pokemonCount) {
+                number += formeOffset;
+            }
+            byte[] data = pokeNarc.files.get(number);
             for (int j = 0; j < 13; j++) {
                 data[Gen5Constants.bsTMHMCompatOffset + j] = getByteFromFlags(flags, j * 8 + 1);
             }
@@ -1990,6 +1995,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         if (!hasMoveTutors()) {
             return;
         }
+        int formeOffset = Gen5Constants.getFormeOffset(romEntry.romType);
         // BW2 move tutor flags aren't using the same order as the move tutor
         // move data.
         // We unscramble them from move data order to personal.narc flag order.
@@ -1999,7 +2005,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         for (Map.Entry<Pokemon, boolean[]> compatEntry : compatData.entrySet()) {
             Pokemon pkmn = compatEntry.getKey();
             boolean[] flags = compatEntry.getValue();
-            byte[] data = pokeNarc.files.get(pkmn.number);
+            int number = pkmn.number;
+            if (number > Gen5Constants.pokemonCount) {
+                number += formeOffset;
+            }
+            byte[] data = pokeNarc.files.get(number);
             for (int mt = 0; mt < 4; mt++) {
                 int offsetOfThisData = 0;
                 for (int cmoIndex = 0; cmoIndex < personalToMoveOrder[mt]; cmoIndex++) {
