@@ -1638,7 +1638,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                                         wgAllowed,
                                         true,
                                         swapThisMegaEvo,
-                                        abilitiesAreRandomized
+                                        abilitiesAreRandomized,
+                                        includeFormes
                                 );
                         setPlacementHistory(newPK);
                         tp.absolutePokeNumber = newPK.number;
@@ -1655,7 +1656,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                                         wgAllowed,
                                         false,
                                         swapThisMegaEvo,
-                                        abilitiesAreRandomized
+                                        abilitiesAreRandomized,
+                                        includeFormes
                                 );
                         tp.absolutePokeNumber = newPK.number;
                         tp.pokemon = newPK;
@@ -1671,7 +1673,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                                     wgAllowed,
                                     distributionSetting,
                                     swapThisMegaEvo,
-                                    abilitiesAreRandomized
+                                    abilitiesAreRandomized,
+                                    includeFormes
                             );
                     if (distributionSetting) {
                         setPlacementHistory(newPK);
@@ -1791,16 +1794,16 @@ public abstract class AbstractRomHandler implements RomHandler {
             List<Trainer> trainersInGroup = groups.get(group);
             // Shuffle ordering within group to promote randomness
             Collections.shuffle(trainersInGroup, random);
-            Type typeForGroup = pickType(weightByFrequency, noLegendaries);
+            Type typeForGroup = pickType(weightByFrequency, noLegendaries, includeFormes);
             if (group.startsWith("GYM")) {
                 while (usedGymTypes.contains(typeForGroup)) {
-                    typeForGroup = pickType(weightByFrequency, noLegendaries);
+                    typeForGroup = pickType(weightByFrequency, noLegendaries, includeFormes);
                 }
                 usedGymTypes.add(typeForGroup);
             }
             if (group.startsWith("ELITE")) {
                 while (usedEliteTypes.contains(typeForGroup)) {
-                    typeForGroup = pickType(weightByFrequency, noLegendaries);
+                    typeForGroup = pickType(weightByFrequency, noLegendaries, includeFormes);
                 }
                 usedEliteTypes.add(typeForGroup);
             }
@@ -1825,7 +1828,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                                     wgAllowed,
                                     false,
                                     swapThisMegaEvo,
-                                    abilitiesAreRandomized
+                                    abilitiesAreRandomized,
+                                    includeFormes
                             );
                     tp.absolutePokeNumber = newPK.number;
                     tp.pokemon = newPK;
@@ -1864,11 +1868,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
 
             if (!assignedTrainers.contains(t)) {
-                Type typeForTrainer = pickType(weightByFrequency, noLegendaries);
+                Type typeForTrainer = pickType(weightByFrequency, noLegendaries, includeFormes);
                 // Ubers: can't have the same type as each other
                 if (t.tag != null && t.tag.equals("UBER")) {
                     while (usedUberTypes.contains(typeForTrainer)) {
-                        typeForTrainer = pickType(weightByFrequency, noLegendaries);
+                        typeForTrainer = pickType(weightByFrequency, noLegendaries, includeFormes);
                     }
                     usedUberTypes.add(typeForTrainer);
                 }
@@ -1888,7 +1892,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                                     shedAllowed,
                                     false,
                                     swapThisMegaEvo,
-                                    abilitiesAreRandomized
+                                    abilitiesAreRandomized,
+                                    includeFormes
                             );
                     tp.absolutePokeNumber = newPK.number;
                     tp.pokemon = newPK;
@@ -4662,7 +4667,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private List<Pokemon> pokemonOfType(Type type, boolean noLegendaries) {
         List<Pokemon> typedPokes = new ArrayList<>();
-        for (Pokemon pk : mainPokemonListInclFormes) {
+        for (Pokemon pk : mainPokemonList) {
             if (pk != null && (!noLegendaries || !pk.isLegendary()) && !pk.actuallyCosmetic) {
                 if (pk.primaryType == type || pk.secondaryType == type) {
                     typedPokes.add(pk);
@@ -4707,12 +4712,14 @@ public abstract class AbstractRomHandler implements RomHandler {
     private Map<Type, Integer> typeWeightings;
     private int totalTypeWeighting;
 
-    private Type pickType(boolean weightByFrequency, boolean noLegendaries) {
+    private Type pickType(boolean weightByFrequency, boolean noLegendaries, boolean allowAltFormes) {
         if (totalTypeWeighting == 0) {
             // Determine weightings
             for (Type t : Type.values()) {
                 if (typeInGame(t)) {
-                    int pkWithTyping = pokemonOfType(t, noLegendaries).size();
+                    List<Pokemon> pokemonOfType = allowAltFormes ? pokemonOfTypeInclFormes(t, noLegendaries) :
+                            pokemonOfType(t, noLegendaries);
+                    int pkWithTyping = pokemonOfType.size();
                     typeWeightings.put(t, pkWithTyping);
                     totalTypeWeighting += pkWithTyping;
                 }
@@ -5018,7 +5025,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private Pokemon pickReplacement(Pokemon current, boolean usePowerLevels, Type type, boolean noLegendaries,
                                     boolean wonderGuardAllowed, boolean usePlacementHistory, boolean swapMegaEvos,
-                                    boolean abilitiesAreRandomized) {
+                                    boolean abilitiesAreRandomized, boolean allowAltFormes) {
         List<Pokemon> pickFrom;
         if (swapMegaEvos) {
             pickFrom = megaEvolutionsList
@@ -5035,7 +5042,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (type != null) {
             if (!cachedReplacementLists.containsKey(type)) {
 //                System.out.println(current.name + " using cachedReplacementLists");
-                List<Pokemon> pokemonOfType = pokemonOfType(type, noLegendaries);
+                List<Pokemon> pokemonOfType = allowAltFormes ? pokemonOfTypeInclFormes(type, noLegendaries) :
+                        pokemonOfType(type, noLegendaries);
                 pokemonOfType.removeAll(this.getBannedFormes());
                 if (!abilitiesAreRandomized) {
                     List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
