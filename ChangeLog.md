@@ -47,3 +47,4 @@
  * Log generation has been consolidated into one area of the code. This should make future log enhancements easier, as well as improve code readability.
  * Table of Contents added to top of log to jump to section of interest
  * Gen 3 and Gen 4 Feebas can now evolve by happiness when removing impossible evolutions
+ * Gen 5 and Gen 6 move updates can be applied independently of one another

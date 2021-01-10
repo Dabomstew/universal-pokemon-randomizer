@@ -70,7 +70,6 @@ public class Randomizer {
         // Template stuff
         this.romHandler.getTemplateData().put("romHandler", romHandler);
         this.romHandler.getTemplateData().put("gen1", romHandler instanceof Gen1RomHandler);
-        this.romHandler.getTemplateData().put("isModernMoves", settings.isUpdateMoves());
 
         // limit pokemon based on generation
         if (settings.isLimitPokemon()) {
@@ -81,12 +80,18 @@ public class Randomizer {
         }
 
         // Gen 5/6 Move stat updates & data changes
-        if (settings.isUpdateMoves()) {
+        if (settings.isUpdateMoves() || settings.isUpdateMovesLegacy()) {
+            // Regardless of whether Gen 5, Gen 6, or both, initialize the 
+            // change data structure
             romHandler.initMoveModernization();
-            if (!(romHandler instanceof Gen5RomHandler)) {
+
+            // Update to Gen 5 if selected and not already a Gen 5 ROM
+            if (settings.isUpdateMovesLegacy()  && !(romHandler instanceof Gen5RomHandler)) {
                 romHandler.updateMovesToGen5();
             }
-            if (!settings.isUpdateMovesLegacy()) {
+
+            // Update to Gen 6 if selected, which will override some Gen 5 updates
+            if (settings.isUpdateMoves()) {
                 romHandler.updateMovesToGen6();
             }
             romHandler.printMoveModernization();
@@ -649,7 +654,8 @@ public class Randomizer {
     private void maybeLogMoveChanges(final RomHandler romHandler) {
         if (settings.isRandomizeMoveAccuracies() || settings.isRandomizeMovePowers()
                 || settings.isRandomizeMovePPs() || settings.isRandomizeMoveCategory()
-                || settings.isRandomizeMoveTypes() || settings.isUpdateMoves()) {
+                || settings.isRandomizeMoveTypes() || settings.isUpdateMoves() 
+                || settings.isUpdateMovesLegacy()) {
             romHandler.getTemplateData().put("logMoves", true);
         }
     }

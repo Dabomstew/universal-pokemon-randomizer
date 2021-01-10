@@ -247,7 +247,6 @@ public class Settings {
         int length = in.read();
         byte[] buffer = FileFunctions.readFullyIntoBuffer(in, length);
         String settings = new String(buffer, "UTF-8");
-        System.out.println(settings);
         boolean oldUpdate = false;
 
         if (version < VERSION) {

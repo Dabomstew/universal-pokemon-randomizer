@@ -162,7 +162,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new RandomizerGUI(au, wn);
+                new RandomizerGUI(au, wn, false);
             }
         });
     }
@@ -173,7 +173,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
      * 
      * @param autoupdate
      */
-    public RandomizerGUI(boolean autoupdate, boolean onWindowsLAF) {
+    public RandomizerGUI(boolean autoupdate, boolean onWindowsLAF, boolean testModeEnabled) {
         ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
         bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle"); // NOI18N
         testForRequiredConfigs();
@@ -202,7 +202,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             autoUpdateEnabled = false;
         }
         setLocationRelativeTo(null);
-        setVisible(true);
+        setVisible(!testModeEnabled);
         if (!haveCheckedCustomNames) {
             checkCustomNames();
         }
@@ -215,7 +215,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
         // All systems: test for font size and adjust if required
         Font f = pokeLimitCB.getFont();
         if (f == null || !f.getFontName().equalsIgnoreCase("tahoma") || f.getSize() != 11) {
-            System.out.println("activating font face fix");
             Font regularFont = new Font("Tahoma", 0, 11);
             Font boldFont = new Font("Tahoma", 1, 11);
             fontFaceFix(this, regularFont, boldFont);
@@ -1084,7 +1083,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.goUpdateMovesCheckBox.setSelected(false);
             this.goUpdateMovesCheckBox.setEnabled(true);
             this.goUpdateMovesLegacyCheckBox.setSelected(false);
-            this.goUpdateMovesLegacyCheckBox.setEnabled(false);
+            this.goUpdateMovesLegacyCheckBox.setEnabled(!(romHandler instanceof Gen5RomHandler));
             this.goUpdateMovesLegacyCheckBox.setVisible(!(romHandler instanceof Gen5RomHandler));
             this.goRemoveTradeEvosCheckBox.setSelected(false);
             this.goRemoveTradeEvosCheckBox.setEnabled(true);
@@ -1344,19 +1343,12 @@ public class RandomizerGUI extends javax.swing.JFrame {
         }
     }
 
-    private void enableOrDisableSubControls() {
+    protected void enableOrDisableSubControls() {
         // This isn't for a new ROM being loaded (that's romLoaded)
         // This is just for when a radio button gets selected or state is loaded
         // and we need to enable/disable secondary controls
         // e.g. wild pokemon / trainer pokemon "modifier"
         // and the 3 starter pokemon dropdowns
-
-        if (this.goUpdateMovesCheckBox.isSelected() && !(romHandler instanceof Gen5RomHandler)) {
-            this.goUpdateMovesLegacyCheckBox.setEnabled(true);
-        } else {
-            this.goUpdateMovesLegacyCheckBox.setEnabled(false);
-            this.goUpdateMovesLegacyCheckBox.setSelected(false);
-        }
 
         this.pokeLimitBtn.setEnabled(this.pokeLimitCB.isSelected());
 
@@ -1623,7 +1615,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 this.tmForceGoodDamagingCB.setSelected(false);
             }
 
-            if (this.romHandler.hasMoveTutors()
+            if (getRomHandler().hasMoveTutors()
                     && (!(this.pmsUnchangedRB.isSelected()) || !(this.mtmUnchangedRB.isSelected()) || !(this.mtcUnchangedRB
                             .isSelected()))) {
                 this.mtLearningSanityCB.setEnabled(true);
@@ -1632,7 +1624,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 this.mtLearningSanityCB.setSelected(false);
             }
 
-            if (this.romHandler.hasMoveTutors() && !(this.mtmUnchangedRB.isSelected())) {
+            if (getRomHandler().hasMoveTutors() && !(this.mtmUnchangedRB.isSelected())) {
                 this.mtKeepFieldMovesCB.setEnabled(true);
                 this.mtForceGoodDamagingCB.setEnabled(true);
             } else {
@@ -1763,7 +1755,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         }
     }
 
-    private Settings getCurrentSettings() throws IOException {
+    public Settings getCurrentSettings() throws IOException {
         Settings settings = createSettingsFromState(FileFunctions.getCustomNames());
         return settings;
     }
@@ -1789,6 +1781,23 @@ public class RandomizerGUI extends javax.swing.JFrame {
         }
         String name = new String(data, Settings.LENGTH_OF_SETTINGS_DATA + 1, nameLength, "US-ASCII");
         return name;
+    }
+
+    protected RomHandler getRomHandler() {
+        return this.romHandler;
+    }
+
+    // Returns a field from this class for unit testing
+    // This method should NOT be used for regular code
+    protected JComponent getField(String field) {
+        switch(field) {
+            case "updateMoves":
+                return goUpdateMovesCheckBox;
+            case "updateMovesLegacy":
+                return goUpdateMovesLegacyCheckBox;
+            default:
+                return null;
+        }
     }
 
     private void restoreStateFromSettings(Settings settings) {
@@ -1976,7 +1985,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
     private Settings createSettingsFromState(CustomNamesSet customNames) {
         Settings settings = new Settings();
-        settings.setRomName(this.romHandler.getROMName());
+        settings.setRomName(getRomHandler().getROMName());
         settings.setChangeImpossibleEvolutions(goRemoveTradeEvosCheckBox.isSelected());
         settings.setUpdateMoves(goUpdateMovesCheckBox.isSelected());
         settings.setUpdateMovesLegacy(goUpdateMovesLegacyCheckBox.isSelected());
@@ -2455,10 +2464,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.currentRestrictions = gld.getChoice();
         }
     }// GEN-LAST:event_pokeLimitBtnActionPerformed
-
-    private void goUpdateMovesCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_goUpdateMovesCheckBoxActionPerformed
-        this.enableOrDisableSubControls();
-    }// GEN-LAST:event_goUpdateMovesCheckBoxActionPerformed
 
     private void pokeLimitCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pokeLimitCBActionPerformed
         this.enableOrDisableSubControls();
@@ -4053,11 +4058,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         goUpdateMovesCheckBox.setText(bundle.getString("RandomizerGUI.goUpdateMovesCheckBox.text")); // NOI18N
         goUpdateMovesCheckBox.setToolTipText(bundle.getString("RandomizerGUI.goUpdateMovesCheckBox.toolTipText")); // NOI18N
-        goUpdateMovesCheckBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                goUpdateMovesCheckBoxActionPerformed(evt);
-            }
-        });
 
         goUpdateMovesLegacyCheckBox.setText(bundle.getString("RandomizerGUI.goUpdateMovesLegacyCheckBox.text")); // NOI18N
         goUpdateMovesLegacyCheckBox.setToolTipText(bundle.getString("RandomizerGUI.goUpdateMovesLegacyCheckBox.toolTipText")); // NOI18N

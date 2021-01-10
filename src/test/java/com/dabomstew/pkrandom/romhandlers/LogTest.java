@@ -36,6 +36,7 @@ public class LogTest {
     public void TestGen1MoveModernization() {
         RomHandler romhandler = spy(new Gen1RomHandler(new Random()));
         resetDataModel(romhandler, 250);
+        romhandler.initMoveModernization();
         
         //**************************
         // Test legacy selection
@@ -89,6 +90,7 @@ public class LogTest {
         // Test Update Moves selection only
         //************************************
         resetDataModel(romhandler, 250);
+        romhandler.initMoveModernization();
         romhandler.updateMovesToGen6();
         romhandler.printMoveModernization();
 
@@ -115,6 +117,7 @@ public class LogTest {
     public void TestGen2MoveModernization() {
         RomHandler romhandler = spy(new Gen2RomHandler(new Random()));
         resetDataModel(romhandler, 353);
+        romhandler.initMoveModernization();
         
         //**************************
         // Test legacy selection
@@ -169,6 +172,7 @@ public class LogTest {
         // Test Update Moves selection only
         //************************************
         resetDataModel(romhandler, 353);
+        romhandler.initMoveModernization();
         romhandler.updateMovesToGen6();
         romhandler.printMoveModernization();
 
@@ -195,6 +199,7 @@ public class LogTest {
     public void TestGen3MoveModernization() {
         RomHandler romhandler = spy(new Gen3RomHandler(new Random()));
         resetDataModel(romhandler, 466);
+        romhandler.initMoveModernization();
         
         //**************************
         // Test legacy selection
@@ -249,6 +254,7 @@ public class LogTest {
         // Test Update Moves selection only
         //************************************
         resetDataModel(romhandler, 466);
+        romhandler.initMoveModernization();
         romhandler.updateMovesToGen6();
         romhandler.printMoveModernization();
 
@@ -275,6 +281,7 @@ public class LogTest {
     public void TestGen4MoveModernization() {
         RomHandler romhandler = spy(new Gen4RomHandler(new Random()));
         resetDataModel(romhandler, 558);
+        romhandler.initMoveModernization();
         
         //**************************
         // Test legacy selection
@@ -327,6 +334,7 @@ public class LogTest {
         // Test Update Moves selection only
         //************************************
         resetDataModel(romhandler, 558);
+        romhandler.initMoveModernization();
         romhandler.updateMovesToGen6();
         romhandler.printMoveModernization();
 
@@ -357,6 +365,7 @@ public class LogTest {
         // Test Update Moves selection only
         //************************************
         resetDataModel(romhandler, 999);
+        romhandler.initMoveModernization();
         romhandler.updateMovesToGen6();
         romhandler.printMoveModernization();
         for(Move m : getTemplateDataMovesMod(romhandler)) {
@@ -543,10 +552,7 @@ public class LogTest {
             doReturn(Gen3RomHandler.getRomFromSupportedRom("Emerald (U)")).when(romhandler).getRomEntry();
             resetDataModel(romhandler, 250);
             romhandler.removeTradeEvolutions(true);
-            assertEquals(((ArrayList)romhandler.getTemplateData().get("removeTradeEvo")).size(), 2);
-
-            // Test high beauty adds a happiness evo
-            assertTrue("High beauty happiness evo", pokemonList.get(0).evolutionsFrom.stream().anyMatch(ev -> ev.type == EvolutionType.HAPPINESS));
+            assertEquals(((ArrayList)romhandler.getTemplateData().get("removeTradeEvo")).size(), 1);
         }
     }
 
@@ -563,10 +569,7 @@ public class LogTest {
         doReturn(mock_arch).when(romhandler).readNARC(anyString());
         resetDataModel(romhandler, 250);
         romhandler.removeTradeEvolutions(true);
-        assertEquals(((ArrayList)romhandler.getTemplateData().get("removeTradeEvo")).size(), 2);
-
-        // Test high beauty adds a happiness evo
-        assertTrue("High beauty happiness evo", pokemonList.get(0).evolutionsFrom.stream().anyMatch(ev -> ev.type == EvolutionType.HAPPINESS));
+        assertEquals(((ArrayList)romhandler.getTemplateData().get("removeTradeEvo")).size(), 1);
     }
 
     @Test
@@ -750,8 +753,7 @@ public class LogTest {
         RomHandler romhandler = spy(new Gen1RomHandler(new Random()));
         resetDataModel(romhandler, 250);
         romhandler.generateTableOfContents();
-        // Sanity Check - Should be empty at the start
-        assertEquals(((ArrayList)romhandler.getTemplateData().get("toc")).size(), 0);
+        assertEquals(0, ((ArrayList)romhandler.getTemplateData().get("toc")).size());
         // Spot Check
         romhandler.condenseLevelEvolutions(GlobalConstants.MAXIMUM_EVO_LEVEL, GlobalConstants.MAXIMUM_INTERMEDIATE_EVO_LEVEL);
         romhandler.generateTableOfContents();
@@ -786,10 +788,8 @@ public class LogTest {
         Pokemon evPk = new Pokemon();
         Evolution ev = new Evolution(pokemonList.get(0), evPk, false, EvolutionType.TRADE, 0);
         Evolution ev2 = new Evolution(pokemonList.get(0), evPk, false, EvolutionType.LEVEL, 50);
-        Evolution ev3 = new Evolution(pokemonList.get(0), evPk, false, EvolutionType.LEVEL_HIGH_BEAUTY, 0);
         pokemonList.get(0).evolutionsFrom.add(ev);
         pokemonList.get(0).evolutionsFrom.add(ev2);
-        pokemonList.get(0).evolutionsFrom.add(ev3);
     }
     
     /**
@@ -806,7 +806,6 @@ public class LogTest {
         doReturn(pokemonList.get(0)).when(romhandler).randomPokemon();
         templateData.put("tweakMap", new HashMap<String, Boolean>());
         romhandler.setTemplate(mock(Template.class), templateData);
-        romhandler.initMoveModernization();
     }
     
     /**

@@ -8,7 +8,7 @@
 
 		<!--====================================================================================-->
 
-    	<#if isModernMoves>
+    	<#if isModernMoves??>
     	<h2 id="mm">Move Modernization</h2>
     	<ul>
     		<#list moveUpdates as moveId, changes>

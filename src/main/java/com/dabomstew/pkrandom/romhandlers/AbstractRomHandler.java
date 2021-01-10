@@ -1836,6 +1836,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void initMoveModernization() {
         moveUpdates = new TreeMap<Integer, boolean[]>();
+        this.getTemplateData().put("isModernMoves", true);
     }
 
     /**
