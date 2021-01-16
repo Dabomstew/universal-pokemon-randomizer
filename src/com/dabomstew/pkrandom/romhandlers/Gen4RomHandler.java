@@ -3715,6 +3715,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             available |= MiscTweak.FASTEST_TEXT.getValue();
         }
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
+        if (romEntry.tweakFiles.get("NationalDexAtStartTweak") != null) {
+            available |= MiscTweak.NATIONAL_DEX_AT_START.getValue();
+        }
         return available;
     }
 
@@ -3729,6 +3732,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
             allowedItems.banSingles(Gen4Constants.luckyEggIndex);
             nonBadItems.banSingles(Gen4Constants.luckyEggIndex);
+        } else if (tweak == MiscTweak.NATIONAL_DEX_AT_START) {
+            patchForNationalDex();
         }
     }
 
@@ -3759,6 +3764,18 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     private void applyFastestText() {
         genericIPSPatch(arm9, "FastestTextTweak");
+    }
+
+    private void patchForNationalDex() {
+        byte[] pokedexScript = scriptNarc.files.get(romEntry.getInt("NationalDexScriptOffset"));
+
+        // Our patcher breaks if the output file is larger than the input file. In our case, we want
+        // to expand the script by four bytes to add an instruction to enable the national dex. Thus,
+        // the IPS patch was created with us adding four 0x00 bytes to the end of the script in mind.
+        byte[] expandedPokedexScript = new byte[pokedexScript.length + 4];
+        System.arraycopy(pokedexScript, 0, expandedPokedexScript, 0, pokedexScript.length);
+        genericIPSPatch(expandedPokedexScript, "NationalDexAtStartTweak");
+        scriptNarc.files.set(romEntry.getInt("NationalDexScriptOffset"), expandedPokedexScript);
     }
 
     private boolean genericIPSPatch(byte[] data, String ctName) {
