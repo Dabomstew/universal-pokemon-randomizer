@@ -245,7 +245,7 @@ public class Randomizer {
         } else if (settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED) {
             romHandler.typeThemeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersMatchTypingDistribution(), settings.isTrainersBlockLegendaries(),
-                    settings.isTrainersBlockEarlyWonderGuard(),
+                    settings.isTrainersBlockEarlyWonderGuard(), false,
                     settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
         }
 

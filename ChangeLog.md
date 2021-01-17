@@ -48,3 +48,4 @@
  * Table of Contents added to top of log to jump to section of interest
  * Gen 3 and Gen 4 Feebas can now evolve by happiness when removing impossible evolutions
  * Gen 5 and Gen 6 move updates can be applied independently of one another
+ * Black/White Cilan, Chili, Cress now have types that are superior to the player's chosen starter

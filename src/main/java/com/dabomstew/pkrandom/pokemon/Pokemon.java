@@ -154,6 +154,10 @@ public class Pokemon implements Comparable<Pokemon> {
         }
     }
 
+    public Type getRandomWeakness(Random random, boolean useResistantType) {
+        return Type.randomWeakness(random, useResistantType, this.primaryType, this.secondaryType);
+    }
+
     public int minimumLevel() {
         int min = 1;
         for (Evolution evo : evolutionsTo) {

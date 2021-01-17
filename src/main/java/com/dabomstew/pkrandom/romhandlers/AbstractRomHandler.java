@@ -1185,7 +1185,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
-            boolean noEarlyWonderGuard, int levelModifier) {
+            boolean noEarlyWonderGuard, boolean useResistantType, int levelModifier) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         cachedReplacementLists = new TreeMap<Type, List<Pokemon>>();
@@ -1207,7 +1207,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 group = group.substring(0, group.indexOf('-'));
             }
             if (group.startsWith("GYM") || group.startsWith("ELITE") || group.startsWith("CHAMPION")
-                    || group.startsWith("THEMED")) {
+                    || group.startsWith("THEMED") || group.startsWith("CILAN") || group.startsWith("CHILI")
+                    || group.startsWith("CRESS")) {
                 // Yep this is a group
                 if (!groups.containsKey(group)) {
                     groups.put(group, new ArrayList<Trainer>());
@@ -1230,6 +1231,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         Set<Type> usedGymTypes = new TreeSet<Type>();
         Set<Type> usedEliteTypes = new TreeSet<Type>();
         Set<Type> usedUberTypes = new TreeSet<Type>();
+        Type gym1 = null;
         for (String group : groups.keySet()) {
             List<Trainer> trainersInGroup = groups.get(group);
             // Shuffle ordering within group to promote randomness
@@ -1238,6 +1240,10 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (group.startsWith("GYM")) {
                 while (usedGymTypes.contains(typeForGroup)) {
                     typeForGroup = pickType(weightByFrequency, noLegendaries);
+                }
+                // Capture GYM1 type for Cilan, Chili, and Cress
+                if (group.equals("GYM1")) {
+                    gym1 = typeForGroup;
                 }
                 usedGymTypes.add(typeForGroup);
             }
@@ -1255,6 +1261,50 @@ public abstract class AbstractRomHandler implements RomHandler {
                 for (TrainerPokemon tp : t.pokemon) {
                     boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
                     tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForGroup, noLegendaries, wgAllowed);
+                    tp.resetMoves = true;
+                    if (levelModifier != 0) {
+                        tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
+                    }
+                }
+            }
+        }
+
+        // Now that GYM1 has a group, we can assign Cilan, Chili, and Cress
+        for (String group: new String[]{"CILAN", "CHILI", "CRESS"}) {
+            List<Trainer> trainersInGroup = groups.get(group);
+            // All 3 groups must exist, so we skip this loop entirely
+            // if any are missing
+            if (trainersInGroup == null) {
+                break;
+            }
+            // Shuffle ordering within group to promote randomness
+            Collections.shuffle(trainersInGroup, random);
+            for (Trainer t : trainersInGroup) {
+                for (int i=0; i < t.pokemon.size(); i++) {
+                    TrainerPokemon tp = t.pokemon.get(i);
+                    boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
+                    // This is the last pokemon. Use the superior type
+                    if (i == t.pokemon.size()-1) {
+                        // Get the starters
+                        // us 0 1 2 => CHILI CRESS CILAN
+                        Type superiorType;
+                        List<Pokemon> starters = this.getStarters();
+                        if (group.equals("CHILI")) {
+                            superiorType = starters.get(0).getRandomWeakness(random, useResistantType);
+                        } 
+                        else if (group.equals("CRESS")) {
+                            superiorType = starters.get(1).getRandomWeakness(random, useResistantType);
+                        }
+                        else {
+                            superiorType = starters.get(2).getRandomWeakness(random, useResistantType);
+
+                        }
+                        tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, superiorType, noLegendaries, wgAllowed);
+                    }
+                    // The rest of the team is equal to GYM1
+                    else {
+                        tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, gym1, noLegendaries, wgAllowed);
+                    }
                     tp.resetMoves = true;
                     if (levelModifier != 0) {
                         tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));

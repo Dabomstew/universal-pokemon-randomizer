@@ -371,11 +371,11 @@ public class Gen5Constants {
     public static void tagTrainersBW(List<Trainer> trs) {
         // We use different Gym IDs to cheat the system for the 3 n00bs
         // Chili, Cress, and Cilan
-        // Cilan can be GYM1, then Chili is GYM9 and Cress GYM10
-        // Also their *trainers* are GYM11 lol
+        // Their *trainers* are GYM1
+        // We use this so their team contains GYM1 Type plus superior type
 
         // Gym Trainers
-        tag(trs, "GYM11", 0x09, 0x0A);
+        tag(trs, "GYM1", 0x09, 0x0A);
         tag(trs, "GYM2", 0x56, 0x57, 0x58);
         tag(trs, "GYM3", 0xC4, 0xC6, 0xC7, 0xC8);
         tag(trs, "GYM4", 0x42, 0x43, 0x44, 0x45);
@@ -385,9 +385,6 @@ public class Gen5Constants {
         tag(trs, "GYM8", 0x109, 0x10A, 0x10F, 0x10E, 0x110, 0x10B, 0x113, 0x112);
 
         // Gym Leaders
-        tag(trs, 0x0C, "GYM1"); // Cilan
-        tag(trs, 0x0B, "GYM9"); // Chili
-        tag(trs, 0x0D, "GYM10"); // Cress
         tag(trs, 0x15, "GYM2"); // Lenora
         tag(trs, 0x16, "GYM3"); // Burgh
         tag(trs, 0x17, "GYM4"); // Elesa
@@ -396,6 +393,11 @@ public class Gen5Constants {
         tag(trs, 0x83, "GYM7"); // Brycen
         tag(trs, 0x84, "GYM8"); // Iris or Drayden
         tag(trs, 0x85, "GYM8"); // Iris or Drayden
+
+        // N00bs
+        tag(trs, 0x0C, "CILAN"); // Cilan
+        tag(trs, 0x0B, "CHILI"); // Chili
+        tag(trs, 0x0D, "CRESS"); // Cress
 
         // Elite 4
         tag(trs, 0xE4, "ELITE1"); // Shauntal

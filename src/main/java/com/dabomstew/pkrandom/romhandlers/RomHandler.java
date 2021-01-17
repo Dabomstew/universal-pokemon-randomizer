@@ -194,7 +194,7 @@ public interface RomHandler {
             int levelModifier);
 
     public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
-            boolean noEarlyWonderGuard, int levelModifier);
+            boolean noEarlyWonderGuard, boolean useResistantType, int levelModifier);
 
     public void rivalCarriesStarter(boolean noLegendaries);
 
