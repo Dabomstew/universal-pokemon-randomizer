@@ -57,6 +57,10 @@ This is subject to change. Make sure you're paying attention to which version of
 This project has a number of files that need to be updated correctly in order to
 support any new options. 
 
+Misc tweaks are not applied directly to the GUI, but are instead dynamically created
+as part of `initTweaksPanel` in `RandomizerGUI.java`. Please see `Misc Tweaks` section
+later in this document.
+
 It is strongly recommended that you download `NetBeans` to take advantage of their
 Java Swing editor, since this project was built using it. NetBeans should be able
 to import the project as Eclipse (you will need a plug-in for this). Once you open
@@ -118,6 +122,26 @@ state back to default if the dependent state changes.
 
 If not done so already, and if you have an element with an `actionPerformed` event, update
 the function to call `this.enableOrDisableSubControls()`.
+
+## Misc Tweaks
+As stated before, Misc Tweak options are dynamically generated based on the values present
+in the `allTweaks` list of `MiscTweak.java`. Simply add your option to the list, doubling
+the value of the last option present in the list (e.g. if the last option's first argument
+is `4096`, yours must be `8192`). This enables the Misc Tweak to be saved to the proper bit and
+not interfere with any other setting. 
+
+You will also need to manually add the `toolTipText` and `name` to `Bundle.properties`
+as these are required fields in the constructor. The format must be `CodeTweaks.<field>.name`
+and `CodeTweaks.<field>.toolTipText` where <field> is the 2nd argument provided in the
+Misc Tewak constructor. Remember that you must start the `toolTipText` value with `<html>`.
+See other Misc Tweaks for examples.
+
+As the enabling and disabling is handled elsewhere, the only thing left is to add the misc
+tweak to the list of options for whichever generation your tweak applies to. Open the
+RomHandler, edit the `miscTweaksAvailable` function and add the tweak to the `available`
+field. Then update the `applyMiscTweak` function to perform the desired modification.
+It is recommended to make a function that does this to enable future enhancements and
+easier unit testing.
 
 # Contacting Me
 Please only contact me with the following

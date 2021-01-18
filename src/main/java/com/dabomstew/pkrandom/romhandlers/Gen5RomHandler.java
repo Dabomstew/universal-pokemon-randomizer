@@ -1301,6 +1301,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
         available |= MiscTweak.NO_FREE_LUCKY_EGG.getValue();
+        if (getRomEntry().romType == Gen5Constants.Type_BW) {
+            available |= MiscTweak.USE_RESISTANT_TYPE.getValue();
+        }
         return available;
     }
 
@@ -1316,6 +1319,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             ((Map<String, Boolean>) this.getTemplateData().get("tweakMap")).put(MiscTweak.BAN_LUCKY_EGG.getTweakName(), true);
         } else if (tweak == MiscTweak.NO_FREE_LUCKY_EGG) {
             removeFreeLuckyEgg();
+        } else if (tweak == MiscTweak.USE_RESISTANT_TYPE) {
+            // Is referenced in Randomizer.java 
+            // No action is taken here
+            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap")).put(MiscTweak.USE_RESISTANT_TYPE.getTweakName(), true);
         }
     }
 

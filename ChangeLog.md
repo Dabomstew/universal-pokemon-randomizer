@@ -49,3 +49,4 @@
  * Gen 3 and Gen 4 Feebas can now evolve by happiness when removing impossible evolutions
  * Gen 5 and Gen 6 move updates can be applied independently of one another
  * Black/White Cilan, Chili, Cress now have types that are superior to the player's chosen starter
+ * As an additional option to the previous change, players can opt for a defensively resistant opponent. For instance, Magnemite would normally face a Ground type, but this option makes the Gym use an Electric type as Electric resists both Electric and Steel.
