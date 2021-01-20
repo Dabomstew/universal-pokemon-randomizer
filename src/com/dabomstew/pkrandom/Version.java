@@ -60,4 +60,25 @@ public class Version {
 
         return map;
     }
+
+    public static boolean isReleaseVersionNewer(String releaseVersion) {
+        if (VERSION_STRING.contains("dev")) {
+            return false;
+        }
+        // Chop off leading "v" from release version
+        String releaseVersionTrimmed = releaseVersion.substring(1);
+        String[] thisVersionPieces = VERSION_STRING.split("\\.");
+        String[] releaseVersionPieces = releaseVersionTrimmed.split("\\.");
+        int smallestLength = Math.min(thisVersionPieces.length, releaseVersionPieces.length);
+        for (int i = 0; i < smallestLength; i++) {
+            int thisVersionPiece = Integer.parseInt(thisVersionPieces[i]);
+            int releaseVersionPiece = Integer.parseInt(releaseVersionPieces[i]);
+            if (thisVersionPiece < releaseVersionPiece) {
+                return true;
+            } else if (thisVersionPiece > releaseVersionPiece) {
+                return false;
+            }
+        }
+        return false;
+    }
 }

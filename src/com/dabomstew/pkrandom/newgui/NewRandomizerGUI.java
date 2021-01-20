@@ -366,6 +366,10 @@ public class NewRandomizerGUI {
                 e.printStackTrace();
             }
 
+            // If the release version is newer than this version, bold it to make it more obvious.
+            if (Version.isReleaseVersionNewer(latestVersionString)) {
+                latestVersionString = String.format("<b>%s</b>", latestVersionString);
+            }
             String finalLatestVersionString = latestVersionString;
             SwingUtilities.invokeLater(() -> {
                 websiteLinkLabel.setText(String.format(bundle.getString("GUI.websiteLinkLabel.text"), finalLatestVersionString));
