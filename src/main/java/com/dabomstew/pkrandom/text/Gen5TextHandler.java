@@ -59,19 +59,20 @@ public class Gen5TextHandler {
                     "And my name is Cilan.\\xFFFEI like "
                     + taggedGroupTypes.get("CILAN").camelCase()
                     +"-type Pok\\x00E9mon.\\xF000\\xBE01\\x0000");
-                gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymTextOffset2,
+                gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymText2Offset,
                     "Ta-da! The " + taggedGroupTypes.get("CHILI").camelCase() 
                     + "-type scorcher Chili--\\xFFFEthat's me--will be your "
                     + "opponent!\\xF000\\xBE01\\x0000");
-                gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymTextOffset2+1,                   
+                gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymText2Offset+1,                   
                     "That is correct!\\xF000\\xBE01\\x0000\\xFFFEIt shall "
                     + "be I and my esteemed " + taggedGroupTypes.get("CRESS").camelCase() 
                     + "\\xFFFEtypes that you must face in battle!\\xF000\\xBE01\\x0000");
-                gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymTextOffset2+2,
+                gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymText2Offset+2,
                     "Nothing personal... No hard feelings...\\xFFFEMe and my "
                     + taggedGroupTypes.get("CILAN").camelCase()
                     + "-type Pok\\x00E9mon will...um..."
-                    + "\\xF000\\xBE01\\x0000\\xFFFEWe're gonna battle, come what may.\\xF000\\xBE01\\x0000");
+                    + "\\xF000\\xBE01\\x0000\\xFFFEWe're gonna battle, "
+                    + "come what may.\\xF000\\xBE01\\x0000");
             }
         } 
         // Types are not available - Make any type references generic
@@ -88,18 +89,19 @@ public class Gen5TextHandler {
                 gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymTextOffset+2,
                     "And my name is Cilan.\\xFFFEI like "
                     +"any Pok\\x00E9mon.\\xF000\\xBE01\\x0000");
-                gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymTextOffset2,
-                    "Ta-da! The jalapeno scorcher "
+                gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymText2Offset,
+                    "Ta-da! The jalape\\x00F1o scorcher "
                     + "Chili--\\xFFFEthat's me--will be your "
                     + "opponent!\\xF000\\xBE01\\x0000");
-                gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymTextOffset2+1,                   
+                gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymText2Offset+1,                   
                     "That is correct!\\xF000\\xBE01\\x0000\\xFFFEIt shall "
                     + "be I and my esteemed team\\xFFFEof Pok\\x00E9mon "
                     + "that you must face in battle!\\xF000\\xBE01\\x0000");
-                gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymTextOffset2+2,
+                gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymText2Offset+2,
                     "Nothing personal... No hard feelings...\\xFFFEMe and my "
                     + "favorite Pok\\x00E9mon will...um..."
-                    + "\\xF000\\xBE01\\x0000\\xFFFEWe're gonna battle, come what may.\\xF000\\xBE01\\x0000");
+                    + "\\xF000\\xBE01\\x0000\\xFFFEWe're gonna battle, "
+                    + "come what may.\\xF000\\xBE01\\x0000");
             }
         }
         setStrings(getRomEntry().getInt("StriatonLeaderTextOffset"), gymLeaderSpeech);        
