@@ -61,6 +61,7 @@ import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
+import com.dabomstew.pkrandom.text.Gen5TextHandler;
 
 import compressors.DSDecmp;
 
@@ -87,7 +88,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         private int offset;
     }
 
-    private static class RomEntry {
+    private static class RomEntry implements IRomEntry {
         private String name;
         private String romCode;
         private int romType;
@@ -99,11 +100,17 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         private Map<String, OffsetWithinEntry[]> offsetArrayEntries = new HashMap<String, OffsetWithinEntry[]>();
         private List<StaticPokemon> staticPokemon = new ArrayList<StaticPokemon>();
 
-        private int getInt(String key) {
+        @Override
+        public int getInt(String key) {
             if (!numbers.containsKey(key)) {
                 numbers.put(key, 0);
             }
             return numbers.get(key);
+        }
+
+        @Override
+        public String getRomCode() {
+            return romCode;
         }
 
         private String getString(String key) {
@@ -270,6 +277,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private List<Pokemon> pokemonList;
     private Move[] moves;
     private RomEntry romEntry;
+    private Gen5TextHandler textHandler;
     private byte[] arm9;
     private List<String> abilityNames;
     private List<String> itemNames;
@@ -320,6 +328,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+        textHandler = new Gen5TextHandler();
+        getTextHandler().setRomEntry(romEntry);
+        getTextHandler().setStoryNARC(storyTextNarc);
         Gen5Constants.allowedItems.allowSingles(Gen5Constants.luckyEggIndex);
         Gen5Constants.nonBadItems.allowSingles(Gen5Constants.luckyEggIndex);
         loadPokemonStats();
@@ -553,18 +564,18 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         // Fix up starter offsets
         try {
-            NARCArchive scriptNARC = scriptNarc;
+            NARCArchive scriptNARC = getScriptNARC();
             for (int i = 0; i < 3; i++) {
                 int starter = newStarters.get(i).number;
                 OffsetWithinEntry[] thisStarter = getRomEntry().offsetArrayEntries.get("StarterOffsets" + (i + 1));
                 for (OffsetWithinEntry entry : thisStarter) {
-                    writeWord(scriptNARC.files.get(entry.entry), entry.offset, starter);
+                    writeWord(scriptNARC.getFiles().get(entry.entry), entry.offset, starter);
                 }
             }
             // GIVE ME BACK MY PURRLOIN
             if (getRomEntry().romType == Gen5Constants.Type_BW2) {
                 byte[] newScript = Gen5Constants.bw2NewStarterScript;
-                byte[] oldFile = scriptNARC.files.get(getRomEntry().getInt("PokedexGivenFileOffset"));
+                byte[] oldFile = getScriptNARC().getFiles().get(getRomEntry().getInt("PokedexGivenFileOffset"));
                 byte[] newFile = new byte[oldFile.length + newScript.length];
                 int offset = find(oldFile, Gen5Constants.bw2StarterScriptMagic);
                 if (offset > 0) {
@@ -581,7 +592,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             } else {
                 byte[] newScript = Gen5Constants.bw1NewStarterScript;
 
-                byte[] oldFile = scriptNARC.files.get(getRomEntry().getInt("PokedexGivenFileOffset"));
+                byte[] oldFile = getScriptNARC().getFiles().get(getRomEntry().getInt("PokedexGivenFileOffset"));
                 byte[] newFile = new byte[oldFile.length + newScript.length];
                 int offset = find(oldFile, Gen5Constants.bw1StarterScriptMagic);
                 if (offset > 0) {
@@ -612,40 +623,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
         // Fix text depending on version
         if (getRomEntry().romType == Gen5Constants.Type_BW) {
-            List<String> yourHouseStrings = getStrings(true, getRomEntry().getInt("StarterLocationTextOffset"));
-            for (int i = 0; i < 3; i++) {
-                yourHouseStrings.set(Gen5Constants.bw1StarterTextOffset - i,
-                        "\\xF000\\xBD02\\x0000The " + newStarters.get(i).primaryType.camelCase()
-                                + "-type Pok\\x00E9mon\\xFFFE\\xF000\\xBD02\\x0000" + newStarters.get(i).name);
-            }
-            // Update what the friends say
-            yourHouseStrings
-                    .set(Gen5Constants.bw1CherenText1Offset,
-                            "Cheren: Hey, how come you get to pick\\xFFFEout my Pok\\x00E9mon?"
-                                    + "\\xF000\\xBE01\\x0000\\xFFFEOh, never mind. I wanted this one\\xFFFEfrom the start, anyway."
-                                    + "\\xF000\\xBE01\\x0000");
-            yourHouseStrings.set(Gen5Constants.bw1CherenText2Offset,
-                    "It's decided. You'll be my opponent...\\xFFFEin our first Pok\\x00E9mon battle!"
-                            + "\\xF000\\xBE01\\x0000\\xFFFELet's see what you can do, \\xFFFEmy Pok\\x00E9mon!"
-                            + "\\xF000\\xBE01\\x0000");
-
-            // rewrite
-            setStrings(true, getRomEntry().getInt("StarterLocationTextOffset"), yourHouseStrings);
+            getTextHandler().bw1StarterTextModifications(newStarters);
         } else {
-            List<String> starterTownStrings = getStrings(true, getRomEntry().getInt("StarterLocationTextOffset"));
-            for (int i = 0; i < 3; i++) {
-                starterTownStrings.set(Gen5Constants.bw2StarterTextOffset - i, "\\xF000\\xBD02\\x0000The "
-                        + newStarters.get(i).primaryType.camelCase()
-                        + "-type Pok\\x00E9mon\\xFFFE\\xF000\\xBD02\\x0000" + newStarters.get(i).name);
-            }
-            // Update what the rival says
-            starterTownStrings.set(Gen5Constants.bw2RivalTextOffset,
-                    "\\xF000\\x0100\\x0001\\x0001: Let's see how good\\xFFFEa Trainer you are!"
-                            + "\\xF000\\xBE01\\x0000\\xFFFEI'll use my Pok\\x00E9mon"
-                            + "\\xFFFEthat I raised from an Egg!\\xF000\\xBE01\\x0000");
-
-            // rewrite
-            setStrings(true, getRomEntry().getInt("StarterLocationTextOffset"), starterTownStrings);
+            getTextHandler().bw2StarterTextModifications(newStarters);          
         }
         return true;
     }
@@ -663,12 +643,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     private void replaceStarterFiles(NARCArchive starterNARC, NARCArchive pokespritesNARC, int starterIndex,
             int pokeNumber) throws IOException, InterruptedException {
-        starterNARC.files.set(starterIndex * 2, pokespritesNARC.files.get(pokeNumber * 20 + 18));
+        starterNARC.getFiles().set(starterIndex * 2, pokespritesNARC.getFiles().get(pokeNumber * 20 + 18));
         // Get the picture...
-        byte[] compressedPic = pokespritesNARC.files.get(pokeNumber * 20);
+        byte[] compressedPic = pokespritesNARC.getFiles().get(pokeNumber * 20);
         // Decompress it with JavaDSDecmp
         byte[] uncompressedPic = DSDecmp.Decompress(compressedPic);
-        starterNARC.files.set(12 + starterIndex, uncompressedPic);
+        starterNARC.getFiles().set(12 + starterIndex, uncompressedPic);
     }
 
     @Override
@@ -1095,9 +1075,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
             // empty entry
             trpokes.files.add(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 });
-            int trainernum = trainers.files.size();
+            int trainernum = trainers.getFiles().size();
             for (int i = 1; i < trainernum; i++) {
-                byte[] trainer = trainers.files.get(i);
+                byte[] trainer = trainers.getFiles().get(i);
                 Trainer tr = allTrainers.next();
                 // preserve original poketype for held item & moves
                 trainer[0] = (byte) tr.poketype;
@@ -1118,8 +1098,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     TrainerPokemon tp = tpokes.next();
                     trpoke[pokeOffs] = (byte) tp.AILevel;
                     // no gender or ability info, so no byte 1
-                    writeWord(trpoke, pokeOffs + 2, tp.level);
-                    writeWord(trpoke, pokeOffs + 4, tp.pokemon.number);
+                    writeWord(trpoke, pokeOffs + 2, tp.getLevel());
+                    writeWord(trpoke, pokeOffs + 4, tp.getPokemon().number);
                     // no form info, so no byte 6/7
                     pokeOffs += 8;
                     if ((tr.poketype & 2) == 2) {
@@ -1175,6 +1155,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
         } catch (IOException ex) {
             throw new RandomizerIOException(ex);
+        }
+    }
+
+    @Override
+    public void modifyTrainerText(Map taggedTypes) {
+        if (getRomEntry().romType == Gen5Constants.Type_BW) {
+            getTextHandler().bw1StriatonCityTextModifications(taggedTypes);
         }
     }
 
@@ -2423,6 +2410,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     
     protected RomEntry getRomEntry() {
         return romEntry;
+    }
+
+    protected Gen5TextHandler getTextHandler() {
+        return textHandler;
     }
 
     protected NARCArchive getScriptNARC() {

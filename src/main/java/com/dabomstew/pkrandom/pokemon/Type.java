@@ -85,6 +85,7 @@ public enum Type {
     public static final List<Type> RESISTANT_TO_STEEL = Arrays.asList(Type.FIRE, Type.WATER, Type.ELECTRIC, Type.STEEL);
     public static final List<Type> STRONG_AGAINST_DARK = Arrays.asList(Type.FIGHTING, Type.BUG);
     public static final List<Type> RESISTANT_TO_DARK = Arrays.asList(Type.FIGHTING, Type.DARK);
+    // Ordering in this list must match ordering in the VALUES array
     public static final List<List<Type>> STRONG_AGAINST = Arrays.asList(
         STRONG_AGAINST_NORMAL,
         STRONG_AGAINST_FIGHTING,
@@ -104,6 +105,7 @@ public enum Type {
         STRONG_AGAINST_STEEL,
         STRONG_AGAINST_DARK
     );
+    // Ordering in this list must match ordering in the VALUES array
     public static final List<List<Type>> RESISTANT_TO = Arrays.asList(
         RESISTANT_TO_NORMAL,
         RESISTANT_TO_FIGHTING,

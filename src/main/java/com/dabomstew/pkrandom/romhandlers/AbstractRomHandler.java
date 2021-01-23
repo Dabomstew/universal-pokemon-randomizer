@@ -1181,6 +1181,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Save it all up
         this.setTrainers(currentTrainers);
+        this.modifyTrainerText(null);
     }
 
     @Override
@@ -1231,7 +1232,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         Set<Type> usedGymTypes = new TreeSet<Type>();
         Set<Type> usedEliteTypes = new TreeSet<Type>();
         Set<Type> usedUberTypes = new TreeSet<Type>();
-        Type gym1 = null;
+        Map<String, Type> groupTypesMap = new HashMap<String, Type>();
         for (String group : groups.keySet()) {
             List<Trainer> trainersInGroup = groups.get(group);
             // Shuffle ordering within group to promote randomness
@@ -1240,10 +1241,6 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (group.startsWith("GYM")) {
                 while (usedGymTypes.contains(typeForGroup)) {
                     typeForGroup = pickType(weightByFrequency, noLegendaries);
-                }
-                // Capture GYM1 type for Cilan, Chili, and Cress
-                if (group.equals("GYM1")) {
-                    gym1 = typeForGroup;
                 }
                 usedGymTypes.add(typeForGroup);
             }
@@ -1267,6 +1264,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                 }
             }
+            groupTypesMap.put(group, typeForGroup);
         }
 
         // Now that GYM1 has a group, we can assign Cilan, Chili, and Cress
@@ -1300,10 +1298,11 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                         }
                         tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, superiorType, noLegendaries, wgAllowed);
+                        groupTypesMap.put(group, superiorType);
                     }
                     // The rest of the team is equal to GYM1
                     else {
-                        tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, gym1, noLegendaries, wgAllowed);
+                        tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels,  groupTypesMap.get("GYM1"), noLegendaries, wgAllowed);
                     }
                     tp.resetMoves = true;
                     if (levelModifier != 0) {
@@ -1348,6 +1347,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Save it all up
         this.setTrainers(currentTrainers);
+        this.modifyTrainerText(groupTypesMap);
     }
 
     @Override
@@ -1389,6 +1389,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         this.setTrainers(currentTrainers);
     }
+
+    // This is left empty so that subclasses can define if any test needs
+    // to be modified based on the new gym types
+    @Override
+    public void modifyTrainerText(Map taggedTypes) {}
 
     // MOVE DATA
     // All randomizers don't touch move ID 165 (Struggle)
@@ -4005,7 +4010,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private Pokemon pickReplacement(Pokemon current, boolean usePowerLevels, Type type, boolean noLegendaries,
             boolean wonderGuardAllowed) {
-        List<Pokemon> pickFrom = cachedAllList;
+        List<Pokemon> pickFrom = getCachedAllList();
         if (type != null) {
             if (!cachedReplacementLists.containsKey(type)) {
                 cachedReplacementLists.put(type, pokemonOfType(type, noLegendaries));
@@ -4259,5 +4264,9 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void applyMiscTweak(MiscTweak tweak) {
         // default: do nothing
+    }
+
+    protected List<Pokemon> getCachedAllList() {
+        return this.cachedAllList;
     }
 }

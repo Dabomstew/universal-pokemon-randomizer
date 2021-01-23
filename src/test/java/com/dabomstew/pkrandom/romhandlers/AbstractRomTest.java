@@ -14,6 +14,7 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.text.Gen5TextHandler;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,12 +49,14 @@ public class AbstractRomTest {
         // Ponyta should return a random element from the Fire listing
         // All 3 have 1 pokemon with a shared type
         HashSet<Type> gym1Type = new HashSet<Type>();
-        RomHandler romhandler = spy(new Gen5RomHandler(new Random()));
+        Gen5RomHandler romhandler = spy(new Gen5RomHandler(new Random()));
         resetDataModel(romhandler);
         startersList.get(0).primaryType = Type.ELECTRIC;
         startersList.get(0).secondaryType = Type.STEEL;
         startersList.get(1).primaryType = Type.FIRE;
         startersList.get(2).primaryType = Type.NORMAL;
+        doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
+        doReturn(mock(Gen5TextHandler.class)).when(romhandler).getTextHandler();
         doNothing().when(romhandler).setTrainers(argCap.capture());
         
         //**************************

@@ -451,6 +451,8 @@ public interface RomHandler {
 
     public void generateTableOfContents();
 
+    public void modifyTrainerText(Map taggedTypes);
+
     // code tweaks
     public int miscTweaksAvailable();
 
