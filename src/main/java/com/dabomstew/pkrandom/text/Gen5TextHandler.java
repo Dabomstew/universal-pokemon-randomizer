@@ -3,6 +3,7 @@ package com.dabomstew.pkrandom.text;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
@@ -34,6 +35,18 @@ import pptxt.PPTxtHandler;
 /*--  You should have received a copy of the GNU General Public License     --*/
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
+
+/**
+ * Please note that certain characters need to be redefined with their Unicode
+ * hexidecimal number (such as é is x00E9). If you encounter issues with
+ * characters not being convertable into numbers, please use this site
+ * to look up the conversion code https://unicodemap.org/
+ * 
+ * Successful translation requires maintaining the proper spacing characters
+ * (such as \\xF000\\xBE01\\x0000\\xFFFE). It is easy to start with the
+ * original text by exporting a/0/0/3 from the ROM (using a tool like
+ * NitroExplorer2) and opening it up in PPTxt, then copying that into here.
+ */
 
 public class Gen5TextHandler {
     IRomEntry romEntry;
@@ -105,6 +118,92 @@ public class Gen5TextHandler {
             }
         }
         setStrings(getRomEntry().getInt("StriatonLeaderTextOffset"), gymLeaderSpeech);        
+    }
+
+    public void bw1NacreneCityTextModifications(Map<String, Type> taggedGroupTypes, Random random) {
+        List<String> gymLeaderSpeech = getStrings(getRomEntry().getInt("NacreneLeaderTextOffset"));
+        
+        // If we have types available for the groups, use them
+        if (taggedGroupTypes != null) {
+            // Update the text for the English games
+            if (getRomEntry().getRomCode().charAt(3) == 'O') {
+                gymLeaderSpeech.set(Gen5Constants.bw1NacreneCityGymTextOffset,
+                    "All Trainers in this Gym use\\xFFFE"
+                    + taggedGroupTypes.get("GYM2").camelCase() 
+                    + "-type Pok\\x00E9mon.\\xF000\\xBE01\\x0000\\xFFFEThis "
+                    + "is just between you and me...\\xF000\\xBE01\\x0000\\xFFFE"
+                    + taggedGroupTypes.get("GYM2").camelCase() 
+                    + "-type Pok\\x00E9mon are weak against\\xFFFE"
+                    + Type.randomWeakness(random, false, taggedGroupTypes.get("GYM2")).camelCase()
+                    + "-type Pok\\x00E9mon.\\xF000\\xBE01\\x0000\\xFFFEUse "
+                    + "your Pok\\x00E9dex to find where that type is."
+                    + "\\xF000\\xBE01\\x0000\\xFFFENow, I will explain "
+                    + "about the Gym itself!\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "In this Pok\\x00E9mon Gym, if you answer\\xFFFEquestions "
+                    + "hidden in books,\\xF000\\xBE01\\x0000\\xFFFEyou "
+                    + "can move forward.\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "For your information, the first book is\\xFFFE"
+                    + "\\x0022Nice to Meet You, Pok\\x00E9mon.\\x0022"
+                    + "\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "If you don't know where the book is,\\xFFFEplease "
+                    + "ask anyone!\\xF000\\xBE01\\x0000");
+                gymLeaderSpeech.set(Gen5Constants.bw1NacreneCityGymTextOffset + 1,
+                    "All Trainers in this Gym use\\xFFFE"
+                    + taggedGroupTypes.get("GYM2").camelCase() + "-type Pok\\x00E9mon."
+                    + "\\xF000\\xBE01\\x0000\\xFFFEThis is just between you "
+                    + "and me...\\xF000\\xBE01\\x0000\\xFFFE"
+                    + taggedGroupTypes.get("GYM2").camelCase() + "-type Pok\\x00E9mon "
+                    + "are weak against\\xFFFE"
+                    + Type.randomWeakness(random, false, taggedGroupTypes.get("GYM2")).camelCase()
+                    + "-type Pok\\x00E9mon.\\xF000\\xBE01\\x0000\\xFFFEUse "
+                    + "your Pok\\x00E9dex to find where that type is."
+                    + "\\xF000\\xBE01\\x0000\\xFFFENow, I will explain about the "
+                    + "Gym itself!\\xF000\\xBE01\\x0000\\xFFFEIn this Pok\\x00E9mon Gym, "
+                    + "if you answer\\xFFFEquestions hidden in books,"
+                    + "\\xF000\\xBE01\\x0000\\xFFFEyou can move forward."
+                    + "\\xF000\\xBE01\\x0000\\xFFFEFor your information, the first "
+                    + "book is\\xFFFE\\x0022Nice to Meet You, Pok\\x00E9mon.\\x0022"
+                    + "\\xF000\\xBE01\\x0000\\xFFFEIf you don't know where the book is,"
+                    + "\\xFFFEplease ask anyone!");
+            }
+        }
+        // Types are not available - Make any type references generic
+        else {
+            // Update the text for the English games
+            if (getRomEntry().getRomCode().charAt(3) == 'O') {
+                gymLeaderSpeech.set(Gen5Constants.bw1NacreneCityGymTextOffset,
+                    "All Trainers in this Gym use\\xFFFE"
+                    + "awesome Pok\\x00E9mon.\\xF000\\xBE01\\x0000\\xFFFEThis "
+                    + "is just between you and me...\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "you have awesome Pok\\x00E9mmon too!"
+                    + "\\xF000\\xBE01\\x0000\\xFFFENow, I will explain "
+                    + "about the Gym itself!\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "In this Pok\\x00E9mon Gym, if you answer\\xFFFEquestions "
+                    + "hidden in books,\\xF000\\xBE01\\x0000\\xFFFEyou "
+                    + "can move forward.\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "For your information, the first book is\\xFFFE"
+                    + "\\x0022Nice to Meet You, Pok\\x00E9mon.\\x0022"
+                    + "\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "If you don't know where the book is,\\xFFFEplease "
+                    + "ask anyone!\\xF000\\xBE01\\x0000");
+                gymLeaderSpeech.set(Gen5Constants.bw1NacreneCityGymTextOffset + 1,
+                    "All Trainers in this Gym use\\xFFFE"
+                    + "awesome Pok\\x00E9mon."
+                    + "\\xF000\\xBE01\\x0000\\xFFFEThis is just between you "
+                    + "and me...\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "you have awesome Pok\\x00E9mmon too!"
+                    + "\\xF000\\xBE01\\x0000\\xFFFENow, I will explain about the "
+                    + "Gym itself!\\xF000\\xBE01\\x0000\\xFFFEIn this Pok\\x00E9mon Gym, "
+                    + "if you answer\\xFFFEquestions hidden in books,"
+                    + "\\xF000\\xBE01\\x0000\\xFFFEyou can move forward."
+                    + "\\xF000\\xBE01\\x0000\\xFFFEFor your information, the first "
+                    + "book is\\xFFFE\\x0022Nice to Meet You, Pok\\x00E9mon.\\x0022"
+                    + "\\xF000\\xBE01\\x0000\\xFFFEIf you don't know where the book is,"
+                    + "\\xFFFEplease ask anyone!");
+            }
+        }
+
+        setStrings(getRomEntry().getInt("NacreneLeaderTextOffset"), gymLeaderSpeech);    
     }
 
     public void bw1StarterTextModifications(List<Pokemon> newStarters) {

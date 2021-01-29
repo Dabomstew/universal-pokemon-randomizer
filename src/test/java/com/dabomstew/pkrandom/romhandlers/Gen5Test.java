@@ -82,6 +82,24 @@ public class Gen5Test {
         verify(mockTextHandler, times(1)).bw1StriatonCityTextModifications(isNotNull());
     }
 
+    @Test
+    public void TestBW1NacreneCityText() throws IOException {
+        // Test with and without null
+        Gen5RomHandler romhandler = spy(new Gen5RomHandler(new Random()));
+        resetDataModel(romhandler);
+        doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
+        doReturn(0xFFFF).when(romhandler).readWord(any(), anyInt());
+        doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
+        
+        // Verify with random team
+        romhandler.randomizeTrainerPokes(false, false, false, 0);
+        verify(mockTextHandler, times(1)).bw1NacreneCityTextModifications(isNull(), any());
+
+        // Verify with type theming
+        romhandler.typeThemeTrainerPokes(false, false, false, false, false, 0);
+        verify(mockTextHandler, times(1)).bw1NacreneCityTextModifications(isNotNull(), any());
+    }
+
     /**
      * Function for granular modification of data model
      */

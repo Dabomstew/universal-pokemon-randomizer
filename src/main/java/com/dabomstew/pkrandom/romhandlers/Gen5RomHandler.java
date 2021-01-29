@@ -1162,6 +1162,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public void modifyTrainerText(Map taggedTypes) {
         if (getRomEntry().romType == Gen5Constants.Type_BW) {
             getTextHandler().bw1StriatonCityTextModifications(taggedTypes);
+            getTextHandler().bw1NacreneCityTextModifications(taggedTypes, this.random);
         }
     }
 
