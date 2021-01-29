@@ -624,6 +624,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         // Fix text depending on version
         if (getRomEntry().romType == Gen5Constants.Type_BW) {
             getTextHandler().bw1StarterTextModifications(newStarters);
+            getTextHandler().bw1CasteliaCityTextModifications(newStarters);
         } else {
             getTextHandler().bw2StarterTextModifications(newStarters);          
         }

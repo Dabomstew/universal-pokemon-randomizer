@@ -231,7 +231,47 @@ public class Gen5TextHandler {
         // rewrite
         setStrings(getRomEntry().getInt("StarterLocationTextOffset"), yourHouseStrings);
 
-    } 
+    }
+    
+    public void bw1CasteliaCityTextModifications(List<Pokemon> newStarters) {
+        List<String> itemGuyStrings = getStrings(getRomEntry().getInt("CasteliaItemTextOffset"));
+        
+        // Update the text for the English games
+        if (getRomEntry().getRomCode().charAt(3) == 'O') {
+            itemGuyStrings.set(Gen5Constants.bw1CasteliaCityItemTextOffset, 
+                "You have " + newStarters.get(0).getName() + "! "
+                + "Then I will give you "
+                + "this!\\xF000\\xBE01\\x0000\\xFFFEWhen you let your "
+                + "Pok\\x00E9mon hold it, it can\\xFFFEraise the power of " 
+                + "Grass-type moves!\\xF000\\xBE01\\x0000");
+            itemGuyStrings.set(Gen5Constants.bw1CasteliaCityItemTextOffset + 1, 
+                "You have " + newStarters.get(1).getName() + "! Then I "
+                + "will give\\xFFFEyou "
+                + "this!\\xF000\\xBE01\\x0000\\xFFFEWhen you let your "
+                + "Pok\\x00E9mon hold it, it can\\xFFFEraise the power of "
+                + "Water-type moves!\\xF000\\xBE01\\x0000");
+            itemGuyStrings.set(Gen5Constants.bw1CasteliaCityItemTextOffset + 2, 
+                "You have " + newStarters.get(2).getName() + "! "
+                + "Then I will give you "
+                + "this!\\xF000\\xBE01\\x0000\\xFFFEWhen you let your "
+                + "Pok\\x00E9mon hold it, it can\\xFFFEraise the power of "
+                + "Fire-type moves!\\xF000\\xBE01\\x0000");
+            itemGuyStrings.set(Gen5Constants.bw1CasteliaCityItemText2Offset, 
+                newStarters.get(0).getName());
+            itemGuyStrings.set(Gen5Constants.bw1CasteliaCityItemText2Offset + 1, 
+                newStarters.get(1).getName());
+            itemGuyStrings.set(Gen5Constants.bw1CasteliaCityItemText2Offset + 2, 
+                newStarters.get(2).getName());
+            itemGuyStrings.set(Gen5Constants.bw1CasteliaCityItemText3Offset, 
+                "Do you have " + newStarters.get(0).getName() + "?");
+            itemGuyStrings.set(Gen5Constants.bw1CasteliaCityItemText3Offset + 1, 
+                "Do you have " + newStarters.get(1).getName() + "?");
+            itemGuyStrings.set(Gen5Constants.bw1CasteliaCityItemText3Offset + 2, 
+                "Do you have " + newStarters.get(2).getName() + "?");
+        }
+
+        setStrings(getRomEntry().getInt("CasteliaItemTextOffset"), itemGuyStrings); 
+    }
 
     public void bw2StarterTextModifications(List<Pokemon> newStarters) {
         List<String> starterTownStrings = getStrings(getRomEntry().getInt("StarterLocationTextOffset"));

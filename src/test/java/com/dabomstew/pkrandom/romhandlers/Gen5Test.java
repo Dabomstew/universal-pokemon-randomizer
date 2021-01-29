@@ -82,6 +82,11 @@ public class Gen5Test {
         verify(mockTextHandler, times(1)).bw1StriatonCityTextModifications(isNotNull());
     }
 
+    /**
+     * When altering trainers, make sure the ROM's text is altered when it is a
+     * Black/White ROM
+     * @throws IOException
+     */
     @Test
     public void TestBW1NacreneCityText() throws IOException {
         // Test with and without null
@@ -98,6 +103,21 @@ public class Gen5Test {
         // Verify with type theming
         romhandler.typeThemeTrainerPokes(false, false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1NacreneCityTextModifications(isNotNull(), any());
+    }
+
+    /**
+     * When altering starters, make sure the ROM's text is updated when it is a
+     * Black/White ROM
+     * 
+     * @throws IOException
+     */
+    @Test
+    public void TestBW1CasteliaCityText() throws IOException {
+        Gen5RomHandler romhandler = spy(new Gen5RomHandler(new Random()));
+        resetDataModel(romhandler);
+        doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
+        romhandler.setStarters(pokemonList.subList(0, 3));
+        verify(mockTextHandler, times(1)).bw1CasteliaCityTextModifications(any());
     }
 
     /**
