@@ -95,9 +95,9 @@ public class GlobalConstants {
 
     public static final List<Integer> battleTrappingAbilities = Arrays.asList(23, 42, 71);
 
-    public static final List<Integer> negativeAbilities = Arrays.asList(129, 112, 54, 59, 161, 150);
-    // Defeatist, Slow Start, Truant, Forecast, Zen Mode, Imposter
-    // To test: Illusion
+    public static final List<Integer> negativeAbilities = Arrays.asList(129, 112, 54, 59, 161, 150, 96, 100);
+    // Defeatist, Slow Start, Truant, Forecast, Zen Mode, Imposter, Normalize, Stall
+    // List found at https://projectpokemon.org/home/forums/topic/36919-abilities-amp-moves-by-index-number-id-4-powersaves-abilitymove-modifiers/
 
     public static final int WONDER_GUARD_INDEX = 25;
 

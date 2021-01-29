@@ -10,6 +10,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import com.dabomstew.pkrandom.constants.Gen5Constants;
+import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
@@ -208,6 +209,22 @@ public class AbstractRomTest {
                     || gym1Type.contains(tp.pokemon.secondaryType)).count() < 2);    
             } 
         }        
+    }
+
+    /**
+     * Check that negative abilities like Normalize are removed
+     */ 
+    @Test  
+    public void TestNegativeAbilityRemoved() {
+        RomHandler romhandler = spy(new Gen5RomHandler(new Random()));
+        resetDataModel(romhandler);
+        romhandler.randomizeAbilities(false, false, false, true);
+        for (Pokemon p : pokemonList) {
+            assertFalse("" + p.getAbility1() + " was in negativeAbilities, but still found",
+                GlobalConstants.negativeAbilities.contains(p.getAbility1()));
+            assertFalse("" + p.getAbility2() + " was in negativeAbilities, but still found",
+                GlobalConstants.negativeAbilities.contains(p.getAbility2()));
+        }
     }
     
 
