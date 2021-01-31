@@ -1165,6 +1165,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             getTextHandler().bw1StriatonCityTextModifications(taggedTypes);
             getTextHandler().bw1NacreneCityTextModifications(taggedTypes, this.random);
             getTextHandler().bw1CasteliaCityPraiseTextModifications(taggedTypes);
+            getTextHandler().bw1CasteliaCityBurghTextModifications(taggedTypes);
         }
     }
 

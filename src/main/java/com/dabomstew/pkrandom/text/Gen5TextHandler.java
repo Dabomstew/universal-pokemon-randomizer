@@ -217,13 +217,13 @@ public class Gen5TextHandler {
                     "The Striaton City Gym Leaders are a\\xFFFEgreat triplet "
                     + "combo!\\xF000\\xBE01\\x0000\\xFFFEThe "
                     + taggedGroupTypes.get("CILAN").camelCase()
-                    + "-type Pokémon user, Cilan,\\xFFFEchooses great tea "
+                    + "-type Pok\\x00E9mon user, Cilan,\\xFFFEchooses great tea "
                     + "leaves.\\xF000\\xBE01\\x0000\\xFFFEThe "
                     + taggedGroupTypes.get("CRESS").camelCase()
-                    + "-type Pokémon user, Cress,\\xFFFEprepares the best "
+                    + "-type Pok\\x00E9mon user, Cress,\\xFFFEprepares the best "
                     + "water.\\xF000\\xBE01\\x0000\\xFFFEAnd the "
                     + taggedGroupTypes.get("CHILI").camelCase()
-                    + "-type Pokémon user, Chili,\\xFFFEpours hot water at "
+                    + "-type Pok\\x00E9mon user, Chili,\\xFFFEpours hot water at "
                     + "the right heat.\\xF000\\xBE01\\x0000\\xFFFENo "
                     + "wonder their tea is the best!");
             }
@@ -246,6 +246,65 @@ public class Gen5TextHandler {
         }
         setStrings(getRomEntry().getInt("CasteliaPraiseTextOffset"), gymPraiseSpeech);        
     }
+
+    public void bw1CasteliaCityBurghTextModifications(Map<String, Type> taggedGroupTypes) {
+        List<String> gymLeaderSpeech = getStrings(getRomEntry().getInt("CasteliaBurghTextOffset"));
+        
+        // If we have types available for the groups, use them
+        if (taggedGroupTypes != null) {
+            // Update the text for the English games
+            if (getRomEntry().getRomCode().charAt(3) == 'O') {
+                gymLeaderSpeech.set(Gen5Constants.bw1CasteliaCityBurghTextOffset,
+                    "Thanks again for your help.\\xF000\\xBE01\\x0000\\xFFFEMy"
+                    + taggedGroupTypes.get("GYM3").camelCase() + " Pok\\x00E9mon "
+                    + "are scurrying with\\xFFFEexcitement about getting to "
+                    + "battle you.\\xF000\\xBE01\\x0000\\xFFFELet's get "
+                    + "straight to it!\\xF000\\xBE01\\x0000");
+                gymLeaderSpeech.set(Gen5Constants.bw1CasteliaCityBurghText2Offset,
+                    "How many discoveries have you made\\xFFFEsince you "
+                    + "started your adventure?\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "When I was a kid, my innocent heart was\\xFFFEcaptured "
+                    + "by the beauty of " + taggedGroupTypes.get("GYM3").camelCase() 
+                    + " Pok\\x00E9mon.\\xF000\\xBE01\\x0000\\xFFFEI drew with "
+                    + "them and battled with them,\\xFFFEand after all this time, "
+                    + "I continue\\xF000\\xBE01\\x0000\\xFFFEto discover new "
+                    + "things.\\xF000\\xBE01\\x0000\\xFFFEA world shared with "
+                    + "Pok\\x00E9mon is a world\\xFFFEswarming with mysteries.");
+                gymLeaderSpeech.set(Gen5Constants.bw1CasteliaCityBurghText3Offset,
+                    "If you hadn't stepped on that switch,\\xFFFEI'd still be "
+                    + "stuck hidden away.\\xF000\\xBE01\\x0000\\xFFFEThat's "
+                    + "right! " + taggedGroupTypes.get("GYM3").camelCase() 
+                    + " Gym Trainers like to\\xFFFEbe bugged!");
+            }
+        }
+        // Types are not available - Make any type references generic
+        else {
+             // Update the text for the English games
+             if (getRomEntry().getRomCode().charAt(3) == 'O') {
+                gymLeaderSpeech.set(Gen5Constants.bw1CasteliaCityBurghTextOffset,
+                    "Thanks again for your help.\\xF000\\xBE01\\x0000\\xFFFEMy "
+                    + "Pok\\x00E9mon are scurrying with\\xFFFEexcitement about "
+                    + "getting to battle you.\\xF000\\xBE01\\x0000\\xFFFELet's "
+                    + "get straight to it!\\xF000\\xBE01\\x0000");
+                gymLeaderSpeech.set(Gen5Constants.bw1CasteliaCityBurghText2Offset,
+                    "How many discoveries have you made\\xFFFEsince you "
+                    + "started your adventure?\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "When I was a kid, my innocent heart was\\xFFFEcaptured "
+                    + "by the beauty of Pok\\x00E9mon.\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "I drew with them and battled with them,\\xFFFEand after "
+                    + "all this time, I continue\\xF000\\xBE01\\x0000\\xFFFEto "
+                    + "discover new things.\\xF000\\xBE01\\x0000\\xFFFEA "
+                    + "world shared with Pok\\x00E9mon is a world\\xFFFEswarming "
+                    + "with mysteries.");
+                gymLeaderSpeech.set(Gen5Constants.bw1CasteliaCityBurghText3Offset,
+                    "If you hadn't stepped on that switch,\\xFFFEI'd still be "
+                    + "stuck hidden away.\\xF000\\xBE01\\x0000\\xFFFEThat's "
+                    + "right! Gym Trainers like to\\xFFFEbe bugged!");
+            }
+        }
+        setStrings(getRomEntry().getInt("CasteliaBurghTextOffset"), gymLeaderSpeech);        
+    }
+
 
     public void bw1StarterTextModifications(List<Pokemon> newStarters) {
         List<String> yourHouseStrings = getStrings(getRomEntry().getInt("StarterLocationTextOffset"));
