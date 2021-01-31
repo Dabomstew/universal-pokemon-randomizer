@@ -206,6 +206,47 @@ public class Gen5TextHandler {
         setStrings(getRomEntry().getInt("NacreneLeaderTextOffset"), gymLeaderSpeech);    
     }
 
+    public void bw1CasteliaCityPraiseTextModifications(Map<String, Type> taggedGroupTypes) {
+        List<String> gymPraiseSpeech = getStrings(getRomEntry().getInt("CasteliaPraiseTextOffset"));
+        
+        // If we have types available for the groups, use them
+        if (taggedGroupTypes != null) {
+            // Update the text for the English games
+            if (getRomEntry().getRomCode().charAt(3) == 'O') {
+                gymPraiseSpeech.set(Gen5Constants.bw1CasteliaCityPraiseTextOffset,
+                    "The Striaton City Gym Leaders are a\\xFFFEgreat triplet "
+                    + "combo!\\xF000\\xBE01\\x0000\\xFFFEThe "
+                    + taggedGroupTypes.get("CILAN").camelCase()
+                    + "-type Pokémon user, Cilan,\\xFFFEchooses great tea "
+                    + "leaves.\\xF000\\xBE01\\x0000\\xFFFEThe "
+                    + taggedGroupTypes.get("CRESS").camelCase()
+                    + "-type Pokémon user, Cress,\\xFFFEprepares the best "
+                    + "water.\\xF000\\xBE01\\x0000\\xFFFEAnd the "
+                    + taggedGroupTypes.get("CHILI").camelCase()
+                    + "-type Pokémon user, Chili,\\xFFFEpours hot water at "
+                    + "the right heat.\\xF000\\xBE01\\x0000\\xFFFENo "
+                    + "wonder their tea is the best!");
+            }
+        } 
+        // Types are not available - Make any type references generic
+        else {
+            // Update the text for the English games
+            if (getRomEntry().getRomCode().charAt(3) == 'O') {
+                gymPraiseSpeech.set(Gen5Constants.bw1CasteliaCityPraiseTextOffset,
+                    "The Striaton City Gym Leaders are a\\xFFFEgreat triplet "
+                    + "combo!\\xF000\\xBE01\\x0000\\xFFFEThe herbalist, "
+                    + "Cilan,\\xFFFEchooses great tea leaves."
+                    + "\\xF000\\xBE01\\x0000\\xFFFEThe general specialist, "
+                    + "Cress,\\xFFFEprepares the best water."
+                    + "\\xF000\\xBE01\\x0000\\xFFFEAnd the jalape\\x00F1o "
+                    + "scorcher, Chili,\\xFFFEpours hot water at "
+                    + "the right heat.\\xF000\\xBE01\\x0000\\xFFFENo "
+                    + "wonder their tea is the best!");
+            }
+        }
+        setStrings(getRomEntry().getInt("CasteliaPraiseTextOffset"), gymPraiseSpeech);        
+    }
+
     public void bw1StarterTextModifications(List<Pokemon> newStarters) {
         List<String> yourHouseStrings = getStrings(getRomEntry().getInt("StarterLocationTextOffset"));
         // Update the text for the English games
@@ -233,7 +274,7 @@ public class Gen5TextHandler {
 
     }
     
-    public void bw1CasteliaCityTextModifications(List<Pokemon> newStarters) {
+    public void bw1CasteliaCityItemTextModifications(List<Pokemon> newStarters) {
         List<String> itemGuyStrings = getStrings(getRomEntry().getInt("CasteliaItemTextOffset"));
         
         // Update the text for the English games

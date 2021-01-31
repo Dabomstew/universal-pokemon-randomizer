@@ -56,7 +56,7 @@ public class Gen5Constants {
         bw1NacreneCityGymTextOffset = 1;
     
     public static final int bw1CasteliaCityItemTextOffset = 3, bw1CasteliaCityItemText2Offset = 7,
-        bw1CasteliaCityItemText3Offset = 11;
+        bw1CasteliaCityItemText3Offset = 11, bw1CasteliaCityPraiseTextOffset = 6;
 
     public static final byte[] bw2NewStarterScript = { 0x28, 0x00, (byte) 0xA1, 0x40, 0x04, 0x00, (byte) 0xDE, 0x00,
             0x00, 0x00, (byte) 0xFD, 0x01, 0x05, 0x00 };

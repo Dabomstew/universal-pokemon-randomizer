@@ -624,7 +624,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         // Fix text depending on version
         if (getRomEntry().romType == Gen5Constants.Type_BW) {
             getTextHandler().bw1StarterTextModifications(newStarters);
-            getTextHandler().bw1CasteliaCityTextModifications(newStarters);
+            getTextHandler().bw1CasteliaCityItemTextModifications(newStarters);
         } else {
             getTextHandler().bw2StarterTextModifications(newStarters);          
         }
@@ -1164,6 +1164,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         if (getRomEntry().romType == Gen5Constants.Type_BW) {
             getTextHandler().bw1StriatonCityTextModifications(taggedTypes);
             getTextHandler().bw1NacreneCityTextModifications(taggedTypes, this.random);
+            getTextHandler().bw1CasteliaCityPraiseTextModifications(taggedTypes);
         }
     }
 
