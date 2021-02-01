@@ -320,6 +320,7 @@ public class Gen5TextHandler {
                     + "\\xF000\\xBE01\\x0000");
             }
         }
+        // Types are not available - Make any type references generic
         else {
             // Update the text for the English games
             if (getRomEntry().getRomCode().charAt(3) == 'O') {
@@ -331,6 +332,62 @@ public class Gen5TextHandler {
             }
         }
         setStrings(getRomEntry().getInt("CherenBurghTextOffset"), gymLeaderSpeech);  
+    }
+
+    public void bw1NimbasaCityTextModifications(Map<String, Type> taggedGroupTypes, Random random) {
+        List<String> gymLeaderSpeech = getStrings(getRomEntry().getInt("NimbasaLeaderTextOffset"));
+        
+        // If we have types available for the groups, use them
+        if (taggedGroupTypes != null) {
+            // Update the text for the English games
+            if (getRomEntry().getRomCode().charAt(3) == 'O') {
+                gymLeaderSpeech.set(Gen5Constants.bw1NimbasaCityTextOffset, 
+                    "In this roller coaster Gym, the first\\xFFFEstep "
+                    + "is to get in the car.\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "Next comes the platform!\\xFFFEThere, you can "
+                    + "change\\xF000\\xBE01\\x0000\\xFFFEwhere the "
+                    + "coaster is going!\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "Sometimes you continue by riding\\xFFFEthe cars "
+                    + "of opponents you defeat.\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "That's how you aim for the Gym Leader!"
+                    + "\\xF000\\xBE01\\x0000\\xFFFEBy the way, "
+                    + taggedGroupTypes.get("GYM4").camelCase() 
+                    + "-type Pok\\x00E9mon don't\\xFFFEdo well against "
+                    + Type.randomWeakness(random, false, taggedGroupTypes.get("GYM4")).camelCase()
+                    + "-type moves...");
+                gymLeaderSpeech.set(Gen5Constants.bw1NimbasaCityTextOffset + 1,
+                    "Elesa uses dazzling\\xFFFE"
+                    + taggedGroupTypes.get("GYM4").camelCase() 
+                    + "-type attacks!\\xF000\\xBE01\\x0000\\xFFFEBut "
+                    + "the combination of you and your\\xFFFEPok\\x00E9mon "
+                    + "was even more impressive!\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "It was... It was...\\xFFFEan emotional roller coaster!");
+            }
+        }
+        // Types are not available - Make any type references generic
+        else {
+            // Update the text for the English games
+            if (getRomEntry().getRomCode().charAt(3) == 'O') {
+                gymLeaderSpeech.set(Gen5Constants.bw1NimbasaCityTextOffset, 
+                    "In this roller coaster Gym, the first\\xFFFEstep "
+                    + "is to get in the car.\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "Next comes the platform!\\xFFFEThere, you can "
+                    + "change\\xF000\\xBE01\\x0000\\xFFFEwhere the "
+                    + "coaster is going!\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "Sometimes you continue by riding\\xFFFEthe cars "
+                    + "of opponents you defeat.\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "That's how you aim for the Gym Leader!"
+                    + "\\xF000\\xBE01\\x0000\\xFFFEBy the way, "
+                    + "she got moves...");
+                gymLeaderSpeech.set(Gen5Constants.bw1NimbasaCityTextOffset + 1,
+                    "Elesa uses dazzling\\xFFFE"
+                    + "attacks!\\xF000\\xBE01\\x0000\\xFFFEBut "
+                    + "the combination of you and your\\xFFFEPok\\x00E9mon "
+                    + "was even more impressive!\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "It was... It was...\\xFFFEan emotional roller coaster!");
+            }
+        }
+        setStrings(getRomEntry().getInt("NimbasaLeaderTextOffset"), gymLeaderSpeech);  
     }
 
 
