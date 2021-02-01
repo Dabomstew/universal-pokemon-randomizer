@@ -169,6 +169,30 @@ public class Gen5Test {
     }
 
     /**
+     * When altering trainers, make sure the ROM's text is updated when it is a
+     * Black/White ROM
+     * 
+     * @throws IOException
+     */
+    @Test
+    public void TestBW1CherenBurghText() throws IOException {
+        // Test with and without null
+        Gen5RomHandler romhandler = spy(new Gen5RomHandler(new Random()));
+        resetDataModel(romhandler);
+        doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
+        doReturn(0xFFFF).when(romhandler).readWord(any(), anyInt());
+        doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
+        
+        // Verify with random team
+        romhandler.randomizeTrainerPokes(false, false, false, 0);
+        verify(mockTextHandler, times(1)).bw1CherenBurghTextModifications(isNull());
+
+        // Verify with type theming
+        romhandler.typeThemeTrainerPokes(false, false, false, false, false, 0);
+        verify(mockTextHandler, times(1)).bw1CherenBurghTextModifications(isNotNull());
+    }
+
+    /**
      * Function for granular modification of data model
      */
     private void setUp() {

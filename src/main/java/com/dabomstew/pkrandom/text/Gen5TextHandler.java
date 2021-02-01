@@ -305,6 +305,34 @@ public class Gen5TextHandler {
         setStrings(getRomEntry().getInt("CasteliaBurghTextOffset"), gymLeaderSpeech);        
     }
 
+    public void bw1CherenBurghTextModifications(Map<String, Type> taggedGroupTypes) {
+        List<String> gymLeaderSpeech = getStrings(getRomEntry().getInt("CherenBurghTextOffset"));
+        
+        // If we have types available for the groups, use them
+        if (taggedGroupTypes != null) {
+            // Update the text for the English games
+            if (getRomEntry().getRomCode().charAt(3) == 'O') {
+                gymLeaderSpeech.set(Gen5Constants.bw1CherenBurghTextOffset,
+                    "He's a seasoned Gym Leader.\\xFFFEHe made me work for "
+                    + "that Gym Badge!\\xF000\\xBE01\\x0000\\xFFFEBut for me, "
+                    + taggedGroupTypes.get("GYM3").camelCase()  
+                    + "-type Pok\\x00E9mon\\xFFFEaren't much of a challenge."
+                    + "\\xF000\\xBE01\\x0000");
+            }
+        }
+        else {
+            // Update the text for the English games
+            if (getRomEntry().getRomCode().charAt(3) == 'O') {
+                gymLeaderSpeech.set(Gen5Constants.bw1CherenBurghTextOffset,
+                    "He's a seasoned Gym Leader.\\xFFFEHe made me work for "
+                    + "that Gym Badge!\\xF000\\xBE01\\x0000\\xFFFEBut for me, "
+                    + "his Pok\\x00E9mon\\xFFFEaren't much of a challenge."
+                    + "\\xF000\\xBE01\\x0000");
+            }
+        }
+        setStrings(getRomEntry().getInt("CherenBurghTextOffset"), gymLeaderSpeech);  
+    }
+
 
     public void bw1StarterTextModifications(List<Pokemon> newStarters) {
         List<String> yourHouseStrings = getStrings(getRomEntry().getInt("StarterLocationTextOffset"));

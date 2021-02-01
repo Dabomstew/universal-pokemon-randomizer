@@ -14,7 +14,7 @@ XX Choice not available until game is played XXStriaton City leaders use correct
 **Item guy in Castalia City uses the names of the true starters (3rd narc, block 30, index 3-5, 7-9, 11-13)
 **Castalia City guy who praises Striaton City gym leaders should reference true type (3rd narc, block 31, index 6)
 **Burgh speech should reference true type (3rd narc, block 34, index 0, 5, 11)
-Cheren's speech should reference Burgh's true type (3rd narc, block 36, index 2)
+**Cheren's speech should reference Burgh's true type (3rd narc, block 36, index 2)
 Gym guy in Nimbasa gym should use Elesa's true type (3rd narc, block 68, index 19)
 Professor Juniper should reference Elesa's true type (3rd narc, block 95, index 2)
 Gym guy in Drifviel City should reference Clay's true type (3rd narc, block 103, index 1)
