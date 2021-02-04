@@ -278,6 +278,7 @@ public class NewRandomizerGUI {
     private JCheckBox miscBalanceStaticLevelsCheckBox;
     private JCheckBox miscRetainAltFormesCheckBox;
     private JComboBox pbsEXPCurveComboBox;
+    private JCheckBox miscRunWithoutRunningShoesCheckBox;
 
     private static JFrame frame;
 

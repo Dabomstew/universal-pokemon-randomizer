@@ -64,6 +64,8 @@ public class Gen3Constants {
 
     public static final String rsPokemonPalettesPointerSuffix = "080C064A11404840";
 
+    public static final String frlgRunningShoesCheckPrefix = "02200540002D29D0";
+
     public static final int efrlgPokemonNamesPointer = 0x144, efrlgMoveNamesPointer = 0x148,
             efrlgAbilityNamesPointer = 0x1C0, efrlgItemDataPointer = 0x1C8, efrlgMoveDataPointer = 0x1CC,
             efrlgPokemonStatsPointer = 0x1BC, efrlgFrontSpritesPointer = 0x128, efrlgPokemonPalettesPointer = 0x130;

@@ -3082,6 +3082,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             available |= MiscTweak.RANDOMIZE_PC_POTION.getValue();
         }
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
+        if (romEntry.romType == Gen3Constants.RomType_FRLG) {
+            available |= MiscTweak.RUN_WITHOUT_RUNNING_SHOES.getValue();
+        }
         return available;
     }
 
@@ -3102,6 +3105,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             nonBadItems.banSingles(Gen3Constants.luckyEggIndex);
         } else if (tweak == MiscTweak.RANDOMIZE_PC_POTION) {
             randomizePCPotion();
+        } else if (tweak == MiscTweak.RUN_WITHOUT_RUNNING_SHOES) {
+            applyRunWithoutRunningShoesPatch();
         }
     }
 
@@ -3182,6 +3187,23 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private void randomizePCPotion() {
         if (romEntry.getValue("PCPotionOffset") != 0) {
             writeWord(romEntry.getValue("PCPotionOffset"), this.getNonBadItems().randomNonTM(this.random));
+        }
+    }
+
+    private void applyRunWithoutRunningShoesPatch() {
+        if (romEntry.romType == Gen3Constants.RomType_FRLG) {
+            int offset = find(Gen3Constants.frlgRunningShoesCheckPrefix);
+            if (offset != 0) {
+                // The prefix starts 0x12 bytes from what we want to patch because what
+                // comes between is version-specific. To start running, the game checks:
+                // 1. That you're holding the B button
+                // 2. That the FLAG_SYS_B_DASH flag is set (aka, you've acquired Running Shoes)
+                // 3. That you're allowed to run in this location
+                // For #2, if the flag is unset, it jumps to a different part of the
+                // code to make you walk instead. This simply nops out this jump so the
+                // game stops caring about the FLAG_SYS_B_DASH flag entirely.
+                writeWord(offset + 0x12, 0);
+            }
         }
     }
 
