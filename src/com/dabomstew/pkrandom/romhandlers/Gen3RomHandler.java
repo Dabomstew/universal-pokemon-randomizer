@@ -3189,15 +3189,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void applyRunWithoutRunningShoesPatch() {
-        String prefix;
-        if (romEntry.romType == Gen3Constants.RomType_Ruby || romEntry.romType == Gen3Constants.RomType_Sapp) {
-            prefix = Gen3Constants.rsRunningShoesCheckPrefix;
-        }
-        else if (romEntry.romType == Gen3Constants.RomType_FRLG) {
-            prefix = Gen3Constants.frlgRunningShoesCheckPrefix;
-        } else {
-            prefix = Gen3Constants.eRunningShoesCheckPrefix;
-        }
+        String prefix = Gen3Constants.getRunningShoesCheckPrefix(romEntry.romType);
         int offset = find(prefix);
         if (offset != 0) {
             // The prefix starts 0x12 bytes from what we want to patch because what comes

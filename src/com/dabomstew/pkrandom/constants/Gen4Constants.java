@@ -333,6 +333,8 @@ public class Gen4Constants {
 
     public static final String feebasLevelPrefixDPPt = "019813B0F0BD", honeyTreeLevelPrefixDPPt = "F0BDF0B589B0051C0C1C";
 
+    private static final String runningShoesCheckPrefixDPPt = "281C0C24", runningShoesCheckPrefixHGSS = "301C0C24";
+
     private static final int trophyGardenGrassEncounterIndexDP = 304, trophyGardenGrassEncounterIndexPt = 308;
     private static final List<Integer> marshGrassEncounterIndicesDP = Arrays.asList(76, 82, 88, 94, 100, 102),
             marshGrassEncounterIndicesPt = Arrays.asList(76, 82, 88, 94, 100, 106);
@@ -490,6 +492,14 @@ public class Gen4Constants {
             return doubleBattleFixPrefixPt;
         } else {
             return doubleBattleFixPrefixHGSS;
+        }
+    }
+
+    public static String getRunWithoutRunningShoesPrefix(int romType) {
+        if (romType == Gen4Constants.Type_DP || romType == Gen4Constants.Type_Plat) {
+            return runningShoesCheckPrefixDPPt;
+        } else {
+            return runningShoesCheckPrefixHGSS;
         }
     }
 

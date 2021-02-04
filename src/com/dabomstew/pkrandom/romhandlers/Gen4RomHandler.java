@@ -3654,6 +3654,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         if (romEntry.tweakFiles.get("NationalDexAtStartTweak") != null) {
             available |= MiscTweak.NATIONAL_DEX_AT_START.getValue();
         }
+        available |= MiscTweak.RUN_WITHOUT_RUNNING_SHOES.getValue();
         return available;
     }
 
@@ -3670,6 +3671,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             nonBadItems.banSingles(Gen4Constants.luckyEggIndex);
         } else if (tweak == MiscTweak.NATIONAL_DEX_AT_START) {
             patchForNationalDex();
+        } else if (tweak == MiscTweak.RUN_WITHOUT_RUNNING_SHOES) {
+            applyRunWithoutRunningShoesPatch();
         }
     }
 
@@ -3712,6 +3715,21 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         System.arraycopy(pokedexScript, 0, expandedPokedexScript, 0, pokedexScript.length);
         genericIPSPatch(expandedPokedexScript, "NationalDexAtStartTweak");
         scriptNarc.files.set(romEntry.getInt("NationalDexScriptOffset"), expandedPokedexScript);
+    }
+
+    private void applyRunWithoutRunningShoesPatch() {
+        String prefix = Gen4Constants.getRunWithoutRunningShoesPrefix(romEntry.romType);
+        int offset = find(arm9, prefix);
+        if (offset != 0) {
+            // The prefix starts 0xE bytes from what we want to patch because what comes
+            // between is region and revision dependent. To start running, the game checks:
+            // 1. That you're holding the B button
+            // 2. That the FLAG_SYS_B_DASH flag is set (aka, you've acquired Running Shoes)
+            // For #2, if the flag is unset, it jumps to a different part of the
+            // code to make you walk instead. This simply nops out this jump so the
+            // game stops caring about the FLAG_SYS_B_DASH flag entirely.
+            writeWord(arm9,offset + 0xE, 0);
+        }
     }
 
     private boolean genericIPSPatch(byte[] data, String ctName) {
