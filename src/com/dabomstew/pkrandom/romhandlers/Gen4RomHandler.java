@@ -1127,10 +1127,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             }
 
             // Up to 100 now... 2*2*2 for radio pokemon
-            // Time to handle Surfing, Rock Smash, and Old Rod
-            // Good Rod and Super Rod handled separately due to time-based replacement
+            // Time to handle Surfing, Rock Smash, Rods
             int offset = 100;
-            for (int i = 1; i < 4; i++) {
+            for (int i = 1; i < 6; i++) {
                 List<Encounter> encountersHere = readSeaEncountersHGSS(b, offset, amounts[i]);
                 offset += 4 * amounts[i];
                 if (rates[i] != 0) {
@@ -1143,42 +1142,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 }
             }
 
-            // Good Rod and Super Rod
-            Pokemon nightFishingReplacement = pokes[readWord(b, 192)];
-            if (useTimeOfDay) {
-                if (rates[4] != 0) {
-                    List<EncounterSet> goodRodEncounters =
-                            readTimeBasedRodEncountersHGSS(b, offset, nightFishingReplacement, mapName,
-                                    rates,4, Gen4Constants.hgssGoodRodReplacementIndex);
-                    encounters.addAll(goodRodEncounters);
-                }
-                if (rates[5] != 0) {
-                    List<EncounterSet> superRodEncounters =
-                            readTimeBasedRodEncountersHGSS(b, offset + 20, nightFishingReplacement, mapName,
-                                    rates, 5, Gen4Constants.hgssSuperRodReplacementIndex);
-                    encounters.addAll(superRodEncounters);
-                }
-                offset += 40;
-            } else {
-                for (int i = 4; i < 6; i++) {
-                    List<Encounter> encountersHere = readSeaEncountersHGSS(b, offset, amounts[i]);
-                    offset += 4 * amounts[i];
-                    if (rates[i] != 0) {
-                        // Valid area.
-                        EncounterSet other = new EncounterSet();
-                        other.encounters = encountersHere;
-                        other.displayName = mapName + " " + Gen4Constants.hgssNonGrassSetNames[i];
-                        other.rate = rates[i];
-                        encounters.add(other);
-                    }
-                }
-            }
-
             // Swarms
             EncounterSet swarms = readOptionalEncountersHGSS(b, offset, 2);
             swarms.displayName = mapName + " Swarms";
             if (swarms.encounters.size() > 0) {
                 encounters.add(swarms);
+            }
+            EncounterSet nightFishingReplacement = readOptionalEncountersHGSS(b, offset + 4, 1);
+            nightFishingReplacement.displayName = mapName + " Night Fishing Replacement";
+            if (nightFishingReplacement.encounters.size() > 0) {
+                encounters.add(nightFishingReplacement);
             }
             EncounterSet fishingSwarms = readOptionalEncountersHGSS(b, offset + 6, 1);
             fishingSwarms.displayName = mapName + " Fishing Swarm";
@@ -1309,14 +1282,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         return es;
     }
 
-    private List<EncounterSet> readTimeBasedRodEncountersHGSS(byte[] data, int offset, Pokemon replacement, String mapName,
-                                                              int[] rates, int encounterIndex, int replacementIndex) {
+    private List<EncounterSet> readTimeBasedRodEncountersHGSS(byte[] data, int offset, Pokemon replacement, int replacementIndex) {
         List<EncounterSet> encounters = new ArrayList<>();
         List<Encounter> rodMorningDayEncounters = readSeaEncountersHGSS(data, offset, 5);
         EncounterSet rodMorningDay = new EncounterSet();
         rodMorningDay.encounters = rodMorningDayEncounters;
-        rodMorningDay.displayName = mapName + " Morning/Day " + Gen4Constants.hgssNonGrassSetNames[encounterIndex];
-        rodMorningDay.rate = rates[encounterIndex];
         encounters.add(rodMorningDay);
 
         List<Encounter> rodNightEncounters = new ArrayList<>(rodMorningDayEncounters);
@@ -1324,8 +1294,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         rodNightEncounters.set(replacementIndex, replacedEncounter);
         EncounterSet rodNight = new EncounterSet();
         rodNight.encounters = rodNightEncounters;
-        rodNight.displayName = mapName + " Night " + Gen4Constants.hgssNonGrassSetNames[4];
-        rodNight.rate = rates[encounterIndex];
         encounters.add(rodNight);
         return encounters;
     }
@@ -1581,9 +1549,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             writeOptionalEncountersHGSS(b, 92, 4, encounters);
 
             // Up to 100 now... 2*2*2 for radio pokemon
-            // Write surf, rock smash, and old rod
+            // Write surf, rock smash, and rods
             int offset = 100;
-            for (int i = 1; i < 4; i++) {
+            for (int i = 1; i < 6; i++) {
                 if (rates[i] != 0) {
                     // Valid area.
                     EncounterSet other = encounters.next();
@@ -1592,39 +1560,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 offset += 4 * amounts[i];
             }
 
-            // Write Good Rod and Super Rod
-            Pokemon nightFishingReplacement = null;
-            if (rates[4] != 0) {
-                if (useTimeOfDay) {
-                    EncounterSet goodRodMorningDay = encounters.next();
-                    EncounterSet goodRodNight = encounters.next();
-                    nightFishingReplacement = goodRodNight.encounters.get(Gen4Constants.hgssGoodRodReplacementIndex).pokemon;
-                    writeSeaEncountersHGSS(b, offset, goodRodMorningDay.encounters);
-                } else {
-                    EncounterSet goodRod = encounters.next();
-                    nightFishingReplacement = goodRod.encounters.get(Gen4Constants.hgssGoodRodReplacementIndex).pokemon;
-                    writeSeaEncountersHGSS(b, offset, goodRod.encounters);
-                }
-            }
-            if (rates[5] != 0) {
-                if (useTimeOfDay) {
-                    EncounterSet superRodMorningDay = encounters.next();
-                    EncounterSet superRodNight = encounters.next();
-                    nightFishingReplacement = superRodNight.encounters.get(Gen4Constants.hgssSuperRodReplacementIndex).pokemon;
-                    writeSeaEncountersHGSS(b, offset + 20, superRodMorningDay.encounters);
-                } else {
-                    EncounterSet superRod = encounters.next();
-                    nightFishingReplacement = superRod.encounters.get(Gen4Constants.hgssSuperRodReplacementIndex).pokemon;
-                    writeSeaEncountersHGSS(b, offset + 20, superRod.encounters);
-                }
-            }
-            if (nightFishingReplacement != null) {
-                writeWord(b, 192, nightFishingReplacement.number);
-            }
-            offset += 40;
-
             // Write swarm pokemon
             writeOptionalEncountersHGSS(b, offset, 2, encounters);
+            writeOptionalEncountersHGSS(b, offset + 4, 1, encounters);
             writeOptionalEncountersHGSS(b, offset + 6, 1, encounters);
         }
 
@@ -2006,12 +1944,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 }
             }
 
-            // Handle good and super rod
+            // Handle good and super rod, because they can get an encounter slot replaced by the night fishing replacement
             Pokemon nightFishingReplacement = pokes[readWord(b, 192)];
             if (rates[4] != 0) {
                 List<EncounterSet> goodRodEncounters =
-                        readTimeBasedRodEncountersHGSS(b, offset, nightFishingReplacement, "",
-                                rates,4, Gen4Constants.hgssGoodRodReplacementIndex);
+                        readTimeBasedRodEncountersHGSS(b, offset, nightFishingReplacement, Gen4Constants.hgssGoodRodReplacementIndex);
                 for (Encounter enc : goodRodEncounters.get(0).encounters) {
                     target[enc.pokemon.number][0].add(index);
                     target[enc.pokemon.number][1].add(index);
@@ -2022,8 +1959,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             }
             if (rates[5] != 0) {
                 List<EncounterSet> superRodEncounters =
-                        readTimeBasedRodEncountersHGSS(b, offset + 20, nightFishingReplacement, "",
-                                rates, 5, Gen4Constants.hgssSuperRodReplacementIndex);
+                        readTimeBasedRodEncountersHGSS(b, offset + 20, nightFishingReplacement, Gen4Constants.hgssSuperRodReplacementIndex);
                 for (Encounter enc : superRodEncounters.get(0).encounters) {
                     target[enc.pokemon.number][0].add(index);
                     target[enc.pokemon.number][1].add(index);
