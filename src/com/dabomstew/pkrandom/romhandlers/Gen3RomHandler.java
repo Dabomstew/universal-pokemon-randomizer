@@ -3082,10 +3082,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             available |= MiscTweak.RANDOMIZE_PC_POTION.getValue();
         }
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
-        if (romEntry.romType == Gen3Constants.RomType_Ruby || romEntry.romType == Gen3Constants.RomType_Sapp ||
-                romEntry.romType == Gen3Constants.RomType_FRLG) {
-            available |= MiscTweak.RUN_WITHOUT_RUNNING_SHOES.getValue();
-        }
+        available |= MiscTweak.RUN_WITHOUT_RUNNING_SHOES.getValue();
         return available;
     }
 
@@ -3192,12 +3189,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void applyRunWithoutRunningShoesPatch() {
-        String prefix = "";
+        String prefix;
         if (romEntry.romType == Gen3Constants.RomType_Ruby || romEntry.romType == Gen3Constants.RomType_Sapp) {
             prefix = Gen3Constants.rsRunningShoesCheckPrefix;
         }
         else if (romEntry.romType == Gen3Constants.RomType_FRLG) {
             prefix = Gen3Constants.frlgRunningShoesCheckPrefix;
+        } else {
+            prefix = Gen3Constants.eRunningShoesCheckPrefix;
         }
         int offset = find(prefix);
         if (offset != 0) {
