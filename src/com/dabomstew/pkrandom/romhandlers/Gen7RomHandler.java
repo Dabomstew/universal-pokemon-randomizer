@@ -2368,6 +2368,100 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public void removeTimeBasedEvolutions() {
+        log("--Removing Timed-Based Evolutions--");
+        Set<Evolution> extraEvolutions = new HashSet<>();
+        for (Pokemon pkmn : pokes) {
+            if (pkmn != null) {
+                extraEvolutions.clear();
+                for (Evolution evo : pkmn.evolutionsFrom) {
+                    if (evo.type == EvolutionType.HAPPINESS_DAY) {
+                        if (evo.from.number == Gen7Constants.eeveeIndex) {
+                            // We can't set Eevee to evolve into Espeon with happiness at night because that's how
+                            // Umbreon works in the original game. Instead, make Eevee: == sun stone => Espeon
+                            evo.type = EvolutionType.STONE;
+                            evo.extraInfo = Gen7Constants.sunStoneIndex;
+                            logEvoChangeStone(evo.from.fullName(), evo.to.fullName(), itemNames.get(Gen7Constants.sunStoneIndex));
+                        } else {
+                            // Add an extra evo for Happiness at Night
+                            logEvoChangeHappiness(evo.from.fullName(), evo.to.fullName());
+                            Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                    EvolutionType.HAPPINESS_NIGHT, 0);
+                            extraEntry.forme = evo.forme;
+                            extraEvolutions.add(extraEntry);
+                        }
+                    } else if (evo.type == EvolutionType.HAPPINESS_NIGHT) {
+                        if (evo.from.number == Gen7Constants.eeveeIndex) {
+                            // We can't set Eevee to evolve into Umbreon with happiness at day because that's how
+                            // Espeon works in the original game. Instead, make Eevee: == moon stone => Umbreon
+                            evo.type = EvolutionType.STONE;
+                            evo.extraInfo = Gen7Constants.moonStoneIndex;
+                            logEvoChangeStone(evo.from.fullName(), evo.to.fullName(), itemNames.get(Gen7Constants.moonStoneIndex));
+                        } else {
+                            // Add an extra evo for Happiness at Day
+                            logEvoChangeHappiness(evo.from.fullName(), evo.to.fullName());
+                            Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                    EvolutionType.HAPPINESS_DAY, 0);
+                            extraEntry.forme = evo.forme;
+                            extraEvolutions.add(extraEntry);
+                        }
+                    } else if (evo.type == EvolutionType.LEVEL_ITEM_DAY) {
+                        int item = evo.extraInfo;
+                        // Add an extra evo for Level w/ Item During Night
+                        logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
+                        Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                EvolutionType.LEVEL_ITEM_NIGHT, item);
+                        extraEntry.forme = evo.forme;
+                        extraEvolutions.add(extraEntry);
+                    } else if (evo.type == EvolutionType.LEVEL_ITEM_NIGHT) {
+                        int item = evo.extraInfo;
+                        // Add an extra evo for Level w/ Item During Day
+                        logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
+                        Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                EvolutionType.LEVEL_ITEM_DAY, item);
+                        extraEntry.forme = evo.forme;
+                        extraEvolutions.add(extraEntry);
+                    } else if (evo.type == EvolutionType.LEVEL_DAY) {
+                        if (evo.from.number == Gen7Constants.rockruffIndex) {
+                            // We can't set Rockruff to evolve into Lycanroc-Midday with level at night because that's how
+                            // Lycanroc-Midnight works in the original game. Instead, make Rockruff: == sun stone => Lycanroc-Midday
+                            evo.type = EvolutionType.STONE;
+                            evo.extraInfo = Gen7Constants.sunStoneIndex;
+                            logEvoChangeStone(evo.from.fullName(), evo.to.fullName(), itemNames.get(Gen7Constants.sunStoneIndex));
+                        } else {
+                            logEvoChangeLevel(evo.from.fullName(), evo.to.fullName(), evo.extraInfo);
+                            evo.type = EvolutionType.LEVEL;
+                        }
+                    } else if (evo.type == EvolutionType.LEVEL_NIGHT) {
+                        if (evo.from.number == Gen7Constants.rockruffIndex) {
+                            // We can't set Rockruff to evolve into Lycanroc-Midnight with level at night because that's how
+                            // Lycanroc-Midday works in the original game. Instead, make Rockruff: == moon stone => Lycanroc-Midnight
+                            evo.type = EvolutionType.STONE;
+                            evo.extraInfo = Gen7Constants.moonStoneIndex;
+                            logEvoChangeStone(evo.from.fullName(), evo.to.fullName(), itemNames.get(Gen7Constants.moonStoneIndex));
+                        } else {
+                            logEvoChangeLevel(evo.from.fullName(), evo.to.fullName(), evo.extraInfo);
+                            evo.type = EvolutionType.LEVEL;
+                        }
+                    } else if (evo.type == EvolutionType.LEVEL_DUSK) {
+                        // This is the Rockruff => Lycanroc-Dusk evolution. We can't set it to evolve with level at other
+                        // times because the other Lycanroc formes work like that in the original game. Instead, make
+                        // Rockruff: == dusk stone => Lycanroc-Dusk
+                        evo.type = EvolutionType.STONE;
+                        evo.extraInfo = Gen7Constants.duskStoneIndex;
+                        logEvoChangeStone(evo.from.fullName(), evo.to.fullName(), itemNames.get(Gen7Constants.duskStoneIndex));
+                    }
+                }
+                pkmn.evolutionsFrom.addAll(extraEvolutions);
+                for (Evolution ev : extraEvolutions) {
+                    ev.to.evolutionsTo.add(ev);
+                }
+            }
+        }
+        logBlankLine();
+    }
+
+    @Override
     public boolean hasShopRandomization() {
         return true;
     }

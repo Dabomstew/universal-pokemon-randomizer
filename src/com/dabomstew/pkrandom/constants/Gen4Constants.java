@@ -73,7 +73,7 @@ public class Gen4Constants {
     public static final int dpStarterStringIndex = 19, ptStarterStringIndex = 36;
 
     public static final int chikoritaIndex = 152, cyndaquilIndex = 155, totodileIndex = 158, turtwigIndex = 387,
-            chimcharIndex = 390, piplupIndex = 393, slowpokeIndex = 79;
+            chimcharIndex = 390, piplupIndex = 393, slowpokeIndex = 79, eeveeIndex = 133;
 
     public static final int fossilCount = 7;
 
@@ -90,7 +90,7 @@ public class Gen4Constants {
 
     public static final int evolutionMethodCount = 26;
 
-    public static final int waterStoneIndex = 84, leafStoneIndex = 85, dawnStoneIndex = 109;
+    public static final int sunStoneIndex = 80, moonStoneIndex = 81, waterStoneIndex = 84, leafStoneIndex = 85, dawnStoneIndex = 109;
 
     public static final int highestAbilityIndex = 123;
 

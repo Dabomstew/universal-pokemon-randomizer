@@ -55,9 +55,9 @@ public class Gen7Constants {
     public static final int evolutionMethodCount = 42;
     public static final int rockruffIndex = 744;
 
-    public static final int slowpokeIndex = 79, karrablastIndex = 588, shelmetIndex = 616;
+    public static final int slowpokeIndex = 79, eeveeIndex = 133, karrablastIndex = 588, shelmetIndex = 616;
 
-    public static final int waterStoneIndex = 84, luckyEggIndex = 0xE7;
+    public static final int sunStoneIndex = 80, moonStoneIndex = 81, waterStoneIndex = 84, duskStoneIndex = 108, luckyEggIndex = 0xE7;
 
 
     private static List<Integer> speciesWithAlolanForms = Arrays.asList(

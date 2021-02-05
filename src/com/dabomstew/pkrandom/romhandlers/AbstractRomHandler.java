@@ -5575,6 +5575,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
+    protected void logEvoChangeHappiness(String pkFrom, String pkTo) {
+        if (logStream != null) {
+            logStream.printf("%-15s -> %-15s by reaching high happiness", pkFrom, pkTo);
+            logStream.println();
+        }
+    }
+
     /* Default Implementations */
     /* Used when a subclass doesn't override */
     /*

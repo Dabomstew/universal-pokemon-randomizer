@@ -2391,6 +2391,30 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    public void removeTimeBasedEvolutions() {
+        log("--Removing Timed-Based Evolutions--");
+        for (Pokemon pkmn : pokes) {
+            if (pkmn != null) {
+                for (Evolution evol : pkmn.evolutionsFrom) {
+                    // In Gen 3, only Eevee has a time-based evolution.
+                    if (evol.type == EvolutionType.HAPPINESS_DAY) {
+                        // Eevee: Make sun stone => Espeon
+                        evol.type = EvolutionType.STONE;
+                        evol.extraInfo = Gen3Constants.sunStoneIndex;
+                        logEvoChangeStone(evol.from.name, evol.to.name, itemNames[Gen3Constants.sunStoneIndex]);
+                    } else if (evol.type == EvolutionType.HAPPINESS_NIGHT) {
+                        // Eevee: Make moon stone => Umbreon
+                        evol.type = EvolutionType.STONE;
+                        evol.extraInfo = Gen3Constants.moonStoneIndex;
+                        logEvoChangeStone(evol.from.name, evol.to.name, itemNames[Gen3Constants.moonStoneIndex]);
+                    }
+                }
+            }
+        }
+        logBlankLine();
+    }
+
+    @Override
     public boolean hasShopRandomization() {
         return false;
     }

@@ -2329,6 +2329,67 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public void removeTimeBasedEvolutions() {
+        log("--Removing Timed-Based Evolutions--");
+        Set<Evolution> extraEvolutions = new HashSet<>();
+        for (Pokemon pkmn : pokes) {
+            if (pkmn != null) {
+                extraEvolutions.clear();
+                for (Evolution evo : pkmn.evolutionsFrom) {
+                    if (evo.type == EvolutionType.HAPPINESS_DAY) {
+                        if (evo.from.number == Gen5Constants.eeveeIndex) {
+                            // We can't set Eevee to evolve into Espeon with happiness at night because that's how
+                            // Umbreon works in the original game. Instead, make Eevee: == sun stone => Espeon
+                            evo.type = EvolutionType.STONE;
+                            evo.extraInfo = Gen5Constants.sunStoneIndex;
+                            logEvoChangeStone(evo.from.fullName(), evo.to.fullName(), itemNames.get(Gen5Constants.sunStoneIndex));
+                        } else {
+                            // Add an extra evo for Happiness at Night
+                            logEvoChangeHappiness(evo.from.fullName(), evo.to.fullName());
+                            Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                    EvolutionType.HAPPINESS_NIGHT, 0);
+                            extraEvolutions.add(extraEntry);
+                        }
+                    } else if (evo.type == EvolutionType.HAPPINESS_NIGHT) {
+                        if (evo.from.number == Gen5Constants.eeveeIndex) {
+                            // We can't set Eevee to evolve into Umbreon with happiness at day because that's how
+                            // Espeon works in the original game. Instead, make Eevee: == moon stone => Umbreon
+                            evo.type = EvolutionType.STONE;
+                            evo.extraInfo = Gen5Constants.moonStoneIndex;
+                            logEvoChangeStone(evo.from.fullName(), evo.to.fullName(), itemNames.get(Gen5Constants.moonStoneIndex));
+                        } else {
+                            // Add an extra evo for Happiness at Day
+                            logEvoChangeHappiness(evo.from.fullName(), evo.to.fullName());
+                            Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                    EvolutionType.HAPPINESS_DAY, 0);
+                            extraEvolutions.add(extraEntry);
+                        }
+                    } else if (evo.type == EvolutionType.LEVEL_ITEM_DAY) {
+                        int item = evo.extraInfo;
+                        // Add an extra evo for Level w/ Item During Night
+                        logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
+                        Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                EvolutionType.LEVEL_ITEM_NIGHT, item);
+                        extraEvolutions.add(extraEntry);
+                    } else if (evo.type == EvolutionType.LEVEL_ITEM_NIGHT) {
+                        int item = evo.extraInfo;
+                        // Add an extra evo for Level w/ Item During Day
+                        logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
+                        Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                EvolutionType.LEVEL_ITEM_DAY, item);
+                        extraEvolutions.add(extraEntry);
+                    }
+                }
+                pkmn.evolutionsFrom.addAll(extraEvolutions);
+                for (Evolution ev : extraEvolutions) {
+                    ev.to.evolutionsTo.add(ev);
+                }
+            }
+        }
+        logBlankLine();
+    }
+
+    @Override
     public boolean hasShopRandomization() {
         return true;
     }

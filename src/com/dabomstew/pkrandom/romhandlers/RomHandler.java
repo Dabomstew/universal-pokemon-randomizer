@@ -456,6 +456,8 @@ public interface RomHandler {
 
     void makeEvolutionsEasier(boolean wildsRandomized);
 
+    void removeTimeBasedEvolutions();
+
     void randomizeEvolutions(boolean similarStrength, boolean sameType, boolean limitToThreeStages,
                              boolean forceChange, boolean allowAltFormes, boolean abilitiesAreRandomized);
 

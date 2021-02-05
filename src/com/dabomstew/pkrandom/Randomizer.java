@@ -242,6 +242,11 @@ public class Randomizer {
             romHandler.makeEvolutionsEasier(!settings.getWildPokemonMod().equals(Settings.WildPokemonMod.UNCHANGED));
         }
 
+        // Remove time-based evolutions
+        if (settings.isRemoveTimeBasedEvolutions()) {
+            romHandler.removeTimeBasedEvolutions();
+        }
+
         // Starter Pokemon
         // Applied after type to update the strings correctly based on new types
         maybeChangeAndLogStarters(log, romHandler);
