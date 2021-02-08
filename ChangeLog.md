@@ -51,11 +51,12 @@
  * Black/White Cilan, Chili, Cress now have types that are superior to the player's chosen starter
  * As an additional option to the previous change, players can opt for a defensively resistant opponent. For instance, Magnemite would normally face a Ground type, but this option makes the Gym use an Electric type as Electric resists both Electric and Steel.
  * Modified the following sections of in-game text to match choices
-    * Striaton City Gym leaders will use their true types when using type-theming on Gym Leaders, or use generic terms when completely random
+   * Striaton City Gym leaders will use their true types when using type-theming on Gym Leaders, or use generic terms when completely random
    * Nacrene City Gym Guy will use true type and appropriate weakness when using type-theming on Gym Leaders, or use generic terms when completely random
    * Castelia City item guy will use correct starter names when giving type-boosting items. Items will not match the types of the new starters
    * Castelia City cafe guy will use correct types when referring to Striaton City leaders, or use generic terms when completely random
-   * Castelia City Gym Trainers and Burgh will use the true type of the gym when type-theming, or use generic terms when completely random.
-   * Cheren will use Burgh's true type when referring to him, or use generic terms when completely random.
+   * Castelia City Gym Trainers and Burgh will use the true type of the gym when type-theming, or use generic terms when completely random
+   * Cheren will use Burgh's true type when referring to him, or use generic terms when completely random
    * Nimbasa City Gym Guy will use true type and appropriate weakness when using type-theming on Gym Leaders, or use generic terms when completely random
+   * Professor Juniper will use Elesa's true type when speaking, or use generic terms when completely random
  * Added `Normalize` and `Stall` to list of negative abilities that can be banned

@@ -55,7 +55,8 @@ public class Gen5Constants {
     public static final int bw1StriatonCityGymTextOffset = 2, bw1StriatonCityGymText2Offset = 8,
         bw1NacreneCityGymTextOffset = 1, bw1CasteliaCityBurghTextOffset = 0,
         bw1CasteliaCityBurghText2Offset = 5, bw1CasteliaCityBurghText3Offset = 11,
-        bw1CherenBurghTextOffset = 1, bw1NimbasaCityTextOffset = 18;
+        bw1CherenBurghTextOffset = 1, bw1NimbasaCityTextOffset = 18, 
+        bw1JuniperElesaTextOffset = 2;
     
     public static final int bw1CasteliaCityItemTextOffset = 3, bw1CasteliaCityItemText2Offset = 7,
         bw1CasteliaCityItemText3Offset = 11, bw1CasteliaCityPraiseTextOffset = 6;

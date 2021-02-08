@@ -43,12 +43,17 @@ import pptxt.PPTxtHandler;
  * to look up the conversion code https://unicodemap.org/
  * 
  * Successful translation requires maintaining the proper spacing characters
- * (such as \\xF000\\xBE01\\x0000\\xFFFE). It is easy to start with the
+ * (such as \xf000븀\x0000\xfffe). It is easy to start with the
  * original text by exporting a/0/0/3 from the ROM (using a tool like
  * NitroExplorer2) and opening it up in PPTxt, then copying that into here.
  */
 
 public class Gen5TextHandler {
+
+    // Fast replacement for \xf000븁\x0000\xfffe
+    private static final String MAJOR_LINE_BREAK = "\\xF000\\xBE01\\x0000\\xFFFE";
+    private static final String MINOR_LINE_BREAK = "\\xF000\\xBE01\\x0000";
+
     IRomEntry romEntry;
     NARCArchive storyNARC;
 
@@ -62,30 +67,30 @@ public class Gen5TextHandler {
                 gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymTextOffset,
                     "I'm Chili! I light things up with\\xFFFE" 
                     + taggedGroupTypes.get("CHILI").camelCase()
-                    + "-type Pok\\x00E9mon!\\xF000\\xBE01\\x0000");
+                    + "-type Pok\\x00E9mon!" + MINOR_LINE_BREAK);
                 gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymTextOffset+1,
                     "I'm a " + taggedGroupTypes.get("CRESS").camelCase()
                     + "-type specialist,\\xFFFEand my name is Cress."
-                    + "\\xF000\\xBE01\\x0000\\xFFFEPleased "
-                    + "to make your acquaintance.\\xF000\\xBE01\\x0000");
+                    + MAJOR_LINE_BREAK + "Pleased "
+                    + "to make your acquaintance." + MINOR_LINE_BREAK);
                 gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymTextOffset+2,
                     "And my name is Cilan.\\xFFFEI like "
                     + taggedGroupTypes.get("CILAN").camelCase()
-                    +"-type Pok\\x00E9mon.\\xF000\\xBE01\\x0000");
+                    +"-type Pok\\x00E9mon." + MINOR_LINE_BREAK);
                 gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymText2Offset,
                     "Ta-da! The " + taggedGroupTypes.get("CHILI").camelCase() 
                     + "-type scorcher Chili--\\xFFFEthat's me--will be your "
-                    + "opponent!\\xF000\\xBE01\\x0000");
+                    + "opponent!" + MINOR_LINE_BREAK);
                 gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymText2Offset+1,                   
-                    "That is correct!\\xF000\\xBE01\\x0000\\xFFFEIt shall "
+                    "That is correct!" + MAJOR_LINE_BREAK + "It shall "
                     + "be I and my esteemed " + taggedGroupTypes.get("CRESS").camelCase() 
-                    + "\\xFFFEtypes that you must face in battle!\\xF000\\xBE01\\x0000");
+                    + "\\xFFFEtypes that you must face in battle!" + MINOR_LINE_BREAK);
                 gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymText2Offset+2,
                     "Nothing personal... No hard feelings...\\xFFFEMe and my "
                     + taggedGroupTypes.get("CILAN").camelCase()
                     + "-type Pok\\x00E9mon will...um..."
-                    + "\\xF000\\xBE01\\x0000\\xFFFEWe're gonna battle, "
-                    + "come what may.\\xF000\\xBE01\\x0000");
+                    + MAJOR_LINE_BREAK + "We're gonna battle, "
+                    + "come what may." + MINOR_LINE_BREAK);
             }
         } 
         // Types are not available - Make any type references generic
@@ -94,27 +99,27 @@ public class Gen5TextHandler {
             if (getRomEntry().getRomCode().charAt(3) == 'O') {
                 gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymTextOffset,
                     "I'm Chili! I light things up with\\xFFFE" 
-                    + "hot Pok\\x00E9mon!\\xF000\\xBE01\\x0000");
+                    + "hot Pok\\x00E9mon!" + MINOR_LINE_BREAK);
                 gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymTextOffset+1,
                     "I'm a general specialist,\\xFFFEand my name is Cress."
-                    + "\\xF000\\xBE01\\x0000\\xFFFEPleased "
-                    + "to make your acquaintance.\\xF000\\xBE01\\x0000");
+                    + MAJOR_LINE_BREAK + "Pleased "
+                    + "to make your acquaintance." + MINOR_LINE_BREAK);
                 gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymTextOffset+2,
                     "And my name is Cilan.\\xFFFEI like "
-                    +"any Pok\\x00E9mon.\\xF000\\xBE01\\x0000");
+                    +"any Pok\\x00E9mon." + MINOR_LINE_BREAK);
                 gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymText2Offset,
                     "Ta-da! The jalape\\x00F1o scorcher "
                     + "Chili--\\xFFFEthat's me--will be your "
-                    + "opponent!\\xF000\\xBE01\\x0000");
+                    + "opponent!" + MINOR_LINE_BREAK);
                 gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymText2Offset+1,                   
-                    "That is correct!\\xF000\\xBE01\\x0000\\xFFFEIt shall "
+                    "That is correct!" + MAJOR_LINE_BREAK + "It shall "
                     + "be I and my esteemed team\\xFFFEof Pok\\x00E9mon "
-                    + "that you must face in battle!\\xF000\\xBE01\\x0000");
+                    + "that you must face in battle!" + MINOR_LINE_BREAK);
                 gymLeaderSpeech.set(Gen5Constants.bw1StriatonCityGymText2Offset+2,
                     "Nothing personal... No hard feelings...\\xFFFEMe and my "
                     + "favorite Pok\\x00E9mon will...um..."
-                    + "\\xF000\\xBE01\\x0000\\xFFFEWe're gonna battle, "
-                    + "come what may.\\xF000\\xBE01\\x0000");
+                    + MAJOR_LINE_BREAK + "We're gonna battle, "
+                    + "come what may." + MINOR_LINE_BREAK);
             }
         }
         setStrings(getRomEntry().getInt("StriatonLeaderTextOffset"), gymLeaderSpeech);        
@@ -130,40 +135,40 @@ public class Gen5TextHandler {
                 gymLeaderSpeech.set(Gen5Constants.bw1NacreneCityGymTextOffset,
                     "All Trainers in this Gym use\\xFFFE"
                     + taggedGroupTypes.get("GYM2").camelCase() 
-                    + "-type Pok\\x00E9mon.\\xF000\\xBE01\\x0000\\xFFFEThis "
-                    + "is just between you and me...\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "-type Pok\\x00E9mon." + MAJOR_LINE_BREAK + "This "
+                    + "is just between you and me..." + MAJOR_LINE_BREAK
                     + taggedGroupTypes.get("GYM2").camelCase() 
                     + "-type Pok\\x00E9mon are weak against\\xFFFE"
                     + Type.randomWeakness(random, false, taggedGroupTypes.get("GYM2")).camelCase()
-                    + "-type Pok\\x00E9mon.\\xF000\\xBE01\\x0000\\xFFFEUse "
+                    + "-type Pok\\x00E9mon." + MAJOR_LINE_BREAK + "Use "
                     + "your Pok\\x00E9dex to find where that type is."
-                    + "\\xF000\\xBE01\\x0000\\xFFFENow, I will explain "
-                    + "about the Gym itself!\\xF000\\xBE01\\x0000\\xFFFE"
+                    + MAJOR_LINE_BREAK + "Now, I will explain "
+                    + "about the Gym itself!" + MAJOR_LINE_BREAK
                     + "In this Pok\\x00E9mon Gym, if you answer\\xFFFEquestions "
-                    + "hidden in books,\\xF000\\xBE01\\x0000\\xFFFEyou "
-                    + "can move forward.\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "hidden in books," + MAJOR_LINE_BREAK
+                    + "you can move forward." + MAJOR_LINE_BREAK
                     + "For your information, the first book is\\xFFFE"
                     + "\\x0022Nice to Meet You, Pok\\x00E9mon.\\x0022"
-                    + "\\xF000\\xBE01\\x0000\\xFFFE"
+                    + MAJOR_LINE_BREAK
                     + "If you don't know where the book is,\\xFFFEplease "
-                    + "ask anyone!\\xF000\\xBE01\\x0000");
+                    + "ask anyone!" + MINOR_LINE_BREAK);
                 gymLeaderSpeech.set(Gen5Constants.bw1NacreneCityGymTextOffset + 1,
                     "All Trainers in this Gym use\\xFFFE"
                     + taggedGroupTypes.get("GYM2").camelCase() + "-type Pok\\x00E9mon."
-                    + "\\xF000\\xBE01\\x0000\\xFFFEThis is just between you "
-                    + "and me...\\xF000\\xBE01\\x0000\\xFFFE"
+                    + MAJOR_LINE_BREAK + "This is just between you "
+                    + "and me..." + MAJOR_LINE_BREAK
                     + taggedGroupTypes.get("GYM2").camelCase() + "-type Pok\\x00E9mon "
                     + "are weak against\\xFFFE"
                     + Type.randomWeakness(random, false, taggedGroupTypes.get("GYM2")).camelCase()
-                    + "-type Pok\\x00E9mon.\\xF000\\xBE01\\x0000\\xFFFEUse "
-                    + "your Pok\\x00E9dex to find where that type is."
-                    + "\\xF000\\xBE01\\x0000\\xFFFENow, I will explain about the "
-                    + "Gym itself!\\xF000\\xBE01\\x0000\\xFFFEIn this Pok\\x00E9mon Gym, "
+                    + "-type Pok\\x00E9mon." + MAJOR_LINE_BREAK
+                    + "Use your Pok\\x00E9dex to find where that type is."
+                    + MAJOR_LINE_BREAK + "Now, I will explain about the "
+                    + "Gym itself!" + MAJOR_LINE_BREAK + "In this Pok\\x00E9mon Gym, "
                     + "if you answer\\xFFFEquestions hidden in books,"
-                    + "\\xF000\\xBE01\\x0000\\xFFFEyou can move forward."
-                    + "\\xF000\\xBE01\\x0000\\xFFFEFor your information, the first "
+                    + MAJOR_LINE_BREAK + "you can move forward."
+                    + MAJOR_LINE_BREAK + "For your information, the first "
                     + "book is\\xFFFE\\x0022Nice to Meet You, Pok\\x00E9mon.\\x0022"
-                    + "\\xF000\\xBE01\\x0000\\xFFFEIf you don't know where the book is,"
+                    + MAJOR_LINE_BREAK + "If you don't know where the book is,"
                     + "\\xFFFEplease ask anyone!");
             }
         }
@@ -173,32 +178,32 @@ public class Gen5TextHandler {
             if (getRomEntry().getRomCode().charAt(3) == 'O') {
                 gymLeaderSpeech.set(Gen5Constants.bw1NacreneCityGymTextOffset,
                     "All Trainers in this Gym use\\xFFFE"
-                    + "awesome Pok\\x00E9mon.\\xF000\\xBE01\\x0000\\xFFFEThis "
-                    + "is just between you and me...\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "awesome Pok\\x00E9mon." + MAJOR_LINE_BREAK
+                    + "This is just between you and me..." + MAJOR_LINE_BREAK
                     + "you have awesome Pok\\x00E9mmon too!"
-                    + "\\xF000\\xBE01\\x0000\\xFFFENow, I will explain "
-                    + "about the Gym itself!\\xF000\\xBE01\\x0000\\xFFFE"
+                    + MAJOR_LINE_BREAK + "Now, I will explain "
+                    + "about the Gym itself!" + MAJOR_LINE_BREAK
                     + "In this Pok\\x00E9mon Gym, if you answer\\xFFFEquestions "
-                    + "hidden in books,\\xF000\\xBE01\\x0000\\xFFFEyou "
-                    + "can move forward.\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "hidden in books," + MAJOR_LINE_BREAK
+                    + "you can move forward." + MAJOR_LINE_BREAK
                     + "For your information, the first book is\\xFFFE"
                     + "\\x0022Nice to Meet You, Pok\\x00E9mon.\\x0022"
-                    + "\\xF000\\xBE01\\x0000\\xFFFE"
+                    + MAJOR_LINE_BREAK
                     + "If you don't know where the book is,\\xFFFEplease "
-                    + "ask anyone!\\xF000\\xBE01\\x0000");
+                    + "ask anyone!" + MINOR_LINE_BREAK);
                 gymLeaderSpeech.set(Gen5Constants.bw1NacreneCityGymTextOffset + 1,
                     "All Trainers in this Gym use\\xFFFE"
                     + "awesome Pok\\x00E9mon."
-                    + "\\xF000\\xBE01\\x0000\\xFFFEThis is just between you "
-                    + "and me...\\xF000\\xBE01\\x0000\\xFFFE"
+                    + MAJOR_LINE_BREAK + "This is just between you "
+                    + "and me..." + MAJOR_LINE_BREAK
                     + "you have awesome Pok\\x00E9mmon too!"
-                    + "\\xF000\\xBE01\\x0000\\xFFFENow, I will explain about the "
-                    + "Gym itself!\\xF000\\xBE01\\x0000\\xFFFEIn this Pok\\x00E9mon Gym, "
+                    + MAJOR_LINE_BREAK + "Now, I will explain about the "
+                    + "Gym itself!" + MAJOR_LINE_BREAK + "In this Pok\\x00E9mon Gym, "
                     + "if you answer\\xFFFEquestions hidden in books,"
-                    + "\\xF000\\xBE01\\x0000\\xFFFEyou can move forward."
-                    + "\\xF000\\xBE01\\x0000\\xFFFEFor your information, the first "
+                    + MAJOR_LINE_BREAK + "you can move forward."
+                    + MAJOR_LINE_BREAK + "For your information, the first "
                     + "book is\\xFFFE\\x0022Nice to Meet You, Pok\\x00E9mon.\\x0022"
-                    + "\\xF000\\xBE01\\x0000\\xFFFEIf you don't know where the book is,"
+                    + MAJOR_LINE_BREAK + "If you don't know where the book is,"
                     + "\\xFFFEplease ask anyone!");
             }
         }
@@ -215,16 +220,16 @@ public class Gen5TextHandler {
             if (getRomEntry().getRomCode().charAt(3) == 'O') {
                 gymPraiseSpeech.set(Gen5Constants.bw1CasteliaCityPraiseTextOffset,
                     "The Striaton City Gym Leaders are a\\xFFFEgreat triplet "
-                    + "combo!\\xF000\\xBE01\\x0000\\xFFFEThe "
+                    + "combo!" + MAJOR_LINE_BREAK + "The "
                     + taggedGroupTypes.get("CILAN").camelCase()
                     + "-type Pok\\x00E9mon user, Cilan,\\xFFFEchooses great tea "
-                    + "leaves.\\xF000\\xBE01\\x0000\\xFFFEThe "
+                    + "leaves." + MAJOR_LINE_BREAK + "The "
                     + taggedGroupTypes.get("CRESS").camelCase()
                     + "-type Pok\\x00E9mon user, Cress,\\xFFFEprepares the best "
-                    + "water.\\xF000\\xBE01\\x0000\\xFFFEAnd the "
+                    + "water." + MAJOR_LINE_BREAK + "And the "
                     + taggedGroupTypes.get("CHILI").camelCase()
                     + "-type Pok\\x00E9mon user, Chili,\\xFFFEpours hot water at "
-                    + "the right heat.\\xF000\\xBE01\\x0000\\xFFFENo "
+                    + "the right heat." + MAJOR_LINE_BREAK + "No "
                     + "wonder their tea is the best!");
             }
         } 
@@ -234,13 +239,13 @@ public class Gen5TextHandler {
             if (getRomEntry().getRomCode().charAt(3) == 'O') {
                 gymPraiseSpeech.set(Gen5Constants.bw1CasteliaCityPraiseTextOffset,
                     "The Striaton City Gym Leaders are a\\xFFFEgreat triplet "
-                    + "combo!\\xF000\\xBE01\\x0000\\xFFFEThe herbalist, "
+                    + "combo!" + MAJOR_LINE_BREAK + "The herbalist, "
                     + "Cilan,\\xFFFEchooses great tea leaves."
-                    + "\\xF000\\xBE01\\x0000\\xFFFEThe general specialist, "
+                    + MAJOR_LINE_BREAK + "The general specialist, "
                     + "Cress,\\xFFFEprepares the best water."
-                    + "\\xF000\\xBE01\\x0000\\xFFFEAnd the jalape\\x00F1o "
+                    + MAJOR_LINE_BREAK + "And the jalape\\x00F1o "
                     + "scorcher, Chili,\\xFFFEpours hot water at "
-                    + "the right heat.\\xF000\\xBE01\\x0000\\xFFFENo "
+                    + "the right heat." + MAJOR_LINE_BREAK + "No "
                     + "wonder their tea is the best!");
             }
         }
@@ -255,24 +260,24 @@ public class Gen5TextHandler {
             // Update the text for the English games
             if (getRomEntry().getRomCode().charAt(3) == 'O') {
                 gymLeaderSpeech.set(Gen5Constants.bw1CasteliaCityBurghTextOffset,
-                    "Thanks again for your help.\\xF000\\xBE01\\x0000\\xFFFEMy"
+                    "Thanks again for your help." + MAJOR_LINE_BREAK + "My"
                     + taggedGroupTypes.get("GYM3").camelCase() + " Pok\\x00E9mon "
                     + "are scurrying with\\xFFFEexcitement about getting to "
-                    + "battle you.\\xF000\\xBE01\\x0000\\xFFFELet's get "
-                    + "straight to it!\\xF000\\xBE01\\x0000");
+                    + "battle you." + MAJOR_LINE_BREAK + "Let's get "
+                    + "straight to it!" + MINOR_LINE_BREAK);
                 gymLeaderSpeech.set(Gen5Constants.bw1CasteliaCityBurghText2Offset,
                     "How many discoveries have you made\\xFFFEsince you "
-                    + "started your adventure?\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "started your adventure?" + MAJOR_LINE_BREAK
                     + "When I was a kid, my innocent heart was\\xFFFEcaptured "
                     + "by the beauty of " + taggedGroupTypes.get("GYM3").camelCase() 
-                    + " Pok\\x00E9mon.\\xF000\\xBE01\\x0000\\xFFFEI drew with "
+                    + " Pok\\x00E9mon." + MAJOR_LINE_BREAK + "I drew with "
                     + "them and battled with them,\\xFFFEand after all this time, "
-                    + "I continue\\xF000\\xBE01\\x0000\\xFFFEto discover new "
-                    + "things.\\xF000\\xBE01\\x0000\\xFFFEA world shared with "
+                    + "I continue" + MAJOR_LINE_BREAK + "to discover new "
+                    + "things." + MAJOR_LINE_BREAK + "A world shared with "
                     + "Pok\\x00E9mon is a world\\xFFFEswarming with mysteries.");
                 gymLeaderSpeech.set(Gen5Constants.bw1CasteliaCityBurghText3Offset,
                     "If you hadn't stepped on that switch,\\xFFFEI'd still be "
-                    + "stuck hidden away.\\xF000\\xBE01\\x0000\\xFFFEThat's "
+                    + "stuck hidden away." + MAJOR_LINE_BREAK + "That's "
                     + "right! " + taggedGroupTypes.get("GYM3").camelCase() 
                     + " Gym Trainers like to\\xFFFEbe bugged!");
             }
@@ -282,23 +287,23 @@ public class Gen5TextHandler {
              // Update the text for the English games
              if (getRomEntry().getRomCode().charAt(3) == 'O') {
                 gymLeaderSpeech.set(Gen5Constants.bw1CasteliaCityBurghTextOffset,
-                    "Thanks again for your help.\\xF000\\xBE01\\x0000\\xFFFEMy "
+                    "Thanks again for your help." + MAJOR_LINE_BREAK + "My "
                     + "Pok\\x00E9mon are scurrying with\\xFFFEexcitement about "
-                    + "getting to battle you.\\xF000\\xBE01\\x0000\\xFFFELet's "
-                    + "get straight to it!\\xF000\\xBE01\\x0000");
+                    + "getting to battle you." + MAJOR_LINE_BREAK + "Let's "
+                    + "get straight to it!" + MINOR_LINE_BREAK);
                 gymLeaderSpeech.set(Gen5Constants.bw1CasteliaCityBurghText2Offset,
                     "How many discoveries have you made\\xFFFEsince you "
-                    + "started your adventure?\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "started your adventure?" + MAJOR_LINE_BREAK
                     + "When I was a kid, my innocent heart was\\xFFFEcaptured "
-                    + "by the beauty of Pok\\x00E9mon.\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "by the beauty of Pok\\x00E9mon." + MAJOR_LINE_BREAK
                     + "I drew with them and battled with them,\\xFFFEand after "
-                    + "all this time, I continue\\xF000\\xBE01\\x0000\\xFFFEto "
-                    + "discover new things.\\xF000\\xBE01\\x0000\\xFFFEA "
-                    + "world shared with Pok\\x00E9mon is a world\\xFFFEswarming "
-                    + "with mysteries.");
+                    + "all this time, I continue" + MAJOR_LINE_BREAK
+                    + "to discover new things." + MAJOR_LINE_BREAK
+                    + "A world shared with Pok\\x00E9mon is a world\\xFFFE"
+                    + "swarming with mysteries.");
                 gymLeaderSpeech.set(Gen5Constants.bw1CasteliaCityBurghText3Offset,
                     "If you hadn't stepped on that switch,\\xFFFEI'd still be "
-                    + "stuck hidden away.\\xF000\\xBE01\\x0000\\xFFFEThat's "
+                    + "stuck hidden away." + MAJOR_LINE_BREAK + "That's "
                     + "right! Gym Trainers like to\\xFFFEbe bugged!");
             }
         }
@@ -314,10 +319,10 @@ public class Gen5TextHandler {
             if (getRomEntry().getRomCode().charAt(3) == 'O') {
                 gymLeaderSpeech.set(Gen5Constants.bw1CherenBurghTextOffset,
                     "He's a seasoned Gym Leader.\\xFFFEHe made me work for "
-                    + "that Gym Badge!\\xF000\\xBE01\\x0000\\xFFFEBut for me, "
+                    + "that Gym Badge!" + MAJOR_LINE_BREAK + "But for me, "
                     + taggedGroupTypes.get("GYM3").camelCase()  
                     + "-type Pok\\x00E9mon\\xFFFEaren't much of a challenge."
-                    + "\\xF000\\xBE01\\x0000");
+                    + MINOR_LINE_BREAK);
             }
         }
         // Types are not available - Make any type references generic
@@ -326,9 +331,9 @@ public class Gen5TextHandler {
             if (getRomEntry().getRomCode().charAt(3) == 'O') {
                 gymLeaderSpeech.set(Gen5Constants.bw1CherenBurghTextOffset,
                     "He's a seasoned Gym Leader.\\xFFFEHe made me work for "
-                    + "that Gym Badge!\\xF000\\xBE01\\x0000\\xFFFEBut for me, "
+                    + "that Gym Badge!" + MAJOR_LINE_BREAK + "But for me, "
                     + "his Pok\\x00E9mon\\xFFFEaren't much of a challenge."
-                    + "\\xF000\\xBE01\\x0000");
+                    + MINOR_LINE_BREAK);
             }
         }
         setStrings(getRomEntry().getInt("CherenBurghTextOffset"), gymLeaderSpeech);  
@@ -343,14 +348,14 @@ public class Gen5TextHandler {
             if (getRomEntry().getRomCode().charAt(3) == 'O') {
                 gymLeaderSpeech.set(Gen5Constants.bw1NimbasaCityTextOffset, 
                     "In this roller coaster Gym, the first\\xFFFEstep "
-                    + "is to get in the car.\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "is to get in the car." + MAJOR_LINE_BREAK
                     + "Next comes the platform!\\xFFFEThere, you can "
-                    + "change\\xF000\\xBE01\\x0000\\xFFFEwhere the "
-                    + "coaster is going!\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "change" + MAJOR_LINE_BREAK + "where the "
+                    + "coaster is going!" + MAJOR_LINE_BREAK
                     + "Sometimes you continue by riding\\xFFFEthe cars "
-                    + "of opponents you defeat.\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "of opponents you defeat." + MAJOR_LINE_BREAK
                     + "That's how you aim for the Gym Leader!"
-                    + "\\xF000\\xBE01\\x0000\\xFFFEBy the way, "
+                    + MAJOR_LINE_BREAK + "By the way, "
                     + taggedGroupTypes.get("GYM4").camelCase() 
                     + "-type Pok\\x00E9mon don't\\xFFFEdo well against "
                     + Type.randomWeakness(random, false, taggedGroupTypes.get("GYM4")).camelCase()
@@ -358,9 +363,9 @@ public class Gen5TextHandler {
                 gymLeaderSpeech.set(Gen5Constants.bw1NimbasaCityTextOffset + 1,
                     "Elesa uses dazzling\\xFFFE"
                     + taggedGroupTypes.get("GYM4").camelCase() 
-                    + "-type attacks!\\xF000\\xBE01\\x0000\\xFFFEBut "
+                    + "-type attacks!" + MAJOR_LINE_BREAK + "But "
                     + "the combination of you and your\\xFFFEPok\\x00E9mon "
-                    + "was even more impressive!\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "was even more impressive!" + MAJOR_LINE_BREAK
                     + "It was... It was...\\xFFFEan emotional roller coaster!");
             }
         }
@@ -370,25 +375,58 @@ public class Gen5TextHandler {
             if (getRomEntry().getRomCode().charAt(3) == 'O') {
                 gymLeaderSpeech.set(Gen5Constants.bw1NimbasaCityTextOffset, 
                     "In this roller coaster Gym, the first\\xFFFEstep "
-                    + "is to get in the car.\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "is to get in the car." + MAJOR_LINE_BREAK
                     + "Next comes the platform!\\xFFFEThere, you can "
-                    + "change\\xF000\\xBE01\\x0000\\xFFFEwhere the "
-                    + "coaster is going!\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "change" + MAJOR_LINE_BREAK + "where the "
+                    + "coaster is going!" + MAJOR_LINE_BREAK
                     + "Sometimes you continue by riding\\xFFFEthe cars "
-                    + "of opponents you defeat.\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "of opponents you defeat." + MAJOR_LINE_BREAK
                     + "That's how you aim for the Gym Leader!"
-                    + "\\xF000\\xBE01\\x0000\\xFFFEBy the way, "
+                    + MAJOR_LINE_BREAK + "By the way, "
                     + "she got moves...");
                 gymLeaderSpeech.set(Gen5Constants.bw1NimbasaCityTextOffset + 1,
                     "Elesa uses dazzling\\xFFFE"
-                    + "attacks!\\xF000\\xBE01\\x0000\\xFFFEBut "
+                    + "attacks!" + MAJOR_LINE_BREAK + "But "
                     + "the combination of you and your\\xFFFEPok\\x00E9mon "
-                    + "was even more impressive!\\xF000\\xBE01\\x0000\\xFFFE"
+                    + "was even more impressive!" + MAJOR_LINE_BREAK
                     + "It was... It was...\\xFFFEan emotional roller coaster!");
             }
         }
         setStrings(getRomEntry().getInt("NimbasaLeaderTextOffset"), gymLeaderSpeech);  
     }
+
+    public void bw1JuniperTextModifications(Map<String, Type> taggedGroupTypes) {
+        List<String> professorSpeech = getStrings(getRomEntry().getInt("JuniperElesaTextOffset"));
+        
+        // If we have types available for the groups, use them
+        if (taggedGroupTypes != null) {
+            // Update the text for the English games
+            if (getRomEntry().getRomCode().charAt(3) == 'O') {
+                professorSpeech.set(Gen5Constants.bw1JuniperElesaTextOffset, 
+                    "Professor Juniper: Elesa called and was"
+                    + "\\xFFFEasking me all about "
+                    + taggedGroupTypes.get("GYM4").camelCase() 
+                    + "-type" + MAJOR_LINE_BREAK +"Pok\\x00E9mon, and I "
+                    + "thought about you guys." + MAJOR_LINE_BREAK 
+                    + "That's why I wanted to see you.\\xFFFETa-da! Freebies for you!"
+                    + MINOR_LINE_BREAK);
+            }
+        }
+        // Types are not available - Make any type references generic
+        else {
+            // Update the text for the English games
+            if (getRomEntry().getRomCode().charAt(3) == 'O') {
+                professorSpeech.set(Gen5Constants.bw1JuniperElesaTextOffset, 
+                    "Professor Juniper: Elesa called and was"
+                    + "\\xFFFEasking me all about her favorite "
+                    + "type" + MAJOR_LINE_BREAK +"of Pok\\x00E9mon, and I "
+                    + "thought about you guys." + MAJOR_LINE_BREAK 
+                    + "That's why I wanted to see you.\\xFFFETa-da! Freebies for you!"
+                    + MINOR_LINE_BREAK);
+            }
+        }
+        setStrings(getRomEntry().getInt("JuniperElesaTextOffset"), professorSpeech);
+    } 
 
 
     public void bw1StarterTextModifications(List<Pokemon> newStarters) {
@@ -404,13 +442,13 @@ public class Gen5TextHandler {
             yourHouseStrings
                     .set(Gen5Constants.bw1CherenText1Offset,
                             "Cheren: Hey, how come you get to pick\\xFFFEout my Pok\\x00E9mon?"
-                                    + "\\xF000\\xBE01\\x0000\\xFFFEOh, never mind. I wanted this one"
+                                    + MAJOR_LINE_BREAK + "Oh, never mind. I wanted this one"
                                     + "\\xFFFEfrom the start, anyway."
-                                    + "\\xF000\\xBE01\\x0000");
+                                    + MINOR_LINE_BREAK);
             yourHouseStrings.set(Gen5Constants.bw1CherenText2Offset,
                     "It's decided. You'll be my opponent...\\xFFFEin our first Pok\\x00E9mon battle!"
-                            + "\\xF000\\xBE01\\x0000\\xFFFELet's see what you can do, \\xFFFEmy Pok\\x00E9mon!"
-                            + "\\xF000\\xBE01\\x0000");
+                            + MAJOR_LINE_BREAK + "Let's see what you can do, \\xFFFEmy Pok\\x00E9mon!"
+                            + MINOR_LINE_BREAK);
         }
 
         // rewrite
@@ -426,21 +464,21 @@ public class Gen5TextHandler {
             itemGuyStrings.set(Gen5Constants.bw1CasteliaCityItemTextOffset, 
                 "You have " + newStarters.get(0).getName() + "! "
                 + "Then I will give you "
-                + "this!\\xF000\\xBE01\\x0000\\xFFFEWhen you let your "
+                + "this!" + MAJOR_LINE_BREAK + "When you let your "
                 + "Pok\\x00E9mon hold it, it can\\xFFFEraise the power of " 
-                + "Grass-type moves!\\xF000\\xBE01\\x0000");
+                + "Grass-type moves!" + MINOR_LINE_BREAK);
             itemGuyStrings.set(Gen5Constants.bw1CasteliaCityItemTextOffset + 1, 
                 "You have " + newStarters.get(1).getName() + "! Then I "
                 + "will give\\xFFFEyou "
-                + "this!\\xF000\\xBE01\\x0000\\xFFFEWhen you let your "
+                + "this!" + MAJOR_LINE_BREAK + "When you let your "
                 + "Pok\\x00E9mon hold it, it can\\xFFFEraise the power of "
-                + "Water-type moves!\\xF000\\xBE01\\x0000");
+                + "Water-type moves!" + MINOR_LINE_BREAK);
             itemGuyStrings.set(Gen5Constants.bw1CasteliaCityItemTextOffset + 2, 
                 "You have " + newStarters.get(2).getName() + "! "
                 + "Then I will give you "
-                + "this!\\xF000\\xBE01\\x0000\\xFFFEWhen you let your "
+                + "this!" + MAJOR_LINE_BREAK + "When you let your "
                 + "Pok\\x00E9mon hold it, it can\\xFFFEraise the power of "
-                + "Fire-type moves!\\xF000\\xBE01\\x0000");
+                + "Fire-type moves!" + MINOR_LINE_BREAK);
             itemGuyStrings.set(Gen5Constants.bw1CasteliaCityItemText2Offset, 
                 newStarters.get(0).getName());
             itemGuyStrings.set(Gen5Constants.bw1CasteliaCityItemText2Offset + 1, 
@@ -470,8 +508,8 @@ public class Gen5TextHandler {
             // Update what the rival says
             starterTownStrings.set(Gen5Constants.bw2RivalTextOffset,
                     "\\xF000\\x0100\\x0001\\x0001: Let's see how good\\xFFFEa Trainer you are!"
-                            + "\\xF000\\xBE01\\x0000\\xFFFEI'll use my Pok\\x00E9mon"
-                            + "\\xFFFEthat I raised from an Egg!\\xF000\\xBE01\\x0000");
+                            + MAJOR_LINE_BREAK + "I'll use my Pok\\x00E9mon"
+                            + "\\xFFFEthat I raised from an Egg!" + MINOR_LINE_BREAK);
         }
         
         // rewrite
