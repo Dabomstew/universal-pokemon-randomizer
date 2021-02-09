@@ -429,6 +429,42 @@ public class Gen5TextHandler {
     } 
 
 
+    public void bw1DriftveilCityTextModifications(Map<String, Type> taggedGroupTypes, Random random) {
+        List<String> gymLeaderSpeech = getStrings(getRomEntry().getInt("DriftveilLeaderTextOffset"));
+        
+        // If we have types available for the groups, use them
+        if (taggedGroupTypes != null) {
+            // Update the text for the English games
+            if (getRomEntry().getRomCode().charAt(3) == 'O') {
+                gymLeaderSpeech.set(Gen5Constants.bw1DriftveilCityTextOffset, 
+                    "The Gym Leader Clay uses\\xFFFE" 
+                    + taggedGroupTypes.get("GYM5").camelCase()
+                    + "-type Pok\\x00E9mon!" + MAJOR_LINE_BREAK
+                    + "Well, just between you and me,\\xFFFE"
+                    + taggedGroupTypes.get("GYM5").camelCase()
+                    + "-type Pok\\x00E9mon aren't good against" + MAJOR_LINE_BREAK
+                    + Type.randomWeakness(random, false, taggedGroupTypes.get("GYM5")).camelCase()
+                    + "-type attacks." + MAJOR_LINE_BREAK
+                    + "Kinda makes me wonder why Clay is living\\xFFFEexposed to them.");
+            }
+        }
+        // Types are not available - Make any type references generic
+        else {
+            // Update the text for the English games
+            if (getRomEntry().getRomCode().charAt(3) == 'O') {
+                gymLeaderSpeech.set(Gen5Constants.bw1DriftveilCityTextOffset, 
+                "The Gym Leader Clay uses\\xFFFE" 
+                + "very strong Pok\\x00E9mon!" + MAJOR_LINE_BREAK
+                + "Well, just between you and me,\\xFFFE"
+                + "those kind of Pok\\x00E9mon aren't good against" + MAJOR_LINE_BREAK
+                + "strategic attacks." + MAJOR_LINE_BREAK
+                + "Kinda makes me wonder why Clay is living\\xFFFEexposed to them.");
+            }
+        }
+        setStrings(getRomEntry().getInt("DriftveilLeaderTextOffset"), gymLeaderSpeech);
+    }
+
+
     public void bw1StarterTextModifications(List<Pokemon> newStarters) {
         List<String> yourHouseStrings = getStrings(getRomEntry().getInt("StarterLocationTextOffset"));
         // Update the text for the English games

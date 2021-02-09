@@ -59,4 +59,5 @@
    * Cheren will use Burgh's true type when referring to him, or use generic terms when completely random
    * Nimbasa City Gym Guy will use true type and appropriate weakness when using type-theming on Gym Leaders, or use generic terms when completely random
    * Professor Juniper will use Elesa's true type when speaking, or use generic terms when completely random
+   * Driftveil City Gym Guy will use true type and appropriate weakness when using type-theming on Gym Leaders, or use generic terms when completely random
  * Added `Normalize` and `Stall` to list of negative abilities that can be banned
