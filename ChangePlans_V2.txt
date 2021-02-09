@@ -18,7 +18,7 @@ XX Choice not available until game is played XXStriaton City leaders use correct
 **Gym guy in Nimbasa gym should use Elesa's true type (3rd narc, block 68, index 19)
 **Professor Juniper should reference Elesa's true type (3rd narc, block 95, index 2)
 **Gym guy in Drifviel City should reference Clay's true type (3rd narc, block 103, index 1)
-Gym guy in Mistralton City should reference Skyla's true type (3rd narc, block 113, index 8)
+**Gym guy in Mistralton City should reference Skyla's true type (3rd narc, block 113, index 8)
 Monkey giver should use correct types (3rd narc, block 160, index 4-6)
 Black/White pinwheel Gorm should reference Lenora's and Burgh's true type (3rd narc, block 163, index 28)
 Black/White Celestial tower Skyla should reference true type (3rd narc, block 374, index 6)

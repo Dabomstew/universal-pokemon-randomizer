@@ -195,4 +195,9 @@ public enum Type {
         // No type was able to be returned so throw an exception
         throw new RandomizationException("No type weakness found for " + Arrays.toString(checkTypes));
     }
+
+    public static List<Type> getWeaknesses(Type checkType, int maxNum) {    
+        List<Type> checkList = STRONG_AGAINST.get(checkType.ordinal());
+        return checkList.subList(0, maxNum > checkList.size() ? checkList.size() : maxNum);
+    } 
 }

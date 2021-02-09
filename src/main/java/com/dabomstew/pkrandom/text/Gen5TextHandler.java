@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
@@ -464,6 +465,42 @@ public class Gen5TextHandler {
         setStrings(getRomEntry().getInt("DriftveilLeaderTextOffset"), gymLeaderSpeech);
     }
 
+    public void bw1MistraltonCityTextModifications(Map<String, Type> taggedGroupTypes) {
+        List<String> gymLeaderSpeech = getStrings(getRomEntry().getInt("MistraltonLeaderTextOffset"));
+        
+        // If we have types available for the groups, use them
+        if (taggedGroupTypes != null) {
+            // Update the text for the English games
+            if (getRomEntry().getRomCode().charAt(3) == 'O') {
+                gymLeaderSpeech.set(Gen5Constants.bw1MistraltonCityTextOffset,
+                    "Just between you and me..." + MAJOR_LINE_BREAK
+                    + Type.getWeaknesses(taggedGroupTypes.get("GYM6"), 3).stream()
+                      .map(type -> type.camelCase()).collect(Collectors.joining(", "))
+                    + "... " + taggedGroupTypes.get("GYM6").camelCase() 
+                    + "-types have\\xFFFEmore weaknesses than people know about."
+                    + MAJOR_LINE_BREAK + "If you use Pokémon and moves of those\\xFFFEtypes, "
+                    + "victory is practically yours!" + MAJOR_LINE_BREAK + "By the way, "
+                    + "to proceed in this Gym,\\xFFFEyou climb in the cannons to move forward."
+                    + MAJOR_LINE_BREAK + "The cannons go up, down, left, and right.\\xFFFE"
+                    + "You can get in them from anywhere!");
+            }
+        }
+        // Types are not available - Make any type references generic
+        else {
+            // Update the text for the English games
+            if (getRomEntry().getRomCode().charAt(3) == 'O') {
+                gymLeaderSpeech.set(Gen5Constants.bw1MistraltonCityTextOffset,
+                    "Just between you and me..." + MAJOR_LINE_BREAK
+                    + "these types have\\xFFFEmore weaknesses than people know about."
+                    + MAJOR_LINE_BREAK + "If you use Pokémon and moves of those\\xFFFEtypes, "
+                    + "victory is practically yours!" + MAJOR_LINE_BREAK + "By the way, "
+                    + "to proceed in this Gym,\\xFFFEyou climb in the cannons to move forward."
+                    + MAJOR_LINE_BREAK + "The cannons go up, down, left, and right.\\xFFFE"
+                    + "You can get in them from anywhere!");
+            }
+        }
+        setStrings(getRomEntry().getInt("MistraltonLeaderTextOffset"), gymLeaderSpeech);  
+    }
 
     public void bw1StarterTextModifications(List<Pokemon> newStarters) {
         List<String> yourHouseStrings = getStrings(getRomEntry().getInt("StarterLocationTextOffset"));
