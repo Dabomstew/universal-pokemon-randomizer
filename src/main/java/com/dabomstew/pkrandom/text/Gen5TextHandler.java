@@ -529,6 +529,28 @@ public class Gen5TextHandler {
 
     }
     
+    public void bw1MonkeyTextModifications(List<Pokemon> newStatics, Random random) {
+        List<String> monkeyGuyStrings = getStrings(getRomEntry().getInt("MonkeyGiverTextOffset"));
+        // Update the text for the English games
+        if (getRomEntry().getRomCode().charAt(3) == 'O') {
+            for (int i = 0; i < 3; i++) {
+                // Original order is FIRE WATER GRASS
+                // Static Pokemon order is GRASS FIRE WATER
+                int staticPointer = (i + 1) % 3;
+                monkeyGuyStrings.set(Gen5Constants.bw1MonkeyGiverTextOffset + i,
+                    "OK. Here you go!" + MAJOR_LINE_BREAK + "It can use "
+                    + newStatics.get(staticPointer).primaryType.camelCase() + "-type moves, "
+                    + "so that\\xFFFEmakes it great against "
+                    + Type.randomStrength(random, false, newStatics.get(staticPointer).primaryType).camelCase()
+                    + " types!" + MINOR_LINE_BREAK);
+            }
+        }
+
+        // rewrite
+        setStrings(getRomEntry().getInt("MonkeyGiverTextOffset"), monkeyGuyStrings);
+
+    }
+
     public void bw1CasteliaCityItemTextModifications(List<Pokemon> newStarters) {
         List<String> itemGuyStrings = getStrings(getRomEntry().getInt("CasteliaItemTextOffset"));
         

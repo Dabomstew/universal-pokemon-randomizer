@@ -3,6 +3,7 @@ package com.dabomstew.pkrandom.pokemon;
 import static org.junit.Assert.*;
 import java.util.Random;
 import java.util.Arrays;
+import java.util.List;
 import org.junit.Test;
 
 public class TypeTest {    
@@ -378,5 +379,70 @@ public class TypeTest {
         assertNotEquals(latter.primaryType, latter.secondaryType);
         assertEquals(latter.primaryType, newType);
         assertEquals(latter.secondaryType, null);
+    }
+
+    @Test
+    public void TestGetRandomStrength() {
+        // ******************
+        // Random type that one or more types are superior to
+        // ******************
+        Type type1 = Type.ELECTRIC;
+        Type type2 = Type.ROCK;
+
+        // ******************
+        // Test resistances first
+        // ******************
+        Type newType = Type.randomStrength(new Random(), true, type1);
+        assertTrue(type1.camelCase() + " does not appear in " + newType.camelCase() + " resist list",
+            Type.RESISTANT_TO.get(newType.ordinal()).contains(type1));
+        newType = Type.randomStrength(new Random(), true, type2);
+        assertTrue(type2.camelCase() + " does not appear in " + newType.camelCase() + " resist list",
+            Type.RESISTANT_TO.get(newType.ordinal()).contains(type2));
+        newType = Type.randomStrength(new Random(), true, type1, type2);
+        assertTrue("Random Strength resistance for both types is not FLYING ",
+            newType == Type.FLYING);
+
+        // ******************
+        // Test strengths next
+        // ******************
+        type2 = Type.ICE;
+        newType = Type.randomStrength(new Random(), false, type1);
+        assertTrue(type1.camelCase() + " does not appear in " + newType.camelCase() + " strength list",
+            Type.STRONG_AGAINST.get(newType.ordinal()).contains(type1));
+        newType = Type.randomStrength(new Random(), false, type2);
+        assertTrue(type2.camelCase() + " does not appear in " + newType.camelCase() + " strength list",
+            Type.STRONG_AGAINST.get(newType.ordinal()).contains(type2));
+        newType = Type.randomStrength(new Random(), false, type1, type2);
+        assertTrue("Random Strength offense for both types is not FLYING ",
+            newType == Type.FLYING);
+
+    }
+
+    @Test
+    public void TestGetWeaknessList() {
+        // ******************
+        // Returns list of random types up to max
+        // ******************
+        Type type1 = Type.GRASS;
+
+        // Test less than
+        List<Type> returnedList = Type.getWeaknesses(type1, 1);
+        assertEquals(1, returnedList.size());
+
+        // Test equal to
+        returnedList = Type.getWeaknesses(type1, Type.STRONG_AGAINST.get(type1.ordinal()).size());
+        assertEquals(Type.STRONG_AGAINST.get(type1.ordinal()).size(), returnedList.size());
+
+        // Test greater than
+        returnedList = Type.getWeaknesses(type1, 999);
+        assertEquals(Type.STRONG_AGAINST.get(type1.ordinal()).size(), returnedList.size());
+
+        // Test negative
+        returnedList = Type.getWeaknesses(type1, -1);
+        assertEquals(0, returnedList.size());
+
+        // Test zero
+        returnedList = Type.getWeaknesses(type1, 0);
+        assertEquals(0, returnedList.size());
     }
 }

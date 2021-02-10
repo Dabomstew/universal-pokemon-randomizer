@@ -1283,6 +1283,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
         }
 
+        if (getRomEntry().romType == Gen5Constants.Type_BW) {
+            getTextHandler().bw1MonkeyTextModifications(staticPokemon, this.random);
+        }
+
         return true;
     }
 

@@ -59,6 +59,23 @@ public class Gen5Test {
     }
 
     /**
+     * When altering statics, make sure the ROM's text is updated when it is a
+     * Black/White ROM
+     * 
+     * @throws IOException
+     */
+    @Test
+    public void TestBW1MonkeyText() throws IOException {
+        Gen5RomHandler romhandler = spy(new Gen5RomHandler(new Random()));
+        resetDataModel(romhandler);
+        doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
+        // The length of this sublist must match the length of static pokemon in the rom
+        // Run a print statement in the setStaticPokemon function to get it
+        romhandler.setStaticPokemon(pokemonList.subList(0, 31));
+        verify(mockTextHandler, times(1)).bw1MonkeyTextModifications(any(), any());
+    }
+
+    /**
      * When altering trainers, make sure the ROM's text is updated when it is a
      * Black/White ROM
      * 

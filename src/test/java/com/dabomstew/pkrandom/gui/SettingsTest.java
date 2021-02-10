@@ -68,6 +68,9 @@ public class SettingsTest {
         } catch (java.awt.HeadlessException exc) {
             System.out.println("No X11 DISPLAY variable is set. Unable to verify functionality. Passing Gen5Separation test.");
             Assume.assumeTrue(false);
+        } catch (java.awt.AWTError | NoClassDefFoundError exc) {
+            System.out.println("Cannot reach the X11 DISPLAY variable set. Unable to verify functionality. Passing Gen5Separation test.");
+            Assume.assumeTrue(false);
         }
     }
 
@@ -102,6 +105,9 @@ public class SettingsTest {
             (settings.getCurrentMiscTweaks() & MiscTweak.USE_RESISTANT_TYPE.getValue()) > 0);
         } catch (java.awt.HeadlessException exc) {
             System.out.println("No X11 DISPLAY variable is set. Unable to verify functionality. Passing UseResistantType test.");
+            Assume.assumeTrue(false);
+        } catch (java.awt.AWTError | NoClassDefFoundError exc) {
+            System.out.println("Cannot reach the X11 DISPLAY variable set. Unable to verify functionality. Passing UseResistantType test.");
             Assume.assumeTrue(false);
         }
     }

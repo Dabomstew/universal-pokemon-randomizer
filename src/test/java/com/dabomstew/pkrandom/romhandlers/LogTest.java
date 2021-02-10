@@ -25,8 +25,11 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.EvolutionType;
+import com.dabomstew.pkrandom.text.Gen5TextHandler;
 
 public class LogTest {
+
+    private static final int MAX_POKE_COUNT = 650;
     
     ArrayList<Move> moveList;
     ArrayList<Pokemon> pokemonList;
@@ -624,7 +627,7 @@ public class LogTest {
             resetDataModel(romhandler, 250);
             doReturn(Gen3RomHandler.getRomFromSupportedRom("Ruby (U)")).when(romhandler).getRomEntry();
             doReturn(0).when(romhandler).readWord(anyInt());
-            doReturn(IntStream.range(0, 649).toArray()).when(romhandler).getPokedexToInternal();
+            doReturn(IntStream.range(0, MAX_POKE_COUNT).toArray()).when(romhandler).getPokedexToInternal();
             doReturn(pokemonList.toArray(new Pokemon[pokemonList.size()])).when(romhandler).getPokesInternal();
             doNothing().when(romhandler).writeWord(anyInt(), anyInt());
             romhandler.randomizeStaticPokemon(true);
@@ -670,6 +673,7 @@ public class LogTest {
         doReturn(mlList).when(mock_arch).getFiles();
         doReturn(mock_arch).when(romhandler).readNARC(anyString());
         doReturn(mock_arch).when(romhandler).getScriptNARC();
+        doReturn(mock(Gen5TextHandler.class)).when(romhandler).getTextHandler();
         doNothing().when(romhandler).writeWord(any(), anyInt(), anyInt());
         romhandler.randomizeStaticPokemon(true);
         assertEquals(((TreeMap)romhandler.getTemplateData().get("staticPokemon")).size(), 31);
@@ -778,7 +782,7 @@ public class LogTest {
             mv.number = i;
             moveList.add(mv);
         }
-        for(int i = 0; i < 650; i++) {
+        for(int i = 0; i < MAX_POKE_COUNT; i++) {
             Pokemon pk = new Pokemon();
             pk.number = i;
             pk.name = "";

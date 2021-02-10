@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
@@ -146,6 +148,50 @@ public enum Type {
         return shuffledList;
     }
 
+    public static Type randomStrength(Random random, boolean useResistantType, Type... checkTypes) {
+        // Safety check since varargs allow zero arguments
+        if (checkTypes.length < 1) {
+            throw new RandomizationException("Must provide at least 1 type to obtain a strength");
+        }
+        
+        if (useResistantType) {
+            return getStrengthFromList(random, RESISTANT_TO, checkTypes);
+        } else {
+            return getStrengthFromList(random, STRONG_AGAINST, checkTypes);
+        }
+    }
+
+    private static Type getStrengthFromList(Random random, List<List<Type>> checkList, Type[] checkTypes) {
+        // Only uses 17 canon types
+        List<Integer> randomIndices = IntStream.range(0, 17).boxed().collect(Collectors.toList());
+        Integer backupChoice = -1;
+        Collections.shuffle(randomIndices);
+
+        // Attempt to find shared type
+        for(Integer i : randomIndices) {
+            // If everything is in a list, return it
+            if (checkList.get(i).containsAll(Arrays.asList(checkTypes))) {
+                return VALUES.get(i);
+            }
+
+            // If no backup set, and neither of the types appears, go to next iteration
+            if (backupChoice < 0 && Collections.disjoint(checkList.get(i), Arrays.asList(checkTypes))) {
+                continue;
+            }
+
+            // Set the backup choice since at least 1 is shared
+            backupChoice = i;
+        }
+
+        // Return the backup choice since no shared type was found
+        if (backupChoice > -1) {
+            return VALUES.get(backupChoice);
+        }
+
+        // No match found (although this should be impossible)
+        throw new RandomizationException("No type strength found for " + Arrays.toString(checkTypes));
+    }
+
     public static Type randomWeakness(Random random, boolean useResistantType, Type... checkTypes) {
         // Safety check since varargs allow zero arguments
         if (checkTypes.length < 1) {
@@ -197,6 +243,9 @@ public enum Type {
     }
 
     public static List<Type> getWeaknesses(Type checkType, int maxNum) {    
+        if (maxNum < 0) {
+            return Collections.emptyList();
+        }
         List<Type> checkList = STRONG_AGAINST.get(checkType.ordinal());
         return checkList.subList(0, maxNum > checkList.size() ? checkList.size() : maxNum);
     } 
