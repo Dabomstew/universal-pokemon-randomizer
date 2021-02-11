@@ -59,8 +59,9 @@
    * Cheren will use Burgh's true type when referring to him, or use generic terms when completely random
    * Nimbasa City Gym Guy will use true type and appropriate weakness when using type-theming on Gym Leaders, or use generic terms when completely random
    * Professor Juniper will use Elesa's true type when speaking, or use generic terms when completely random
-   * Driftveil City Gym Guy will use true type and appropriate weakness when using type-theming on Gym Leaders, or use generic terms when completely random
-   * Mistralton City Gym Guy will use true type and appropriate weakness when using type-theming on Gym Leaders, or use generic terms when completely random
+   * Driftveil City Gym Guy will use Clay's true type and appropriate weakness when using type-theming on Gym Leaders, or use generic terms when completely random
+   * Mistralton City Gym Guy will use Skyla's true type and appropriate weakness when using type-theming on Gym Leaders, or use generic terms when completely random
    * Monkey giver in Striaton City will use correct types of Pokemon and a relevant strength when randomizing static Pokemon
+   * Gorm in Pinwheel Forest will use correct type for Burgh and Lenora when type-theming on Gym Leaders, or generic terms when completely random
  * Added `Normalize` and `Stall` to list of negative abilities that can be banned
  * Static Pokemon are randomized before trainers. Should have no noticable impact.

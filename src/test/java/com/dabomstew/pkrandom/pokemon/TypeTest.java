@@ -416,6 +416,11 @@ public class TypeTest {
         assertTrue("Random Strength offense for both types is not FLYING ",
             newType == Type.FLYING);
 
+        // ******************
+        // Test Normal type
+        // ******************
+        assertEquals(null,  Type.randomStrength(new Random(), false, Type.NORMAL));
+
     }
 
     @Test

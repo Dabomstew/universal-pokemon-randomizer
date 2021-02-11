@@ -478,7 +478,7 @@ public class Gen5TextHandler {
                       .map(type -> type.camelCase()).collect(Collectors.joining(", "))
                     + "... " + taggedGroupTypes.get("GYM6").camelCase() 
                     + "-types have\\xFFFEmore weaknesses than people know about."
-                    + MAJOR_LINE_BREAK + "If you use Pokémon and moves of those\\xFFFEtypes, "
+                    + MAJOR_LINE_BREAK + "If you use Pok\\x00E9mon and moves of those\\xFFFEtypes, "
                     + "victory is practically yours!" + MAJOR_LINE_BREAK + "By the way, "
                     + "to proceed in this Gym,\\xFFFEyou climb in the cannons to move forward."
                     + MAJOR_LINE_BREAK + "The cannons go up, down, left, and right.\\xFFFE"
@@ -492,7 +492,7 @@ public class Gen5TextHandler {
                 gymLeaderSpeech.set(Gen5Constants.bw1MistraltonCityTextOffset,
                     "Just between you and me..." + MAJOR_LINE_BREAK
                     + "these types have\\xFFFEmore weaknesses than people know about."
-                    + MAJOR_LINE_BREAK + "If you use Pokémon and moves of those\\xFFFEtypes, "
+                    + MAJOR_LINE_BREAK + "If you use Pok\\x00E9mon and moves of those\\xFFFEtypes, "
                     + "victory is practically yours!" + MAJOR_LINE_BREAK + "By the way, "
                     + "to proceed in this Gym,\\xFFFEyou climb in the cannons to move forward."
                     + MAJOR_LINE_BREAK + "The cannons go up, down, left, and right.\\xFFFE"
@@ -500,6 +500,53 @@ public class Gen5TextHandler {
             }
         }
         setStrings(getRomEntry().getInt("MistraltonLeaderTextOffset"), gymLeaderSpeech);  
+    }
+
+    public void bw1PinwheelForestTextModifications(Map<String, Type> taggedGroupTypes) {
+        List<String> plasmaGormSpeech = getStrings(getRomEntry().getInt("PinwheelGormTextOffset"));
+        
+        // If we have types available for the groups, use them
+        if (taggedGroupTypes != null) {
+            // Update the text for the English games
+            if (getRomEntry().getRomCode().charAt(3) == 'O') {
+                plasmaGormSpeech.set(Gen5Constants.bw1PinwheelForestTextOffset,
+                    "Gorm: I am one of the Seven Sages\\xFFFEof Team Plasma."
+                    + MAJOR_LINE_BREAK + "Ghetsis, another of the Seven Sages,"
+                    + "\\xFFFEwill liberate Pok\\x00E9mon with words alone!"
+                    + MAJOR_LINE_BREAK + "The remainder of the Seven Sages have"
+                    + "\\xFFFEordered their compatriots to take" + MAJOR_LINE_BREAK
+                    + "Pok\\x00E9mon with full force!" + MAJOR_LINE_BREAK + "But the "
+                    + "odds are a little against us now." + MAJOR_LINE_BREAK 
+                    + "To you, the " + taggedGroupTypes.get("GYM3").camelCase()
+                    + " Pok\\x00E9mon user Burgh and\\xFFFEthe "
+                    + taggedGroupTypes.get("GYM2").camelCase() + " Pok\\x00E9mon user "
+                    + "Lenora, I say..." + MAJOR_LINE_BREAK + "Know your enemies, "
+                    + "know yourself,\\xFFFEand you need not fear the result"
+                    + MAJOR_LINE_BREAK + "of a hundred battles..." + MAJOR_LINE_BREAK 
+                    + "This time, we shall retreat quietly." + MINOR_LINE_BREAK);
+            }
+        }
+        // Types are not available - Make any type references generic
+        else {
+            // Update the text for the English games
+            if (getRomEntry().getRomCode().charAt(3) == 'O') {
+                plasmaGormSpeech.set(Gen5Constants.bw1PinwheelForestTextOffset,
+                    "Gorm: I am one of the Seven Sages\\xFFFEof Team Plasma."
+                    + MAJOR_LINE_BREAK + "Ghetsis, another of the Seven Sages,"
+                    + "\\xFFFEwill liberate Pok\\x00E9mon with words alone!"
+                    + MAJOR_LINE_BREAK + "The remainder of the Seven Sages have"
+                    + "\\xFFFEordered their compatriots to take" + MAJOR_LINE_BREAK
+                    + "Pok\\x00E9mon with full force!" + MAJOR_LINE_BREAK + "But the "
+                    + "odds are a little against us now." + MAJOR_LINE_BREAK 
+                    + "To you, the average Pok\\x00E9mon user Burgh and\\xFFFEthe "
+                    + "simple Pok\\x00E9mon user "
+                    + "Lenora, I say..." + MAJOR_LINE_BREAK + "Know your enemies, "
+                    + "know yourself,\\xFFFEand you need not fear the result"
+                    + MAJOR_LINE_BREAK + "of a hundred battles..." + MAJOR_LINE_BREAK 
+                    + "This time, we shall retreat quietly." + MINOR_LINE_BREAK);
+            }
+        }
+        setStrings(getRomEntry().getInt("PinwheelGormTextOffset"), plasmaGormSpeech);  
     }
 
     public void bw1StarterTextModifications(List<Pokemon> newStarters) {
@@ -537,18 +584,27 @@ public class Gen5TextHandler {
                 // Original order is FIRE WATER GRASS
                 // Static Pokemon order is GRASS FIRE WATER
                 int staticPointer = (i + 1) % 3;
-                monkeyGuyStrings.set(Gen5Constants.bw1MonkeyGiverTextOffset + i,
-                    "OK. Here you go!" + MAJOR_LINE_BREAK + "It can use "
-                    + newStatics.get(staticPointer).primaryType.camelCase() + "-type moves, "
-                    + "so that\\xFFFEmakes it great against "
-                    + Type.randomStrength(random, false, newStatics.get(staticPointer).primaryType).camelCase()
-                    + " types!" + MINOR_LINE_BREAK);
+                Type superiorType = Type.randomStrength(random, false, newStatics.get(staticPointer).primaryType);
+                if (superiorType != null) {
+                    monkeyGuyStrings.set(Gen5Constants.bw1MonkeyGiverTextOffset + i,
+                        "OK. Here you go!" + MAJOR_LINE_BREAK + "It can use "
+                        + newStatics.get(staticPointer).primaryType.camelCase() + "-type moves, "
+                        + "so that\\xFFFEmakes it great against "
+                        + superiorType.camelCase() + " types!" + MINOR_LINE_BREAK);
+                } 
+                // The monkey replacement is probably Normal type
+                else {
+                    monkeyGuyStrings.set(Gen5Constants.bw1MonkeyGiverTextOffset + i,
+                        "OK. Here you go!" + MAJOR_LINE_BREAK + "It can use "
+                        + newStatics.get(staticPointer).primaryType.camelCase() + "-type moves, "
+                        + "so that\\xFFFEmakes it unremarkable against "
+                        + "most types!" + MINOR_LINE_BREAK);
+                }
             }
         }
 
         // rewrite
         setStrings(getRomEntry().getInt("MonkeyGiverTextOffset"), monkeyGuyStrings);
-
     }
 
     public void bw1CasteliaCityItemTextModifications(List<Pokemon> newStarters) {

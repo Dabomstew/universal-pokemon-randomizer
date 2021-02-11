@@ -188,8 +188,8 @@ public enum Type {
             return VALUES.get(backupChoice);
         }
 
-        // No match found (although this should be impossible)
-        throw new RandomizationException("No type strength found for " + Arrays.toString(checkTypes));
+        // No match found (for instance, Normal-type)
+        return null;
     }
 
     public static Type randomWeakness(Random random, boolean useResistantType, Type... checkTypes) {
@@ -238,8 +238,8 @@ public enum Type {
             return resistantList.get(random.nextInt(resistantList.size()));
         }
 
-        // No type was able to be returned so throw an exception
-        throw new RandomizationException("No type weakness found for " + Arrays.toString(checkTypes));
+        // No match found so return null
+        return null;
     }
 
     public static List<Type> getWeaknesses(Type checkType, int maxNum) {    
