@@ -261,7 +261,7 @@ public class Gen5TextHandler {
             // Update the text for the English games
             if (getRomEntry().getRomCode().charAt(3) == 'O') {
                 gymLeaderSpeech.set(Gen5Constants.bw1CasteliaCityBurghTextOffset,
-                    "Thanks again for your help." + MAJOR_LINE_BREAK + "My"
+                    "Thanks again for your help." + MAJOR_LINE_BREAK + "My "
                     + taggedGroupTypes.get("GYM3").camelCase() + " Pok\\x00E9mon "
                     + "are scurrying with\\xFFFEexcitement about getting to "
                     + "battle you." + MAJOR_LINE_BREAK + "Let's get "
@@ -547,6 +547,41 @@ public class Gen5TextHandler {
             }
         }
         setStrings(getRomEntry().getInt("PinwheelGormTextOffset"), plasmaGormSpeech);  
+    }
+
+    public void bw1CelestialTowerTextModifications(Map<String, Type> taggedGroupTypes) {
+        List<String> gymLeaderSpeech = getStrings(getRomEntry().getInt("CelestialSkylaTextOffset"));
+        
+        // If we have types available for the groups, use them
+        if (taggedGroupTypes != null) {
+            // Update the text for the English games
+            if (getRomEntry().getRomCode().charAt(3) == 'O') {
+                gymLeaderSpeech.set(Gen5Constants.bw1CelestialTowerTextOffset, 
+                    "I'd like to introduce myself again!" + MAJOR_LINE_BREAK 
+                    + "I'm Skyla, the Leader of\\xFFFEMistralton's "
+                    + "Pok\\x00E9mon Gym." + MAJOR_LINE_BREAK + "I use "
+                    + taggedGroupTypes.get("GYM6").camelCase()
+                    + "-type Pok\\x00E9mon." + MAJOR_LINE_BREAK
+                    + "When you are ready, please\\xFFFEcome to the Gym."
+                    + MAJOR_LINE_BREAK + "I'll give you a big welcome!"
+                    + MINOR_LINE_BREAK);
+            }
+        }
+        // Types are not available - Make any type references generic
+        else {
+            // Update the text for the English games
+            if (getRomEntry().getRomCode().charAt(3) == 'O') {
+                gymLeaderSpeech.set(Gen5Constants.bw1CelestialTowerTextOffset, 
+                    "I'd like to introduce myself again!" + MAJOR_LINE_BREAK 
+                    + "I'm Skyla, the Leader of\\xFFFEMistralton's "
+                    + "Pok\\x00E9mon Gym." + MAJOR_LINE_BREAK + "I use "
+                    + "efficient Pok\\x00E9mon." + MAJOR_LINE_BREAK
+                    + "When you are ready, please\\xFFFEcome to the Gym."
+                    + MAJOR_LINE_BREAK + "I'll give you a big welcome!"
+                    + MINOR_LINE_BREAK);
+            }
+        }
+        setStrings(getRomEntry().getInt("CelestialSkylaTextOffset"), gymLeaderSpeech);  
     }
 
     public void bw1StarterTextModifications(List<Pokemon> newStarters) {

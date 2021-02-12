@@ -165,7 +165,7 @@ public enum Type {
         // Only uses 17 canon types
         List<Integer> randomIndices = IntStream.range(0, 17).boxed().collect(Collectors.toList());
         Integer backupChoice = -1;
-        Collections.shuffle(randomIndices);
+        Collections.shuffle(randomIndices, random);
 
         // Attempt to find shared type
         for(Integer i : randomIndices) {

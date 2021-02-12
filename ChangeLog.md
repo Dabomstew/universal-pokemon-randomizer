@@ -50,7 +50,7 @@
  * Gen 5 and Gen 6 move updates can be applied independently of one another
  * Black/White Cilan, Chili, Cress now have types that are superior to the player's chosen starter
  * As an additional option to the previous change, players can opt for a defensively resistant opponent. For instance, Magnemite would normally face a Ground type, but this option makes the Gym use an Electric type as Electric resists both Electric and Steel.
- * Modified the following sections of in-game text to match choices
+ * Modified the following sections of Gen 5 Black/White in-game text to match choices
    * Striaton City Gym leaders will use their true types when using type-theming on Gym Leaders, or use generic terms when completely random
    * Nacrene City Gym Guy will use true type and appropriate weakness when using type-theming on Gym Leaders, or use generic terms when completely random
    * Castelia City item guy will use correct starter names when giving type-boosting items. Items will not match the types of the new starters
@@ -63,5 +63,6 @@
    * Mistralton City Gym Guy will use Skyla's true type and appropriate weakness when using type-theming on Gym Leaders, or use generic terms when completely random
    * Monkey giver in Striaton City will use correct types of Pokemon and a relevant strength when randomizing static Pokemon
    * Gorm in Pinwheel Forest will use correct type for Burgh and Lenora when type-theming on Gym Leaders, or generic terms when completely random
+   * Skyla in Celestial Tower will use her true type when using type-theming on Gym Leaders, or use generic terms when completely random
  * Added `Normalize` and `Stall` to list of negative abilities that can be banned
  * Static Pokemon are randomized before trainers. Should have no noticable impact.

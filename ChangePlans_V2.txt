@@ -21,7 +21,7 @@ XX Choice not available until game is played XXStriaton City leaders use correct
 **Gym guy in Mistralton City should reference Skyla's true type (3rd narc, block 113, index 8)
 **Monkey giver should use correct types (3rd narc, block 160, index 4-6)
 **Black/White pinwheel Gorm should reference Lenora's and Burgh's true type (3rd narc, block 163, index 28)
-Black/White Celestial tower Skyla should reference true type (3rd narc, block 374, index 6)
+**Black/White Celestial tower Skyla should reference true type (3rd narc, block 374, index 6)
 **Add normalize, stall to list of banned abilities
 Monkey static has type that trumps Striaton type if randomizing trainers, or covers weakness of starter when randomizing statics
 Condense Starter evo choice to slider (random = 0, 1 or 2 = 1, 2 = 2)

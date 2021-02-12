@@ -1172,6 +1172,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             getTextHandler().bw1DriftveilCityTextModifications(taggedTypes, this.random);
             getTextHandler().bw1MistraltonCityTextModifications(taggedTypes);
             getTextHandler().bw1PinwheelForestTextModifications(taggedTypes);
+            getTextHandler().bw1CelestialTowerTextModifications(taggedTypes);
         }
     }
 
