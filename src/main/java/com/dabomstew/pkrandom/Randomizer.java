@@ -633,6 +633,7 @@ public class Randomizer {
 
     private int maybeChangeAndLogStaticPokemon(final RomHandler romHandler, boolean raceMode,
             int checkValue) {
+        List<Pokemon> oldStatics = romHandler.getStaticPokemon();
         if (romHandler.canChangeStaticPokemon()) {
             if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING) {
                 romHandler.randomizeStaticPokemon(true);
@@ -641,7 +642,6 @@ public class Randomizer {
             }
 
             // Update Check Value
-            List<Pokemon> oldStatics = romHandler.getStaticPokemon();
             List<Pokemon> newStatics = romHandler.getStaticPokemon();
             if (settings.getStaticPokemonMod() != Settings.StaticPokemonMod.UNCHANGED) {
                 for (int i = 0; i < oldStatics.size(); i++) {

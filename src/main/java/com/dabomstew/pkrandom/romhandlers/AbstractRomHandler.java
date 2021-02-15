@@ -49,6 +49,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<Pokemon> alreadyPicked = new ArrayList<Pokemon>();
     private List<Pokemon> giratinaPicks;
     protected boolean ptGiratina = false;
+    protected Map<String, Type> groupTypesMap = new HashMap<String, Type>();
 
     /* Constructor */
     public AbstractRomHandler(Random random) {
@@ -480,12 +481,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                         "ERROR: Not enough starter choices available. Please " + "reduce the filtering and try again.");
             }
         }
-        Pokemon chosen = starterPokes.randomPokemon(this.random);
+        Pokemon chosen = starterPokes.randomPokemon(this.random, true);
         if (chosen == null) {
             throw new RandomizationException(
                     "ERROR: Valid list of starters has been consumed. Please " + "reduce the filtering and try again.");
         }
-        starterPokes.remove(chosen);
         return chosen;
     }
 
@@ -511,12 +511,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                         "ERROR: Not enough starter choices available. Please " + "reduce the filtering and try again.");
             }
         }
-        Pokemon chosen = starterPokes.randomPokemon(this.random);
+        Pokemon chosen = starterPokes.randomPokemon(this.random, true);
         if (chosen == null) {
             throw new RandomizationException(
                     "ERROR: Valid list of starters has been consumed. Please " + "reduce the filtering and try again.");
         }
-        starterPokes.remove(chosen);
         return chosen;
     }
 
@@ -542,12 +541,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                         "ERROR: Not enough starter choices available. Please " + "reduce the filtering and try again.");
             }
         }
-        Pokemon chosen = starterPokes.randomPokemon(this.random);
+        Pokemon chosen = starterPokes.randomPokemon(this.random, true);
         if (chosen == null) {
             throw new RandomizationException(
                     "ERROR: Valid list of starters has been consumed. Please " + "reduce the filtering and try again.");
         }
-        starterPokes.remove(chosen);
         return chosen;
     }
 
@@ -961,8 +959,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (catchEmAll) {
                 PokemonSet workingSet = new PokemonSet(areaSet);
                 for (Encounter enc : area.encounters) {
-                    enc.pokemon = workingSet.randomPokemon(random);
-                    workingSet.remove(enc.pokemon);
+                    enc.pokemon = workingSet.randomPokemon(random, true);
                     if (workingSet.size() == 0) {
                         workingSet = new PokemonSet(areaSet);
                     }
@@ -971,19 +968,19 @@ public abstract class AbstractRomHandler implements RomHandler {
                 Type areaTheme = areaSet.randomType(random);
                 for (Encounter enc : area.encounters) {
                     // Pick a random themed pokemon
-                    enc.pokemon = areaSet.randomPokemonOfType(areaTheme, random);
+                    enc.pokemon = areaSet.randomPokemonOfType(areaTheme, random, false);
                 }
             } else if (usePowerLevels) {
                 for (Encounter enc : area.encounters) {
-                    enc.pokemon = areaSet.randomPokemonByPowerLevel(enc.pokemon, false, random);
+                    enc.pokemon = areaSet.randomPokemonByPowerLevel(enc.pokemon, false, random, false);
                 }
             } else if (matchTypingDistribution) {
                 for (Encounter enc : area.encounters) {
-                    enc.pokemon = areaSet.randomPokemonTypeWeighted(random);
+                    enc.pokemon = areaSet.randomPokemonTypeWeighted(random, false);
                 }
             } else {
                 for (Encounter enc : area.encounters) {
-                    enc.pokemon = areaSet.randomPokemon(random);
+                    enc.pokemon = areaSet.randomPokemon(random, false);
                 }
             }
         }
@@ -1023,34 +1020,29 @@ public abstract class AbstractRomHandler implements RomHandler {
                         workingSet = new PokemonSet(areaSet);
                     }
 
-                    Pokemon picked = workingSet.randomPokemon(random);
-                    workingSet.remove(picked);
+                    Pokemon picked = workingSet.randomPokemon(random, true);
                     areaMap.put(areaPk, picked);
                 }
             } else if (typeThemed) {
                 Type areaTheme = areaSet.randomType(inArea.size(), random);
                 for (Pokemon areaPk : inArea) {
-                    Pokemon picked = areaSet.randomPokemonOfType(areaTheme, random);
+                    Pokemon picked = areaSet.randomPokemonOfType(areaTheme, random, true);
                     areaMap.put(areaPk, picked);
-                    areaSet.remove(picked);
                 }
             } else if (usePowerLevels) {
                 for (Pokemon areaPk : inArea) {
-                    Pokemon picked = areaSet.randomPokemonByPowerLevel(areaPk, false, random);
+                    Pokemon picked = areaSet.randomPokemonByPowerLevel(areaPk, false, random, true);
                     areaMap.put(areaPk, picked);
-                    areaSet.remove(picked);
                 }
             } else if (matchTypingDistribution) {
                 for (Pokemon areaPk : inArea) {
-                    Pokemon picked = areaSet.randomPokemonTypeWeighted(random);
+                    Pokemon picked = areaSet.randomPokemonTypeWeighted(random, true);
                     areaMap.put(areaPk, picked);
-                    areaSet.remove(picked);
                 }
             } else {
                 for (Pokemon areaPk : inArea) {
-                    Pokemon picked = areaSet.randomPokemon(random);
+                    Pokemon picked = areaSet.randomPokemon(random, true);
                     areaMap.put(areaPk, picked);
-                    areaSet.remove(picked);
                 }
             }
 
@@ -1088,18 +1080,17 @@ public abstract class AbstractRomHandler implements RomHandler {
                 toSet = new PokemonSet(globalSet);
             }
 
-            Pokemon from = fromSet.randomPokemon(random);
-            fromSet.remove(from);
-            Pokemon to = toSet.randomPokemon(random);
+            Pokemon from = fromSet.randomPokemon(random, true);
+            Pokemon to = toSet.randomPokemon(random, false);
 
             if (usePowerLevels) {
                 if (toSet.size() != 1) {
-                    to = toSet.randomPokemonByPowerLevel(from, true, random);
+                    to = toSet.randomPokemonByPowerLevel(from, true, random, false);
                 }
             } else {
                 while (from == to && toSet.size() > 1) {
                     // Reroll for a different pokemon if at all possible
-                    to = toSet.randomPokemon(random);
+                    to = toSet.randomPokemon(random, false);
                 }
             }
 
@@ -1121,9 +1112,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 + "to no available pokemon. Please reduce the filtering and try again.");
                     }
                     if (usePowerLevels) {
-                        enc.pokemon = areaSet.randomPokemonByPowerLevel(enc.pokemon, false, random);
+                        enc.pokemon = areaSet.randomPokemonByPowerLevel(enc.pokemon, false, random, false);
                     } else {
-                        enc.pokemon = areaSet.randomPokemon(random);
+                        enc.pokemon = areaSet.randomPokemon(random, false);
                     }
                 }
             }
@@ -1232,7 +1223,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         Set<Type> usedGymTypes = new TreeSet<Type>();
         Set<Type> usedEliteTypes = new TreeSet<Type>();
         Set<Type> usedUberTypes = new TreeSet<Type>();
-        Map<String, Type> groupTypesMap = new HashMap<String, Type>();
         for (String group : groups.keySet()) {
             List<Trainer> trainersInGroup = groups.get(group);
             // Shuffle ordering within group to promote randomness
@@ -2201,10 +2191,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         Map<String, String> staticPokemon = new TreeMap<String, String>();
 
         if (legendForLegend) {
-            List<Pokemon> legendariesLeft = new ArrayList<Pokemon>(onlyLegendaryList);
-            List<Pokemon> nonlegsLeft = new ArrayList<Pokemon>(noLegendaryList);
-            legendariesLeft.removeAll(banned);
-            nonlegsLeft.removeAll(banned);
+            PokemonSet legendariesLeft = new PokemonSet(onlyLegendaryList);
+            PokemonSet nonlegsLeft = new PokemonSet(noLegendaryList);
+            legendariesLeft.filterList(banned);
+            nonlegsLeft.filterList(banned);
             for (int i = 0; i < currentStaticPokemon.size(); i++) {
                 Pokemon old = currentStaticPokemon.get(i);
                 Pokemon newPK;
@@ -2213,17 +2203,54 @@ public abstract class AbstractRomHandler implements RomHandler {
                         newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
                         legendariesLeft.remove(newPK);
                     } else {
-                        newPK = legendariesLeft.remove(this.random.nextInt(legendariesLeft.size()));
+                        newPK = legendariesLeft.randomPokemon(this.random, true);
                     }
                     if (legendariesLeft.size() == 0) {
                         legendariesLeft.addAll(onlyLegendaryList);
-                        legendariesLeft.removeAll(banned);
+                        legendariesLeft.filterList(banned);
                     }
                 } else {
-                    newPK = nonlegsLeft.remove(this.random.nextInt(nonlegsLeft.size()));
+                    // Replace grass monkey
+                    if (old.number == 511) {
+                        // Grass => Fire (starter 1)
+                        // Find a random type weakness of starter that should be covered
+                        Type cover = groupTypesMap.get("CRESS");
+                        if (cover == null) {
+                            cover = Type.randomWeakness(this.random, false, this.getStarters().get(1).primaryType);
+                        }
+
+                        // Get a pokemon with a type that is superior to that weakness
+                        newPK = nonlegsLeft.randomPokemonOfType(Type.randomWeakness(this.random, false, cover), this.random, true);
+                    } 
+                    // Replace fire monkey
+                    else if (old.number == 513) {
+                        // Fire => Water (starter 2)
+                        // Find a random type weakness of starter that should be covered
+                        Type cover = groupTypesMap.get("CILAN");
+                        if (cover == null) {
+                            cover = Type.randomWeakness(this.random, false, this.getStarters().get(2).primaryType);
+                        }
+
+                        // Get a pokemon with a type that is superior to that weakness
+                        newPK = nonlegsLeft.randomPokemonOfType(Type.randomWeakness(this.random, false, cover), this.random, true);
+                    }
+                    // Replace water monkey
+                    else if (old.number == 515) {
+                        // Water => Grass (starter 0)
+                        // Find a random type weakness of starter that should be covered
+                        Type cover = groupTypesMap.get("CHILI");
+                        if (cover == null) {
+                            cover = Type.randomWeakness(this.random, false, this.getStarters().get(0).primaryType);
+                        }
+
+                        // Get a pokemon with a type that is superior to that weakness
+                        newPK = nonlegsLeft.randomPokemonOfType(Type.randomWeakness(this.random, false, cover), this.random, true);
+                    } else {
+                        newPK = nonlegsLeft.randomPokemon(this.random, true);
+                    }
                     if (nonlegsLeft.size() == 0) {
                         nonlegsLeft.addAll(noLegendaryList);
-                        nonlegsLeft.removeAll(banned);
+                        nonlegsLeft.filterList(banned);
                     }
                 }
                 replacements.add(newPK);
@@ -2236,20 +2263,58 @@ public abstract class AbstractRomHandler implements RomHandler {
                 staticPokemon.put(oldName, newPK.name);
             }
         } else {
-            List<Pokemon> pokemonLeft = new ArrayList<Pokemon>(mainPokemonList);
-            pokemonLeft.removeAll(banned);
+            PokemonSet pokemonLeft = new PokemonSet(mainPokemonList);
+            pokemonLeft.filterList(banned);
             for (int i = 0; i < currentStaticPokemon.size(); i++) {
                 Pokemon old = currentStaticPokemon.get(i);
                 Pokemon newPK;
+                // Replace Giratina
                 if (old.number == 487 && ptGiratina) {
                     newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
                     pokemonLeft.remove(newPK);
-                } else {
-                    newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
+                } 
+                // Replace grass monkey
+                else if (old.number == 511) {
+                    // Grass => Fire (starter 1)
+                    // Find a random type weakness of starter that should be covered
+                    Type cover = groupTypesMap.get("CRESS");
+                    if (cover == null) {
+                        cover = Type.randomWeakness(this.random, false, this.getStarters().get(1).primaryType);
+                    }
+                    
+                    // Get a pokemon with a type that is superior to that weakness
+                    newPK = pokemonLeft.randomPokemonOfType(Type.randomWeakness(this.random, false, cover), this.random, true);
+                } 
+                // Replace fire monkey
+                else if (old.number == 513) {
+                    // Fire => Water (starter 2)
+                    // Find a random type weakness of starter that should be covered
+                    Type cover = groupTypesMap.get("CILAN");
+                    if (cover == null) {
+                        cover = Type.randomWeakness(this.random, false, this.getStarters().get(2).primaryType);
+                    }
+
+                    // Get a pokemon with a type that is superior to that weakness
+                    newPK = pokemonLeft.randomPokemonOfType(Type.randomWeakness(this.random, false, cover), this.random, true);
+                }
+                // Replace water monkey
+                else if (old.number == 515) {
+                    // Water => Grass (starter 0)
+                    // Find a random type weakness of starter that should be covered
+                    Type cover = groupTypesMap.get("CHILI");
+                    if (cover == null) {
+                        cover = Type.randomWeakness(this.random, false, this.getStarters().get(0).primaryType);
+                    }
+
+                    // Get a pokemon with a type that is superior to that weakness
+                    newPK = pokemonLeft.randomPokemonOfType(Type.randomWeakness(this.random, false, cover), this.random, true);
+                }
+                else {
+                    newPK = pokemonLeft.randomPokemon(this.random, true);
                 }
                 if (pokemonLeft.size() == 0) {
                     pokemonLeft.addAll(mainPokemonList);
-                    pokemonLeft.removeAll(banned);
+                    pokemonLeft.filterList(banned);
                 }
                 replacements.add(newPK);
                 String oldName = old.name;

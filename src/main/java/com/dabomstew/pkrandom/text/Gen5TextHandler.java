@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.text;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -611,19 +612,34 @@ public class Gen5TextHandler {
 
     }
     
-    public void bw1MonkeyTextModifications(List<Pokemon> newStatics, Random random) {
+    public void bw1MonkeyTextModifications(List<Pokemon> newStatics, Map<String, Type> taggedGroupTypes, Random random) {
         List<String> monkeyGuyStrings = getStrings(getRomEntry().getInt("MonkeyGiverTextOffset"));
+        // Superior order is CILAN CHILI CRESS
+        // Revised order is CRESS CILAN CHILI to match static order
+        List<String> striatonStrings = Arrays.asList("CRESS", "CILAN", "CHILI");
         // Update the text for the English games
         if (getRomEntry().getRomCode().charAt(3) == 'O') {
             for (int i = 0; i < 3; i++) {
                 // Original order is FIRE WATER GRASS
                 // Static Pokemon order is GRASS FIRE WATER
                 int staticPointer = (i + 1) % 3;
-                Type superiorType = Type.randomStrength(random, false, newStatics.get(staticPointer).primaryType);
+                Type superiorType = null, staticType = newStatics.get(staticPointer).primaryType;
+                if (taggedGroupTypes != null) {
+                    superiorType = taggedGroupTypes.get(striatonStrings.get(staticPointer));
+                    // Check if the primary type is strong against the superior type
+                    // If not, use the secondary type
+                    if (newStatics.get(staticPointer).secondaryType != null &&
+                        !Type.STRONG_AGAINST.get(superiorType.ordinal()).contains(staticType)) {
+                        staticType = newStatics.get(staticPointer).secondaryType;
+                    }
+                } else {
+                    superiorType = Type.randomStrength(random, false, newStatics.get(staticPointer).primaryType);
+                }
+
                 if (superiorType != null) {
                     monkeyGuyStrings.set(Gen5Constants.bw1MonkeyGiverTextOffset + i,
                         "OK. Here you go!" + MAJOR_LINE_BREAK + "It can use "
-                        + newStatics.get(staticPointer).primaryType.camelCase() + "-type moves, "
+                        + staticType.camelCase() + "-type moves, "
                         + "so that\\xFFFEmakes it great against "
                         + superiorType.camelCase() + " types!" + MINOR_LINE_BREAK);
                 } 
@@ -631,7 +647,7 @@ public class Gen5TextHandler {
                 else {
                     monkeyGuyStrings.set(Gen5Constants.bw1MonkeyGiverTextOffset + i,
                         "OK. Here you go!" + MAJOR_LINE_BREAK + "It can use "
-                        + newStatics.get(staticPointer).primaryType.camelCase() + "-type moves, "
+                        + staticType.camelCase() + "-type moves, "
                         + "so that\\xFFFEmakes it unremarkable against "
                         + "most types!" + MINOR_LINE_BREAK);
                 }

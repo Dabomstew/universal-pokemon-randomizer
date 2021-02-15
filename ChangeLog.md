@@ -64,5 +64,6 @@
    * Monkey giver in Striaton City will use correct types of Pokemon and a relevant strength when randomizing static Pokemon
    * Gorm in Pinwheel Forest will use correct type for Burgh and Lenora when type-theming on Gym Leaders, or generic terms when completely random
    * Skyla in Celestial Tower will use her true type when using type-theming on Gym Leaders, or use generic terms when completely random
- * Added `Normalize` and `Stall` to list of negative abilities that can be banned
- * Static Pokemon are randomized before trainers. Should have no noticable impact.
+ * Added `Normalize`, `Klutz`, `Multitype` and `Stall` to list of negative abilities that can be banned
+ * Static Pokemon are randomized before trainers. Should have no noticable impact
+ * Pansear, Pansage, and Panpour (elemental monkies) now are replaced with a type that trumps Striaton gym if type-theming on Gym Leaders, or covers a random weakness of the selected starter

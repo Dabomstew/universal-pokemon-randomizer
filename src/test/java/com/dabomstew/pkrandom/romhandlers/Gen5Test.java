@@ -72,7 +72,7 @@ public class Gen5Test {
         // The length of this sublist must match the length of static pokemon in the rom
         // Run a print statement in the setStaticPokemon function to get it
         romhandler.setStaticPokemon(pokemonList.subList(0, 31));
-        verify(mockTextHandler, times(1)).bw1MonkeyTextModifications(any(), any());
+        verify(mockTextHandler, times(1)).bw1MonkeyTextModifications(any(), any(), any());
     }
 
     /**

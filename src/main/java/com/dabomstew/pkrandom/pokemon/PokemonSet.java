@@ -51,27 +51,7 @@ public class PokemonSet {
         pokes = new ArrayList<Pokemon>();
         pokesByType = new TreeMap<Type, ArrayList<Pokemon>>();
 
-        for (Pokemon pk : pks) {
-            if (pk != null) {
-                pokes.add(pk);
-
-                ArrayList<Pokemon> set = pokesByType.get(pk.primaryType);
-                if (set == null) {
-                    set = new ArrayList<Pokemon>();
-                    pokesByType.put(pk.primaryType, set);
-                }
-                set.add(pk);
-
-                if (pk.secondaryType != null) {
-                    set = pokesByType.get(pk.secondaryType);
-                    if (set == null) {
-                        set = new ArrayList<Pokemon>();
-                        pokesByType.put(pk.secondaryType, set);
-                    }
-                    set.add(pk);
-                }
-            }
-        }
+        addAll(pks);        
 
         updateTypeCount();
     }
@@ -101,6 +81,18 @@ public class PokemonSet {
         return uniquePokeCount;
     }
 
+    public int typeCount() {
+        return typeCount;
+    }
+
+    public ArrayList<Pokemon> getPokes() {
+        return this.pokes;
+    }
+
+    public Map<Type, ArrayList<Pokemon>> getPokesByType() {
+        return this.pokesByType;
+    }
+
     // Filtering
     public PokemonSet filterLegendaries() {
         filter(p -> p.isLegendary());
@@ -124,6 +116,11 @@ public class PokemonSet {
 
     public PokemonSet filterByMinimumLevel(int level) {
         filter(p -> p.minimumLevel() > level);
+        return this;
+    }
+
+    public PokemonSet addAll(List<Pokemon> list) {
+        list.forEach(pk -> add(pk));
         return this;
     }
 
@@ -168,38 +165,86 @@ public class PokemonSet {
         return this;
     }
 
-    // Generation
-    public Pokemon randomPokemon(Random random) {
-        return pokes.get(random.nextInt(pokes.size()));
+    /**
+     * Returns a random pokemon from the set
+     * @param random The object containing the random seed
+     * @param pop Remove the pokemon from the set and return it
+     * @return Pokemon from the set
+     */
+    public Pokemon randomPokemon(Random random, boolean pop) {
+        Pokemon chosen = getPokes().get(random.nextInt(pokes.size()));
+        if (pop) {
+            remove(chosen);
+        }
+        return chosen;
     }
 
-    public Pokemon randomPokemonOfType(Type type, Random random) {
-        ArrayList<Pokemon> list = pokesByType.get(type);
+    /**
+     * Returns a random pokemon from the set with the type requested
+     * @param type Type for the pokemon to have
+     * @param random The object containing the random seed
+     * @param pop Remove the pokemon from the set and return it
+     * @return Pokemon from the set of the requested type
+     * @throws RandomizationException If there is no Pokemon that can be selected
+     */
+    public Pokemon randomPokemonOfType(Type type, Random random, boolean pop) {
+        ArrayList<Pokemon> list = getPokesByType().get(type);
         if (list == null || list.size() == 0) {
             throw new RandomizationException("No pokemon in set of type: " + type);
         }
-        return list.get(random.nextInt(list.size()));
+        Pokemon chosen = list.get(random.nextInt(list.size()));
+        if (pop) {
+            remove(chosen);
+        }
+
+        return chosen;
     }
 
-    public Pokemon randomPokemonTypeWeighted(Random random) {
+    /**
+     * Returns a random pokemon with greater preference to common types
+     * @param random The object containing the random seed
+     * @param pop Remove the pokemon from the set and return it
+     * @return Pokemon from the set
+     * @throws IllegalStateException If there was no type with a significant size
+     */
+    public Pokemon randomPokemonTypeWeighted(Random random, boolean pop) {
+        // Generate number between 0 and typeCount
         int idx = random.nextInt(typeCount);
+        Pokemon chosen = null;
         for (Map.Entry<Type, ArrayList<Pokemon>> entry : pokesByType.entrySet()) {
+            // If idx is in the length of this list, get the pokemon at that index
             if (idx < entry.getValue().size()) {
-                return entry.getValue().get(idx);
+                chosen = entry.getValue().get(idx);
+                if (pop) {
+                    remove(chosen);
+                }
+                return chosen;
             }
+            // Reduce the selected number by the amount in the list and try again
             idx -= entry.getValue().size();
         }
 
         throw new IllegalStateException(String.format("randomPokemonTypeWeighted: %d/%d", idx, typeCount));
     }
 
-    public Pokemon randomPokemonByPowerLevel(Pokemon current, boolean banSamePokemon, Random random) {
+    /**
+     * Returns a random pokemon with a similar BST
+     * @param current The pokemon for comparison
+     * @param banSamePokemon Do not select the same pokemon as a replacement
+     * @param random The object containing the random seed
+     * @param pop Remove the pokemon from the set and return it
+     * @return Pokemon from the set with similar BST
+     * @throws RandomizationException If no pokemon were found with similar BST
+     */
+    public Pokemon randomPokemonByPowerLevel(Pokemon current, boolean banSamePokemon, Random random, boolean pop) {
         // start with within 10% and add 20% either direction till we find
         // something
         int currentBST = current.bstForPowerLevels();
         int minTarget = currentBST - currentBST / 10;
         int maxTarget = currentBST + currentBST / 10;
         Set<Pokemon> canPick = new TreeSet<Pokemon>();
+        // Create a pick list of similar BST. Break when three or more elements exist in the pick list, 
+        // or exceeds 50 BST either direction
         for (int expandRounds = 0; canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 3); expandRounds++) {
             for (Pokemon pk : pokes) {
                 if (pk.bstForPowerLevels() >= minTarget && pk.bstForPowerLevels() <= maxTarget
@@ -210,9 +255,24 @@ public class PokemonSet {
             minTarget -= currentBST / 20;
             maxTarget += currentBST / 20;
         }
-        return new ArrayList<Pokemon>(canPick).get(random.nextInt(canPick.size()));
+
+        // Throw error if list is empty
+        if (canPick.size() < 1) {
+            throw new RandomizationException("No pokemon with similar BST found for " + current.name);
+        }
+
+        Pokemon chosen = new ArrayList<Pokemon>(canPick).get(random.nextInt(canPick.size()));
+        if (pop) {
+            remove(chosen);
+        }
+        return chosen;
     }
 
+    /**
+     * Return a type represented by the types in the set
+     * @param random The object containing the random seed
+     * @return Type from the list of types available in the set
+     */
     public Type randomType(Random random) {
         ArrayList<Type> list = new ArrayList<Type>(pokesByType.keySet());
         return list.get(random.nextInt(list.size()));
