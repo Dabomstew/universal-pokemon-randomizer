@@ -500,10 +500,10 @@ public class Randomizer {
         // TM/HM compatibility
         switch (settings.getTmsHmsCompatibilityMod()) {
         case RANDOM_PREFER_TYPE:
-            romHandler.randomizeTMHMCompatibility(true);
+            romHandler.randomizeTMHMCompatibility(true, settings.isTmsFollowEvolutions());
             break;
         case COMPLETELY_RANDOM:
-            romHandler.randomizeTMHMCompatibility(false);
+            romHandler.randomizeTMHMCompatibility(false, settings.isTmsFollowEvolutions());
             break;
         case FULL:
             romHandler.fullTMHMCompatibility();
@@ -514,6 +514,9 @@ public class Randomizer {
 
         if (settings.isTmLevelUpMoveSanity()) {
             romHandler.ensureTMCompatSanity();
+            if (settings.isTmsFollowEvolutions()) {
+                romHandler.ensureTMEvolutionSanity();
+            }
         }
 
         if (settings.isFullHMCompat()) {
@@ -546,10 +549,10 @@ public class Randomizer {
             // Compatibility
             switch (settings.getMoveTutorsCompatibilityMod()) {
             case RANDOM_PREFER_TYPE:
-                romHandler.randomizeMoveTutorCompatibility(true);
+                romHandler.randomizeMoveTutorCompatibility(true, settings.isTutorFollowEvolutions());
                 break;
             case COMPLETELY_RANDOM:
-                romHandler.randomizeMoveTutorCompatibility(false);
+                romHandler.randomizeMoveTutorCompatibility(false, settings.isTutorFollowEvolutions());
                 break;
             case FULL:
                 romHandler.fullMoveTutorCompatibility();
@@ -560,6 +563,9 @@ public class Randomizer {
 
             if (settings.isTutorLevelUpMoveSanity()) {
                 romHandler.ensureMoveTutorCompatSanity();
+                if (settings.isTutorFollowEvolutions()) {
+                    romHandler.ensureMoveTutorEvolutionSanity();
+                }
             }
         }
 
@@ -739,6 +745,48 @@ public class Randomizer {
                 }
             }
             log.println();
+        }
+    }
+
+    private void maybeLogTMHMCompatibility(final PrintStream log, final RomHandler romHandler) {
+        if (settings.getTmsHmsCompatibilityMod() != Settings.TMsHMsCompatibilityMod.UNCHANGED) {
+            log.println("--TM Compatibility--");
+            Map<Pokemon, boolean[]> compat = romHandler.getTMHMCompatibility();
+            List<Integer> tmHMs = new ArrayList<>(romHandler.getTMMoves());
+            tmHMs.addAll(romHandler.getHMMoves());
+            List<Move> moveData = romHandler.getMoves();
+
+            logCompatibility(log, compat, tmHMs, moveData);
+        }
+    }
+
+    private void maybeLogTutorCompatibility(final PrintStream log, final RomHandler romHandler) {
+        if (settings.getTmsHmsCompatibilityMod() != Settings.TMsHMsCompatibilityMod.UNCHANGED) {
+            log.println("--Move Tutor Compatibility--");
+            Map<Pokemon, boolean[]> compat = romHandler.getMoveTutorCompatibility();
+            List<Integer> tutorMoves = romHandler.getMoveTutorMoves();
+            List<Move> moveData = romHandler.getMoves();
+
+            logCompatibility(log, compat, tutorMoves, moveData);
+        }
+    }
+
+    private void logCompatibility(final PrintStream log, Map<Pokemon, boolean[]> compat, List<Integer> moveList,
+                                  List<Move> moveData) {
+        for (Map.Entry<Pokemon, boolean[]> entry : compat.entrySet()) {
+            Pokemon pkmn = entry.getKey();
+            boolean[] flags = entry.getValue();
+
+            StringBuilder sb = new StringBuilder();
+            sb.append(pkmn.fullName()).append(": ");
+
+            for (int i = 1; i < flags.length; i++) {
+                if (flags[i]) {
+                    sb.append(moveData.get(moveList.get(i - 1)).name).append(", ");
+                }
+            }
+
+            log.println(sb.toString());
         }
     }
 

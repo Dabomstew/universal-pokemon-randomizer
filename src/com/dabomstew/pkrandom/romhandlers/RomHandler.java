@@ -315,13 +315,15 @@ public interface RomHandler {
 
     void setTMHMCompatibility(Map<Pokemon, boolean[]> compatData);
 
-    void randomizeTMHMCompatibility(boolean preferSameType);
+    void randomizeTMHMCompatibility(boolean preferSameType, boolean evolutionSanity);
 
     void fullTMHMCompatibility();
 
     // tm/moveset sanity
 
     void ensureTMCompatSanity();
+
+    void ensureTMEvolutionSanity();
 
     // new 170: full HM (but not TM) compat override
 
@@ -341,13 +343,15 @@ public interface RomHandler {
 
     void setMoveTutorCompatibility(Map<Pokemon, boolean[]> compatData);
 
-    void randomizeMoveTutorCompatibility(boolean preferSameType);
+    void randomizeMoveTutorCompatibility(boolean preferSameType, boolean evolutionSanity);
 
     void fullMoveTutorCompatibility();
 
     // mt/moveset sanity
 
     void ensureMoveTutorCompatSanity();
+
+    void ensureMoveTutorEvolutionSanity();
 
     // Randomizer: trainer names
 

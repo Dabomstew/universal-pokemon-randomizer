@@ -49,7 +49,7 @@ public class Settings {
 
     public static final int VERSION = Version.VERSION;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 47;
+    public static final int LENGTH_OF_SETTINGS_DATA = 49;
 
     private CustomNamesSet customNames;
 
@@ -240,6 +240,7 @@ public class Settings {
     private boolean tmsForceGoodDamaging;
     private int tmsGoodDamagingPercent = 0;
     private boolean blockBrokenTMMoves;
+    private boolean tmsFollowEvolutions;
 
     public enum TMsHMsCompatibilityMod {
         UNCHANGED, RANDOM_PREFER_TYPE, COMPLETELY_RANDOM, FULL
@@ -257,6 +258,7 @@ public class Settings {
     private boolean tutorsForceGoodDamaging;
     private int tutorsGoodDamagingPercent = 0;
     private boolean blockBrokenTutorMoves;
+    private boolean tutorFollowEvolutions;
 
     public enum MoveTutorsCompatibilityMod {
         UNCHANGED, RANDOM_PREFER_TYPE, COMPLETELY_RANDOM, FULL
@@ -539,6 +541,8 @@ public class Settings {
 
         out.write(selectedEXPCurve.toByte());
 
+        out.write(makeByteSelected(tmsFollowEvolutions, tutorFollowEvolutions));
+
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
             out.write(romName.length);
@@ -802,6 +806,9 @@ public class Settings {
         settings.setUpdateMovesToGeneration(data[45]);
 
         settings.setSelectedEXPCurve(ExpCurve.fromByte(data[46]));
+
+        settings.setTmsFollowEvolutions(restoreState(data[48], 0));
+        settings.setTutorFollowEvolutions(restoreState(data[48], 1));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1885,6 +1892,14 @@ public class Settings {
         this.tmsHmsCompatibilityMod = tmsHmsCompatibilityMod;
     }
 
+    public boolean isTmsFollowEvolutions() {
+        return tmsFollowEvolutions;
+    }
+
+    public void setTmsFollowEvolutions(boolean tmsFollowEvolutions) {
+        this.tmsFollowEvolutions = tmsFollowEvolutions;
+    }
+
     public MoveTutorMovesMod getMoveTutorMovesMod() {
         return moveTutorMovesMod;
     }
@@ -1947,6 +1962,14 @@ public class Settings {
 
     private void setMoveTutorsCompatibilityMod(MoveTutorsCompatibilityMod moveTutorsCompatibilityMod) {
         this.moveTutorsCompatibilityMod = moveTutorsCompatibilityMod;
+    }
+
+    public boolean isTutorFollowEvolutions() {
+        return tutorFollowEvolutions;
+    }
+
+    public void setTutorFollowEvolutions(boolean tutorFollowEvolutions) {
+        this.tutorFollowEvolutions = tutorFollowEvolutions;
     }
 
     public InGameTradesMod getInGameTradesMod() {
