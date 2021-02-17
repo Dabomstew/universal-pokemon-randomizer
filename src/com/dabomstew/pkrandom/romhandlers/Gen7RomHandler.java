@@ -75,6 +75,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         private String titleId;
         private String acronym;
         private int romType;
+        private Map<Integer, Integer> linkedStaticOffsets = new HashMap<>();
         private Map<String, String> strings = new HashMap<>();
         private Map<String, Integer> numbers = new HashMap<>();
         private Map<String, int[]> arrayEntries = new HashMap<>();
@@ -139,6 +140,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             current.titleId = r[1];
                         } else if (r[0].equals("Acronym")) {
                             current.acronym = r[1];
+                        } else if (r[0].equals("LinkedStaticEncounterOffsets")) {
+                            String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
+                            for (int i = 0; i < offsets.length; i++) {
+                                String[] parts = offsets[i].split(":");
+                                current.linkedStaticOffsets.put(Integer.parseInt(parts[0].trim()), Integer.parseInt(parts[1].trim()));
+                            }
                         } else if (r[0].endsWith("Offset") || r[0].endsWith("Count") || r[0].endsWith("Number")) {
                             int offs = parseRIInt(r[1]);
                             current.numbers.put(r[0], offs);
@@ -158,6 +165,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             for (RomEntry otherEntry : roms) {
                                 if (r[1].equalsIgnoreCase(otherEntry.romCode)) {
                                     // copy from here
+                                    current.linkedStaticOffsets.putAll(otherEntry.linkedStaticOffsets);
                                     current.arrayEntries.putAll(otherEntry.arrayEntries);
                                     current.numbers.putAll(otherEntry.numbers);
                                     current.strings.putAll(otherEntry.strings);
@@ -955,7 +963,6 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 }
                 se.pkmn = pokemon;
                 se.forme = forme;
-                se.formeSuffix = Gen7Constants.getFormeSuffixByBaseForme(species, forme);
                 se.level = giftsFile[offset + 3];
                 se.heldItem = FileFunctions.read2ByteInt(giftsFile, offset + 8);
                 starters.add(se);
@@ -1728,7 +1735,6 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 }
                 totem.pkmn = pokemon;
                 totem.forme = forme;
-                totem.formeSuffix = Gen7Constants.getFormeSuffixByBaseForme(species, forme);
                 totem.level = staticEncountersFile[offset + 3];
                 int heldItem = FileFunctions.read2ByteInt(staticEncountersFile, offset + 4);
                 if (heldItem == 0xFFFF) {
@@ -1838,9 +1844,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 }
                 se.pkmn = pokemon;
                 se.forme = forme;
-                se.formeSuffix = Gen7Constants.getFormeSuffixByBaseForme(species, forme);
                 se.level = giftsFile[offset + 3];
                 se.heldItem = FileFunctions.read2ByteInt(giftsFile, offset + 8);
+                se.isEgg = giftsFile[offset + 10] == 1;
                 statics.add(se);
             }
 
@@ -1856,6 +1862,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+        consolidateLinkedEncounters(statics);
         return statics;
     }
 
@@ -1872,7 +1879,6 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         }
         se.pkmn = pokemon;
         se.forme = forme;
-        se.formeSuffix = Gen7Constants.getFormeSuffixByBaseForme(species, forme);
         se.level = staticEncountersFile[offset + 3];
         int heldItem = FileFunctions.read2ByteInt(staticEncountersFile, offset + 4);
         if (heldItem == 0xFFFF) {
@@ -1882,9 +1888,23 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         return se;
     }
 
+    private void consolidateLinkedEncounters(List<StaticEncounter> statics) {
+        List<StaticEncounter> encountersToRemove = new ArrayList<>();
+        for (Map.Entry<Integer, Integer> entry : romEntry.linkedStaticOffsets.entrySet()) {
+            StaticEncounter baseEncounter = statics.get(entry.getKey());
+            StaticEncounter linkedEncounter = statics.get(entry.getValue());
+            baseEncounter.linkedEncounters.add(linkedEncounter);
+            encountersToRemove.add(linkedEncounter);
+        }
+        for (StaticEncounter encounter : encountersToRemove) {
+            statics.remove(encounter);
+        }
+    }
+
     @Override
     public boolean setStaticPokemon(List<StaticEncounter> staticPokemon) {
         try {
+            unlinkStaticEncounters(staticPokemon);
             GARCArchive staticGarc = readGARC(romEntry.getString("StaticPokemon"), true);
             List<Integer> skipIndices =
                     Arrays.stream(romEntry.arrayEntries.get("TotemPokemonIndices")).boxed().collect(Collectors.toList());
@@ -1931,7 +1951,21 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+    }
 
+    private void unlinkStaticEncounters(List<StaticEncounter> statics) {
+        List<Integer> offsetsToInsert = new ArrayList<>();
+        for (Map.Entry<Integer, Integer> entry : romEntry.linkedStaticOffsets.entrySet()) {
+            offsetsToInsert.add(entry.getValue());
+        }
+        Collections.sort(offsetsToInsert);
+        for (Integer offsetToInsert : offsetsToInsert) {
+            statics.add(offsetToInsert, new StaticEncounter());
+        }
+        for (Map.Entry<Integer, Integer> entry : romEntry.linkedStaticOffsets.entrySet()) {
+            StaticEncounter baseEncounter = statics.get(entry.getKey());
+            statics.set(entry.getValue(), baseEncounter.linkedEncounters.get(0));
+        }
     }
 
     @Override

@@ -930,35 +930,41 @@ public class Randomizer {
             if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING) { // Legendary for L
                 romHandler.randomizeStaticPokemon(true, false,settings.isLimitMusketeers(),
                         settings.isLimit600(), settings.isAllowStaticAltFormes(), settings.isSwapStaticMegaEvos(),
-                        settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
+                        settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE,
+                        settings.isStaticLevelModified() ? settings.getStaticLevelModifier() : 0);
             } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.COMPLETELY_RANDOM) {
                 romHandler.randomizeStaticPokemon(false, false,settings.isLimitMusketeers(),
                         settings.isLimit600(), settings.isAllowStaticAltFormes(), settings.isSwapStaticMegaEvos(),
-                        settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
+                        settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE,
+                        settings.isStaticLevelModified() ? settings.getStaticLevelModifier() : 0);
             } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.SIMILAR_STRENGTH) {
                 romHandler.randomizeStaticPokemon(false, true,settings.isLimitMusketeers(),
                         settings.isLimit600(), settings.isAllowStaticAltFormes(), settings.isSwapStaticMegaEvos(),
-                        settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
+                        settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE,
+                        settings.isStaticLevelModified() ? settings.getStaticLevelModifier() : 0);
+            } else if (settings.isStaticLevelModified()) {
+                romHandler.onlyChangeStaticLevels(settings.getStaticLevelModifier());
             }
             List<StaticEncounter> newStatics = romHandler.getStaticPokemon();
-            if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED) {
+            if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED && !settings.isStaticLevelModified()) {
                 log.println("Static Pokemon: Unchanged." + NEWLINE);
             } else {
                 log.println("--Static Pokemon--");
-                Map<Pokemon, Integer> seenPokemon = new TreeMap<>();
+                Map<String, Integer> seenPokemon = new TreeMap<>();
                 for (int i = 0; i < oldStatics.size(); i++) {
                     StaticEncounter oldP = oldStatics.get(i);
                     StaticEncounter newP = newStatics.get(i);
                     checkValue = addToCV(checkValue, newP.pkmn.number);
-                    log.print(oldP.toString());
-                    if (seenPokemon.containsKey(oldP.pkmn)) {
-                        int amount = seenPokemon.get(oldP.pkmn);
+                    String oldStaticString = oldP.toString(settings.isStaticLevelModified());
+                    log.print(oldStaticString);
+                    if (seenPokemon.containsKey(oldStaticString)) {
+                        int amount = seenPokemon.get(oldStaticString);
                         log.print("(" + (++amount) + ")");
-                        seenPokemon.put(oldP.pkmn, amount);
+                        seenPokemon.put(oldStaticString, amount);
                     } else {
-                        seenPokemon.put(oldP.pkmn, 1);
+                        seenPokemon.put(oldStaticString, 1);
                     }
-                    log.println(" => " + newP.toString());
+                    log.println(" => " + newP.toString(settings.isStaticLevelModified()));
                 }
                 log.println();
             }

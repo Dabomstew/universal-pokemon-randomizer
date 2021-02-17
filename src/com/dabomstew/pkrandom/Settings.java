@@ -49,7 +49,7 @@ public class Settings {
 
     public static final int VERSION = Version.VERSION;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 47;
+    public static final int LENGTH_OF_SETTINGS_DATA = 48;
 
     private CustomNamesSet customNames;
 
@@ -208,6 +208,8 @@ public class Settings {
 
     private boolean allowStaticAltFormes;
     private boolean swapStaticMegaEvos;
+    private boolean staticLevelModified;
+    private int staticLevelModifier = 0; // -50 ~ 50
 
     public enum TotemPokemonMod {
         UNCHANGED, RANDOM, SIMILAR_STRENGTH
@@ -539,6 +541,8 @@ public class Settings {
 
         out.write(selectedEXPCurve.toByte());
 
+        out.write((staticLevelModified ? 0x80 : 0) | (staticLevelModifier+50));
+
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
             out.write(romName.length);
@@ -802,6 +806,9 @@ public class Settings {
         settings.setUpdateMovesToGeneration(data[45]);
 
         settings.setSelectedEXPCurve(ExpCurve.fromByte(data[46]));
+
+        settings.setStaticLevelModified(restoreState(data[47],7));
+        settings.setStaticLevelModifier((data[47] & 0x7F) - 50);
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1743,6 +1750,22 @@ public class Settings {
 
     public void setSwapStaticMegaEvos(boolean swapStaticMegaEvos) {
         this.swapStaticMegaEvos = swapStaticMegaEvos;
+    }
+
+    public boolean isStaticLevelModified() {
+        return staticLevelModified;
+    }
+
+    public void setStaticLevelModified(boolean staticLevelModified) {
+        this.staticLevelModified = staticLevelModified;
+    }
+
+    public int getStaticLevelModifier() {
+        return staticLevelModifier;
+    }
+
+    public void setStaticLevelModifier(int staticLevelModifier) {
+        this.staticLevelModifier = staticLevelModifier;
     }
 
     public TotemPokemonMod getTotemPokemonMod() {
