@@ -957,39 +957,6 @@
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpRandomSimilarStrengthRadioButton.toolTipText"/>
                     </properties>
                   </component>
-                  <component id="cde9e" class="javax.swing.JCheckBox" binding="stpLimitMusketeersCheckBox">
-                    <constraints>
-                      <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                      <gridbag weightx="1.0" weighty="0.0"/>
-                    </constraints>
-                    <properties>
-                      <enabled value="false"/>
-                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpLimitMusketeersCheckBox.text"/>
-                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpLimitMusketeersCheckBox.toolTipText"/>
-                    </properties>
-                  </component>
-                  <component id="ae826" class="javax.swing.JCheckBox" binding="stpRandomize600BSTCheckBox">
-                    <constraints>
-                      <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                      <gridbag weightx="0.8" weighty="0.0"/>
-                    </constraints>
-                    <properties>
-                      <enabled value="false"/>
-                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpRandomize600BSTCheckBox.text"/>
-                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpRandomize600BSTCheckBox.toolTipText"/>
-                    </properties>
-                  </component>
-                  <component id="69057" class="javax.swing.JCheckBox" binding="stpAllowAltFormesCheckBox">
-                    <constraints>
-                      <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                      <gridbag weightx="0.0" weighty="0.0"/>
-                    </constraints>
-                    <properties>
-                      <enabled value="false"/>
-                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpAllowAltFormesCheckBox.text"/>
-                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpAllowAltFormesCheckBox.toolTipText"/>
-                    </properties>
-                  </component>
                   <component id="c441c" class="javax.swing.JCheckBox" binding="stpSwapMegaEvosCheckBox">
                     <constraints>
                       <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
@@ -1014,7 +981,7 @@
                   </component>
                   <component id="f3518" class="javax.swing.JSlider" binding="stpPercentageLevelModifierSlider">
                     <constraints>
-                      <grid row="2" column="3" row-span="2" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="2" column="3" row-span="3" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -1027,6 +994,39 @@
                       <paintTicks value="true"/>
                       <snapToTicks value="true"/>
                       <value value="0"/>
+                    </properties>
+                  </component>
+                  <component id="ae826" class="javax.swing.JCheckBox" binding="stpRandomize600BSTCheckBox">
+                    <constraints>
+                      <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.8" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpRandomize600BSTCheckBox.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpRandomize600BSTCheckBox.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="69057" class="javax.swing.JCheckBox" binding="stpAllowAltFormesCheckBox">
+                    <constraints>
+                      <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpAllowAltFormesCheckBox.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpAllowAltFormesCheckBox.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="cde9e" class="javax.swing.JCheckBox" binding="stpLimitMusketeersCheckBox">
+                    <constraints>
+                      <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="1.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpLimitMusketeersCheckBox.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpLimitMusketeersCheckBox.toolTipText"/>
                     </properties>
                   </component>
                 </children>
