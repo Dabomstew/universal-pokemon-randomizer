@@ -37,6 +37,7 @@ import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen3Constants;
+import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -3150,6 +3151,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
         available |= MiscTweak.RUN_WITHOUT_RUNNING_SHOES.getValue();
+        if (romEntry.romType == Gen3Constants.RomType_FRLG) {
+            available |= MiscTweak.BALANCE_STATIC_LEVELS.getValue();
+        }
         return available;
     }
 
@@ -3172,6 +3176,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             randomizePCPotion();
         } else if (tweak == MiscTweak.RUN_WITHOUT_RUNNING_SHOES) {
             applyRunWithoutRunningShoesPatch();
+        } else if (tweak == MiscTweak.BALANCE_STATIC_LEVELS) {
+            int[] fossilLevelOffsets = romEntry.arrayEntries.get("FossilLevelOffsets");
+            for (int fossilLevelOffset : fossilLevelOffsets) {
+                writeWord(rom, fossilLevelOffset, 30);
+            }
         }
     }
 
