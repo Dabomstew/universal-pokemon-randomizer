@@ -1233,15 +1233,17 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         tr.offset = 0;
                         for (int poke = 0; poke < 3; poke++) {
                             byte[] pkmndata = driftveil.files.get(trno * 3 + poke + 1);
+                            int species = readWord(pkmndata, 0);
                             TrainerPokemon tpk = new TrainerPokemon();
                             tpk.level = 25;
-                            tpk.pokemon = pokes[readWord(pkmndata, 0)];
+                            tpk.pokemon = pokes[species];
                             tpk.AILevel = 255;
                             tpk.heldItem = readWord(pkmndata, 12);
                             tpk.move1 = readWord(pkmndata, 2);
                             tpk.move2 = readWord(pkmndata, 4);
                             tpk.move3 = readWord(pkmndata, 6);
                             tpk.move4 = readWord(pkmndata, 8);
+                            tpk.absolutePokeNumber = Gen5Constants.getAbsolutePokeNumByBaseForme(species,0);
                             tr.pokemon.add(tpk);
                         }
                         allTrainers.add(tr);
