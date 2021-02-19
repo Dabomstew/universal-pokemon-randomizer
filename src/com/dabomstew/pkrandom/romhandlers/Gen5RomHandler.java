@@ -1227,12 +1227,17 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             } else {
                 if (!romEntry.getString("DriftveilPokemon").isEmpty()) {
                     NARCArchive driftveil = this.readNARC(romEntry.getString("DriftveilPokemon"));
-                    for (int trno = 0; trno < 2; trno++) {
+                    int currentFile = 1;
+                    for (int trno = 0; trno < 17; trno++) {
                         Trainer tr = new Trainer();
                         tr.poketype = 3;
                         tr.offset = 0;
-                        for (int poke = 0; poke < 3; poke++) {
-                            byte[] pkmndata = driftveil.files.get(trno * 3 + poke + 1);
+                        int pokemonNum = 6;
+                        if (trno < 2) {
+                            pokemonNum = 3;
+                        }
+                        for (int poke = 0; poke < pokemonNum; poke++) {
+                            byte[] pkmndata = driftveil.files.get(currentFile);
                             int species = readWord(pkmndata, 0);
                             TrainerPokemon tpk = new TrainerPokemon();
                             tpk.level = 25;
@@ -1245,6 +1250,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                             tpk.move4 = readWord(pkmndata, 8);
                             tpk.absolutePokeNumber = Gen5Constants.getAbsolutePokeNumByBaseForme(species,0);
                             tr.pokemon.add(tpk);
+                            currentFile++;
                         }
                         allTrainers.add(tr);
                     }
@@ -1270,7 +1276,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             return Gen5Constants.emptyPlaythroughTrainers;
         }
     }
-    
+
     @Override
     public List<Integer> getEvolutionItems() {
             return Gen5Constants.evolutionItems;
@@ -1352,11 +1358,16 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             // Deal with PWT
             if (romEntry.romType == Gen5Constants.Type_BW2 && !romEntry.getString("DriftveilPokemon").isEmpty()) {
                 NARCArchive driftveil = this.readNARC(romEntry.getString("DriftveilPokemon"));
-                for (int trno = 0; trno < 2; trno++) {
+                int currentFile = 1;
+                for (int trno = 0; trno < 17; trno++) {
                     Trainer tr = allTrainers.next();
                     Iterator<TrainerPokemon> tpks = tr.pokemon.iterator();
-                    for (int poke = 0; poke < 3; poke++) {
-                        byte[] pkmndata = driftveil.files.get(trno * 3 + poke + 1);
+                    int pokemonNum = 6;
+                    if (trno < 2) {
+                        pokemonNum = 3;
+                    }
+                    for (int poke = 0; poke < pokemonNum; poke++) {
+                        byte[] pkmndata = driftveil.files.get(currentFile);
                         TrainerPokemon tp = tpks.next();
                         // pokemon and held item
                         writeWord(pkmndata, 0, tp.pokemon.number);
@@ -1373,6 +1384,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                             writeWord(pkmndata, 6, tp.move3);
                             writeWord(pkmndata, 8, tp.move4);
                         }
+                        currentFile++;
                     }
                 }
                 this.writeNARC(romEntry.getString("DriftveilPokemon"), driftveil);
