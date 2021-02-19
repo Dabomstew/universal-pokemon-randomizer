@@ -3639,7 +3639,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                     String changeTo = trainerName;
                     int ctl = intStrLen;
-                    if (pickFrom != null && pickFrom.size() > 0 && intStrLen > 1) {
+                    if (pickFrom != null && pickFrom.size() > 0 && intStrLen > 0) {
                         int innerTries = 0;
                         changeTo = pickFrom.get(this.cosmeticRandom.nextInt(pickFrom.size()));
                         ctl = this.internalStringLength(changeTo);
