@@ -1611,8 +1611,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Fully random is easy enough - randomize then worry about rival
         // carrying starter at the end
         for (Trainer t : scrambledTrainers) {
+            applyLevelModifierToTrainerPokemon(t, levelModifier);
             if (t.tag != null && t.tag.equals("IRIVAL")) {
-                continue; // skip
+                // This is the first rival in Yellow. His Pokemon is used to determine the non-player
+                // starter, so we can't change it here. Just skip it
+                continue;
             }
             for (TrainerPokemon tp : t.pokemon) {
                 boolean swapThisMegaEvo = swapMegaEvos && tp.canMegaEvolve();
@@ -1691,9 +1694,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                             .argument;
                 }
                 tp.resetMoves = true;
-                if (levelModifier != 0) {
-                    tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
-                }
                 if (shinyChance) {
                     if (this.random.nextInt(256) == 0) {
                         tp.IVs |= (1 << 30);
@@ -1720,6 +1720,14 @@ public abstract class AbstractRomHandler implements RomHandler {
             tp.forme = tp.pokemon.getCosmeticFormNumber(this.random.nextInt(tp.pokemon.cosmeticForms));
         } else if (!checkCosmetics && pk.cosmeticForms > 0) {
             tp.forme += pk.getCosmeticFormNumber(this.random.nextInt(pk.cosmeticForms));
+        }
+    }
+
+    private void applyLevelModifierToTrainerPokemon(Trainer trainer, int levelModifier) {
+        if (levelModifier != 0) {
+            for (TrainerPokemon tp : trainer.pokemon) {
+                tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
+            }
         }
     }
 
@@ -1759,8 +1767,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         Set<Trainer> assignedTrainers = new TreeSet<>();
         Map<String, List<Trainer>> groups = new TreeMap<>();
         for (Trainer t : currentTrainers) {
+            applyLevelModifierToTrainerPokemon(t, levelModifier);
             if (t.tag != null && t.tag.equals("IRIVAL")) {
-                continue; // skip
+                // This is the first rival in Yellow. His Pokemon is used to determine the non-player
+                // starter, so we can't change it here. Just skip it.
+                continue;
             }
             String group = t.tag == null ? "" : t.tag;
             if (group.contains("-")) {
@@ -1843,9 +1854,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
 
                     tp.resetMoves = true;
-                    if (levelModifier != 0) {
-                        tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
-                    }
                     if (shinyChance) {
                         if (this.random.nextInt(256) == 0) {
                             tp.IVs |= (1 << 30);
@@ -1907,9 +1915,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
 
                     tp.resetMoves = true;
-                    if (levelModifier != 0) {
-                        tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
-                    }
                     if (shinyChance) {
                         if (this.random.nextInt(256) == 0) {
                             tp.IVs |= (1 << 30);
@@ -1957,9 +1962,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Trainer> currentTrainers = this.getTrainers();
         if (levelModifier != 0) {
             for (Trainer t: currentTrainers) {
-                for (TrainerPokemon tp: t.pokemon) {
-                    tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
-                }
+                applyLevelModifierToTrainerPokemon(t, levelModifier);
             }
             this.setTrainers(currentTrainers, false);
         }
