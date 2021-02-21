@@ -46,7 +46,7 @@ public class Settings {
 
     public static final int VERSION = 181;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 41;
+    public static final int LENGTH_OF_SETTINGS_DATA = 42;
 
     private CustomNamesSet customNames;
 
@@ -114,6 +114,7 @@ public class Settings {
     private EvolutionsMod evolutionsMod = EvolutionsMod.UNCHANGED;
     private boolean evosSimilarStrength;
     private boolean evosSameTyping;
+    private boolean evosChangeMethod;
     private boolean evosMaxThreeStages;
     private boolean evosForceChange;
     private boolean evosNoConverge;
@@ -410,7 +411,10 @@ public class Settings {
         // @ 40 Trainer and Wild Pokemon Overflow
         out.write(makeByteSelected(rivalCarriesTeamThroughout, allowLowLevelEvolvedTypes));
 
-        // @ 41 Rom Title Name (update LENGTH_OF_SETTINGS_DATA if this changes)
+        // @ 41 Evolution overflow
+        out.write(makeByteSelected(evosChangeMethod));
+
+        // @ 42 Rom Title Name (update LENGTH_OF_SETTINGS_DATA if this changes)
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
             out.write(romName.length);
@@ -634,6 +638,8 @@ public class Settings {
 
         settings.setRivalCarriesTeamThroughout(restoreState(data[40], 0));
         settings.setAllowLowLevelEvolvedTypes(restoreState(data[40], 1));
+
+        settings.setEvosChangeMethod(restoreState(data[41], 0));
         
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1113,6 +1119,15 @@ public class Settings {
 
     public Settings setEvosSameTyping(boolean evosSameTyping) {
         this.evosSameTyping = evosSameTyping;
+        return this;
+    }
+
+    public boolean isEvosChangeMethod() {
+        return evosChangeMethod;
+    }
+
+    public Settings setEvosChangeMethod(boolean evosChangeMethod) {
+        this.evosChangeMethod = evosChangeMethod;
         return this;
     }
 

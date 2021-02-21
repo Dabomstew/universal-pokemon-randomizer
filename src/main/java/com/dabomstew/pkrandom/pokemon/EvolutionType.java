@@ -1,5 +1,7 @@
 package com.dabomstew.pkrandom.pokemon;
 
+import java.util.Random;
+
 /*----------------------------------------------------------------------------*/
 /*--  EvolutionType.java - represents an evolution method.                  --*/
 /*--                                                                        --*/
@@ -78,6 +80,45 @@ public enum EvolutionType {
 
     public static EvolutionType fromIndex(int generation, int index) {
         return reverseIndexes[generation - 1][index];
+    }
+
+    public static EvolutionType randomFromGeneration(Random random, int generation) {
+        int choice = random.nextInt(generationCount(generation));
+        EvolutionType et = reverseIndexes[generation-1][choice+1];
+        if (generation == 2) {
+            // Since Gen 2 has a special pointer value for the version of happiness,
+            // all indices are set at 4. We select a specific version by getting a
+            // number from 0-2 and adding 4 to match the index of that type
+            if (et == EvolutionType.HAPPINESS) {
+                et = EvolutionType.values()[random.nextInt(3)+4];
+            }
+            // Same thing here, but for atk-def methods
+            else if (et == EvolutionType.LEVEL_ATTACK_HIGHER) {
+                et = EvolutionType.values()[random.nextInt(3)+7];
+            }
+            // Same thing here, but for trade and trade_item
+            else if (et == EvolutionType.TRADE) {
+                et = EvolutionType.values()[random.nextInt(2)+2];
+            }
+        }
+        return et;
+    }
+
+    public static int generationCount(int generation) {
+        switch(generation) {
+            case 1:
+                return 3;
+            case 2:
+                return 5;
+            case 3:
+                return 15;
+            case 4:
+                return 26;
+            case 5:
+                return 27;
+            default:
+                return 0;
+        }
     }
 
     public boolean usesLevel() {

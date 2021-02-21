@@ -316,26 +316,30 @@ public class AbstractRomTest {
         romhandler.randomizeStaticPokemon(false);
         Map<String, Type> taggedTypes = romhandler.getTaggedGroupTypes();
 
-
+        // TODO: Replace for loop with specific pokemonCap entry (same as above)
+        // Current implementation is skipped as no replacement has the same number
         for (Pokemon pk : pokemonCap.getValue()) {
             // Grass monkey (starter 1)
             if (pk.number == 511) {
                 Type cressType = taggedTypes.get("CRESS");
-                assertTrue("Grass monkey replacement type was not found in weakness list for CRESS",
+                assertTrue("Grass monkey replacement type " + pk.primaryType.camelCase() + "/" 
+                + pk.secondaryType  + " was not found in weakness list for CRESS " + cressType.camelCase(),
                     Type.STRONG_AGAINST.get(cressType.ordinal()).contains(pk.primaryType) ||
                     Type.STRONG_AGAINST.get(cressType.ordinal()).contains(pk.secondaryType));
             }
             // Fire monkey (starter 2)
             else if (pk.number == 513) {
                 Type cilanType = taggedTypes.get("CILAN");
-                assertTrue("Fire monkey replacement type was not found in weakness list for CILAN",
+                assertTrue("Fire monkey replacement type " + pk.primaryType.camelCase() + "/" 
+                + pk.secondaryType  + " was not found in weakness list for CILAN " + cilanType.camelCase(),
                     Type.STRONG_AGAINST.get(cilanType.ordinal()).contains(pk.primaryType) ||
                     Type.STRONG_AGAINST.get(cilanType.ordinal()).contains(pk.secondaryType));
             }
             // Water monkey (starter 0)
             else if (pk.number == 515) {
                 Type chiliType = taggedTypes.get("CHILI");
-                assertTrue("Water monkey replacement type was not found in weakness list for CHILI",
+                assertTrue("Water monkey replacement type " + pk.primaryType.camelCase() + "/" 
+                + pk.secondaryType  + " was not found in weakness list for CHILI " + chiliType.camelCase(),
                     Type.STRONG_AGAINST.get(chiliType.ordinal()).contains(pk.primaryType) ||
                     Type.STRONG_AGAINST.get(chiliType.ordinal()).contains(pk.secondaryType));
             }
@@ -353,21 +357,24 @@ public class AbstractRomTest {
             // Grass monkey (starter 1)
             if (pk.number == 511) {
                 Type cressType = taggedTypes.get("CRESS");
-                assertTrue("Grass monkey replacement type was not found in weakness list for CRESS",
+                assertTrue("Grass monkey replacement type " + pk.primaryType.camelCase() + "/" 
+                + pk.secondaryType  + " was not found in weakness list for CRESS " + cressType.camelCase(),
                     Type.STRONG_AGAINST.get(cressType.ordinal()).contains(pk.primaryType) ||
                     Type.STRONG_AGAINST.get(cressType.ordinal()).contains(pk.secondaryType));
             }
             // Fire monkey (starter 2)
             else if (pk.number == 513) {
                 Type cilanType = taggedTypes.get("CILAN");
-                assertTrue("Fire monkey replacement type was not found in weakness list for CILAN",
+                assertTrue("Fire monkey replacement type " + pk.primaryType.camelCase() + "/" 
+                + pk.secondaryType  + " was not found in weakness list for CILAN " + cilanType.camelCase(),
                     Type.STRONG_AGAINST.get(cilanType.ordinal()).contains(pk.primaryType) ||
                     Type.STRONG_AGAINST.get(cilanType.ordinal()).contains(pk.secondaryType));
             }
             // Water monkey (starter 0)
             else if (pk.number == 515) {
                 Type chiliType = taggedTypes.get("CHILI");
-                assertTrue("Water monkey replacement type was not found in weakness list for CHILI",
+                assertTrue("Water monkey replacement type " + pk.primaryType.camelCase() + "/" 
+                + pk.secondaryType  + " was not found in weakness list for CHILI " + chiliType.camelCase(),
                     Type.STRONG_AGAINST.get(chiliType.ordinal()).contains(pk.primaryType) ||
                     Type.STRONG_AGAINST.get(chiliType.ordinal()).contains(pk.secondaryType));
             }

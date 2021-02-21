@@ -1360,18 +1360,33 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void removeTradeEvolutions(boolean changeMoveEvos) {
+    public void removeTradeEvolutions(boolean changeMoveEvos, boolean changeMethodEvos) {
         // no move evos, so no need to check for those
         List<Evolution> tradeEvoFixed = new ArrayList<Evolution>();
         for (Pokemon pkmn : getPokemon()) {
             if (pkmn != null) {
-                for (Evolution evo : pkmn.evolutionsFrom) {
-                    if (evo.type == EvolutionType.TRADE || evo.type == EvolutionType.TRADE_ITEM) {
+                pkmn.evolutionsFrom.stream().filter(ev -> ev.type == EvolutionType.TRADE || ev.type == EvolutionType.TRADE_ITEM)
+                    .forEach(evo -> {
+                    if (changeMethodEvos) {
+                        // We can't use a level since one already exists - use a stone instead
+                        if (pkmn.evolutionsFrom.stream().anyMatch(evos -> evos.type == EvolutionType.LEVEL)) {
+                            List<Integer> unusedStones = RomFunctions.removeUsedStones(new ArrayList<Integer>(Gen2Constants.availableStones), evo);
+                            evo.type = EvolutionType.STONE;
+                            evo.extraInfo = unusedStones.get(this.random.nextInt(unusedStones.size()));
+                            tradeEvoFixed.add(evo);
+                        }
+                        // Change it to evolve at 37
+                        else {
+                            evo.type = EvolutionType.LEVEL;
+                            evo.extraInfo = 37;
+                            tradeEvoFixed.add(evo);
+                        }
+                    } else {
                         // change
                         if (evo.from.number == Gen2Constants.slowpokeIndex) {
                             // Slowpoke: Make water stone => Slowking
                             evo.type = EvolutionType.STONE;
-                            evo.extraInfo = 24; // water stone
+                            evo.extraInfo = Gen2Constants.waterStoneIndex;
                         } else if (evo.from.number == Gen2Constants.seadraIndex) {
                             // Seadra: level 40
                             evo.type = EvolutionType.LEVEL;
@@ -1387,12 +1402,69 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                             evo.type = EvolutionType.LEVEL;
                             evo.extraInfo = 30; // level
                         }
-                        tradeEvoFixed.add(evo);
+                        tradeEvoFixed.add(evo);                    
                     }
-                }
+                });
             }
         }
         this.getTemplateData().put("removeTradeEvo", tradeEvoFixed);
+    }
+
+    @Override
+    public void updateExtraInfo(Evolution ev) {
+        switch(ev.type) {
+            case LEVEL:
+            case LEVEL_ATK_DEF_SAME:
+            case LEVEL_ATTACK_HIGHER:
+            case LEVEL_DEFENSE_HIGHER:
+                // Get the level of previous evolution
+                List<EvolutionType> levelMethods = Arrays.asList(EvolutionType.LEVEL, EvolutionType.LEVEL_ATK_DEF_SAME,
+                    EvolutionType.LEVEL_ATTACK_HIGHER, EvolutionType.LEVEL_DEFENSE_HIGHER);
+                int prevLevel = 0;
+                int maxSiblingLevel = 0;
+                for (Evolution ev2 : ev.from.evolutionsTo) {
+                    if (levelMethods.contains(ev2.type)) {
+                        prevLevel = Integer.max(prevLevel, ev2.extraInfo);
+                    }
+                }
+
+                // If there is a split evo based on level, make sure it is the highest
+                for (Evolution ev3 : ev.from.evolutionsFrom) {
+                    if (ev3.type == EvolutionType.LEVEL) {
+                        maxSiblingLevel = Integer.max(maxSiblingLevel, ev3.extraInfo);
+                    }
+                }
+
+                // There's no previous level so make it at least 25
+                if (prevLevel == 0) {
+                    ev.extraInfo = this.random.nextInt(16) + 25;
+                    // For low BST, divide that level in half
+                    if (ev.from.bst() < 300) {
+                        ev.extraInfo /= 2;
+                    }
+                }
+                // Set the new evolution level to 5-20 higher than the current
+                else {
+                    ev.extraInfo = this.random.nextInt(16) + 5 + prevLevel;
+                }
+
+                // Reduce below level if necessary
+                if (maxSiblingLevel > 0 && ev.extraInfo >= maxSiblingLevel) {
+                    ev.extraInfo = maxSiblingLevel - 1;
+                }
+                break;
+            case STONE:
+                // Remove any stones already used
+                List<Integer> unusedStones = RomFunctions.removeUsedStones(new ArrayList<Integer>(Gen2Constants.availableStones), ev);
+                ev.extraInfo = unusedStones.get(this.random.nextInt(unusedStones.size()));
+                break;
+            case TRADE_ITEM:
+                ev.extraInfo = this.getAllowedItems().randomNonTM(this.random);
+                break;
+            default:
+                ev.extraInfo = 0;
+                break;
+        }
     }
 
     @Override

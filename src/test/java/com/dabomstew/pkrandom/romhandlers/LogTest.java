@@ -536,7 +536,7 @@ public class LogTest {
     public void TestGen1TradeEvo() {
         RomHandler romhandler = spy(new Gen1RomHandler(new Random()));
         resetDataModel(romhandler, 250);
-        romhandler.removeTradeEvolutions(true);
+        romhandler.removeTradeEvolutions(true, false);
         assertEquals(((ArrayList)romhandler.getTemplateData().get("removeTradeEvo")).size(), 1);
     }
 
@@ -544,7 +544,7 @@ public class LogTest {
     public void TestGen2TradeEvo() {
         RomHandler romhandler = spy(new Gen2RomHandler(new Random()));
         resetDataModel(romhandler, 250);
-        romhandler.removeTradeEvolutions(true);
+        romhandler.removeTradeEvolutions(true, false);
         assertEquals(((ArrayList)romhandler.getTemplateData().get("removeTradeEvo")).size(), 1);
     }
 
@@ -554,7 +554,7 @@ public class LogTest {
             Gen3RomHandler romhandler = spy(new Gen3RomHandler(new Random()));
             doReturn(Gen3RomHandler.getRomFromSupportedRom("Emerald (U)")).when(romhandler).getRomEntry();
             resetDataModel(romhandler, 250);
-            romhandler.removeTradeEvolutions(true);
+            romhandler.removeTradeEvolutions(true, false);
             assertEquals(((ArrayList)romhandler.getTemplateData().get("removeTradeEvo")).size(), 1);
         }
     }
@@ -571,7 +571,7 @@ public class LogTest {
         doReturn(mlList).when(mock_arch).getFiles();
         doReturn(mock_arch).when(romhandler).readNARC(anyString());
         resetDataModel(romhandler, 250);
-        romhandler.removeTradeEvolutions(true);
+        romhandler.removeTradeEvolutions(true, false);
         assertEquals(((ArrayList)romhandler.getTemplateData().get("removeTradeEvo")).size(), 1);
     }
 
@@ -587,7 +587,7 @@ public class LogTest {
         doReturn(mlList).when(mock_arch).getFiles();
         doReturn(mock_arch).when(romhandler).readNARC(anyString());
         resetDataModel(romhandler, 250);
-        romhandler.removeTradeEvolutions(true);
+        romhandler.removeTradeEvolutions(true, false);
         assertEquals(((ArrayList)romhandler.getTemplateData().get("removeTradeEvo")).size(), 1);
     }
 
@@ -693,7 +693,7 @@ public class LogTest {
     public void TestRandomizedEvolutions() {
         RomHandler romhandler = spy(new Gen1RomHandler(new Random()));
         resetDataModel(romhandler, 250);
-        romhandler.randomizeEvolutions(false, false, false, false, false, false);
+        romhandler.randomizeEvolutions(false, false, false, false, false, false, false);
         assertEquals(romhandler.getTemplateData().get("logEvolutions"), true);
 
     }

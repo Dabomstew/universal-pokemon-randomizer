@@ -1,28 +1,28 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 /*----------------------------------------------------------------------------*/
- /*--  RomHandler.java - defines the functionality that each randomization   --*/
- /*--                    handler must implement.                             --*/
- /*--                                                                        --*/
- /*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
- /*--  Pokemon and any associated names and the like are                     --*/
- /*--  trademark and (C) Nintendo 1996-2012.                                 --*/
- /*--                                                                        --*/
- /*--  The custom code written here is licensed under the terms of the GPL:  --*/
- /*--                                                                        --*/
- /*--  This program is free software: you can redistribute it and/or modify  --*/
- /*--  it under the terms of the GNU General Public License as published by  --*/
- /*--  the Free Software Foundation, either version 3 of the License, or     --*/
- /*--  (at your option) any later version.                                   --*/
- /*--                                                                        --*/
- /*--  This program is distributed in the hope that it will be useful,       --*/
- /*--  but WITHOUT ANY WARRANTY; without even the implied warranty of        --*/
- /*--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          --*/
- /*--  GNU General Public License for more details.                          --*/
- /*--                                                                        --*/
- /*--  You should have received a copy of the GNU General Public License     --*/
- /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
- /*----------------------------------------------------------------------------*/
+/*--  RomHandler.java - defines the functionality that each randomization   --*/
+/*--                    handler must implement.                             --*/
+/*--                                                                        --*/
+/*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
+/*--  Pokemon and any associated names and the like are                     --*/
+/*--  trademark and (C) Nintendo 1996-2012.                                 --*/
+/*--                                                                        --*/
+/*--  The custom code written here is licensed under the terms of the GPL:  --*/
+/*--                                                                        --*/
+/*--  This program is free software: you can redistribute it and/or modify  --*/
+/*--  it under the terms of the GNU General Public License as published by  --*/
+/*--  the Free Software Foundation, either version 3 of the License, or     --*/
+/*--  (at your option) any later version.                                   --*/
+/*--                                                                        --*/
+/*--  This program is distributed in the hope that it will be useful,       --*/
+/*--  but WITHOUT ANY WARRANTY; without even the implied warranty of        --*/
+/*--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          --*/
+/*--  GNU General Public License for more details.                          --*/
+/*--                                                                        --*/
+/*--  You should have received a copy of the GNU General Public License     --*/
+/*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
+/*----------------------------------------------------------------------------*/
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +33,7 @@ import freemarker.template.Template;
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
+import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.IngameTrade;
 import com.dabomstew.pkrandom.pokemon.ItemList;
@@ -401,12 +402,14 @@ public interface RomHandler {
     public int maxTradeOTNameLength();
 
     // Evos
-    public void removeTradeEvolutions(boolean changeMoveEvos);
+    public void removeTradeEvolutions(boolean changeMoveEvos, boolean changeMethodEvos);
 
     public void condenseLevelEvolutions(int maxLevel, int maxIntermediateLevel);
 
-    public void randomizeEvolutions(boolean similarStrength, boolean sameType, boolean limitToThreeStages,
-            boolean forceChange, boolean noConverge, boolean forceGrowth);
+    public void randomizeEvolutions(boolean similarStrength, boolean sameType, boolean changeMethods,
+            boolean limitToThreeStages, boolean forceChange, boolean noConverge, boolean forceGrowth);
+
+    public void updateExtraInfo(Evolution ev);
 
     // stats stuff
     public void minimumCatchRate(int rateNonLegendary, int rateLegendary);

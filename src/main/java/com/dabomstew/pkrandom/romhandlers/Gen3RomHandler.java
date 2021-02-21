@@ -2271,7 +2271,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public void removeTradeEvolutions(boolean changeMoveEvos) {
+    public void removeTradeEvolutions(boolean changeMoveEvos, boolean changeMethodEvos) {
         attemptObedienceEvolutionPatches();
         List<Evolution> tradeEvoFixed = new ArrayList<Evolution>();
         Set<Evolution> extraEvolutions = new HashSet<Evolution>();

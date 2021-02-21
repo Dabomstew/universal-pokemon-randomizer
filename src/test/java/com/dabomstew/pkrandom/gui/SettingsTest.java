@@ -22,7 +22,7 @@ public class SettingsTest {
      * 
      * @throws IOException
      */
-    @Test
+    @Test(timeout = 4000)
     public void TestGen5Separation() throws IOException {
         try {
             RandomizerGUI rg = spy(new RandomizerGUI(false, false, true));
@@ -80,7 +80,7 @@ public class SettingsTest {
      * 
      * @throws IOException
      */
-    @Test
+    @Test(timeout = 4000)
     public void TestUseResistantType() throws IOException {
         try {
             RandomizerGUI rg = spy(new RandomizerGUI(false, false, true));

@@ -41,6 +41,14 @@ public class Gen1Constants {
             bsExpYieldOffset = 9, bsFrontSpriteOffset = 11, bsLevel1MovesOffset = 15, bsGrowthCurveOffset = 19,
             bsTMHMCompatOffset = 20;
 
+    public static final int moonStoneIndex = 10, fireStoneIndex = 32, thunderStoneIndex = 33, waterStoneIndex = 34,
+            leafStoneIndex = 47;
+    
+    public static final List<Integer> availableStones = Arrays.asList(
+                Gen1Constants.moonStoneIndex, Gen1Constants.fireStoneIndex,
+                Gen1Constants.waterStoneIndex, Gen1Constants.thunderStoneIndex,
+                Gen1Constants.leafStoneIndex);
+
     public static final int mewIndex = 151, marowakIndex = 105;
 
     public static final int encounterTableEnd = 0xFFFF, encounterTableSize = 10, yellowSuperRodTableSize = 4;

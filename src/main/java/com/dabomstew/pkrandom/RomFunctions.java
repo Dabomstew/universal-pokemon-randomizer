@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import com.dabomstew.pkrandom.pokemon.Evolution;
+import com.dabomstew.pkrandom.pokemon.EvolutionType;
 import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
@@ -88,6 +89,19 @@ public class RomFunctions {
             }
         }
         return finalEvolutions;
+    }
+
+    public static List<Integer> removeUsedStones(List<Integer> stoneList, Evolution ev) {
+        ArrayList<Integer> availableStones = new ArrayList<Integer>(stoneList);
+
+        // Remove any stones already used
+        ev.from.evolutionsFrom.forEach(evo -> {
+            if (evo.type == EvolutionType.STONE) {
+                availableStones.remove(availableStones.indexOf(evo.extraInfo));
+            }
+        });
+        
+        return availableStones;
     }
 
     /**

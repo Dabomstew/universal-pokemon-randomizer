@@ -42,6 +42,7 @@ import java.util.TreeMap;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
+import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.constants.Gen1Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
@@ -1413,23 +1414,63 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void removeTradeEvolutions(boolean changeMoveEvos) {
+    public void removeTradeEvolutions(boolean changeMoveEvos, boolean changeMethodEvos) {
         // Gen 1: only regular trade evos
         // change them all to evolve at level 37
         List<Evolution> tradeEvoFixed = new ArrayList<Evolution>();
         for (Pokemon pkmn : getPokemon()) {
             if (pkmn != null) {
-                for (Evolution evo : pkmn.evolutionsFrom) {
-                    if (evo.type == EvolutionType.TRADE) {
-                        // change
+                pkmn.evolutionsFrom.stream().filter(ev -> ev.type == EvolutionType.TRADE).forEach(evo -> {
+                    // We can't use a level since one already exists - use a stone instead
+                    if (pkmn.evolutionsFrom.stream().anyMatch(evos -> evos.type == EvolutionType.LEVEL)) {
+                        List<Integer> unusedStones = RomFunctions.removeUsedStones(new ArrayList<Integer>(Gen1Constants.availableStones), evo);
+                        evo.type = EvolutionType.STONE;
+                        evo.extraInfo = unusedStones.get(this.random.nextInt(unusedStones.size()));
+                        tradeEvoFixed.add(evo);
+                    }
+                    // Change it to evolve at 37
+                    else {
                         evo.type = EvolutionType.LEVEL;
                         evo.extraInfo = 37;
                         tradeEvoFixed.add(evo);
                     }
-                }
+                });
             }
         }
         this.getTemplateData().put("removeTradeEvo", tradeEvoFixed);
+    }
+
+    @Override
+    public void updateExtraInfo(Evolution ev) {
+        if (ev.type == EvolutionType.LEVEL) {
+            // Get the level of previous evolution
+            int prevLevel = 0;
+            for (Evolution ev2 : ev.from.evolutionsTo) {
+                if (ev2.type == EvolutionType.LEVEL) {
+                    prevLevel = Integer.max(prevLevel, ev2.extraInfo);
+                }
+            }
+
+            // There's no previous level so make it at least 25
+            if (prevLevel == 0) {
+                ev.extraInfo = this.random.nextInt(16) + 25;
+                // For low BST, divide that level in half
+                if (ev.from.gen1Bst() < 250) {
+                    ev.extraInfo /= 2;
+                }
+            }
+            // Set the new evolution level to 5-20 higher than the current
+            else {
+                ev.extraInfo = this.random.nextInt(16) + 5 + prevLevel;
+            }
+        }
+        else if (ev.type == EvolutionType.STONE) {
+            // Remove any stones already used
+            List<Integer> unusedStones = RomFunctions.removeUsedStones(new ArrayList<Integer>(Gen1Constants.availableStones), ev);
+            ev.extraInfo = unusedStones.get(this.random.nextInt(unusedStones.size()));
+        } else {
+            ev.extraInfo = 0;
+        }
     }
 
     private List<String> getTrainerClassesForText() {

@@ -3139,8 +3139,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizeEvolutions(boolean similarStrength, boolean sameType, boolean limitToThreeStages,
-            boolean forceChange, boolean noConverge, boolean forceGrowth) {
+    public void randomizeEvolutions(boolean similarStrength, boolean sameType, boolean changeMethods,
+            boolean limitToThreeStages, boolean forceChange, boolean noConverge, boolean forceGrowth) {
         checkPokemonRestrictions();
         this.getTemplateData().put("logEvolutions", true);
         List<Pokemon> pokemonPool = new ArrayList<Pokemon>(mainPokemonList);
@@ -3322,6 +3322,10 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                     // Step 4: add it to the new evos pool
                     Evolution newEvo = new Evolution(fromPK, picked, ev.carryStats, ev.type, ev.extraInfo);
+                    if (changeMethods) {
+                        generateEvolutionType(newEvo);
+                        updateExtraInfo(newEvo);
+                    }
                     fromPK.evolutionsFrom.add(newEvo);
                     picked.evolutionsTo.add(newEvo);
                     newEvoPairs.add(new EvolutionPair(fromPK, picked));
@@ -3343,6 +3347,72 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // If we made it out of the loop, we weren't able to randomize evos.
         throw new RandomizationException("Not able to randomize evolutions in a sane amount of retries.");
+    }
+
+    // Default implementation
+    // Will cause issues if evolution method requires a value (e.g. LEVEL)
+    @Override
+    public void updateExtraInfo(Evolution ev) {
+        ev.extraInfo = 0;
+    }
+
+    private void generateEvolutionType(Evolution ev) {
+        List<EvolutionType> usedMethods = ev.from.evolutionsFrom.stream().map(evo -> {
+            // We can have multiple STONE evolutions - they just need to be different stones
+            if (evo.type != EvolutionType.STONE) {
+                return evo.type;
+            } else {
+                return EvolutionType.NONE;
+            }
+        }).collect(Collectors.toList());
+
+        while(true) {
+            EvolutionType et = EvolutionType.randomFromGeneration(this.random, this.generationOfPokemon());
+            
+            // Can only have 2 happiness evos max (night + day)
+            List<EvolutionType> happyMethods = Arrays.asList(EvolutionType.HAPPINESS, EvolutionType.HAPPINESS_DAY, 
+                EvolutionType.HAPPINESS_NIGHT);
+            if (happyMethods.contains(et) && !Collections.disjoint(happyMethods, usedMethods)) {
+                // Already have a happiness evo - try something else
+                if (usedMethods.contains(EvolutionType.HAPPINESS) || 
+                    (usedMethods.contains(EvolutionType.HAPPINESS_DAY) && usedMethods.contains(EvolutionType.HAPPINESS_NIGHT))) {
+                    continue;
+                }
+                // We only have DAY in the list since first check verified we don't have both
+                if (usedMethods.contains(EvolutionType.HAPPINESS_DAY)) {
+                    et = EvolutionType.HAPPINESS_NIGHT;
+                }
+
+                // We only have NIGHT in the list
+                if (usedMethods.contains(EvolutionType.HAPPINESS_NIGHT)) {
+                    et = EvolutionType.HAPPINESS_DAY;
+                }
+            }
+
+            // Prevent duplicate evolution methods
+            if (usedMethods.contains(et)) {
+                continue;
+            }
+
+            // Can only have 1 trade evo
+            List<EvolutionType> tradeMethods = Arrays.asList(EvolutionType.TRADE, EvolutionType.TRADE_ITEM, 
+                EvolutionType.TRADE_SPECIAL);
+            if (tradeMethods.contains(et) && !Collections.disjoint(tradeMethods, usedMethods)) {
+                continue;
+            }
+
+            // Require attack and defense to be within 5 points of each other to be feasible
+            if (et == EvolutionType.LEVEL_ATK_DEF_SAME || et == EvolutionType.LEVEL_ATTACK_HIGHER || 
+                et == EvolutionType.LEVEL_DEFENSE_HIGHER) {
+                    if (Math.abs(ev.from.attack-ev.from.defense) > 5) {
+                        continue;
+                    }
+            }
+
+            // Update the type and end the loop
+            ev.type = et;
+            break;
+        }
     }
 
     @Override

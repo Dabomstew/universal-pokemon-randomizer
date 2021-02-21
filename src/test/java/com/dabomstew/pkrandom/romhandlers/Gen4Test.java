@@ -40,7 +40,7 @@ public class Gen4Test {
         doReturn(mock_arch).when(romhandler).readNARC(anyString());
         doReturn(mock(Map.class)).when(romhandler).getTemplateData();
         resetDataModel(romhandler);
-        romhandler.removeTradeEvolutions(true);
+        romhandler.removeTradeEvolutions(true, false);
         // Stream the "evolutionsFrom" list to see if any evolutions are now HAPPINESS
         assertTrue(pokemonList.get(0).evolutionsFrom.stream().anyMatch(item -> EvolutionType.HAPPINESS.equals(item.type)));
     }

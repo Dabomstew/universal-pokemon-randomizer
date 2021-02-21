@@ -1797,7 +1797,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public void removeTradeEvolutions(boolean changeMoveEvos) {
+    public void removeTradeEvolutions(boolean changeMoveEvos, boolean changeMethodEvos) {
         List<Evolution> tradeEvoFixed = new ArrayList<Evolution>();
         Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
         Set<Evolution> extraEvolutions = new HashSet<Evolution>();

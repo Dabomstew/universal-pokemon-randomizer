@@ -132,11 +132,30 @@
     		<#if pkmn?? && pkmn.evolutionsFrom?size gt 0>
     			<li>
     			${pkmn.name} now evolves into
-				<#assign filteredEvos=pkmn.getFilteredEvolutionsFrom()>
-    			<#list filteredEvos as evoFm>
-					<!-- Merged on one line due to whitespace issues with comma-separation -->
-    				${evoFm.to.name}<#sep><#if filteredEvos?size - evoFm?counter < 2>	and <#else>, </#if></#sep>
-    			</#list>
+					<ul>
+					<#list pkmn.evolutionsFrom as evoFm>
+						<li>
+						${evoFm.to.name} - 
+						<#switch evoFm.type>
+							<#case "LEVEL">
+							<#case "LEVEL_ATK_DEF_SAME">
+							<#case "LEVEL_ATTACK_HIGHER">
+				            <#case "LEVEL_DEFENSE_HIGHER">
+								${evoFm.type} ${evoFm.extraInfo}
+							<#break>
+							<#case "STONE">
+								${romHandler.getItemNames()[evoFm.extraInfo]}
+							<#break>
+							<#case "TRADE_ITEM">
+								TRADE holding ${romHandler.getItemNames()[evoFm.extraInfo]}
+							<#break>
+							<#default>
+								${evoFm.type}
+							<#break>
+						</#switch>
+						</li>
+					</#list>
+					</ul>
     			</li>
     		</#if>
     		</#list>

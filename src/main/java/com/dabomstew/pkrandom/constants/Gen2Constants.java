@@ -51,6 +51,13 @@ public class Gen2Constants {
             bsCatchRateOffset = 9, bsCommonHeldItemOffset = 11, bsRareHeldItemOffset = 12, bsPicDimensionsOffset = 17,
             bsGrowthCurveOffset = 22, bsTMHMCompatOffset = 24, bsMTCompatOffset = 31;
 
+    public static final int moonStoneIndex = 8, fireStoneIndex = 22, thunderStoneIndex = 23,
+            waterStoneIndex = 24, leafStoneIndex = 34, sunStoneIndex = 169;
+    public static final List<Integer> availableStones = Arrays.asList(
+                Gen2Constants.moonStoneIndex, Gen2Constants.fireStoneIndex,
+                Gen2Constants.waterStoneIndex, Gen2Constants.thunderStoneIndex,
+                Gen2Constants.leafStoneIndex, Gen2Constants.sunStoneIndex);
+
     public static final String[] starterNames = new String[] { "CYNDAQUIL", "TOTODILE", "CHIKORITA" };
 
     public static final int fishingGroupCount = 12, pokesPerFishingGroup = 11, fishingGroupEntryLength = 3,

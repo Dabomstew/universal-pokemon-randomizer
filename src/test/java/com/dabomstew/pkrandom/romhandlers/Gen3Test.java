@@ -31,7 +31,7 @@ public class Gen3Test {
             doReturn(Gen3RomHandler.getRomFromSupportedRom("Emerald (U)")).when(romhandler).getRomEntry();
             doReturn(mock(Map.class)).when(romhandler).getTemplateData();
             resetDataModel(romhandler);
-            romhandler.removeTradeEvolutions(true);
+            romhandler.removeTradeEvolutions(true, false);
             // Stream the "evolutionsFrom" list to see if any evolutions are now HAPPINESS
             assertTrue(pokemonList.get(0).evolutionsFrom.stream().anyMatch(item -> EvolutionType.HAPPINESS.equals(item.type)));
         }
