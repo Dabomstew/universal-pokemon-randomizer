@@ -981,6 +981,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.peForceGrowthCB.setSelected(false);
         this.peNoConvergeCB.setEnabled(false);
         this.peNoConvergeCB.setSelected(false);
+        this.peChangeMethodsCB.setEnabled(false);
+        this.peChangeMethodsCB.setSelected(false);
 
         for (JCheckBox cb : tweakCheckboxes) {
             cb.setVisible(true);
@@ -1692,6 +1694,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.peSimilarStrengthCB.setEnabled(true);
             this.peForceGrowthCB.setEnabled(true);
             this.peNoConvergeCB.setEnabled(true);
+            this.peChangeMethodsCB.setEnabled(true);
         } else {
             this.peForceChangeCB.setEnabled(false);
             this.peForceChangeCB.setSelected (false);
@@ -1705,6 +1708,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.peForceGrowthCB.setSelected(false);
             this.peNoConvergeCB.setEnabled(false);
             this.peNoConvergeCB.setSelected(false);
+            this.peChangeMethodsCB.setEnabled(false);
+            this.peChangeMethodsCB.setSelected(false);
         }
     }
 
@@ -2038,6 +2043,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setEvosForceChange(peForceChangeCB.isSelected());
         settings.setEvosForceGrowth(peForceGrowthCB.isSelected());
         settings.setEvosNoConverge(peNoConvergeCB.isSelected());
+        settings.setEvosChangeMethod(peChangeMethodsCB.isSelected());
 
         settings.setRandomizeMoveAccuracies(mdRandomAccuracyCB.isSelected());
         settings.setRandomizeMoveCategory(mdRandomCategoryCB.isSelected());
@@ -2881,6 +2887,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         goCondenseEvosCheckBox = new javax.swing.JCheckBox();
         peNoConvergeCB = new javax.swing.JCheckBox();
         peForceGrowthCB = new javax.swing.JCheckBox();
+        peChangeMethodsCB = new javax.swing.JCheckBox();
         startersInnerPanel = new javax.swing.JPanel();
         starterPokemonPanel = new javax.swing.JPanel();
         spUnchangedRB = new javax.swing.JRadioButton();
@@ -3530,6 +3537,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
         peForceGrowthCB.setText(bundle.getString("RandomizerGUI.peForceGrowthCB.text")); // NOI18N
         peForceGrowthCB.setToolTipText(bundle.getString("RandomizerGUI.peForceGrowthCB.toolTipText")); // NOI18N
 
+        peChangeMethodsCB.setText(bundle.getString("RandomizerGUI.peChangeMethodsCB.text")); // NOI18N
+        peChangeMethodsCB.setToolTipText(bundle.getString("RandomizerGUI.peChangeMethodsCB.toolTipText")); // NOI18N
+
         javax.swing.GroupLayout pokemonEvolutionsPanelLayout = new javax.swing.GroupLayout(pokemonEvolutionsPanel);
         pokemonEvolutionsPanel.setLayout(pokemonEvolutionsPanelLayout);
         pokemonEvolutionsPanelLayout.setHorizontalGroup(
@@ -3544,15 +3554,16 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(peSameTypeCB)
                     .addComponent(peSimilarStrengthCB)
                     .addComponent(peNoConvergeCB))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 181, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 74, Short.MAX_VALUE)
                 .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(peThreeStagesCB)
                     .addComponent(peForceGrowthCB)
                     .addComponent(peForceChangeCB))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 179, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 71, Short.MAX_VALUE)
                 .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(goRemoveTradeEvosCheckBox)
-                    .addComponent(goCondenseEvosCheckBox))
+                    .addComponent(goCondenseEvosCheckBox)
+                    .addComponent(peChangeMethodsCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         pokemonEvolutionsPanelLayout.setVerticalGroup(
@@ -3562,18 +3573,19 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(peUnchangedRB)
                     .addComponent(peSimilarStrengthCB)
-                    .addComponent(goRemoveTradeEvosCheckBox)
-                    .addComponent(peThreeStagesCB))
+                    .addComponent(peThreeStagesCB)
+                    .addComponent(peChangeMethodsCB))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(peRandomRB)
                     .addComponent(peSameTypeCB)
-                    .addComponent(goCondenseEvosCheckBox)
-                    .addComponent(peForceChangeCB))
+                    .addComponent(peForceChangeCB)
+                    .addComponent(goRemoveTradeEvosCheckBox))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(peNoConvergeCB)
-                    .addComponent(peForceGrowthCB))
+                    .addComponent(peForceGrowthCB)
+                    .addComponent(goCondenseEvosCheckBox))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -4003,7 +4015,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(pmsRandomTypeRB)
                     .addComponent(pmsUnchangedRB)
                     .addComponent(pmsMetronomeOnlyRB))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 710, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 178, Short.MAX_VALUE)
                 .addGroup(pokemonMovesetsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(pmsReorderDamagingMovesCB)
                     .addComponent(pmsForceGoodDamagingSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -4281,7 +4293,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(tpLevelModifierCB))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(tpLevelModifierSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(42, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout trainersInnerPanelLayout = new javax.swing.GroupLayout(trainersInnerPanel);
@@ -4951,7 +4963,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                         .addComponent(fiRandomRB)
                         .addGap(76, 76, 76)
                         .addComponent(fiBanBadCB)))
-                .addContainerGap(939, Short.MAX_VALUE))
+                .addContainerGap(468, Short.MAX_VALUE))
         );
         fieldItemsPanelLayout.setVerticalGroup(
             fieldItemsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -4996,7 +5008,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             .addGroup(miscTweaksPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(mtNoneAvailableLabel)
-                .addContainerGap(1188, Short.MAX_VALUE))
+                .addContainerGap(418, Short.MAX_VALUE))
         );
         miscTweaksPanelLayout.setVerticalGroup(
             miscTweaksPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -5177,6 +5189,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox pbsStandardEXPCurvesCB;
     private javax.swing.JCheckBox pbsStatsRandomizeFirstCB;
     private javax.swing.JCheckBox pbsUpdateStatsCB;
+    private javax.swing.JCheckBox peChangeMethodsCB;
     private javax.swing.JCheckBox peForceChangeCB;
     private javax.swing.JCheckBox peForceGrowthCB;
     private javax.swing.JCheckBox peNoConvergeCB;

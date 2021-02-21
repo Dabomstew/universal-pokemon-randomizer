@@ -192,7 +192,8 @@ public class Randomizer {
 
         // Trade evolutions removal
         if (settings.isChangeImpossibleEvolutions()) {
-            romHandler.removeTradeEvolutions(!(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED));
+            romHandler.removeTradeEvolutions(!(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED),
+                settings.isEvosChangeMethod());
         }
 
         // Easier evolutions
@@ -484,8 +485,8 @@ public class Randomizer {
     private void maybeChangeEvolutions(final RomHandler romHandler) {
         if (settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM) {
             romHandler.randomizeEvolutions(settings.isEvosSimilarStrength(), settings.isEvosSameTyping(),
-                    settings.isEvosMaxThreeStages(), settings.isEvosForceChange(), settings.isEvosNoConverge(), 
-                    settings.isEvosForceGrowth());
+                    settings.isEvosChangeMethod(), settings.isEvosMaxThreeStages(), settings.isEvosForceChange(),
+                    settings.isEvosNoConverge(), settings.isEvosForceGrowth());
 
             List<Pokemon> allPokes = romHandler.getPokemon();
             List<Pokemon> basePokes = new ArrayList<Pokemon>();

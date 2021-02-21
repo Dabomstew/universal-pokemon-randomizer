@@ -1050,16 +1050,17 @@
                               <Component id="peSimilarStrengthCB" min="-2" max="-2" attributes="0"/>
                               <Component id="peNoConvergeCB" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace type="unrelated" pref="181" max="32767" attributes="0"/>
+                          <EmptySpace type="unrelated" pref="74" max="32767" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="peThreeStagesCB" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Component id="peForceGrowthCB" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Component id="peForceChangeCB" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace pref="179" max="32767" attributes="0"/>
+                          <EmptySpace pref="71" max="32767" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="goRemoveTradeEvosCheckBox" min="-2" max="-2" attributes="0"/>
                               <Component id="goCondenseEvosCheckBox" min="-2" max="-2" attributes="0"/>
+                              <Component id="peChangeMethodsCB" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
@@ -1072,20 +1073,21 @@
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="peUnchangedRB" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="peSimilarStrengthCB" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="goRemoveTradeEvosCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="peThreeStagesCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="peChangeMethodsCB" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="peRandomRB" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="peSameTypeCB" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="goCondenseEvosCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="peForceChangeCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="goRemoveTradeEvosCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="peNoConvergeCB" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="peForceGrowthCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="goCondenseEvosCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="32767" attributes="0"/>
                       </Group>
@@ -1207,6 +1209,17 @@
                     <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
                       <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.peForceGrowthCB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="peChangeMethodsCB">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.peChangeMethodsCB.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.peChangeMethodsCB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                 </Component>
               </SubComponents>
@@ -1843,7 +1856,7 @@
                               <Component id="pmsUnchangedRB" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Component id="pmsMetronomeOnlyRB" alignment="0" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace pref="710" max="32767" attributes="0"/>
+                          <EmptySpace pref="178" max="32767" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="pmsReorderDamagingMovesCB" min="-2" max="-2" attributes="0"/>
                               <Component id="pmsForceGoodDamagingSlider" min="-2" max="-2" attributes="0"/>
@@ -2139,9 +2152,6 @@
                       <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.goUpdateMovesCheckBox.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
                   </Properties>
-                  <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="goUpdateMovesCheckBoxActionPerformed"/>
-                  </Events>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="goUpdateMovesLegacyCheckBox">
                   <Properties>
@@ -3558,7 +3568,7 @@
                                   <Component id="fiBanBadCB" min="-2" max="-2" attributes="0"/>
                               </Group>
                           </Group>
-                          <EmptySpace pref="939" max="32767" attributes="0"/>
+                          <EmptySpace pref="468" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -3692,7 +3702,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="mtNoneAvailableLabel" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="1188" max="32767" attributes="0"/>
+                          <EmptySpace pref="418" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
