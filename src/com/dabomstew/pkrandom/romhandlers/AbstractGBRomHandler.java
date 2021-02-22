@@ -31,6 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Random;
+import java.util.zip.CRC32;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -38,6 +39,7 @@ import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
     protected byte[] rom;
+    protected byte[] originalRom;
     private String loadedFN;
 
     public AbstractGBRomHandler(Random random, PrintStream logStream) {
@@ -51,6 +53,8 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
             return false;
         }
         this.rom = loaded;
+        this.originalRom = new byte[rom.length];
+        System.arraycopy(rom, 0, originalRom, 0, rom.length);
         loadedFN = filename;
         loadedRom();
         return true;
@@ -100,6 +104,14 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     public String getGameUpdateVersion() {
         // do nothing, as DS games don't have external game updates
         return null;
+    }
+
+    @Override
+    public void printRomDiagnostics(PrintStream logStream) {
+        CRC32 checksum = new CRC32();
+        checksum.update(originalRom);
+        long crc = checksum.getValue();
+        logStream.println("Original ROM CRC32: " + String.format("%08X", crc));
     }
 
     @Override

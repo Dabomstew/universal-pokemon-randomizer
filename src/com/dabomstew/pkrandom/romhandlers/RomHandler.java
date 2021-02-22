@@ -72,6 +72,8 @@ public interface RomHandler {
 
     void setLog(PrintStream logStream);
 
+    void printRomDiagnostics(PrintStream logStream);
+
     // Get a List of Pokemon objects in this game.
     // 0 = null 1-whatever = the Pokemon.
     List<Pokemon> getPokemon();

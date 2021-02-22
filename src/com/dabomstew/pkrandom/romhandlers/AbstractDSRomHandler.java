@@ -120,6 +120,11 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         return null;
     }
 
+    @Override
+    public void printRomDiagnostics(PrintStream logStream) {
+        baseRom.printRomDiagnostics(logStream);
+    }
+
     public void closeInnerRom() throws IOException {
         baseRom.closeROM();
     }

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.zip.CRC32;
 
 import com.dabomstew.pkrandom.FileFunctions;
 
@@ -37,6 +38,7 @@ public class NDSFile {
     private Extracted status = Extracted.NOT;
     private String extFilename;
     public byte[] data;
+    public long originalCRC;
 
     public NDSFile(NDSRom parent) {
         this.parent = parent;
@@ -50,6 +52,9 @@ public class NDSFile {
             byte[] buf = new byte[this.size];
             rom.seek(this.offset);
             rom.readFully(buf);
+            CRC32 checksum = new CRC32();
+            checksum.update(buf);
+            originalCRC = checksum.getValue();
             if (parent.isWritingEnabled()) {
                 // make a file
                 String tmpDir = parent.getTmpFolder();

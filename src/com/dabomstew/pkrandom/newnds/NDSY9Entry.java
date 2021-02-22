@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.zip.CRC32;
 
 import com.dabomstew.pkrandom.FileFunctions;
 
@@ -44,6 +45,7 @@ public class NDSY9Entry {
     private Extracted status = Extracted.NOT;
     private String extFilename;
     public byte[] data;
+    public long originalCRC;
     private boolean decompressed_data = false;
 
     public NDSY9Entry(NDSRom parent) {
@@ -58,6 +60,9 @@ public class NDSY9Entry {
             byte[] buf = new byte[this.original_size];
             rom.seek(this.offset);
             rom.readFully(buf);
+            CRC32 checksum = new CRC32();
+            checksum.update(buf);
+            originalCRC = checksum.getValue();
             // Compression?
             if (compress_flag != 0 && this.original_size == this.compressed_size && this.compressed_size != 0) {
                 buf = new BLZCoder(null).BLZ_DecodePub(buf, "overlay " + overlay_id);

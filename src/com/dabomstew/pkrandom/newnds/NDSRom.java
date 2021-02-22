@@ -1,13 +1,8 @@
 package com.dabomstew.pkrandom.newnds;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.io.*;
+import java.util.*;
+import java.util.zip.CRC32;
 
 import com.dabomstew.pkrandom.SysConstants;
 import com.dabomstew.pkrandom.FileFunctions;
@@ -54,6 +49,7 @@ public class NDSRom {
     private int arm9_szmode, arm9_szoffset;
     private byte[] arm9_footer;
     private byte[] arm9_ramstored;
+    private long originalArm9CRC;
 
     private static final int arm9_align = 0x1FF, arm7_align = 0x1FF;
     private static final int fnt_align = 0x1FF, fat_align = 0x1FF;
@@ -477,6 +473,9 @@ public class NDSRom {
             byte[] arm9 = new byte[arm9_size];
             this.baseRom.seek(arm9_offset);
             this.baseRom.readFully(arm9);
+            CRC32 checksum = new CRC32();
+            checksum.update(arm9);
+            originalArm9CRC = checksum.getValue();
             // footer check
             int nitrocode = readFromFile(this.baseRom, 4);
             if (nitrocode == 0xDEC00621) {
@@ -618,6 +617,30 @@ public class NDSRom {
                 filenames.put(fileID, name);
                 fileDirectories.put(fileID, dir);
             }
+        }
+    }
+
+    public void printRomDiagnostics(PrintStream logStream) {
+        List<String> overlayList = new ArrayList<>();
+        List<String> fileList = new ArrayList<>();
+        for (Map.Entry<Integer, NDSY9Entry> entry : arm9overlaysByFileID.entrySet()) {
+            if (entry.getValue().originalCRC != 0) {
+                overlayList.add("overlay9_" + entry.getKey() + ": " + String.format("%08X", entry.getValue().originalCRC));
+            }
+        }
+        for (Map.Entry<String, NDSFile> entry : files.entrySet()) {
+            if (entry.getValue().originalCRC != 0) {
+                fileList.add(entry.getKey() + ": " + String.format("%08X", entry.getValue().originalCRC));
+            }
+        }
+        Collections.sort(overlayList);
+        Collections.sort(fileList);
+        logStream.println("arm9: " + String.format("%08X", originalArm9CRC));
+        for (String overlayLog : overlayList) {
+            logStream.println(overlayLog);
+        }
+        for (String fileLog : fileList) {
+            logStream.println(fileLog);
         }
     }
 

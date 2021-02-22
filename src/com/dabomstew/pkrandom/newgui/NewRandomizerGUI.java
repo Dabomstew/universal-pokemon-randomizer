@@ -1692,6 +1692,9 @@ public class NewRandomizerGUI {
                 }
             }
             ex.printStackTrace();
+            ps.println();
+            ps.println("--ROM Diagnostics--");
+            romHandler.printRomDiagnostics(ps);
             System.setErr(e1);
             ps.close();
             if (showMessage) {

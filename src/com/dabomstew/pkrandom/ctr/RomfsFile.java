@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.zip.CRC32;
 
 public class RomfsFile {
 
@@ -39,6 +40,7 @@ public class RomfsFile {
     private String extFilename;
     public byte[] data;
     public boolean fileChanged = false;
+    public long originalCRC;
 
     public RomfsFile(NCCH parent) {
         this.parent = parent;
@@ -52,6 +54,9 @@ public class RomfsFile {
             byte[] buf = new byte[this.size];
             rom.seek(this.offset);
             rom.readFully(buf);
+            CRC32 checksum = new CRC32();
+            checksum.update(buf);
+            originalCRC = checksum.getValue();
             if (parent.isWritingEnabled()) {
                 // make a file
                 String tmpDir = parent.getTmpFolder();
