@@ -327,6 +327,9 @@ public class Gen5Constants {
 
     public static final String shedinjaFunctionLocator = "F8B582B0061C30680F1C";
 
+    private static final int bw1FieldOverlayNumber = 21, bw2FieldOverlayNumber = 36;
+    public static final String runningShoesPrefix = "01D0012008BD002008BD63";
+
     private static Type[] constructTypeTable() {
         Type[] table = new Type[256];
         table[0x00] = Type.NORMAL;
@@ -672,6 +675,14 @@ public class Gen5Constants {
         Map<Integer,Integer> m = new HashMap<>();
         m.put(255,0);
         return m;
+    }
+
+    public static int getFieldOverlayNumber(int romType) {
+        if (romType == Gen5Constants.Type_BW) {
+            return Gen5Constants.bw1FieldOverlayNumber;
+        } else {
+            return Gen5Constants.bw2FieldOverlayNumber;
+        }
     }
 
     public static ItemList allowedItems, nonBadItems;

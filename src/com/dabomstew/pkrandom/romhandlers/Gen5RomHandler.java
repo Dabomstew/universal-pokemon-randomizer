@@ -1726,6 +1726,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         if (romEntry.tweakFiles.get("NationalDexAtStartTweak") != null) {
             available |= MiscTweak.NATIONAL_DEX_AT_START.getValue();
         }
+        available |= MiscTweak.RUN_WITHOUT_RUNNING_SHOES.getValue();
         return available;
     }
 
@@ -1757,6 +1758,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             writeWord(fossilFile,Gen5Constants.fossilPokemonLevelOffset,20);
         } else if (tweak == MiscTweak.NATIONAL_DEX_AT_START) {
             patchForNationalDex();
+        } else if (tweak == MiscTweak.RUN_WITHOUT_RUNNING_SHOES) {
+            applyRunWithoutRunningShoesPatch();
         }
     }
 
@@ -1846,6 +1849,26 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         System.arraycopy(pokedexScript, 0, expandedPokedexScript, 0, pokedexScript.length);
         genericIPSPatch(expandedPokedexScript, "NationalDexAtStartTweak");
         scriptNarc.files.set(romEntry.getInt("NationalDexScriptOffset"), expandedPokedexScript);
+    }
+
+    private void applyRunWithoutRunningShoesPatch() {
+        try {
+            // In the overlay that handles field movement, there's a very simple function
+            // that checks if the player has the Running Shoes by checking if flag 2403 is
+            // set on the save file. If it isn't, the code branches to a separate code path
+            // where the function returns 0. The below code simply nops this branch so that
+            // this function always returns 1, regardless of the status of flag 2403.
+            int fieldOverlayNumber = Gen5Constants.getFieldOverlayNumber(romEntry.romType);
+            byte[] fieldOverlay = readOverlay(fieldOverlayNumber);
+            String prefix = Gen5Constants.runningShoesPrefix;
+            int offset = find(fieldOverlay, prefix);
+            if (offset != 0) {
+                writeWord(fieldOverlay, offset, 0);
+                writeOverlay(fieldOverlayNumber, fieldOverlay);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     private boolean genericIPSPatch(byte[] data, String ctName) {
