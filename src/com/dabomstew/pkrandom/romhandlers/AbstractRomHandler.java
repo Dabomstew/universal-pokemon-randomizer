@@ -3450,7 +3450,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (int i = 1; i < toCompat.length; i++) {
                 toCompat[i] |= fromCompat[i];
             }
-        }), false);
+        }), true);
         this.setTMHMCompatibility(compat);
     }
 
@@ -3630,7 +3630,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (int i = 1; i < toCompat.length; i++) {
                 toCompat[i] |= fromCompat[i];
             }
-        }), false);
+        }), true);
         this.setMoveTutorCompatibility(compat);
     }
 
