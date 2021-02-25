@@ -316,7 +316,7 @@ public class NewRandomizerGUI {
     private JMenuItem loadGetSettingsMenuItem;
 
     private ImageIcon emptyIcon = new ImageIcon(getClass().getResource("/com/dabomstew/pkrandom/newgui/emptyIcon.png"));
-    private boolean haveCheckedCustomNames;
+    private boolean haveCheckedCustomNames, unloadGameOnSuccess;
     private Map<String, String> gameUpdates = new TreeMap<>();
 
     public NewRandomizerGUI() {
@@ -915,8 +915,10 @@ public class NewRandomizerGUI {
                             JOptionPane.showMessageDialog(frame,
                                     bundle.getString("GUI.randomizationDone"));
                             // Done
-                            romHandler = null;
-                            initialState();
+                            if (this.unloadGameOnSuccess) {
+                                romHandler = null;
+                                initialState();
+                            }
                         } else {
                             // Compile a config string
                             try {
@@ -929,8 +931,10 @@ public class NewRandomizerGUI {
                             }
 
                             // Done
-                            romHandler = null;
-                            initialState();
+                            if (this.unloadGameOnSuccess) {
+                                romHandler = null;
+                                initialState();
+                            }
                         }
                     });
                 } else {
@@ -3352,6 +3356,9 @@ public class NewRandomizerGUI {
                                 initialPopup = false;
                             }
                         }
+                        if (key.equals("unloadgameonsuccess")) {
+                            unloadGameOnSuccess = Boolean.parseBoolean(tokens[1].trim());
+                        }
                     }
                 } else if (isReadingUpdates) {
                     isReadingUpdates = false;
@@ -3373,6 +3380,7 @@ public class NewRandomizerGUI {
             PrintStream ps = new PrintStream(new FileOutputStream(fh), true, "UTF-8");
             ps.println("checkedcustomnames=true");
             ps.println("checkedcustomnames172=" + haveCheckedCustomNames);
+            ps.println("unloadgameonsuccess=true");
             if (!initialPopup) {
                 ps.println("firststart=" + Version.VERSION_STRING);
             }
