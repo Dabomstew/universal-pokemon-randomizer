@@ -768,29 +768,40 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         // In the game's executable, there's a hardcoded value to indicate what "extra"
         // Pokemon to create. It produces a Shedinja using the following instruction:
         // mov r1, #0x124, where 0x124 = 292 in decimal, which is Shedinja's species ID.
-        // The below code tweaks this instruction to use the species ID of Nincada's
-        // new extra evolution.
+        // We can't just blindly replace it, though, because certain constants (for example,
+        // 0x125) cannot be moved without using the movw instruction. This works fine in
+        // Citra, but crashes on real hardware. Instead, we have to annoyingly shift up a
+        // big chunk of code to fill in a nop; we can then do a pc-relative load to a
+        // constant in the new free space.
         offset = find(code, Gen7Constants.shedinjaPrefix);
         if (offset > 0) {
             offset += Gen7Constants.shedinjaPrefix.length() / 2; // because it was a prefix
-            int extraEvoSpecies = extraEvolution.number;
-            int extraEvoForme = extraEvolution.formeNumber;
-            if (extraEvoForme != 0) {
-                extraEvoSpecies = extraEvolution.baseForme.number;
+
+            // Shift up everything below the last nop to make some room at the bottom of the function.
+            for (int i = 84; i < 120; i++) {
+                code[offset + i] = code[offset + i + 4];
             }
+
+            // For every bl that we shifted up, patch them so they're now pointing to the same place they
+            // were before (without this, they will be pointing to 0x4 before where they're supposed to).
+            List<Integer> blOffsetsToPatch = Arrays.asList(84, 96, 108);
+            for (int blOffsetToPatch : blOffsetsToPatch) {
+                code[offset + blOffsetToPatch] += 1;
+            }
+
+            // Write Nincada's new extra evolution in the new free space.
+            writeLong(code, offset + 120, extraEvolution.number);
 
             // Second parameter of pml::pokepara::CoreParam::ChangeMonsNo is the
             // new forme number
-            code[offset] = (byte) extraEvoForme;
+            code[offset] = (byte) extraEvolution.formeNumber;
 
             // First parameter of pml::pokepara::CoreParam::ChangeMonsNo is the
-            // new species number
-            int extraEvoLower = extraEvoSpecies & 0x00FF;
-            int extraEvoUpper = (extraEvoSpecies & 0xFF00) >> 8;
-            code[offset + 4] = (byte) extraEvoLower;
-            code[offset + 5] = (byte) (0x10 + extraEvoUpper);
-            code[offset + 6] = 0x00;
-            code[offset + 7] = (byte) 0xE3;
+            // new species number. Write a pc-relative load to what we wrote before.
+            code[offset + 4] = (byte) 0x6C;
+            code[offset + 5] = 0x10;
+            code[offset + 6] = (byte) 0x9F;
+            code[offset + 7] = (byte) 0xE5;
         }
 
         // Now that we've handled the hardcoded Shedinja evolution, delete it so that
