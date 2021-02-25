@@ -78,6 +78,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         private String acronym;
         private int romType;
         private boolean staticPokemonSupport = true, copyStaticPokemon = true;
+        private Map<Integer, Integer> linkedStaticOffsets = new HashMap<>();
         private Map<String, String> strings = new HashMap<>();
         private Map<String, Integer> numbers = new HashMap<>();
         private Map<String, int[]> arrayEntries = new HashMap<>();
@@ -146,17 +147,18 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                             for (RomEntry otherEntry : roms) {
                                 if (r[1].equalsIgnoreCase(otherEntry.romCode)) {
                                     // copy from here
+                                    current.linkedStaticOffsets.putAll(otherEntry.linkedStaticOffsets);
                                     current.arrayEntries.putAll(otherEntry.arrayEntries);
                                     current.numbers.putAll(otherEntry.numbers);
                                     current.strings.putAll(otherEntry.strings);
                                     current.offsetArrayEntries.putAll(otherEntry.offsetArrayEntries);
-//                                    if (current.copyStaticPokemon) {
-//                                        current.staticPokemon.addAll(otherEntry.staticPokemon);
-//                                        current.staticPokemonSupport = true;
-//                                    } else {
-//                                        current.staticPokemonSupport = false;
-//                                    }
                                 }
+                            }
+                        } else if (r[0].equals("LinkedStaticEncounterOffsets")) {
+                            String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
+                            for (int i = 0; i < offsets.length; i++) {
+                                String[] parts = offsets[i].split(":");
+                                current.linkedStaticOffsets.put(Integer.parseInt(parts[0].trim()), Integer.parseInt(parts[1].trim()));
                             }
                         } else if (r[1].startsWith("[") && r[1].endsWith("]")) {
                             String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
@@ -941,7 +943,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 Pokemon starter = starterIter.next();
                 if (starter.formeNumber > 0) {
                     newStatic.forme = starter.formeNumber;
-                    newStatic.formeSuffix = starter.formeSuffix;
                     starter = starter.baseForme;
                 }
                 newStatic.pkmn = starter;
@@ -1824,7 +1825,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                     heldItem = 0;
                 }
                 se.heldItem = heldItem;
-                se.formeSuffix = Gen6Constants.getFormeSuffixByBaseForme(se.pkmn.number,se.forme);
                 statics.add(se);
             }
 
@@ -1855,21 +1855,33 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                     heldItem = 0;
                 }
                 se.heldItem = heldItem;
+                if (romEntry.romType == Gen6Constants.Type_ORAS) {
+                    int metLocation = FileFunctions.read2ByteInt(staticCRO, offset + i * size + 18);
+                    if (metLocation == 0xEA64) {
+                        se.isEgg = true;
+                    }
+                }
                 statics.add(se);
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
 
-        // In XY, there are two Xerneas/Yveltal encounters; one for when you
-        // first encounter them, and another for every time after that. For
-        // multiple reasons, we don't want these to be different, so delete
-        // the second one.
-        if (romEntry.romType == Gen6Constants.Type_XY) {
-            int[] boxLegendaryOffsets = romEntry.arrayEntries.get("BoxLegendaryOffsets");
-            statics.remove(boxLegendaryOffsets[1]);
-        }
+        consolidateLinkedEncounters(statics);
         return statics;
+    }
+
+    private void consolidateLinkedEncounters(List<StaticEncounter> statics) {
+        List<StaticEncounter> encountersToRemove = new ArrayList<>();
+        for (Map.Entry<Integer, Integer> entry : romEntry.linkedStaticOffsets.entrySet()) {
+            StaticEncounter baseEncounter = statics.get(entry.getKey());
+            StaticEncounter linkedEncounter = statics.get(entry.getValue());
+            baseEncounter.linkedEncounters.add(linkedEncounter);
+            encountersToRemove.add(linkedEncounter);
+        }
+        for (StaticEncounter encounter : encountersToRemove) {
+            statics.remove(encounter);
+        }
     }
 
     @Override
@@ -1878,13 +1890,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         try {
             byte[] staticCRO = readFile(romEntry.getString("StaticPokemon"));
 
-            // To match what we did in getStaticPokemon, we have to add the
-            // second Xerneas/Yveltal encounter back into the list of statics.
-            if (romEntry.romType == Gen6Constants.Type_XY) {
-                int[] boxLegendaryOffsets = romEntry.arrayEntries.get("BoxLegendaryOffsets");
-                staticPokemon.add(boxLegendaryOffsets[1], staticPokemon.get(boxLegendaryOffsets[0]));
-            }
-
+            unlinkStaticEncounters(staticPokemon);
             Iterator<StaticEncounter> staticIter = staticPokemon.iterator();
 
             int staticCount = Gen6Constants.getStaticPokemonCount(romEntry.romType);
@@ -1935,6 +1941,21 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             return true;
         } catch (IOException e) {
             throw new RandomizerIOException(e);
+        }
+    }
+
+    private void unlinkStaticEncounters(List<StaticEncounter> statics) {
+        List<Integer> offsetsToInsert = new ArrayList<>();
+        for (Map.Entry<Integer, Integer> entry : romEntry.linkedStaticOffsets.entrySet()) {
+            offsetsToInsert.add(entry.getValue());
+        }
+        Collections.sort(offsetsToInsert);
+        for (Integer offsetToInsert : offsetsToInsert) {
+            statics.add(offsetToInsert, new StaticEncounter());
+        }
+        for (Map.Entry<Integer, Integer> entry : romEntry.linkedStaticOffsets.entrySet()) {
+            StaticEncounter baseEncounter = statics.get(entry.getKey());
+            statics.set(entry.getValue(), baseEncounter.linkedEncounters.get(0));
         }
     }
 

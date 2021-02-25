@@ -282,6 +282,8 @@ public class NewRandomizerGUI {
     private JCheckBox peRemoveTimeBasedEvolutionsCheckBox;
     private JCheckBox tmFollowEvolutionsCheckBox;
     private JCheckBox mtFollowEvolutionsCheckBox;
+    private JCheckBox stpPercentageLevelModifierCheckBox;
+    private JSlider stpPercentageLevelModifierSlider;
 
     private static JFrame frame;
 
@@ -316,7 +318,7 @@ public class NewRandomizerGUI {
     private JMenuItem loadGetSettingsMenuItem;
 
     private ImageIcon emptyIcon = new ImageIcon(getClass().getResource("/com/dabomstew/pkrandom/newgui/emptyIcon.png"));
-    private boolean haveCheckedCustomNames;
+    private boolean haveCheckedCustomNames, unloadGameOnSuccess;
     private Map<String, String> gameUpdates = new TreeMap<>();
 
     public NewRandomizerGUI() {
@@ -399,6 +401,7 @@ public class NewRandomizerGUI {
         stpSwapLegendariesSwapStandardsRadioButton.addActionListener(e -> enableOrDisableSubControls());
         stpRandomCompletelyRadioButton.addActionListener(e -> enableOrDisableSubControls());
         stpRandomSimilarStrengthRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        stpPercentageLevelModifierCheckBox.addActionListener(e -> enableOrDisableSubControls());
         igtUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         igtRandomizeGivenPokemonOnlyRadioButton.addActionListener(e -> enableOrDisableSubControls());
         igtRandomizeBothRequestedGivenRadioButton.addActionListener(e -> enableOrDisableSubControls());
@@ -914,8 +917,10 @@ public class NewRandomizerGUI {
                             JOptionPane.showMessageDialog(frame,
                                     bundle.getString("GUI.randomizationDone"));
                             // Done
-                            romHandler = null;
-                            initialState();
+                            if (this.unloadGameOnSuccess) {
+                                romHandler = null;
+                                initialState();
+                            }
                         } else {
                             // Compile a config string
                             try {
@@ -928,8 +933,10 @@ public class NewRandomizerGUI {
                             }
 
                             // Done
-                            romHandler = null;
-                            initialState();
+                            if (this.unloadGameOnSuccess) {
+                                romHandler = null;
+                                initialState();
+                            }
                         }
                     });
                 } else {
@@ -1392,6 +1399,8 @@ public class NewRandomizerGUI {
         stpRandomize600BSTCheckBox.setSelected(settings.isLimit600());
         stpAllowAltFormesCheckBox.setSelected(settings.isAllowStaticAltFormes());
         stpSwapMegaEvosCheckBox.setSelected(settings.isSwapStaticMegaEvos());
+        stpPercentageLevelModifierCheckBox.setSelected(settings.isStaticLevelModified());
+        stpPercentageLevelModifierSlider.setValue(settings.getStaticLevelModifier());
 
         thcRandomCompletelyRadioButton
                 .setSelected(settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.COMPLETELY_RANDOM);
@@ -1589,6 +1598,8 @@ public class NewRandomizerGUI {
         settings.setLimit600(stpRandomize600BSTCheckBox.isSelected());
         settings.setAllowStaticAltFormes(stpAllowAltFormesCheckBox.isSelected() && stpAllowAltFormesCheckBox.isVisible());
         settings.setSwapStaticMegaEvos(stpSwapMegaEvosCheckBox.isSelected() && stpSwapMegaEvosCheckBox.isVisible());
+        settings.setStaticLevelModified(stpPercentageLevelModifierCheckBox.isSelected());
+        settings.setStaticLevelModifier(stpPercentageLevelModifierSlider.getValue());
 
         settings.setTmsMod(tmUnchangedRadioButton.isSelected(), tmRandomRadioButton.isSelected());
 
@@ -1691,6 +1702,9 @@ public class NewRandomizerGUI {
                 }
             }
             ex.printStackTrace();
+            ps.println();
+            ps.println("--ROM Diagnostics--");
+            romHandler.printRomDiagnostics(ps);
             System.setErr(e1);
             ps.close();
             if (showMessage) {
@@ -1918,6 +1932,12 @@ public class NewRandomizerGUI {
         stpRandomSimilarStrengthRadioButton.setVisible(true);
         stpRandomSimilarStrengthRadioButton.setEnabled(false);
         stpRandomSimilarStrengthRadioButton.setSelected(false);
+        stpPercentageLevelModifierCheckBox.setVisible(true);
+        stpPercentageLevelModifierCheckBox.setEnabled(false);
+        stpPercentageLevelModifierCheckBox.setSelected(false);
+        stpPercentageLevelModifierSlider.setVisible(true);
+        stpPercentageLevelModifierSlider.setEnabled(false);
+        stpPercentageLevelModifierSlider.setValue(0);
         stpLimitMusketeersCheckBox.setVisible(true);
         stpLimitMusketeersCheckBox.setEnabled(false);
         stpLimitMusketeersCheckBox.setSelected(false);
@@ -2463,12 +2483,18 @@ public class NewRandomizerGUI {
                 stpLimitMusketeersCheckBox.setVisible(pokemonGeneration == 5);
                 stpAllowAltFormesCheckBox.setVisible(romHandler.hasStaticAltFormes());
                 stpSwapMegaEvosCheckBox.setVisible(pokemonGeneration == 6 && !romHandler.forceSwapStaticMegaEvos());
+                stpPercentageLevelModifierCheckBox.setVisible(pokemonGeneration >= 3);
+                stpPercentageLevelModifierCheckBox.setEnabled(pokemonGeneration >= 3);
+                stpPercentageLevelModifierSlider.setVisible(pokemonGeneration >= 3);
+                stpPercentageLevelModifierSlider.setEnabled(false);
             } else {
                 stpSwapLegendariesSwapStandardsRadioButton.setVisible(false);
                 stpRandomCompletelyRadioButton.setVisible(false);
                 stpRandomSimilarStrengthRadioButton.setVisible(false);
                 stpRandomize600BSTCheckBox.setVisible(false);
                 stpLimitMusketeersCheckBox.setVisible(false);
+                stpPercentageLevelModifierCheckBox.setVisible(false);
+                stpPercentageLevelModifierSlider.setVisible(false);
             }
 
             igtUnchangedRadioButton.setEnabled(true);
@@ -2818,6 +2844,13 @@ public class NewRandomizerGUI {
             stpRandomize600BSTCheckBox.setEnabled(true);
             stpAllowAltFormesCheckBox.setEnabled(true);
             stpSwapMegaEvosCheckBox.setEnabled(true);
+        }
+
+        if (stpPercentageLevelModifierCheckBox.isSelected()) {
+            stpPercentageLevelModifierSlider.setEnabled(true);
+        } else {
+            stpPercentageLevelModifierSlider.setEnabled(false);
+            stpPercentageLevelModifierSlider.setValue(0);
         }
 
         if (igtUnchangedRadioButton.isSelected()) {
@@ -3345,6 +3378,9 @@ public class NewRandomizerGUI {
                                 initialPopup = false;
                             }
                         }
+                        if (key.equals("unloadgameonsuccess")) {
+                            unloadGameOnSuccess = Boolean.parseBoolean(tokens[1].trim());
+                        }
                     }
                 } else if (isReadingUpdates) {
                     isReadingUpdates = false;
@@ -3366,6 +3402,7 @@ public class NewRandomizerGUI {
             PrintStream ps = new PrintStream(new FileOutputStream(fh), true, "UTF-8");
             ps.println("checkedcustomnames=true");
             ps.println("checkedcustomnames172=" + haveCheckedCustomNames);
+            ps.println("unloadgameonsuccess=true");
             if (!initialPopup) {
                 ps.println("firststart=" + Version.VERSION_STRING);
             }

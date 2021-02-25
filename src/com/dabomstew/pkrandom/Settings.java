@@ -208,6 +208,8 @@ public class Settings {
 
     private boolean allowStaticAltFormes;
     private boolean swapStaticMegaEvos;
+    private boolean staticLevelModified;
+    private int staticLevelModifier = 0; // -50 ~ 50
 
     public enum TotemPokemonMod {
         UNCHANGED, RANDOM, SIMILAR_STRENGTH
@@ -541,6 +543,8 @@ public class Settings {
 
         out.write(selectedEXPCurve.toByte());
 
+        out.write((staticLevelModified ? 0x80 : 0) | (staticLevelModifier+50));
+        
         out.write(makeByteSelected(tmsFollowEvolutions, tutorFollowEvolutions));
 
         try {
@@ -807,6 +811,9 @@ public class Settings {
 
         settings.setSelectedEXPCurve(ExpCurve.fromByte(data[46]));
 
+        settings.setStaticLevelModified(restoreState(data[47],7));
+        settings.setStaticLevelModifier((data[47] & 0x7F) - 50);
+        
         settings.setTmsFollowEvolutions(restoreState(data[48], 0));
         settings.setTutorFollowEvolutions(restoreState(data[48], 1));
 
@@ -1750,6 +1757,22 @@ public class Settings {
 
     public void setSwapStaticMegaEvos(boolean swapStaticMegaEvos) {
         this.swapStaticMegaEvos = swapStaticMegaEvos;
+    }
+
+    public boolean isStaticLevelModified() {
+        return staticLevelModified;
+    }
+
+    public void setStaticLevelModified(boolean staticLevelModified) {
+        this.staticLevelModified = staticLevelModified;
+    }
+
+    public int getStaticLevelModifier() {
+        return staticLevelModifier;
+    }
+
+    public void setStaticLevelModifier(int staticLevelModifier) {
+        this.staticLevelModifier = staticLevelModifier;
     }
 
     public TotemPokemonMod getTotemPokemonMod() {

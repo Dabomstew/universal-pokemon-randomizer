@@ -72,6 +72,8 @@ public interface RomHandler {
 
     void setLog(PrintStream logStream);
 
+    void printRomDiagnostics(PrintStream logStream);
+
     // Get a List of Pokemon objects in this game.
     // 0 = null 1-whatever = the Pokemon.
     List<Pokemon> getPokemon();
@@ -267,7 +269,8 @@ public interface RomHandler {
     boolean setStaticPokemon(List<StaticEncounter> staticPokemon);
 
     void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMusketeers,
-                                boolean limit600, boolean allowAltFormes, boolean swapMegaEvos1, boolean abilitiesAreRandomized);
+                                boolean limit600, boolean allowAltFormes, boolean swapMegaEvos1,
+                                boolean abilitiesAreRandomized, int levelModifier);
 
     boolean canChangeStaticPokemon();
 
@@ -276,6 +279,8 @@ public interface RomHandler {
     List<Pokemon> bannedForStaticPokemon();
 
     boolean forceSwapStaticMegaEvos();
+
+    void onlyChangeStaticLevels(int levelModifier);
 
     // Randomizer: Totem Pokemon
 

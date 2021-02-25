@@ -29,7 +29,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.dabomstew.pkrandom.pokemon.*;
 import thenewpoketext.PokeTextData;
@@ -152,29 +155,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                                     }
                                 }
                             }
-                        } else if (r[0].equals("StaticPokemon[]")) {
-                            if (r[1].startsWith("[") && r[1].endsWith("]")) {
-                                String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
-                                int[] offs = new int[offsets.length];
-                                int[] files = new int[offsets.length];
-                                int c = 0;
-                                for (String off : offsets) {
-                                    String[] parts = off.split(":");
-                                    files[c] = parseRIInt(parts[0]);
-                                    offs[c++] = parseRIInt(parts[1]);
-                                }
-                                StaticPokemon sp = new StaticPokemon();
-                                sp.files = files;
-                                sp.offsets = offs;
-                                current.staticPokemon.add(sp);
-                            } else {
-                                String[] parts = r[1].split(":");
-                                int files = parseRIInt(parts[0]);
-                                int offs = parseRIInt(parts[1]);
-                                StaticPokemon sp = new StaticPokemon();
-                                sp.files = new int[] { files };
-                                sp.offsets = new int[] { offs };
-                            }
+                        } else if (r[0].equals("StaticPokemon{}")) {
+                            current.staticPokemon.add(parseStaticPokemon(r[1]));
                         } else if (r[0].equals("StaticPokemonSupport")) {
                             int spsupport = parseRIInt(r[1]);
                             current.staticPokemonSupport = (spsupport > 0);
@@ -227,6 +209,34 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             System.err.println("invalid base " + radix + "number " + off);
             return 0;
         }
+    }
+
+    private static StaticPokemon parseStaticPokemon(String staticPokemonString) {
+        StaticPokemon sp = new StaticPokemon();
+        String pattern = "[A-z]+=\\[([0-9]+:0x[0-9a-fA-F]+,?\\s?)+]";
+        Pattern r = Pattern.compile(pattern);
+        Matcher m = r.matcher(staticPokemonString);
+        while (m.find()) {
+            String[] segments = m.group().split("=");
+            String[] offsets = segments[1].substring(1, segments[1].length() - 1).split(",");
+            ScriptEntry[] entries = new ScriptEntry[offsets.length];
+            for (int i = 0; i < entries.length; i++) {
+                String[] parts = offsets[i].split(":");
+                entries[i] = new ScriptEntry(parseRIInt(parts[0]), parseRIInt(parts[1]));
+            }
+            switch (segments[0]) {
+                case "Species":
+                    sp.speciesEntries = entries;
+                    break;
+                case "Level":
+                    sp.levelEntries = entries;
+                    break;
+                case "Forme":
+                    sp.formeEntries = entries;
+                    break;
+            }
+        }
+        return sp;
     }
 
     // This rom
@@ -2290,19 +2300,70 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     }
 
+    private static class ScriptEntry {
+        private int scriptFile;
+        private int scriptOffset;
+
+        public ScriptEntry(int scriptFile, int scriptOffset) {
+            this.scriptFile = scriptFile;
+            this.scriptOffset = scriptOffset;
+        }
+    }
+
     private static class StaticPokemon {
-        private int[] files;
-        private int[] offsets;
+        private ScriptEntry[] speciesEntries;
+        private ScriptEntry[] formeEntries;
+        private ScriptEntry[] levelEntries;
+
+        public StaticPokemon() {
+            this.speciesEntries = new ScriptEntry[0];
+            this.formeEntries = new ScriptEntry[0];
+            this.levelEntries = new ScriptEntry[0];
+        }
 
         public Pokemon getPokemon(Gen4RomHandler parent, NARCArchive scriptNARC) {
-            return parent.pokes[parent.readWord(scriptNARC.files.get(files[0]), offsets[0])];
+            return parent.pokes[parent.readWord(scriptNARC.files.get(speciesEntries[0].scriptFile), speciesEntries[0].scriptOffset)];
         }
 
         public void setPokemon(Gen4RomHandler parent, NARCArchive scriptNARC, Pokemon pkmn) {
             int value = pkmn.number;
-            for (int i = 0; i < offsets.length; i++) {
-                byte[] file = scriptNARC.files.get(files[i]);
-                parent.writeWord(file, offsets[i], value);
+            for (int i = 0; i < speciesEntries.length; i++) {
+                byte[] file = scriptNARC.files.get(speciesEntries[i].scriptFile);
+                parent.writeWord(file, speciesEntries[i].scriptOffset, value);
+            }
+        }
+
+        public int getForme(NARCArchive scriptNARC) {
+            if (formeEntries.length == 0) {
+                return 0;
+            }
+            byte[] file = scriptNARC.files.get(formeEntries[0].scriptFile);
+            return file[formeEntries[0].scriptOffset];
+        }
+
+        public void setForme(NARCArchive scriptNARC, int forme) {
+            for (int i = 0; i < formeEntries.length; i++) {
+                byte[] file = scriptNARC.files.get(formeEntries[i].scriptFile);
+                file[formeEntries[i].scriptOffset] = (byte) forme;
+            }
+        }
+
+        public int getLevelCount() {
+            return levelEntries.length;
+        }
+
+        public int getLevel(NARCArchive scriptNARC, int i) {
+            if (levelEntries.length <= i) {
+                return 1;
+            }
+            byte[] file = scriptNARC.files.get(levelEntries[i].scriptFile);
+            return file[levelEntries[i].scriptOffset];
+        }
+
+        public void setLevel(NARCArchive scriptNARC, int level, int i) {
+            if (levelEntries.length > i) { // Might not have a level entry e.g., it's an egg
+                byte[] file = scriptNARC.files.get(levelEntries[i].scriptFile);
+                file[levelEntries[i].scriptOffset] = (byte) level;
             }
         }
     }
@@ -2314,30 +2375,62 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             return sp;
         }
         try {
+            int[] staticEggOffsets = new int[0];
+            if (romEntry.arrayEntries.containsKey("StaticEggPokemonOffsets")) {
+                staticEggOffsets = romEntry.arrayEntries.get("StaticEggPokemonOffsets");
+            }
             NARCArchive scriptNARC = scriptNarc;
-            for (StaticPokemon statP : romEntry.staticPokemon) {
-                sp.add(new StaticEncounter(statP.getPokemon(this, scriptNARC)));
+            for (int i = 0; i < romEntry.staticPokemon.size(); i++) {
+                int currentOffset = i;
+                StaticPokemon statP = romEntry.staticPokemon.get(i);
+                StaticEncounter se = new StaticEncounter();
+                Pokemon newPK = statP.getPokemon(this, scriptNARC);
+                newPK = getAltFormeOfPokemon(newPK, statP.getForme(scriptNARC));
+                se.pkmn = newPK;
+                se.level = statP.getLevel(scriptNARC, 0);
+                se.isEgg = Arrays.stream(staticEggOffsets).anyMatch(x-> x == currentOffset);
+                for (int levelEntry = 1; levelEntry < statP.getLevelCount(); levelEntry++) {
+                    StaticEncounter linkedStatic = new StaticEncounter();
+                    linkedStatic.pkmn = newPK;
+                    linkedStatic.level = statP.getLevel(scriptNARC, levelEntry);
+                    se.linkedEncounters.add(linkedStatic);
+                }
+                sp.add(se);
             }
             if (romEntry.arrayEntries.containsKey("StaticPokemonTrades")) {
                 NARCArchive tradeNARC = this.readNARC(romEntry.getString("InGameTrades"));
                 int[] trades = romEntry.arrayEntries.get("StaticPokemonTrades");
-                for (int tradeNum : trades) {
-                    sp.add(new StaticEncounter(pokes[readLong(tradeNARC.files.get(tradeNum), 0)]));
+                int[] scripts = romEntry.arrayEntries.get("StaticPokemonTradeScripts");
+                int[] scriptOffsets = romEntry.arrayEntries.get("StaticPokemonTradeLevelOffsets");
+                for (int i = 0; i < trades.length; i++) {
+                    int tradeNum = trades[i];
+                    byte[] scriptFile = scriptNARC.files.get(scripts[i]);
+                    int level = scriptFile[scriptOffsets[i]];
+                    StaticEncounter se = new StaticEncounter(pokes[readLong(tradeNARC.files.get(tradeNum), 0)]);
+                    se.level = level;
+                    sp.add(se);
                 }
             }
             if (romEntry.getInt("MysteryEggOffset") > 0) {
                 byte[] ovOverlay = readOverlay(romEntry.getInt("MoveTutorMovesOvlNumber"));
-                sp.add(new StaticEncounter(pokes[ovOverlay[romEntry.getInt("MysteryEggOffset")] & 0xFF]));
+                StaticEncounter se = new StaticEncounter(pokes[ovOverlay[romEntry.getInt("MysteryEggOffset")] & 0xFF]);
+                se.isEgg = true;
+                sp.add(se);
             }
             if (romEntry.getInt("FossilTableOffset") > 0) {
                 byte[] ftData = arm9;
                 int baseOffset = romEntry.getInt("FossilTableOffset");
+                int fossilLevelScriptNum = romEntry.getInt("FossilLevelScriptNumber");
+                byte[] fossilLevelScript = scriptNARC.files.get(fossilLevelScriptNum);
+                int level = fossilLevelScript[romEntry.getInt("FossilLevelOffset")];
                 if (romEntry.romType == Gen4Constants.Type_HGSS) {
                     ftData = readOverlay(romEntry.getInt("FossilTableOvlNumber"));
                 }
                 // read the 7 Fossil Pokemon
                 for (int f = 0; f < Gen4Constants.fossilCount; f++) {
-                    sp.add(new StaticEncounter(pokes[readWord(ftData, baseOffset + 2 + f * 4)]));
+                    StaticEncounter se = new StaticEncounter(pokes[readWord(ftData, baseOffset + 2 + f * 4)]);
+                    se.level = level;
+                    sp.add(se);
                 }
             }
         } catch (IOException e) {
@@ -2362,13 +2455,24 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             Iterator<StaticEncounter> statics = staticPokemon.iterator();
             NARCArchive scriptNARC = scriptNarc;
             for (StaticPokemon statP : romEntry.staticPokemon) {
-                statP.setPokemon(this, scriptNARC, statics.next().pkmn);
+                StaticEncounter se = statics.next();
+                statP.setPokemon(this, scriptNARC, se.pkmn);
+                statP.setForme(scriptNARC, se.pkmn.formeNumber);
+                statP.setLevel(scriptNARC, se.level, 0);
+                for (int i = 0; i < se.linkedEncounters.size(); i++) {
+                    StaticEncounter linkedStatic = se.linkedEncounters.get(i);
+                    statP.setLevel(scriptNARC, linkedStatic.level, i + 1);
+                }
             }
             if (romEntry.arrayEntries.containsKey("StaticPokemonTrades")) {
                 NARCArchive tradeNARC = this.readNARC(romEntry.getString("InGameTrades"));
                 int[] trades = romEntry.arrayEntries.get("StaticPokemonTrades");
-                for (int tradeNum : trades) {
-                    Pokemon thisTrade = statics.next().pkmn;
+                int[] scripts = romEntry.arrayEntries.get("StaticPokemonTradeScripts");
+                int[] scriptOffsets = romEntry.arrayEntries.get("StaticPokemonTradeLevelOffsets");
+                for (int i = 0; i < trades.length; i++) {
+                    int tradeNum = trades[i];
+                    StaticEncounter se = statics.next();
+                    Pokemon thisTrade = se.pkmn;
                     List<Integer> possibleAbilities = new ArrayList<>();
                     possibleAbilities.add(thisTrade.ability1);
                     if (thisTrade.ability2 > 0) {
@@ -2381,6 +2485,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     writeLong(tradeNARC.files.get(tradeNum), 0, thisTrade.number);
                     writeLong(tradeNARC.files.get(tradeNum), 0x1C,
                             possibleAbilities.get(this.random.nextInt(possibleAbilities.size())));
+                    // Write level to script file
+                    byte[] scriptFile = scriptNARC.files.get(scripts[i]);
+                    scriptFile[scriptOffsets[i]] = (byte) se.level;
                 }
                 writeNARC(romEntry.getString("InGameTrades"), tradeNARC);
             }
@@ -2397,18 +2504,24 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             }
             if (romEntry.getInt("FossilTableOffset") > 0) {
                 int baseOffset = romEntry.getInt("FossilTableOffset");
+                int fossilLevelScriptNum = romEntry.getInt("FossilLevelScriptNumber");
+                byte[] fossilLevelScript = scriptNARC.files.get(fossilLevelScriptNum);
                 if (romEntry.romType == Gen4Constants.Type_HGSS) {
                     byte[] ftData = readOverlay(romEntry.getInt("FossilTableOvlNumber"));
                     for (int f = 0; f < Gen4Constants.fossilCount; f++) {
-                        int pokenum = statics.next().pkmn.number;
+                        StaticEncounter se = statics.next();
+                        int pokenum = se.pkmn.number;
                         writeWord(ftData, baseOffset + 2 + f * 4, pokenum);
+                        fossilLevelScript[romEntry.getInt("FossilLevelOffset")] = (byte) se.level;
                     }
                     writeOverlay(romEntry.getInt("FossilTableOvlNumber"), ftData);
                 } else {
                     // write to arm9
                     for (int f = 0; f < Gen4Constants.fossilCount; f++) {
-                        int pokenum = statics.next().pkmn.number;
+                        StaticEncounter se = statics.next();
+                        int pokenum = se.pkmn.number;
                         writeWord(arm9, baseOffset + 2 + f * 4, pokenum);
+                        fossilLevelScript[romEntry.getInt("FossilLevelOffset")] = (byte) se.level;
                     }
                 }
             }

@@ -27,6 +27,8 @@ package com.dabomstew.pkrandom.romhandlers;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.CRC32;
 
 import com.dabomstew.pkrandom.FileFunctions;
@@ -150,19 +152,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         }
                         r[1] = r[1].trim();
                         // Static Pokemon?
-                        if (r[0].equals("StaticPokemon[]")) {
-                            if (r[1].startsWith("[") && r[1].endsWith("]")) {
-                                String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
-                                int[] offs = new int[offsets.length];
-                                int c = 0;
-                                for (String off : offsets) {
-                                    offs[c++] = parseRIInt(off);
-                                }
-                                current.staticPokemon.add(new StaticPokemon(offs));
-                            } else {
-                                int offs = parseRIInt(r[1]);
-                                current.staticPokemon.add(new StaticPokemon(offs));
-                            }
+                        if (r[0].equals("StaticPokemon{}")) {
+                            current.staticPokemon.add(parseStaticPokemon(r[1]));
                         } else if (r[0].equals("TMText[]")) {
                             if (r[1].startsWith("[") && r[1].endsWith("]")) {
                                 String[] parts = r[1].substring(1, r[1].length() - 1).split(",", 6);
@@ -272,6 +263,30 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             System.err.println("invalid base " + radix + "number " + off);
             return 0;
         }
+    }
+
+    private static StaticPokemon parseStaticPokemon(String staticPokemonString) {
+        StaticPokemon sp = new StaticPokemon();
+        String pattern = "[A-z]+=\\[(0x[0-9a-fA-F]+,?\\s?)+]";
+        Pattern r = Pattern.compile(pattern);
+        Matcher m = r.matcher(staticPokemonString);
+        while (m.find()) {
+            String[] segments = m.group().split("=");
+            String[] romOffsets = segments[1].substring(1, segments[1].length() - 1).split(",");
+            int[] offsets = new int [romOffsets.length];
+            for (int i = 0; i < offsets.length; i++) {
+                offsets[i] = parseRIInt(romOffsets[i]);
+            }
+            switch (segments[0]) {
+                case "Species":
+                    sp.speciesOffsets = offsets;
+                    break;
+                case "Level":
+                    sp.levelOffsets = offsets;
+                    break;
+            }
+        }
+        return sp;
     }
 
     private void loadTextTable(String filename) {
@@ -1694,20 +1709,35 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private static class StaticPokemon {
-        private int[] offsets;
+        private int[] speciesOffsets;
+        private int[] levelOffsets;
 
-        public StaticPokemon(int... offsets) {
-            this.offsets = offsets;
+        public StaticPokemon() {
+            this.speciesOffsets = new int[0];
+            this.levelOffsets = new int[0];
         }
 
         public Pokemon getPokemon(Gen3RomHandler parent) {
-            return parent.pokesInternal[parent.readWord(offsets[0])];
+            return parent.pokesInternal[parent.readWord(speciesOffsets[0])];
         }
 
         public void setPokemon(Gen3RomHandler parent, Pokemon pkmn) {
             int value = parent.pokedexToInternal[pkmn.number];
-            for (int offset : offsets) {
+            for (int offset : speciesOffsets) {
                 parent.writeWord(offset, value);
+            }
+        }
+
+        public int getLevel(byte[] rom, int i) {
+            if (levelOffsets.length <= i) {
+                return 1;
+            }
+            return rom[levelOffsets[i]];
+        }
+
+        public void setLevel(byte[] rom, int level, int i) {
+            if (levelOffsets.length > i) { // Might not have a level entry e.g., it's an egg
+                rom[levelOffsets[i]] = (byte) level;
             }
         }
     }
@@ -1716,8 +1746,18 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     public List<StaticEncounter> getStaticPokemon() {
         List<StaticEncounter> statics = new ArrayList<>();
         List<StaticPokemon> staticsHere = romEntry.staticPokemon;
-        for (StaticPokemon staticPK : staticsHere) {
-            statics.add(new StaticEncounter(staticPK.getPokemon(this)));
+        int[] staticEggOffsets = new int[0];
+        if (romEntry.arrayEntries.containsKey("StaticEggPokemonOffsets")) {
+            staticEggOffsets = romEntry.arrayEntries.get("StaticEggPokemonOffsets");
+        }
+        for (int i = 0; i < staticsHere.size(); i++) {
+            int currentOffset = i;
+            StaticPokemon staticPK = staticsHere.get(i);
+            StaticEncounter se = new StaticEncounter();
+            se.pkmn = staticPK.getPokemon(this);
+            se.level = staticPK.getLevel(rom, 0);
+            se.isEgg = Arrays.stream(staticEggOffsets).anyMatch(x-> x == currentOffset);
+            statics.add(se);
         }
         return statics;
     }
@@ -1734,6 +1774,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
         for (int i = 0; i < staticsHere.size(); i++) {
             staticsHere.get(i).setPokemon(this, staticPokemon.get(i).pkmn);
+            staticsHere.get(i).setLevel(rom, staticPokemon.get(i).level, 0);
         }
         return true;
     }
@@ -3107,6 +3148,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
         available |= MiscTweak.RUN_WITHOUT_RUNNING_SHOES.getValue();
+        if (romEntry.romType == Gen3Constants.RomType_FRLG) {
+            available |= MiscTweak.BALANCE_STATIC_LEVELS.getValue();
+        }
         return available;
     }
 
@@ -3129,6 +3173,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             randomizePCPotion();
         } else if (tweak == MiscTweak.RUN_WITHOUT_RUNNING_SHOES) {
             applyRunWithoutRunningShoesPatch();
+        } else if (tweak == MiscTweak.BALANCE_STATIC_LEVELS) {
+            int[] fossilLevelOffsets = romEntry.arrayEntries.get("FossilLevelOffsets");
+            for (int fossilLevelOffset : fossilLevelOffsets) {
+                writeWord(rom, fossilLevelOffset, 30);
+            }
         }
     }
 

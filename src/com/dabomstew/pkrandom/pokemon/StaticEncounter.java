@@ -23,25 +23,60 @@ package com.dabomstew.pkrandom.pokemon;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class StaticEncounter {
     public Pokemon pkmn;
     public int forme = 0;
-    public String formeSuffix = "";
     public int level;
     public int heldItem;
+    public boolean isEgg = false;
     public boolean resetMoves = false;
 
-    public StaticEncounter() {
+    // In the games, sometimes what is logically an encounter or set of encounters with one specific Pokemon
+    // can actually consist of multiple encounters internally. This can happen because:
+    // - The same Pokemon appears in multiple locations (e.g., Reshiram/Zekrom in BW1, Giratina in Pt)
+    // - The same Pokemon appears at different levels depending on game progression (e.g., Volcarona in BW2)
+    // - Rebattling a Pokemon actually is different encounter entirely (e.g., Xerneas/Yveltal in XY)
+    // This list tracks encounters that should logically have the same species and forme, but *may* have
+    // differences in other properties like level.
+    public List<StaticEncounter> linkedEncounters;
 
+    public StaticEncounter() {
+        this.linkedEncounters = new ArrayList<>();
     }
 
     public StaticEncounter(Pokemon pkmn) {
         this.pkmn = pkmn;
+        this.linkedEncounters = new ArrayList<>();
     }
 
     @Override
     public String toString() {
-        return pkmn.fullName();
+        return this.toString(true);
+    }
+
+    public String toString(boolean printLevel) {
+        if (isEgg) {
+            return pkmn.fullName() + " (egg)";
+        }
+        else if (!printLevel) {
+            return pkmn.fullName();
+        }
+        StringBuilder levelStringBuilder = new StringBuilder("Lv" + level);
+        boolean needToDisplayLinkedLevels = false;
+        for (int i = 0; i < linkedEncounters.size(); i++) {
+            if (level != linkedEncounters.get(i).level) {
+                needToDisplayLinkedLevels = true;
+            }
+        }
+        if (needToDisplayLinkedLevels) {
+            for (int i = 0; i < linkedEncounters.size(); i++) {
+                levelStringBuilder.append(" / ").append("Lv").append(linkedEncounters.get(i).level);
+            }
+        }
+        return pkmn.fullName() + ", " + levelStringBuilder.toString();
     }
 
     public boolean canMegaEvolve() {

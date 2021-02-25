@@ -30,10 +30,8 @@ import cuecompressors.BLZCoder;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.zip.CRC32;
 
 public class NCCH {
 
@@ -53,6 +51,9 @@ public class NCCH {
     private boolean writingEnabled;
     private boolean codeCompressed, codeOpen, codeChanged;
     private byte[] codeRamstored;
+
+    // Public so the base game can read it from the game update NCCH
+    public long originalCodeCRC, originalRomfsHeaderCRC;
 
     private static final int media_unit_size = 0x200;
     private static final int header_and_exheader_size = 0xA00;
@@ -158,6 +159,9 @@ public class NCCH {
         byte[] romfsHeaderData = new byte[romfs_header_size];
         baseRom.seek(romfsOffset);
         baseRom.readFully(romfsHeaderData);
+        CRC32 checksum = new CRC32();
+        checksum.update(romfsHeaderData);
+        originalRomfsHeaderCRC = checksum.getValue();
         int magic1 = FileFunctions.readFullInt(romfsHeaderData, 0x00);
         int magic2 = FileFunctions.readFullInt(romfsHeaderData, 0x04);
         if (magic1 != romfs_magic_1 || magic2 != romfs_magic_2) {
@@ -642,6 +646,9 @@ public class NCCH {
             // size of the exefs header, so we need to add it back ourselves.
             baseRom.seek(exefsOffset + exefs_header_size + codeFileHeader.offset);
             baseRom.readFully(code);
+            CRC32 checksum = new CRC32();
+            checksum.update(code);
+            originalCodeCRC = checksum.getValue();
 
             if (codeCompressed) {
                 code = new BLZCoder(null).BLZ_DecodePub(code, ".code");
@@ -712,6 +719,45 @@ public class NCCH {
         if (romfsFiles.containsKey(filename)) {
             romfsFiles.get(filename).writeOverride(data);
         }
+    }
+
+    public void printRomDiagnostics(PrintStream logStream, NCCH gameUpdate) {
+        if (gameUpdate == null) {
+            logStream.println(".code: " + String.format("%08X", this.originalCodeCRC));
+        } else {
+            logStream.println(".code: " + String.format("%08X", gameUpdate.originalCodeCRC));
+        }
+        logStream.println("romfs header: " + String.format("%08X", this.originalRomfsHeaderCRC));
+        if (gameUpdate != null) {
+            logStream.println("romfs header (game update): " + String.format("%08X", gameUpdate.originalRomfsHeaderCRC));
+        }
+        List<String> fileList = new ArrayList<>();
+        Map<String, String> baseRomfsFileDiagnostics = this.getRomfsFilesDiagnostics();
+        Map<String, String> updateRomfsFileDiagnostics = new HashMap<>();
+        if (gameUpdate != null) {
+            updateRomfsFileDiagnostics = gameUpdate.getRomfsFilesDiagnostics();
+        }
+        for (Map.Entry<String, String> entry : updateRomfsFileDiagnostics.entrySet()) {
+            baseRomfsFileDiagnostics.remove(entry.getKey());
+            fileList.add(entry.getValue());
+        }
+        for (Map.Entry<String, String> entry : baseRomfsFileDiagnostics.entrySet()) {
+            fileList.add(entry.getValue());
+        }
+        Collections.sort(fileList);
+        for (String fileLog : fileList) {
+            logStream.println(fileLog);
+        }
+    }
+
+    public Map<String, String> getRomfsFilesDiagnostics() {
+        Map<String, String> fileDiagnostics = new HashMap<>();
+        for (Map.Entry<String, RomfsFile> entry : romfsFiles.entrySet()) {
+            if (entry.getValue().originalCRC != 0) {
+                fileDiagnostics.put(entry.getKey(), entry.getKey() + ": " + String.format("%08X", entry.getValue().originalCRC));
+            }
+        }
+        return fileDiagnostics;
     }
 
     public String getTmpFolder() {
