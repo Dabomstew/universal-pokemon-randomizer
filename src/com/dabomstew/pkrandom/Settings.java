@@ -49,7 +49,7 @@ public class Settings {
 
     public static final int VERSION = Version.VERSION;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 49;
+    public static final int LENGTH_OF_SETTINGS_DATA = 48;
 
     private CustomNamesSet customNames;
 
@@ -426,7 +426,7 @@ public class Settings {
 
         // 19 tms part 2
         // new in 170
-        out.write(makeByteSelected(fullHMCompat));
+        out.write(makeByteSelected(fullHMCompat, tmsFollowEvolutions, tutorFollowEvolutions));
 
         // 20 tms good damaging
         out.write((tmsForceGoodDamaging ? 0x80 : 0) | tmsGoodDamagingPercent);
@@ -544,8 +544,6 @@ public class Settings {
         out.write(selectedEXPCurve.toByte());
 
         out.write((staticLevelModified ? 0x80 : 0) | (staticLevelModifier+50));
-        
-        out.write(makeByteSelected(tmsFollowEvolutions, tutorFollowEvolutions));
 
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -688,7 +686,10 @@ public class Settings {
         )); 
         settings.setTmLevelUpMoveSanity(restoreState(data[18], 5));
         settings.setKeepFieldMoveTMs(restoreState(data[18], 6));
+
         settings.setFullHMCompat(restoreState(data[19], 0));
+        settings.setTmsFollowEvolutions(restoreState(data[19], 1));
+        settings.setTutorFollowEvolutions(restoreState(data[19], 2));
 
         settings.setTmsForceGoodDamaging(restoreState(data[20], 7));
         settings.setTmsGoodDamagingPercent(data[20] & 0x7F);
@@ -813,9 +814,6 @@ public class Settings {
 
         settings.setStaticLevelModified(restoreState(data[47],7));
         settings.setStaticLevelModifier((data[47] & 0x7F) - 50);
-        
-        settings.setTmsFollowEvolutions(restoreState(data[48], 0));
-        settings.setTutorFollowEvolutions(restoreState(data[48], 1));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
