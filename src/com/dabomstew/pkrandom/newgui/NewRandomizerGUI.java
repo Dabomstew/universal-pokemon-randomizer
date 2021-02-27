@@ -528,6 +528,8 @@ public class NewRandomizerGUI {
         ptRandomFollowEvolutionsRadioButton.addActionListener(e -> enableOrDisableSubControls());
         ptRandomCompletelyRadioButton.addActionListener(e -> enableOrDisableSubControls());
         spRandomizeStarterHeldItemsCheckBox.addActionListener(e -> enableOrDisableSubControls());
+        tmLevelupMoveSanityCheckBox.addActionListener(e -> enableOrDisableSubControls());
+        mtLevelupMoveSanityCheckBox.addActionListener(e -> enableOrDisableSubControls());
     }
 
     private void showInitialPopup() {
@@ -3104,10 +3106,15 @@ public class NewRandomizerGUI {
             if (!(pmsUnchangedRadioButton.isSelected()) || !(tmUnchangedRadioButton.isSelected())
                     || !(thcUnchangedRadioButton.isSelected())) {
                 tmLevelupMoveSanityCheckBox.setEnabled(true);
-                tmFollowEvolutionsCheckBox.setEnabled(true);
             } else {
                 tmLevelupMoveSanityCheckBox.setEnabled(false);
                 tmLevelupMoveSanityCheckBox.setSelected(false);
+            }
+
+            if ((!thcUnchangedRadioButton.isSelected()) || (tmLevelupMoveSanityCheckBox.isSelected())) {
+                tmFollowEvolutionsCheckBox.setEnabled(true);
+            }
+            else {
                 tmFollowEvolutionsCheckBox.setEnabled(false);
                 tmFollowEvolutionsCheckBox.setSelected(false);
             }
@@ -3129,10 +3136,15 @@ public class NewRandomizerGUI {
                     && (!(pmsUnchangedRadioButton.isSelected()) || !(mtUnchangedRadioButton.isSelected())
                     || !(mtcUnchangedRadioButton.isSelected()))) {
                 mtLevelupMoveSanityCheckBox.setEnabled(true);
-                mtFollowEvolutionsCheckBox.setEnabled(true);
             } else {
                 mtLevelupMoveSanityCheckBox.setEnabled(false);
                 mtLevelupMoveSanityCheckBox.setSelected(false);
+            }
+
+            if (!(mtcUnchangedRadioButton.isSelected()) || (mtLevelupMoveSanityCheckBox.isSelected())) {
+                mtFollowEvolutionsCheckBox.setEnabled(true);
+            }
+            else {
                 mtFollowEvolutionsCheckBox.setEnabled(false);
                 mtFollowEvolutionsCheckBox.setSelected(false);
             }
