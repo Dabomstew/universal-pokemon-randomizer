@@ -4751,7 +4751,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Get evolution data.
         Set<Pokemon> dontCopyPokes = RomFunctions.getBasicOrNoCopyPokemon(this, dontCopySplitEvos);
-        Set<Pokemon> middleEvos = RomFunctions.getMiddleEvolutions(this);
+        Set<Pokemon> middleEvos = RomFunctions.getMiddleEvolutions(this, dontCopySplitEvos);
 
         for (Pokemon pk : dontCopyPokes) {
             bpAction.applyTo(pk);
