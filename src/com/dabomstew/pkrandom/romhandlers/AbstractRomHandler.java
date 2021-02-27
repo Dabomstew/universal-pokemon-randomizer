@@ -4737,11 +4737,11 @@ public abstract class AbstractRomHandler implements RomHandler {
      *            Method to run on all base or no-copy Pokemon
      * @param epAction
      *            Method to run on all evolved Pokemon with a linear chain of
-     * @param ignoreNoCopyFlag
-     *            If true, treat no-copy pokemon like other evolutions
+     * @param dontCopySplitEvos
+     *            If true, treat split evolutions the same as other evolutions
      */
     private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction,
-                                        boolean ignoreNoCopyFlag) {
+                                        boolean dontCopySplitEvos) {
         List<Pokemon> allPokes = this.getPokemonInclFormes();
         for (Pokemon pk : allPokes) {
             if (pk != null) {
@@ -4750,7 +4750,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // Get evolution data.
-        Set<Pokemon> dontCopyPokes = RomFunctions.getBasicPokemon(this, !ignoreNoCopyFlag);
+        Set<Pokemon> dontCopyPokes = RomFunctions.getBasicOrNoCopyPokemon(this, dontCopySplitEvos);
         Set<Pokemon> middleEvos = RomFunctions.getMiddleEvolutions(this);
 
         for (Pokemon pk : dontCopyPokes) {

@@ -39,22 +39,22 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 public class RomFunctions {
 
-    public static Set<Pokemon> getBasicPokemon(RomHandler baseRom, boolean includeNonCopyingMons) {
+    public static Set<Pokemon> getBasicOrNoCopyPokemon(RomHandler baseRom, boolean dontCopySplitEvos) {
         List<Pokemon> allPokes = baseRom.getPokemonInclFormes();
-        Set<Pokemon> basicPokemon = new TreeSet<>();
+        Set<Pokemon> dontCopyPokes = new TreeSet<>();
         for (Pokemon pkmn : allPokes) {
             if (pkmn != null) {
                 if (pkmn.evolutionsTo.size() < 1) {
-                    basicPokemon.add(pkmn);
-                } else if (includeNonCopyingMons) {
+                    dontCopyPokes.add(pkmn);
+                } else if (!dontCopySplitEvos) {
                     Evolution onlyEvo = pkmn.evolutionsTo.get(0);
                     if (!onlyEvo.carryStats) {
-                        basicPokemon.add(pkmn);
+                        dontCopyPokes.add(pkmn);
                     }
                 }
             }
         }
-        return basicPokemon;
+        return dontCopyPokes;
     }
 
     public static Set<Pokemon> getMiddleEvolutions(RomHandler baseRom) {
