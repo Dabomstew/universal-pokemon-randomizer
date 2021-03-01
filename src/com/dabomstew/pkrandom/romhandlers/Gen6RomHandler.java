@@ -444,9 +444,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 if (pk.number == 290) {
                     Pokemon shedinja = pokes[292];
                     Evolution evol = new Evolution(pk, shedinja, false, EvolutionType.LEVEL_IS_EXTRA, 20);
-                    evol.forme = -1;
-                    evol.level = 20;
                     pk.evolutionsFrom.add(evol);
+                    shedinja.evolutionsTo.add(evol);
                 }
 
                 // Split evos shouldn't carry stats unless the evo is Nincada's
@@ -758,6 +757,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         // Now that we've handled the hardcoded Shedinja evolution, delete it so that
         // we do *not* handle it in WriteEvolutions
         nincada.evolutionsFrom.remove(1);
+        extraEvolution.evolutionsTo.remove(0);
         writeFile(romEntry.getString("Evolution"), evolutionCRO);
     }
 
