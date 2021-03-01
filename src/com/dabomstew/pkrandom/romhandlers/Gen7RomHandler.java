@@ -529,6 +529,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     evol.forme = -1;
                     evol.level = 20;
                     pk.evolutionsFrom.add(evol);
+                    shedinja.evolutionsTo.add(evol);
                 }
 
                 // Split evos shouldn't carry stats unless the evo is Nincada's
@@ -807,6 +808,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         // Now that we've handled the hardcoded Shedinja evolution, delete it so that
         // we do *not* handle it in WriteEvolutions
         nincada.evolutionsFrom.remove(1);
+        extraEvolution.evolutionsTo.remove(0);
     }
 
     private void saveMoves() {

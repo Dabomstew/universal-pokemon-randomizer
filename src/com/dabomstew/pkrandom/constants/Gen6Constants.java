@@ -219,6 +219,7 @@ public class Gen6Constants {
                             rustlingBushEncounterOffset = 0xF40CC, rustlingBushEncounterCount = 7;
     public static final Map<Integer, String> fallingEncounterNameMap = constructFallingEncounterNameMap();
     public static final Map<Integer, String> rustlingBushEncounterNameMap = constructRustlingBushEncounterNameMap();
+    public static final int perPokemonAreaDataLengthXY = 0xE8;
 
     private static final String saveLoadFormeReversionPrefixXY = "09EB000094E5141094E54A0B80E2", saveLoadFormeReversionPrefixORAS = "09EB000094E5141094E5120A80E2";
     public static final String afterBattleFormeReversionPrefix = "E4FFFFEA0000000000000000";
@@ -1762,4 +1763,50 @@ public class Gen6Constants {
             {774,0}, // Meteorite Shard
             {775,0}, // Eon Flute
     }).collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
+
+    public static final int[] xyMapNumToPokedexIndex = {
+            7,  // Couriway Town
+            8,  // Ambrette Town
+            13, // Cyllage City
+            14, // Shalour City
+            16, // Laverre City
+            22, // Route 2
+            23, // Route 3
+            24, // Route 4
+            25, // Route 5
+            26, // Route 6
+            27, // Route 7
+            28, // Route 8
+            29, // Route 9
+            30, // Route 10
+            31, // Route 11
+            32, // Route 12
+            33, // Route 13
+            34, // Route 14
+            35, // Route 15
+            36, // Route 16
+            37, // Route 17
+            38, // Route 18
+            39, // Route 19
+            40, // Route 20
+            41, // Route 21
+            42, // Route 22
+            44, // Santalune Forest
+            45, // Parfum Palace
+            46, 46, // Glittering Cave
+            47, 47, 47, 47, // Reflection Cave
+            49, 49, 49, 49, 49, // Frost Cavern
+            50, // Pokemon Village
+            51, 51, 51, 51, 51, // Victory Road
+            52, // Connecting Cave
+            54, 54, 54, 54, 54, // Terminus Cave
+            55, // Lost Hotel
+            43, // Azure Bay
+            46, 46, 46, 46, // Glittering Cave (ceiling)
+            47, 47, 47, 47, 47, 47, 47, 47, 47, 47, 47, 47, 47, 47, 47, 47, // Reflection Cave (ceiling)
+            51, 51, 51, 51, 51, 51, 51, 51, 51, 51, 51, 51, 51, 51, 51, 51, 51, 51, 51, 51, 51, 51, 51, 51, 51, 51, // Victory Road (ceiling and sky)
+            54, 54, 54, 54, 54, 54, 54, 54, 54, // Terminus Cave (ceiling)
+            26, 26, 26, // Route 6 (rustling bush)
+            38, 38, 38, 38 // Route 18 (rustling bush)
+    };
 }
