@@ -96,7 +96,7 @@ public class RomFunctions {
 
         // Remove any stones already used
         ev.from.evolutionsFrom.forEach(evo -> {
-            if (evo.type == EvolutionType.STONE) {
+            if (EvolutionType.isOfType("Stone", evo.type)) {
                 availableStones.remove(availableStones.indexOf(evo.extraInfo));
             }
         });

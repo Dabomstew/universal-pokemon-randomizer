@@ -158,7 +158,12 @@ public class Gen3Constants {
 
     public static final int evolutionMethodCount = 15;
 
-    public static final int sunStoneIndex = 93, moonStoneIndex = 94, waterStoneIndex = 97;
+    public static final int sunStoneIndex = 93, moonStoneIndex = 94, fireStoneIndex = 95, thunderStoneIndex = 96,
+        waterStoneIndex = 97, leafStoneIndex = 98;
+    public static final List<Integer> availableStones = Arrays.asList(
+        Gen3Constants.moonStoneIndex, Gen3Constants.fireStoneIndex,
+        Gen3Constants.waterStoneIndex, Gen3Constants.thunderStoneIndex,
+        Gen3Constants.leafStoneIndex, Gen3Constants.sunStoneIndex);
 
     public static final int highestAbilityIndex = 77;
 

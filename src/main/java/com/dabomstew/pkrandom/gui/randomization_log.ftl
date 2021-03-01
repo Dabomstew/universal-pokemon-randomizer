@@ -143,8 +143,38 @@
 				            <#case "LEVEL_DEFENSE_HIGHER">
 								${evoFm.type} ${evoFm.extraInfo}
 							<#break>
+							<#case "LEVEL_HIGH_PV">
+								LEVEL ${evoFm.extraInfo} when HIGH PERSONALITY VALUE
+							<#break>
+							<#case "LEVEL_LOW_PV">
+								LEVEL ${evoFm.extraInfo} when LOW PERSONALITY VALUE
+							<#break>
+							<#case "LEVEL_MALE_ONLY">
+								LEVEL ${evoFm.extraInfo} when MALE
+							<#break>
+							<#case "LEVEL_FEMALE_ONLY">
+								LEVEL ${evoFm.extraInfo} when FEMALE
+							<#break>
+							<#case "LEVEL_WITH_OTHER">
+								LEVEL with ${romHandler.getPokemon()[evoFm.extraInfo].name} in party
+							<#break>
+							<#case "LEVEL_ITEM_DAY">
+								LEVEL holding ${romHandler.getItemNames()[evoFm.extraInfo]} during DAY
+							<#break>
+							<#case "LEVEL_ITEM_NIGHT">
+								LEVEL holding ${romHandler.getItemNames()[evoFm.extraInfo]} during NIGHT
+							<#break>
+							<#case "LEVEL_WITH_MOVE">
+								LEVEL while knowing ${romHandler.getMoves()[evoFm.extraInfo].name}
+							<#break>
 							<#case "STONE">
 								${romHandler.getItemNames()[evoFm.extraInfo]}
+							<#break>
+							<#case "STONE_MALE_ONLY">
+								${romHandler.getItemNames()[evoFm.extraInfo]} when MALE
+							<#break>
+							<#case "STONE_FEMALE_ONLY">
+								${romHandler.getItemNames()[evoFm.extraInfo]} when FEMALE
 							<#break>
 							<#case "TRADE_ITEM">
 								TRADE holding ${romHandler.getItemNames()[evoFm.extraInfo]}
@@ -307,6 +337,8 @@
 				<li>Made <strong>${evo.from.name}</strong> evolve into <strong>${evo.to.name}</strong> by leveling up holding <strong>${romHandler.getItemNames()[evo.extraInfo]}</strong></li>
 			<#elseif evo.type.name() == "LEVEL_WITH_OTHER">
 				<li>Made <strong>${evo.from.name}</strong> evolve into <strong>${evo.to.name}</strong> by leveling up with <strong>${romHandler.getPokemon()[evo.extraInfo].name}</strong> in the party</li>
+			<#elseif evo.type.name() == "LEVEL_WITH_MOVE">
+				<li>Made <strong>${evo.from.name}</strong> evolve into <strong>${evo.to.name}</strong> by leveling up knowing <strong>${romHandler.getMoves()[evo.extraInfo].name}</strong></li>
 			<#else>
 				<li>${evo.from.name} evo type is ${evo.type.name()}</li>
 			</#if>

@@ -1,13 +1,22 @@
 package com.dabomstew.pkrandom.romhandlers;
 
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
+import com.dabomstew.pkrandom.pokemon.Evolution;
+import com.dabomstew.pkrandom.pokemon.EvolutionType;
+import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
@@ -25,6 +34,7 @@ public class Gen5Test {
     Gen5TextHandler mockTextHandler;
     NARCArchive mockArch;
     ArrayList<byte[]> mlList;
+    Map<Pokemon, List<MoveLearnt>> movesList;
 
     /**
      * When altering starters, make sure the ROM's text is updated when it is a
@@ -350,6 +360,62 @@ public class Gen5Test {
         romhandler.typeThemeTrainerPokes(false, false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1CelestialTowerTextModifications(isNotNull());
     }  
+            
+    /**
+     * Test Gen5 change methods only includes methods available in Gen5
+     * Also verify no duplicate methods used, and no invalid evolutions
+     * 
+     * @throws IOException
+     */
+    @Test
+    public void TestGen5ChangeMethods() throws IOException {
+        Gen5RomHandler romhandler = spy(new Gen5RomHandler(new Random()));
+        doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
+        doReturn(mock(Map.class)).when(romhandler).getTemplateData();
+        resetDataModel(romhandler);
+        romhandler.randomizeEvolutions(false, false, true, true, false, false, false);
+        romhandler.getPokemon().stream().forEach(pk -> {
+            ArrayList<EvolutionType> usedMethods = new ArrayList<EvolutionType>();
+            ArrayList<Integer> usedStones = new ArrayList<Integer>();
+            ArrayList<Integer> usedItems = new ArrayList<Integer>();
+            ArrayList<Integer> usedPokemon = new ArrayList<Integer>();
+            ArrayList<Integer> usedMoves = new ArrayList<Integer>();
+            pk.evolutionsFrom.stream().forEach(evo -> {
+                assertTrue("Evolution is invalid - " + evo, evo.type != null && evo.type != EvolutionType.NONE);
+                assertTrue(evo.type + " was not available in Gen 5", EvolutionType.isInGeneration(5, evo.type));
+
+                // Collect the method
+                if (EvolutionType.isOfType("Stone", evo.type)) {
+                    usedStones.add(evo.extraInfo);
+                } else if (EvolutionType.isOfType("Item", evo.type)) {
+                    usedItems.add(evo.extraInfo);
+                } else if (EvolutionType.isOfType("Party", evo.type)) {
+                    usedPokemon.add(evo.extraInfo);
+                } else if (evo.type == EvolutionType.LEVEL_WITH_MOVE) {
+                    usedMoves.add(evo.extraInfo);
+                } else {
+                    usedMethods.add(evo.type);
+                }
+            });
+
+            // Verify no duplicates
+            HashSet<EvolutionType> uniqueMethods = new HashSet<EvolutionType>(usedMethods);
+            assertTrue("Duplicate method detected - " + Arrays.toString(usedMethods.toArray()), 
+                uniqueMethods.size() == usedMethods.size());
+            HashSet<Integer> uniqueStones = new HashSet<Integer>(usedStones);
+            assertTrue("Duplicate stone detected - " + Arrays.toString(usedStones.toArray()), 
+                    uniqueStones.size() == usedStones.size());
+            HashSet<Integer> uniqueItems = new HashSet<Integer>(usedItems);
+            assertTrue("Duplicate item detected - " + Arrays.toString(usedItems.toArray()), 
+                    uniqueItems.size() == usedItems.size());
+            HashSet<Integer> uniquePokemon = new HashSet<Integer>(usedPokemon);
+            assertTrue("Duplicate pokemon detected - " + Arrays.toString(usedPokemon.toArray()), 
+                    uniquePokemon.size() == usedPokemon.size());
+            HashSet<Integer> uniqueMoves = new HashSet<Integer>(usedMoves);
+            assertTrue("Duplicate move detected - " + Arrays.toString(usedMoves.toArray()), 
+                    uniqueMoves.size() == usedMoves.size());
+        });
+    }
 
     /**
      * Function for granular modification of data model
@@ -357,6 +423,7 @@ public class Gen5Test {
     private void setUp() {
         pokemonList = new ArrayList<Pokemon>();
         trainerList = new ArrayList<Trainer>();
+        movesList = new HashMap<Pokemon, List<MoveLearnt>>();
         mockTextHandler = mock(Gen5TextHandler.class);
         mockArch = mock(NARCArchive.class);
         mlList = new ArrayList();
@@ -366,6 +433,10 @@ public class Gen5Test {
             pk.name = "";
             pk.primaryType = Type.values()[i%Type.values().length];
             pokemonList.add(pk);
+            for (int j = 0; j < i % 3; j++) {
+                Evolution ev = new Evolution(pk, new Pokemon(), false, EvolutionType.LEVEL, 1);
+                pk.evolutionsFrom.add(ev);
+            }
         }
         for(String tag: new String[]{"GYM1", "CILAN", "CHILI", "CRESS"}) {
             Trainer t = new Trainer();
@@ -388,6 +459,27 @@ public class Gen5Test {
         }
         for (int i = 0; i < GET_FILE_LENGTH; i++) {
             mlList.add(new byte[] { (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF });
+        }
+
+        for(int i = 0; i < pokemonList.size(); i++) {
+            ArrayList<MoveLearnt> pMoveList = new ArrayList<MoveLearnt>();
+            MoveLearnt ml = new MoveLearnt();
+            ml.move = 1;
+            ml.level = 1;
+            pMoveList.add(ml);
+            MoveLearnt ml2 = new MoveLearnt();
+            ml.move = 2;
+            ml.level = 2;
+            pMoveList.add(ml2);
+            MoveLearnt ml3 = new MoveLearnt();
+            ml.move = 3;
+            ml.level = 3;
+            pMoveList.add(ml3);
+            MoveLearnt ml4 = new MoveLearnt();
+            ml.move = 4;
+            ml.level = 4;
+            pMoveList.add(ml4);
+            movesList.put(pokemonList.get(i), pMoveList);
         }
     }
 
@@ -412,6 +504,7 @@ public class Gen5Test {
         doNothing().when(romhandler).writeWord(any(), anyInt(), anyInt());
         doNothing().when(romhandler).writeNARC(anyString(), any());
         doNothing().when(romhandler).writeLong(any(), anyInt(), anyInt());
+        doReturn(movesList).when(romhandler).getMovesLearnt();
     }
     
 }

@@ -88,7 +88,15 @@ public class Gen4Constants {
 
     public static final int evolutionMethodCount = 26;
 
-    public static final int waterStoneIndex = 84, leafStoneIndex = 85, dawnStoneIndex = 109;
+    public static final int sunStoneIndex = 80, moonStoneIndex = 81, fireStoneIndex = 82, thunderStoneIndex = 83, 
+        waterStoneIndex = 84, leafStoneIndex = 85, shinyStoneIndex = 107, duskStoneIndex = 108, dawnStoneIndex = 109;
+
+    public static final List<Integer> availableStones = Arrays.asList(
+        Gen4Constants.moonStoneIndex, Gen4Constants.fireStoneIndex,
+        Gen4Constants.waterStoneIndex, Gen4Constants.thunderStoneIndex,
+        Gen4Constants.leafStoneIndex, Gen4Constants.sunStoneIndex,
+        Gen4Constants.shinyStoneIndex, Gen4Constants.duskStoneIndex,
+        Gen4Constants.dawnStoneIndex);
 
     public static final int highestAbilityIndex = 123;
 

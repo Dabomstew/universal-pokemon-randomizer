@@ -39,6 +39,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 
 import com.dabomstew.pkrandom.FileFunctions;
@@ -2277,67 +2278,135 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         Set<Evolution> extraEvolutions = new HashSet<Evolution>();
         for (Pokemon pkmn : getPokemon()) {
             if (pkmn != null) {
-                for (Evolution evo : pkmn.evolutionsFrom) {
-                    // Not trades, but impossible without trading
-                    if (evo.type == EvolutionType.HAPPINESS_DAY && getRomEntry().romType == Gen3Constants.RomType_FRLG) {
-                        // happiness day change to Sun Stone
-                        evo.type = EvolutionType.STONE;
-                        evo.extraInfo = Gen3Constants.sunStoneIndex; // sun stone
-                        tradeEvoFixed.add(evo);
-                    }
-                    if (evo.type == EvolutionType.HAPPINESS_NIGHT && getRomEntry().romType == Gen3Constants.RomType_FRLG) {
-                        // happiness night change to Moon Stone
-                        evo.type = EvolutionType.STONE;
-                        evo.extraInfo = Gen3Constants.moonStoneIndex; // moon stone
-                        tradeEvoFixed.add(evo);
-                    }
-                    if (evo.type == EvolutionType.LEVEL_HIGH_BEAUTY) {
-                        // beauty add alternate of happiness
-                        Evolution extraEntry = new Evolution(evo.from, evo.to, true,
-                        EvolutionType.HAPPINESS, 0);
-                        extraEvolutions.add(extraEntry);
-                        tradeEvoFixed.add(extraEntry);
-                    }
-                    // Pure Trade
-                    if (evo.type == EvolutionType.TRADE) {
-                        // Haunter, Machoke, Kadabra, Graveler
-                        // Make it into level 37, we're done.
-                        evo.type = EvolutionType.LEVEL;
-                        evo.extraInfo = 37;
-                        tradeEvoFixed.add(evo);
-                    }
-                    // Trade w/ Held Item
-                    if (evo.type == EvolutionType.TRADE_ITEM) {
-                        if (evo.from.number == Gen3Constants.poliwhirlIndex) {
-                            // Poliwhirl: Lv 37
+                extraEvolutions.clear();
+                pkmn.evolutionsFrom.stream().forEach(evo -> {
+                    if (changeMethodEvos) {
+                        switch (evo.type) {
+                            case TRADE:
+                            case TRADE_ITEM:
+                                // We can't use a level since one already exists - use a stone instead
+                                if (pkmn.evolutionsFrom.stream().anyMatch(evos -> evos.type.usesLevel())) {
+                                    List<Integer> unusedStones = RomFunctions.removeUsedStones(new ArrayList<Integer>(Gen3Constants.availableStones), evo);
+                                    evo.type = EvolutionType.STONE;
+                                    evo.extraInfo = unusedStones.get(this.random.nextInt(unusedStones.size()));
+                                    tradeEvoFixed.add(evo);
+                                }
+                                // Change it to evolve at 37
+                                else {
+                                    evo.type = EvolutionType.LEVEL;
+                                    evo.extraInfo = 37;
+                                    tradeEvoFixed.add(evo);
+                                }
+                                break;
+                            case HAPPINESS_DAY:
+                                if (getRomEntry().romType == Gen3Constants.RomType_FRLG) {
+                                    // Check if we can change to a sun stone, otherwise any.
+                                    List<Integer> unusedStones = RomFunctions.removeUsedStones(new ArrayList<Integer>(Gen3Constants.availableStones), evo);
+                                    evo.type = EvolutionType.STONE;
+                                    if (unusedStones.contains(Gen3Constants.sunStoneIndex)) {
+                                        evo.extraInfo = Gen3Constants.sunStoneIndex;
+                                    } else {
+                                        evo.extraInfo = unusedStones.get(this.random.nextInt(unusedStones.size()));
+                                    }
+                                    tradeEvoFixed.add(evo);
+                                }
+                                break;
+                            case HAPPINESS_NIGHT:
+                                if (getRomEntry().romType == Gen3Constants.RomType_FRLG) {
+                                    // Check if we can change to a moon stone, otherwise any.
+                                    List<Integer> unusedStones = RomFunctions.removeUsedStones(new ArrayList<Integer>(Gen3Constants.availableStones), evo);
+                                    evo.type = EvolutionType.STONE;
+                                    if (unusedStones.contains(Gen3Constants.moonStoneIndex)) {
+                                        evo.extraInfo = Gen3Constants.moonStoneIndex;
+                                    } else {
+                                        evo.extraInfo = unusedStones.get(this.random.nextInt(unusedStones.size()));
+                                    }
+                                    tradeEvoFixed.add(evo);
+                                }
+                                break;
+                            case LEVEL_HIGH_BEAUTY:
+                                // We can't use happiness if it's been used - use a stone instead
+                                if (evo.from.evolutionsFrom.stream().anyMatch(ev -> EvolutionType.isOfType("Happiness", ev.type))) {
+                                    List<Integer> unusedStones = RomFunctions.removeUsedStones(new ArrayList<Integer>(Gen3Constants.availableStones), evo);
+                                    Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                        EvolutionType.STONE, unusedStones.get(this.random.nextInt(unusedStones.size())));
+                                    extraEvolutions.add(extraEntry);
+                                    tradeEvoFixed.add(extraEntry);
+                                }
+                                // Add extra to evolve at high happiness
+                                else {
+                                    Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                        EvolutionType.HAPPINESS, 0);
+                                    extraEvolutions.add(extraEntry);
+                                    tradeEvoFixed.add(extraEntry);
+                                }
+                                break;
+                            default:
+                                // Don't do anything
+                                break;
+                        }
+                    } else {
+                        // Not trades, but impossible without trading
+                        if (evo.type == EvolutionType.HAPPINESS_DAY && getRomEntry().romType == Gen3Constants.RomType_FRLG) {
+                            // happiness day change to Sun Stone
+                            evo.type = EvolutionType.STONE;
+                            evo.extraInfo = Gen3Constants.sunStoneIndex; // sun stone
+                            tradeEvoFixed.add(evo);
+                        }
+                        if (evo.type == EvolutionType.HAPPINESS_NIGHT && getRomEntry().romType == Gen3Constants.RomType_FRLG) {
+                            // happiness night change to Moon Stone
+                            evo.type = EvolutionType.STONE;
+                            evo.extraInfo = Gen3Constants.moonStoneIndex; // moon stone
+                            tradeEvoFixed.add(evo);
+                        }
+                        if (evo.type == EvolutionType.LEVEL_HIGH_BEAUTY) {
+                            // beauty add alternate of happiness
+                            Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                EvolutionType.HAPPINESS, 0);
+                            extraEvolutions.add(extraEntry);
+                            tradeEvoFixed.add(extraEntry);
+                        }
+                        // Pure Trade
+                        if (evo.type == EvolutionType.TRADE) {
+                            // Haunter, Machoke, Kadabra, Graveler
+                            // Make it into level 37, we're done.
                             evo.type = EvolutionType.LEVEL;
                             evo.extraInfo = 37;
-                        } else if (evo.from.number == Gen3Constants.slowpokeIndex) {
-                            // Slowpoke: Water Stone
-                            evo.type = EvolutionType.STONE;
-                            evo.extraInfo = Gen3Constants.waterStoneIndex; // water stone
-                        } else if (evo.from.number == Gen3Constants.seadraIndex) {
-                            // Seadra: Lv 40
-                            evo.type = EvolutionType.LEVEL;
-                            evo.extraInfo = 40;
-                        } else if (evo.from.number == Gen3Constants.clamperlIndex
-                                && evo.to.number == Gen3Constants.huntailIndex) {
-                            // Clamperl -> Huntail: Lv30
-                            evo.type = EvolutionType.LEVEL;
-                            evo.extraInfo = 30;
-                        } else if (evo.from.number == Gen3Constants.clamperlIndex
-                                && evo.to.number == Gen3Constants.gorebyssIndex) {
-                            // Clamperl -> Gorebyss: Water Stone
-                            evo.type = EvolutionType.STONE;
-                            evo.extraInfo = Gen3Constants.waterStoneIndex; // water stone
-                        } else {
-                            // Onix, Scyther or Porygon: Lv30
-                            evo.type = EvolutionType.LEVEL;
-                            evo.extraInfo = 30;
+                            tradeEvoFixed.add(evo);
                         }
-                        tradeEvoFixed.add(evo);
+                        // Trade w/ Held Item
+                        if (evo.type == EvolutionType.TRADE_ITEM) {
+                            if (evo.from.number == Gen3Constants.poliwhirlIndex) {
+                                // Poliwhirl: Lv 37
+                                evo.type = EvolutionType.LEVEL;
+                                evo.extraInfo = 37;
+                            } else if (evo.from.number == Gen3Constants.slowpokeIndex) {
+                                // Slowpoke: Water Stone
+                                evo.type = EvolutionType.STONE;
+                                evo.extraInfo = Gen3Constants.waterStoneIndex; // water stone
+                            } else if (evo.from.number == Gen3Constants.seadraIndex) {
+                                // Seadra: Lv 40
+                                evo.type = EvolutionType.LEVEL;
+                                evo.extraInfo = 40;
+                            } else if (evo.from.number == Gen3Constants.clamperlIndex
+                                    && evo.to.number == Gen3Constants.huntailIndex) {
+                                // Clamperl -> Huntail: Lv30
+                                evo.type = EvolutionType.LEVEL;
+                                evo.extraInfo = 30;
+                            } else if (evo.from.number == Gen3Constants.clamperlIndex
+                                    && evo.to.number == Gen3Constants.gorebyssIndex) {
+                                // Clamperl -> Gorebyss: Water Stone
+                                evo.type = EvolutionType.STONE;
+                                evo.extraInfo = Gen3Constants.waterStoneIndex; // water stone
+                            } else {
+                                // Onix, Scyther or Porygon: Lv30
+                                evo.type = EvolutionType.LEVEL;
+                                evo.extraInfo = 30;
+                            }
+                            tradeEvoFixed.add(evo);
+                        }
                     }
-                }
+                });
                 pkmn.evolutionsFrom.addAll(extraEvolutions);
                 for (Evolution ev : extraEvolutions) {
                     ev.to.evolutionsTo.add(ev);
@@ -2345,6 +2414,92 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             }
         }
         this.getTemplateData().put("removeTradeEvo", tradeEvoFixed);
+    }
+
+    @Override
+    public void updateExtraInfo(Evolution ev) {
+        switch(ev.type) {
+            case LEVEL:
+            case LEVEL_ATK_DEF_SAME:
+            case LEVEL_ATTACK_HIGHER:
+            case LEVEL_DEFENSE_HIGHER:
+            case LEVEL_LOW_PV:
+            case LEVEL_HIGH_PV:
+                // Get the level of previous evolution
+                int prevLevel = 0, minSiblingLevel = 0, maxSiblingLevel = 0;
+                for (Evolution ev2 : ev.from.evolutionsTo) {
+                    if (ev2.type.usesLevel()) {
+                        prevLevel = Integer.max(prevLevel, ev2.extraInfo);
+                    }
+                }
+
+                // If there is a split evo based on level, make sure it is the highest
+                for (Evolution ev3 : ev.from.evolutionsFrom) {
+                    if (EvolutionType.isOfType("Uncontrolled", ev3.type)) {
+                        maxSiblingLevel = Integer.max(maxSiblingLevel, ev3.extraInfo);
+                    }
+                    // Check if it's a level at all to avoid setting a new evolution
+                    // earlier than a method like ATTACK_HIGHER
+                    else if (ev3.type.usesLevel()) {
+                        minSiblingLevel = Integer.max(minSiblingLevel, ev3.extraInfo);
+                    }
+                }
+
+                // There's no previous level so make it at least 25
+                if (prevLevel == 0) {
+                    ev.extraInfo = this.random.nextInt(16) + 25;
+                    // For low BST, divide that level in half
+                    if (ev.from.bst() < 300) {
+                        ev.extraInfo /= 2;
+                    }
+                }
+                // Set the new evolution level to 5-20 higher than the current
+                else {
+                    ev.extraInfo = this.random.nextInt(16) + 5 + prevLevel;
+                }
+
+                // We have a LEVEL, LEVEL_LOW_PV, or LEVEL_HIGH_PV
+                if (maxSiblingLevel > 0) {
+                    // Set this one equal to that sibling since they're both 
+                    // uncontrolled levels
+                    if (EvolutionType.isOfType("Uncontrolled", ev.type)) {
+                        ev.extraInfo = maxSiblingLevel;
+                    } 
+                    // Set this one less than that sibling since this is controllable
+                    else if (ev.extraInfo >= maxSiblingLevel) {
+                        ev.extraInfo = maxSiblingLevel - 1;
+                    }
+                }
+
+                // Increase above level if necessary (setting uncontrolledLevelEvo after controllable)
+                if (minSiblingLevel > 0 && maxSiblingLevel == 0 && ev.extraInfo <= minSiblingLevel) {
+                    ev.extraInfo = minSiblingLevel + 1;
+                }
+
+                break;
+            case LEVEL_HIGH_BEAUTY:
+                ev.extraInfo = 170;
+                break;
+            case STONE:
+                // Remove any stones already used
+                List<Integer> unusedStones = RomFunctions.removeUsedStones(new ArrayList<Integer>(Gen3Constants.availableStones), ev);
+                ev.extraInfo = unusedStones.get(this.random.nextInt(unusedStones.size()));
+                break;
+            case TRADE_ITEM:
+                List<Integer> usedItems = ev.from.evolutionsFrom.stream().filter(evo -> evo.type == ev.type)
+                    .map(evo -> evo.extraInfo).collect(Collectors.toList());
+                ev.extraInfo = this.getAllowedItems().randomNonTM(this.random);
+                // Given there are 200+ items to choose from, this should almost never be called
+                // It exists to prevent the edge case where we have a split evo pokemon with both
+                // methods being TRADE_ITEM and both pick the same item
+                while (usedItems.contains(ev.extraInfo)) {
+                    ev.extraInfo = this.getAllowedItems().randomNonTM(this.random);
+                }
+                break;
+            default:
+                ev.extraInfo = 0;
+                break;
+        }
     }
 
     @Override

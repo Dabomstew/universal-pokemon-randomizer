@@ -111,4 +111,34 @@ public class SettingsTest {
             Assume.assumeTrue(false);
         }
     }
+
+    // Test change methods is enabled only when randomzied evos is true
+    // evaluates to false when turned off
+    // selecting evaluates to true
+    // not selecting evaluates to false
+    @Test
+    public void TestChangeMethods() throws IOException {
+        try {
+            RandomizerGUI rg = spy(new RandomizerGUI(false, false, true));
+            RomHandler romhandler = mock(RomHandler.class);
+            doReturn(romhandler).when(rg).getRomHandler();
+            Settings settings = rg.getCurrentSettings();
+            // Sanity check - should evaluate to false
+            assertFalse("Change Methods should not be set yet", settings.isEvosChangeMethod());
+            
+            // Turn evosChangeMethod to true
+            settings.setEvosChangeMethod(true);
+            assertTrue("evosChangeMethod should evaluate to true", settings.isEvosChangeMethod());
+
+            // Turn evosChangeMethod to false
+            settings.setEvosChangeMethod(false);
+            assertFalse("evosChangeMethod should evaluate to false", settings.isEvosChangeMethod());
+        } catch (java.awt.HeadlessException exc) {
+            System.out.println("No X11 DISPLAY variable is set. Unable to verify functionality. Passing ChangeMethods test.");
+            Assume.assumeTrue(false);
+        } catch (java.awt.AWTError | NoClassDefFoundError exc) {
+            System.out.println("Cannot reach the X11 DISPLAY variable set. Unable to verify functionality. Passing ChangeMethods test.");
+            Assume.assumeTrue(false);
+        }
+    } 
 }

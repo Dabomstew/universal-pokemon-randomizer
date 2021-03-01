@@ -106,7 +106,16 @@ public class Gen5Constants {
 
     public static final int slowpokeIndex = 79, karrablastIndex = 588, shelmetIndex = 616;
 
-    public static final int waterStoneIndex = 84;
+    public static final int sunStoneIndex = 80, moonStoneIndex = 81, fireStoneIndex = 82,
+        thunderStoneIndex = 83, waterStoneIndex = 84, leafStoneIndex = 85, shinyStoneIndex = 107,
+        duskStoneIndex = 108, dawnStoneIndex = 109;
+
+    public static final List<Integer> availableStones = Arrays.asList(
+        Gen5Constants.moonStoneIndex, Gen5Constants.fireStoneIndex,
+        Gen5Constants.waterStoneIndex, Gen5Constants.thunderStoneIndex,
+        Gen5Constants.leafStoneIndex, Gen5Constants.sunStoneIndex,
+        Gen5Constants.shinyStoneIndex, Gen5Constants.duskStoneIndex,
+        Gen5Constants.dawnStoneIndex);
 
     public static final int highestAbilityIndex = 164;
 

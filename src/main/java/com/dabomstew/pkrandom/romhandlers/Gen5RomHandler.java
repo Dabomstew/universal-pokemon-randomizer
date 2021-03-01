@@ -38,6 +38,7 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import pptxt.PPTxtHandler;
 
@@ -1804,67 +1805,137 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         for (Pokemon pkmn : getPokemon()) {
             if (pkmn != null) {
                 extraEvolutions.clear();
-                for (Evolution evo : pkmn.evolutionsFrom) {
-                    if (changeMoveEvos && evo.type == EvolutionType.LEVEL_WITH_MOVE) {
-                        // read move
-                        int move = evo.extraInfo;
-                        int levelLearntAt = 1;
-                        for (MoveLearnt ml : movesets.get(evo.from)) {
-                            if (ml.move == move) {
-                                levelLearntAt = ml.level;
+                pkmn.evolutionsFrom.stream().forEach(evo -> {
+                    if (changeMethodEvos) {
+                        switch (evo.type) {
+                            case TRADE:
+                                // We can't use a level since one already exists - use a stone instead
+                                if (pkmn.evolutionsFrom.stream().anyMatch(evos -> evos.type.usesLevel())) {
+                                    List<Integer> unusedStones = RomFunctions.removeUsedStones(new ArrayList<Integer>(Gen5Constants.availableStones), evo);
+                                    evo.type = EvolutionType.STONE;
+                                    evo.extraInfo = unusedStones.get(this.random.nextInt(unusedStones.size()));
+                                    tradeEvoFixed.add(evo);
+                                }
+                                // Change it to evolve at 37
+                                else {
+                                    evo.type = EvolutionType.LEVEL;
+                                    evo.extraInfo = 37;
+                                    tradeEvoFixed.add(evo);
+                                }
                                 break;
+                            case TRADE_ITEM:
+                                // Get the current item & evolution
+                                int item = evo.extraInfo;
+                                // We can't use a level since one already exists - use a stone instead
+                                if (pkmn.evolutionsFrom.stream().anyMatch(evos -> evos.type.usesLevel())) {
+                                    List<Integer> unusedStones = RomFunctions.removeUsedStones(new ArrayList<Integer>(Gen5Constants.availableStones), evo);
+                                    evo.type = EvolutionType.STONE;
+                                    evo.extraInfo = unusedStones.get(this.random.nextInt(unusedStones.size()));
+                                    tradeEvoFixed.add(evo);
+                                } else {
+                                    // Replace, for this entry, w/
+                                    // Level up w/ Held Item at Day
+                                    evo.type = EvolutionType.LEVEL_ITEM_DAY;
+                                    // now add an extra evo for
+                                    // Level up w/ Held Item at Night
+                                    Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                            EvolutionType.LEVEL_ITEM_NIGHT, item);
+                                    extraEvolutions.add(extraEntry);
+                                    tradeEvoFixed.add(evo);
+                                }
+                                break;
+                            case LEVEL_WITH_MOVE:
+                                // Pick another move
+                                if (changeMoveEvos) {
+                                    // Pick another move
+                                    List<Integer> usedMoves = evo.from.evolutionsFrom.stream().filter(ev -> ev.type == evo.type)
+                                        .map(ev -> ev.extraInfo).collect(Collectors.toList());
+                                    evo.extraInfo = this.getMovesLearnt().get(evo.from).get(this.random.nextInt(this.getMovesLearnt().get(evo.from).size())).move;
+                                    // Similar to STONE, but each Pokemon has a finite moveset
+                                    // Must make sure there are no duplicates
+                                    while (usedMoves.contains(evo.extraInfo)) {
+                                        evo.extraInfo = this.getMovesLearnt().get(evo.from).get(this.random.nextInt(this.getMovesLearnt().get(evo.from).size())).move;
+                                    }
+                                    tradeEvoFixed.add(evo);
+                                }
+                                break;
+                            case LEVEL_HIGH_BEAUTY:
+                                // We can't use happiness if it's been used - use a stone instead
+                                if (evo.from.evolutionsFrom.stream().anyMatch(ev -> EvolutionType.isOfType("Happiness", ev.type))) {
+                                    List<Integer> unusedStones = RomFunctions.removeUsedStones(new ArrayList<Integer>(Gen5Constants.availableStones), evo);
+                                    Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                        EvolutionType.STONE, unusedStones.get(this.random.nextInt(unusedStones.size())));
+                                    extraEvolutions.add(extraEntry);
+                                    tradeEvoFixed.add(extraEntry);
+                                }
+                                // Add extra to evolve at high happiness
+                                else {
+                                    Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                        EvolutionType.HAPPINESS, 0);
+                                    extraEvolutions.add(extraEntry);
+                                    tradeEvoFixed.add(extraEntry);
+                                }
+                                break;
+                            default:
+                                // Don't do anything
+                                break;
+                        }
+                    }
+                    else {
+                        if (changeMoveEvos && evo.type == EvolutionType.LEVEL_WITH_MOVE) {
+                            // Pick another move
+                            List<Integer> usedMoves = evo.from.evolutionsFrom.stream().filter(ev -> ev.type == evo.type)
+                                .map(ev -> ev.extraInfo).collect(Collectors.toList());
+                            evo.extraInfo = this.getMovesLearnt().get(evo.from).get(this.random.nextInt(this.getMovesLearnt().get(evo.from).size())).move;
+                            // Similar to STONE, but each Pokemon has a finite moveset
+                            // Must make sure there are no duplicates
+                            while (usedMoves.contains(evo.extraInfo)) {
+                                evo.extraInfo = this.getMovesLearnt().get(evo.from).get(this.random.nextInt(this.getMovesLearnt().get(evo.from).size())).move;
+                            }
+                            tradeEvoFixed.add(evo);
+                        }
+                        // Pure Trade
+                        if (evo.type == EvolutionType.TRADE) {
+                            // Replace w/ level 37
+                            evo.type = EvolutionType.LEVEL;
+                            evo.extraInfo = 37;
+                            tradeEvoFixed.add(evo);
+                        }
+                        // Trade w/ Item
+                        if (evo.type == EvolutionType.TRADE_ITEM) {
+                            // Get the current item & evolution
+                            int item = evo.extraInfo;
+                            if (evo.from.number == Gen5Constants.slowpokeIndex) {
+                                // Slowpoke is awkward - he already has a level evo
+                                // So we can't do Level up w/ Held Item for him
+                                // Put Water Stone instead
+                                evo.type = EvolutionType.STONE;
+                                evo.extraInfo = Gen5Constants.waterStoneIndex; // water stone
+                                tradeEvoFixed.add(evo);
+                            } else {
+                                // Replace, for this entry, w/
+                                // Level up w/ Held Item at Day
+                                evo.type = EvolutionType.LEVEL_ITEM_DAY;
+                                // now add an extra evo for
+                                // Level up w/ Held Item at Night
+                                Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                        EvolutionType.LEVEL_ITEM_NIGHT, item);
+                                extraEvolutions.add(extraEntry);
+                                tradeEvoFixed.add(evo);
                             }
                         }
-                        if (levelLearntAt == 1) {
-                            // override for piloswine
-                            levelLearntAt = 45;
-                        }
-                        // change to pure level evo
-                        evo.type = EvolutionType.LEVEL;
-                        evo.extraInfo = levelLearntAt;
-                        tradeEvoFixed.add(evo);
-                    }
-                    // Pure Trade
-                    if (evo.type == EvolutionType.TRADE) {
-                        // Replace w/ level 37
-                        evo.type = EvolutionType.LEVEL;
-                        evo.extraInfo = 37;
-                        tradeEvoFixed.add(evo);
-                    }
-                    // Trade w/ Item
-                    if (evo.type == EvolutionType.TRADE_ITEM) {
-                        // Get the current item & evolution
-                        int item = evo.extraInfo;
-                        if (evo.from.number == Gen5Constants.slowpokeIndex) {
-                            // Slowpoke is awkward - he already has a level evo
-                            // So we can't do Level up w/ Held Item for him
-                            // Put Water Stone instead
-                            evo.type = EvolutionType.STONE;
-                            evo.extraInfo = Gen5Constants.waterStoneIndex; // water stone
-                            tradeEvoFixed.add(evo);
-                        } else {
-                            // Replace, for this entry, w/
-                            // Level up w/ Held Item at Day
-                            evo.type = EvolutionType.LEVEL_ITEM_DAY;
-                            // now add an extra evo for
-                            // Level up w/ Held Item at Night
-                            Evolution extraEntry = new Evolution(evo.from, evo.to, true,
-                                    EvolutionType.LEVEL_ITEM_NIGHT, item);
-                            extraEvolutions.add(extraEntry);
+                        if (evo.type == EvolutionType.TRADE_SPECIAL) {
+                            // This is the karrablast <-> shelmet trade
+                            // Replace it with Level up w/ Other Species in Party
+                            // (22)
+                            // Based on what species we're currently dealing with
+                            evo.type = EvolutionType.LEVEL_WITH_OTHER;
+                            evo.extraInfo = (evo.from.number == Gen5Constants.karrablastIndex ? Gen5Constants.shelmetIndex
+                                    : Gen5Constants.karrablastIndex);
                             tradeEvoFixed.add(evo);
                         }
                     }
-                    if (evo.type == EvolutionType.TRADE_SPECIAL) {
-                        // This is the karrablast <-> shelmet trade
-                        // Replace it with Level up w/ Other Species in Party
-                        // (22)
-                        // Based on what species we're currently dealing with
-                        evo.type = EvolutionType.LEVEL_WITH_OTHER;
-                        evo.extraInfo = (evo.from.number == Gen5Constants.karrablastIndex ? Gen5Constants.shelmetIndex
-                                : Gen5Constants.karrablastIndex);
-                        tradeEvoFixed.add(evo);
-                    }
-                }
+                });
 
                 pkmn.evolutionsFrom.addAll(extraEvolutions);
                 for (Evolution ev : extraEvolutions) {
@@ -1873,6 +1944,121 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
         }
         this.getTemplateData().put("removeTradeEvo", tradeEvoFixed);
+    }
+
+    @Override
+    public void updateExtraInfo(Evolution ev) {
+        switch(ev.type) {
+            case LEVEL:
+            case LEVEL_ATK_DEF_SAME:
+            case LEVEL_ATTACK_HIGHER:
+            case LEVEL_DEFENSE_HIGHER:
+            case LEVEL_LOW_PV:
+            case LEVEL_HIGH_PV:
+            case LEVEL_FEMALE_ONLY:
+            case LEVEL_MALE_ONLY:
+                // Get the level of previous evolution
+                int prevLevel = 0, minSiblingLevel = 0, maxSiblingLevel = 0;
+                for (Evolution ev2 : ev.from.evolutionsTo) {
+                    if (ev2.type.usesLevel()) {
+                        prevLevel = Integer.max(prevLevel, ev2.extraInfo);
+                    }
+                }
+
+                // If there is a split evo based on level, make sure it is the highest
+                for (Evolution ev3 : ev.from.evolutionsFrom) {
+                    if (EvolutionType.isOfType("Uncontrolled", ev3.type)) {
+                        maxSiblingLevel = Integer.max(maxSiblingLevel, ev3.extraInfo);
+                    }
+                    // Check if it's a level at all to avoid setting a new evolution
+                    // earlier than a method like ATTACK_HIGHER
+                    else if (ev3.type.usesLevel()) {
+                        minSiblingLevel = Integer.max(minSiblingLevel, ev3.extraInfo);
+                    }
+                }
+
+                // There's no previous level so make it at least 25
+                if (prevLevel == 0) {
+                    ev.extraInfo = this.random.nextInt(16) + 25;
+                    // For low BST, divide that level in half
+                    if (ev.from.bst() < 300) {
+                        ev.extraInfo /= 2;
+                    }
+                }
+                // Set the new evolution level to 5-20 higher than the current
+                else {
+                    ev.extraInfo = this.random.nextInt(16) + 5 + prevLevel;
+                }
+
+                // We have a method that can conflict
+                if (maxSiblingLevel > 0) {
+                    // Set this one equal to that sibling since they're both 
+                    // uncontrolled levels
+                    if (EvolutionType.isOfType("Uncontrolled", ev.type)) {
+                        ev.extraInfo = maxSiblingLevel;
+                    } 
+                    // Set this one less than that sibling since this is controllable
+                    else if (ev.extraInfo >= maxSiblingLevel) {
+                        ev.extraInfo = maxSiblingLevel - 1;
+                    }
+                }
+
+                // Increase above level if necessary (setting uncontrolledLevelEvo after controllable)
+                if (minSiblingLevel > 0 && maxSiblingLevel == 0 && ev.extraInfo <= minSiblingLevel) {
+                    ev.extraInfo = minSiblingLevel + 1;
+                }
+
+                break;
+            case LEVEL_HIGH_BEAUTY:
+                ev.extraInfo = 170;
+                break;
+            case LEVEL_WITH_OTHER:
+                List<Integer> usedPokemon = ev.from.evolutionsFrom.stream().filter(evo -> evo.type == ev.type)
+                    .map(evo -> evo.extraInfo).collect(Collectors.toList());
+                ev.extraInfo = this.random.nextInt(Gen5Constants.pokemonCount);
+                // Given there are 450+ pokemon to choose from, this should almost never be called
+                // It exists to prevent the edge case where we have a split evo pokemon with both
+                // methods being LEVEL_WITH_OTHER and both pick the same pokemon
+                while (usedPokemon.contains(ev.extraInfo)) {
+                    ev.extraInfo = this.random.nextInt(Gen5Constants.pokemonCount);
+                }
+                break;
+            case LEVEL_WITH_MOVE:
+                List<Integer> usedMoves = ev.from.evolutionsFrom.stream().filter(evo -> evo.type == ev.type)
+                    .map(evo -> evo.extraInfo).collect(Collectors.toList());
+                ev.extraInfo = this.getMovesLearnt().get(ev.from).get(this.random.nextInt(this.getMovesLearnt().get(ev.from).size())).move;
+                // Similar to STONE, but each Pokemon has a finite moveset
+                // Must make sure there are no duplicates
+                while (usedMoves.contains(ev.extraInfo)) {
+                    System.out.println("In loop");
+                    ev.extraInfo = this.getMovesLearnt().get(ev.from).get(this.random.nextInt(this.getMovesLearnt().get(ev.from).size())).move;
+                    System.out.println(ev.extraInfo + " ---- ");
+                    usedMoves.forEach(um -> System.out.println(um));
+                }
+                break;
+            case STONE:
+            case STONE_MALE_ONLY:
+            case STONE_FEMALE_ONLY:
+                // Remove any stones already used
+                List<Integer> unusedStones = RomFunctions.removeUsedStones(new ArrayList<Integer>(Gen5Constants.availableStones), ev);
+                ev.extraInfo = unusedStones.get(this.random.nextInt(unusedStones.size()));
+                break;
+            case TRADE_ITEM:
+            case LEVEL_ITEM_DAY:
+            case LEVEL_ITEM_NIGHT:
+                List<Integer> usedItems = ev.from.evolutionsFrom.stream().filter(evo -> evo.type == ev.type)
+                    .map(evo -> evo.extraInfo).collect(Collectors.toList());
+                ev.extraInfo = this.getAllowedItems().randomNonTM(this.random);
+                // Similar to LEVEL_WITH_OTHER, there are a lot of items
+                // available and this should almost never be called.
+                while (usedItems.contains(ev.extraInfo)) {
+                    ev.extraInfo = this.getAllowedItems().randomNonTM(this.random);
+                }
+                break;
+            default:
+                ev.extraInfo = 0;
+                break;
+        }
     }
 
     @Override

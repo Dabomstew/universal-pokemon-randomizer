@@ -1869,6 +1869,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.peForceChangeCB.setSelected(settings.isEvosForceChange());
         this.peForceGrowthCB.setSelected(settings.isEvosForceGrowth());
         this.peNoConvergeCB.setSelected(settings.isEvosNoConverge());
+        this.peChangeMethodsCB.setSelected(settings.isEvosChangeMethod());
 
         this.mdRandomAccuracyCB.setSelected(settings.isRandomizeMoveAccuracies());
         this.mdRandomCategoryCB.setSelected(settings.isRandomizeMoveCategory());

@@ -39,6 +39,7 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.GFXFunctions;
@@ -1369,7 +1370,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                     .forEach(evo -> {
                     if (changeMethodEvos) {
                         // We can't use a level since one already exists - use a stone instead
-                        if (pkmn.evolutionsFrom.stream().anyMatch(evos -> evos.type == EvolutionType.LEVEL)) {
+                        if (pkmn.evolutionsFrom.stream().anyMatch(evos -> evos.type.usesLevel())) {
                             List<Integer> unusedStones = RomFunctions.removeUsedStones(new ArrayList<Integer>(Gen2Constants.availableStones), evo);
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = unusedStones.get(this.random.nextInt(unusedStones.size()));
@@ -1418,12 +1419,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             case LEVEL_ATTACK_HIGHER:
             case LEVEL_DEFENSE_HIGHER:
                 // Get the level of previous evolution
-                List<EvolutionType> levelMethods = Arrays.asList(EvolutionType.LEVEL, EvolutionType.LEVEL_ATK_DEF_SAME,
-                    EvolutionType.LEVEL_ATTACK_HIGHER, EvolutionType.LEVEL_DEFENSE_HIGHER);
                 int prevLevel = 0;
                 int maxSiblingLevel = 0;
                 for (Evolution ev2 : ev.from.evolutionsTo) {
-                    if (levelMethods.contains(ev2.type)) {
+                    if (ev2.type.usesLevel()) {
                         prevLevel = Integer.max(prevLevel, ev2.extraInfo);
                     }
                 }
@@ -1459,7 +1458,15 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 ev.extraInfo = unusedStones.get(this.random.nextInt(unusedStones.size()));
                 break;
             case TRADE_ITEM:
+                List<Integer> usedItems = ev.from.evolutionsFrom.stream().filter(evo -> evo.type == ev.type)
+                    .map(evo -> evo.extraInfo).collect(Collectors.toList());
                 ev.extraInfo = this.getAllowedItems().randomNonTM(this.random);
+                // Given there are 200+ items to choose from, this should almost never be called
+                // It exists to prevent the edge case where we have a split evo pokemon with both
+                // methods being TRADE_ITEM and both pick the same item
+                while (usedItems.contains(ev.extraInfo)) {
+                    ev.extraInfo = this.getAllowedItems().randomNonTM(this.random);
+                }
                 break;
             default:
                 ev.extraInfo = 0;

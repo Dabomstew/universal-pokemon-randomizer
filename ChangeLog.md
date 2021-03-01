@@ -67,3 +67,7 @@
  * Added `Normalize`, `Klutz`, `Multitype` and `Stall` to list of negative abilities that can be banned
  * Static Pokemon are randomized before trainers. Should have no noticable impact
  * Pansear, Pansage, and Panpour (elemental monkies) now are replaced with a type that trumps Striaton gym if type-theming on Gym Leaders, or covers a random weakness of the selected starter
+ * Evolution Methods can now be randomized
+   * In order to make this compatible with Metronome Only mode, all pokemon that evolve due to knowing a move (e.g. Bonsly) now require Metronome regardless of whether evolution methods are randomized
+   * Fixing impossible evos occurs after movesets are randomized, and selects a new move from the randomzied moveset to replace the current one used when evolving while knowing a move regardless of whether evolution methods are randomized
+   * Evolutions like Nincada and Karrablast are excluded due to lack of support in game for randomization of these methods

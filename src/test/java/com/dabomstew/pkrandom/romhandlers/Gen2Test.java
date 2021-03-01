@@ -9,43 +9,24 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 
-import com.dabomstew.pkrandom.constants.Gen3Constants;
+import com.dabomstew.pkrandom.constants.Gen2Constants;
 import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.EvolutionType;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 
 import org.junit.Test;
-import org.mockito.MockedStatic;
 
-public class Gen3Test {
-
+public class Gen2Test {
     ArrayList<Pokemon> pokemonList;
-    
-    /**
-     * When removing trades, verify that LEVEL_HIGH_BEAUTY adds
-     * a new HAPPINESS evolution
-     */
-    @Test
-    public void TestHighBeautyTradeEvoRemoval() {
-        try (MockedStatic<com.dabomstew.pkrandom.RomFunctions> mockRomFunctions = mockStatic(com.dabomstew.pkrandom.RomFunctions.class)) {
-            Gen3RomHandler romhandler = spy(new Gen3RomHandler(new Random()));
-            doReturn(Gen3RomHandler.getRomFromSupportedRom("Emerald (U)")).when(romhandler).getRomEntry();
-            doReturn(mock(Map.class)).when(romhandler).getTemplateData();
-            resetDataModel(romhandler);
-            romhandler.removeTradeEvolutions(true, false);
-            // Stream the "evolutionsFrom" list to see if any evolutions are now HAPPINESS
-            assertTrue(pokemonList.get(0).evolutionsFrom.stream().anyMatch(ev -> EvolutionType.HAPPINESS.equals(ev.type)));
-        }
-    }
 
     /**
-     * Test Gen3 change methods only includes methods available in Gen3
+     * Test Gen2 change methods only includes methods available in Gen2
      * Also verify no duplicate methods used, and no invalid evolutions
      */
     @Test
-    public void TestGen3ChangeMethods() {
-        Gen3RomHandler romhandler = spy(new Gen3RomHandler(new Random()));
+    public void TestGen2ChangeMethods() {
+        Gen2RomHandler romhandler = spy(new Gen2RomHandler(new Random()));
         resetDataModel(romhandler);
         doReturn(mock(Map.class)).when(romhandler).getTemplateData();
         romhandler.randomizeEvolutions(false, false, true, true, false, false, false);
@@ -55,7 +36,7 @@ public class Gen3Test {
             ArrayList<Integer> usedItems = new ArrayList<Integer>();
             pk.evolutionsFrom.stream().forEach(evo -> {
                 assertTrue("Evolution is invalid - " + evo, evo.type != null && evo.type != EvolutionType.NONE);
-                assertTrue(evo.type + " was not available in Gen 3", EvolutionType.isInGeneration(3, evo.type));
+                assertTrue(evo.type + " was not available in Gen 2", EvolutionType.isInGeneration(2, evo.type));
 
                 // Collect the method
                 if (EvolutionType.isOfType("Stone", evo.type)) {
@@ -85,19 +66,17 @@ public class Gen3Test {
      */
     private void setUp() {
         pokemonList = spy(ArrayList.class);
-        for(int i = 0; i < Gen3Constants.unhackedRealPokedex; i++) {
+        for(int i = 0; i < Gen2Constants.pokemonCount + 1; i++) {
             Pokemon pk = new Pokemon();
             pk.number = i;
             pk.name = "";
-            pk.primaryType = Type.BUG;
+            pk.primaryType = Type.values()[i%17];
             pokemonList.add(pk);
             for (int j = 0; j < i % 3; j++) {
                 Evolution ev = new Evolution(pk, new Pokemon(), false, EvolutionType.LEVEL, 1);
                 pk.evolutionsFrom.add(ev);
             }
-        }
-        Evolution ev = new Evolution(pokemonList.get(0), pokemonList.get(1), false, EvolutionType.LEVEL_HIGH_BEAUTY, 0);
-        pokemonList.get(0).evolutionsFrom.add(ev);
+        }  
     }
 
     /**
@@ -108,5 +87,5 @@ public class Gen3Test {
         setUp();
         doReturn(pokemonList).when(romhandler).getPokemon();
         doReturn(pokemonList.get(0)).when(romhandler).randomPokemon();
-    }
+    }   
 }

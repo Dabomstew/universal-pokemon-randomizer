@@ -266,15 +266,15 @@ public class AbstractRomTest {
         }
 
         // This one needs to cover a random fire type weakness, which gives us a wide selection
-        ArrayList<Type> acceptableTypes = new ArrayList<Type>();
+        ArrayList<Type> weaknessTypes = new ArrayList<Type>();
         Type.STRONG_AGAINST.get(startersList.get(1).primaryType.ordinal()).forEach(t -> {
             // Get the list of weaknesses for that type and add them to acceptable types
-            acceptableTypes.addAll(Type.STRONG_AGAINST.get(t.ordinal()));
+            weaknessTypes.addAll(Type.STRONG_AGAINST.get(t.ordinal()));
         });
 
-        acceptableTypes.addAll(Type.STRONG_AGAINST_ROCK);
+        weaknessTypes.addAll(Type.STRONG_AGAINST_ROCK);
         assertTrue("Grass monkey replacement type was not found in weakness list for starter 1",
-            !Collections.disjoint(acceptableTypes, types));
+            !Collections.disjoint(weaknessTypes, types));
         
         // Fire monkey (third element in the static list)
         // Thus the third replacement in the capture
@@ -316,34 +316,62 @@ public class AbstractRomTest {
         romhandler.randomizeStaticPokemon(false);
         Map<String, Type> taggedTypes = romhandler.getTaggedGroupTypes();
 
-        // TODO: Replace for loop with specific pokemonCap entry (same as above)
-        // Current implementation is skipped as no replacement has the same number
-        for (Pokemon pk : pokemonCap.getValue()) {
-            // Grass monkey (starter 1)
-            if (pk.number == 511) {
-                Type cressType = taggedTypes.get("CRESS");
-                assertTrue("Grass monkey replacement type " + pk.primaryType.camelCase() + "/" 
-                + pk.secondaryType  + " was not found in weakness list for CRESS " + cressType.camelCase(),
-                    Type.STRONG_AGAINST.get(cressType.ordinal()).contains(pk.primaryType) ||
-                    Type.STRONG_AGAINST.get(cressType.ordinal()).contains(pk.secondaryType));
-            }
-            // Fire monkey (starter 2)
-            else if (pk.number == 513) {
-                Type cilanType = taggedTypes.get("CILAN");
-                assertTrue("Fire monkey replacement type " + pk.primaryType.camelCase() + "/" 
-                + pk.secondaryType  + " was not found in weakness list for CILAN " + cilanType.camelCase(),
-                    Type.STRONG_AGAINST.get(cilanType.ordinal()).contains(pk.primaryType) ||
-                    Type.STRONG_AGAINST.get(cilanType.ordinal()).contains(pk.secondaryType));
-            }
-            // Water monkey (starter 0)
-            else if (pk.number == 515) {
-                Type chiliType = taggedTypes.get("CHILI");
-                assertTrue("Water monkey replacement type " + pk.primaryType.camelCase() + "/" 
-                + pk.secondaryType  + " was not found in weakness list for CHILI " + chiliType.camelCase(),
-                    Type.STRONG_AGAINST.get(chiliType.ordinal()).contains(pk.primaryType) ||
-                    Type.STRONG_AGAINST.get(chiliType.ordinal()).contains(pk.secondaryType));
-            }
+        // Grass monkey (first element in static list)
+        // Thus the first replacement in the capture
+        pkmn = pokemonCap.getValue().get(0);
+
+        // Gather both types of the replacement into a list
+        types = new ArrayList<Type>();
+        types.add(pkmn.primaryType);
+        if (pkmn.secondaryType != null) {
+            types.add(pkmn.secondaryType);
         }
+
+        // Add in all weaknesses of CRESS
+        Type cressType = taggedTypes.get("CRESS");
+        ArrayList<Type> acceptableTypes = new ArrayList<Type>();
+        acceptableTypes.addAll(Type.STRONG_AGAINST.get(cressType.ordinal()));
+        assertTrue("Grass monkey replacement type " + pkmn.primaryType + "/" 
+        + pkmn.secondaryType  + " was not found in weakness list for CRESS " + cressType.camelCase(),
+            acceptableTypes.contains(pkmn.primaryType) || acceptableTypes.contains(pkmn.secondaryType));
+
+        // Fire monkey (third element in the static list)
+        // Thus the third replacement in the capture
+        pkmn = pokemonCap.getValue().get(2);
+
+        // Gather both types of the replacement into a list
+        types = new ArrayList<Type>();
+        types.add(pkmn.primaryType);
+        if (pkmn.secondaryType != null) {
+            types.add(pkmn.secondaryType);
+        }
+
+        // Add in all weakneses of CILAN
+        Type cilanType = taggedTypes.get("CILAN");
+        acceptableTypes = new ArrayList<Type>();
+        acceptableTypes.addAll(Type.STRONG_AGAINST.get(cilanType.ordinal()));
+        assertTrue("Fire monkey replacement type " + pkmn.primaryType + "/" 
+        + pkmn.secondaryType  + " was not found in weakness list for CILAN " + cilanType.camelCase(),
+            acceptableTypes.contains(pkmn.primaryType) || acceptableTypes.contains(pkmn.secondaryType));
+
+        // Water monkey (fifth element in the static list)
+        // Thus the fifth replacement in the capture
+        pkmn = pokemonCap.getValue().get(4);
+
+        // Gather both types of the replacement into a list
+        types = new ArrayList<Type>();
+        types.add(pkmn.primaryType);
+        if (pkmn.secondaryType != null) {
+            types.add(pkmn.secondaryType);
+        }
+
+        // Add in all weakneses of CHILI
+        Type chiliType = taggedTypes.get("CHILI");
+        acceptableTypes = new ArrayList<Type>();
+        acceptableTypes.addAll(Type.STRONG_AGAINST.get(chiliType.ordinal()));
+        assertTrue("Water monkey replacement type " + pkmn.primaryType + "/" 
+        + pkmn.secondaryType  + " was not found in weakness list for CHILI " + chiliType.camelCase(),
+            acceptableTypes.contains(pkmn.primaryType) || acceptableTypes.contains(pkmn.secondaryType));
 
         //**************************
         // Test Striaton defense selection
@@ -353,34 +381,66 @@ public class AbstractRomTest {
         taggedTypes = romhandler.getTaggedGroupTypes();
 
 
-        for (Pokemon pk : pokemonCap.getValue()) {
-            // Grass monkey (starter 1)
-            if (pk.number == 511) {
-                Type cressType = taggedTypes.get("CRESS");
-                assertTrue("Grass monkey replacement type " + pk.primaryType.camelCase() + "/" 
-                + pk.secondaryType  + " was not found in weakness list for CRESS " + cressType.camelCase(),
-                    Type.STRONG_AGAINST.get(cressType.ordinal()).contains(pk.primaryType) ||
-                    Type.STRONG_AGAINST.get(cressType.ordinal()).contains(pk.secondaryType));
-            }
-            // Fire monkey (starter 2)
-            else if (pk.number == 513) {
-                Type cilanType = taggedTypes.get("CILAN");
-                assertTrue("Fire monkey replacement type " + pk.primaryType.camelCase() + "/" 
-                + pk.secondaryType  + " was not found in weakness list for CILAN " + cilanType.camelCase(),
-                    Type.STRONG_AGAINST.get(cilanType.ordinal()).contains(pk.primaryType) ||
-                    Type.STRONG_AGAINST.get(cilanType.ordinal()).contains(pk.secondaryType));
-            }
-            // Water monkey (starter 0)
-            else if (pk.number == 515) {
-                Type chiliType = taggedTypes.get("CHILI");
-                assertTrue("Water monkey replacement type " + pk.primaryType.camelCase() + "/" 
-                + pk.secondaryType  + " was not found in weakness list for CHILI " + chiliType.camelCase(),
-                    Type.STRONG_AGAINST.get(chiliType.ordinal()).contains(pk.primaryType) ||
-                    Type.STRONG_AGAINST.get(chiliType.ordinal()).contains(pk.secondaryType));
-            }
+        // Grass monkey (first element in static list)
+        // Thus the first replacement in the capture
+        pkmn = pokemonCap.getValue().get(0);
+
+        // Gather both types of the replacement into a list
+        types = new ArrayList<Type>();
+        types.add(pkmn.primaryType);
+        if (pkmn.secondaryType != null) {
+            types.add(pkmn.secondaryType);
         }
+
+        // Add in all weaknesses of CRESS
+        cressType = taggedTypes.get("CRESS");
+        acceptableTypes = new ArrayList<Type>();
+        acceptableTypes.addAll(Type.STRONG_AGAINST.get(cressType.ordinal()));
+        assertTrue("Grass monkey replacement type " + pkmn.primaryType + "/" 
+        + pkmn.secondaryType  + " was not found in weakness list for CRESS " + cressType.camelCase(),
+            acceptableTypes.contains(pkmn.primaryType) || acceptableTypes.contains(pkmn.secondaryType));
+
+        // Fire monkey (third element in the static list)
+        // Thus the third replacement in the capture
+        pkmn = pokemonCap.getValue().get(2);
+
+        // Gather both types of the replacement into a list
+        types = new ArrayList<Type>();
+        types.add(pkmn.primaryType);
+        if (pkmn.secondaryType != null) {
+            types.add(pkmn.secondaryType);
+        }
+
+        // Add in all weakneses of CILAN
+        cilanType = taggedTypes.get("CILAN");
+        acceptableTypes = new ArrayList<Type>();
+        acceptableTypes.addAll(Type.STRONG_AGAINST.get(cilanType.ordinal()));
+        assertTrue("Fire monkey replacement type " + pkmn.primaryType + "/" 
+        + pkmn.secondaryType  + " was not found in weakness list for CILAN " + cilanType.camelCase(),
+            acceptableTypes.contains(pkmn.primaryType) || acceptableTypes.contains(pkmn.secondaryType));
+
+        // Water monkey (fifth element in the static list)
+        // Thus the fifth replacement in the capture
+        pkmn = pokemonCap.getValue().get(4);
+
+        // Gather both types of the replacement into a list
+        types = new ArrayList<Type>();
+        types.add(pkmn.primaryType);
+        if (pkmn.secondaryType != null) {
+            types.add(pkmn.secondaryType);
+        }
+
+        // Add in all weakneses of CHILI
+        chiliType = taggedTypes.get("CHILI");
+        acceptableTypes = new ArrayList<Type>();
+        acceptableTypes.addAll(Type.STRONG_AGAINST.get(chiliType.ordinal()));
+        assertTrue("Water monkey replacement type " + pkmn.primaryType + "/" 
+        + pkmn.secondaryType  + " was not found in weakness list for CHILI " + chiliType.camelCase(),
+            acceptableTypes.contains(pkmn.primaryType) || acceptableTypes.contains(pkmn.secondaryType));
     }
     
+    // Test randomized evolutions uses change methods
+    // Test remove trade evos plays nicely with and without change methods
 
     /**
      * Function for granular modification of data model

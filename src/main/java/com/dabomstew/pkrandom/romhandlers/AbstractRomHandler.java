@@ -2179,6 +2179,17 @@ public abstract class AbstractRomHandler implements RomHandler {
             Move thisHM = moveData.get(hm);
             thisHM.pp = 0;
         }
+
+        // evolution tweaks
+        for (Pokemon pk : this.getPokemon()) {
+            if (pk != null) {
+                for (Evolution ev : pk.evolutionsFrom) {
+                    if (ev.type == EvolutionType.LEVEL_WITH_MOVE) {
+                        ev.extraInfo = GlobalConstants.METRONOME_MOVE;
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -3349,17 +3360,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         throw new RandomizationException("Not able to randomize evolutions in a sane amount of retries.");
     }
 
-    // Default implementation
-    // Will cause issues if evolution method requires a value (e.g. LEVEL)
-    @Override
-    public void updateExtraInfo(Evolution ev) {
-        ev.extraInfo = 0;
-    }
-
     private void generateEvolutionType(Evolution ev) {
         List<EvolutionType> usedMethods = ev.from.evolutionsFrom.stream().map(evo -> {
-            // We can have multiple STONE evolutions - they just need to be different stones
-            if (evo.type != EvolutionType.STONE) {
+            // We can have multiple STONE, ITEM, and PARTY evolutions - they just need to be different stones/items/pokemon
+            if (!EvolutionType.isOfType("STONE", evo.type) && !EvolutionType.isOfType("ITEM", evo.type) && 
+                !EvolutionType.isOfType("PARTY", evo.type)) {
                 return evo.type;
             } else {
                 return EvolutionType.NONE;
@@ -3370,9 +3375,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             EvolutionType et = EvolutionType.randomFromGeneration(this.random, this.generationOfPokemon());
             
             // Can only have 2 happiness evos max (night + day)
-            List<EvolutionType> happyMethods = Arrays.asList(EvolutionType.HAPPINESS, EvolutionType.HAPPINESS_DAY, 
-                EvolutionType.HAPPINESS_NIGHT);
-            if (happyMethods.contains(et) && !Collections.disjoint(happyMethods, usedMethods)) {
+            if (EvolutionType.isOfType("Happiness", et) && EvolutionType.usesTypeOf("Happiness", usedMethods)) {
                 // Already have a happiness evo - try something else
                 if (usedMethods.contains(EvolutionType.HAPPINESS) || 
                     (usedMethods.contains(EvolutionType.HAPPINESS_DAY) && usedMethods.contains(EvolutionType.HAPPINESS_NIGHT))) {
@@ -3388,26 +3391,58 @@ public abstract class AbstractRomHandler implements RomHandler {
                     et = EvolutionType.HAPPINESS_DAY;
                 }
             }
+            // Can only have 2 uncontrolled level evos max (high/low pv or male/female or combination)
+            else if (EvolutionType.isOfType("Uncontrolled", et) && EvolutionType.usesTypeOf("Uncontrolled", usedMethods)) {
+                // Already have level evo - try something else
+                if (usedMethods.contains(EvolutionType.LEVEL) || EvolutionType.usesTypeOf("BranchLevel", usedMethods, 2)) {
+                    continue;
+                }
+                // We only have HIGH PV in the list since first check verified we don't have more than 1 branch level
+                // We only change the selected method if it is the same or generic LEVEL
+                if (usedMethods.contains(EvolutionType.LEVEL_HIGH_PV) && 
+                    (et == EvolutionType.LEVEL_HIGH_PV || et == EvolutionType.LEVEL)) {
+                    et = EvolutionType.LEVEL_LOW_PV;
+                }
+                // We only have LOW PV in the list 
+                else if (usedMethods.contains(EvolutionType.LEVEL_LOW_PV) && 
+                    (et == EvolutionType.LEVEL_LOW_PV || et == EvolutionType.LEVEL)) {
+                    et = EvolutionType.LEVEL_HIGH_PV;
+                }
+                // We only have MALE in the list
+                else if (usedMethods.contains(EvolutionType.LEVEL_MALE_ONLY) && 
+                    (et == EvolutionType.LEVEL_MALE_ONLY || et == EvolutionType.LEVEL)) {
+                    et = EvolutionType.LEVEL_FEMALE_ONLY;
+                }
+                // We only have FEMALE in the list
+                else if (usedMethods.contains(EvolutionType.LEVEL_FEMALE_ONLY) && 
+                    (et == EvolutionType.LEVEL_FEMALE_ONLY || et == EvolutionType.LEVEL)) {
+                    et = EvolutionType.LEVEL_MALE_ONLY;
+                }
+            }
+            // Can only have 1 TRADE evo (but multiple trade item)
+            else if (EvolutionType.isOfType("Trade", et) && ev.from.evolutionsFrom.size() > 0 ) {
+                // Regather the evolution methods because the other TRADE evolutions are marked as
+                // NONE to prevent them from being counted as duplicates
+                List<EvolutionType> tradeMethods = ev.from.evolutionsFrom.stream().filter(evo -> EvolutionType.isOfType("Trade", evo.type))
+                    .map(evo -> evo.type).collect(Collectors.toList());
 
+                // If this is a trade and we already used trade, try again 
+                if ((et == EvolutionType.TRADE && EvolutionType.usesTypeOf("Trade", tradeMethods)) || 
+                    tradeMethods.contains(EvolutionType.TRADE)) {
+                    continue;
+                }
+            } 
             // Prevent duplicate evolution methods
-            if (usedMethods.contains(et)) {
+            else if (usedMethods.contains(et)) {
                 continue;
-            }
-
-            // Can only have 1 trade evo
-            List<EvolutionType> tradeMethods = Arrays.asList(EvolutionType.TRADE, EvolutionType.TRADE_ITEM, 
-                EvolutionType.TRADE_SPECIAL);
-            if (tradeMethods.contains(et) && !Collections.disjoint(tradeMethods, usedMethods)) {
-                continue;
-            }
-
+            } 
             // Require attack and defense to be within 5 points of each other to be feasible
-            if (et == EvolutionType.LEVEL_ATK_DEF_SAME || et == EvolutionType.LEVEL_ATTACK_HIGHER || 
-                et == EvolutionType.LEVEL_DEFENSE_HIGHER) {
-                    if (Math.abs(ev.from.attack-ev.from.defense) > 5) {
-                        continue;
-                    }
-            }
+            else if (et == EvolutionType.LEVEL_ATK_DEF_SAME || et == EvolutionType.LEVEL_ATTACK_HIGHER || 
+            et == EvolutionType.LEVEL_DEFENSE_HIGHER) {
+                if (Math.abs(ev.from.attack-ev.from.defense) > 5) {
+                    continue;
+                }
+            }     
 
             // Update the type and end the loop
             ev.type = et;

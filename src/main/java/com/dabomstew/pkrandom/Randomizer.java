@@ -190,17 +190,6 @@ public class Randomizer {
             }
         }
 
-        // Trade evolutions removal
-        if (settings.isChangeImpossibleEvolutions()) {
-            romHandler.removeTradeEvolutions(!(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED),
-                settings.isEvosChangeMethod());
-        }
-
-        // Easier evolutions
-        if (settings.isMakeEvolutionsEasier()) {
-            romHandler.condenseLevelEvolutions(GlobalConstants.MAXIMUM_EVO_LEVEL, GlobalConstants.MAXIMUM_INTERMEDIATE_EVO_LEVEL);
-        }
-
         // Starter Pokemon
         // Applied after type to update the strings correctly based on new types
         maybeChangeAndLogStarters(romHandler);
@@ -225,6 +214,17 @@ public class Randomizer {
 
         if (settings.isReorderDamagingMoves()) {
             romHandler.orderDamagingMovesByDamage();
+        }
+
+        // Trade evolutions removal
+        if (settings.isChangeImpossibleEvolutions()) {
+            romHandler.removeTradeEvolutions(!(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED),
+                settings.isEvosChangeMethod());
+        }
+
+        // Easier evolutions
+        if (settings.isMakeEvolutionsEasier()) {
+            romHandler.condenseLevelEvolutions(GlobalConstants.MAXIMUM_EVO_LEVEL, GlobalConstants.MAXIMUM_INTERMEDIATE_EVO_LEVEL);
         }
 
         // Show the new movesets if applicable

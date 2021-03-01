@@ -1,5 +1,9 @@
 package com.dabomstew.pkrandom.pokemon;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 /*----------------------------------------------------------------------------*/
@@ -59,6 +63,10 @@ public enum EvolutionType {
 
     private int[] indexNumbers;
     private static EvolutionType[][] reverseIndexes = new EvolutionType[5][30];
+    private static ArrayList<EvolutionType> bannedMethods = new ArrayList<EvolutionType>(
+        // These don't work for anything but Nincada -> Shedninja
+        // And Karrablast -> Shelmet
+        Arrays.asList(LEVEL_CREATE_EXTRA, LEVEL_IS_EXTRA, TRADE_SPECIAL));
 
     static {
         for (EvolutionType et : EvolutionType.values()) {
@@ -78,6 +86,17 @@ public enum EvolutionType {
         return indexNumbers[generation - 1];
     }
 
+    public boolean usesLevel() {
+        return (this == LEVEL) || (this == LEVEL_ATTACK_HIGHER) || (this == LEVEL_DEFENSE_HIGHER)
+            || (this == LEVEL_ATK_DEF_SAME) || (this == LEVEL_LOW_PV) || (this == LEVEL_HIGH_PV)
+            || (this == LEVEL_CREATE_EXTRA) || (this == LEVEL_IS_EXTRA) || (this == LEVEL_MALE_ONLY)
+            || (this == LEVEL_FEMALE_ONLY);
+    }
+
+    public static boolean isInGeneration(int generation, EvolutionType et) {
+        return et.indexNumbers[generation-1] > -1;
+    }
+
     public static EvolutionType fromIndex(int generation, int index) {
         return reverseIndexes[generation - 1][index];
     }
@@ -85,6 +104,10 @@ public enum EvolutionType {
     public static EvolutionType randomFromGeneration(Random random, int generation) {
         int choice = random.nextInt(generationCount(generation));
         EvolutionType et = reverseIndexes[generation-1][choice+1];
+        while (bannedMethods.contains(et)) {
+            choice = random.nextInt(generationCount(generation));
+            et = reverseIndexes[generation-1][choice+1];
+        }
         if (generation == 2) {
             // Since Gen 2 has a special pointer value for the version of happiness,
             // all indices are set at 4. We select a specific version by getting a
@@ -121,10 +144,107 @@ public enum EvolutionType {
         }
     }
 
-    public boolean usesLevel() {
-        return (this == LEVEL) || (this == LEVEL_ATTACK_HIGHER) || (this == LEVEL_DEFENSE_HIGHER)
-                || (this == LEVEL_ATK_DEF_SAME) || (this == LEVEL_LOW_PV) || (this == LEVEL_HIGH_PV)
-                || (this == LEVEL_CREATE_EXTRA) || (this == LEVEL_IS_EXTRA) || (this == LEVEL_MALE_ONLY)
-                || (this == LEVEL_FEMALE_ONLY);
+    public static ArrayList<EvolutionType> happinessEvos() {
+        return new ArrayList<EvolutionType>(Arrays.asList(EvolutionType.HAPPINESS, EvolutionType.HAPPINESS_DAY, 
+            EvolutionType.HAPPINESS_NIGHT));
+    }
+
+    public static ArrayList<EvolutionType> uncontrolledLevelEvos() {
+        return  new ArrayList<EvolutionType>(Arrays.asList(EvolutionType.LEVEL, EvolutionType.LEVEL_HIGH_PV,
+            EvolutionType.LEVEL_LOW_PV, EvolutionType.LEVEL_FEMALE_ONLY, EvolutionType.LEVEL_MALE_ONLY));
+    }
+
+    public static ArrayList<EvolutionType> tradeEvos() {
+        return new ArrayList<EvolutionType>(Arrays.asList(EvolutionType.TRADE, EvolutionType.TRADE_ITEM));
+    }
+
+    public static ArrayList<EvolutionType> stoneEvos() {
+        return new ArrayList<EvolutionType>(Arrays.asList(EvolutionType.STONE, EvolutionType.STONE_MALE_ONLY, 
+            EvolutionType.STONE_FEMALE_ONLY));
+    }
+
+    public static ArrayList<EvolutionType> itemEvos() {
+        return new ArrayList<EvolutionType>(Arrays.asList(EvolutionType.LEVEL_ITEM_DAY, EvolutionType.LEVEL_ITEM_NIGHT,
+            EvolutionType.TRADE_ITEM));
+    }
+
+    public static ArrayList<EvolutionType> partyEvos() {
+        return new ArrayList<EvolutionType>(Arrays.asList(EvolutionType.LEVEL_WITH_OTHER));
+    }
+
+    /**
+     * Check if an evolution type is of a particular group
+     * @param method - The group name
+     * @param toCheck - The evolution type to compare with the group
+     * @return - True if it's in the group, false if it's not or if the method is unsupported
+     */
+    public static boolean isOfType(String method, EvolutionType toCheck) {
+        switch (method.toUpperCase()) {
+            case "HAPPINESS":
+                return happinessEvos().contains(toCheck);
+            case "UNCONTROLLED":
+                return uncontrolledLevelEvos().contains(toCheck);
+            case "BRANCHLEVEL":
+                return uncontrolledLevelEvos().contains(toCheck) && toCheck != EvolutionType.LEVEL;
+            case "TRADE":
+                return tradeEvos().contains(toCheck);
+            case "STONE":
+                return stoneEvos().contains(toCheck);
+            case "ITEM":
+                return itemEvos().contains(toCheck);
+            case "PARTY":
+                return partyEvos().contains(toCheck);
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Check if a list of evolution types contains a type used in a method
+     * @param method - The group to check
+     * @param methodGroup - List of evolution types to compare with
+     * @return - True if there is at least one shared method between the lists, false if not or
+     * if method is unsupported
+     */
+    public static boolean usesTypeOf(String method, List<EvolutionType> methodGroup) {
+        switch (method.toUpperCase()) {
+            case "HAPPINESS":
+                return !Collections.disjoint(happinessEvos(), methodGroup);
+            case "UNCONTROLLED":
+                return !Collections.disjoint(uncontrolledLevelEvos(), methodGroup);
+            case "BRANCHLEVEL":
+                return !Collections.disjoint(uncontrolledLevelEvos(), methodGroup) && !methodGroup.contains(EvolutionType.LEVEL);
+            case "TRADE":
+                return !Collections.disjoint(tradeEvos(), methodGroup);
+            case "STONE":
+                return !Collections.disjoint(stoneEvos(), methodGroup);
+            case "ITEM":
+                return !Collections.disjoint(itemEvos(), methodGroup);
+            case "PARTY":
+                return !Collections.disjoint(partyEvos(), methodGroup);
+            default:
+                return false; 
+        }
+    }
+
+    public static boolean usesTypeOf(String method, List<EvolutionType> methodGroup, int size) {
+        switch (method.toUpperCase()) {
+            case "HAPPINESS":
+                return happinessEvos().stream().filter(ev -> methodGroup.contains(ev)).count() >= size;
+            case "UNCONTROLLED":
+                return uncontrolledLevelEvos().stream().filter(ev -> methodGroup.contains(ev)).count() >= size;
+            case "BRANCHLEVEL":
+                return uncontrolledLevelEvos().stream().filter(ev -> methodGroup.contains(ev) && ev != EvolutionType.LEVEL).count() >= size;
+            case "TRADE":
+                return tradeEvos().stream().filter(ev -> methodGroup.contains(ev)).count() >= size;
+            case "STONE":
+                return stoneEvos().stream().filter(ev -> methodGroup.contains(ev)).count() >= size;
+            case "ITEM":
+                return itemEvos().stream().filter(ev -> methodGroup.contains(ev)).count() >= size;
+            case "PARTY":
+                return partyEvos().stream().filter(ev -> methodGroup.contains(ev)).count() >= size;
+            default:
+                return false;
+        }
     }
 }
