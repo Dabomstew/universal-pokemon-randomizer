@@ -46,7 +46,7 @@ public class RomFunctions {
             if (pkmn != null) {
                 if (pkmn.evolutionsTo.size() < 1) {
                     dontCopyPokes.add(pkmn);
-                } else if (!dontCopySplitEvos) {
+                } else if (dontCopySplitEvos) {
                     Evolution onlyEvo = pkmn.evolutionsTo.get(0);
                     if (!onlyEvo.carryStats) {
                         dontCopyPokes.add(pkmn);

@@ -3329,7 +3329,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     pk, compat.get(pk), tmHMs, requiredEarlyOn, preferSameType),
             (evFrom, evTo, toMonIsFinalEvo) ->  copyPokemonMoveCompatibilityUpEvolutions(
                     evFrom, evTo, compat.get(evFrom), compat.get(evTo), tmHMs, preferSameType
-            ), true);
+            ), false);
         }
         else {
             for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
@@ -3450,7 +3450,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (int i = 1; i < toCompat.length; i++) {
                 toCompat[i] |= fromCompat[i];
             }
-        }), true);
+        }), false);
         this.setTMHMCompatibility(compat);
     }
 
@@ -3566,7 +3566,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     pk, compat.get(pk), mts, priorityTutors, preferSameType),
                     (evFrom, evTo, toMonIsFinalEvo) ->  copyPokemonMoveCompatibilityUpEvolutions(
                             evFrom, evTo, compat.get(evFrom), compat.get(evTo), mts, preferSameType
-                    ), true);
+                    ), false);
         }
         else {
             for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
@@ -3630,7 +3630,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (int i = 1; i < toCompat.length; i++) {
                 toCompat[i] |= fromCompat[i];
             }
-        }), true);
+        }), false);
         this.setMoveTutorCompatibility(compat);
     }
 
@@ -4738,7 +4738,7 @@ public abstract class AbstractRomHandler implements RomHandler {
      * @param epAction
      *            Method to run on all evolved Pokemon with a linear chain of
      * @param dontCopySplitEvos
-     *            If true, treat split evolutions the same as other evolutions
+     *            If true, treat split evolutions the same way as base Pokemon
      */
     private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction,
                                         boolean dontCopySplitEvos) {
@@ -4751,7 +4751,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Get evolution data.
         Set<Pokemon> dontCopyPokes = RomFunctions.getBasicOrNoCopyPokemon(this, dontCopySplitEvos);
-        Set<Pokemon> middleEvos = RomFunctions.getMiddleEvolutions(this, dontCopySplitEvos);
+        Set<Pokemon> middleEvos = RomFunctions.getMiddleEvolutions(this, !dontCopySplitEvos);
 
         for (Pokemon pk : dontCopyPokes) {
             bpAction.applyTo(pk);
@@ -4788,7 +4788,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction) {
-        copyUpEvolutionsHelper(bpAction, epAction, false);
+        copyUpEvolutionsHelper(bpAction, epAction, true);
     }
 
     private boolean checkForUnusedMove(List<Move> potentialList, Set<Integer> alreadyUsed) {
