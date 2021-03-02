@@ -219,7 +219,7 @@ public class Gen6Constants {
                             rustlingBushEncounterOffset = 0xF40CC, rustlingBushEncounterCount = 7;
     public static final Map<Integer, String> fallingEncounterNameMap = constructFallingEncounterNameMap();
     public static final Map<Integer, String> rustlingBushEncounterNameMap = constructRustlingBushEncounterNameMap();
-    public static final int perPokemonAreaDataLengthXY = 0xE8;
+    public static final int perPokemonAreaDataLengthXY = 0xE8, perPokemonAreaDataLengthORAS = 0x2A0;
 
     private static final String saveLoadFormeReversionPrefixXY = "09EB000094E5141094E54A0B80E2", saveLoadFormeReversionPrefixORAS = "09EB000094E5141094E5120A80E2";
     public static final String afterBattleFormeReversionPrefix = "E4FFFFEA0000000000000000";
@@ -1808,5 +1808,87 @@ public class Gen6Constants {
             54, 54, 54, 54, 54, 54, 54, 54, 54, // Terminus Cave (ceiling)
             26, 26, 26, // Route 6 (rustling bush)
             38, 38, 38, 38 // Route 18 (rustling bush)
+    };
+
+    public static final int[] orasMapNumToPokedexIndex = {
+            2,  // Dewford Town
+            6,  // Pacifidlog Town
+            7,  // Petalburg City
+            8,  // Slateport City
+            12, // Lilycove City
+            13, // Mossdeep City
+            14, // Sootopolis City
+            15, // Ever Grande City
+            17, // Route 101
+            18, // Route 102
+            19, // Route 103
+            20, // Route 104 (North Section)
+            21, // Route 104 (South Section)
+            22, // Route 105
+            23, // Route 106
+            24, // Route 107
+            26, // Route 108
+            27, // Route 109
+            28, // Route 110
+            30, // Route 111 (Desert)
+            32, // Route 111 (South Section)
+            33, // Route 112 (North Section)
+            34, // Route 112 (South Section)
+            35, // Route 113
+            36, // Route 114
+            37, // Route 115
+            38, // Route 116
+            39, // Route 117
+            40, // Route 118
+            41, 41, // Route 119
+            43, 43, // Route 120
+            45, // Route 121
+            46, // Route 122
+            47, // Route 123
+            48, // Route 124
+            50, // Route 125
+            51, // Route 126
+            53, // Route 127
+            55, // Route 128
+            57, // Route 129
+            59, // Route 130
+            61, // Route 131
+            62, // Route 132
+            63, // Route 133
+            64, // Route 134
+            25, // Route 107 (Underwater)
+            49, // Route 124 (Underwater)
+            52, // Route 126 (Underwater)
+            56, // Route 128 (Underwater)
+            58, // Route 129 (Underwater)
+            60, // Route 130 (Underwater)
+            69, 69, 69, 69, // Meteor Falls
+            73, // Rusturf Tunnel
+            74, 74, 74, // Granite Cave
+            78, // Petalburg Woods
+            80, // Jagged Pass
+            81, // Fiery Path
+            82, 82, 82, 82, 82, 82, // Mt. Pyre
+            -1, // Team Aqua Hideout
+            88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, // Seafloor Cavern
+            102, 102, 102, 102, 102, // Cave of Origin
+            114, 114, 114, 114, // Victory Road
+            119, 119, 119, 119, 119, 119, 119, // Shoal Cave
+            130, // New Mauville
+            136, 136, 136, 136, // Sea Mauville
+            -1, // Sealed Chamber
+            -1, -1, -1, -1, // Scorched Slab
+            -1, // Team Magma Hideout
+            150, // Sky Pillar
+            -1, -1, -1, -1, -1, -1, -1, -1, // Mirage Forest
+            -1, -1, -1, -1, -1, -1, -1, -1, // Mirage Island
+            -1, // Mirage Mountain
+            159, // Battle Resort
+            65, 65, 65, 65, // Safari Zone
+            102, // Cave of Origin
+            -1, -1, -1, -1, -1, -1, -1, // Mirage Mountain
+            -1, -1, -1, -1, -1, -1, -1, -1, // Mirage Cave
+            -1, // Mt. Pyre (unused)
+            -1  // Sootopolis City (unused)
     };
 }

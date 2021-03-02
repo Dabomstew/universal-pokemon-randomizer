@@ -258,6 +258,14 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
         try {
             stringsGarc = readGARC(romEntry.getString("TextStrings"),true);
+            GARCArchive encounterGarc = readGARC(romEntry.getString("WildPokemon"), false);
+            byte[] boxLegendaryRoomData = encounterGarc.getFile(227);
+            AMX localScript = new AMX(boxLegendaryRoomData, 1);
+            byte[] data = localScript.decData;
+            File output = new File("C:\\Users\\Tom\\Desktop\\1.amx");
+            try (FileOutputStream outputStream = new FileOutputStream(output)) {
+                outputStream.write(data);
+            }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
@@ -1493,6 +1501,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
         // Save
         writeGARC(encountersFile, encounterGarc);
+
+        this.updatePokedexAreaDataORAS(encounterGarc);
     }
 
     private void updatePokedexAreaDataXY(GARCArchive encounterGarc, byte[] fieldCRO) throws IOException {
@@ -1566,13 +1576,65 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         writeGARC(romEntry.getString("PokedexAreaData"), pokedexAreaGarc);
     }
 
+    private void updatePokedexAreaDataORAS(GARCArchive encounterGarc) throws IOException {
+        byte[] pokedexAreaData = new byte[(Gen6Constants.pokemonCount + 1) * Gen6Constants.perPokemonAreaDataLengthORAS];
+        int currentMapNum = 0;
+        for (int i = 0; i < encounterGarc.files.size() - 2; i++) {
+            byte[] b = encounterGarc.files.get(i).get(0);
+            int offset = FileFunctions.readFullIntLittleEndian(b, 0x10) + 0xE;
+            int offset2 = FileFunctions.readFullIntLittleEndian(b, 0x14);
+            int length = offset2 - offset;
+            if (length < 0xF6) { // No encounters in this map
+                continue;
+            }
+            int areaIndex = Gen6Constants.orasMapNumToPokedexIndex[currentMapNum];
+            if (areaIndex == -1) { // Current encounters are not taken into account for the Pokedex
+                currentMapNum++;
+                continue;
+            }
+            byte[] encounterData = new byte[0xF6];
+            System.arraycopy(b, offset, encounterData, 0, 0xF6);
+
+            EncounterSet grassEncounters = readEncounter(encounterData, 0, 12);
+            updatePokedexAreaDataFromEncounterSet(grassEncounters, pokedexAreaData, areaIndex, 0x1);
+            EncounterSet longGrassEncounters = readEncounter(encounterData, 48, 12);
+            updatePokedexAreaDataFromEncounterSet(longGrassEncounters, pokedexAreaData, areaIndex, 0x2);
+            int foreignEncounterType = grassEncounters.encounters.size() > 0 ? 0x04 : 0x08;
+            EncounterSet dexNavForeignEncounters = readEncounter(encounterData, 96, 3);
+            updatePokedexAreaDataFromEncounterSet(dexNavForeignEncounters, pokedexAreaData, areaIndex, foreignEncounterType);
+            EncounterSet surfEncounters = readEncounter(encounterData, 108, 5);
+            updatePokedexAreaDataFromEncounterSet(surfEncounters, pokedexAreaData, areaIndex, 0x10);
+            EncounterSet rockSmashEncounters = readEncounter(encounterData, 128, 5);
+            updatePokedexAreaDataFromEncounterSet(rockSmashEncounters, pokedexAreaData, areaIndex, 0x20);
+            EncounterSet oldRodEncounters = readEncounter(encounterData, 148, 3);
+            updatePokedexAreaDataFromEncounterSet(oldRodEncounters, pokedexAreaData, areaIndex, 0x40);
+            EncounterSet goodRodEncounters = readEncounter(encounterData, 160, 3);
+            updatePokedexAreaDataFromEncounterSet(goodRodEncounters, pokedexAreaData, areaIndex, 0x80);
+            EncounterSet superRodEncounters = readEncounter(encounterData, 172, 3);
+            updatePokedexAreaDataFromEncounterSet(superRodEncounters, pokedexAreaData, areaIndex, 0x100);
+            EncounterSet hordeCommonEncounters = readEncounter(encounterData, 184, 5);
+            updatePokedexAreaDataFromEncounterSet(hordeCommonEncounters, pokedexAreaData, areaIndex, 0x200);
+            EncounterSet hordeUncommonEncounters = readEncounter(encounterData, 204, 5);
+            updatePokedexAreaDataFromEncounterSet(hordeUncommonEncounters, pokedexAreaData, areaIndex, 0x200);
+            EncounterSet hordeRareEncounters = readEncounter(encounterData, 224, 5);
+            updatePokedexAreaDataFromEncounterSet(hordeRareEncounters, pokedexAreaData, areaIndex, 0x200);
+            currentMapNum++;
+        }
+
+        GARCArchive pokedexAreaGarc = readGARC(romEntry.getString("PokedexAreaData"), true);
+        pokedexAreaGarc.setFile(0, pokedexAreaData);
+        writeGARC(romEntry.getString("PokedexAreaData"), pokedexAreaGarc);
+    }
+
     private void updatePokedexAreaDataFromEncounterSet(EncounterSet es, byte[] pokedexAreaData, int areaIndex, int encounterType) {
         for (Encounter enc : es.encounters) {
             Pokemon pkmn = enc.pokemon;
             while (pkmn.baseForme != null) { // Failsafe if we need to write encounters without modifying species
                 pkmn = pkmn.baseForme;
             }
-            int offset = pkmn.number * Gen6Constants.perPokemonAreaDataLengthXY + areaIndex * 4;
+            int perPokemonAreaDataLength = romEntry.romType == Gen6Constants.Type_XY ?
+                    Gen6Constants.perPokemonAreaDataLengthXY : Gen6Constants.perPokemonAreaDataLengthORAS;
+            int offset = pkmn.number * perPokemonAreaDataLength + areaIndex * 4;
             int value = FileFunctions.readFullIntLittleEndian(pokedexAreaData, offset);
             value |= encounterType;
             FileFunctions.writeFullIntLittleEndian(pokedexAreaData, offset, value);
