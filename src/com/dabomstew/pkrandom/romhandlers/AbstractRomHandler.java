@@ -3400,6 +3400,24 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public void copyTMCompatibilityToCosmeticFormes() {
+        Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
+
+        for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
+            Pokemon pkmn = compatEntry.getKey();
+            boolean[] flags = compatEntry.getValue();
+            if (pkmn.actuallyCosmetic) {
+                boolean[] baseFlags = compat.get(pkmn.baseForme);
+                for (int i = 1; i < flags.length; i++) {
+                    flags[i] = baseFlags[i];
+                }
+            }
+        }
+
+        this.setTMHMCompatibility(compat);
+    }
+
+    @Override
     public void randomizeMoveTutorMoves(boolean noBroken, boolean preserveField, double goodDamagingProbability) {
         if (!this.hasMoveTutors()) {
             return;
@@ -3553,6 +3571,24 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         this.setMoveTutorCompatibility(compat);
 
+    }
+
+    @Override
+    public void copyMoveTutorCompatibilityToCosmeticFormes() {
+        Map<Pokemon, boolean[]> compat = this.getMoveTutorCompatibility();
+
+        for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
+            Pokemon pkmn = compatEntry.getKey();
+            boolean[] flags = compatEntry.getValue();
+            if (pkmn.actuallyCosmetic) {
+                boolean[] baseFlags = compat.get(pkmn.baseForme);
+                for (int i = 1; i < flags.length; i++) {
+                    flags[i] = baseFlags[i];
+                }
+            }
+        }
+
+        this.setMoveTutorCompatibility(compat);
     }
 
     @SuppressWarnings("unchecked")

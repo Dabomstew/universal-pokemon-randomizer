@@ -520,6 +520,12 @@ public class Randomizer {
             romHandler.fullHMCompatibility();
         }
 
+        // Copy TM/HM compatibility to cosmetic formes if it was changed at all
+        if (settings.getTmsHmsCompatibilityMod() != Settings.TMsHMsCompatibilityMod.UNCHANGED
+                || settings.isTmLevelUpMoveSanity()) {
+            romHandler.copyTMCompatibilityToCosmeticFormes();
+        }
+
         // Move Tutors (new 1.0.3)
         if (romHandler.hasMoveTutors()) {
             boolean noBrokenTutorMoves = settings.isBlockBrokenTutorMoves();
@@ -560,6 +566,12 @@ public class Randomizer {
 
             if (settings.isTutorLevelUpMoveSanity()) {
                 romHandler.ensureMoveTutorCompatSanity();
+            }
+
+            // Copy move tutor compatibility to cosmetic formes if it was changed at all
+            if (settings.getMoveTutorsCompatibilityMod() != Settings.MoveTutorsCompatibilityMod.UNCHANGED
+                    || settings.isTutorLevelUpMoveSanity()) {
+                romHandler.copyMoveTutorCompatibilityToCosmeticFormes();
             }
         }
 
