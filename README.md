@@ -47,7 +47,11 @@ Another option is to build in a docker container. You can build by running
 `docker run -it --rm -v "$PWD":/usr/src/mymaven -v "$HOME/.m2":/root/.m2 -w /usr/src/mymaven maven:3.6-jdk-8 mvn clean package`.
 This volume maps the current directory and the local maven repository into a docker container
 and performs a maven build there. Make sure your current directory is the same location as
-`pom.xml` for this command to work. 
+`pom.xml` for this command to work. Note that this may make your `target` directory
+root-owned and prevent local executions from saving config files. You can run
+`sudo chown 1000:1000 target` to return ownership to your user. You can also
+delete the target folder, which should prompt for elevated permissions before
+allowing the folder to be deleted. The folder is rebuilt during `mvn compile`. 
 
 This is subject to change. Make sure you're paying attention to which version of Java
 (currently this project is set to use Java 8) and Maven (3.6) you're using.

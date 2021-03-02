@@ -1,20 +1,22 @@
 package com.dabomstew.pkrandom.gui;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
+import java.awt.Component;
 import java.io.IOException;
 
 import javax.swing.JCheckBox;
+import javax.swing.JRadioButton;
 
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
-import org.junit.Assume;
+import org.assertj.swing.core.GenericTypeMatcher;
+import org.assertj.swing.fixture.JCheckBoxFixture;
+import org.assertj.swing.fixture.JRadioButtonFixture;
 import org.junit.Test;
 
-public class SettingsTest {
+public class SettingsTest extends AbstractUIBase {
 
     /**
      * Toggling Gen 6 does not toggle Gen 5
@@ -24,54 +26,60 @@ public class SettingsTest {
      */
     @Test(timeout = 4000)
     public void TestGen5Separation() throws IOException {
-        try {
-            RandomizerGUI rg = spy(new RandomizerGUI(false, false, true));
-            RomHandler romhandler = mock(RomHandler.class);
-            doReturn(romhandler).when(rg).getRomHandler();
-            Settings settings = rg.getCurrentSettings();
-            // Sanity check - Should initialize to False
-            assertFalse(settings.isUpdateMoves());
-            assertFalse(settings.isUpdateMovesLegacy());
+        JCheckBoxFixture updateMovesCBFixture = this.frame.checkBox(new GenericTypeMatcher(JCheckBox.class, true) {
+            @Override
+            protected boolean isMatching(Component component) {
+                if (component.getName() != null && component.getName().equals("goUpdateMovesCheckBox")) {
+                    return true;
+                }
+                return false;
+            }
+        });
+        JCheckBoxFixture updateMovesLegacyCBFixture = this.frame.checkBox(new GenericTypeMatcher(JCheckBox.class, true) {
+            @Override
+            protected boolean isMatching(Component component) {
+                if (component.getName() != null && component.getName().equals("goUpdateMovesLegacyCheckBox")) {
+                    return true;
+                }
+                return false;
+            }
+        });
+        Settings settings = this.mainWindow.getCurrentSettings();
+        // Sanity check - Should initialize to False
+        assertFalse("Update Moves started as selected", settings.isUpdateMoves());
+        assertFalse("Update Moves Legacy started as selected", settings.isUpdateMovesLegacy());
 
-            // Get the checkboxes and enable them to mimic romLoaded
-            JCheckBox gen5CB = (JCheckBox) rg.getField("updateMovesLegacy");
-            JCheckBox gen6CB = (JCheckBox) rg.getField("updateMoves");
-            gen5CB.setEnabled(true);
-            gen6CB.setEnabled(true);
+        // Toggle Gen 5
+        updateMovesLegacyCBFixture.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertFalse("Update Moves was selected even though it was not clicked", settings.isUpdateMoves());
+        assertTrue("Update Moves Legacy was not selected even though it was clicked", settings.isUpdateMovesLegacy());
+        assertTrue("Update Moves is disabled but was expected to be enabled", updateMovesCBFixture.requireVisible().isEnabled());
+        assertTrue("Update Moves Legacy is disabled but was expected to be enabled", updateMovesLegacyCBFixture.requireVisible().isEnabled());
 
-            // Toggle Gen 5
-            gen5CB.setSelected(true);
-            rg.enableOrDisableSubControls();
-            settings = rg.getCurrentSettings();
-            assertFalse(settings.isUpdateMoves());
-            assertTrue(settings.isUpdateMovesLegacy());
-            assertTrue(gen5CB.isEnabled());
-            assertTrue(gen6CB.isEnabled());
+        // Toggle Gen 5 + Gen 6
+        updateMovesCBFixture.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue("Update Moves was not selected even though it was clicked", settings.isUpdateMoves());
+        assertTrue("Update Moves Legacy was not selected even though state was not changed", settings.isUpdateMovesLegacy());
+        assertTrue("Update Moves is disabled but was expected to be enabled", updateMovesCBFixture.requireVisible().isEnabled());
+        assertTrue("Update Moves Legacy is disabled but was expected to be enabled", updateMovesLegacyCBFixture.requireVisible().isEnabled());
 
-            // Toggle Gen 5 + Gen 6
-            gen6CB.setSelected(true);
-            rg.enableOrDisableSubControls();
-            settings = rg.getCurrentSettings();
-            assertTrue(settings.isUpdateMoves());
-            assertTrue(settings.isUpdateMovesLegacy());
-            assertTrue(gen5CB.isEnabled());
-            assertTrue(gen6CB.isEnabled());
+        // Toggle Gen 5 off leaving Gen 6
+        updateMovesLegacyCBFixture.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue("Update Moves was not selected even though state was not changed", settings.isUpdateMoves());
+        assertFalse("Update Moves Legacy was selected even though it was toggled off", settings.isUpdateMovesLegacy());
+        assertTrue("Update Moves is disabled but was expected to be enabled", updateMovesCBFixture.requireVisible().isEnabled());
+        assertTrue("Update Moves Legacy is disabled but was expected to be enabled", updateMovesLegacyCBFixture.requireVisible().isEnabled());
 
-            // Toggle Gen 6
-            gen5CB.setSelected(false);
-            rg.enableOrDisableSubControls();
-            settings = rg.getCurrentSettings();
-            assertTrue(settings.isUpdateMoves());
-            assertFalse(settings.isUpdateMovesLegacy());
-            assertTrue(gen5CB.isEnabled());
-            assertTrue(gen6CB.isEnabled());
-        } catch (java.awt.HeadlessException exc) {
-            System.out.println("No X11 DISPLAY variable is set. Unable to verify functionality. Passing Gen5Separation test.");
-            Assume.assumeTrue(false);
-        } catch (java.awt.AWTError | NoClassDefFoundError exc) {
-            System.out.println("Cannot reach the X11 DISPLAY variable set. Unable to verify functionality. Passing Gen5Separation test.");
-            Assume.assumeTrue(false);
-        }
+        //Toggle Gen 6 off leaving nothing
+        updateMovesCBFixture.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertFalse("Update Moves was selected even though it was toggled off", settings.isUpdateMoves());
+        assertFalse("Update Moves Legacy was selected even though state was not changed", settings.isUpdateMovesLegacy());
+        assertTrue("Update Moves is disabled but was expected to be enabled", updateMovesCBFixture.requireVisible().isEnabled());
+        assertTrue("Update Moves Legacy is disabled but was expected to be enabled", updateMovesLegacyCBFixture.requireVisible().isEnabled());
     }
 
     /**
@@ -82,63 +90,100 @@ public class SettingsTest {
      */
     @Test(timeout = 4000)
     public void TestUseResistantType() throws IOException {
-        try {
-            RandomizerGUI rg = spy(new RandomizerGUI(false, false, true));
-            RomHandler romhandler = mock(RomHandler.class);
-            doReturn(romhandler).when(rg).getRomHandler();
-            Settings settings = rg.getCurrentSettings();
-            // Sanity check - should evaluate to false
-            assertTrue("Misc Tweaks should not be set yet", settings.getCurrentMiscTweaks() == 0);
+        JCheckBoxFixture resistantTypeCBFixture = this.frame.checkBox(new GenericTypeMatcher(JCheckBox.class, true) {
+            @Override
+            protected boolean isMatching(Component component) {
+                if (component.getName() != null && component.getName().equals("Use Resistant Type")) {
+                    return true;
+                }
+                return false;
+            }
+        });
+        Settings settings = this.mainWindow.getCurrentSettings();
+        // Sanity check - should evaluate to false
+        assertTrue("Misc Tweaks should not be set yet", settings.getCurrentMiscTweaks() == 0);
 
-            // Turn USE_RESISTANT_TYPE to true
-            int mTweaks = 0;
-            mTweaks |= MiscTweak.USE_RESISTANT_TYPE.getValue();
-            settings.setCurrentMiscTweaks(mTweaks);
-            assertTrue("USE_RESISTANT_TYPE should evaluate to true", 
-                (settings.getCurrentMiscTweaks() & MiscTweak.USE_RESISTANT_TYPE.getValue()) > 0);
-
-            // Turn USE_RESISTANT_TYPE to false
-            mTweaks = 0;
-            mTweaks |= MiscTweak.ALLOW_PIKACHU_EVOLUTION.getValue();
-            settings.setCurrentMiscTweaks(mTweaks);
-            assertFalse("USE_RESISTANT_TYPE should evaluate to false", 
+        // Turn USE_RESISTANT_TYPE to true
+        resistantTypeCBFixture.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue("USE_RESISTANT_TYPE should evaluate to true", 
             (settings.getCurrentMiscTweaks() & MiscTweak.USE_RESISTANT_TYPE.getValue()) > 0);
-        } catch (java.awt.HeadlessException exc) {
-            System.out.println("No X11 DISPLAY variable is set. Unable to verify functionality. Passing UseResistantType test.");
-            Assume.assumeTrue(false);
-        } catch (java.awt.AWTError | NoClassDefFoundError exc) {
-            System.out.println("Cannot reach the X11 DISPLAY variable set. Unable to verify functionality. Passing UseResistantType test.");
-            Assume.assumeTrue(false);
-        }
+
+        // Turn USE_RESISTANT_TYPE to false
+        resistantTypeCBFixture.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertFalse("USE_RESISTANT_TYPE should evaluate to false", 
+            (settings.getCurrentMiscTweaks() & MiscTweak.USE_RESISTANT_TYPE.getValue()) > 0);
     }
 
-    // Test change methods is enabled only when randomzied evos is true
-    // evaluates to false when turned off
-    // selecting evaluates to true
-    // not selecting evaluates to false
+    /**
+     * Selecting "RANDOM" opens up the "Change Methods" option
+     * Change Methods correctly updates settings
+     * Toggling the "RANDOM" evolution mod radio button disables "Change Methods"
+     * 
+     * @throws IOException
+     */
     @Test
     public void TestChangeMethods() throws IOException {
-        try {
-            RandomizerGUI rg = spy(new RandomizerGUI(false, false, true));
-            RomHandler romhandler = mock(RomHandler.class);
-            doReturn(romhandler).when(rg).getRomHandler();
-            Settings settings = rg.getCurrentSettings();
-            // Sanity check - should evaluate to false
-            assertFalse("Change Methods should not be set yet", settings.isEvosChangeMethod());
-            
-            // Turn evosChangeMethod to true
-            settings.setEvosChangeMethod(true);
-            assertTrue("evosChangeMethod should evaluate to true", settings.isEvosChangeMethod());
+        JRadioButtonFixture unchangedEvoRBFixture = this.frame.radioButton(new GenericTypeMatcher(JRadioButton.class, true) {
+            @Override
+            protected boolean isMatching(Component component) {
+                if (component.getName() != null && component.getName().equals("peUnchangedRB")) {
+                    return true;
+                }
+                return false;
+            }
+        });
+        JRadioButtonFixture randomEvoRBFixture = this.frame.radioButton(new GenericTypeMatcher(JRadioButton.class, true) {
+            @Override
+            protected boolean isMatching(Component component) {
+                if (component.getName() != null && component.getName().equals("peRandomRB")) {
+                    return true;
+                }
+                return false;
+            }
+        });
+        JCheckBoxFixture changeMethodsCBFixture = this.frame.checkBox(new GenericTypeMatcher(JCheckBox.class, true) {
+            @Override
+            protected boolean isMatching(Component component) {
+                if (component.getName() != null && component.getName().equals("peChangeMethodsCB")) {
+                    return true;
+                }
+                return false;
+            }
+        });
+        Settings settings = this.mainWindow.getCurrentSettings();
+        // Sanity check - should evaluate to false
+        assertFalse("Change Methods should not be set yet", settings.isEvosChangeMethod());
+        assertFalse("Change Methods should not be enabled yet", changeMethodsCBFixture.isEnabled());
+        assertTrue("Evolutions should be set to UNCHANGED but was not", settings.getEvolutionsMod() == Settings.EvolutionsMod.UNCHANGED);
 
-            // Turn evosChangeMethod to false
-            settings.setEvosChangeMethod(false);
-            assertFalse("evosChangeMethod should evaluate to false", settings.isEvosChangeMethod());
-        } catch (java.awt.HeadlessException exc) {
-            System.out.println("No X11 DISPLAY variable is set. Unable to verify functionality. Passing ChangeMethods test.");
-            Assume.assumeTrue(false);
-        } catch (java.awt.AWTError | NoClassDefFoundError exc) {
-            System.out.println("Cannot reach the X11 DISPLAY variable set. Unable to verify functionality. Passing ChangeMethods test.");
-            Assume.assumeTrue(false);
-        }
+        // Turn randomEvos on
+        randomEvoRBFixture.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertFalse("Change Methods should not be set yet", settings.isEvosChangeMethod());
+        assertTrue("Change Methods should be enabled now", changeMethodsCBFixture.isEnabled());
+        assertTrue("Evolutions were not set to RANDOM", settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM);
+
+        // Turn evosChangeMethod to true
+        changeMethodsCBFixture.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue("evosChangeMethod should evaluate to true", settings.isEvosChangeMethod());
+
+        // Turn evosChangeMethod to false
+        changeMethodsCBFixture.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertFalse("evosChangeMethod should evaluate to false", settings.isEvosChangeMethod());
+
+        // Turn randomEvos off while evosChangeMethod is true should turn evosChangeMethod to false
+        changeMethodsCBFixture.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue("evosChangeMethod should evaluate to true", settings.isEvosChangeMethod());
+        assertTrue("Evolutions should be set to RANDOM as state did not change", settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM);
+        unchangedEvoRBFixture.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertFalse("evosChangeMethod should evaluate to false", settings.isEvosChangeMethod());
+        assertFalse("Change Methods should be disabled now", changeMethodsCBFixture.isEnabled());
+        assertTrue("Evolutions should be set to UNCHANGED but was not", settings.getEvolutionsMod() == Settings.EvolutionsMod.UNCHANGED);
     } 
 }

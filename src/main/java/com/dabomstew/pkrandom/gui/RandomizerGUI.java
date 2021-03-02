@@ -94,6 +94,7 @@ import com.dabomstew.pkrandom.romhandlers.Gen3RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen4RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen5RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
+import com.dabomstew.pkrandom.romhandlers.TestRomHandler;
 
 /**
  * 
@@ -202,12 +203,18 @@ public class RandomizerGUI extends javax.swing.JFrame {
             autoUpdateEnabled = false;
         }
         setLocationRelativeTo(null);
-        setVisible(!testModeEnabled);
+        setVisible(true);
         if (!haveCheckedCustomNames) {
             checkCustomNames();
         }
         if (autoUpdateEnabled) {
             new UpdateCheckThread(this, false).start();
+        }
+        // Enable skipping loading rom to activate the UI
+        // for automated testing
+        if (testModeEnabled) {
+            romHandler = new TestRomHandler();
+            romLoaded();
         }
     }
 
@@ -517,6 +524,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             JCheckBox tweakBox = new JCheckBox();
             tweakBox.setText(ct.getTweakName());
             tweakBox.setToolTipText(ct.getTooltipText());
+            tweakBox.setName(ct.getTweakName());
             tweakCheckboxes.add(tweakBox);
         }
     }
@@ -3494,6 +3502,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         peUnchangedRB.setSelected(true);
         peUnchangedRB.setText(bundle.getString("RandomizerGUI.peUnchangedRB.text")); // NOI18N
         peUnchangedRB.setToolTipText(bundle.getString("RandomizerGUI.peUnchangedRB.toolTipText")); // NOI18N
+        peUnchangedRB.setName("peUnchangedRB"); // NOI18N
         peUnchangedRB.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 peUnchangedRBActionPerformed(evt);
@@ -3503,6 +3512,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         pokeEvolutionsButtonGroup.add(peRandomRB);
         peRandomRB.setText(bundle.getString("RandomizerGUI.peRandomRB.text")); // NOI18N
         peRandomRB.setToolTipText(bundle.getString("RandomizerGUI.peRandomRB.toolTipText")); // NOI18N
+        peRandomRB.setName("peRandomRB"); // NOI18N
         peRandomRB.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 peRandomRBActionPerformed(evt);
@@ -3540,6 +3550,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         peChangeMethodsCB.setText(bundle.getString("RandomizerGUI.peChangeMethodsCB.text")); // NOI18N
         peChangeMethodsCB.setToolTipText(bundle.getString("RandomizerGUI.peChangeMethodsCB.toolTipText")); // NOI18N
+        peChangeMethodsCB.setName("peChangeMethodsCB"); // NOI18N
 
         javax.swing.GroupLayout pokemonEvolutionsPanelLayout = new javax.swing.GroupLayout(pokemonEvolutionsPanel);
         pokemonEvolutionsPanel.setLayout(pokemonEvolutionsPanelLayout);
@@ -4071,9 +4082,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         goUpdateMovesCheckBox.setText(bundle.getString("RandomizerGUI.goUpdateMovesCheckBox.text")); // NOI18N
         goUpdateMovesCheckBox.setToolTipText(bundle.getString("RandomizerGUI.goUpdateMovesCheckBox.toolTipText")); // NOI18N
+        goUpdateMovesCheckBox.setName("goUpdateMovesCheckBox"); // NOI18N
 
         goUpdateMovesLegacyCheckBox.setText(bundle.getString("RandomizerGUI.goUpdateMovesLegacyCheckBox.text")); // NOI18N
         goUpdateMovesLegacyCheckBox.setToolTipText(bundle.getString("RandomizerGUI.goUpdateMovesLegacyCheckBox.toolTipText")); // NOI18N
+        goUpdateMovesLegacyCheckBox.setName("goUpdateMovesLegacyCheckBox"); // NOI18N
 
         javax.swing.GroupLayout moveDataPanelLayout = new javax.swing.GroupLayout(moveDataPanel);
         moveDataPanel.setLayout(moveDataPanelLayout);
