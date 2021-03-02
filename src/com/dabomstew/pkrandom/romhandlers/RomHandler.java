@@ -334,6 +334,8 @@ public interface RomHandler {
 
     // Randomizer: move tutors
 
+    void copyTMCompatibilityToCosmeticFormes();
+
     boolean hasMoveTutors();
 
     List<Integer> getMoveTutorMoves();
@@ -355,6 +357,8 @@ public interface RomHandler {
     void ensureMoveTutorCompatSanity();
 
     // Randomizer: trainer names
+
+    void copyMoveTutorCompatibilityToCosmeticFormes();
 
     boolean canChangeTrainerText();
 
