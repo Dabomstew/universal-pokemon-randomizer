@@ -2482,18 +2482,24 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         }
                     } else if (evo.type == EvolutionType.LEVEL_ITEM_DAY) {
                         int item = evo.extraInfo;
-                        // Add an extra evo for Level w/ Item During Night
-                        logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
-                        Evolution extraEntry = new Evolution(evo.from, evo.to, true,
-                                EvolutionType.LEVEL_ITEM_NIGHT, item);
-                        extraEvolutions.add(extraEntry);
+                        // Make sure we don't already have an evo for the same item at night (e.g., when using Change Impossible Evos)
+                        if (evo.from.evolutionsFrom.stream().noneMatch(e -> e.type == EvolutionType.LEVEL_ITEM_NIGHT && e.extraInfo == item)) {
+                            // Add an extra evo for Level w/ Item During Night
+                            logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
+                            Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                    EvolutionType.LEVEL_ITEM_NIGHT, item);
+                            extraEvolutions.add(extraEntry);
+                        }
                     } else if (evo.type == EvolutionType.LEVEL_ITEM_NIGHT) {
                         int item = evo.extraInfo;
-                        // Add an extra evo for Level w/ Item During Day
-                        logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
-                        Evolution extraEntry = new Evolution(evo.from, evo.to, true,
-                                EvolutionType.LEVEL_ITEM_DAY, item);
-                        extraEvolutions.add(extraEntry);
+                        // Make sure we don't already have an evo for the same item at day (e.g., when using Change Impossible Evos)
+                        if (evo.from.evolutionsFrom.stream().noneMatch(e -> e.type == EvolutionType.LEVEL_ITEM_DAY && e.extraInfo == item)) {
+                            // Add an extra evo for Level w/ Item During Day
+                            logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
+                            Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                    EvolutionType.LEVEL_ITEM_DAY, item);
+                            extraEvolutions.add(extraEntry);
+                        }
                     }
                 }
                 pkmn.evolutionsFrom.addAll(extraEvolutions);
