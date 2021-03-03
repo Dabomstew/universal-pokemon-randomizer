@@ -2900,7 +2900,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMusketeers,
+    public void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMainGameLegendaries,
                                        boolean limit600, boolean allowAltFormes, boolean swapMegaEvos,
                                        boolean abilitiesAreRandomized, int levelModifier) {
         // Load
@@ -3011,6 +3011,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                             .collect(Collectors.toList());
             List<Pokemon> pokemonLeft = new ArrayList<>(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
             pokemonLeft.removeAll(banned);
+            List<Integer> mainGameLegendaries = getMainGameLegendaries();
             for (StaticEncounter old : currentStaticPokemon) {
                 StaticEncounter newStatic = cloneStaticEncounter(old);
                 Pokemon newPK;
@@ -3031,52 +3032,45 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                     setPokemonAndFormeForStaticEncounter(newStatic, newPK);
                 } else {
-                    if ((oldPK.number == 638 || oldPK.number == 639 || oldPK.number == 640) && limitMusketeers) {
-                        newPK = pickStaticPowerLvlReplacement(
-                                pokemonLeft,
-                                oldPK,
-                                true,
-                                replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
-                                true);
-                    } else {
-                        if (reallySwapMegaEvos && old.canMegaEvolve()) {
-                            List<Pokemon> megaEvoPokemonLeft =
+                    boolean limitBST = oldPK.baseForme == null ?
+                            limitMainGameLegendaries && mainGameLegendaries.contains(oldPK.number) :
+                            limitMainGameLegendaries && mainGameLegendaries.contains(oldPK.baseForme.number);
+                    if (reallySwapMegaEvos && old.canMegaEvolve()) {
+                        List<Pokemon> megaEvoPokemonLeft =
+                                megaEvolutionsList
+                                        .stream()
+                                        .filter(mega -> mega.method == 1)
+                                        .map(mega -> mega.from)
+                                        .distinct()
+                                        .filter(pokemonLeft::contains)
+                                        .collect(Collectors.toList());
+                        if (megaEvoPokemonLeft.isEmpty()) {
+                            megaEvoPokemonLeft =
                                     megaEvolutionsList
                                             .stream()
                                             .filter(mega -> mega.method == 1)
                                             .map(mega -> mega.from)
                                             .distinct()
-                                            .filter(pokemonLeft::contains)
+                                            .filter(mainPokemonList::contains)
                                             .collect(Collectors.toList());
-                            if (megaEvoPokemonLeft.isEmpty()) {
-                                megaEvoPokemonLeft =
-                                        megaEvolutionsList
-                                                .stream()
-                                                .filter(mega -> mega.method == 1)
-                                                .map(mega -> mega.from)
-                                                .distinct()
-                                                .filter(mainPokemonList::contains)
-                                                .collect(Collectors.toList());
-                            }
-                            boolean limitBST = generationOfPokemon() == 6 && (oldPK.number == 380 || oldPK.number == 381);
-                            newPK = pickStaticPowerLvlReplacement(
-                                    megaEvoPokemonLeft,
-                                    oldPK,
-                                    true,
-                                    replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
-                                    limitBST);
-                            newStatic.heldItem = newPK
-                                    .megaEvolutionsFrom
-                                    .get(this.random.nextInt(newPK.megaEvolutionsFrom.size()))
-                                    .argument;
-                        } else {
-                            newPK = pickStaticPowerLvlReplacement(
-                                    pokemonLeft,
-                                    oldPK,
-                                    true,
-                                    replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
-                                    false);
                         }
+                        newPK = pickStaticPowerLvlReplacement(
+                                megaEvoPokemonLeft,
+                                oldPK,
+                                true,
+                                replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
+                                limitBST);
+                        newStatic.heldItem = newPK
+                                .megaEvolutionsFrom
+                                .get(this.random.nextInt(newPK.megaEvolutionsFrom.size()))
+                                .argument;
+                    } else {
+                        newPK = pickStaticPowerLvlReplacement(
+                                pokemonLeft,
+                                oldPK,
+                                true,
+                                replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
+                                limitBST);
                     }
                     pokemonLeft.remove(newPK);
                     setPokemonAndFormeForStaticEncounter(newStatic, newPK);

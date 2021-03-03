@@ -106,7 +106,7 @@ public class Settings {
     // offset from the dropdown index from RandomizerGUI by 1
     private int[] customStarters = new int[3];
     private boolean randomizeStartersHeldItems;
-    private boolean limitMusketeers;
+    private boolean limitMainGameLegendaries;
     private boolean limit600;
     private boolean banBadRandomStarterHeldItems;
 
@@ -414,7 +414,7 @@ public class Settings {
                 staticPokemonMod == StaticPokemonMod.RANDOM_MATCHING,
                 staticPokemonMod == StaticPokemonMod.COMPLETELY_RANDOM,
                 staticPokemonMod == StaticPokemonMod.SIMILAR_STRENGTH,
-                limitMusketeers, limit600, allowStaticAltFormes, swapStaticMegaEvos));
+                limitMainGameLegendaries, limit600, allowStaticAltFormes, swapStaticMegaEvos));
 
         // 18 tm randomization
         // new stuff 162
@@ -671,7 +671,7 @@ public class Settings {
                 3  // SIMILAR_STRENGTH 
         ));
         
-        settings.setLimitMusketeers(restoreState(data[17], 4));
+        settings.setLimitMainGameLegendaries(restoreState(data[17], 4));
         settings.setLimit600(restoreState(data[17], 5));
         settings.setAllowStaticAltFormes(restoreState(data[17], 6));
         settings.setSwapStaticMegaEvos(restoreState(data[17], 7));
@@ -1725,12 +1725,12 @@ public class Settings {
         this.staticPokemonMod = staticPokemonMod;
     }
 
-    public boolean isLimitMusketeers() {
-        return limitMusketeers;
+    public boolean isLimitMainGameLegendaries() {
+        return limitMainGameLegendaries;
     }
 
-    public void setLimitMusketeers(boolean limitMusketeers) {
-        this.limitMusketeers = limitMusketeers;
+    public void setLimitMainGameLegendaries(boolean limitMainGameLegendaries) {
+        this.limitMainGameLegendaries = limitMainGameLegendaries;
     }
 
     public boolean isLimit600() {

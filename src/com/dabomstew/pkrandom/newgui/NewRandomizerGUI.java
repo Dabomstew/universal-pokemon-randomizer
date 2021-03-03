@@ -41,8 +41,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryPoolMXBean;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -52,9 +50,6 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import static com.dabomstew.pkrandom.pokemon.ExpCurve.MEDIUM_FAST;
-import static com.dabomstew.pkrandom.pokemon.ExpCurve.MEDIUM_SLOW;
 
 public class NewRandomizerGUI {
     private JTabbedPane tabbedPane1;
@@ -106,7 +101,7 @@ public class NewRandomizerGUI {
     private JRadioButton stpSwapLegendariesSwapStandardsRadioButton;
     private JRadioButton stpRandomCompletelyRadioButton;
     private JRadioButton stpRandomSimilarStrengthRadioButton;
-    private JCheckBox stpLimitMusketeersCheckBox;
+    private JCheckBox stpLimitMainGameLegendariesCheckBox;
     private JCheckBox stpRandomize600BSTCheckBox;
     private JRadioButton igtUnchangedRadioButton;
     private JRadioButton igtRandomizeGivenPokemonOnlyRadioButton;
@@ -1397,7 +1392,7 @@ public class NewRandomizerGUI {
                 .setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.COMPLETELY_RANDOM);
         stpRandomSimilarStrengthRadioButton
                 .setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.SIMILAR_STRENGTH);
-        stpLimitMusketeersCheckBox.setSelected(settings.isLimitMusketeers());
+        stpLimitMainGameLegendariesCheckBox.setSelected(settings.isLimitMainGameLegendaries());
         stpRandomize600BSTCheckBox.setSelected(settings.isLimit600());
         stpAllowAltFormesCheckBox.setSelected(settings.isAllowStaticAltFormes());
         stpSwapMegaEvosCheckBox.setSelected(settings.isSwapStaticMegaEvos());
@@ -1596,7 +1591,7 @@ public class NewRandomizerGUI {
 
         settings.setStaticPokemonMod(stpUnchangedRadioButton.isSelected(), stpSwapLegendariesSwapStandardsRadioButton.isSelected(),
                 stpRandomCompletelyRadioButton.isSelected(), stpRandomSimilarStrengthRadioButton.isSelected());
-        settings.setLimitMusketeers(stpLimitMusketeersCheckBox.isSelected() && stpLimitMusketeersCheckBox.isVisible());
+        settings.setLimitMainGameLegendaries(stpLimitMainGameLegendariesCheckBox.isSelected() && stpLimitMainGameLegendariesCheckBox.isVisible());
         settings.setLimit600(stpRandomize600BSTCheckBox.isSelected());
         settings.setAllowStaticAltFormes(stpAllowAltFormesCheckBox.isSelected() && stpAllowAltFormesCheckBox.isVisible());
         settings.setSwapStaticMegaEvos(stpSwapMegaEvosCheckBox.isSelected() && stpSwapMegaEvosCheckBox.isVisible());
@@ -1940,9 +1935,9 @@ public class NewRandomizerGUI {
         stpPercentageLevelModifierSlider.setVisible(true);
         stpPercentageLevelModifierSlider.setEnabled(false);
         stpPercentageLevelModifierSlider.setValue(0);
-        stpLimitMusketeersCheckBox.setVisible(true);
-        stpLimitMusketeersCheckBox.setEnabled(false);
-        stpLimitMusketeersCheckBox.setSelected(false);
+        stpLimitMainGameLegendariesCheckBox.setVisible(true);
+        stpLimitMainGameLegendariesCheckBox.setEnabled(false);
+        stpLimitMainGameLegendariesCheckBox.setSelected(false);
         stpRandomize600BSTCheckBox.setVisible(true);
         stpRandomize600BSTCheckBox.setEnabled(false);
         stpRandomize600BSTCheckBox.setSelected(false);
@@ -2482,7 +2477,8 @@ public class NewRandomizerGUI {
                 stpSwapLegendariesSwapStandardsRadioButton.setEnabled(true);
                 stpRandomCompletelyRadioButton.setEnabled(true);
                 stpRandomSimilarStrengthRadioButton.setEnabled(true);
-                stpLimitMusketeersCheckBox.setVisible(pokemonGeneration == 5);
+                stpLimitMainGameLegendariesCheckBox.setVisible(pokemonGeneration >= 3);
+                stpLimitMainGameLegendariesCheckBox.setEnabled(false);
                 stpAllowAltFormesCheckBox.setVisible(romHandler.hasStaticAltFormes());
                 stpSwapMegaEvosCheckBox.setVisible(pokemonGeneration == 6 && !romHandler.forceSwapStaticMegaEvos());
                 stpPercentageLevelModifierCheckBox.setVisible(pokemonGeneration >= 3);
@@ -2494,7 +2490,7 @@ public class NewRandomizerGUI {
                 stpRandomCompletelyRadioButton.setVisible(false);
                 stpRandomSimilarStrengthRadioButton.setVisible(false);
                 stpRandomize600BSTCheckBox.setVisible(false);
-                stpLimitMusketeersCheckBox.setVisible(false);
+                stpLimitMainGameLegendariesCheckBox.setVisible(false);
                 stpPercentageLevelModifierCheckBox.setVisible(false);
                 stpPercentageLevelModifierSlider.setVisible(false);
             }
@@ -2833,8 +2829,6 @@ public class NewRandomizerGUI {
         }
 
         if (stpUnchangedRadioButton.isSelected()) {
-            stpLimitMusketeersCheckBox.setEnabled(false);
-            stpLimitMusketeersCheckBox.setSelected(false);
             stpRandomize600BSTCheckBox.setEnabled(false);
             stpRandomize600BSTCheckBox.setSelected(false);
             stpAllowAltFormesCheckBox.setEnabled(false);
@@ -2842,10 +2836,16 @@ public class NewRandomizerGUI {
             stpSwapMegaEvosCheckBox.setEnabled(false);
             stpSwapMegaEvosCheckBox.setSelected(false);
         } else {
-            stpLimitMusketeersCheckBox.setEnabled(true);
             stpRandomize600BSTCheckBox.setEnabled(true);
             stpAllowAltFormesCheckBox.setEnabled(true);
             stpSwapMegaEvosCheckBox.setEnabled(true);
+        }
+
+        if (stpRandomSimilarStrengthRadioButton.isSelected()) {
+            stpLimitMainGameLegendariesCheckBox.setEnabled(true);
+        } else {
+            stpLimitMainGameLegendariesCheckBox.setEnabled(false);
+            stpLimitMainGameLegendariesCheckBox.setSelected(false);
         }
 
         if (stpPercentageLevelModifierCheckBox.isSelected()) {

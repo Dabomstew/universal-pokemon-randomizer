@@ -993,17 +993,17 @@ public class Randomizer {
         if (romHandler.canChangeStaticPokemon()) {
             List<StaticEncounter> oldStatics = romHandler.getStaticPokemon();
             if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING) { // Legendary for L
-                romHandler.randomizeStaticPokemon(true, false,settings.isLimitMusketeers(),
+                romHandler.randomizeStaticPokemon(true, false,settings.isLimitMainGameLegendaries(),
                         settings.isLimit600(), settings.isAllowStaticAltFormes(), settings.isSwapStaticMegaEvos(),
                         settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE,
                         settings.isStaticLevelModified() ? settings.getStaticLevelModifier() : 0);
             } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.COMPLETELY_RANDOM) {
-                romHandler.randomizeStaticPokemon(false, false,settings.isLimitMusketeers(),
+                romHandler.randomizeStaticPokemon(false, false,settings.isLimitMainGameLegendaries(),
                         settings.isLimit600(), settings.isAllowStaticAltFormes(), settings.isSwapStaticMegaEvos(),
                         settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE,
                         settings.isStaticLevelModified() ? settings.getStaticLevelModifier() : 0);
             } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.SIMILAR_STRENGTH) {
-                romHandler.randomizeStaticPokemon(false, true,settings.isLimitMusketeers(),
+                romHandler.randomizeStaticPokemon(false, true,settings.isLimitMainGameLegendaries(),
                         settings.isLimit600(), settings.isAllowStaticAltFormes(), settings.isSwapStaticMegaEvos(),
                         settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE,
                         settings.isStaticLevelModified() ? settings.getStaticLevelModifier() : 0);

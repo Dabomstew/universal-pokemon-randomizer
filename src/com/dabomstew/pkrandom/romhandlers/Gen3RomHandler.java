@@ -29,6 +29,7 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 
 import com.dabomstew.pkrandom.FileFunctions;
@@ -2583,6 +2584,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     @Override
     public boolean hasStaticAltFormes() {
         return false;
+    }
+
+    @Override
+    public List<Integer> getMainGameLegendaries() {
+        return Arrays.stream(romEntry.arrayEntries.get("MainGameLegendaries")).boxed().collect(Collectors.toList());
     }
 
     @Override

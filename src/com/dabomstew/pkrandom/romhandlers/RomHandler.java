@@ -268,7 +268,7 @@ public interface RomHandler {
 
     boolean setStaticPokemon(List<StaticEncounter> staticPokemon);
 
-    void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMusketeers,
+    void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMainGameLegendaries,
                                 boolean limit600, boolean allowAltFormes, boolean swapMegaEvos1,
                                 boolean abilitiesAreRandomized, int levelModifier);
 
@@ -281,6 +281,8 @@ public interface RomHandler {
     boolean forceSwapStaticMegaEvos();
 
     void onlyChangeStaticLevels(int levelModifier);
+
+    List<Integer> getMainGameLegendaries();
 
     // Randomizer: Totem Pokemon
 

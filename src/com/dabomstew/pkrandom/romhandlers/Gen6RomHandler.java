@@ -258,14 +258,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
         try {
             stringsGarc = readGARC(romEntry.getString("TextStrings"),true);
-            GARCArchive encounterGarc = readGARC(romEntry.getString("WildPokemon"), false);
-            byte[] boxLegendaryRoomData = encounterGarc.getFile(227);
-            AMX localScript = new AMX(boxLegendaryRoomData, 1);
-            byte[] data = localScript.decData;
-            File output = new File("C:\\Users\\Tom\\Desktop\\1.amx");
-            try (FileOutputStream outputStream = new FileOutputStream(output)) {
-                outputStream.write(data);
-            }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
@@ -2537,6 +2529,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     @Override
     public boolean forceSwapStaticMegaEvos() {
         return romEntry.romType == Gen6Constants.Type_XY;
+    }
+
+    @Override
+    public List<Integer> getMainGameLegendaries() {
+        return Arrays.stream(romEntry.arrayEntries.get("MainGameLegendaries")).boxed().collect(Collectors.toList());
     }
 
     @Override

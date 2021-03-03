@@ -32,6 +32,7 @@ import java.io.PrintStream;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.dabomstew.pkrandom.pokemon.*;
@@ -1553,6 +1554,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     public boolean hasStaticAltFormes() {
         return false;
+    }
+
+    @Override
+    public List<Integer> getMainGameLegendaries() {
+        return Arrays.stream(romEntry.arrayEntries.get("MainGameLegendaries")).boxed().collect(Collectors.toList());
     }
 
     @Override
