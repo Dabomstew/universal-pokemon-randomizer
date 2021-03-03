@@ -73,3 +73,4 @@
    * In order to make this compatible with Metronome Only mode, all pokemon that evolve due to knowing a move (e.g. Bonsly) now require Metronome regardless of whether evolution methods are randomized
    * Fixing impossible evos occurs after movesets are randomized, and selects a new move from the randomzied moveset to replace the current one used when evolving while knowing a move regardless of whether evolution methods are randomized
    * Evolutions like Nincada and Karrablast are excluded due to lack of support in game for randomization of these methods
+ * Starter Pokemon selection has been condensed to use a slider to select whether the starters have 1, 2, or any amount of evolutions. 

@@ -86,7 +86,9 @@ Under the Properties tab, uncheck `enabled` so that the element starts disabled 
 a ROM is loaded. Check `horizontally resizable` to allow element to match the text size.
 Adjust the `text` and `toolTip` by clicking the `...` box to the right.
 Ensure `Resource Bundle` is selected, `com.dabomstew.pkrandom.gui.Bundle` is the bundle name.
-All tool tips need to start with `<html>` for proper rendering. Use `<br />` for line breaks. 
+All tool tips need to start with `<html>` for proper rendering. Use `<br />` for line breaks.
+Fill the `name` field in and name it the same as the button. This enables the GUI Tester to
+find it by name.
 
 Under the Code tab, use `actionPerformed` when another element will be enabled/disabled
 based on whether your element is selected or not. 

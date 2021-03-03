@@ -82,7 +82,7 @@ public class Settings {
     private boolean banNegativeAbilities;
 
     public enum StartersMod {
-        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_ONE_OR_TWO_EVOLUTIONS, RANDOM_WITH_TWO_EVOLUTIONS
+        UNCHANGED, CUSTOM, RANDOM
     }
 
     private StartersMod startersMod = StartersMod.UNCHANGED;
@@ -97,6 +97,8 @@ public class Settings {
     private boolean starterLimitBST;
     private boolean startersBaseEvoOnly;
     private int starterBSTModifier;
+    private boolean startersExactEvos;
+    private int startersMinimumEvos;
 
     public enum TypesMod {
         UNCHANGED, RANDOM_RETAIN, COMPLETELY_RANDOM, SHUFFLE
@@ -284,9 +286,9 @@ public class Settings {
                 allowWonderGuard, abilitiesFollowEvolutions, banTrappingAbilities, banNegativeAbilities));
 
         // 4: starter pokemon stuff (see byte 37 for additional options)
-        out.write(makeByteSelected(startersMod == StartersMod.CUSTOM, startersMod == StartersMod.COMPLETELY_RANDOM,
-                startersMod == StartersMod.UNCHANGED, startersMod == StartersMod.RANDOM_WITH_TWO_EVOLUTIONS,
-                randomizeStartersHeldItems, banBadRandomStarterHeldItems));
+        out.write(makeByteSelected(startersMod == StartersMod.CUSTOM, startersMinimumEvos == 0,
+                startersMod == StartersMod.UNCHANGED, startersMinimumEvos == 2,
+                randomizeStartersHeldItems, banBadRandomStarterHeldItems, startersExactEvos));
 
         // @5 dropdowns
         write2ByteInt(out, customStarters[0] - 1);
@@ -402,8 +404,8 @@ public class Settings {
         baseStatisticsMod == BaseStatisticsMod.SHUFFLE_ALL, typesFollowEvos));
 
         // @ 37 Starter Pokemon Overflow
-        out.write(makeByteSelected(startersMod==StartersMod.RANDOM_WITH_ONE_OR_TWO_EVOLUTIONS,
-        startersNoSplit, startersUniqueTypes, starterLimitBST, startersBaseEvoOnly));
+        out.write(makeByteSelected(startersMinimumEvos == 1, startersNoSplit, startersUniqueTypes, 
+        starterLimitBST, startersBaseEvoOnly));
 
         // @ 38 Starter Pokemon BST Modifier
         write2ByteInt(out, starterBSTModifier - 1);
@@ -489,12 +491,12 @@ public class Settings {
         settings.setStartersMod(getEnum(StartersMod.class, 
                 restoreState(data[4], 2), // UNCHANGED
                 restoreState(data[4], 0), // CUSTOM
-                restoreState(data[4], 1), // COMPLETELY_RANDOM
-                restoreState(data[37], 0), //RANDOM_WITH_ONE_OR_TWO_EVOLUTIONS
-                restoreState(data[4], 3) // RANDOM_WITH_TWO_EVOLUTIONS
+                restoreState(data[4], 1) // RANDOM
         ));
+        settings.setStartersMinimumEvos(restoreState(data[4], 3) ? 2 : 0);
         settings.setRandomizeStartersHeldItems(restoreState(data[4], 4));
         settings.setBanBadRandomStarterHeldItems(restoreState(data[4], 5));
+        settings.setStartersExactEvos(restoreState(data[4], 6));
 
         settings.setCustomStarters(new int[] { FileFunctions.read2ByteInt(data, 5) + 1,
                 FileFunctions.read2ByteInt(data, 7) + 1, FileFunctions.read2ByteInt(data, 9) + 1 });
@@ -629,6 +631,9 @@ public class Settings {
         settings.setStatsRandomizeFirst(restoreState(data[36], 0));
         settings.setTypesFollowEvos(restoreState(data[36], 3));
 
+        if (restoreState(data[37], 0)) {
+            settings.setStartersMinimumEvos(1);
+        }
         settings.setStartersNoSplit(restoreState(data[37], 2));
         settings.setStartersUniqueTypes(restoreState(data[37], 1));
         settings.setStartersLimitBST(restoreState(data[37], 3));
@@ -1057,6 +1062,24 @@ public class Settings {
 
     public Settings setStartersBSTLimitModifier(int starterBSTModifier) {
         this.starterBSTModifier = starterBSTModifier;
+        return this;
+    }
+
+    public boolean isStartersExactEvo() {
+        return startersExactEvos;
+    }
+
+    public Settings setStartersExactEvos(boolean startersExactEvos) {
+        this.startersExactEvos = startersExactEvos;
+        return this;
+    }
+
+    public int getStartersMinimumEvos() {
+        return startersMinimumEvos;
+    }
+
+    public Settings setStartersMinimumEvos(int startersMinimumEvos) {
+        this.startersMinimumEvos = startersMinimumEvos;
         return this;
     }
 

@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.gui;
 
 import java.awt.GraphicsEnvironment;
+import java.awt.Point;
 
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.edt.GuiActionRunner;
@@ -59,6 +60,7 @@ public class AbstractUIBase extends AssertJSwingTestCaseTemplate {
         });
         this.frame = new FrameFixture(this.robot(), mainWindow);
         this.frame.show();
+        this.frame.moveTo(new Point(10, 10));
         onSetUp();
     }
 
