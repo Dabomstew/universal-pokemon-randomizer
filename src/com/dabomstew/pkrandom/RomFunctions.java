@@ -39,14 +39,14 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 public class RomFunctions {
 
-    public static Set<Pokemon> getBasicOrNoCopyPokemon(RomHandler baseRom) {
+    public static Set<Pokemon> getBasicOrNoCopyPokemon(RomHandler baseRom, boolean dontCopySplitEvos) {
         List<Pokemon> allPokes = baseRom.getPokemonInclFormes();
         Set<Pokemon> dontCopyPokes = new TreeSet<>();
         for (Pokemon pkmn : allPokes) {
             if (pkmn != null) {
                 if (pkmn.evolutionsTo.size() < 1) {
                     dontCopyPokes.add(pkmn);
-                } else {
+                } else if (dontCopySplitEvos) {
                     Evolution onlyEvo = pkmn.evolutionsTo.get(0);
                     if (!onlyEvo.carryStats) {
                         dontCopyPokes.add(pkmn);
@@ -57,14 +57,14 @@ public class RomFunctions {
         return dontCopyPokes;
     }
 
-    public static Set<Pokemon> getMiddleEvolutions(RomHandler baseRom) {
+    public static Set<Pokemon> getMiddleEvolutions(RomHandler baseRom, boolean includeSplitEvos) {
         List<Pokemon> allPokes = baseRom.getPokemon();
         Set<Pokemon> middleEvolutions = new TreeSet<>();
         for (Pokemon pkmn : allPokes) {
             if (pkmn != null) {
                 if (pkmn.evolutionsTo.size() == 1 && pkmn.evolutionsFrom.size() > 0) {
                     Evolution onlyEvo = pkmn.evolutionsTo.get(0);
-                    if (onlyEvo.carryStats) {
+                    if (onlyEvo.carryStats || includeSplitEvos) {
                         middleEvolutions.add(pkmn);
                     }
                 }
@@ -73,14 +73,14 @@ public class RomFunctions {
         return middleEvolutions;
     }
 
-    public static Set<Pokemon> getFinalEvolutions(RomHandler baseRom) {
+    public static Set<Pokemon> getFinalEvolutions(RomHandler baseRom, boolean includeSplitEvos) {
         List<Pokemon> allPokes = baseRom.getPokemon();
         Set<Pokemon> finalEvolutions = new TreeSet<>();
         for (Pokemon pkmn : allPokes) {
             if (pkmn != null) {
                 if (pkmn.evolutionsTo.size() == 1 && pkmn.evolutionsFrom.size() == 0) {
                     Evolution onlyEvo = pkmn.evolutionsTo.get(0);
-                    if (onlyEvo.carryStats) {
+                    if (onlyEvo.carryStats || includeSplitEvos) {
                         finalEvolutions.add(pkmn);
                     }
                 }

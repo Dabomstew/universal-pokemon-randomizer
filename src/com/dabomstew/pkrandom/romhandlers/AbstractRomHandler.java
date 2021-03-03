@@ -3316,40 +3316,95 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizeTMHMCompatibility(boolean preferSameType) {
+    public void randomizeTMHMCompatibility(boolean preferSameType, boolean followEvolutions) {
         // Get current compatibility
         // new: increase HM chances if required early on
         List<Integer> requiredEarlyOn = this.getEarlyRequiredHMMoves();
         Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
         List<Integer> tmHMs = new ArrayList<>(this.getTMMoves());
         tmHMs.addAll(this.getHMMoves());
-        List<Move> moveData = this.getMoves();
-        for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
-            Pokemon pkmn = compatEntry.getKey();
-            boolean[] flags = compatEntry.getValue();
-            for (int i = 1; i <= tmHMs.size(); i++) {
-                int move = tmHMs.get(i - 1);
-                Move mv = moveData.get(move);
-                double probability = 0.5;
-                if (preferSameType) {
-                    if (pkmn.primaryType.equals(mv.type)
-                            || (pkmn.secondaryType != null && pkmn.secondaryType.equals(mv.type))) {
-                        probability = 0.9;
-                    } else if (mv.type != null && mv.type.equals(Type.NORMAL)) {
-                        probability = 0.5;
-                    } else {
-                        probability = 0.25;
-                    }
-                }
-                if (requiredEarlyOn.contains(move)) {
-                    probability = Math.min(1.0, probability * 1.8);
-                }
-                flags[i] = (this.random.nextDouble() < probability);
+
+        if (followEvolutions) {
+            copyUpEvolutionsHelper(pk -> randomizePokemonMoveCompatibility(
+                    pk, compat.get(pk), tmHMs, requiredEarlyOn, preferSameType),
+            (evFrom, evTo, toMonIsFinalEvo) ->  copyPokemonMoveCompatibilityUpEvolutions(
+                    evFrom, evTo, compat.get(evFrom), compat.get(evTo), tmHMs, preferSameType
+            ), false);
+        }
+        else {
+            for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
+                randomizePokemonMoveCompatibility(compatEntry.getKey(), compatEntry.getValue(), tmHMs,
+                        requiredEarlyOn, preferSameType);
             }
         }
 
         // Set the new compatibility
         this.setTMHMCompatibility(compat);
+    }
+
+    private void randomizePokemonMoveCompatibility(Pokemon pkmn, boolean[] moveCompatibilityFlags,
+                                                   List<Integer> moveIDs, List<Integer> prioritizedMoves,
+                                                   boolean preferSameType) {
+        List<Move> moveData = this.getMoves();
+        for (int i = 1; i <= moveIDs.size(); i++) {
+            int move = moveIDs.get(i - 1);
+            Move mv = moveData.get(move);
+            double probability = getMoveCompatibilityProbability(
+                    pkmn,
+                    mv,
+                    prioritizedMoves.contains(move),
+                    preferSameType
+            );
+            moveCompatibilityFlags[i] = (this.random.nextDouble() < probability);
+        }
+    }
+
+    private void copyPokemonMoveCompatibilityUpEvolutions(Pokemon evFrom, Pokemon evTo, boolean[] prevCompatibilityFlags,
+                                                          boolean[] toCompatibilityFlags, List<Integer> moveIDs,
+                                                          boolean preferSameType) {
+        List<Move> moveData = this.getMoves();
+        for (int i = 1; i <= moveIDs.size(); i++) {
+            if (!prevCompatibilityFlags[i]) {
+                // Slight chance to gain TM/HM compatibility for a move if not learned by an earlier evolution step
+                // Without prefer same type: 25% chance
+                // With prefer same type:    10% chance, 90% chance for a type new to this evolution
+                int move = moveIDs.get(i - 1);
+                Move mv = moveData.get(move);
+                double probability = 0.25;
+                if (preferSameType) {
+                    probability = 0.1;
+                    if (evTo.primaryType.equals(mv.type)
+                            && !evTo.primaryType.equals(evFrom.primaryType) && !evTo.primaryType.equals(evFrom.secondaryType)
+                            || evTo.secondaryType != null && evTo.secondaryType.equals(mv.type)
+                            && !evTo.secondaryType.equals(evFrom.secondaryType) && !evTo.secondaryType.equals(evFrom.primaryType)) {
+                        probability = 0.9;
+                    }
+                }
+                toCompatibilityFlags[i] = (this.random.nextDouble() < probability);
+            }
+            else {
+                toCompatibilityFlags[i] = prevCompatibilityFlags[i];
+            }
+        }
+    }
+
+    private double getMoveCompatibilityProbability(Pokemon pkmn, Move mv, boolean requiredEarlyOn,
+                                                  boolean preferSameType) {
+            double probability = 0.5;
+            if (preferSameType) {
+                if (pkmn.primaryType.equals(mv.type)
+                        || (pkmn.secondaryType != null && pkmn.secondaryType.equals(mv.type))) {
+                    probability = 0.9;
+                } else if (mv.type != null && mv.type.equals(Type.NORMAL)) {
+                    probability = 0.5;
+                } else {
+                    probability = 0.25;
+                }
+            }
+            if (requiredEarlyOn) {
+                probability = Math.min(1.0, probability * 1.8);
+            }
+            return probability;
     }
 
     @Override
@@ -3382,6 +3437,20 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
+        this.setTMHMCompatibility(compat);
+    }
+
+    @Override
+    public void ensureTMEvolutionSanity() {
+        Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
+        // Don't do anything with the base, just copy upwards to ensure later evolutions retain learn compatibility
+        copyUpEvolutionsHelper(pk -> {}, ((evFrom, evTo, toMonIsFinalEvo) -> {
+            boolean[] fromCompat = compat.get(evFrom);
+            boolean[] toCompat = compat.get(evTo);
+            for (int i = 1; i < toCompat.length; i++) {
+                toCompat[i] |= fromCompat[i];
+            }
+        }), false);
         this.setTMHMCompatibility(compat);
     }
 
@@ -3499,38 +3568,32 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizeMoveTutorCompatibility(boolean preferSameType) {
+    public void randomizeMoveTutorCompatibility(boolean preferSameType, boolean followEvolutions) {
         if (!this.hasMoveTutors()) {
             return;
         }
         // Get current compatibility
         Map<Pokemon, boolean[]> compat = this.getMoveTutorCompatibility();
         List<Integer> mts = this.getMoveTutorMoves();
-        List<Move> moveData = this.getMoves();
-        for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
-            Pokemon pkmn = compatEntry.getKey();
-            boolean[] flags = compatEntry.getValue();
-            for (int i = 1; i <= mts.size(); i++) {
-                int move = mts.get(i - 1);
-                Move mv = moveData.get(move);
-                double probability = 0.5;
-                if (preferSameType) {
-                    if (pkmn.primaryType.equals(mv.type)
-                            || (pkmn.secondaryType != null && pkmn.secondaryType.equals(mv.type))) {
-                        probability = 0.9;
-                    } else if (mv.type != null && mv.type.equals(Type.NORMAL)) {
-                        probability = 0.5;
-                    } else {
-                        probability = 0.25;
-                    }
-                }
-                flags[i] = (this.random.nextDouble() < probability);
+
+        // Empty list
+        List<Integer> priorityTutors = new ArrayList<Integer>();
+
+        if (followEvolutions) {
+            copyUpEvolutionsHelper(pk -> randomizePokemonMoveCompatibility(
+                    pk, compat.get(pk), mts, priorityTutors, preferSameType),
+                    (evFrom, evTo, toMonIsFinalEvo) ->  copyPokemonMoveCompatibilityUpEvolutions(
+                            evFrom, evTo, compat.get(evFrom), compat.get(evTo), mts, preferSameType
+                    ), false);
+        }
+        else {
+            for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
+                randomizePokemonMoveCompatibility(compatEntry.getKey(), compatEntry.getValue(), mts, priorityTutors, preferSameType);
             }
         }
 
         // Set the new compatibility
         this.setMoveTutorCompatibility(compat);
-
     }
 
     @Override
@@ -3570,7 +3633,23 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
         this.setMoveTutorCompatibility(compat);
+    }
 
+    @Override
+    public void ensureMoveTutorEvolutionSanity() {
+        if (!this.hasMoveTutors()) {
+            return;
+        }
+        Map<Pokemon, boolean[]> compat = this.getMoveTutorCompatibility();
+        // Don't do anything with the base, just copy upwards to ensure later evolutions retain learn compatibility
+        copyUpEvolutionsHelper(pk -> {}, ((evFrom, evTo, toMonIsFinalEvo) -> {
+            boolean[] fromCompat = compat.get(evFrom);
+            boolean[] toCompat = compat.get(evTo);
+            for (int i = 1; i < toCompat.length; i++) {
+                toCompat[i] |= fromCompat[i];
+            }
+        }), false);
+        this.setMoveTutorCompatibility(compat);
     }
 
     @Override
@@ -4694,8 +4773,11 @@ public abstract class AbstractRomHandler implements RomHandler {
      *            Method to run on all base or no-copy Pokemon
      * @param epAction
      *            Method to run on all evolved Pokemon with a linear chain of
+     * @param dontCopySplitEvos
+     *            If true, treat split evolutions the same way as base Pokemon
      */
-    private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction) {
+    private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction,
+                                        boolean dontCopySplitEvos) {
         List<Pokemon> allPokes = this.getPokemonInclFormes();
         for (Pokemon pk : allPokes) {
             if (pk != null) {
@@ -4704,8 +4786,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // Get evolution data.
-        Set<Pokemon> dontCopyPokes = RomFunctions.getBasicOrNoCopyPokemon(this);
-        Set<Pokemon> middleEvos = RomFunctions.getMiddleEvolutions(this);
+        Set<Pokemon> dontCopyPokes = RomFunctions.getBasicOrNoCopyPokemon(this, dontCopySplitEvos);
+        Set<Pokemon> middleEvos = RomFunctions.getMiddleEvolutions(this, !dontCopySplitEvos);
 
         for (Pokemon pk : dontCopyPokes) {
             bpAction.applyTo(pk);
@@ -4739,6 +4821,10 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             }
         }
+    }
+
+    private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction) {
+        copyUpEvolutionsHelper(bpAction, epAction, true);
     }
 
     private boolean checkForUnusedMove(List<Move> potentialList, Set<Integer> alreadyUsed) {

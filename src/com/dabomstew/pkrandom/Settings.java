@@ -242,6 +242,7 @@ public class Settings {
     private boolean tmsForceGoodDamaging;
     private int tmsGoodDamagingPercent = 0;
     private boolean blockBrokenTMMoves;
+    private boolean tmsFollowEvolutions;
 
     public enum TMsHMsCompatibilityMod {
         UNCHANGED, RANDOM_PREFER_TYPE, COMPLETELY_RANDOM, FULL
@@ -259,6 +260,7 @@ public class Settings {
     private boolean tutorsForceGoodDamaging;
     private int tutorsGoodDamagingPercent = 0;
     private boolean blockBrokenTutorMoves;
+    private boolean tutorFollowEvolutions;
 
     public enum MoveTutorsCompatibilityMod {
         UNCHANGED, RANDOM_PREFER_TYPE, COMPLETELY_RANDOM, FULL
@@ -424,7 +426,7 @@ public class Settings {
 
         // 19 tms part 2
         // new in 170
-        out.write(makeByteSelected(fullHMCompat));
+        out.write(makeByteSelected(fullHMCompat, tmsFollowEvolutions, tutorFollowEvolutions));
 
         // 20 tms good damaging
         out.write((tmsForceGoodDamaging ? 0x80 : 0) | tmsGoodDamagingPercent);
@@ -684,7 +686,10 @@ public class Settings {
         )); 
         settings.setTmLevelUpMoveSanity(restoreState(data[18], 5));
         settings.setKeepFieldMoveTMs(restoreState(data[18], 6));
+
         settings.setFullHMCompat(restoreState(data[19], 0));
+        settings.setTmsFollowEvolutions(restoreState(data[19], 1));
+        settings.setTutorFollowEvolutions(restoreState(data[19], 2));
 
         settings.setTmsForceGoodDamaging(restoreState(data[20], 7));
         settings.setTmsGoodDamagingPercent(data[20] & 0x7F);
@@ -1908,6 +1913,14 @@ public class Settings {
         this.tmsHmsCompatibilityMod = tmsHmsCompatibilityMod;
     }
 
+    public boolean isTmsFollowEvolutions() {
+        return tmsFollowEvolutions;
+    }
+
+    public void setTmsFollowEvolutions(boolean tmsFollowEvolutions) {
+        this.tmsFollowEvolutions = tmsFollowEvolutions;
+    }
+
     public MoveTutorMovesMod getMoveTutorMovesMod() {
         return moveTutorMovesMod;
     }
@@ -1970,6 +1983,14 @@ public class Settings {
 
     private void setMoveTutorsCompatibilityMod(MoveTutorsCompatibilityMod moveTutorsCompatibilityMod) {
         this.moveTutorsCompatibilityMod = moveTutorsCompatibilityMod;
+    }
+
+    public boolean isTutorFollowEvolutions() {
+        return tutorFollowEvolutions;
+    }
+
+    public void setTutorFollowEvolutions(boolean tutorFollowEvolutions) {
+        this.tutorFollowEvolutions = tutorFollowEvolutions;
     }
 
     public InGameTradesMod getInGameTradesMod() {
