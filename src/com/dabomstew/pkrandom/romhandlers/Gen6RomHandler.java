@@ -2192,6 +2192,9 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         available |= MiscTweak.FASTEST_TEXT.getValue();
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
         available |= MiscTweak.RETAIN_ALT_FORMES.getValue();
+        if (romEntry.romType == Gen6Constants.Type_ORAS) {
+            available |= MiscTweak.NATIONAL_DEX_AT_START.getValue();
+        }
         return available;
     }
 
@@ -2208,6 +2211,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        } else if (tweak == MiscTweak.NATIONAL_DEX_AT_START) {
+            patchForNationalDex();
         }
     }
 
@@ -2225,6 +2230,20 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             offset += Gen6Constants.fastestTextPrefixes[1].length() / 2; // because it was a prefix
             code[offset] = 0x03;
             code[offset + 1] = 0x50;
+            code[offset + 2] = (byte) 0xA0;
+            code[offset + 3] = (byte) 0xE3;
+        }
+    }
+
+    private void patchForNationalDex() {
+        int offset = find(code, Gen6Constants.nationalDexFunctionLocator);
+        if (offset > 0) {
+            // In Savedata::ZukanData::GetZenkokuZukanFlag, we load a flag into r0 and
+            // then AND it with 0x1 to get a boolean that determines if the player has
+            // the National Dex. The below code patches this piece of code so that
+            // instead of loading the flag, we simply "mov r0, #0x1".
+            code[offset] = 0x01;
+            code[offset + 1] = 0x00;
             code[offset + 2] = (byte) 0xA0;
             code[offset + 3] = (byte) 0xE3;
         }
