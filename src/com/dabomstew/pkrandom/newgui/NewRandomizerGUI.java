@@ -307,7 +307,6 @@ public class NewRandomizerGUI {
 
     private JPopupMenu settingsMenu;
     private JMenuItem customNamesEditorMenuItem;
-    private JMenuItem updateOldSettingsMenuItem;
     private JMenuItem applyGameUpdateMenuItem;
     private JMenuItem removeGameUpdateMenuItem;
     private JMenuItem loadGetSettingsMenuItem;
@@ -469,7 +468,6 @@ public class NewRandomizerGUI {
         loadSettingsButton.addActionListener(e -> loadQS());
         saveSettingsButton.addActionListener(e -> saveQS());
         settingsButton.addActionListener(e -> settingsMenu.show(settingsButton,0,settingsButton.getHeight()));
-        updateOldSettingsMenuItem.addActionListener(e -> updateOldSettingsMenuItemActionPerformed());
         customNamesEditorMenuItem.addActionListener(e -> new CustomNamesEditorDialog(frame));
         applyGameUpdateMenuItem.addActionListener(e -> applyGameUpdateMenuItemActionPerformed());
         removeGameUpdateMenuItem.addActionListener(e -> removeGameUpdateMenuItemActionPerformed());
@@ -621,10 +619,6 @@ public class NewRandomizerGUI {
         customNamesEditorMenuItem = new JMenuItem();
         customNamesEditorMenuItem.setText(bundle.getString("GUI.customNamesEditorMenuItem.text"));
         settingsMenu.add(customNamesEditorMenuItem);
-
-        updateOldSettingsMenuItem = new JMenuItem();
-        updateOldSettingsMenuItem.setText(bundle.getString("GUI.updateOldSettingsMenuItem.text"));
-        settingsMenu.add(updateOldSettingsMenuItem);
 
         loadGetSettingsMenuItem = new JMenuItem();
         loadGetSettingsMenuItem.setText(bundle.getString("GUI.loadGetSettingsMenuItem.text"));
@@ -1075,43 +1069,6 @@ public class NewRandomizerGUI {
             }
         }
         return saveType;
-    }
-
-    private void updateOldSettingsMenuItemActionPerformed() {
-
-        qsUpdateChooser.setSelectedFile(null);
-        int returnVal = qsUpdateChooser.showOpenDialog(frame);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File fh = qsUpdateChooser.getSelectedFile();
-            try {
-                FileInputStream in = new FileInputStream(fh);
-                int version = in.read();
-                if (version == 0 || version > 172) {
-                    JOptionPane.showMessageDialog(frame, bundle.getString("GUI.oldSettingsFileInvalid"));
-                    in.close();
-                    return;
-                }
-                int length = in.read();
-                byte[] buffer = FileFunctions.readFullyIntoBuffer(in, length);
-                in.close();
-
-                ByteBuffer buf = ByteBuffer.allocate(length + 8);
-                buf.putInt(version);
-                buf.putInt(length);
-                buf.put(buffer);
-
-                FileOutputStream out = new FileOutputStream(fh);
-                out.write(buf.array());
-                out.close();
-                JOptionPane.showMessageDialog(frame, bundle.getString("GUI.oldSettingsFileUpdated"));
-            } catch (IllegalArgumentException ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(frame, bundle.getString("GUI.invalidSettingsFile"));
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(frame, bundle.getString("GUI.settingsLoadFailed"));
-            }
-        }
     }
 
     private void applyGameUpdateMenuItemActionPerformed() {
