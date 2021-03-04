@@ -271,6 +271,15 @@ public class SettingsUpdater {
             insertExtraByte(45, (byte) 0);
         }
 
+        if (oldVersion < 314) {
+
+            // exp curve
+            insertExtraByte(46, (byte) 0);
+
+            // static level modifier
+            insertExtraByte(47, (byte) 50);
+        }
+
         // fix checksum
         CRC32 checksum = new CRC32();
         checksum.update(dataBlock, 0, actualDataLength - 8);
