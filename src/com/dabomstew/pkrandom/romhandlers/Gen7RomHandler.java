@@ -513,10 +513,16 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         if (pk.baseForme != null && pk.baseForme.number == Gen7Constants.rockruffIndex && pk.formeNumber > 0) {
                             evol.from = pk.baseForme;
                             pk.baseForme.evolutionsFrom.add(evol);
+                            pokes[absolutePokeNumByBaseForme.get(species).get(evol.forme)].evolutionsTo.add(evol);
                         }
                         if (!pk.evolutionsFrom.contains(evol)) {
                             pk.evolutionsFrom.add(evol);
-                            if (!pk.actuallyCosmetic) pokes[species].evolutionsTo.add(evol);
+                            if (!pk.actuallyCosmetic) {
+                                if (evol.forme > 0) {
+                                    species = absolutePokeNumByBaseForme.get(species).get(evol.forme);
+                                }
+                                pokes[species].evolutionsTo.add(evol);
+                            }
                         }
                     }
                 }
