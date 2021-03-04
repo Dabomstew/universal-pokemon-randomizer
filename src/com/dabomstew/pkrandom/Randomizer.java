@@ -497,16 +497,20 @@ public class Randomizer {
             log.println("TM Moves: Unchanged." + NEWLINE);
         }
 
+        boolean tmsHmsCompatChanged = false;
         // TM/HM compatibility
         switch (settings.getTmsHmsCompatibilityMod()) {
         case RANDOM_PREFER_TYPE:
             romHandler.randomizeTMHMCompatibility(true, settings.isTmsFollowEvolutions());
+            tmsHmsCompatChanged = true;
             break;
         case COMPLETELY_RANDOM:
             romHandler.randomizeTMHMCompatibility(false, settings.isTmsFollowEvolutions());
+            tmsHmsCompatChanged = true;
             break;
         case FULL:
             romHandler.fullTMHMCompatibility();
+            tmsHmsCompatChanged = true;
             break;
         default:
             break;
@@ -517,16 +521,18 @@ public class Randomizer {
             if (settings.isTmsFollowEvolutions()) {
                 romHandler.ensureTMEvolutionSanity();
             }
+            tmsHmsCompatChanged = true;
         }
 
         if (settings.isFullHMCompat()) {
             romHandler.fullHMCompatibility();
+            tmsHmsCompatChanged = true;
         }
 
-        // Copy TM/HM compatibility to cosmetic formes if it was changed at all
-        if (settings.getTmsHmsCompatibilityMod() != Settings.TMsHMsCompatibilityMod.UNCHANGED
-                || settings.isTmLevelUpMoveSanity()) {
+        // Copy TM/HM compatibility to cosmetic formes if it was changed at all, and log changes
+        if (tmsHmsCompatChanged) {
             romHandler.copyTMCompatibilityToCosmeticFormes();
+            maybeLogTMHMCompatibility(log, romHandler);
         }
 
         // Move Tutors (new 1.0.3)
@@ -552,16 +558,20 @@ public class Randomizer {
                 log.println("Move Tutor Moves: Unchanged." + NEWLINE);
             }
 
+            boolean tutorCompatChanged = false;
             // Compatibility
             switch (settings.getMoveTutorsCompatibilityMod()) {
             case RANDOM_PREFER_TYPE:
                 romHandler.randomizeMoveTutorCompatibility(true, settings.isTutorFollowEvolutions());
+                tutorCompatChanged = true;
                 break;
             case COMPLETELY_RANDOM:
                 romHandler.randomizeMoveTutorCompatibility(false, settings.isTutorFollowEvolutions());
+                tutorCompatChanged = true;
                 break;
             case FULL:
                 romHandler.fullMoveTutorCompatibility();
+                tutorCompatChanged = true;
                 break;
             default:
                 break;
@@ -572,13 +582,15 @@ public class Randomizer {
                 if (settings.isTutorFollowEvolutions()) {
                     romHandler.ensureMoveTutorEvolutionSanity();
                 }
+                tutorCompatChanged = true;
             }
 
             // Copy move tutor compatibility to cosmetic formes if it was changed at all
-            if (settings.getMoveTutorsCompatibilityMod() != Settings.MoveTutorsCompatibilityMod.UNCHANGED
-                    || settings.isTutorLevelUpMoveSanity()) {
+            if (tutorCompatChanged) {
                 romHandler.copyMoveTutorCompatibilityToCosmeticFormes();
+                maybeLogTutorCompatibility(log,romHandler);
             }
+
         }
 
         // In-game trades
@@ -773,7 +785,7 @@ public class Randomizer {
             tmHMs.addAll(romHandler.getHMMoves());
             List<Move> moveData = romHandler.getMoves();
 
-            logCompatibility(log, compat, tmHMs, moveData);
+            logCompatibility(log, compat, tmHMs, moveData, true);
         }
     }
 
@@ -784,27 +796,48 @@ public class Randomizer {
             List<Integer> tutorMoves = romHandler.getMoveTutorMoves();
             List<Move> moveData = romHandler.getMoves();
 
-            logCompatibility(log, compat, tutorMoves, moveData);
+            logCompatibility(log, compat, tutorMoves, moveData, false);
         }
     }
 
     private void logCompatibility(final PrintStream log, Map<Pokemon, boolean[]> compat, List<Integer> moveList,
-                                  List<Move> moveData) {
+                                  List<Move> moveData, boolean includeTMNumber) {
+        int tmCount = romHandler.getTMCount();
         for (Map.Entry<Pokemon, boolean[]> entry : compat.entrySet()) {
             Pokemon pkmn = entry.getKey();
+            if (pkmn.actuallyCosmetic) continue;
             boolean[] flags = entry.getValue();
 
-            StringBuilder sb = new StringBuilder();
-            sb.append(pkmn.fullName()).append(": ");
+            String nameSpFormat = "%-14s";
+            if (romHandler.generationOfPokemon() >= 6) {
+                nameSpFormat = "%-17s";
+            }
+            log.printf("%3d " + nameSpFormat, pkmn.number, pkmn.fullName() + " ");
 
             for (int i = 1; i < flags.length; i++) {
+
+                int moveNameLength = moveData.get(moveList.get(i - 1)).name.length();
                 if (flags[i]) {
-                    sb.append(moveData.get(moveList.get(i - 1)).name).append(", ");
+                    if (includeTMNumber) {
+                        if (i <= tmCount) {
+                            log.printf("|TM%02d %" + moveNameLength + "s ", i, moveData.get(moveList.get(i - 1)).name);
+                        } else {
+                            log.printf("|HM%02d %" + moveNameLength + "s ", i-tmCount, moveData.get(moveList.get(i - 1)).name);
+                        }
+                    } else {
+                        log.printf("|%" + moveNameLength + "s ", moveData.get(moveList.get(i - 1)).name);
+                    }
+                } else {
+                    if (includeTMNumber) {
+                        log.printf("| %" + (moveNameLength+4) + "s ", "-");
+                    } else {
+                        log.printf("| %" + (moveNameLength-1) + "s ", "-");
+                    }
                 }
             }
-
-            log.println(sb.toString());
+            log.println("|");
         }
+        log.println("");
     }
 
     private void maybeChangeAndLogStarters(final PrintStream log, final RomHandler romHandler) {
