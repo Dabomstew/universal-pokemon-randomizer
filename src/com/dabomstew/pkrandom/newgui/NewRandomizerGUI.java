@@ -311,6 +311,7 @@ public class NewRandomizerGUI {
     private JMenuItem applyGameUpdateMenuItem;
     private JMenuItem removeGameUpdateMenuItem;
     private JMenuItem loadGetSettingsMenuItem;
+    private JMenuItem keepOrUnloadGameAfterRandomizingMenuItem;
 
     private ImageIcon emptyIcon = new ImageIcon(getClass().getResource("/com/dabomstew/pkrandom/newgui/emptyIcon.png"));
     private boolean haveCheckedCustomNames, unloadGameOnSuccess;
@@ -473,6 +474,7 @@ public class NewRandomizerGUI {
         applyGameUpdateMenuItem.addActionListener(e -> applyGameUpdateMenuItemActionPerformed());
         removeGameUpdateMenuItem.addActionListener(e -> removeGameUpdateMenuItemActionPerformed());
         loadGetSettingsMenuItem.addActionListener(e -> loadGetSettingsMenuItemActionPerformed());
+        keepOrUnloadGameAfterRandomizingMenuItem.addActionListener(e -> keepOrUnloadGameAfterRandomizingMenuItemActionPerformed());
         limitPokemonButton.addActionListener(e -> {
             NewGenerationLimitDialog gld = new NewGenerationLimitDialog(frame, currentRestrictions,
                     romHandler.generationOfPokemon(), romHandler.forceSwapStaticMegaEvos());
@@ -635,6 +637,14 @@ public class NewRandomizerGUI {
         removeGameUpdateMenuItem = new JMenuItem();
         removeGameUpdateMenuItem.setText(bundle.getString("GUI.removeGameUpdateMenuItem.text"));
         settingsMenu.add(removeGameUpdateMenuItem);
+
+        keepOrUnloadGameAfterRandomizingMenuItem = new JMenuItem();
+        if (this.unloadGameOnSuccess) {
+            keepOrUnloadGameAfterRandomizingMenuItem.setText(bundle.getString("GUI.keepGameLoadedAfterRandomizingMenuItem.text"));
+        } else {
+            keepOrUnloadGameAfterRandomizingMenuItem.setText(bundle.getString("GUI.unloadGameAfterRandomizingMenuItem.text"));
+        }
+        settingsMenu.add(keepOrUnloadGameAfterRandomizingMenuItem);
     }
 
     private void loadROM() {
@@ -1211,6 +1221,18 @@ public class NewRandomizerGUI {
 
             }
         }
+    }
+
+    private void keepOrUnloadGameAfterRandomizingMenuItemActionPerformed() {
+        this.unloadGameOnSuccess = !this.unloadGameOnSuccess;
+        if (this.unloadGameOnSuccess) {
+            JOptionPane.showMessageDialog(frame, bundle.getString("GUI.unloadGameAfterRandomizing"));
+            keepOrUnloadGameAfterRandomizingMenuItem.setText(bundle.getString("GUI.keepGameLoadedAfterRandomizingMenuItem.text"));
+        } else {
+            JOptionPane.showMessageDialog(frame, bundle.getString("GUI.keepGameLoadedAfterRandomizing"));
+            keepOrUnloadGameAfterRandomizingMenuItem.setText(bundle.getString("GUI.unloadGameAfterRandomizingMenuItem.text"));
+        }
+        attemptWriteConfig();
     }
 
     private void showMessageDialogWithLink(String text, String url) {
@@ -3414,7 +3436,7 @@ public class NewRandomizerGUI {
             PrintStream ps = new PrintStream(new FileOutputStream(fh), true, "UTF-8");
             ps.println("checkedcustomnames=true");
             ps.println("checkedcustomnames172=" + haveCheckedCustomNames);
-            ps.println("unloadgameonsuccess=true");
+            ps.println("unloadgameonsuccess=" + unloadGameOnSuccess);
             if (!initialPopup) {
                 ps.println("firststart=" + Version.VERSION_STRING);
             }
