@@ -76,7 +76,7 @@ public class TextToPoke {
                     i++;
                 }
                 if (i == 6) {
-                    System.out.printf("Char not found %s(%d)", text.substring(0, 1), text.charAt(0));
+                    System.out.printf("Char not found %s(%x)", text.substring(0, 1), (byte)text.charAt(0));
                     text = text.substring(1);
                 } else {
                     data.add(UnicodeParser.d.get(text.substring(0, 6 - i)));
