@@ -3336,6 +3336,8 @@ public class NewRandomizerGUI {
     }
 
     private void attemptReadConfig() {
+        // Things that should be true by default should be manually set here
+        unloadGameOnSuccess = true;
         File fh = new File(SysConstants.ROOT_PATH + "config.ini");
         if (!fh.exists() || !fh.canRead()) {
             return;
