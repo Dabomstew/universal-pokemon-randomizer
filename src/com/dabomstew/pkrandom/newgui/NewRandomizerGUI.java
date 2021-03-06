@@ -2398,6 +2398,7 @@ public class NewRandomizerGUI {
 
             // Pokemon Abilities
             if (pokemonGeneration >= 3) {
+                pokemonAbilitiesPanel.setVisible(true);
                 paUnchangedRadioButton.setEnabled(true);
                 paUnchangedRadioButton.setSelected(true);
                 paRandomRadioButton.setEnabled(true);
