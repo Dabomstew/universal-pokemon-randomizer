@@ -1806,6 +1806,7 @@ public class NewRandomizerGUI {
         ptFollowMegaEvosCheckBox.setVisible(true);
         ptFollowMegaEvosCheckBox.setEnabled(false);
         ptFollowMegaEvosCheckBox.setSelected(false);
+        pokemonAbilitiesPanel.setVisible(true);
         paUnchangedRadioButton.setVisible(true);
         paUnchangedRadioButton.setEnabled(false);
         paUnchangedRadioButton.setSelected(false);
@@ -2398,7 +2399,6 @@ public class NewRandomizerGUI {
 
             // Pokemon Abilities
             if (pokemonGeneration >= 3) {
-                pokemonAbilitiesPanel.setVisible(true);
                 paUnchangedRadioButton.setEnabled(true);
                 paUnchangedRadioButton.setSelected(true);
                 paRandomRadioButton.setEnabled(true);
