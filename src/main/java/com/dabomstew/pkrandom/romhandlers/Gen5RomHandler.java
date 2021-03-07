@@ -1800,12 +1800,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     public void removeTradeEvolutions(boolean changeMoveEvos, boolean changeMethodEvos) {
         List<Evolution> tradeEvoFixed = new ArrayList<Evolution>();
-        Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
         Set<Evolution> extraEvolutions = new HashSet<Evolution>();
         for (Pokemon pkmn : getPokemon()) {
             if (pkmn != null) {
                 extraEvolutions.clear();
-                pkmn.evolutionsFrom.stream().forEach(evo -> {
+                pkmn.evolutionsFrom.forEach(evo -> {
                     if (changeMethodEvos) {
                         switch (evo.type) {
                             case TRADE:

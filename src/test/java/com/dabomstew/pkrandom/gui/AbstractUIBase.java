@@ -1,12 +1,21 @@
 package com.dabomstew.pkrandom.gui;
 
+import java.awt.Component;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 
+import javax.swing.JCheckBox;
+import javax.swing.JRadioButton;
+import javax.swing.JSlider;
+
+import org.assertj.swing.core.GenericTypeMatcher;
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.edt.GuiQuery;
 import org.assertj.swing.fixture.FrameFixture;
+import org.assertj.swing.fixture.JCheckBoxFixture;
+import org.assertj.swing.fixture.JRadioButtonFixture;
+import org.assertj.swing.fixture.JSliderFixture;
 import org.assertj.swing.testing.AssertJSwingTestCaseTemplate;
 import org.junit.After;
 import org.junit.Assume;
@@ -74,6 +83,59 @@ public class AbstractUIBase extends AssertJSwingTestCaseTemplate {
     /*****************************************************************************************
      * Here you could insert further helper methods, e.g. frequently used component matchers *
      *****************************************************************************************/
+    /**
+     * Returns a JCheckBoxFixture where the JCheckBox has the requested component name
+     * @param name - Name of the JCheckBox (different than variable name)
+     * @return JCheckBoxFixture with the given name
+     */
+     public JCheckBoxFixture getCheckBoxByName(String name) {
+        JCheckBoxFixture jCheckBoxFixture = this.frame.checkBox(new GenericTypeMatcher(JCheckBox.class, true) {
+            @Override
+            protected boolean isMatching(Component component) {
+                if (component.getName() != null && component.getName().equals(name)) {
+                    return true;
+                }
+                return false;
+            }
+        });
+        return jCheckBoxFixture;
+    }
+
+    /**
+     * Returns a JRadioButtonFixture where the JRadioButton has the requested component name
+     * @param name - Name of the JRadioButton (different than variable name)
+     * @return JRadioButtonFixture with the given name
+     */
+    public JRadioButtonFixture getRadoiButtonByName(String name) {
+        JRadioButtonFixture jRadioButtonFixture = this.frame.radioButton(new GenericTypeMatcher(JRadioButton.class, true) {
+            @Override
+            protected boolean isMatching(Component component) {
+                if (component.getName() != null && component.getName().equals(name)) {
+                    return true;
+                }
+                return false;
+            }
+        });
+        return jRadioButtonFixture;
+    }
+
+    /**
+     * Returns a JSliderFixture where the JSlider has the requested component name
+     * @param name - Name of the JSlider (different than variable name)
+     * @return JSlider with the given name
+     */
+    public JSliderFixture getSliderByName(String name) {
+        JSliderFixture jSliderFixture = this.frame.slider(new GenericTypeMatcher(JSlider.class, true) {
+            @Override
+            protected boolean isMatching(Component component) {
+                if (component.getName() != null && component.getName().equals(name)) {
+                    return true;
+                }
+                return false;
+            }
+        });
+        return jSliderFixture;
+    }
 
     /**
      * Cleans up any resources used in this test. After calling <code>{@link #onTearDown()}</code>, this method cleans up resources used by this

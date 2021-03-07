@@ -106,6 +106,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
      * 
      */
     private static final long serialVersionUID = 637989089525556154L;
+    private boolean uiUpdated = true;
     private RomHandler romHandler;
     protected RomHandler.Factory[] checkHandlers;
 
@@ -213,9 +214,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
         // Enable skipping loading rom to activate the UI
         // for automated testing
         if (testModeEnabled) {
-            romHandler = new TestRomHandler();
+            romHandler = new TestRomHandler(RandomSource.instance());
             romLoaded();
         }
+    }
+
+    public boolean isUIUpdated() {
+        return uiUpdated;
     }
 
     private void guiCleanup() {
@@ -1359,7 +1364,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         // and we need to enable/disable secondary controls
         // e.g. wild pokemon / trainer pokemon "modifier"
         // and the 3 starter pokemon dropdowns
-
+        uiUpdated = false;
         this.pokeLimitBtn.setEnabled(this.pokeLimitCB.isSelected());
 
         if (this.spCustomRB.isSelected()) {
@@ -1725,6 +1730,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.peChangeMethodsCB.setEnabled(false);
             this.peChangeMethodsCB.setSelected(false);
         }
+
+        uiUpdated = true;
     }
 
     private void saveROM() {

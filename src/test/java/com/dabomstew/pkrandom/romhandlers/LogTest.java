@@ -700,14 +700,16 @@ public class LogTest {
 
     @Test
     public void TestRandomStarter() {
-        RomHandler romhandler = spy(new Gen1RomHandler(new Random()));
+        TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler, 250);
-        romhandler.randomStarterPokemon(false, false, false, 999);
-        assertEquals(romhandler.getTemplateData().get("logStarters"), "random");
-        romhandler.random1or2EvosPokemon(false, false, false, 999);
-        assertEquals(romhandler.getTemplateData().get("logStarters"), "1or2evo");
-        romhandler.random2EvosPokemon(false, false, false, 999);
-        assertEquals(romhandler.getTemplateData().get("logStarters"), "2evo");
+        romhandler.randomStarterPokemon(false, false, false, 999, 0, false);
+        assertEquals("random", romhandler.getTemplateData().get("logStarters"));
+        romhandler.clearStarterPokes();
+        romhandler.randomStarterPokemon(false, false, false, 999, 1, false);
+        assertEquals("1or2evo", romhandler.getTemplateData().get("logStarters"));
+        romhandler.clearStarterPokes();
+        romhandler.randomStarterPokemon(false, false, false, 999, 2, false);
+        assertEquals("2evo", romhandler.getTemplateData().get("logStarters"));
     }
     
     @Test
@@ -763,7 +765,7 @@ public class LogTest {
         romhandler.generateTableOfContents();
         assertArrayEquals(((ArrayList<String[]>)romhandler.getTemplateData().get("toc")).get(0), 
             new String[]{"cle", "Condensed Evos"});
-        romhandler.randomStarterPokemon(false, false, false, 999);
+        romhandler.randomStarterPokemon(false, false, false, 999, 0, false);
         romhandler.generateTableOfContents();
         assertArrayEquals(((ArrayList<String[]>)romhandler.getTemplateData().get("toc")).get(1), 
             new String[]{"rs", "Starters"});
@@ -788,6 +790,14 @@ public class LogTest {
             pk.name = "";
             pk.primaryType = Type.BUG;
             pokemonList.add(pk);
+            for (int j = 0; j < i % 2; j++) {
+                Evolution ev = new Evolution(pk, new Pokemon(), false, EvolutionType.LEVEL, 1);
+                pk.evolutionsFrom.add(ev);
+                if (i % 3 == 0) {
+                    Evolution ev2 = new Evolution(ev.to, new Pokemon(), false, EvolutionType.LEVEL, 1);
+                    ev.to.evolutionsFrom.add(ev2);
+                }
+            }
         }
         Pokemon evPk = new Pokemon();
         Evolution ev = new Evolution(pokemonList.get(0), evPk, false, EvolutionType.TRADE, 0);

@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 
 import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
+import com.dabomstew.pkrandom.pokemon.Evolution;
+import com.dabomstew.pkrandom.pokemon.EvolutionType;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
@@ -438,9 +440,72 @@ public class AbstractRomTest {
         + pkmn.secondaryType  + " was not found in weakness list for CHILI " + chiliType.camelCase(),
             acceptableTypes.contains(pkmn.primaryType) || acceptableTypes.contains(pkmn.secondaryType));
     }
-    
-    // Test randomized evolutions uses change methods
-    // Test remove trade evos plays nicely with and without change methods
+
+    @Test
+    public void TestMinimumEvos() {
+        TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
+        resetDataModel(romhandler);
+        romhandler.randomStarterPokemon(false, false, false, 999, 0, false);
+        boolean pokemonWithZeroEvo = false, pokemonWithOneEvo = false, pokemonWithTwoEvo = false;
+        for(Pokemon pk : romhandler.getStarterPokes()) {
+            int evoLength = romhandler.evolutionChainSize(pk);
+            if (evoLength == 1) {
+                pokemonWithZeroEvo = true;
+            } else if (evoLength == 2) {
+                pokemonWithOneEvo = true;
+            } else if (evoLength > 2) {
+                pokemonWithTwoEvo = true;
+            }
+
+            // End loop if we have all the conditions met
+            if (pokemonWithOneEvo && pokemonWithTwoEvo && pokemonWithZeroEvo) {
+                break;
+            }
+        }
+        assertTrue("Matches should be true: zeroEvo - " + pokemonWithZeroEvo + ", oneEvo - " + pokemonWithOneEvo
+            + ", twoEvo - " + pokemonWithTwoEvo, pokemonWithZeroEvo && pokemonWithOneEvo && pokemonWithTwoEvo);
+        pokemonWithZeroEvo = false;
+        pokemonWithOneEvo = false;
+        pokemonWithTwoEvo = false;
+        romhandler.clearStarterPokes();
+        romhandler.randomStarterPokemon(false, false, false, 999, 1, false);
+        for(Pokemon pk : romhandler.getStarterPokes()) {
+            int evoLength = romhandler.evolutionChainSize(pk);
+            if (evoLength == 1) {
+                pokemonWithZeroEvo = true;
+            } else if (evoLength == 2) {
+                pokemonWithOneEvo = true;
+            } else if (evoLength > 2) {
+                pokemonWithTwoEvo = true;
+            }
+        }
+        assertTrue("Matches should be false: zeroEvo - " + pokemonWithZeroEvo 
+            + "\nMatches should be true: oneEvo - " + pokemonWithOneEvo
+            + ", twoEvo - " + pokemonWithTwoEvo, !pokemonWithZeroEvo && pokemonWithOneEvo && pokemonWithTwoEvo);
+        pokemonWithZeroEvo = false;
+        pokemonWithOneEvo = false;
+        pokemonWithTwoEvo = false;
+        romhandler.clearStarterPokes();
+        romhandler.randomStarterPokemon(false, false, false, 999, 2, false);
+        for(Pokemon pk : romhandler.getStarterPokes()) {
+            int evoLength = romhandler.evolutionChainSize(pk);
+            if (evoLength == 1) {
+                pokemonWithZeroEvo = true;
+            } else if (evoLength == 2) {
+                pokemonWithOneEvo = true;
+            } else if (evoLength > 2) {
+                pokemonWithTwoEvo = true;
+            }
+        }
+        assertTrue("Matches should be false: zeroEvo - " + pokemonWithZeroEvo + ", oneEvo - " + pokemonWithOneEvo
+            + "\nMatches should be true: twoEvo - " + pokemonWithTwoEvo, 
+            !pokemonWithZeroEvo && !pokemonWithOneEvo && pokemonWithTwoEvo);
+    }
+
+    @Test
+    public void TestExactEvos() {
+
+    }
 
     /**
      * Function for granular modification of data model
@@ -455,6 +520,14 @@ public class AbstractRomTest {
             pk.name = "";
             pk.primaryType = Type.values()[i%17];
             pokemonList.add(pk);
+            for (int j = 0; j < i % 2; j++) {
+                Evolution ev = new Evolution(pk, new Pokemon(), false, EvolutionType.LEVEL, 1);
+                pk.evolutionsFrom.add(ev);
+                if (i % 3 == 0) {
+                    Evolution ev2 = new Evolution(ev.to, new Pokemon(), false, EvolutionType.LEVEL, 1);
+                    ev.to.evolutionsFrom.add(ev2);
+                }
+            }
         }
         for(String tag: new String[]{"GYM1", "CILAN", "CHILI", "CRESS"}) {
             Trainer t = new Trainer();
@@ -478,5 +551,6 @@ public class AbstractRomTest {
         doReturn(pokemonList.get(0)).when(romhandler).randomPokemon();
         doReturn(trainerList).when(romhandler).getTrainers();
         doReturn(startersList).when(romhandler).getStarters();
+        doReturn(mock(Map.class)).when(romhandler).getTemplateData();
     }
 }

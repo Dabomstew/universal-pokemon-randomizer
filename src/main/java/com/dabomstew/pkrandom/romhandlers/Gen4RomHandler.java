@@ -2012,7 +2012,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         for (Pokemon pkmn : getPokemon()) {
             if (pkmn != null) {
                 extraEvolutions.clear();
-                pkmn.evolutionsFrom.stream().forEach(evo -> {
+                pkmn.evolutionsFrom.forEach(evo -> {
                     if (changeMethodEvos) {
                         switch (evo.type) {
                             case TRADE:

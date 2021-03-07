@@ -561,41 +561,16 @@ public class Randomizer {
                 romHandler.setStarters(starters);
                 romHandler.getTemplateData().put("startersList", starters);
             } else if (settings.getStartersMod() == Settings.StartersMod.RANDOM) {
-                switch (settings.getStartersMinimumEvos()) {
-                    case 0:
-                        int starterCount = romHandler.isYellow() ? 2 : 3;
-                        List<Pokemon> starters = new ArrayList<Pokemon>();
-                        selectRandomStarter(starterCount, starters, () -> romHandler.randomStarterPokemon(
-                            settings.isStartersNoSplit(), settings.isStartersUniqueTypes(), 
-                            settings.isStartersBaseEvoOnly(),
-                            settings.isStartersLimitBST() ? settings.getStartersBSTLimitModifier() : 9999));
+                int starterCount = romHandler.isYellow() ? 2 : 3;
+                List<Pokemon> starters = new ArrayList<Pokemon>();
+                selectRandomStarter(starterCount, starters, () -> romHandler.randomStarterPokemon(
+                    settings.isStartersNoSplit(), settings.isStartersUniqueTypes(), 
+                    settings.isStartersBaseEvoOnly(),
+                    settings.isStartersLimitBST() ? settings.getStartersBSTLimitModifier() : 9999,
+                    settings.getStartersMinimumEvos(), settings.isStartersExactEvo()));
 
-                        romHandler.setStarters(starters);
-                        romHandler.getTemplateData().put("startersList", starters);
-                        break;
-                    case 1:            
-                        starterCount = romHandler.isYellow() ? 2 : 3;
-                        starters = new ArrayList<Pokemon>();
-                        selectRandomStarter(starterCount, starters, () -> 
-                            romHandler.random1or2EvosPokemon(settings.isStartersNoSplit(), 
-                            settings.isStartersUniqueTypes(), settings.isStartersBaseEvoOnly(),
-                            settings.isStartersLimitBST() ? settings.getStartersBSTLimitModifier() : 9999));
-
-                        romHandler.setStarters(starters);
-                        romHandler.getTemplateData().put("startersList", starters);
-                        break;
-                    case 2:
-                        starterCount = romHandler.isYellow() ? 2 : 3;
-                        starters = new ArrayList<Pokemon>();
-                        selectRandomStarter(starterCount, starters, () -> 
-                            romHandler.random2EvosPokemon(settings.isStartersNoSplit(), 
-                            settings.isStartersUniqueTypes(), settings.isStartersBaseEvoOnly(),
-                            settings.isStartersLimitBST() ? settings.getStartersBSTLimitModifier() : 9999));
-
-                        romHandler.setStarters(starters);
-                        romHandler.getTemplateData().put("startersList", starters);
-                        break;
-                }
+                romHandler.setStarters(starters);
+                romHandler.getTemplateData().put("startersList", starters);
             }
             if (settings.isRandomizeStartersHeldItems() && !(romHandler instanceof Gen1RomHandler)) {
                 romHandler.randomizeStarterHeldItems(settings.isBanBadRandomStarterHeldItems());

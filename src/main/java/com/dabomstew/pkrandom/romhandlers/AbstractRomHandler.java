@@ -49,6 +49,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<Pokemon> alreadyPicked = new ArrayList<Pokemon>();
     private List<Pokemon> giratinaPicks;
     protected boolean ptGiratina = false;
+    protected PokemonSet starterPokes;
     protected Map<String, Type> groupTypesMap = new HashMap<String, Type>();
 
     /* Constructor */
@@ -459,81 +460,54 @@ public abstract class AbstractRomHandler implements RomHandler {
         return length + 1;
     }
 
-    private PokemonSet starterPokes;
-
     @Override
-    public Pokemon randomStarterPokemon(boolean noSplitEvos, boolean uniqueTypes, boolean baseOnly, int bstLimit) {
-        this.getTemplateData().put("logStarters", "random");
+    public Pokemon randomStarterPokemon(boolean noSplitEvos, boolean uniqueTypes, boolean baseOnly, int bstLimit,
+        int minimumEvos, boolean exactEvos) {
         if (starterPokes == null) {
             // Prepare the list
             starterPokes = new PokemonSet();
-            List<Pokemon> allPokes = this.getPokemon();
-            for (Pokemon pk : allPokes) {
-                if (pk != null) {
-                    if ((pk.evolutionsFrom.size() < 2 || !noSplitEvos) && (pk.evolutionsTo.size() == 0 || !baseOnly)
-                            && !(pk.bstForPowerLevels() > bstLimit))
-                        // Candidate
-                        starterPokes.add(pk);
-                }
-            }
-            if (starterPokes.size() < 3 || (uniqueTypes && starterPokes.uniquePokes() < 3)) {
-                throw new RandomizationException(
-                        "ERROR: Not enough starter choices available. Please " + "reduce the filtering and try again.");
-            }
-        }
-        Pokemon chosen = starterPokes.randomPokemon(this.random, true);
-        if (chosen == null) {
-            throw new RandomizationException(
-                    "ERROR: Valid list of starters has been consumed. Please " + "reduce the filtering and try again.");
-        }
-        return chosen;
-    }
-
-    @Override
-    public Pokemon random1or2EvosPokemon(boolean noSplitEvos, boolean uniqueTypes, boolean baseOnly, int bstLimit) {
-        this.getTemplateData().put("logStarters", "1or2evo");
-        if (starterPokes == null) {
-            // Prepare the list
-            starterPokes = new PokemonSet();
-            List<Pokemon> allPokes = this.getPokemon();
-            for (Pokemon pk : allPokes) {
+            for (Pokemon pk : this.getPokemon()) {
                 if (pk != null) {
                     int length = evolutionChainSize(pk);
-                    // Stages counts base pokemon, hence a pokemon with no evolutions has length 1
-                    if (length > 1 && length < 4 && (pk.evolutionsFrom.size() < 2 || !noSplitEvos)
-                            && (pk.evolutionsTo.size() == 0 || !baseOnly) && !(pk.bstForPowerLevels() > bstLimit))
-                        // Candidate
-                        starterPokes.add(pk);
-                }
-            }
-            if (starterPokes.size() < 3 || (uniqueTypes && starterPokes.uniquePokes() < 3)) {
-                throw new RandomizationException(
-                        "ERROR: Not enough starter choices available. Please " + "reduce the filtering and try again.");
-            }
-        }
-        Pokemon chosen = starterPokes.randomPokemon(this.random, true);
-        if (chosen == null) {
-            throw new RandomizationException(
-                    "ERROR: Valid list of starters has been consumed. Please " + "reduce the filtering and try again.");
-        }
-        return chosen;
-    }
-
-    @Override
-    public Pokemon random2EvosPokemon(boolean noSplitEvos, boolean uniqueTypes, boolean baseOnly, int bstLimit) {
-        this.getTemplateData().put("logStarters", "2evo");
-        if (starterPokes == null) {
-            // Prepare the list
-            starterPokes = new PokemonSet();
-            List<Pokemon> allPokes = this.getPokemon();
-            for (Pokemon pk : allPokes) {
-                if (pk != null) {
-                    int length = evolutionChainSize(pk);
-                    // Stages counts base pokemon, hence a pokemon with 2 evolutions has length 3
-                    if (length == 3 && (pk.evolutionsFrom.size() < 2 || !noSplitEvos)
-                            && (pk.evolutionsTo.size() == 0 || !baseOnly) && !(pk.bstForPowerLevels() > bstLimit))
-                        // Candidate
-                        starterPokes.add(pk);
+                    switch (minimumEvos) {
+                        case 0:
+                            this.getTemplateData().put("logStarters", "random");
+                            if (!exactEvos && (pk.evolutionsFrom.size() < 2 || !noSplitEvos) && (pk.evolutionsTo.size() == 0 || !baseOnly)
+                                    && !(pk.bstForPowerLevels() > bstLimit))
+                                // Candidate
+                                starterPokes.add(pk);
+                            else if (exactEvos && length == 1 && (pk.evolutionsFrom.size() < 2 || !noSplitEvos) 
+                                && (pk.evolutionsTo.size() == 0 || !baseOnly) && !(pk.bstForPowerLevels() > bstLimit))
+                                //Candidate with exactly 0 evo
+                                starterPokes.add(pk);
+                            break;
+                        case 1:
+                            this.getTemplateData().put("logStarters", "1or2evo");
+                             // Stages counts base pokemon, hence a pokemon with no evolutions has length 1
+                            if (!exactEvos && length > 1 && (pk.evolutionsFrom.size() < 2 || !noSplitEvos)
+                                && (pk.evolutionsTo.size() == 0 || !baseOnly) && !(pk.bstForPowerLevels() > bstLimit))
+                                // Candidate
+                                starterPokes.add(pk);
+                            // A pokemon 1 evolution has length 2
+                            else if (exactEvos && length == 2 && (pk.evolutionsFrom.size() < 2 || !noSplitEvos)
+                                && (pk.evolutionsTo.size() == 0 || !baseOnly) && !(pk.bstForPowerLevels() > bstLimit))
+                                // Candidate with exactly 1 evo
+                                starterPokes.add(pk);
+                            break;
+                        case 2:
+                            this.getTemplateData().put("logStarters", "2evo");
+                            // Stages count as base pokemon, hence a pokemon with 1 evolution has length 2
+                            if (!exactEvos && length > 2 && (pk.evolutionsFrom.size() < 2 || !noSplitEvos)
+                                && (pk.evolutionsTo.size() == 0 || !baseOnly) && !(pk.bstForPowerLevels() > bstLimit))
+                                // Candidate
+                                starterPokes.add(pk);
+                            // A pokemon with 2 evolutions has length 3
+                            else if (exactEvos && length == 3 && (pk.evolutionsFrom.size() < 2 || !noSplitEvos)
+                                && (pk.evolutionsTo.size() == 0 || !baseOnly) && !(pk.bstForPowerLevels() > bstLimit))
+                                // Candidate with exactly 2 evo
+                                starterPokes.add(pk);
+                            break;
+                    }
                 }
             }
             if (starterPokes.size() < 3 || (uniqueTypes && starterPokes.uniquePokes() < 3)) {

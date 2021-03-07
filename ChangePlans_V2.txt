@@ -25,7 +25,7 @@ XX Choice not available until game is played XXStriaton City leaders use correct
 **Add normalize, stall, multitype, klutz to list of banned abilities
 **Monkey static has type that trumps Striaton type if randomizing trainers, or covers weakness of starter when randomizing statics
 **Condense Starter evo choice to slider (random = 0, 1 or 2 = 1, 2 = 2)
-Add checkbox to force starter slider to be only that value instead of greater or equal
+**Add checkbox to force starter slider to be only that value instead of greater or equal
 **Randomize evolutions methods
 Trainer Class Names should be gender based (Rich Boy woman not allowed) (group all trainer names and determine a 1-1 swap)
 Randomize trainer held items (limit to battle tower stuff)

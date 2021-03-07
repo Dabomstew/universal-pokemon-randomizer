@@ -194,6 +194,8 @@ public enum EvolutionType {
                 return itemEvos().contains(toCheck);
             case "PARTY":
                 return partyEvos().contains(toCheck);
+            case "BANNED":
+                return bannedMethods.contains(toCheck);
             default:
                 return false;
         }
@@ -222,6 +224,8 @@ public enum EvolutionType {
                 return !Collections.disjoint(itemEvos(), methodGroup);
             case "PARTY":
                 return !Collections.disjoint(partyEvos(), methodGroup);
+            case "BANNED":
+                return !Collections.disjoint(bannedMethods, methodGroup);
             default:
                 return false; 
         }
@@ -243,6 +247,8 @@ public enum EvolutionType {
                 return itemEvos().stream().filter(ev -> methodGroup.contains(ev)).count() >= size;
             case "PARTY":
                 return partyEvos().stream().filter(ev -> methodGroup.contains(ev)).count() >= size;
+            case "BANNED":
+                return bannedMethods.stream().filter(ev -> methodGroup.contains(ev)).count() >= size;
             default:
                 return false;
         }

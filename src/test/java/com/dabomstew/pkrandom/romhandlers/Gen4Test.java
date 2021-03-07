@@ -64,15 +64,16 @@ public class Gen4Test {
         doReturn(mock(Map.class)).when(romhandler).getTemplateData();
         resetDataModel(romhandler);
         romhandler.randomizeEvolutions(false, false, true, true, false, false, false);
-        romhandler.getPokemon().stream().forEach(pk -> {
+        romhandler.getPokemon().forEach(pk -> {
             ArrayList<EvolutionType> usedMethods = new ArrayList<EvolutionType>();
             ArrayList<Integer> usedStones = new ArrayList<Integer>();
             ArrayList<Integer> usedItems = new ArrayList<Integer>();
             ArrayList<Integer> usedPokemon = new ArrayList<Integer>();
             ArrayList<Integer> usedMoves = new ArrayList<Integer>();
-            pk.evolutionsFrom.stream().forEach(evo -> {
+            pk.evolutionsFrom.forEach(evo -> {
                 assertTrue("Evolution is invalid - " + evo, evo.type != null && evo.type != EvolutionType.NONE);
                 assertTrue(evo.type + " was not available in Gen 4", EvolutionType.isInGeneration(4, evo.type));
+                assertFalse(evo.type + " should be removed", EvolutionType.isOfType("Banned", evo.type));
 
                 // Collect the method
                 if (EvolutionType.isOfType("Stone", evo.type)) {
@@ -104,6 +105,97 @@ public class Gen4Test {
             HashSet<Integer> uniqueMoves = new HashSet<Integer>(usedMoves);
             assertTrue("Duplicate move detected - " + Arrays.toString(usedMoves.toArray()), 
                     uniqueMoves.size() == usedMoves.size());
+        });
+    }
+
+        /**
+         * Test Gen4 change methods is correctly affected by remove impossible evos
+         * no duplicate methods used, and no invalid evolutions
+         * 
+         * @throws IOException
+         */
+        @Test
+        public void TestGen4RemoveEvosChangeMethods() throws IOException {
+        Gen4RomHandler romhandler = spy(new Gen4RomHandler(new Random()));
+        doReturn(Gen4RomHandler.getRomFromSupportedRom("Diamond (U)")).when(romhandler).getRomEntry();
+        doReturn(mock(Map.class)).when(romhandler).getTemplateData();
+        resetDataModel(romhandler);
+        romhandler.randomizeEvolutions(false, false, true, true, false, false, false);
+        romhandler.removeTradeEvolutions(false, true);
+        romhandler.getPokemon().forEach(pk -> {
+            ArrayList<EvolutionType> usedMethods = new ArrayList<EvolutionType>();
+            ArrayList<Integer> usedStones = new ArrayList<Integer>();
+            ArrayList<Integer> usedItems = new ArrayList<Integer>();
+            ArrayList<Integer> usedPokemon = new ArrayList<Integer>();
+            ArrayList<Integer> usedMoves = new ArrayList<Integer>();
+            HashMap<Integer, ArrayList<EvolutionType>> itemEvos = new HashMap<Integer, ArrayList<EvolutionType>>();
+            pk.evolutionsFrom.forEach(evo -> {
+                assertTrue("Evolution is invalid - " + evo, evo.type != null && evo.type != EvolutionType.NONE);
+                assertTrue(evo.type + " was not available in Gen 4", EvolutionType.isInGeneration(4, evo.type));
+                assertFalse(evo.type + " should be removed", EvolutionType.isOfType("Trade", evo.type) 
+                    || EvolutionType.isOfType("Banned", evo.type));
+
+                // Collect the method
+                if (EvolutionType.isOfType("Stone", evo.type)) {
+                    usedStones.add(evo.extraInfo);
+                } else if (EvolutionType.isOfType("Item", evo.type)) {
+                    usedItems.add(evo.extraInfo);
+                    ArrayList<EvolutionType> etList = itemEvos.getOrDefault(evo.extraInfo, 
+                        new ArrayList<EvolutionType>());
+                    etList.add(evo.type);
+                    itemEvos.put(evo.extraInfo, etList);
+                } else if (EvolutionType.isOfType("Party", evo.type)) {
+                    usedPokemon.add(evo.extraInfo);
+                } else if (evo.type == EvolutionType.LEVEL_WITH_MOVE) {
+                    usedMoves.add(evo.extraInfo);
+                } else {
+                    usedMethods.add(evo.type);
+                }
+            });
+
+            // Verify no duplicates
+            HashSet<EvolutionType> uniqueMethods = new HashSet<EvolutionType>(usedMethods);
+            assertTrue("Duplicate method detected - " + Arrays.toString(usedMethods.toArray()), 
+                uniqueMethods.size() == usedMethods.size());
+            HashSet<Integer> uniqueStones = new HashSet<Integer>(usedStones);
+            assertTrue("Duplicate stone detected - " + Arrays.toString(usedStones.toArray()), 
+                    uniqueStones.size() == usedStones.size());
+            HashSet<Integer> uniquePokemon = new HashSet<Integer>(usedPokemon);
+            assertTrue("Duplicate pokemon detected - " + Arrays.toString(usedPokemon.toArray()), 
+                    uniquePokemon.size() == usedPokemon.size());
+            HashSet<Integer> uniqueMoves = new HashSet<Integer>(usedMoves);
+            assertTrue("Duplicate move detected - " + Arrays.toString(usedMoves.toArray()), 
+                    uniqueMoves.size() == usedMoves.size());
+
+            // Check if any item duplicates correspond to Night/Day Item
+            // This is what TRADE_ITEM turns into after removing trade evos
+            // === ASSUMPTIONS ===
+            // - More than 1 item may be duplicated
+            // - An item can have more than 2 copies
+            // - The only acceptable occurrence is if there is exactly 1 LEVEL_ITEM_NIGHT and
+            //   exactly 1 LEVEL_ITEM_DAY. 
+            HashSet<Integer> uniqueItems = new HashSet<Integer>(usedItems);
+            if(uniqueItems.size() != usedItems.size()) {
+                // Remove uniques, leaving only duplicates
+                for(Integer i : uniqueItems) {
+                    usedItems.remove(usedItems.indexOf(i));
+                }
+
+                // Make it a set to limit checks
+                HashSet<Integer> dupsToCheck = new HashSet<Integer>(usedItems);
+
+                // Check each duplicate item if it conforms to acceptable criteria
+                for(Integer j : dupsToCheck) {
+                    // Get the list of evolution types that use this item
+                    List<EvolutionType> typeWithItem = itemEvos.get(j);
+
+                    // Cannot be more than length 2 and must contain LEVEL_ITEM_DAY and LEVEL_ITEM_NIGHT
+                    assertTrue("Duplicate items detected - Item " + j + " is used by " 
+                        + Arrays.toString(typeWithItem.toArray()), 
+                        typeWithItem.size() == 2 && typeWithItem.contains(EvolutionType.LEVEL_ITEM_DAY)
+                        && typeWithItem.contains(EvolutionType.LEVEL_ITEM_NIGHT)); 
+                }
+            }
         });
     }
 

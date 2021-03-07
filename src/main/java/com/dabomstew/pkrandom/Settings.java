@@ -286,8 +286,10 @@ public class Settings {
                 allowWonderGuard, abilitiesFollowEvolutions, banTrappingAbilities, banNegativeAbilities));
 
         // 4: starter pokemon stuff (see byte 37 for additional options)
-        out.write(makeByteSelected(startersMod == StartersMod.CUSTOM, startersMinimumEvos == 0,
-                startersMod == StartersMod.UNCHANGED, startersMinimumEvos == 2,
+        out.write(makeByteSelected(startersMod == StartersMod.CUSTOM, 
+                startersMod == StartersMod.RANDOM && startersMinimumEvos == 0,
+                startersMod == StartersMod.UNCHANGED, 
+                startersMod == StartersMod.RANDOM && startersMinimumEvos == 2,
                 randomizeStartersHeldItems, banBadRandomStarterHeldItems, startersExactEvos));
 
         // @5 dropdowns
@@ -401,11 +403,12 @@ public class Settings {
 
         // @ 36 Base Statistics and Types Overflow
         out.write(makeByteSelected(statsRandomizeFirst, baseStatisticsMod == BaseStatisticsMod.SHUFFLE_BST, 
-        baseStatisticsMod == BaseStatisticsMod.SHUFFLE_ALL, typesFollowEvos));
+            baseStatisticsMod == BaseStatisticsMod.SHUFFLE_ALL, typesFollowEvos));
 
         // @ 37 Starter Pokemon Overflow
-        out.write(makeByteSelected(startersMinimumEvos == 1, startersNoSplit, startersUniqueTypes, 
-        starterLimitBST, startersBaseEvoOnly));
+        out.write(makeByteSelected(startersMod == StartersMod.RANDOM && startersMinimumEvos == 1, 
+            startersNoSplit, startersUniqueTypes, 
+            starterLimitBST, startersBaseEvoOnly));
 
         // @ 38 Starter Pokemon BST Modifier
         write2ByteInt(out, starterBSTModifier - 1);
