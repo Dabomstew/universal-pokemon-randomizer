@@ -1075,7 +1075,7 @@ public class Randomizer {
                 settings.getAllyPokemonMod() != Settings.AllyPokemonMod.UNCHANGED ||
                 settings.getAuraMod() != Settings.AuraMod.UNCHANGED ||
                 settings.isRandomizeTotemHeldItems() ||
-                settings.isWildLevelsModified()) {
+                settings.isTotemLevelsModified()) {
 
             List<TotemPokemon> oldTotems = romHandler.getTotemPokemon();
             boolean randomizeTotems =
