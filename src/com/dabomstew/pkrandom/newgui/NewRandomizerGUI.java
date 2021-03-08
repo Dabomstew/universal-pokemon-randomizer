@@ -2530,13 +2530,13 @@ public class NewRandomizerGUI {
 
             tpAdditionalPokemonForLabel.setVisible(additionalPokemonAvailable);
             tpBossTrainersCheckBox.setVisible(additionalPokemonAvailable);
-            tpBossTrainersCheckBox.setEnabled(additionalPokemonAvailable);
+            tpBossTrainersCheckBox.setEnabled(false);
             tpBossTrainersSpinner.setVisible(additionalPokemonAvailable);
             tpImportantTrainersCheckBox.setVisible(additionalPokemonAvailable);
-            tpImportantTrainersCheckBox.setEnabled(additionalPokemonAvailable);
+            tpImportantTrainersCheckBox.setEnabled(false);
             tpImportantTrainersSpinner.setVisible(additionalPokemonAvailable);
             tpRegularTrainersCheckBox.setVisible(additionalPokemonAvailable);
-            tpRegularTrainersCheckBox.setEnabled(additionalPokemonAvailable);
+            tpRegularTrainersCheckBox.setEnabled(false);
             tpRegularTrainersSpinner.setVisible(additionalPokemonAvailable);
 
             tpRandomizeTrainerNamesCheckBox.setEnabled(true);
@@ -2902,6 +2902,12 @@ public class NewRandomizerGUI {
             tpSwapMegaEvosCheckBox.setSelected(false);
             tpRandomShinyTrainerPokemonCheckBox.setEnabled(false);
             tpRandomShinyTrainerPokemonCheckBox.setSelected(false);
+            tpBossTrainersCheckBox.setEnabled(false);
+            tpBossTrainersCheckBox.setSelected(false);
+            tpImportantTrainersCheckBox.setEnabled(false);
+            tpImportantTrainersCheckBox.setSelected(false);
+            tpRegularTrainersCheckBox.setEnabled(false);
+            tpRegularTrainersCheckBox.setSelected(false);
         } else {
             tpSimilarStrengthCheckBox.setEnabled(true);
             tpDontUseLegendariesCheckBox.setEnabled(true);
@@ -2914,6 +2920,9 @@ public class NewRandomizerGUI {
                 tpSwapMegaEvosCheckBox.setSelected(false);
             }
             tpRandomShinyTrainerPokemonCheckBox.setEnabled(true);
+            tpBossTrainersCheckBox.setEnabled(tpBossTrainersCheckBox.isVisible());
+            tpImportantTrainersCheckBox.setEnabled(tpImportantTrainersCheckBox.isVisible());
+            tpRegularTrainersCheckBox.setEnabled(tpRegularTrainersCheckBox.isVisible());
         }
 
         if (tpForceFullyEvolvedAtCheckBox.isSelected()) {
