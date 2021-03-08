@@ -3143,6 +3143,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                 }
             }
+            setPokemonAndFormeForStaticEncounter(se, se.pkmn);
         }
         this.setStaticPokemon(currentStaticPokemon);
     }
