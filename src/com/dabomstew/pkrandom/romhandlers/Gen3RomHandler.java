@@ -2588,7 +2588,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public List<Integer> getMainGameLegendaries() {
-        return Arrays.stream(romEntry.arrayEntries.get("MainGameLegendaries")).boxed().collect(Collectors.toList());
+        if (romEntry.arrayEntries.get("MainGameLegendaries") != null) {
+            return Arrays.stream(romEntry.arrayEntries.get("MainGameLegendaries")).boxed().collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
 
     @Override
