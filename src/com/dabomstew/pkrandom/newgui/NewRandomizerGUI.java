@@ -921,6 +921,8 @@ public class NewRandomizerGUI {
                             if (this.unloadGameOnSuccess) {
                                 romHandler = null;
                                 initialState();
+                            } else {
+                                reinitializeRomHandler();
                             }
                         } else {
                             // Compile a config string
@@ -937,6 +939,8 @@ public class NewRandomizerGUI {
                             if (this.unloadGameOnSuccess) {
                                 romHandler = null;
                                 initialState();
+                            } else {
+                                reinitializeRomHandler();
                             }
                         }
                     });
@@ -1208,6 +1212,36 @@ public class NewRandomizerGUI {
         label.setCursor(new java.awt.Cursor(Cursor.HAND_CURSOR));
         Object[] messages = {text,label};
         JOptionPane.showMessageDialog(frame, messages);
+    }
+
+    // This is only intended to be used with the "Keep Game Loaded After Randomizing" setting; it assumes that
+    // the game has already been loaded once, and we just need to reload the same game to reinitialize the
+    // RomHandler. Don't use this for other purposes unless you know what you're doing.
+    private void reinitializeRomHandler() {
+        String currentFN = this.romHandler.loadedFilename();
+        for (RomHandler.Factory rhf : checkHandlers) {
+            if (rhf.isLoadable(currentFN)) {
+                this.romHandler = rhf.create(RandomSource.instance());
+                opDialog = new OperationDialog(bundle.getString("GUI.loadingText"), frame, true);
+                Thread t = new Thread(() -> {
+                    SwingUtilities.invokeLater(() -> opDialog.setVisible(true));
+                    try {
+                        this.romHandler.loadRom(currentFN);
+                        if (gameUpdates.containsKey(this.romHandler.getROMCode())) {
+                            this.romHandler.loadGameUpdate(gameUpdates.get(this.romHandler.getROMCode()));
+                        }
+                    } catch (Exception ex) {
+                        attemptToLogException(ex, "GUI.loadFailed", "GUI.loadFailedNoLog", null, null);
+                    }
+                    SwingUtilities.invokeLater(() -> {
+                        this.opDialog.setVisible(false);
+                    });
+                });
+                t.start();
+
+                return;
+            }
+        }
     }
 
     private void restoreStateFromSettings(Settings settings) {
