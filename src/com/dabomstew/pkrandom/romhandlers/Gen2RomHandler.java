@@ -1125,6 +1125,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public boolean hasMainGameLegendaries() {
+        return false;
+    }
+
+    @Override
     public List<Integer> getMainGameLegendaries() {
         return new ArrayList<>();
     }

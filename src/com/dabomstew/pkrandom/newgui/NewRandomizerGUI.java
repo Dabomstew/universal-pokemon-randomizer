@@ -2457,7 +2457,7 @@ public class NewRandomizerGUI {
                 stpSwapLegendariesSwapStandardsRadioButton.setEnabled(true);
                 stpRandomCompletelyRadioButton.setEnabled(true);
                 stpRandomSimilarStrengthRadioButton.setEnabled(true);
-                stpLimitMainGameLegendariesCheckBox.setVisible(pokemonGeneration >= 3);
+                stpLimitMainGameLegendariesCheckBox.setVisible(romHandler.hasMainGameLegendaries());
                 stpLimitMainGameLegendariesCheckBox.setEnabled(false);
                 stpAllowAltFormesCheckBox.setVisible(romHandler.hasStaticAltFormes());
                 stpSwapMegaEvosCheckBox.setVisible(pokemonGeneration == 6 && !romHandler.forceSwapStaticMegaEvos());
@@ -2822,7 +2822,7 @@ public class NewRandomizerGUI {
         }
 
         if (stpRandomSimilarStrengthRadioButton.isSelected()) {
-            stpLimitMainGameLegendariesCheckBox.setEnabled(true);
+            stpLimitMainGameLegendariesCheckBox.setEnabled(stpLimitMainGameLegendariesCheckBox.isVisible());
         } else {
             stpLimitMainGameLegendariesCheckBox.setEnabled(false);
             stpLimitMainGameLegendariesCheckBox.setSelected(false);

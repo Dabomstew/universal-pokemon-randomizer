@@ -282,6 +282,8 @@ public interface RomHandler {
 
     void onlyChangeStaticLevels(int levelModifier);
 
+    boolean hasMainGameLegendaries();
+
     List<Integer> getMainGameLegendaries();
 
     // Randomizer: Totem Pokemon
