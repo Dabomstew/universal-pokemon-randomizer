@@ -2896,7 +2896,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     @Override
     public boolean hasMainGameLegendaries() {
-        return true;
+        return !ptGiratina;
     }
 
     @Override
