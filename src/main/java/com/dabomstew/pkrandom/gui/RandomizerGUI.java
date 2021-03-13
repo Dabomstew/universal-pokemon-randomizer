@@ -1418,11 +1418,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
         }
         
 
-        if (this.spUnchangedRB.isSelected()) {
+        if (this.spRandomRB.isSelected()) {
+            this.spNoSplitCB.setEnabled(true);
+        } else {
             this.spNoSplitCB.setEnabled(false);
             this.spNoSplitCB.setSelected(false);
-        } else {
-            this.spNoSplitCB.setEnabled(true);
         }
 
         if (this.spBSTLimitCB.isSelected()) {
@@ -3700,6 +3700,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         spNoSplitCB.setText(bundle.getString("RandomizerGUI.spNoSplitCB.text")); // NOI18N
         spNoSplitCB.setToolTipText(bundle.getString("RandomizerGUI.spNoSplitCB.toolTipText")); // NOI18N
+        spNoSplitCB.setName(bundle.getString("RandomizerGUI.spNoSplitCB.name")); // NOI18N
 
         spUniqueTypesCB.setText(bundle.getString("RandomizerGUI.spUniqueTypesCB.text")); // NOI18N
         spUniqueTypesCB.setToolTipText(bundle.getString("RandomizerGUI.spUniqueTypesCB.toolTipText")); // NOI18N

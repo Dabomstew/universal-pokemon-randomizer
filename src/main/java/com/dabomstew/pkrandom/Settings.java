@@ -637,8 +637,8 @@ public class Settings {
         if (restoreState(data[37], 0)) {
             settings.setStartersMinimumEvos(1);
         }
-        settings.setStartersNoSplit(restoreState(data[37], 2));
-        settings.setStartersUniqueTypes(restoreState(data[37], 1));
+        settings.setStartersNoSplit(restoreState(data[37], 1));
+        settings.setStartersUniqueTypes(restoreState(data[37], 2));
         settings.setStartersLimitBST(restoreState(data[37], 3));
         settings.setStartersBaseEvoOnly(restoreState(data[37], 4));
 

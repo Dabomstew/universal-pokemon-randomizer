@@ -351,6 +351,79 @@ public class SettingsTest extends AbstractUIBase {
     }
 
     /**
+     * Selecting "RANDOM" enables the No Split Evos checkbox
+     * Toggles the No Split Evo checkbox
+     * Selecting "UNCHANGED" disables the No Split Evocheckbox and resets state to false
+     * Verifies settings can be stored and loaded with no error and preserve state
+     * @throws IOException
+     */
+    @Test
+    public void TestNoSplitEvos() throws IOException {
+        JRadioButtonFixture unchangedStarterRBFixture = getRadoiButtonByName("spUnchangedRB");
+        JRadioButtonFixture randomStarterRBFixture = getRadoiButtonByName("spRandomRB");
+        JCheckBoxFixture noSplitCBFixture = getCheckBoxByName("spNoSplitCB");
+        // Sanity check - should evaluate to false
+        Settings settings = this.mainWindow.getCurrentSettings();
+        assertFalse("No Split Evo should not be set yet", settings.isStartersNoSplit());
+        assertFalse("No Split Evo should not be enabled yet", noSplitCBFixture.isEnabled());
+        assertTrue("Starters should be set to UNCHANGED but was not", settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
+        // Sanity check - Should not fail with 0 options
+        String setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertFalse("No Split Evo was not false after reloading settings 0", settings.isStartersNoSplit());
+        assertTrue("Starters was not UNCHANGED after reloading settings 0", settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
+
+        // Turn random starters on
+        clickRBAndWait(randomStarterRBFixture);
+        settings = this.mainWindow.getCurrentSettings();
+        assertFalse("No Split Evo should not be set yet", settings.isStartersNoSplit());
+        assertTrue("No Split Evo should be enabled now", noSplitCBFixture.isEnabled());
+        assertTrue("Starters should be set to RANDOM but was not", settings.getStartersMod() == Settings.StartersMod.RANDOM);
+        setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertFalse("No Split Evo was not false after reloading settings 1", settings.isStartersNoSplit());
+        assertTrue("Starters was not RANDOM after reloading settings 1", settings.getStartersMod() == Settings.StartersMod.RANDOM);
+
+        // Toggle No Split Evo on
+        noSplitCBFixture.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue("No Split Evo should be set now", settings.isStartersNoSplit());
+        assertTrue("No Split Evo should be enabled as state did not change", noSplitCBFixture.isEnabled());
+        assertTrue("Starters should be set to RANDOM as state did not change", settings.getStartersMod() == Settings.StartersMod.RANDOM);
+        setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertTrue("No Split Evo was not true after reloading settings 2", settings.isStartersNoSplit());
+        assertTrue("Starters was not RANDOM after reloading settings 2", settings.getStartersMod() == Settings.StartersMod.RANDOM);
+
+        // Toggle No Split Evo off
+        noSplitCBFixture.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertFalse("No Split Evo should be unset now", settings.isStartersNoSplit());
+        assertTrue("No Split Evo should be enabled as state did not change", noSplitCBFixture.isEnabled());
+        assertTrue("Starters should be set to RANDOM as state did not change", settings.getStartersMod() == Settings.StartersMod.RANDOM);
+        setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertFalse("No Split Evo was not false after reloading settings 3", settings.isStartersNoSplit());
+        assertTrue("Starters was not RANDOM after reloading settings 3", settings.getStartersMod() == Settings.StartersMod.RANDOM);
+
+        // Turn random starter off while No Split Evo is true should set No Split Evo to false
+        noSplitCBFixture.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue("No Split Evo should be set now", settings.isStartersNoSplit());
+        assertTrue("No Split Evo should be enabled as state did not change", noSplitCBFixture.isEnabled());
+        assertTrue("Starters should be set to RANDOM as state did not change", settings.getStartersMod() == Settings.StartersMod.RANDOM);
+        clickRBAndWait(unchangedStarterRBFixture);
+        settings = this.mainWindow.getCurrentSettings();
+        assertFalse("No Split Evo should be unset now", settings.isStartersNoSplit());
+        assertFalse("No Split Evo should be disabled now", noSplitCBFixture.isEnabled());
+        assertTrue("Starters should be set to UNCHANGED but was not", settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
+        setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertFalse("No Split Evo was not false after reloading settings 4", settings.isStartersNoSplit());
+        assertTrue("Starters was not UNCHANGED after reloading settings 4", settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
+    }
+
+    /**
      * Clicks a JRadioButton and waits for the UI to update before completing
      * @param rbFixture - The fixture representing the radio button to click
      */
