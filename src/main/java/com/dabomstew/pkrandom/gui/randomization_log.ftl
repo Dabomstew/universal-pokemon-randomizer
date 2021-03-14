@@ -488,7 +488,14 @@
 				<em>New Team</em>
 				<ul class="new-trainer-pk">
 				<#list trainer.pokemon as tpk>
-                    <li>${tpk.pokemon.name} <em>Lv${tpk.level}</em></li>
+                    <li>${tpk.pokemon.name}
+					<#if tpk.heldItem gt 0>
+						<br /><em>${romHandler.getItemNames()[tpk.heldItem]}</em>
+					</#if> 
+					<div>
+						<em>Lv${tpk.level}</em>
+					</div>
+					</li>
                 </#list>
 				</ul>
 			</div>

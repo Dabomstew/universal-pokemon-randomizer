@@ -2883,6 +2883,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return Gen3Constants.nonBadItems;
     }
 
+    @Override
+    public ItemList getTrainerItems() {
+        return Gen3Constants.trainerItemList;
+    }
+
     private void loadItemNames() {
         int nameoffs = getRomEntry().getValue("ItemData");
         int structlen = getRomEntry().getValue("ItemEntrySize");

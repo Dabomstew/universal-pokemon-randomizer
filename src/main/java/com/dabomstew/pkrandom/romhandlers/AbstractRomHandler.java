@@ -1113,8 +1113,13 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public ItemList getTrainerItems() {
+        return null;
+    }
+
+    @Override
     public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
-            int levelModifier) {
+        boolean randomHeldItem, int levelModifier) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
 
@@ -1140,6 +1145,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                 tp.resetMoves = true;
                 if (levelModifier != 0) {
                     tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
+                }
+                if (randomHeldItem && this.getTrainerItems() != null) {
+                    tp.heldItem = this.getTrainerItems().randomItem(this.random);
                 }
             }
         }

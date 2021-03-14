@@ -424,6 +424,41 @@ public class SettingsTest extends AbstractUIBase {
     }
 
     /**
+     * Toggle RandomizeHeldItems available on any trainers mod setting
+     * 
+     * @throws IOException
+     */
+    @Test(timeout = 4000)
+    public void TestTrainerRandomHeldItem() throws IOException {
+        JCheckBoxFixture randomHeldItemCBFixture = getCheckBoxByName("goUpdateMovesCheckBox");
+        Settings settings = this.mainWindow.getCurrentSettings();
+        // Sanity check - Should initialize to False
+        assertFalse("Trainer Random Held Item should not be set yet", settings.isTrainersRandomHeldItem());
+        // Sanity check - Should not fail with 0 options
+        String setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);
+        assertFalse("Trainer Random Held Item was selected after reloading settings 0", settings.isTrainersRandomHeldItem());
+
+        // Toggle on
+        randomHeldItemCBFixture.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue("Trainer Random Held Item was not selected even though it was clicked", settings.isTrainersRandomHeldItem());
+        assertTrue("Trainer Random Held Item is disabled but was expected to be enabled", randomHeldItemCBFixture.requireVisible().isEnabled());
+        setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);
+        assertTrue("Trainer Random Held Item was not selected after reloading settings 1", settings.isTrainersRandomHeldItem());
+
+        //Toggle off
+        randomHeldItemCBFixture.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertFalse("Trainer Random Held Item was selected even though it was toggled off", settings.isTrainersRandomHeldItem());
+        assertTrue("Trainer Random Held Item is disabled but was expected to be enabled", randomHeldItemCBFixture.requireVisible().isEnabled());
+        setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);
+        assertFalse("Trainer Random Held Item was selected after reloading settings 2", settings.isTrainersRandomHeldItem());
+    }
+
+    /**
      * Clicks a JRadioButton and waits for the UI to update before completing
      * @param rbFixture - The fixture representing the radio button to click
      */

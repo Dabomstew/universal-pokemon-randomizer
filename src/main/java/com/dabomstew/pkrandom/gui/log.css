@@ -495,7 +495,7 @@ li {
 
 .new-trainer-pk {
   background-color: #f1e1b7;
-  height: 250px;
+  height: 355px;
   list-style-type: none;
   margin: 0;
   padding: 10px 42px;
@@ -508,6 +508,10 @@ li {
   padding: 6px 14px;
   border-radius: 8px;
   border: 2px solid #ffb262;
+}
+
+.new-trainer-pk > li > div {
+  font-size: 0.8em;
 }
 
 .new-trainer-pk > li > em {

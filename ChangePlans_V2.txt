@@ -28,7 +28,7 @@ XX Choice not available until game is played XXStriaton City leaders use correct
 **Add checkbox to force starter slider to be only that value instead of greater or equal
 **Randomize evolutions methods
 **No Split Evos does not enable unless "RANDOM"
-Trainer Class Names should be gender based (Rich Boy woman not allowed) (group all trainer names and determine a 1-1 swap)
+XXToo much workXXTrainer Class Names should be gender based (Rich Boy woman not allowed) (group all trainer names and determine a 1-1 swap)
 Randomize trainer held items (limit to battle tower stuff)
 Type theme gyms with random trainers route trainers (keep gym trainers consistent)
 Checkbox if gyms should be type randomized (regardless of route trainer randomization)

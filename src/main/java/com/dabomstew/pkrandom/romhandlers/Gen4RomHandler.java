@@ -2440,6 +2440,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public ItemList getTrainerItems() {
+        return Gen4Constants.trainerItemList;
+    }
+
+    @Override
     public String[] getItemNames() {
         return itemNames.toArray(new String[0]);
     }

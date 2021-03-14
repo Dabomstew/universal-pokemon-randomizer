@@ -182,7 +182,7 @@ public interface RomHandler {
     public void levelUpTrainerPokes(int levelModifier);
 
     public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
-            int levelModifier);
+            boolean randomHeldItem, int levelModifier);
 
     public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
             boolean noEarlyWonderGuard, boolean useResistantType, int levelModifier);
@@ -348,6 +348,8 @@ public interface RomHandler {
     public ItemList getAllowedItems();
 
     public ItemList getNonBadItems();
+
+    public ItemList getTrainerItems();
 
     public void randomizeWildHeldItems(boolean banBadItems);
 

@@ -159,6 +159,7 @@ public class Settings {
     private int trainersForceFullyEvolvedLevel = 30;
     private boolean trainersLevelModified;
     private int trainersLevelModifier = 0; // -50 ~ 50
+    private boolean trainersRandomHeldItem;
 
     public enum WildPokemonMod {
         UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING
@@ -407,14 +408,13 @@ public class Settings {
 
         // @ 37 Starter Pokemon Overflow
         out.write(makeByteSelected(startersMod == StartersMod.RANDOM && startersMinimumEvos == 1, 
-            startersNoSplit, startersUniqueTypes, 
-            starterLimitBST, startersBaseEvoOnly));
+            startersNoSplit, startersUniqueTypes, starterLimitBST, startersBaseEvoOnly));
 
         // @ 38 Starter Pokemon BST Modifier
         write2ByteInt(out, starterBSTModifier - 1);
         
         // @ 40 Trainer and Wild Pokemon Overflow
-        out.write(makeByteSelected(rivalCarriesTeamThroughout, allowLowLevelEvolvedTypes));
+        out.write(makeByteSelected(rivalCarriesTeamThroughout, allowLowLevelEvolvedTypes, trainersRandomHeldItem));
 
         // @ 41 Evolution overflow
         out.write(makeByteSelected(evosChangeMethod));
@@ -646,6 +646,7 @@ public class Settings {
 
         settings.setRivalCarriesTeamThroughout(restoreState(data[40], 0));
         settings.setAllowLowLevelEvolvedTypes(restoreState(data[40], 1));
+        settings.setTrainersRandomHeldItem(restoreState(data[40], 2));
 
         settings.setEvosChangeMethod(restoreState(data[41], 0));
         
@@ -1413,6 +1414,15 @@ public class Settings {
 
     public Settings setTrainersLevelModifier(int trainersLevelModifier) {
         this.trainersLevelModifier = trainersLevelModifier;
+        return this;
+    }
+
+    public boolean isTrainersRandomHeldItem() {
+        return trainersRandomHeldItem;
+    }
+
+    public Settings setTrainersRandomHeldItem(boolean trainersRandomHeldItem) {
+        this.trainersRandomHeldItem = trainersRandomHeldItem;
         return this;
     }
 

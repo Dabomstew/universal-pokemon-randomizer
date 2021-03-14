@@ -69,6 +69,14 @@ public class TrainerPokemon {
     	this.level = level;
     }
 
+    public int getHeldItem() {
+        return this.heldItem;
+    }
+
+    public void setHeldItem(int heldItem) {
+        this.heldItem = heldItem;
+    }
+
     public String toString() {
         return pokemon.name + " Lv" + level;
     }

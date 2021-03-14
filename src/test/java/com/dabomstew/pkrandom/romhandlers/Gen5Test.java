@@ -101,7 +101,7 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1StriatonCityTextModifications(isNull());
 
         // Verify with type theming
@@ -124,7 +124,7 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1NacreneCityTextModifications(isNull(), any());
 
         // Verify with type theming
@@ -163,7 +163,7 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1CasteliaCityPraiseTextModifications(isNull());
 
         // Verify with type theming
@@ -187,7 +187,7 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1CasteliaCityBurghTextModifications(isNull());
 
         // Verify with type theming
@@ -211,7 +211,7 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1CherenBurghTextModifications(isNull());
 
         // Verify with type theming
@@ -234,7 +234,7 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1NimbasaCityTextModifications(isNull(), any());
 
         // Verify with type theming
@@ -258,7 +258,7 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1JuniperTextModifications(isNull());
 
         // Verify with type theming
@@ -281,7 +281,7 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1DriftveilCityTextModifications(isNull(), any());
 
         // Verify with type theming
@@ -305,7 +305,7 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1MistraltonCityTextModifications(isNull());
 
         // Verify with type theming
@@ -329,7 +329,7 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1PinwheelForestTextModifications(isNull());
 
         // Verify with type theming
@@ -353,7 +353,7 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1CelestialTowerTextModifications(isNull());
 
         // Verify with type theming

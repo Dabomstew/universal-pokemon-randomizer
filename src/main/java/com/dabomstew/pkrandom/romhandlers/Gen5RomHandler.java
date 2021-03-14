@@ -2187,6 +2187,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public ItemList getTrainerItems() {
+        return Gen5Constants.trainerItemList;
+    }
+
+    @Override
     public String[] getItemNames() {
         return itemNames.toArray(new String[0]);
     }

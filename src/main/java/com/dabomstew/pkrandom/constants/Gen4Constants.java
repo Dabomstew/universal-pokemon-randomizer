@@ -157,7 +157,7 @@ public class Gen4Constants {
     // HGSS: just cut
     public static final List<Integer> hgssEarlyRequiredHMMoves = Arrays.asList(15);
 
-    public static ItemList allowedItems, nonBadItems;
+    public static ItemList allowedItems, nonBadItems, trainerItemList;
 
     static {
         setupAllowedItems();
@@ -185,6 +185,29 @@ public class Gen4Constants {
         nonBadItems.banRange(0x9F, 54); // berries DansGame
         nonBadItems.banRange(0x100, 4); // pokemon specific
         nonBadItems.banRange(0x104, 5); // contest scarves
+
+        trainerItemList = new ItemList(536);
+        trainerItemList.banRange(0, 537);
+        trainerItemList.allowSingles(154, 155, 157); // LEPPA BERRY, ORAN BERRY, LUM BERRY
+        trainerItemList.allowSingles(158, 201, 202); // SITRUS BERRY, LIECHI BERRY, GANLON BERRY
+        trainerItemList.allowSingles(203, 204, 205); // SALAC BERRY, PETAYA BERRY, APICOT BERRY
+        trainerItemList.allowSingles(206, 207, 208); // LANSAT BERRY, STARF BERRY, ENIGMA BERRY
+        trainerItemList.allowSingles(209, 210, 211); // MICLE BERRY, CUSTAP BERRY, JABOCA BERRY
+        trainerItemList.allowSingles(213, 214, 217); // BRIGHTPOWDER, WHITE HERB, QUICK CLAW
+        trainerItemList.allowSingles(220, 221, 222); // CHOICE BAND, KING's ROCK, SILVERPOWDER
+        trainerItemList.allowSingles(230, 232, 233); // FOCUS BAND, SCOPE LENS, METAL COAT
+        trainerItemList.allowSingles(234, 237, 238); // LEFTOVERS, SOFT SAND, HARD STONE
+        trainerItemList.allowSingles(239, 240, 241); // MIRACLE SEED, BLACKGLASSES, BLACK BELT
+        trainerItemList.allowSingles(242, 243, 244); // MAGNET, MYSTIC WATER, SHARP BEAK
+        trainerItemList.allowSingles(245, 246, 247); // POISON BARB, NEVERMELTICE, SPELL TAG
+        trainerItemList.allowSingles(248, 249, 250); // TWISTEDSPOON, CHARCOAL, DRAGON FANG
+        trainerItemList.allowSingles(251, 254, 255); // SILK SCARF, SEA INCENSE, LAX INCENSE
+        trainerItemList.allowSingles(212, 265, 266); // ROWAP BERRY, WIDE LENS, MUSCLE BAND
+        trainerItemList.allowSingles(267, 268, 269); // WISE GLASSES, EXPERT BELT, LIGHT CLAY
+        trainerItemList.allowSingles(270, 271, 275); // LIFE ORB, POWER HERB, FOCUS SASH
+        trainerItemList.allowSingles(276, 277, 286); // ZOOM LENS, METRONOME, GRIP CLAW
+        trainerItemList.allowSingles(287, 288, 295); // CHOICE SCARF, STICKY BARB, SHED SHELL
+        trainerItemList.allowSingles(296, 297, 200); // BIG ROOT, CHOICE SPECS, CHILAN BERRY
     }
 
     public static final Type[] typeTable = constructTypeTable();
