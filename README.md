@@ -4,9 +4,30 @@ With significant contributions from darkeye, cleartonic
 
 Based on the Universal Pokemon Randomizer by Dabomstew
 
-# Purpose
-The purpose of this fork was originally to fix minor issues, and to rebalance/change some things. As such, you might find that some of the things that are changed are not necessarily _better,_ but rather just different. Regardless, these changes have the goal of making the randomizer more fun to play, so hopefully you (the person reading this) find the changes to be good.
+# Info
 
-The fork has since then become a bit more ambitious, adding new features and support for new games. Additions/updates will still be done at my discretion, so don't contact me to tell me to add things to the randomizer. However, if you find something that seems to be a bug, feel free to submit an issue. Thanks!
+This fork was originally made to make some minor tweaks and fixes, but became a bit more ambitious since 2020. There are several new features and supported games (including 3DS games) compared to the original Universal Pokemon Randomizer.
 
-Have a look at the [release page](https://github.com/Ajarmar/universal-pokemon-randomizer-zx/releases) for changelogs.
+Have a look at the [release page](https://github.com/Ajarmar/universal-pokemon-randomizer-zx/releases) for changelogs and downloads.
+
+# Contributing
+
+If you want to contribute something to the codebase, we'd recommend creating an issue for it first (using the `Contribution Idea` template). This way, we can discuss whether or not it's a good fit for the randomizer before you put in the work to implement it. This is just to save you time in the event that we don't think it's something we want to accept.
+
+### What is a good fit for the randomizer?
+
+In general, we try to make settings as universal as possible. This means that it preferably should work in as many games as possible, and also that it's something that many people will find useful. If the setting is very niche, it will mostly just bloat the GUI.
+
+If your idea is a change to an existing setting rather than a new setting, it needs to be well motivated.
+
+# Feature requests
+
+We do not take feature requests.
+
+# Bug reports
+
+If you encounter something that seems to be a bug, submit an issue using the `Bug Report` issue template.
+
+# Other problems
+
+If you have problems using the randomizer, it could be because of some problem with Java or your operating system. **If you have problems with starting the randomizer specifically, [read this page first before creating an issue.](https://github.com/Ajarmar/universal-pokemon-randomizer-zx/wiki/About-Java)** If that page does not solve your problem, submit an issue using the `Need Help` issue template.
