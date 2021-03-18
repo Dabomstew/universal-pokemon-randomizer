@@ -4223,7 +4223,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                 for (Evolution ev : pk.evolutionsFrom) {
                     oldEvoPairs.add(new EvolutionPair(ev.from, ev.to));
                     if (generationOfPokemon() >= 7 && ev.from.number == 790) { // Special case for Cosmoem to add Lunala/Solgaleo since we remove the split evo
-                        oldEvoPairs.add(new EvolutionPair(ev.from, pokemonPool.get(ev.from.number + (ev.to.number % 791))));
+                        int oppositeVersionLegendaryNumber = ev.to.number == 791 ? 792 : 791;
+                        Pokemon toPkmn = findPokemonInPoolWithSpeciesID(pokemonPool, oppositeVersionLegendaryNumber);
+                        if (toPkmn != null) {
+                            oldEvoPairs.add(new EvolutionPair(ev.from, toPkmn));
+                        }
                     }
                 }
             }
