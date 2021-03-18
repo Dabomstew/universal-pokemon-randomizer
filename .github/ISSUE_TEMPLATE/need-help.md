@@ -14,7 +14,8 @@ assignees: ''
  - Randomizer Version: 
 
 **If your problem is that you can't start the randomizer:**
-Open a terminal window (if you're not sure how, google your operating system + "terminal window"). Type in `java -version` and press Enter. Please include a screenshot of what you get:
+- If there is a `launcher-log.txt` created when you try to start the launcher, please attach it to this issue as an attached file.
+- Open a terminal window (if you're not sure how, google your operating system + "terminal window"). Type in `java -version` and press Enter. Please include a screenshot of what you get:
 
 
 
