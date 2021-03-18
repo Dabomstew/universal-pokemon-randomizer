@@ -1,5 +1,5 @@
 ---
-name: Bug report
+name: Bug Report
 about: If something doesn't work as expected.
 title: "[Bug] "
 labels: bug
