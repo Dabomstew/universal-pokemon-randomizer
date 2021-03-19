@@ -32,16 +32,12 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
+import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.pokemon.*;
 import thenewpoketext.PokeTextData;
 import thenewpoketext.TextToPoke;
 
-import com.dabomstew.pkrandom.FileFunctions;
-import com.dabomstew.pkrandom.GFXFunctions;
-import com.dabomstew.pkrandom.MiscTweak;
-import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen4Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -3049,9 +3045,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public void removeImpossibleEvolutions(boolean changeMoveEvos) {
+    public void removeImpossibleEvolutions(Settings settings) {
+
+        boolean changeMoveEvos = !(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED);
+
         Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
-        log("--Removing Impossible Evolutions--");
         Set<Evolution> extraEvolutions = new HashSet<>();
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
@@ -3064,14 +3062,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                             // Replace w/ level 35
                             evo.type = EvolutionType.LEVEL;
                             evo.extraInfo = 35;
-                            logEvoChangeLevel(evo.from.name, evo.to.name, 35);
+                            addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
                         }
                         // mt.coronet (magnezone/probopass)
                         if (evo.type == EvolutionType.LEVEL_ELECTRIFIED_AREA) {
                             // Replace w/ level 40
                             evo.type = EvolutionType.LEVEL;
                             evo.extraInfo = 40;
-                            logEvoChangeLevel(evo.from.name, evo.to.name, 40);
+                            addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
                         }
                         // moss rock (leafeon)
                         if (evo.type == EvolutionType.LEVEL_MOSS_ROCK) {
@@ -3079,7 +3077,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen4Constants.leafStoneIndex; // leaf
                                                                           // stone
-                            logEvoChangeStone(evo.from.name, evo.to.name, itemNames.get(Gen4Constants.leafStoneIndex));
+                            addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
                         }
                         // icy rock (glaceon)
                         if (evo.type == EvolutionType.LEVEL_ICY_ROCK) {
@@ -3087,7 +3085,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen4Constants.dawnStoneIndex; // dawn
                                                                           // stone
-                            logEvoChangeStone(evo.from.name, evo.to.name, itemNames.get(Gen4Constants.dawnStoneIndex));
+                            addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
                         }
                     }
                     if (changeMoveEvos && evo.type == EvolutionType.LEVEL_WITH_MOVE) {
@@ -3107,14 +3105,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                         // change to pure level evo
                         evo.type = EvolutionType.LEVEL;
                         evo.extraInfo = levelLearntAt;
-                        logEvoChangeLevel(evo.from.name, evo.to.name, levelLearntAt);
+                        addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
                     }
                     // Pure Trade
                     if (evo.type == EvolutionType.TRADE) {
                         // Replace w/ level 37
                         evo.type = EvolutionType.LEVEL;
                         evo.extraInfo = 37;
-                        logEvoChangeLevel(evo.from.name, evo.to.name, 37);
+                        addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
                     }
                     // Trade w/ Item
                     if (evo.type == EvolutionType.TRADE_ITEM) {
@@ -3127,9 +3125,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen4Constants.waterStoneIndex; // water
                                                                            // stone
-                            logEvoChangeStone(evo.from.name, evo.to.name, itemNames.get(Gen4Constants.waterStoneIndex));
+                            addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
                         } else {
-                            logEvoChangeLevelWithItem(evo.from.name, evo.to.name, itemNames.get(item));
+                            addEvoUpdateHeldItem(impossibleEvolutionUpdates, evo, itemNames.get(item));
                             // Replace, for this entry, w/
                             // Level up w/ Held Item at Day
                             evo.type = EvolutionType.LEVEL_ITEM_DAY;
@@ -3152,7 +3150,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public void makeEvolutionsEasier(boolean wildsRandomized) {
+    public void makeEvolutionsEasier(Settings settings) {
+
+        boolean wildsRandomized = !settings.getWildPokemonMod().equals(Settings.WildPokemonMod.UNCHANGED);
+
         if (wildsRandomized) {
             for (Pokemon pkmn : pokes) {
                 if (pkmn != null) {
@@ -3161,19 +3162,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                             // Replace w/ level 35
                             evo.type = EvolutionType.LEVEL;
                             evo.extraInfo = 35;
-                            log(String.format("%s now evolves into %s at minimum level %d", evo.from.name, evo.to.name,
-                                    evo.extraInfo));
+                            addEvoUpdateCondensed(easierEvolutionUpdates, evo, false);
                         }
                     }
                 }
             }
-            logBlankLine();
         }
     }
 
     @Override
     public void removeTimeBasedEvolutions() {
-        log("--Removing Timed-Based Evolutions--");
         Set<Evolution> extraEvolutions = new HashSet<>();
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
@@ -3185,10 +3183,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                             // Umbreon works in the original game. Instead, make Eevee: == sun stone => Espeon
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen4Constants.sunStoneIndex;
-                            logEvoChangeStone(evo.from.name, evo.to.name, itemNames.get(Gen4Constants.sunStoneIndex));
+                            addEvoUpdateStone(timeBasedEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
                         } else {
                             // Add an extra evo for Happiness at Night
-                            logEvoChangeHappiness(evo.from.name, evo.to.name);
+                            addEvoUpdateHappiness(timeBasedEvolutionUpdates, evo);
                             Evolution extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.HAPPINESS_NIGHT, 0);
                             extraEvolutions.add(extraEntry);
@@ -3199,10 +3197,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                             // Espeon works in the original game. Instead, make Eevee: == moon stone => Umbreon
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen4Constants.moonStoneIndex;
-                            logEvoChangeStone(evo.from.name, evo.to.name, itemNames.get(Gen4Constants.moonStoneIndex));
+                            addEvoUpdateStone(timeBasedEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
                         } else {
                             // Add an extra evo for Happiness at Day
-                            logEvoChangeHappiness(evo.from.name, evo.to.name);
+                            addEvoUpdateHappiness(timeBasedEvolutionUpdates, evo);
                             Evolution extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.HAPPINESS_DAY, 0);
                             extraEvolutions.add(extraEntry);
@@ -3212,7 +3210,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                         // Make sure we don't already have an evo for the same item at night (e.g., when using Change Impossible Evos)
                         if (evo.from.evolutionsFrom.stream().noneMatch(e -> e.type == EvolutionType.LEVEL_ITEM_NIGHT && e.extraInfo == item)) {
                             // Add an extra evo for Level w/ Item During Night
-                            logEvoChangeLevelWithItem(evo.from.name, evo.to.name, itemNames.get(item));
+                            addEvoUpdateHeldItem(timeBasedEvolutionUpdates, evo, itemNames.get(item));
                             Evolution extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.LEVEL_ITEM_NIGHT, item);
                             extraEvolutions.add(extraEntry);
@@ -3222,7 +3220,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                         // Make sure we don't already have an evo for the same item at day (e.g., when using Change Impossible Evos)
                         if (evo.from.evolutionsFrom.stream().noneMatch(e -> e.type == EvolutionType.LEVEL_ITEM_DAY && e.extraInfo == item)) {
                             // Add an extra evo for Level w/ Item During Day
-                            logEvoChangeLevelWithItem(evo.from.name, evo.to.name, itemNames.get(item));
+                            addEvoUpdateHeldItem(timeBasedEvolutionUpdates, evo, itemNames.get(item));
                             Evolution extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.LEVEL_ITEM_DAY, item);
                             extraEvolutions.add(extraEntry);
@@ -3235,7 +3233,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 }
             }
         }
-        logBlankLine();
+
     }
 
     @Override

@@ -28,16 +28,13 @@ package com.dabomstew.pkrandom;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
-import com.dabomstew.pkrandom.romhandlers.Gen5RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 // Can randomize a file based on settings. Output varies by seed.
@@ -70,9 +67,8 @@ public class Randomizer {
     }
 
     public int randomize(final String filename, final PrintStream log, long seed) {
+
         final long startTime = System.currentTimeMillis();
-        // long seed2 = 123456789;    // TESTING
-        // RandomSource.seed(seed2);    // TESTING
         RandomSource.seed(seed);
 
         int checkValue = 0;
@@ -82,148 +78,144 @@ public class Randomizer {
         log.println("Settings String: " + Version.VERSION + settings.toString());
         log.println();
 
-        // limit pokemon?
+        // All possible changes that can be logged
+        boolean movesUpdated = false;
+        boolean movesChanged = false;
+        boolean movesetsChanged = false;
+        boolean pokemonTraitsChanged = false;
+        boolean startersChanged = false;
+        boolean evolutionsChanged = false;
+        boolean trainersChanged = false;
+        boolean staticsChanged = false;
+        boolean totemsChanged = false;
+        boolean wildsChanged = false;
+        boolean tmMovesChanged = false;
+        boolean tradesChanged = false;
+        boolean tmsHmsCompatChanged = false;
+        boolean tutorCompatChanged = false;
+        boolean shopsChanged = false;
+
+        // Limit Pokemon
+        // 1. Set Pokemon pool according to limits (or lack thereof)
+        // 2. If limited, remove evolutions that are outside of the pool
+
+        romHandler.setPokemonPool(settings);
+
         if (settings.isLimitPokemon()) {
-            romHandler.setPokemonPool(settings.getCurrentRestrictions());
             romHandler.removeEvosForPokemonPool();
-        } else {
-            romHandler.setPokemonPool(null);
         }
 
         // Move updates & data changes
+        // 1. Update moves to a future generation
+        // 2. Randomize move stats
+
         if (settings.isUpdateMoves()) {
             romHandler.initMoveUpdates();
-            romHandler.updateMoves(settings.getUpdateMovesToGeneration());
-//            if (!(romHandler instanceof Gen5RomHandler)) {
-//                romHandler.updateMovesToGen5();
-//            }
-//            if (!settings.isUpdateMovesLegacy()) {
-//                romHandler.updateMovesToGen6();
-//            }
-            romHandler.printMoveUpdates();
+            romHandler.updateMoves(settings);
+            movesUpdated = true;
+        }
+
+        if (movesUpdated) {
+            logMoveUpdates(log);
         }
 
         if (settings.isRandomizeMovePowers()) {
             romHandler.randomizeMovePowers();
+            movesChanged = true;
         }
 
         if (settings.isRandomizeMoveAccuracies()) {
             romHandler.randomizeMoveAccuracies();
+            movesChanged = true;
         }
 
         if (settings.isRandomizeMovePPs()) {
             romHandler.randomizeMovePPs();
+            movesChanged = true;
         }
 
         if (settings.isRandomizeMoveTypes()) {
             romHandler.randomizeMoveTypes();
+            movesChanged = true;
         }
 
         if (settings.isRandomizeMoveCategory() && romHandler.hasPhysicalSpecialSplit()) {
             romHandler.randomizeMoveCategory();
+            movesChanged = true;
         }
 
-        List<Move> moves = romHandler.getMoves();
+        // Misc Tweaks
 
-        // Misc Tweaks?
-        int currentMiscTweaks = settings.getCurrentMiscTweaks();
-        if (romHandler.miscTweaksAvailable() != 0) {
-            int codeTweaksAvailable = romHandler.miscTweaksAvailable();
-            List<MiscTweak> tweaksToApply = new ArrayList<>();
-
-            for (MiscTweak mt : MiscTweak.allTweaks) {
-                if ((codeTweaksAvailable & mt.getValue()) > 0 && (currentMiscTweaks & mt.getValue()) > 0) {
-                    tweaksToApply.add(mt);
-                }
-            }
-
-            // Sort so priority is respected in tweak ordering.
-            Collections.sort(tweaksToApply);
-
-            // Now apply in order.
-            for (MiscTweak mt : tweaksToApply) {
-                romHandler.applyMiscTweak(mt);
-            }
+        if (settings.getCurrentMiscTweaks() != MiscTweak.NO_MISC_TWEAKS) {
+            romHandler.applyMiscTweaks(settings);
         }
+
+        // Update base stats to a future generation
 
         if (settings.isUpdateBaseStats()) {
-            romHandler.updatePokemonStats(settings.getUpdateBaseStatsToGeneration());
+            romHandler.updatePokemonStats(settings);
         }
+
+        // Standardize EXP curves
 
         if (settings.isStandardizeEXPCurves()) {
-            romHandler.standardizeEXPCurves(settings.getExpCurveMod(), settings.getSelectedEXPCurve());
+            romHandler.standardizeEXPCurves(settings);
         }
-
 
         // Pokemon Types
-        switch (settings.getTypesMod()) {
-        case RANDOM_FOLLOW_EVOLUTIONS:
-            romHandler.randomizePokemonTypes(true, settings.isTypesFollowMegaEvolutions());
-            break;
-        case COMPLETELY_RANDOM:
-            romHandler.randomizePokemonTypes(false, settings.isTypesFollowMegaEvolutions());
-            break;
-        default:
-            break;
+
+        if (settings.getTypesMod() != Settings.TypesMod.UNCHANGED) {
+            romHandler.randomizePokemonTypes(settings);
+            pokemonTraitsChanged = true;
         }
 
-        // Wild Held Items?
+        // Wild Held Items
+
         if (settings.isRandomizeWildPokemonHeldItems()) {
-            romHandler.randomizeWildHeldItems(settings.isBanBadRandomWildPokemonHeldItems());
+            romHandler.randomizeWildHeldItems(settings);
+            pokemonTraitsChanged = true;
         }
 
         // Random Evos
         // Applied after type to pick new evos based on new types.
+
         if (settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM) {
-            romHandler.randomizeEvolutions(settings.isEvosSimilarStrength(), settings.isEvosSameTyping(),
-                    settings.isEvosMaxThreeStages(), settings.isEvosForceChange(), settings.isEvosAllowAltFormes(),
-                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
-
-            log.println("--Randomized Evolutions--");
-            List<Pokemon> allPokes = romHandler.getPokemonInclFormes();
-            for (Pokemon pk : allPokes) {
-                if (pk != null && !pk.actuallyCosmetic) {
-                    int numEvos = pk.evolutionsFrom.size();
-                    if (numEvos > 0) {
-                        StringBuilder evoStr = new StringBuilder(pk.evolutionsFrom.get(0).toFullName());
-                        for (int i = 1; i < numEvos; i++) {
-                            if (i == numEvos - 1) {
-                                evoStr.append(" and ").append(pk.evolutionsFrom.get(i).toFullName());
-                            } else {
-                                evoStr.append(", ").append(pk.evolutionsFrom.get(i).toFullName());
-                            }
-                        }
-                        // log.println(pk.fullName() + " now evolves into " + evoStr.toString());
-                        log.printf("%-15s -> %-15s" + NEWLINE, pk.fullName(), evoStr.toString());
-                    }
-                }
-            }
-
-            log.println();
+            romHandler.randomizeEvolutions(settings);
+            evolutionsChanged = true;
         }
 
-        // Base stats changing
+        if (evolutionsChanged) {
+            logEvolutionChanges(log);
+        }
+
+        // Base stat randomization
+
         switch (settings.getBaseStatisticsMod()) {
             case SHUFFLE:
-                romHandler.shufflePokemonStats(settings.isBaseStatsFollowEvolutions(),
-                        settings.isBaseStatsFollowMegaEvolutions());
+                romHandler.shufflePokemonStats(settings);
+                pokemonTraitsChanged = true;
                 break;
             case RANDOM:
-                romHandler.randomizePokemonStats(settings.isBaseStatsFollowEvolutions(),
-                        settings.isBaseStatsFollowMegaEvolutions());
+                romHandler.randomizePokemonStats(settings);
+                pokemonTraitsChanged = true;
                 break;
             default:
                 break;
         }
 
-        // Abilities? (new 1.0.2)
-        if (romHandler.abilitiesPerPokemon() > 0 && settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE) {
-            romHandler.randomizeAbilities(settings.isAbilitiesFollowEvolutions(), settings.isAllowWonderGuard(),
-                    settings.isBanTrappingAbilities(), settings.isBanNegativeAbilities(), settings.isBanBadAbilities(),
-                    settings.isAbilitiesFollowMegaEvolutions(), settings.isWeighDuplicateAbilitiesTogether());
+        // Abilities
+
+        if (settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE) {
+            romHandler.randomizeAbilities(settings);
+            pokemonTraitsChanged = true;
         }
 
-        maybeLogBaseStatAndTypeChanges(log, romHandler);
+        if (pokemonTraitsChanged) {
+            logPokemonTraitChanges(log);
+        } else {
+            log.println("Pokemon base stats & type: unchanged" + NEWLINE);
+        }
+
         for (Pokemon pkmn : romHandler.getPokemon()) {
             if (pkmn != null) {
                 checkValue = addToCV(checkValue, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk,
@@ -233,145 +225,137 @@ public class Randomizer {
 
         // Trade evolutions removal
         if (settings.isChangeImpossibleEvolutions()) {
-            romHandler.removeImpossibleEvolutions(!(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED));
+            log.println("--Removing Impossible Evolutions--");
+            romHandler.removeImpossibleEvolutions(settings);
+            logUpdatedEvolutions(log, romHandler.getImpossibleEvoUpdates());
         }
 
         // Easier evolutions
         if (settings.isMakeEvolutionsEasier()) {
+            log.println("--Condensed Level Evolutions--");
             romHandler.condenseLevelEvolutions(40, 30);
-            romHandler.makeEvolutionsEasier(!settings.getWildPokemonMod().equals(Settings.WildPokemonMod.UNCHANGED));
+            romHandler.makeEvolutionsEasier(settings);
+            logUpdatedEvolutions(log, romHandler.getEasierEvoUpdates());
         }
 
         // Remove time-based evolutions
         if (settings.isRemoveTimeBasedEvolutions()) {
+            log.println("--Removing Timed-Based Evolutions--");
             romHandler.removeTimeBasedEvolutions();
+            logUpdatedEvolutions(log, romHandler.getTimeBasedEvoUpdates());
         }
 
         // Starter Pokemon
         // Applied after type to update the strings correctly based on new types
-        maybeChangeAndLogStarters(log, romHandler);
+
+        if (romHandler.canChangeStarters()) {
+            switch(settings.getStartersMod()) {
+                case CUSTOM:
+                    romHandler.customStarters(settings);
+                    startersChanged = true;
+                    break;
+                case COMPLETELY_RANDOM:
+                    romHandler.randomizeStarters(settings);
+                    startersChanged = true;
+                    break;
+                case RANDOM_WITH_TWO_EVOLUTIONS:
+                    romHandler.randomizeBasicTwoEvosStarters(settings);
+                    startersChanged = true;
+                    break;
+                default:
+                    break;
+            }
+            if (settings.isRandomizeStartersHeldItems() && !(romHandler instanceof Gen1RomHandler)) {
+                romHandler.randomizeStarterHeldItems(settings);
+            }
+
+            if (startersChanged) {
+                logStarters(log);
+            }
+        }
 
         // Move Data Log
         // Placed here so it matches its position in the randomizer interface
-        maybeLogMoveChanges(log, romHandler);
+        if (movesChanged) {
+            logMoveChanges(log);
+        } else if (!movesUpdated) {
+            log.println("Move Data: Unchanged." + NEWLINE);
+        }
 
         // Movesets
-        boolean noBrokenMovesetMoves = settings.isBlockBrokenMovesetMoves();
-        boolean forceLv1s = romHandler.supportsFourStartingMoves() && settings.isStartWithGuaranteedMoves();
-        int forceLv1Count = settings.getGuaranteedMoveCount();
-        double msGoodDamagingProb = settings.isMovesetsForceGoodDamaging() ? settings.getMovesetsGoodDamagingPercent() / 100.0
-                : 0;
-        if (settings.getMovesetsMod() == Settings.MovesetsMod.RANDOM_PREFER_SAME_TYPE) {
-            romHandler.randomizeMovesLearnt(true, noBrokenMovesetMoves, forceLv1s, forceLv1Count, msGoodDamagingProb,
-                    settings.isEvolutionMovesForAll());
-        } else if (settings.getMovesetsMod() == Settings.MovesetsMod.COMPLETELY_RANDOM) {
-            romHandler.randomizeMovesLearnt(false, noBrokenMovesetMoves, forceLv1s, forceLv1Count, msGoodDamagingProb,
-                    settings.isEvolutionMovesForAll());
+        // 1. Randomize movesets
+        // 2. Reorder moves by damage
+        // Note: "Metronome only" is handled after trainers instead
+
+        if (settings.getMovesetsMod() != Settings.MovesetsMod.UNCHANGED &&
+                settings.getMovesetsMod() != Settings.MovesetsMod.METRONOME_ONLY) {
+            romHandler.randomizeMovesLearnt(settings);
+            movesetsChanged = true;
         }
 
         if (settings.isReorderDamagingMoves()) {
             romHandler.orderDamagingMovesByDamage();
+            movesetsChanged = true;
         }
 
         // Show the new movesets if applicable
-        if (settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED) {
-            log.println("Pokemon Movesets: Unchanged." + NEWLINE);
+        if (movesetsChanged) {
+            logMovesetChanges(log);
         } else if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
             log.println("Pokemon Movesets: Metronome Only." + NEWLINE);
         } else {
-            log.println("--Pokemon Movesets--");
-            List<String> movesets = new ArrayList<>();
-            Map<Integer, List<MoveLearnt>> moveData = romHandler.getMovesLearnt();
-            List<Pokemon> pkmnList = romHandler.getPokemonInclFormes();
-            int i = 1;
-            for (Pokemon pkmn : pkmnList) {
-
-                if (pkmn == null || pkmn.actuallyCosmetic) {
-                    continue;
-                }
-                StringBuilder evoStr = new StringBuilder(); 
-                try {
-                    evoStr.append(" -> ").append(pkmn.evolutionsFrom.get(0).to.fullName());
-                } catch (Exception e) {
-                    evoStr.append(" (no evolution)");
-                }
-
-                StringBuilder sb = new StringBuilder();
-
-                // sb.append(String.format("%03d %s", pkmn.number, pkmn.fullName())).append(System.getProperty("line.separator")).append(String.format("HP %-3d ATK %-3d DEF %-3d SPATK %-3d SPDEF %-3d SPD %-3d", pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef)).append(System.getProperty("line.separator"));
-
-                sb.append(String.format("%03d %s", i, pkmn.fullName())).append(evoStr).append(System.getProperty("line.separator")).append(String.format("HP  %-3d", pkmn.hp)).append(System.getProperty("line.separator")).append(String.format("ATK %-3d", pkmn.attack)).append(System.getProperty("line.separator")).append(String.format("DEF %-3d", pkmn.defense)).append(System.getProperty("line.separator")).append(String.format("SPA %-3d", pkmn.spatk)).append(System.getProperty("line.separator")).append(String.format("SPD %-3d", pkmn.spdef)).append(System.getProperty("line.separator")).append(String.format("SPE %-3d", pkmn.speed)).append(System.getProperty("line.separator"));
-                i++;
-
-                List<MoveLearnt> data = moveData.get(pkmn.number);
-                for (MoveLearnt ml : data) {
-                    try {
-                        if (ml.level == 0) {
-                            sb.append("Learned upon evolution: ").append(moves.get(ml.move).name).append(System.getProperty("line.separator"));
-                        } else {
-                            sb.append("Level ").append(String.format("%-2d", ml.level)).append(": ").append(moves.get(ml.move).name).append(System.getProperty("line.separator"));
-                        }
-                    } catch (NullPointerException ex) {
-                        sb.append("invalid move at level").append(ml.level);
-                    }
-                }
-                movesets.add(sb.toString());
-            }
-            Collections.sort(movesets);
-            for (String moveset : movesets) {
-                log.println(moveset);
-            }
-            log.println();
+            log.println("Pokemon Movesets: Unchanged." + NEWLINE);
         }
 
         // Trainer Pokemon
-        romHandler.addTrainerPokemon(
-                settings.getAdditionalRegularTrainerPokemon(),
-                settings.getAdditionalImportantTrainerPokemon(),
-                settings.getAdditionalBossTrainerPokemon());
+        // 1. Add extra Trainer Pokemon
+        // 2. Set trainers to be double battles and add extra Pokemon if necessary
+        // 3. Randomize Trainer Pokemon
+        // 4. Modify rivals to carry starters
+        // 5. Force Trainer Pokemon to be fully evolved
+
+        if (settings.getAdditionalRegularTrainerPokemon() > 0
+                || settings.getAdditionalImportantTrainerPokemon() > 0
+                || settings.getAdditionalBossTrainerPokemon() > 0) {
+            romHandler.addTrainerPokemon(settings);
+            trainersChanged = true;
+        }
+
 
         if (settings.isDoubleBattleMode()) {
             romHandler.doubleBattleMode();
+            trainersChanged = true;
         }
 
-        if (settings.getTrainersMod() == Settings.TrainersMod.RANDOM) {
-            romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
-                    settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
-                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, false, false,
-                    settings.isAllowTrainerAlternateFormes(), settings.isSwapTrainerMegaEvos(), settings.isShinyChance(),
-                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
-        } else if (settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED) {
-            romHandler.typeThemeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
-                    settings.isTrainersMatchTypingDistribution(), settings.isTrainersBlockLegendaries(),
-                    settings.isTrainersBlockEarlyWonderGuard(),
-                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0,
-                    settings.isAllowTrainerAlternateFormes(), settings.isSwapTrainerMegaEvos(), settings.isShinyChance(),
-                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
-        } else if (settings.getTrainersMod() == Settings.TrainersMod.DISTRIBUTED) {
-            romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
-                    settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
-                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, true, false,
-                    settings.isAllowTrainerAlternateFormes(), settings.isSwapTrainerMegaEvos(), settings.isShinyChance(),
-                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
-        } else if (settings.getTrainersMod() == Settings.TrainersMod.MAINPLAYTHROUGH) {
-            romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
-                    settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
-                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, true, true,
-                    settings.isAllowTrainerAlternateFormes(), settings.isSwapTrainerMegaEvos(), settings.isShinyChance(),
-                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
-        } else {
-            if (settings.isTrainersLevelModified()) {
-                romHandler.onlyChangeTrainerLevels(settings.getTrainersLevelModifier());
-            }
+        switch(settings.getTrainersMod()) {
+            case RANDOM:
+            case DISTRIBUTED:
+            case MAINPLAYTHROUGH:
+                romHandler.randomizeTrainerPokes(settings);
+                trainersChanged = true;
+                break;
+            case TYPE_THEMED:
+                romHandler.typeThemeTrainerPokes(settings);
+                trainersChanged = true;
+                break;
+            default:
+                if (settings.isTrainersLevelModified()) {
+                    romHandler.onlyChangeTrainerLevels(settings);
+                    trainersChanged = true;
+                }
+                break;
         }
 
-        if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)
+        if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED
+                || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)
                 && settings.isRivalCarriesStarterThroughout()) {
             romHandler.rivalCarriesStarter();
+            trainersChanged = true;
         }
 
         if (settings.isTrainersForceFullyEvolved()) {
-            romHandler.forceFullyEvolvedTrainerPokes(settings.getTrainersForceFullyEvolvedLevel());
+            romHandler.forceFullyEvolvedTrainerPokes(settings);
+            trainersChanged = true;
         }
 
         // Trainer names & class names randomization
@@ -379,15 +363,19 @@ public class Randomizer {
 
         if (romHandler.canChangeTrainerText()) {
             if (settings.isRandomizeTrainerClassNames()) {
-                romHandler.randomizeTrainerClassNames(settings.getCustomNames());
+                romHandler.randomizeTrainerClassNames(settings);
             }
 
             if (settings.isRandomizeTrainerNames()) {
-                romHandler.randomizeTrainerNames(settings.getCustomNames());
+                romHandler.randomizeTrainerNames(settings);
             }
         }
 
-        maybeLogTrainerChanges(log, romHandler);
+        if (trainersChanged) {
+            maybeLogTrainerChanges(log);
+        } else {
+            log.println("Trainers: Unchanged." + NEWLINE);
+        }
 
         // Apply metronome only mode now that trainers have been dealt with
         if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
@@ -402,72 +390,80 @@ public class Randomizer {
         }
 
         // Static Pokemon
-        checkValue = maybeChangeAndLogStaticPokemon(log, romHandler, checkValue);
+
+        if (romHandler.canChangeStaticPokemon()) {
+            List<StaticEncounter> oldStatics = romHandler.getStaticPokemon();
+            if (settings.getStaticPokemonMod() != Settings.StaticPokemonMod.UNCHANGED) { // Legendary for L
+                romHandler.randomizeStaticPokemon(settings);
+                staticsChanged = true;
+            } else if (settings.isStaticLevelModified()) {
+                romHandler.onlyChangeStaticLevels(settings);
+                staticsChanged = true;
+            }
+
+            if (staticsChanged) {
+                checkValue = logStaticPokemon(log, checkValue, oldStatics);
+            } else {
+                log.println("Static Pokemon: Unchanged." + NEWLINE);
+            }
+        }
+
+        // Totem Pokemon
 
         if (romHandler.generationOfPokemon() == 7) {
-            checkValue = maybeChangeAndLogTotemPokemon(log, romHandler, checkValue);
+            List<TotemPokemon> oldTotems = romHandler.getTotemPokemon();
+            if (settings.getTotemPokemonMod() != Settings.TotemPokemonMod.UNCHANGED ||
+                    settings.getAllyPokemonMod() != Settings.AllyPokemonMod.UNCHANGED ||
+                    settings.getAuraMod() != Settings.AuraMod.UNCHANGED ||
+                    settings.isRandomizeTotemHeldItems() ||
+                    settings.isTotemLevelsModified()) {
+
+                romHandler.randomizeTotemPokemon(settings);
+                totemsChanged = true;
+            }
+
+            if (totemsChanged) {
+                checkValue = logTotemPokemon(log, checkValue, oldTotems);
+            } else {
+                log.println("Totem Pokemon: Unchanged." + NEWLINE);
+            }
         }
 
         // Wild Pokemon
+        // 1. Update catch rates
+        // 2. Randomize Wild Pokemon
+
         if (settings.isUseMinimumCatchRate()) {
-            boolean gen5 = romHandler instanceof Gen5RomHandler;
-            int normalMin, legendaryMin;
-            switch (settings.getMinimumCatchRateLevel()) {
-            case 1:
-            default:
-                normalMin = gen5 ? 50 : 75;
-                legendaryMin = gen5 ? 25 : 37;
-                break;
-            case 2:
-                normalMin = gen5 ? 100 : 128;
-                legendaryMin = gen5 ? 45 : 64;
-                break;
-            case 3:
-                normalMin = gen5 ? 180 : 200;
-                legendaryMin = gen5 ? 75 : 100;
-                break;
-            case 4:
-                normalMin = legendaryMin = 255;
-                break;
-            }
-            romHandler.minimumCatchRate(normalMin, legendaryMin);
+            romHandler.changeCatchRates(settings);
         }
 
         switch (settings.getWildPokemonMod()) {
-        case RANDOM:
-            romHandler.randomEncounters(settings.isUseTimeBasedEncounters(),
-                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL,
-                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS,
-                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
-                    settings.isBlockWildLegendaries(),
-                    settings.isBalanceShakingGrass(),
-                    settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0, settings.isAllowWildAltFormes(),
-                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
-            break;
-        case AREA_MAPPING:
-            romHandler.area1to1Encounters(settings.isUseTimeBasedEncounters(),
-                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL,
-                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS,
-                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
-                    settings.isBlockWildLegendaries(),
-                    settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0, settings.isAllowWildAltFormes(),
-                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
-            break;
-        case GLOBAL_MAPPING:
-            romHandler.game1to1Encounters(settings.isUseTimeBasedEncounters(),
-                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
-                    settings.isBlockWildLegendaries(),
-                    settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0, settings.isAllowWildAltFormes(),
-                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
-            break;
-        default:
-            if (settings.isWildLevelsModified()) {
-                romHandler.onlyChangeWildLevels(settings.getWildLevelModifier());
-            }
-            break;
+            case RANDOM:
+                romHandler.randomEncounters(settings);
+                wildsChanged = true;
+                break;
+            case AREA_MAPPING:
+                romHandler.area1to1Encounters(settings);
+                wildsChanged = true;
+                break;
+            case GLOBAL_MAPPING:
+                romHandler.game1to1Encounters(settings);
+                wildsChanged = true;
+                break;
+            default:
+                if (settings.isWildLevelsModified()) {
+                    romHandler.onlyChangeWildLevels(settings);
+                    wildsChanged = true;
+                }
+                break;
         }
 
-        maybeLogWildPokemonChanges(log, romHandler);
+        if (wildsChanged) {
+            logWildPokemonChanges(log);
+        } else {
+            log.println("Wild Pokemon: Unchanged." + NEWLINE);
+        }
+
         boolean useTimeBasedEncounters = settings.isUseTimeBasedEncounters() ||
                 (settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED && settings.isWildLevelsModified());
         List<EncounterSet> encounters = romHandler.getEncounters(useTimeBasedEncounters);
@@ -478,42 +474,38 @@ public class Randomizer {
         }
 
         // TMs
-        boolean noBrokenTMMoves = settings.isBlockBrokenTMMoves();
         if (!(settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY)
                 && settings.getTmsMod() == Settings.TMsMod.RANDOM) {
-            double goodDamagingProb = settings.isTmsForceGoodDamaging() ? settings.getTmsGoodDamagingPercent() / 100.0
-                    : 0;
-            romHandler.randomizeTMMoves(noBrokenTMMoves, settings.isKeepFieldMoveTMs(), goodDamagingProb);
-            log.println("--TM Moves--");
-            List<Integer> tmMoves = romHandler.getTMMoves();
-            for (int i = 0; i < tmMoves.size(); i++) {
-                log.printf("TM%02d %s" + NEWLINE, i + 1, moves.get(tmMoves.get(i)).name);
-                checkValue = addToCV(checkValue, tmMoves.get(i));
-            }
-            log.println();
+            romHandler.randomizeTMMoves(settings);
+            tmMovesChanged = true;
+        }
+
+        if (tmMovesChanged) {
+            checkValue = logTMMoves(log, checkValue);
         } else if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
             log.println("TM Moves: Metronome Only." + NEWLINE);
         } else {
             log.println("TM Moves: Unchanged." + NEWLINE);
         }
 
-        boolean tmsHmsCompatChanged = false;
         // TM/HM compatibility
+        // 1. Randomize TM/HM compatibility
+        // 2. Ensure levelup move sanity
+        // 3. Follow evolutions
+        // 4. Full HM compatibility
+        // 5. Copy to cosmetic forms
         switch (settings.getTmsHmsCompatibilityMod()) {
-        case RANDOM_PREFER_TYPE:
-            romHandler.randomizeTMHMCompatibility(true, settings.isTmsFollowEvolutions());
-            tmsHmsCompatChanged = true;
-            break;
-        case COMPLETELY_RANDOM:
-            romHandler.randomizeTMHMCompatibility(false, settings.isTmsFollowEvolutions());
-            tmsHmsCompatChanged = true;
-            break;
-        case FULL:
-            romHandler.fullTMHMCompatibility();
-            tmsHmsCompatChanged = true;
-            break;
-        default:
-            break;
+            case COMPLETELY_RANDOM:
+            case RANDOM_PREFER_TYPE:
+                romHandler.randomizeTMHMCompatibility(settings);
+                tmsHmsCompatChanged = true;
+                break;
+            case FULL:
+                romHandler.fullTMHMCompatibility();
+                tmsHmsCompatChanged = true;
+                break;
+            default:
+                break;
         }
 
         if (settings.isTmLevelUpMoveSanity()) {
@@ -532,49 +524,49 @@ public class Randomizer {
         // Copy TM/HM compatibility to cosmetic formes if it was changed at all, and log changes
         if (tmsHmsCompatChanged) {
             romHandler.copyTMCompatibilityToCosmeticFormes();
-            maybeLogTMHMCompatibility(log, romHandler);
+            logTMHMCompatibility(log);
         }
 
-        // Move Tutors (new 1.0.3)
+        boolean moveTutorMovesChanged = false;
+
+        // Move Tutors
         if (romHandler.hasMoveTutors()) {
-            boolean noBrokenTutorMoves = settings.isBlockBrokenTutorMoves();
+
+            List<Integer> oldMtMoves = romHandler.getMoveTutorMoves();
+
             if (!(settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY)
                     && settings.getMoveTutorMovesMod() == Settings.MoveTutorMovesMod.RANDOM) {
-                List<Integer> oldMtMoves = romHandler.getMoveTutorMoves();
-                double goodDamagingProb = settings.isTutorsForceGoodDamaging() ? settings
-                        .getTutorsGoodDamagingPercent() / 100.0 : 0;
-                romHandler.randomizeMoveTutorMoves(noBrokenTutorMoves, settings.isKeepFieldMoveTutors(), goodDamagingProb);
-                log.println("--Move Tutor Moves--");
-                List<Integer> newMtMoves = romHandler.getMoveTutorMoves();
-                for (int i = 0; i < newMtMoves.size(); i++) {
-                    log.printf("%-10s -> %-10s" + NEWLINE, moves.get(oldMtMoves.get(i)).name,
-                            moves.get(newMtMoves.get(i)).name);
-                    checkValue = addToCV(checkValue, newMtMoves.get(i));
-                }
-                log.println();
+
+                romHandler.randomizeMoveTutorMoves(settings);
+                moveTutorMovesChanged = true;
+            }
+
+            if (moveTutorMovesChanged) {
+                checkValue = logMoveTutorMoves(log, checkValue, oldMtMoves);
             } else if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
                 log.println("Move Tutor Moves: Metronome Only." + NEWLINE);
             } else {
                 log.println("Move Tutor Moves: Unchanged." + NEWLINE);
             }
 
-            boolean tutorCompatChanged = false;
-            // Compatibility
+            // Move Tutor Compatibility
+            // 1. Randomize MT compatibility
+            // 2. Ensure levelup move sanity
+            // 3. Follow evolutions
+            // 4. Copy to cosmetic forms
+
             switch (settings.getMoveTutorsCompatibilityMod()) {
-            case RANDOM_PREFER_TYPE:
-                romHandler.randomizeMoveTutorCompatibility(true, settings.isTutorFollowEvolutions());
-                tutorCompatChanged = true;
-                break;
-            case COMPLETELY_RANDOM:
-                romHandler.randomizeMoveTutorCompatibility(false, settings.isTutorFollowEvolutions());
-                tutorCompatChanged = true;
-                break;
-            case FULL:
-                romHandler.fullMoveTutorCompatibility();
-                tutorCompatChanged = true;
-                break;
-            default:
-                break;
+                case COMPLETELY_RANDOM:
+                case RANDOM_PREFER_TYPE:
+                    romHandler.randomizeMoveTutorCompatibility(settings);
+                    tutorCompatChanged = true;
+                    break;
+                case FULL:
+                    romHandler.fullMoveTutorCompatibility();
+                    tutorCompatChanged = true;
+                    break;
+                default:
+                    break;
             }
 
             if (settings.isTutorLevelUpMoveSanity()) {
@@ -588,60 +580,58 @@ public class Randomizer {
             // Copy move tutor compatibility to cosmetic formes if it was changed at all
             if (tutorCompatChanged) {
                 romHandler.copyMoveTutorCompatibilityToCosmeticFormes();
-                maybeLogTutorCompatibility(log,romHandler);
+                logTutorCompatibility(log);
             }
 
         }
 
         // In-game trades
         List<IngameTrade> oldTrades = romHandler.getIngameTrades();
-        if (settings.getInGameTradesMod() == Settings.InGameTradesMod.RANDOMIZE_GIVEN) {
-            romHandler.randomizeIngameTrades(false, settings.isRandomizeInGameTradesNicknames(),
-                    settings.isRandomizeInGameTradesOTs(), settings.isRandomizeInGameTradesIVs(),
-                    settings.isRandomizeInGameTradesItems(), settings.getCustomNames());
-        } else if (settings.getInGameTradesMod() == Settings.InGameTradesMod.RANDOMIZE_GIVEN_AND_REQUESTED) {
-            romHandler.randomizeIngameTrades(true, settings.isRandomizeInGameTradesNicknames(),
-                    settings.isRandomizeInGameTradesOTs(), settings.isRandomizeInGameTradesIVs(),
-                    settings.isRandomizeInGameTradesItems(), settings.getCustomNames());
+        switch(settings.getInGameTradesMod()) {
+            case RANDOMIZE_GIVEN:
+            case RANDOMIZE_GIVEN_AND_REQUESTED:
+                romHandler.randomizeIngameTrades(settings);
+                tradesChanged = true;
+                break;
+            default:
+                break;
         }
 
-        if (!(settings.getInGameTradesMod() == Settings.InGameTradesMod.UNCHANGED)) {
-            log.println("--In-Game Trades--");
-            List<IngameTrade> newTrades = romHandler.getIngameTrades();
-            int size = oldTrades.size();
-            for (int i = 0; i < size; i++) {
-                IngameTrade oldT = oldTrades.get(i);
-                IngameTrade newT = newTrades.get(i);
-                log.printf("Trade %-11s -> %-11s the %-11s        ->      %-11s -> %-15s the %s" + NEWLINE,
-                        oldT.requestedPokemon != null ? oldT.requestedPokemon.fullName() : "Any",
-                        oldT.nickname, oldT.givenPokemon.fullName(),
-                        newT.requestedPokemon != null ? newT.requestedPokemon.fullName() : "Any",
-                        newT.nickname, newT.givenPokemon.fullName());
-            }
-            log.println();
+        if (tradesChanged) {
+            logTrades(log, oldTrades);
         }
 
         // Field Items
-        if (settings.getFieldItemsMod() == Settings.FieldItemsMod.SHUFFLE) {
-            romHandler.shuffleFieldItems();
-        } else if (settings.getFieldItemsMod() == Settings.FieldItemsMod.RANDOM) {
-            romHandler.randomizeFieldItems(settings.isBanBadRandomFieldItems(), false);
-        } else if (settings.getFieldItemsMod() == Settings.FieldItemsMod.RANDOM_EVEN) {
-            romHandler.randomizeFieldItems(settings.isBanBadRandomFieldItems(), true);
+
+        switch(settings.getFieldItemsMod()) {
+            case SHUFFLE:
+                romHandler.shuffleFieldItems();
+                break;
+            case RANDOM:
+            case RANDOM_EVEN:
+                romHandler.randomizeFieldItems(settings);
+                break;
+            default:
+                break;
         }
 
-        if (settings.getShopItemsMod() == Settings.ShopItemsMod.SHUFFLE) {
-            romHandler.shuffleShopItems();
-        } else if (settings.getShopItemsMod() == Settings.ShopItemsMod.RANDOM) {
-            romHandler.randomizeShopItems(settings.isBanBadRandomShopItems(), settings.isBanRegularShopItems(), settings.isBanOPShopItems(),
-                    settings.isBalanceShopPrices(), settings.isGuaranteeEvolutionItems(), settings.isGuaranteeXItems());
-        }
-
-        
         // Shops
-        if ((settings.getShopItemsMod() == Settings.ShopItemsMod.RANDOM || settings.getShopItemsMod() == Settings.ShopItemsMod.SHUFFLE)
-                && this.romHandler.generationOfPokemon() >= 4) {
-            maybeLogShops(log, romHandler);
+
+        switch(settings.getShopItemsMod()) {
+            case SHUFFLE:
+                romHandler.shuffleShopItems();
+                shopsChanged = true;
+                break;
+            case RANDOM:
+                romHandler.randomizeShopItems(settings);
+                shopsChanged = true;
+                break;
+            default:
+                break;
+        }
+
+        if (shopsChanged) {
+            logShops(log);
         }
         // Test output for placement history
         // romHandler.renderPlacementHistory();
@@ -678,126 +668,284 @@ public class Randomizer {
         return checkValue;
     }
 
-    private void maybeLogBaseStatAndTypeChanges(final PrintStream log, final RomHandler romHandler) {
-        List<Pokemon> allPokes = romHandler.getPokemonInclFormes();
-        String[] itemNames = romHandler.getItemNames();
-        // Log base stats & types if changed at all
-        if (settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.UNCHANGED
-                && settings.getTypesMod() == Settings.TypesMod.UNCHANGED
-                && settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED
-                && !settings.isRandomizeWildPokemonHeldItems()) {
-            log.println("Pokemon base stats & type: unchanged" + NEWLINE);
-        } else {
-            log.println("--Pokemon Base Stats & Types--");
-            if (romHandler instanceof Gen1RomHandler) {
-                log.println("NUM|NAME         |TYPE             |  HP| ATK| DEF| SPE|SPEC");
-                for (Pokemon pkmn : allPokes) {
-                    if (pkmn != null) {
-                        String typeString = pkmn.primaryType == null ? "???" : pkmn.primaryType.toString();
-                        if (pkmn.secondaryType != null) {
-                            typeString += "/" + pkmn.secondaryType.toString();
-                        }
-                        log.printf("%3d|%-10s|%-17s|%4d|%4d|%4d|%4d|%4d" + NEWLINE, pkmn.number, pkmn.fullName(), typeString,
-                                pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef );
+    private int logMoveTutorMoves(PrintStream log, int checkValue, List<Integer> oldMtMoves) {
+        log.println("--Move Tutor Moves--");
+        List<Integer> newMtMoves = romHandler.getMoveTutorMoves();
+        List<Move> moves = romHandler.getMoves();
+        for (int i = 0; i < newMtMoves.size(); i++) {
+            log.printf("%-10s -> %-10s" + NEWLINE, moves.get(oldMtMoves.get(i)).name,
+                    moves.get(newMtMoves.get(i)).name);
+            checkValue = addToCV(checkValue, newMtMoves.get(i));
+        }
+        log.println();
+        return checkValue;
+    }
+
+    private int logTMMoves(PrintStream log, int checkValue) {
+        log.println("--TM Moves--");
+        List<Integer> tmMoves = romHandler.getTMMoves();
+        List<Move> moves = romHandler.getMoves();
+        for (int i = 0; i < tmMoves.size(); i++) {
+            log.printf("TM%02d %s" + NEWLINE, i + 1, moves.get(tmMoves.get(i)).name);
+            checkValue = addToCV(checkValue, tmMoves.get(i));
+        }
+        log.println();
+        return checkValue;
+    }
+
+    private void logTrades(PrintStream log, List<IngameTrade> oldTrades) {
+        log.println("--In-Game Trades--");
+        List<IngameTrade> newTrades = romHandler.getIngameTrades();
+        int size = oldTrades.size();
+        for (int i = 0; i < size; i++) {
+            IngameTrade oldT = oldTrades.get(i);
+            IngameTrade newT = newTrades.get(i);
+            log.printf("Trade %-11s -> %-11s the %-11s        ->      %-11s -> %-15s the %s" + NEWLINE,
+                    oldT.requestedPokemon != null ? oldT.requestedPokemon.fullName() : "Any",
+                    oldT.nickname, oldT.givenPokemon.fullName(),
+                    newT.requestedPokemon != null ? newT.requestedPokemon.fullName() : "Any",
+                    newT.nickname, newT.givenPokemon.fullName());
+        }
+        log.println();
+    }
+
+    private void logMovesetChanges(PrintStream log) {
+        log.println("--Pokemon Movesets--");
+        List<String> movesets = new ArrayList<>();
+        Map<Integer, List<MoveLearnt>> moveData = romHandler.getMovesLearnt();
+        List<Move> moves = romHandler.getMoves();
+        List<Pokemon> pkmnList = romHandler.getPokemonInclFormes();
+        int i = 1;
+        for (Pokemon pkmn : pkmnList) {
+
+            if (pkmn == null || pkmn.actuallyCosmetic) {
+                continue;
+            }
+            StringBuilder evoStr = new StringBuilder();
+            try {
+                evoStr.append(" -> ").append(pkmn.evolutionsFrom.get(0).to.fullName());
+            } catch (Exception e) {
+                evoStr.append(" (no evolution)");
+            }
+
+            StringBuilder sb = new StringBuilder();
+
+            sb.append(String.format("%03d %s", i, pkmn.fullName()))
+                    .append(evoStr).append(System.getProperty("line.separator"))
+                    .append(String.format("HP  %-3d", pkmn.hp)).append(System.getProperty("line.separator"))
+                    .append(String.format("ATK %-3d", pkmn.attack)).append(System.getProperty("line.separator"))
+                    .append(String.format("DEF %-3d", pkmn.defense)).append(System.getProperty("line.separator"))
+                    .append(String.format("SPA %-3d", pkmn.spatk)).append(System.getProperty("line.separator"))
+                    .append(String.format("SPD %-3d", pkmn.spdef)).append(System.getProperty("line.separator"))
+                    .append(String.format("SPE %-3d", pkmn.speed)).append(System.getProperty("line.separator"));
+            i++;
+
+            List<MoveLearnt> data = moveData.get(pkmn.number);
+            for (MoveLearnt ml : data) {
+                try {
+                    if (ml.level == 0) {
+                        sb.append("Learned upon evolution: ")
+                                .append(moves.get(ml.move).name).append(System.getProperty("line.separator"));
+                    } else {
+                        sb.append("Level ")
+                                .append(String.format("%-2d", ml.level))
+                                .append(": ")
+                                .append(moves.get(ml.move).name).append(System.getProperty("line.separator"));
                     }
-
-                }
-            } else {
-                String nameSp = "      ";
-                String nameSpFormat = "%-13s";
-                String abSp = "    ";
-                String abSpFormat = "%-12s";
-                if (romHandler.generationOfPokemon() == 5) {
-                    nameSp = "         ";
-                } else if (romHandler.generationOfPokemon() == 6) {
-                    nameSp = "            ";
-                    nameSpFormat = "%-16s";
-                    abSp = "      ";
-                    abSpFormat = "%-14s";
-                } else if (romHandler.generationOfPokemon() >= 7) {
-                    nameSp = "            ";
-                    nameSpFormat = "%-16s";
-                    abSp = "        ";
-                    abSpFormat = "%-16s";
-                }
-
-                log.print("NUM|NAME" + nameSp + "|TYPE             |  HP| ATK| DEF|SATK|SDEF| SPD");
-                int abils = romHandler.abilitiesPerPokemon();
-                for (int i = 0; i < abils; i++) {
-                    log.print("|ABILITY" + (i + 1) + abSp);
-                }
-                log.print("|ITEM");
-                log.println();
-                int i = 0;
-                for (Pokemon pkmn : allPokes) {
-                    if (pkmn != null && !pkmn.actuallyCosmetic) {
-                        i++;
-                        String typeString = pkmn.primaryType == null ? "???" : pkmn.primaryType.toString();
-                        if (pkmn.secondaryType != null) {
-                            typeString += "/" + pkmn.secondaryType.toString();
-                        }
-                        log.printf("%3d|" + nameSpFormat + "|%-17s|%4d|%4d|%4d|%4d|%4d|%4d", i, pkmn.fullName(), typeString,
-                                pkmn.hp, pkmn.attack, pkmn.defense, pkmn.spatk, pkmn.spdef, pkmn.speed);
-                        if (abils > 0) {
-                            log.printf("|" + abSpFormat + "|" + abSpFormat, romHandler.abilityName(pkmn.ability1),
-                                    pkmn.ability1 == pkmn.ability2 ? "--" : romHandler.abilityName(pkmn.ability2));
-                            if (abils > 2) {
-                                log.printf("|" + abSpFormat, romHandler.abilityName(pkmn.ability3));
-                            }
-                        }
-                        log.print("|");
-                        if (pkmn.guaranteedHeldItem > 0) {
-                            log.print(itemNames[pkmn.guaranteedHeldItem] + " (100%)");
-                        } else {
-                            int itemCount = 0;
-                            if (pkmn.commonHeldItem > 0) {
-                                itemCount++;
-                                log.print(itemNames[pkmn.commonHeldItem] + " (common)");
-                            }
-                            if (pkmn.rareHeldItem > 0) {
-                                if (itemCount > 0) {
-                                    log.print(", ");
-                                }
-                                itemCount++;
-                                log.print(itemNames[pkmn.rareHeldItem] + " (rare)");
-                            }
-                            if (pkmn.darkGrassHeldItem > 0) {
-                                if (itemCount > 0) {
-                                    log.print(", ");
-                                }
-                                log.print(itemNames[pkmn.darkGrassHeldItem] + " (dark grass only)");
-                            }
-                        }
-                        log.println();
-                    }
-
+                } catch (NullPointerException ex) {
+                    sb.append("invalid move at level").append(ml.level);
                 }
             }
+            movesets.add(sb.toString());
+        }
+        Collections.sort(movesets);
+        for (String moveset : movesets) {
+            log.println(moveset);
+        }
+        log.println();
+    }
+
+    private void logMoveUpdates(PrintStream log) {
+        log.println("--Move Updates--");
+        List<Move> moves = romHandler.getMoves();
+        Map<Integer, boolean[]> moveUpdates = romHandler.getMoveUpdates();
+        for (int moveID : moveUpdates.keySet()) {
+            boolean[] changes = moveUpdates.get(moveID);
+            Move mv = moves.get(moveID);
+            List<String> nonTypeChanges = new ArrayList<>();
+            if (changes[0]) {
+                nonTypeChanges.add(String.format("%d power", mv.power));
+            }
+            if (changes[1]) {
+                nonTypeChanges.add(String.format("%d PP", mv.pp));
+            }
+            if (changes[2]) {
+                nonTypeChanges.add(String.format("%.00f%% accuracy", mv.hitratio));
+            }
+            String logStr = "Made " + mv.name;
+            // type or not?
+            if (changes[3]) {
+                logStr += " be " + mv.type + "-type";
+                if (nonTypeChanges.size() > 0) {
+                    logStr += " and";
+                }
+            }
+            if (changes[4]) {
+                if (mv.category == MoveCategory.PHYSICAL) {
+                    logStr += " a Physical move";
+                } else if (mv.category == MoveCategory.SPECIAL) {
+                    logStr += " a Special move";
+                } else if (mv.category == MoveCategory.STATUS) {
+                    logStr += " a Status move";
+                }
+            }
+            if (nonTypeChanges.size() > 0) {
+                logStr += " have ";
+                if (nonTypeChanges.size() == 3) {
+                    logStr += nonTypeChanges.get(0) + ", " + nonTypeChanges.get(1) + " and " + nonTypeChanges.get(2);
+                } else if (nonTypeChanges.size() == 2) {
+                    logStr += nonTypeChanges.get(0) + " and " + nonTypeChanges.get(1);
+                } else {
+                    logStr += nonTypeChanges.get(0);
+                }
+            }
+            log.println(logStr);
+        }
+        log.println();
+    }
+
+    private void logEvolutionChanges(PrintStream log) {
+        log.println("--Randomized Evolutions--");
+        List<Pokemon> allPokes = romHandler.getPokemonInclFormes();
+        for (Pokemon pk : allPokes) {
+            if (pk != null && !pk.actuallyCosmetic) {
+                int numEvos = pk.evolutionsFrom.size();
+                if (numEvos > 0) {
+                    StringBuilder evoStr = new StringBuilder(pk.evolutionsFrom.get(0).toFullName());
+                    for (int i = 1; i < numEvos; i++) {
+                        if (i == numEvos - 1) {
+                            evoStr.append(" and ").append(pk.evolutionsFrom.get(i).toFullName());
+                        } else {
+                            evoStr.append(", ").append(pk.evolutionsFrom.get(i).toFullName());
+                        }
+                    }
+                    log.printf("%-15s -> %-15s" + NEWLINE, pk.fullName(), evoStr.toString());
+                }
+            }
+        }
+
+        log.println();
+    }
+
+    private void logPokemonTraitChanges(final PrintStream log) {
+        List<Pokemon> allPokes = romHandler.getPokemonInclFormes();
+        String[] itemNames = romHandler.getItemNames();
+        // Log base stats & types
+        log.println("--Pokemon Base Stats & Types--");
+        if (romHandler instanceof Gen1RomHandler) {
+            log.println("NUM|NAME         |TYPE             |  HP| ATK| DEF| SPE|SPEC");
+            for (Pokemon pkmn : allPokes) {
+                if (pkmn != null) {
+                    String typeString = pkmn.primaryType == null ? "???" : pkmn.primaryType.toString();
+                    if (pkmn.secondaryType != null) {
+                        typeString += "/" + pkmn.secondaryType.toString();
+                    }
+                    log.printf("%3d|%-10s|%-17s|%4d|%4d|%4d|%4d|%4d" + NEWLINE, pkmn.number, pkmn.fullName(), typeString,
+                            pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef );
+                }
+
+            }
+        } else {
+            String nameSp = "      ";
+            String nameSpFormat = "%-13s";
+            String abSp = "    ";
+            String abSpFormat = "%-12s";
+            if (romHandler.generationOfPokemon() == 5) {
+                nameSp = "         ";
+            } else if (romHandler.generationOfPokemon() == 6) {
+                nameSp = "            ";
+                nameSpFormat = "%-16s";
+                abSp = "      ";
+                abSpFormat = "%-14s";
+            } else if (romHandler.generationOfPokemon() >= 7) {
+                nameSp = "            ";
+                nameSpFormat = "%-16s";
+                abSp = "        ";
+                abSpFormat = "%-16s";
+            }
+
+            log.print("NUM|NAME" + nameSp + "|TYPE             |  HP| ATK| DEF|SATK|SDEF| SPD");
+            int abils = romHandler.abilitiesPerPokemon();
+            for (int i = 0; i < abils; i++) {
+                log.print("|ABILITY" + (i + 1) + abSp);
+            }
+            log.print("|ITEM");
             log.println();
+            int i = 0;
+            for (Pokemon pkmn : allPokes) {
+                if (pkmn != null && !pkmn.actuallyCosmetic) {
+                    i++;
+                    String typeString = pkmn.primaryType == null ? "???" : pkmn.primaryType.toString();
+                    if (pkmn.secondaryType != null) {
+                        typeString += "/" + pkmn.secondaryType.toString();
+                    }
+                    log.printf("%3d|" + nameSpFormat + "|%-17s|%4d|%4d|%4d|%4d|%4d|%4d", i, pkmn.fullName(), typeString,
+                            pkmn.hp, pkmn.attack, pkmn.defense, pkmn.spatk, pkmn.spdef, pkmn.speed);
+                    if (abils > 0) {
+                        log.printf("|" + abSpFormat + "|" + abSpFormat, romHandler.abilityName(pkmn.ability1),
+                                pkmn.ability1 == pkmn.ability2 ? "--" : romHandler.abilityName(pkmn.ability2));
+                        if (abils > 2) {
+                            log.printf("|" + abSpFormat, romHandler.abilityName(pkmn.ability3));
+                        }
+                    }
+                    log.print("|");
+                    if (pkmn.guaranteedHeldItem > 0) {
+                        log.print(itemNames[pkmn.guaranteedHeldItem] + " (100%)");
+                    } else {
+                        int itemCount = 0;
+                        if (pkmn.commonHeldItem > 0) {
+                            itemCount++;
+                            log.print(itemNames[pkmn.commonHeldItem] + " (common)");
+                        }
+                        if (pkmn.rareHeldItem > 0) {
+                            if (itemCount > 0) {
+                                log.print(", ");
+                            }
+                            itemCount++;
+                            log.print(itemNames[pkmn.rareHeldItem] + " (rare)");
+                        }
+                        if (pkmn.darkGrassHeldItem > 0) {
+                            if (itemCount > 0) {
+                                log.print(", ");
+                            }
+                            log.print(itemNames[pkmn.darkGrassHeldItem] + " (dark grass only)");
+                        }
+                    }
+                    log.println();
+                }
+
+            }
         }
+        log.println();
     }
 
-    private void maybeLogTMHMCompatibility(final PrintStream log, final RomHandler romHandler) {
-        if (settings.getTmsHmsCompatibilityMod() != Settings.TMsHMsCompatibilityMod.UNCHANGED) {
-            log.println("--TM Compatibility--");
-            Map<Pokemon, boolean[]> compat = romHandler.getTMHMCompatibility();
-            List<Integer> tmHMs = new ArrayList<>(romHandler.getTMMoves());
-            tmHMs.addAll(romHandler.getHMMoves());
-            List<Move> moveData = romHandler.getMoves();
+    private void logTMHMCompatibility(final PrintStream log) {
+        log.println("--TM Compatibility--");
+        Map<Pokemon, boolean[]> compat = romHandler.getTMHMCompatibility();
+        List<Integer> tmHMs = new ArrayList<>(romHandler.getTMMoves());
+        tmHMs.addAll(romHandler.getHMMoves());
+        List<Move> moveData = romHandler.getMoves();
 
-            logCompatibility(log, compat, tmHMs, moveData, true);
-        }
+        logCompatibility(log, compat, tmHMs, moveData, true);
     }
 
-    private void maybeLogTutorCompatibility(final PrintStream log, final RomHandler romHandler) {
-        if (settings.getTmsHmsCompatibilityMod() != Settings.TMsHMsCompatibilityMod.UNCHANGED) {
-            log.println("--Move Tutor Compatibility--");
-            Map<Pokemon, boolean[]> compat = romHandler.getMoveTutorCompatibility();
-            List<Integer> tutorMoves = romHandler.getMoveTutorMoves();
-            List<Move> moveData = romHandler.getMoves();
+    private void logTutorCompatibility(final PrintStream log) {
+        log.println("--Move Tutor Compatibility--");
+        Map<Pokemon, boolean[]> compat = romHandler.getMoveTutorCompatibility();
+        List<Integer> tutorMoves = romHandler.getMoveTutorMoves();
+        List<Move> moveData = romHandler.getMoves();
 
-            logCompatibility(log, compat, tutorMoves, moveData, false);
-        }
+        logCompatibility(log, compat, tutorMoves, moveData, false);
     }
 
     private void logCompatibility(final PrintStream log, Map<Pokemon, boolean[]> compat, List<Integer> moveList,
@@ -840,315 +988,191 @@ public class Randomizer {
         log.println("");
     }
 
-    private void maybeChangeAndLogStarters(final PrintStream log, final RomHandler romHandler) {
-        if (romHandler.canChangeStarters()) {
-            if (settings.getStartersMod() == Settings.StartersMod.CUSTOM) {
+    private void logUpdatedEvolutions(final PrintStream log, Map<Integer,EvolutionUpdate> updatedEvolutions) {
+        for (EvolutionUpdate evo: updatedEvolutions.values()) {
+            log.println(evo.toString());
+        }
+        log.println();
+    }
+
+    private void logStarters(final PrintStream log) {
+
+        switch(settings.getStartersMod()) {
+            case CUSTOM:
                 log.println("--Custom Starters--");
-                List<Pokemon> romPokemon = romHandler.getPokemonInclFormes()
-                                        .stream()
-                                        .filter(pk -> pk == null || !pk.actuallyCosmetic)
-                                        .collect(Collectors.toList());
-                int[] customStarters = settings.getCustomStarters();
-                Pokemon pkmn1 = romPokemon.get(customStarters[0]);
-                log.println("Set starter 1 to " + pkmn1.fullName());
-                Pokemon pkmn2 = romPokemon.get(customStarters[1]);
-                log.println("Set starter 2 to " + pkmn2.fullName());
-                if (romHandler.isYellow()) {
-                    romHandler.setStarters(Arrays.asList(pkmn1, pkmn2));
-                } else {
-                    Pokemon pkmn3 = romPokemon.get(customStarters[2]);
-                    log.println("Set starter 3 to " + pkmn3.fullName());
-                    if (romHandler.starterCount() > 3) {
-                        List<Pokemon> starters = new ArrayList<>();
-                        starters.add(pkmn1);
-                        starters.add(pkmn2);
-                        starters.add(pkmn3);
-                        for (int i = 3; i < romHandler.starterCount(); i++) {
-                            Pokemon pkmn = romHandler.random2EvosPokemon(settings.isAllowStarterAltFormes());
-                            while (starters.contains(pkmn)) {
-                                pkmn = romHandler.random2EvosPokemon(settings.isAllowStarterAltFormes());
-                            }
-                            log.println("Set starter " + i + " to " + pkmn.fullName());
-                            starters.add(pkmn);
-                        }
-                        romHandler.setStarters(starters);
-                    } else {
-                        romHandler.setStarters(Arrays.asList(pkmn1, pkmn2, pkmn3));
-                    }
-                }
-                log.println();
-
-            } else if (settings.getStartersMod() == Settings.StartersMod.COMPLETELY_RANDOM) {
-                // Randomise
+                break;
+            case COMPLETELY_RANDOM:
                 log.println("--Random Starters--");
-                int starterCount = romHandler.starterCount();
-                List<Pokemon> starters = new ArrayList<>();
-                List<Pokemon> banned = romHandler.getBannedFormes();
-                if (settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED) {
-                    List<Pokemon> abilityDependentFormes = romHandler.getAbilityDependentFormes();
-                    banned.addAll(abilityDependentFormes);
-                }
-                for (int i = 0; i < starterCount; i++) {
-                    Pokemon pkmn =
-                            settings.isAllowStarterAltFormes() ?
-                                    romHandler.randomPokemonInclFormes() :
-                                    romHandler.randomPokemon();
-                    while (starters.contains(pkmn) || banned.contains(pkmn) || pkmn.actuallyCosmetic) {
-                        pkmn = settings.isAllowStarterAltFormes() ?
-                                    romHandler.randomPokemonInclFormes() :
-                                    romHandler.randomPokemon();
-                    }
-                    log.println("Set starter " + (i + 1) + " to " + pkmn.fullName());
-                    starters.add(pkmn);
-                }
-                romHandler.setStarters(starters);
-                log.println();
-            } else if (settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_TWO_EVOLUTIONS) {
-                // Randomise
+                break;
+            case RANDOM_WITH_TWO_EVOLUTIONS:
                 log.println("--Random 2-Evolution Starters--");
-                int starterCount = romHandler.starterCount();
-                List<Pokemon> starters = new ArrayList<>();
-                List<Pokemon> banned = romHandler.getBannedFormes();
-                if (settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED) {
-                    List<Pokemon> abilityDependentFormes = romHandler.getAbilityDependentFormes();
-                    banned.addAll(abilityDependentFormes);
-                }
-                for (int i = 0; i < starterCount; i++) {
-                    Pokemon pkmn = romHandler.random2EvosPokemon(settings.isAllowStarterAltFormes());
-                    while (starters.contains(pkmn) || banned.contains(pkmn)) {
-                        pkmn = romHandler.random2EvosPokemon(settings.isAllowStarterAltFormes());
-                    }
-                    log.println("Set starter " + (i + 1) + " to " + pkmn.fullName());
-                    starters.add(pkmn);
-                }
-                romHandler.setStarters(starters);
-                log.println();
-            }
-            if (settings.isRandomizeStartersHeldItems() && !(romHandler instanceof Gen1RomHandler)) {
-                romHandler.randomizeStarterHeldItems(settings.isBanBadRandomStarterHeldItems());
-            }
+                break;
+            default:
+                break;
         }
+
+        List<Pokemon> starters = romHandler.getPickedStarters();
+        int i = 1;
+        for (Pokemon starter: starters) {
+            log.println("Set starter " + i + " to " + starter.fullName());
+            i++;
+        }
+        log.println();
     }
 
-    private void maybeLogWildPokemonChanges(final PrintStream log, final RomHandler romHandler) {
-        if (settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED && !settings.isWildLevelsModified()) {
-            log.println("Wild Pokemon: Unchanged." + NEWLINE);
-        } else {
-            log.println("--Wild Pokemon--");
-            boolean useTimeBasedEncounters = settings.isUseTimeBasedEncounters() ||
-                    (settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED && settings.isWildLevelsModified());
-            List<EncounterSet> encounters = romHandler.getEncounters(useTimeBasedEncounters);
-            int idx = 0;
-            for (EncounterSet es : encounters) {
-                idx++;
-                log.print("Set #" + idx + " ");
-                if (es.displayName != null) {
-                    log.print("- " + es.displayName + " ");
-                }
-                log.print("(rate=" + es.rate + ")");
-                log.println();
-                for (Encounter e : es.encounters) {
-                
-                // sb.append(String.format("%03d %s", pkmn.number, pkmn.fullName())).append(System.getProperty("line.separator")).append(String.format("HP %d ATK %-3d DEF %-3d SPATK %-3d SPDEF %-3d SPD %-3d", pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef)).append(System.getProperty("line.separator"));
-                    StringBuilder sb = new StringBuilder();
-                    if (e.isSOS) {
-                        String stringToAppend;
-                        switch (e.sosType) {
-                            case RAIN:
-                                stringToAppend = "Rain SOS: ";
-                                break;
-                            case HAIL:
-                                stringToAppend = "Hail SOS: ";
-                                break;
-                            case SAND:
-                                stringToAppend = "Sand SOS: ";
-                                break;
-                            default:
-                                stringToAppend = "  SOS: ";
-                                break;
-                        }
-                        sb.append(stringToAppend);
+    private void logWildPokemonChanges(final PrintStream log) {
+
+        log.println("--Wild Pokemon--");
+        boolean useTimeBasedEncounters = settings.isUseTimeBasedEncounters() ||
+                (settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED && settings.isWildLevelsModified());
+        List<EncounterSet> encounters = romHandler.getEncounters(useTimeBasedEncounters);
+        int idx = 0;
+        for (EncounterSet es : encounters) {
+            idx++;
+            log.print("Set #" + idx + " ");
+            if (es.displayName != null) {
+                log.print("- " + es.displayName + " ");
+            }
+            log.print("(rate=" + es.rate + ")");
+            log.println();
+            for (Encounter e : es.encounters) {
+
+            // sb.append(String.format("%03d %s", pkmn.number, pkmn.fullName())).append(System.getProperty("line.separator")).append(String.format("HP %d ATK %-3d DEF %-3d SPATK %-3d SPDEF %-3d SPD %-3d", pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk, pkmn.spdef)).append(System.getProperty("line.separator"));
+                StringBuilder sb = new StringBuilder();
+                if (e.isSOS) {
+                    String stringToAppend;
+                    switch (e.sosType) {
+                        case RAIN:
+                            stringToAppend = "Rain SOS: ";
+                            break;
+                        case HAIL:
+                            stringToAppend = "Hail SOS: ";
+                            break;
+                        case SAND:
+                            stringToAppend = "Sand SOS: ";
+                            break;
+                        default:
+                            stringToAppend = "  SOS: ";
+                            break;
                     }
-                    sb.append(e.pokemon.fullName()).append(" Lv");
-                    if (e.maxLevel > 0 && e.maxLevel != e.level) {
-                        sb.append("s ").append(e.level).append("-").append(e.maxLevel);
-                    } else {
-                        sb.append(e.level);
-                    }
-                    String whitespaceFormat = romHandler.generationOfPokemon() == 7 ? "%-31s" : "%-25s";
-                    log.print(String.format(whitespaceFormat, sb));
-                    StringBuilder sb2 = new StringBuilder();
-                    sb2.append(String.format("HP %-3d ATK %-3d DEF %-3d SPATK %-3d SPDEF %-3d SPEED %-3d", e.pokemon.hp, e.pokemon.attack, e.pokemon.defense, e.pokemon.spatk, e.pokemon.spdef, e.pokemon.speed));
-                    log.print(sb2);
-                    log.println();
+                    sb.append(stringToAppend);
                 }
+                sb.append(e.pokemon.fullName()).append(" Lv");
+                if (e.maxLevel > 0 && e.maxLevel != e.level) {
+                    sb.append("s ").append(e.level).append("-").append(e.maxLevel);
+                } else {
+                    sb.append(e.level);
+                }
+                String whitespaceFormat = romHandler.generationOfPokemon() == 7 ? "%-31s" : "%-25s";
+                log.print(String.format(whitespaceFormat, sb));
+                StringBuilder sb2 = new StringBuilder();
+                sb2.append(String.format("HP %-3d ATK %-3d DEF %-3d SPATK %-3d SPDEF %-3d SPEED %-3d", e.pokemon.hp, e.pokemon.attack, e.pokemon.defense, e.pokemon.spatk, e.pokemon.spdef, e.pokemon.speed));
+                log.print(sb2);
                 log.println();
             }
             log.println();
         }
+        log.println();
     }
 
-    private void maybeLogTrainerChanges(final PrintStream log, final RomHandler romHandler) {
-        if (settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED && !settings.isRivalCarriesStarterThroughout()
-                && !settings.isTrainersLevelModified() && !settings.isTrainersForceFullyEvolved()) {
-            log.println("Trainers: Unchanged." + NEWLINE);
-        } else {
-            log.println("--Trainers Pokemon--");
-            List<Trainer> trainers = romHandler.getTrainers();
-            int idx = 0;
-            for (Trainer t : trainers) {
-                idx++;
-                log.print("#" + idx + " ");
-                if (t.fullDisplayName != null) {
-                    log.print("(" + t.fullDisplayName + ")");
-                } else if (t.name != null) {
-                    log.print("(" + t.name + ")");
+    private void maybeLogTrainerChanges(final PrintStream log) {
+
+        log.println("--Trainers Pokemon--");
+        List<Trainer> trainers = romHandler.getTrainers();
+        int idx = 0;
+        for (Trainer t : trainers) {
+            idx++;
+            log.print("#" + idx + " ");
+            if (t.fullDisplayName != null) {
+                log.print("(" + t.fullDisplayName + ")");
+            } else if (t.name != null) {
+                log.print("(" + t.name + ")");
+            }
+            if (t.offset != idx && t.offset != 0) {
+                log.printf("@%X", t.offset);
+            }
+            log.print(" - ");
+            boolean first = true;
+            for (TrainerPokemon tpk : t.pokemon) {
+                if (!first) {
+                    log.print(", ");
                 }
-                if (t.offset != idx && t.offset != 0) {
-                    log.printf("@%X", t.offset);
-                }
-                log.print(" - ");
-                boolean first = true;
-                for (TrainerPokemon tpk : t.pokemon) {
-                    if (!first) {
-                        log.print(", ");
-                    }
-                    log.print(tpk.toString());
-                    first = false;
-                }
-                log.println();
+                log.print(tpk.toString());
+                first = false;
             }
             log.println();
         }
+        log.println();
     }
 
-    private int maybeChangeAndLogStaticPokemon(final PrintStream log, final RomHandler romHandler, int checkValue) {
-        if (romHandler.canChangeStaticPokemon()) {
-            List<StaticEncounter> oldStatics = romHandler.getStaticPokemon();
-            if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING) { // Legendary for L
-                romHandler.randomizeStaticPokemon(true, false,settings.isLimitMainGameLegendaries(),
-                        settings.isLimit600(), settings.isAllowStaticAltFormes(), settings.isSwapStaticMegaEvos(),
-                        settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE,
-                        settings.isStaticLevelModified() ? settings.getStaticLevelModifier() : 0);
-            } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.COMPLETELY_RANDOM) {
-                romHandler.randomizeStaticPokemon(false, false,settings.isLimitMainGameLegendaries(),
-                        settings.isLimit600(), settings.isAllowStaticAltFormes(), settings.isSwapStaticMegaEvos(),
-                        settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE,
-                        settings.isStaticLevelModified() ? settings.getStaticLevelModifier() : 0);
-            } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.SIMILAR_STRENGTH) {
-                romHandler.randomizeStaticPokemon(false, true,settings.isLimitMainGameLegendaries(),
-                        settings.isLimit600(), settings.isAllowStaticAltFormes(), settings.isSwapStaticMegaEvos(),
-                        settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE,
-                        settings.isStaticLevelModified() ? settings.getStaticLevelModifier() : 0);
-            } else if (settings.isStaticLevelModified()) {
-                romHandler.onlyChangeStaticLevels(settings.getStaticLevelModifier());
-            }
-            List<StaticEncounter> newStatics = romHandler.getStaticPokemon();
-            if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED && !settings.isStaticLevelModified()) {
-                log.println("Static Pokemon: Unchanged." + NEWLINE);
+    private int logStaticPokemon(final PrintStream log, int checkValue, List<StaticEncounter> oldStatics) {
+
+        List<StaticEncounter> newStatics = romHandler.getStaticPokemon();
+
+        log.println("--Static Pokemon--");
+        Map<String, Integer> seenPokemon = new TreeMap<>();
+        for (int i = 0; i < oldStatics.size(); i++) {
+            StaticEncounter oldP = oldStatics.get(i);
+            StaticEncounter newP = newStatics.get(i);
+            checkValue = addToCV(checkValue, newP.pkmn.number);
+            String oldStaticString = oldP.toString(settings.isStaticLevelModified());
+            log.print(oldStaticString);
+            if (seenPokemon.containsKey(oldStaticString)) {
+                int amount = seenPokemon.get(oldStaticString);
+                log.print("(" + (++amount) + ")");
+                seenPokemon.put(oldStaticString, amount);
             } else {
-                log.println("--Static Pokemon--");
-                Map<String, Integer> seenPokemon = new TreeMap<>();
-                for (int i = 0; i < oldStatics.size(); i++) {
-                    StaticEncounter oldP = oldStatics.get(i);
-                    StaticEncounter newP = newStatics.get(i);
-                    checkValue = addToCV(checkValue, newP.pkmn.number);
-                    String oldStaticString = oldP.toString(settings.isStaticLevelModified());
-                    log.print(oldStaticString);
-                    if (seenPokemon.containsKey(oldStaticString)) {
-                        int amount = seenPokemon.get(oldStaticString);
-                        log.print("(" + (++amount) + ")");
-                        seenPokemon.put(oldStaticString, amount);
-                    } else {
-                        seenPokemon.put(oldStaticString, 1);
-                    }
-                    log.println(" => " + newP.toString(settings.isStaticLevelModified()));
+                seenPokemon.put(oldStaticString, 1);
+            }
+            log.println(" => " + newP.toString(settings.isStaticLevelModified()));
+        }
+        log.println();
+
+        return checkValue;
+    }
+
+    private int logTotemPokemon(final PrintStream log, int checkValue, List<TotemPokemon> oldTotems) {
+
+        List<TotemPokemon> newTotems = romHandler.getTotemPokemon();
+
+        String[] itemNames = romHandler.getItemNames();
+        log.println("--Totem Pokemon--");
+        for (int i = 0; i < oldTotems.size(); i++) {
+            TotemPokemon oldP = oldTotems.get(i);
+            TotemPokemon newP = newTotems.get(i);
+            checkValue = addToCV(checkValue, newP.pkmn.number);
+            log.println(oldP.pkmn.fullName() + " =>");
+            log.printf(newP.toString(),itemNames[newP.heldItem]);
+        }
+        log.println();
+
+        return checkValue;
+    }
+
+    private void logMoveChanges(final PrintStream log) {
+
+        log.println("--Move Data--");
+        log.print("NUM|NAME           |TYPE    |POWER|ACC.|PP");
+        if (romHandler.hasPhysicalSpecialSplit()) {
+            log.print(" |CATEGORY");
+        }
+        log.println();
+        List<Move> allMoves = romHandler.getMoves();
+        for (Move mv : allMoves) {
+            if (mv != null) {
+                String mvType = (mv.type == null) ? "???" : mv.type.toString();
+                log.printf("%3d|%-15s|%-8s|%5d|%4d|%3d", mv.internalId, mv.name, mvType, mv.power,
+                        (int) mv.hitratio, mv.pp);
+                if (romHandler.hasPhysicalSpecialSplit()) {
+                    log.printf("| %s", mv.category.toString());
                 }
                 log.println();
             }
         }
-        return checkValue;
+        log.println();
     }
 
-    private int maybeChangeAndLogTotemPokemon(final PrintStream log, final RomHandler romHandler, int checkValue) {
-        if (settings.getTotemPokemonMod() != Settings.TotemPokemonMod.UNCHANGED ||
-                settings.getAllyPokemonMod() != Settings.AllyPokemonMod.UNCHANGED ||
-                settings.getAuraMod() != Settings.AuraMod.UNCHANGED ||
-                settings.isRandomizeTotemHeldItems() ||
-                settings.isTotemLevelsModified()) {
-
-            List<TotemPokemon> oldTotems = romHandler.getTotemPokemon();
-            boolean randomizeTotems =
-                    settings.getTotemPokemonMod() == Settings.TotemPokemonMod.RANDOM ||
-                            settings.getTotemPokemonMod() == Settings.TotemPokemonMod.SIMILAR_STRENGTH;
-            boolean randomizeAllies =
-                    settings.getAllyPokemonMod() == Settings.AllyPokemonMod.RANDOM ||
-                            settings.getAllyPokemonMod() == Settings.AllyPokemonMod.SIMILAR_STRENGTH;
-            boolean randomizeAuras =
-                    settings.getAuraMod() == Settings.AuraMod.RANDOM ||
-                            settings.getAuraMod() == Settings.AuraMod.SAME_STRENGTH;
-            romHandler.randomizeTotemPokemon(
-                    randomizeTotems,
-                    settings.getTotemPokemonMod() == Settings.TotemPokemonMod.SIMILAR_STRENGTH,
-                    randomizeAllies,
-                    settings.getAllyPokemonMod() == Settings.AllyPokemonMod.SIMILAR_STRENGTH,
-                    randomizeAuras,
-                    settings.getAuraMod() == Settings.AuraMod.SAME_STRENGTH,
-                    settings.isRandomizeTotemHeldItems(),
-                    settings.isTotemLevelsModified() ? settings.getTotemLevelModifier() : 0,
-                    settings.isAllowTotemAltFormes(),
-                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE
-            );
-            List<TotemPokemon> newTotems = romHandler.getTotemPokemon();
-
-            String[] itemNames = romHandler.getItemNames();
-            log.println("--Totem Pokemon--");
-            for (int i = 0; i < oldTotems.size(); i++) {
-                TotemPokemon oldP = oldTotems.get(i);
-                TotemPokemon newP = newTotems.get(i);
-                checkValue = addToCV(checkValue, newP.pkmn.number);
-                log.println(oldP.pkmn.fullName() + " =>");
-                log.printf(newP.toString(),itemNames[newP.heldItem]);
-            }
-            log.println();
-        } else {
-            log.println("Totem Pokemon: Unchanged." + NEWLINE);
-        }
-
-        return checkValue;
-    }
-
-    private void maybeLogMoveChanges(final PrintStream log, final RomHandler romHandler) {
-        if (!settings.isRandomizeMoveAccuracies() && !settings.isRandomizeMovePowers()
-                && !settings.isRandomizeMovePPs() && !settings.isRandomizeMoveCategory()
-                && !settings.isRandomizeMoveTypes()) {
-            if (!settings.isUpdateMoves()) {
-                log.println("Move Data: Unchanged." + NEWLINE);
-            }
-        } else {
-            log.println("--Move Data--");
-            log.print("NUM|NAME           |TYPE    |POWER|ACC.|PP");
-            if (romHandler.hasPhysicalSpecialSplit()) {
-                log.print(" |CATEGORY");
-            }
-            log.println();
-            List<Move> allMoves = romHandler.getMoves();
-            for (Move mv : allMoves) {
-                if (mv != null) {
-                    String mvType = (mv.type == null) ? "???" : mv.type.toString();
-                    log.printf("%3d|%-15s|%-8s|%5d|%4d|%3d", mv.internalId, mv.name, mvType, mv.power,
-                            (int) mv.hitratio, mv.pp);
-                    if (romHandler.hasPhysicalSpecialSplit()) {
-                        log.printf("| %s", mv.category.toString());
-                    }
-                    log.println();
-                }
-            }
-            log.println();
-        }
-    }
-
-    private void maybeLogShops(final PrintStream log, final RomHandler romHandler) {
+    private void logShops(final PrintStream log) {
         String[] shopNames = romHandler.getShopNames();
         String[] itemNames = romHandler.getItemNames();
         log.println("--Shops--");

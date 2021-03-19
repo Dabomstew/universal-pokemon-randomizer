@@ -35,13 +35,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.pokemon.*;
 import pptxt.PPTxtHandler;
 
-import com.dabomstew.pkrandom.FileFunctions;
-import com.dabomstew.pkrandom.GFXFunctions;
-import com.dabomstew.pkrandom.MiscTweak;
-import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -68,6 +65,30 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     public Gen5RomHandler(Random random, PrintStream logStream) {
         super(random, logStream);
+    }
+
+    @Override
+    public void changeCatchRates(Settings settings) {
+        int normalMin, legendaryMin;
+        switch (settings.getMinimumCatchRateLevel()) {
+            case 1:
+            default:
+                normalMin = 50;
+                legendaryMin = 25;
+                break;
+            case 2:
+                normalMin = 100;
+                legendaryMin = 45;
+                break;
+            case 3:
+                normalMin = 180;
+                legendaryMin = 75;
+                break;
+            case 4:
+                normalMin = legendaryMin = 255;
+                break;
+        }
+        minimumCatchRate(normalMin, legendaryMin);
     }
 
     private static class OffsetWithinEntry {
@@ -2354,9 +2375,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public void removeImpossibleEvolutions(boolean changeMoveEvos) {
+    public void removeImpossibleEvolutions(Settings settings) {
+
+        boolean changeMoveEvos = !(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED);
+
         Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
-        log("--Removing Impossible Evolutions--");
         Set<Evolution> extraEvolutions = new HashSet<>();
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
@@ -2379,14 +2402,14 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         // change to pure level evo
                         evo.type = EvolutionType.LEVEL;
                         evo.extraInfo = levelLearntAt;
-                        logEvoChangeLevel(evo.from.fullName(), evo.to.fullName(), levelLearntAt);
+                        addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
                     }
                     // Pure Trade
                     if (evo.type == EvolutionType.TRADE) {
                         // Replace w/ level 37
                         evo.type = EvolutionType.LEVEL;
                         evo.extraInfo = 37;
-                        logEvoChangeLevel(evo.from.fullName(), evo.to.fullName(), 37);
+                        addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
                     }
                     // Trade w/ Item
                     if (evo.type == EvolutionType.TRADE_ITEM) {
@@ -2399,9 +2422,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen5Constants.waterStoneIndex; // water
                                                                            // stone
-                            logEvoChangeStone(evo.from.fullName(), evo.to.fullName(), itemNames.get(Gen5Constants.waterStoneIndex));
+                            addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
                         } else {
-                            logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
+                            addEvoUpdateHeldItem(impossibleEvolutionUpdates, evo, itemNames.get(item));
                             // Replace, for this entry, w/
                             // Level up w/ Held Item at Day
                             evo.type = EvolutionType.LEVEL_ITEM_DAY;
@@ -2420,9 +2443,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         evo.type = EvolutionType.LEVEL_WITH_OTHER;
                         evo.extraInfo = (evo.from.number == Gen5Constants.karrablastIndex ? Gen5Constants.shelmetIndex
                                 : Gen5Constants.karrablastIndex);
-                        logEvoChangeLevelWithPkmn(evo.from.fullName(), evo.to.fullName(),
-                                pokes[(evo.from.number == Gen5Constants.karrablastIndex ? Gen5Constants.shelmetIndex
-                                        : Gen5Constants.karrablastIndex)].fullName());
+                        addEvoUpdateParty(impossibleEvolutionUpdates, evo, pokes[evo.extraInfo].fullName());
                     }
                 }
 
@@ -2436,7 +2457,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public void makeEvolutionsEasier(boolean wildsRandomized) {
+    public void makeEvolutionsEasier(Settings settings) {
+
+        boolean wildsRandomized = !settings.getWildPokemonMod().equals(Settings.WildPokemonMod.UNCHANGED);
+
         if (wildsRandomized) {
             for (Pokemon pkmn : pokes) {
                 if (pkmn != null) {
@@ -2445,19 +2469,16 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                             // Replace w/ level 35
                             evo.type = EvolutionType.LEVEL;
                             evo.extraInfo = 35;
-                            log(String.format("%s now evolves into %s at minimum level %d", evo.from.fullName(), evo.to.fullName(),
-                                    evo.extraInfo));
+                            addEvoUpdateCondensed(easierEvolutionUpdates, evo, false);
                         }
                     }
                 }
             }
-            logBlankLine();
         }
     }
 
     @Override
     public void removeTimeBasedEvolutions() {
-        log("--Removing Timed-Based Evolutions--");
         Set<Evolution> extraEvolutions = new HashSet<>();
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
@@ -2469,10 +2490,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                             // Umbreon works in the original game. Instead, make Eevee: == sun stone => Espeon
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen5Constants.sunStoneIndex;
-                            logEvoChangeStone(evo.from.fullName(), evo.to.fullName(), itemNames.get(Gen5Constants.sunStoneIndex));
+                            addEvoUpdateStone(timeBasedEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
                         } else {
                             // Add an extra evo for Happiness at Night
-                            logEvoChangeHappiness(evo.from.fullName(), evo.to.fullName());
+                            addEvoUpdateHappiness(timeBasedEvolutionUpdates, evo);
                             Evolution extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.HAPPINESS_NIGHT, 0);
                             extraEvolutions.add(extraEntry);
@@ -2483,10 +2504,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                             // Espeon works in the original game. Instead, make Eevee: == moon stone => Umbreon
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen5Constants.moonStoneIndex;
-                            logEvoChangeStone(evo.from.fullName(), evo.to.fullName(), itemNames.get(Gen5Constants.moonStoneIndex));
+                            addEvoUpdateStone(timeBasedEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
                         } else {
                             // Add an extra evo for Happiness at Day
-                            logEvoChangeHappiness(evo.from.fullName(), evo.to.fullName());
+                            addEvoUpdateHappiness(timeBasedEvolutionUpdates, evo);
                             Evolution extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.HAPPINESS_DAY, 0);
                             extraEvolutions.add(extraEntry);
@@ -2496,7 +2517,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         // Make sure we don't already have an evo for the same item at night (e.g., when using Change Impossible Evos)
                         if (evo.from.evolutionsFrom.stream().noneMatch(e -> e.type == EvolutionType.LEVEL_ITEM_NIGHT && e.extraInfo == item)) {
                             // Add an extra evo for Level w/ Item During Night
-                            logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
+                            addEvoUpdateHeldItem(timeBasedEvolutionUpdates, evo, itemNames.get(item));
                             Evolution extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.LEVEL_ITEM_NIGHT, item);
                             extraEvolutions.add(extraEntry);
@@ -2506,7 +2527,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         // Make sure we don't already have an evo for the same item at day (e.g., when using Change Impossible Evos)
                         if (evo.from.evolutionsFrom.stream().noneMatch(e -> e.type == EvolutionType.LEVEL_ITEM_DAY && e.extraInfo == item)) {
                             // Add an extra evo for Level w/ Item During Day
-                            logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
+                            addEvoUpdateHeldItem(timeBasedEvolutionUpdates, evo, itemNames.get(item));
                             Evolution extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.LEVEL_ITEM_DAY, item);
                             extraEvolutions.add(extraEntry);
@@ -2519,7 +2540,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 }
             }
         }
-        logBlankLine();
+
     }
 
     @Override

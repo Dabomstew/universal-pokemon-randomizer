@@ -31,6 +31,8 @@ import java.util.ResourceBundle;
 
 public class MiscTweak implements Comparable<MiscTweak> {
 
+    public static final int NO_MISC_TWEAKS = 0;
+
     private static final ResourceBundle bundle = ResourceBundle.getBundle("com/dabomstew/pkrandom/newgui/Bundle");
 
     public static List<MiscTweak> allTweaks = new ArrayList<>();

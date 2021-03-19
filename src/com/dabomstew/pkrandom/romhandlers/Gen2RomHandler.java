@@ -32,10 +32,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
 
-import com.dabomstew.pkrandom.FileFunctions;
-import com.dabomstew.pkrandom.GFXFunctions;
-import com.dabomstew.pkrandom.MiscTweak;
-import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.constants.Gen2Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
@@ -1409,9 +1406,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void removeImpossibleEvolutions(boolean changeMoveEvos) {
+    public void removeImpossibleEvolutions(Settings settings) {
         // no move evos, so no need to check for those
-        log("--Removing Impossible Evolutions--");
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 for (Evolution evol : pkmn.evolutionsFrom) {
@@ -1421,41 +1417,39 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                             // Slowpoke: Make water stone => Slowking
                             evol.type = EvolutionType.STONE;
                             evol.extraInfo = 24; // water stone
-                            logEvoChangeStone(evol.from.name, evol.to.name, itemNames[24]);
+                            addEvoUpdateStone(impossibleEvolutionUpdates, evol, itemNames[24]);
                         } else if (evol.from.number == Gen2Constants.seadraIndex) {
                             // Seadra: level 40
                             evol.type = EvolutionType.LEVEL;
                             evol.extraInfo = 40; // level
-                            logEvoChangeLevel(evol.from.name, evol.to.name, 40);
+                            addEvoUpdateLevel(impossibleEvolutionUpdates, evol);
                         } else if (evol.from.number == Gen2Constants.poliwhirlIndex || evol.type == EvolutionType.TRADE) {
                             // Poliwhirl or any of the original 4 trade evos
                             // Level 37
                             evol.type = EvolutionType.LEVEL;
                             evol.extraInfo = 37; // level
-                            logEvoChangeLevel(evol.from.name, evol.to.name, 37);
+                            addEvoUpdateLevel(impossibleEvolutionUpdates, evol);
                         } else {
                             // A new trade evo of a single stage Pokemon
                             // level 30
                             evol.type = EvolutionType.LEVEL;
                             evol.extraInfo = 30; // level
-                            logEvoChangeLevel(evol.from.name, evol.to.name, 30);
+                            addEvoUpdateLevel(impossibleEvolutionUpdates, evol);
                         }
                     }
                 }
             }
         }
-        logBlankLine();
 
     }
 
     @Override
-    public void makeEvolutionsEasier(boolean wildsRandomized) {
+    public void makeEvolutionsEasier(Settings settings) {
         // No such thing
     }
 
     @Override
     public void removeTimeBasedEvolutions() {
-        log("--Removing Timed-Based Evolutions--");
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 for (Evolution evol : pkmn.evolutionsFrom) {
@@ -1464,17 +1458,17 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                         // Eevee: Make sun stone => Espeon
                         evol.type = EvolutionType.STONE;
                         evol.extraInfo = 169; // sun stone
-                        logEvoChangeStone(evol.from.name, evol.to.name, itemNames[169]);
+                        addEvoUpdateStone(timeBasedEvolutionUpdates, evol, itemNames[169]);
                     } else if (evol.type == EvolutionType.HAPPINESS_NIGHT) {
                         // Eevee: Make moon stone => Umbreon
                         evol.type = EvolutionType.STONE;
                         evol.extraInfo = 8; // moon stone
-                        logEvoChangeStone(evol.from.name, evol.to.name, itemNames[8]);
+                        addEvoUpdateStone(timeBasedEvolutionUpdates, evol, itemNames[8]);
                     }
                 }
             }
         }
-        logBlankLine();
+
     }
 
     @Override

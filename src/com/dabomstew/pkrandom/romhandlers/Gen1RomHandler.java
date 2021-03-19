@@ -44,6 +44,7 @@ import java.util.TreeMap;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
+import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.constants.Gen1Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
@@ -1479,10 +1480,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void removeImpossibleEvolutions(boolean changeMoveEvos) {
+    public void removeImpossibleEvolutions(Settings settings) {
         // Gen 1: only regular trade evos
         // change them all to evolve at level 37
-        log("--Removing Impossible Evolutions--");
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 for (Evolution evo : pkmn.evolutionsFrom) {
@@ -1490,16 +1490,15 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                         // change
                         evo.type = EvolutionType.LEVEL;
                         evo.extraInfo = 37;
-                        logEvoChangeLevel(evo.from.name, evo.to.name, 37);
+                        addEvoUpdateLevel(impossibleEvolutionUpdates,evo);
                     }
                 }
             }
         }
-        logBlankLine();
     }
 
     @Override
-    public void makeEvolutionsEasier(boolean wildsRandomized) {
+    public void makeEvolutionsEasier(Settings settings) {
         // No such thing
     }
 

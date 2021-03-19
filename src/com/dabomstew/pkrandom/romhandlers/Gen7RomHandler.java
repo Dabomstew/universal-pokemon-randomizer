@@ -26,6 +26,7 @@ package com.dabomstew.pkrandom.romhandlers;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.Gen7Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.ctr.BFLIM;
@@ -2306,9 +2307,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void removeImpossibleEvolutions(boolean changeMoveEvos) {
+    public void removeImpossibleEvolutions(Settings settings) {
+
+        boolean changeMoveEvos = !(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED);
+
         Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
-        log("--Removing Impossible Evolutions--");
         Set<Evolution> extraEvolutions = new HashSet<>();
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
@@ -2331,14 +2334,14 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         // change to pure level evo
                         evo.type = EvolutionType.LEVEL;
                         evo.extraInfo = levelLearntAt;
-                        logEvoChangeLevel(evo.from.fullName(), evo.to.fullName(), levelLearntAt);
+                        addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
                     }
                     // Pure Trade
                     if (evo.type == EvolutionType.TRADE) {
                         // Replace w/ level 37
                         evo.type = EvolutionType.LEVEL;
                         evo.extraInfo = 37;
-                        logEvoChangeLevel(evo.from.fullName(), evo.to.fullName(), 37);
+                        addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
                     }
                     // Trade w/ Item
                     if (evo.type == EvolutionType.TRADE_ITEM) {
@@ -2351,9 +2354,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen7Constants.waterStoneIndex; // water
                             // stone
-                            logEvoChangeStone(evo.from.fullName(), evo.to.fullName(), itemNames.get(Gen7Constants.waterStoneIndex));
+                            addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
                         } else {
-                            logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
+                            addEvoUpdateHeldItem(impossibleEvolutionUpdates, evo, itemNames.get(item));
                             // Replace, for this entry, w/
                             // Level up w/ Held Item at Day
                             evo.type = EvolutionType.LEVEL_ITEM_DAY;
@@ -2373,9 +2376,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         evo.type = EvolutionType.LEVEL_WITH_OTHER;
                         evo.extraInfo = (evo.from.number == Gen7Constants.karrablastIndex ? Gen7Constants.shelmetIndex
                                 : Gen7Constants.karrablastIndex);
-                        logEvoChangeLevelWithPkmn(evo.from.fullName(), evo.to.fullName(),
-                                pokes[(evo.from.number == Gen7Constants.karrablastIndex ? Gen7Constants.shelmetIndex
-                                        : Gen7Constants.karrablastIndex)].fullName());
+                        addEvoUpdateParty(impossibleEvolutionUpdates, evo, pokes[evo.extraInfo].fullName());
                     }
                     // TBD: Pancham, Sliggoo? Sylveon?
                 }
@@ -2390,7 +2391,10 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void makeEvolutionsEasier(boolean wildsRandomized) {
+    public void makeEvolutionsEasier(Settings settings) {
+
+        boolean wildsRandomized = !settings.getWildPokemonMod().equals(Settings.WildPokemonMod.UNCHANGED);
+
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 Evolution extraEntry = null;
@@ -2400,23 +2404,20 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             // Replace w/ level 35
                             evo.type = EvolutionType.LEVEL;
                             evo.extraInfo = 35;
-                            log(String.format("%s now evolves into %s at minimum level %d", evo.from.fullName(), evo.to.fullName(),
-                                    evo.extraInfo));
+                            addEvoUpdateCondensed(easierEvolutionUpdates, evo, false);
                         }
                     }
                     if (romEntry.romType == Gen7Constants.Type_SM) {
                         if (evo.type == EvolutionType.LEVEL_SNOWY) {
-                            log(String.format("%s now also evolves into %s at minimum level %d", evo.from.fullName(), evo.to.fullName(),
-                                    evo.extraInfo));
                             extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.LEVEL, 35);
                             extraEntry.forme = evo.forme;
+                            addEvoUpdateCondensed(easierEvolutionUpdates, evo, true);
                         } else if (evo.type == EvolutionType.LEVEL_ELECTRIFIED_AREA) {
-                            log(String.format("%s now also evolves into %s at minimum level %d", evo.from.fullName(), evo.to.fullName(),
-                                    evo.extraInfo));
                             extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.LEVEL, 35);
                             extraEntry.forme = evo.forme;
+                            addEvoUpdateCondensed(easierEvolutionUpdates, evo, true);
                         }
                     }
                 }
@@ -2426,13 +2427,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 }
             }
         }
-        logBlankLine();
 
     }
 
     @Override
     public void removeTimeBasedEvolutions() {
-        log("--Removing Timed-Based Evolutions--");
         Set<Evolution> extraEvolutions = new HashSet<>();
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
@@ -2444,10 +2443,10 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             // Umbreon works in the original game. Instead, make Eevee: == sun stone => Espeon
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen7Constants.sunStoneIndex;
-                            logEvoChangeStone(evo.from.fullName(), evo.to.fullName(), itemNames.get(Gen7Constants.sunStoneIndex));
+                            addEvoUpdateStone(timeBasedEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
                         } else {
                             // Add an extra evo for Happiness at Night
-                            logEvoChangeHappiness(evo.from.fullName(), evo.to.fullName());
+                            addEvoUpdateHappiness(timeBasedEvolutionUpdates, evo);
                             Evolution extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.HAPPINESS_NIGHT, 0);
                             extraEntry.forme = evo.forme;
@@ -2459,10 +2458,10 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             // Espeon works in the original game. Instead, make Eevee: == moon stone => Umbreon
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen7Constants.moonStoneIndex;
-                            logEvoChangeStone(evo.from.fullName(), evo.to.fullName(), itemNames.get(Gen7Constants.moonStoneIndex));
+                            addEvoUpdateStone(timeBasedEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
                         } else {
                             // Add an extra evo for Happiness at Day
-                            logEvoChangeHappiness(evo.from.fullName(), evo.to.fullName());
+                            addEvoUpdateHappiness(timeBasedEvolutionUpdates, evo);
                             Evolution extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.HAPPINESS_DAY, 0);
                             extraEntry.forme = evo.forme;
@@ -2473,7 +2472,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         // Make sure we don't already have an evo for the same item at night (e.g., when using Change Impossible Evos)
                         if (evo.from.evolutionsFrom.stream().noneMatch(e -> e.type == EvolutionType.LEVEL_ITEM_NIGHT && e.extraInfo == item)) {
                             // Add an extra evo for Level w/ Item During Night
-                            logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
+                            addEvoUpdateHeldItem(timeBasedEvolutionUpdates, evo, itemNames.get(item));
                             Evolution extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.LEVEL_ITEM_NIGHT, item);
                             extraEntry.forme = evo.forme;
@@ -2484,7 +2483,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         // Make sure we don't already have an evo for the same item at day (e.g., when using Change Impossible Evos)
                         if (evo.from.evolutionsFrom.stream().noneMatch(e -> e.type == EvolutionType.LEVEL_ITEM_DAY && e.extraInfo == item)) {
                             // Add an extra evo for Level w/ Item During Day
-                            logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
+                            addEvoUpdateHeldItem(timeBasedEvolutionUpdates, evo, itemNames.get(item));
                             Evolution extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.LEVEL_ITEM_DAY, item);
                             extraEntry.forme = evo.forme;
@@ -2496,9 +2495,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             // Lycanroc-Midnight works in the original game. Instead, make Rockruff: == sun stone => Lycanroc-Midday
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen7Constants.sunStoneIndex;
-                            logEvoChangeStone(evo.from.fullName(), evo.to.fullName(), itemNames.get(Gen7Constants.sunStoneIndex));
+                            addEvoUpdateStone(timeBasedEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
                         } else {
-                            logEvoChangeLevel(evo.from.fullName(), evo.to.fullName(), evo.extraInfo);
+                            addEvoUpdateLevel(timeBasedEvolutionUpdates, evo);
                             evo.type = EvolutionType.LEVEL;
                         }
                     } else if (evo.type == EvolutionType.LEVEL_NIGHT) {
@@ -2507,9 +2506,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             // Lycanroc-Midday works in the original game. Instead, make Rockruff: == moon stone => Lycanroc-Midnight
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen7Constants.moonStoneIndex;
-                            logEvoChangeStone(evo.from.fullName(), evo.to.fullName(), itemNames.get(Gen7Constants.moonStoneIndex));
+                            addEvoUpdateStone(timeBasedEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
                         } else {
-                            logEvoChangeLevel(evo.from.fullName(), evo.to.fullName(), evo.extraInfo);
+                            addEvoUpdateLevel(timeBasedEvolutionUpdates, evo);
                             evo.type = EvolutionType.LEVEL;
                         }
                     } else if (evo.type == EvolutionType.LEVEL_DUSK) {
@@ -2518,7 +2517,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         // Rockruff: == dusk stone => Lycanroc-Dusk
                         evo.type = EvolutionType.STONE;
                         evo.extraInfo = Gen7Constants.duskStoneIndex;
-                        logEvoChangeStone(evo.from.fullName(), evo.to.fullName(), itemNames.get(Gen7Constants.duskStoneIndex));
+                        addEvoUpdateStone(timeBasedEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
                     }
                 }
                 pkmn.evolutionsFrom.addAll(extraEvolutions);
@@ -2527,7 +2526,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 }
             }
         }
-        logBlankLine();
+
     }
 
     @Override
