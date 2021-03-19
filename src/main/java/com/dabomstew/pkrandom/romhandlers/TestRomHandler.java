@@ -428,7 +428,7 @@ public class TestRomHandler extends AbstractRomHandler {
     @Override
     public int generationOfPokemon() {
         // TODO Auto-generated method stub
-        return 0;
+        return 5;
     }
     
     @Override

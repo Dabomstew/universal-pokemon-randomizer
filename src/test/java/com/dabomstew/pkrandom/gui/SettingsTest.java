@@ -238,7 +238,7 @@ public class SettingsTest extends AbstractUIBase {
         assertTrue("Starters was not RANDOM after reloading settings 2", settings.getStartersMod() == Settings.StartersMod.RANDOM);
 
         // Set Slider to 2
-        startersMinimumEvosFixture.requireVisible().requireEnabled().slideTo(1);
+        startersMinimumEvosFixture.requireVisible().requireEnabled().slideTo(2);
         settings = this.mainWindow.getCurrentSettings();
         assertTrue("Starters minimum evos should be set to 2", settings.getStartersMinimumEvos() == 2);
         assertTrue("Starters minimum evos should be enabled", startersMinimumEvosFixture.isEnabled());
@@ -249,7 +249,7 @@ public class SettingsTest extends AbstractUIBase {
         assertTrue("Starters was not RANDOM after reloading settings 3", settings.getStartersMod() == Settings.StartersMod.RANDOM);
 
         // Set Slider to 0
-        startersMinimumEvosFixture.requireVisible().requireEnabled().slideTo(1);
+        startersMinimumEvosFixture.requireVisible().requireEnabled().slideTo(0);
         settings = this.mainWindow.getCurrentSettings();
         assertTrue("Starters minimum evos should be set to 0", settings.getStartersMinimumEvos() == 0);
         assertTrue("Starters minimum evos should be enabled", startersMinimumEvosFixture.isEnabled());
@@ -268,12 +268,12 @@ public class SettingsTest extends AbstractUIBase {
         clickRBAndWait(unchangedStarterRBFixture);
         settings = this.mainWindow.getCurrentSettings();
         assertTrue("Starters minimum evos should be set to 0", settings.getStartersMinimumEvos() == 0);
-        assertTrue("Starters minimum evos should not be enabled", startersMinimumEvosFixture.isEnabled());
+        assertFalse("Starters minimum evos should not be enabled", startersMinimumEvosFixture.isEnabled());
         assertTrue("Starters should be set to UNCHANGED but was not", settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
         setttingsString = settings.toString();
         settings = Settings.fromString(setttingsString);
         assertTrue("Starters minimum evos was not zero after reloading settings 5", settings.getStartersMinimumEvos() == 0);
-        assertTrue("Starters was not UNCHANGED after reloading settings 5", settings.getStartersMod() == Settings.StartersMod.RANDOM);
+        assertTrue("Starters was not UNCHANGED after reloading settings 5", settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
     }
 
 
@@ -430,7 +430,7 @@ public class SettingsTest extends AbstractUIBase {
      */
     @Test(timeout = 4000)
     public void TestTrainerRandomHeldItem() throws IOException {
-        JCheckBoxFixture randomHeldItemCBFixture = getCheckBoxByName("goUpdateMovesCheckBox");
+        JCheckBoxFixture randomHeldItemCBFixture = getCheckBoxByName("tpRandomHeldItemCB");
         Settings settings = this.mainWindow.getCurrentSettings();
         // Sanity check - Should initialize to False
         assertFalse("Trainer Random Held Item should not be set yet", settings.isTrainersRandomHeldItem());

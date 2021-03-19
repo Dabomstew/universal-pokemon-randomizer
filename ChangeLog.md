@@ -78,3 +78,4 @@
    * This removes the ability to have 1 or 2 evo evolutions, but can be achieved by selecting "Limit Evolutions to Three Stages" when randomizing evolutions and selecting option 1 on the slider.
  * Fix Starters No Split to only activate when Random Starters is selected
    * There was a bug discovered in version 1.81 where the values of Starter No Split and Starter Unique Types were restored in the wrong order. This has been corrected and should allow the settings file to be used as expected. 
+ * Trainer pokemon held items can be randomized for Generation 3 or higher. Items are restricted to battle tower viable.

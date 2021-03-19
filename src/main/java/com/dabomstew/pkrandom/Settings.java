@@ -496,7 +496,12 @@ public class Settings {
                 restoreState(data[4], 0), // CUSTOM
                 restoreState(data[4], 1) // RANDOM
         ));
-        settings.setStartersMinimumEvos(restoreState(data[4], 3) ? 2 : 0);
+        if (restoreState(data[4], 3)) {
+            settings.setStartersMinimumEvos(2);
+            settings.setStartersMod(StartersMod.RANDOM);   
+        } else {
+            settings.setStartersMinimumEvos(0);
+        }
         settings.setRandomizeStartersHeldItems(restoreState(data[4], 4));
         settings.setBanBadRandomStarterHeldItems(restoreState(data[4], 5));
         settings.setStartersExactEvos(restoreState(data[4], 6));
@@ -636,6 +641,7 @@ public class Settings {
 
         if (restoreState(data[37], 0)) {
             settings.setStartersMinimumEvos(1);
+            settings.setStartersMod(StartersMod.RANDOM);
         }
         settings.setStartersNoSplit(restoreState(data[37], 1));
         settings.setStartersUniqueTypes(restoreState(data[37], 2));
