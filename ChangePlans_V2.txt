@@ -31,28 +31,26 @@ XX Choice not available until game is played XXStriaton City leaders use correct
 XXToo much workXXTrainer Class Names should be gender based (Rich Boy woman not allowed) (group all trainer names and determine a 1-1 swap)
 **Randomize trainer held items (limit to battle tower stuff)
 Type theme gyms with random trainers route trainers (keep gym trainers consistent)
-Checkbox if gyms should be type randomized (regardless of route trainer randomization)
 Extra Challenge Mode - All leaders have 6 pokemon
 Extra E4 Challenge - Legendaries / BST of at least 600
-Signature Move - All leaders have a signature move on all pokes (same as TM?)
+XXToo much workXXSignature Move - All leaders have a signature move on all pokes (same as TM?)
 All leader/rival pokemon are nicknamed
-Type by ace (one of dual type, or if mono type, keeps mono) (keep type but change team)
+XXToo much workXXType by ace (one of dual type, or if mono type, keeps mono) (keep type but change team)
 RSE Gen 3 - Patch both Arco and Mach
-Redo code to use PokemonSet
+XXToo much workXXRedo code to use PokemonSet
 Explicit type starter selection (filter in/out one or more) (option for one from each)
 Checkbox if rival should have super-effective starter
-TM text updates for Gen 5 (use new names)
+XXToo much workXXTM text updates for Gen 5 (use new names)
 Trainer pokemon evolve at appropriate level (if at level, evolve. if not, unevolve. non-level base off bst)
 Trainer random a 1-1 swap similar to global replace
-Select full team instead of only starter (is it possible to prestock a pc?)
-Randomize trainer held item
-Shift abilities to left or right instead of randomizing (thus activating hidden abilities)
-Enable patching randomization formulas
+XXToo much workXXSelect full team instead of only starter (is it possible to prestock a pc?)
+XXToo much workXXShift abilities to left or right instead of randomizing (thus activating hidden abilities)
+XXToo much workXXEnable patching randomization formulas
 Random settings (each applicable choice is given a randomized selection. still required confirming save to allow modification)
-Evolution level randomized into a range based on the resulting BST
-Randomize attack effects (romHandler.saveMoves)
-Move prefixes (DEFDN-Leer)
-Add PokemonEmerald Party Randomizer
+XXToo much workXXEvolution level randomized into a range based on the resulting BST
+XXToo much workXXRandomize attack effects (romHandler.saveMoves)
+XXToo much workXXMove prefixes (DEFDN-Leer)
+XXToo much workXXAdd PokemonEmerald Party Randomizer
 
 
 Java output to excel
