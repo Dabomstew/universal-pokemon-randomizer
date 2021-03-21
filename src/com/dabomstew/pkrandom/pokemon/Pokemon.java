@@ -25,7 +25,7 @@ package com.dabomstew.pkrandom.pokemon;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import com.dabomstew.pkrandom.constants.Gen7Constants;
+import com.dabomstew.pkrandom.constants.Species;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -106,7 +106,7 @@ public class Pokemon implements Comparable<Pokemon> {
     }
 
     public void randomizeStatsWithinBST(Random random) {
-        if (number == 292) {
+        if (number == Species.shedinja) {
             // Shedinja is horribly broken unless we restrict him to 1HP.
             int bst = bst() - 51;
 
@@ -177,7 +177,7 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public int bstForPowerLevels() {
         // Take into account Shedinja's purposefully nerfed HP
-        if (number == 292) {
+        if (number == Species.shedinja) {
             return (attack + defense + spatk + spdef + speed) * 6 / 5;
         } else {
             return hp + attack + defense + spatk + spdef + speed;
@@ -249,15 +249,27 @@ public class Pokemon implements Comparable<Pokemon> {
         return number - o.number;
     }
 
-    private static final List<Integer> legendaries = Arrays.asList(144, 145, 146, 150, 151, 243, 244, 245, 249, 250,
-            251, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488,
-            489, 490, 491, 492, 493, 494, 638, 639, 640, 641, 642, 643, 644, 645, 646, 647, 648, 649, 716, 717, 718,
-            719, 720, 721, 785, 786, 787, 788, 789, 790, 791, 792, 800, 801, 802, 807);
+    private static final List<Integer> legendaries = Arrays.asList(Species.articuno, Species.zapdos, Species.moltres,
+            Species.mewtwo, Species.mew, Species.raikou, Species.entei, Species.suicune, Species.lugia, Species.hoOh,
+            Species.celebi, Species.regirock, Species.regice, Species.registeel, Species.latias, Species.latios,
+            Species.kyogre, Species.groudon, Species.rayquaza, Species.jirachi, Species.deoxys, Species.rotom,
+            Species.uxie, Species.mesprit, Species.azelf, Species.dialga, Species.palkia, Species.heatran,
+            Species.regigigas, Species.giratina, Species.cresselia, Species.phione, Species.manaphy, Species.darkrai,
+            Species.shaymin, Species.arceus, Species.victini, Species.cobalion, Species.terrakion, Species.virizion,
+            Species.tornadus, Species.thundurus, Species.reshiram, Species.zekrom, Species.landorus, Species.kyurem,
+            Species.keldeo, Species.meloetta, Species.genesect, Species.xerneas, Species.yveltal, Species.zygarde,
+            Species.diancie, Species.hoopa, Species.volcanion, Species.tapuKoko, Species.tapuLele, Species.tapuBulu,
+            Species.tapuFini, Species.cosmog, Species.cosmoem, Species.solgaleo, Species.lunala, Species.necrozma,
+            Species.magearna, Species.marshadow, Species.zeraora);
 
-    private static final List<Integer> strongLegendaries = Arrays.asList(150, 249, 250, 382, 383, 384, 483, 484, 486,
-            487, 493, 643, 644, 646, 716, 717, 789, 790, 791, 792);
+    private static final List<Integer> strongLegendaries = Arrays.asList(Species.mewtwo, Species.lugia, Species.hoOh,
+            Species.kyogre, Species.groudon, Species.rayquaza, Species.dialga, Species.palkia, Species.regigigas,
+            Species.giratina, Species.arceus, Species.reshiram, Species.zekrom, Species.kyurem, Species.xerneas,
+            Species.yveltal, Species.cosmog, Species.cosmoem, Species.solgaleo, Species.lunala);
 
-    private static final List<Integer> ultraBeasts = Arrays.asList(793, 794, 795, 796, 797, 798, 799, 803, 804, 805, 806);
+    private static final List<Integer> ultraBeasts = Arrays.asList(Species.nihilego, Species.buzzwole, Species.pheromosa,
+            Species.xurkitree, Species.celesteela, Species.kartana, Species.guzzlord, Species.poipole, Species.naganadel,
+            Species.stakataka, Species.blacephalon);
 
     public boolean isLegendary() {
         return formeNumber == 0 ? legendaries.contains(this.number) : legendaries.contains(this.baseForme.number);

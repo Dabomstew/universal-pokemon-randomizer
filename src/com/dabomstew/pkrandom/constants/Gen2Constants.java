@@ -60,8 +60,6 @@ public class Gen2Constants {
 
     public static final int oddEggPokemonCount = 14;
 
-    public static final int unownIndex = 201, slowpokeIndex = 79, seadraIndex = 117, poliwhirlIndex = 61;
-
     public static final int tmCount = 50, hmCount = 7;
 
     public static final String mtMenuCancelString = "CANCEL";

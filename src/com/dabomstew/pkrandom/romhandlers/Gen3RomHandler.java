@@ -38,6 +38,7 @@ import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen3Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
+import com.dabomstew.pkrandom.constants.Species;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.*;
@@ -1364,7 +1365,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public List<Pokemon> bannedForWildEncounters() {
-        return Collections.singletonList(pokes[Gen3Constants.unownIndex]); // Unown banned
+        return Collections.singletonList(pokes[Species.unown]); // Unown banned
     }
 
     @Override
@@ -2139,7 +2140,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             rom[deoxysObOffset + 2] = 0x00;
             rom[deoxysObOffset + 3] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1;
             // Look for the mew check too... it's 0x16 ahead
-            if (readWord(deoxysObOffset + Gen3Constants.mewObeyOffsetFromDeoxysObey) == (((Gen3Constants.gbaCmpRxOpcode | Gen3Constants.gbaR0) << 8) | (Gen3Constants.mewIndex))) {
+            if (readWord(deoxysObOffset + Gen3Constants.mewObeyOffsetFromDeoxysObey) == (((Gen3Constants.gbaCmpRxOpcode | Gen3Constants.gbaR0) << 8) | (Species.mew))) {
                 // Bingo, thats CMP R0, 0x97
                 // change to CMP R0, 0x0
                 writeWord(deoxysObOffset + Gen3Constants.mewObeyOffsetFromDeoxysObey,
@@ -2385,30 +2386,30 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     }
                     // Trade w/ Held Item
                     if (evo.type == EvolutionType.TRADE_ITEM) {
-                        if (evo.from.number == Gen3Constants.poliwhirlIndex) {
+                        if (evo.from.number == Species.poliwhirl) {
                             // Poliwhirl: Lv 37
                             evo.type = EvolutionType.LEVEL;
                             evo.extraInfo = 37;
                             logEvoChangeLevel(evo.from.name, evo.to.name, 37);
-                        } else if (evo.from.number == Gen3Constants.slowpokeIndex) {
+                        } else if (evo.from.number == Species.slowpoke) {
                             // Slowpoke: Water Stone
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen3Constants.waterStoneIndex; // water
                                                                            // stone
                             logEvoChangeStone(evo.from.name, evo.to.name, itemNames[Gen3Constants.waterStoneIndex]);
-                        } else if (evo.from.number == Gen3Constants.seadraIndex) {
+                        } else if (evo.from.number == Species.seadra) {
                             // Seadra: Lv 40
                             evo.type = EvolutionType.LEVEL;
                             evo.extraInfo = 40;
                             logEvoChangeLevel(evo.from.name, evo.to.name, 40);
-                        } else if (evo.from.number == Gen3Constants.clamperlIndex
-                                && evo.to.number == Gen3Constants.huntailIndex) {
+                        } else if (evo.from.number == Species.clamperl
+                                && evo.to.number == Species.huntail) {
                             // Clamperl -> Huntail: Lv30
                             evo.type = EvolutionType.LEVEL;
                             evo.extraInfo = 30;
                             logEvoChangeLevel(evo.from.name, evo.to.name, 30);
-                        } else if (evo.from.number == Gen3Constants.clamperlIndex
-                                && evo.to.number == Gen3Constants.gorebyssIndex) {
+                        } else if (evo.from.number == Species.clamperl
+                                && evo.to.number == Species.gorebyss) {
                             // Clamperl -> Gorebyss: Water Stone
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen3Constants.waterStoneIndex; // water

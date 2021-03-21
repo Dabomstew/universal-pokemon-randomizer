@@ -72,9 +72,6 @@ public class Gen4Constants {
 
     public static final int dpStarterStringIndex = 19, ptStarterStringIndex = 36;
 
-    public static final int chikoritaIndex = 152, cyndaquilIndex = 155, totodileIndex = 158, turtwigIndex = 387,
-            chimcharIndex = 390, piplupIndex = 393, slowpokeIndex = 79, eeveeIndex = 133;
-
     public static final int fossilCount = 7;
 
     public static final String dpptTMDataPrefix = "D100D200D300D400", hgssTMDataPrefix = "1E003200";
@@ -1175,10 +1172,10 @@ public class Gen4Constants {
     private static Map<Integer,Integer> setupCosmeticForms() {
         Map<Integer,Integer> cosmeticForms = new TreeMap<>();
 
-        cosmeticForms.put(201,28);
-        cosmeticForms.put(412,3);
-        cosmeticForms.put(422,2);
-        cosmeticForms.put(423,2);
+        cosmeticForms.put(Species.unown, 28);
+        cosmeticForms.put(Species.burmy, 3);
+        cosmeticForms.put(Species.shellos, 2);
+        cosmeticForms.put(Species.gastrodon, 2);
         return cosmeticForms;
     }
 
@@ -1228,20 +1225,20 @@ public class Gen4Constants {
         deoxysMap.put(1,494);
         deoxysMap.put(2,495);
         deoxysMap.put(3,496);
-        map.put(386,deoxysMap);
+        map.put(Species.deoxys, deoxysMap);
 
         Map<Integer,Integer> wormadamMap = new HashMap<>();
         wormadamMap.put(1,497);
         wormadamMap.put(2,498);
-        map.put(413,wormadamMap);
+        map.put(Species.wormadam, wormadamMap);
 
         Map<Integer,Integer> giratinaMap = new HashMap<>();
         giratinaMap.put(1,499);
-        map.put(487,giratinaMap);
+        map.put(Species.giratina, giratinaMap);
 
         Map<Integer,Integer> shayminMap = new HashMap<>();
         shayminMap.put(1,500);
-        map.put(492,shayminMap);
+        map.put(Species.shaymin, shayminMap);
 
         Map<Integer,Integer> rotomMap = new HashMap<>();
         rotomMap.put(1,501);
@@ -1249,7 +1246,7 @@ public class Gen4Constants {
         rotomMap.put(3,503);
         rotomMap.put(4,504);
         rotomMap.put(5,505);
-        map.put(479,rotomMap);
+        map.put(Species.rotom, rotomMap);
 
         return map;
     }

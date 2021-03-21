@@ -100,8 +100,6 @@ public class Gen6Constants {
 
     public static final int evolutionMethodCount = 34;
 
-    public static final int slowpokeIndex = 79, eeveeIndex = 133, karrablastIndex = 588, shelmetIndex = 616;
-
     public static final int sunStoneIndex = 80, moonStoneIndex = 81, waterStoneIndex = 84, luckyEggIndex = 0xE7;
 
     public static final int staticPokemonSize = 0xC;
@@ -539,20 +537,20 @@ public class Gen6Constants {
         deoxysMap.put(1,"-A");
         deoxysMap.put(2,"-D");
         deoxysMap.put(3,"-S");
-        map.put(386,deoxysMap);
+        map.put(Species.deoxys, deoxysMap);
 
         Map<Integer,String> wormadamMap = new HashMap<>();
         wormadamMap.put(1,"-S");
         wormadamMap.put(2,"-T");
-        map.put(413,wormadamMap);
+        map.put(Species.wormadam, wormadamMap);
 
         Map<Integer,String> shayminMap = new HashMap<>();
         shayminMap.put(1,"-S");
-        map.put(492,shayminMap);
+        map.put(Species.shaymin, shayminMap);
 
         Map<Integer,String> giratinaMap = new HashMap<>();
         giratinaMap.put(1,"-O");
-        map.put(487,giratinaMap);
+        map.put(Species.giratina, giratinaMap);
 
         Map<Integer,String> rotomMap = new HashMap<>();
         rotomMap.put(1,"-H");
@@ -560,86 +558,86 @@ public class Gen6Constants {
         rotomMap.put(3,"-Fr");
         rotomMap.put(4,"-Fa");
         rotomMap.put(5,"-M");
-        map.put(479,rotomMap);
+        map.put(Species.rotom, rotomMap);
 
         Map<Integer,String> castformMap = new HashMap<>();
         castformMap.put(1,"-F");
         castformMap.put(2,"-W");
         castformMap.put(3,"-I");
-        map.put(351,castformMap);
+        map.put(Species.castform, castformMap);
 
         Map<Integer,String> basculinMap = new HashMap<>();
         basculinMap.put(1,"-B");
-        map.put(550,basculinMap);
+        map.put(Species.basculin, basculinMap);
 
         Map<Integer,String> darmanitanMap = new HashMap<>();
         darmanitanMap.put(1,"-Z");
-        map.put(555,darmanitanMap);
+        map.put(Species.darmanitan, darmanitanMap);
 
         Map<Integer,String> meloettaMap = new HashMap<>();
         meloettaMap.put(1,"-P");
-        map.put(648,meloettaMap);
+        map.put(Species.meloetta, meloettaMap);
 
         Map<Integer,String> kyuremMap = new HashMap<>();
         kyuremMap.put(1,"-W");
         kyuremMap.put(2,"-B");
-        map.put(646,kyuremMap);
+        map.put(Species.kyurem, kyuremMap);
 
         Map<Integer,String> tornadusMap = new HashMap<>();
         tornadusMap.put(1,"-T");
-        map.put(641,tornadusMap);
+        map.put(Species.tornadus, tornadusMap);
 
         Map<Integer,String> thundurusMap = new HashMap<>();
         thundurusMap.put(1,"-T");
-        map.put(642,thundurusMap);
+        map.put(Species.thundurus, thundurusMap);
 
         Map<Integer,String> landorusMap = new HashMap<>();
         landorusMap.put(1,"-T");
-        map.put(645,landorusMap);
+        map.put(Species.landorus, landorusMap);
 
         Map<Integer,String> meowsticMap = new HashMap<>();
         meowsticMap.put(1,"-F");
-        map.put(678,meowsticMap);
+        map.put(Species.meowstic, meowsticMap);
 
         Map<Integer,String> aegislashMap = new HashMap<>();
         aegislashMap.put(1,"-B");
-        map.put(681,aegislashMap);
+        map.put(Species.aegislash, aegislashMap);
 
         Map<Integer,String> pumpkabooMap = new HashMap<>();
         pumpkabooMap.put(1,"-M");
         pumpkabooMap.put(2,"-L");
         pumpkabooMap.put(3,"-XL");
-        map.put(710,pumpkabooMap);
+        map.put(Species.pumpkaboo, pumpkabooMap);
 
         Map<Integer,String> gourgeistMap = new HashMap<>();
         gourgeistMap.put(1,"-M");
         gourgeistMap.put(2,"-L");
         gourgeistMap.put(3,"-XL");
-        map.put(711,gourgeistMap);
+        map.put(Species.gourgeist, gourgeistMap);
 
         Map<Integer,String> floetteMap = new HashMap<>();
         floetteMap.put(5,"-E");
-        map.put(670,floetteMap);
+        map.put(Species.floette, floetteMap);
 
         Map<Integer,String> kyogreMap = new HashMap<>();
         kyogreMap.put(1,"-P");
-        map.put(382,kyogreMap);
+        map.put(Species.kyogre, kyogreMap);
 
         Map<Integer,String> groudonMap = new HashMap<>();
         groudonMap.put(1,"-P");
-        map.put(383,groudonMap);
+        map.put(Species.groudon, groudonMap);
 
         Map<Integer,String> rayquazaMap = new HashMap<>();
         rayquazaMap.put(1,"-Mega");
-        map.put(384,rayquazaMap);
+        map.put(Species.rayquaza, rayquazaMap);
 
         Map<Integer,String> hoopaMap = new HashMap<>();
         hoopaMap.put(1,"-U");
-        map.put(720,hoopaMap);
+        map.put(Species.hoopa, hoopaMap);
 
         for (Integer species: speciesToMegaStoneORAS.keySet()) {
             Map<Integer,String> megaMap = new HashMap<>();
-            if (species == 6 || species == 150) {
+            if (species == Species.charizard || species == Species.mewtwo) {
                 megaMap.put(1,"-Mega-X");
                 megaMap.put(2,"-Mega-Y");
             } else {
@@ -748,53 +746,53 @@ public class Gen6Constants {
     private static Map<Integer,List<Integer>> setupSpeciesToMegaStone(int romType) {
         Map<Integer,List<Integer>> map = new TreeMap<>();
 
-        map.put(3, Collections.singletonList(659));     // Venusaur
-        map.put(6, Arrays.asList(660, 678));            // Charizard
-        map.put(9, Collections.singletonList(661));     // Blastoise
-        map.put(65, Collections.singletonList(679));    // Alakazam
-        map.put(94, Collections.singletonList(656));    // Gengar
-        map.put(115, Collections.singletonList(675));   // Kangaskhan
-        map.put(127, Collections.singletonList(671));   // Pinsir
-        map.put(130, Collections.singletonList(676));   // Gyarados
-        map.put(142, Collections.singletonList(672));   // Aerodactyl
-        map.put(150, Arrays.asList(662,663));           // Mewtwo
-        map.put(181, Collections.singletonList(658));   // Ampharos
-        map.put(212, Collections.singletonList(670));   // Scizor
-        map.put(214, Collections.singletonList(680));   // Heracross
-        map.put(229, Collections.singletonList(666));   // Houndoom
-        map.put(248, Collections.singletonList(669));   // Tyranitar
-        map.put(257, Collections.singletonList(664));   // Blaziken
-        map.put(282, Collections.singletonList(657));   // Gardevoir
-        map.put(303, Collections.singletonList(681));   // Mawile
-        map.put(306, Collections.singletonList(667));   // Aggron
-        map.put(308, Collections.singletonList(665));   // Medicham
-        map.put(310, Collections.singletonList(682));   // Manectric
-        map.put(354, Collections.singletonList(668));   // Banette
-        map.put(359, Collections.singletonList(677));   // Absol
-        map.put(380, Collections.singletonList(684));   // Latias
-        map.put(381, Collections.singletonList(685));   // Latios
-        map.put(445, Collections.singletonList(683));   // Garchomp
-        map.put(448, Collections.singletonList(673));   // Lucario
-        map.put(460, Collections.singletonList(674));   // Abomasnow
+        map.put(Species.venusaur, Collections.singletonList(659));
+        map.put(Species.charizard, Arrays.asList(660, 678));
+        map.put(Species.blastoise, Collections.singletonList(661));
+        map.put(Species.alakazam, Collections.singletonList(679));
+        map.put(Species.gengar, Collections.singletonList(656));
+        map.put(Species.kangaskhan, Collections.singletonList(675));
+        map.put(Species.pinsir, Collections.singletonList(671));
+        map.put(Species.gyarados, Collections.singletonList(676));
+        map.put(Species.aerodactyl, Collections.singletonList(672));
+        map.put(Species.mewtwo, Arrays.asList(662,663));
+        map.put(Species.ampharos, Collections.singletonList(658));
+        map.put(Species.scizor, Collections.singletonList(670));
+        map.put(Species.heracross, Collections.singletonList(680));
+        map.put(Species.houndoom, Collections.singletonList(666));
+        map.put(Species.tyranitar, Collections.singletonList(669));
+        map.put(Species.blaziken, Collections.singletonList(664));
+        map.put(Species.gardevoir, Collections.singletonList(657));
+        map.put(Species.mawile, Collections.singletonList(681));
+        map.put(Species.aggron, Collections.singletonList(667));
+        map.put(Species.medicham, Collections.singletonList(665));
+        map.put(Species.manectric, Collections.singletonList(682));
+        map.put(Species.banette, Collections.singletonList(668));
+        map.put(Species.absol, Collections.singletonList(677));
+        map.put(Species.latias, Collections.singletonList(684));
+        map.put(Species.latios, Collections.singletonList(685));
+        map.put(Species.garchomp, Collections.singletonList(683));
+        map.put(Species.lucario, Collections.singletonList(673));
+        map.put(Species.abomasnow, Collections.singletonList(674));
 
         if (romType == Type_ORAS) {
-            map.put(15, Collections.singletonList(770));    // Beedrill
-            map.put(18, Collections.singletonList(762));    // Pidgeot
-            map.put(80, Collections.singletonList(760));    // Slowbro
-            map.put(208, Collections.singletonList(761));   // Steelix
-            map.put(254, Collections.singletonList(753));   // Sceptile
-            map.put(260, Collections.singletonList(752));   // Swampert
-            map.put(302, Collections.singletonList(754));   // Sableye
-            map.put(319, Collections.singletonList(759));   // Sharpedo
-            map.put(323, Collections.singletonList(767));   // Camerupt
-            map.put(334, Collections.singletonList(755));   // Altaria
-            map.put(362, Collections.singletonList(763));   // Glalie
-            map.put(373, Collections.singletonList(769));   // Salamence
-            map.put(376, Collections.singletonList(758));   // Metagross
-            map.put(428, Collections.singletonList(768));   // Lopunny
-            map.put(475, Collections.singletonList(756));   // Gallade
-            map.put(531, Collections.singletonList(757));   // Audino
-            map.put(719, Collections.singletonList(764));   // Diancie
+            map.put(Species.beedrill, Collections.singletonList(770));
+            map.put(Species.pidgeot, Collections.singletonList(762));
+            map.put(Species.slowbro, Collections.singletonList(760));
+            map.put(Species.steelix, Collections.singletonList(761));
+            map.put(Species.sceptile, Collections.singletonList(753));
+            map.put(Species.swampert, Collections.singletonList(752));
+            map.put(Species.sableye, Collections.singletonList(754));
+            map.put(Species.sharpedo, Collections.singletonList(759));
+            map.put(Species.camerupt, Collections.singletonList(767));
+            map.put(Species.altaria, Collections.singletonList(755));
+            map.put(Species.glalie, Collections.singletonList(763));
+            map.put(Species.salamence, Collections.singletonList(769));
+            map.put(Species.metagross, Collections.singletonList(758));
+            map.put(Species.lopunny, Collections.singletonList(768));
+            map.put(Species.gallade, Collections.singletonList(756));
+            map.put(Species.audino, Collections.singletonList(757));
+            map.put(Species.diancie, Collections.singletonList(764));
         }
 
         return map;

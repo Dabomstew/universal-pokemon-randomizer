@@ -30,6 +30,7 @@ import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.constants.Gen6Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
+import com.dabomstew.pkrandom.constants.Species;
 import com.dabomstew.pkrandom.ctr.AMX;
 import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.Mini;
@@ -381,13 +382,13 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                     for (int i = 1; i < formeCount; i++) {
                         altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.number,i,FileFunctions.read2ByteInt(stats,Gen6Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
                         if (Gen6Constants.actuallyCosmeticForms.contains(firstFormeOffset+i-1)) {
-                            if (pkmn.number != 25 && pkmn.number != 421) { // No Pikachu/Cherrim
+                            if (pkmn.number != Species.pikachu && pkmn.number != Species.cherrim) { // No Pikachu/Cherrim
                                 pkmn.cosmeticForms += 1;
                             }
                         }
                     }
                 } else {
-                    if (pkmn.number != 493 && pkmn.number != 649 && pkmn.number != 716) {
+                    if (pkmn.number != Species.arceus && pkmn.number != Species.genesect && pkmn.number != Species.xerneas) {
                         // Reason for exclusions:
                         // Arceus/Genesect: to avoid confusion
                         // Xerneas: Should be handled automatically?
@@ -441,8 +442,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
                 // Nincada's Shedinja evo is hardcoded into the game's executable, so
                 // if the Pokemon is Nincada, then let's put it as one of its evolutions
-                if (pk.number == 290) {
-                    Pokemon shedinja = pokes[292];
+                if (pk.number == Species.nincada) {
+                    Pokemon shedinja = pokes[Species.shedinja];
                     Evolution evol = new Evolution(pk, shedinja, false, EvolutionType.LEVEL_IS_EXTRA, 20);
                     pk.evolutionsFrom.add(evol);
                     shedinja.evolutionsTo.add(evol);
@@ -663,7 +664,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             for (int i = 1; i <= Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.romType); i++) {
                 byte[] evoEntry = evoGARC.files.get(i).get(0);
                 Pokemon pk = pokes[i];
-                if (pk.number == 290) {
+                if (pk.number == Species.nincada) {
                     writeShedinjaEvolution();
                 }
                 int evosWritten = 0;
@@ -690,7 +691,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     private void writeShedinjaEvolution() throws IOException {
-        Pokemon nincada = pokes[290];
+        Pokemon nincada = pokes[Species.nincada];
 
         // When the "Limit Pokemon" setting is enabled, we clear out the evolutions of
         // everything *not* in the pool, which could include Nincada. In that case,
@@ -2626,7 +2627,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                     if (evo.type == EvolutionType.TRADE_ITEM) {
                         // Get the current item & evolution
                         int item = evo.extraInfo;
-                        if (evo.from.number == Gen6Constants.slowpokeIndex) {
+                        if (evo.from.number == Species.slowpoke) {
                             // Slowpoke is awkward - he already has a level evo
                             // So we can't do Level up w/ Held Item for him
                             // Put Water Stone instead
@@ -2652,11 +2653,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         // (22)
                         // Based on what species we're currently dealing with
                         evo.type = EvolutionType.LEVEL_WITH_OTHER;
-                        evo.extraInfo = (evo.from.number == Gen6Constants.karrablastIndex ? Gen6Constants.shelmetIndex
-                                : Gen6Constants.karrablastIndex);
+                        evo.extraInfo = (evo.from.number == Species.karrablast ? Species.shelmet
+                                : Species.karrablast);
                         logEvoChangeLevelWithPkmn(evo.from.fullName(), evo.to.fullName(),
-                                pokes[(evo.from.number == Gen6Constants.karrablastIndex ? Gen6Constants.shelmetIndex
-                                        : Gen6Constants.karrablastIndex)].fullName());
+                                pokes[(evo.from.number == Species.karrablast ? Species.shelmet
+                                        : Species.karrablast)].fullName());
                     }
                     // TBD: Pancham, Sliggoo? Sylveon?
                 }
@@ -2699,7 +2700,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 extraEvolutions.clear();
                 for (Evolution evo : pkmn.evolutionsFrom) {
                     if (evo.type == EvolutionType.HAPPINESS_DAY) {
-                        if (evo.from.number == Gen6Constants.eeveeIndex) {
+                        if (evo.from.number == Species.eevee) {
                             // We can't set Eevee to evolve into Espeon with happiness at night because that's how
                             // Umbreon works in the original game. Instead, make Eevee: == sun stone => Espeon
                             evo.type = EvolutionType.STONE;
@@ -2713,7 +2714,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                             extraEvolutions.add(extraEntry);
                         }
                     } else if (evo.type == EvolutionType.HAPPINESS_NIGHT) {
-                        if (evo.from.number == Gen6Constants.eeveeIndex) {
+                        if (evo.from.number == Species.eevee) {
                             // We can't set Eevee to evolve into Umbreon with happiness at day because that's how
                             // Espeon works in the original game. Instead, make Eevee: == moon stone => Umbreon
                             evo.type = EvolutionType.STONE;

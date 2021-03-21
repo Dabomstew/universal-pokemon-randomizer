@@ -44,6 +44,8 @@ public class Gen3Constants {
     public static final int romNameOffset = 0xA0, romCodeOffset = 0xAC, romVersionOffset = 0xBC,
             headerChecksumOffset = 0xBD;
 
+    public static final int pokemonCount = 386;
+
     public static final String wildPokemonPointerPrefix = "0348048009E00000FFFF0000";
 
     public static final String mapBanksPointerPrefix = "80180068890B091808687047";
@@ -101,9 +103,6 @@ public class Gen3Constants {
     public static final Type[] typeTable = constructTypeTable();
 
     public static final int grassSlots = 12, surfingSlots = 5, rockSmashSlots = 5, fishingSlots = 10;
-
-    public static final int unownIndex = 201, slowpokeIndex = 79, seadraIndex = 117, poliwhirlIndex = 61,
-            mewIndex = 151, clamperlIndex = 366, huntailIndex = 367, gorebyssIndex = 368;
 
     public static final int tmCount = 50, hmCount = 8;
 
