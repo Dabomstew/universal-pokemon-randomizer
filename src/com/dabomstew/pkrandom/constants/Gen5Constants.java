@@ -85,9 +85,16 @@ public class Gen5Constants {
     public static final int w2Route4EncounterFile = 105, w2VRExclusiveRoom1 = 78, w2VRExclusiveRoom2 = 79,
             w2ReversalMountainStart = 55, w2ReversalMountainEnd = 60;
 
-    public static final int[] bw2HiddenHollowUnovaPokemon = { 505, 507, 510, 511, 513, 515, 519, 523, 525, 527, 529,
-            531, 533, 535, 538, 539, 542, 545, 546, 548, 550, 553, 556, 558, 559, 561, 564, 569, 572, 575, 578, 580,
-            583, 587, 588, 594, 596, 601, 605, 607, 610, 613, 616, 618, 619, 621, 622, 624, 626, 628, 630, 631, 632, };
+    public static final int[] bw2HiddenHollowUnovaPokemon = { Species.watchog, Species.herdier, Species.liepard,
+            Species.pansage, Species.pansear, Species.panpour, Species.pidove, Species.zebstrika, Species.boldore,
+            Species.woobat, Species.drilbur, Species.audino, Species.gurdurr, Species.tympole, Species.throh,
+            Species.sawk, Species.leavanny, Species.scolipede, Species.cottonee, Species.petilil, Species.basculin,
+            Species.krookodile, Species.maractus, Species.crustle, Species.scraggy, Species.sigilyph, Species.tirtouga,
+            Species.garbodor, Species.minccino, Species.gothorita, Species.duosion, Species.ducklett, Species.vanillish,
+            Species.emolga, Species.karrablast, Species.alomomola, Species.galvantula, Species.klinklang, Species.elgyem,
+            Species.litwick, Species.axew, Species.cubchoo, Species.shelmet, Species.stunfisk, Species.mienfoo,
+            Species.druddigon, Species.golett, Species.pawniard, Species.bouffalant, Species.braviary, Species.mandibuzz,
+            Species.heatmor, Species.durant };
 
     public static final String tmDataPrefix = "87038803";
 
@@ -100,8 +107,6 @@ public class Gen5Constants {
     public static final int bw2MoveTutorCount = 60, bw2MoveTutorBytesPerEntry = 12;
 
     public static final int evolutionMethodCount = 27;
-
-    public static final int slowpokeIndex = 79, eeveeIndex = 133, karrablastIndex = 588, shelmetIndex = 616;
 
     public static final int sunStoneIndex = 80, moonStoneIndex = 81, waterStoneIndex = 84;
 
@@ -527,20 +532,20 @@ public class Gen5Constants {
         deoxysMap.put(1,"-A");
         deoxysMap.put(2,"-D");
         deoxysMap.put(3,"-S");
-        map.put(386,deoxysMap);
+        map.put(Species.deoxys, deoxysMap);
 
         Map<Integer,String> wormadamMap = new HashMap<>();
         wormadamMap.put(1,"-S");
         wormadamMap.put(2,"-T");
-        map.put(413,wormadamMap);
+        map.put(Species.wormadam, wormadamMap);
 
         Map<Integer,String> shayminMap = new HashMap<>();
         shayminMap.put(1,"-S");
-        map.put(492,shayminMap);
+        map.put(Species.shaymin, shayminMap);
 
         Map<Integer,String> giratinaMap = new HashMap<>();
         giratinaMap.put(1,"-O");
-        map.put(487,giratinaMap);
+        map.put(Species.giratina, giratinaMap);
 
         Map<Integer,String> rotomMap = new HashMap<>();
         rotomMap.put(1,"-H");
@@ -548,46 +553,46 @@ public class Gen5Constants {
         rotomMap.put(3,"-Fr");
         rotomMap.put(4,"-Fa");
         rotomMap.put(5,"-M");
-        map.put(479,rotomMap);
+        map.put(Species.rotom, rotomMap);
 
         Map<Integer,String> castformMap = new HashMap<>();
         castformMap.put(1,"-F");
         castformMap.put(2,"-W");
         castformMap.put(3,"-I");
-        map.put(351,castformMap);
+        map.put(Species.castform, castformMap);
 
         Map<Integer,String> basculinMap = new HashMap<>();
         basculinMap.put(1,"-B");
-        map.put(550,basculinMap);
+        map.put(Species.basculin, basculinMap);
 
         Map<Integer,String> darmanitanMap = new HashMap<>();
         darmanitanMap.put(1,"-Z");
-        map.put(555,darmanitanMap);
+        map.put(Species.darmanitan, darmanitanMap);
 
         Map<Integer,String> meloettaMap = new HashMap<>();
         meloettaMap.put(1,"-P");
-        map.put(648,meloettaMap);
+        map.put(Species.meloetta, meloettaMap);
 
         Map<Integer,String> kyuremMap = new HashMap<>();
         kyuremMap.put(1,"-W");
         kyuremMap.put(2,"-B");
-        map.put(646,kyuremMap);
+        map.put(Species.kyurem, kyuremMap);
 
-        Map<Integer,String> keldeoMap = new HashMap<>();
+        Map<Integer,String> keldeoMap = new HashMap();
         keldeoMap.put(1,"-R");
-        map.put(647,keldeoMap);
+        map.put(Species.keldeo, keldeoMap);
 
         Map<Integer,String> tornadusMap = new HashMap<>();
         tornadusMap.put(1,"-T");
-        map.put(641,tornadusMap);
+        map.put(Species.tornadus, tornadusMap);
 
         Map<Integer,String> thundurusMap = new HashMap<>();
         thundurusMap.put(1,"-T");
-        map.put(642,thundurusMap);
+        map.put(Species.thundurus, thundurusMap);
 
         Map<Integer,String> landorusMap = new HashMap<>();
         landorusMap.put(1,"-T");
-        map.put(645,landorusMap);
+        map.put(Species.landorus, landorusMap);
 
         return map;
     }
@@ -606,20 +611,20 @@ public class Gen5Constants {
         deoxysMap.put(1,650);
         deoxysMap.put(2,651);
         deoxysMap.put(3,652);
-        map.put(386,deoxysMap);
+        map.put(Species.deoxys, deoxysMap);
 
         Map<Integer,Integer> wormadamMap = new HashMap<>();
         wormadamMap.put(1,653);
         wormadamMap.put(2,654);
-        map.put(413,wormadamMap);
+        map.put(Species.wormadam, wormadamMap);
 
         Map<Integer,Integer> shayminMap = new HashMap<>();
         shayminMap.put(1,655);
-        map.put(492,shayminMap);
+        map.put(Species.shaymin, shayminMap);
 
         Map<Integer,Integer> giratinaMap = new HashMap<>();
         giratinaMap.put(1,656);
-        map.put(487,giratinaMap);
+        map.put(Species.giratina, giratinaMap);
 
         Map<Integer,Integer> rotomMap = new HashMap<>();
         rotomMap.put(1,657);
@@ -627,46 +632,46 @@ public class Gen5Constants {
         rotomMap.put(3,659);
         rotomMap.put(4,660);
         rotomMap.put(5,661);
-        map.put(479,rotomMap);
+        map.put(Species.rotom, rotomMap);
 
         Map<Integer,Integer> castformMap = new HashMap<>();
         castformMap.put(1,662);
         castformMap.put(2,663);
         castformMap.put(3,664);
-        map.put(351,castformMap);
+        map.put(Species.castform, castformMap);
 
         Map<Integer,Integer> basculinMap = new HashMap<>();
         basculinMap.put(1,665);
-        map.put(550,basculinMap);
+        map.put(Species.basculin, basculinMap);
 
         Map<Integer,Integer> darmanitanMap = new HashMap<>();
         darmanitanMap.put(1,666);
-        map.put(555,darmanitanMap);
+        map.put(Species.darmanitan, darmanitanMap);
 
         Map<Integer,Integer> meloettaMap = new HashMap<>();
         meloettaMap.put(1,667);
-        map.put(648,meloettaMap);
+        map.put(Species.meloetta, meloettaMap);
 
         Map<Integer,Integer> kyuremMap = new HashMap<>();
         kyuremMap.put(1,668);
         kyuremMap.put(2,669);
-        map.put(646,kyuremMap);
+        map.put(Species.kyurem, kyuremMap);
 
         Map<Integer,Integer> keldeoMap = new HashMap<>();
         keldeoMap.put(1,670);
-        map.put(647,keldeoMap);
+        map.put(Species.keldeo, keldeoMap);
 
         Map<Integer,Integer> tornadusMap = new HashMap<>();
         tornadusMap.put(1,671);
-        map.put(641,tornadusMap);
+        map.put(Species.tornadus, tornadusMap);
 
         Map<Integer,Integer> thundurusMap = new HashMap<>();
         thundurusMap.put(1,672);
-        map.put(642,thundurusMap);
+        map.put(Species.thundurus, thundurusMap);
 
         Map<Integer,Integer> landorusMap = new HashMap<>();
         landorusMap.put(1,673);
-        map.put(645,landorusMap);
+        map.put(Species.landorus, landorusMap);
 
         return map;
     }

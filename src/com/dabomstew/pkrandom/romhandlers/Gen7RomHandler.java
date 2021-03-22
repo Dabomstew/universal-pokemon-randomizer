@@ -29,6 +29,7 @@ import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.Gen7Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
+import com.dabomstew.pkrandom.constants.Species;
 import com.dabomstew.pkrandom.ctr.BFLIM;
 import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.Mini;
@@ -431,7 +432,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         }
                     }
                 } else {
-                    if (pkmn.number != 493 && pkmn.number != 649 && pkmn.number != 716 && pkmn.number != 773) {
+                    if (pkmn.number != Species.arceus && pkmn.number != Species.genesect && pkmn.number != Species.xerneas && pkmn.number != Species.silvally) {
                         // Reason for exclusions:
                         // Arceus/Genesect/Silvally: to avoid confusion
                         // Xerneas: Should be handled automatically?
@@ -511,7 +512,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             default:
                                 break;
                         }
-                        if (pk.baseForme != null && pk.baseForme.number == Gen7Constants.rockruffIndex && pk.formeNumber > 0) {
+                        if (pk.baseForme != null && pk.baseForme.number == Species.rockruff && pk.formeNumber > 0) {
                             evol.from = pk.baseForme;
                             pk.baseForme.evolutionsFrom.add(evol);
                             pokes[absolutePokeNumByBaseForme.get(species).get(evol.forme)].evolutionsTo.add(evol);
@@ -530,8 +531,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
                 // Nincada's Shedinja evo is hardcoded into the game's executable,
                 // so if the Pokemon is Nincada, then let's and put it as one of its evolutions
-                if (pk.number == 290) {
-                    Pokemon shedinja = pokes[292];
+                if (pk.number == Species.nincada) {
+                    Pokemon shedinja = pokes[Species.shedinja];
                     Evolution evol = new Evolution(pk, shedinja, false, EvolutionType.LEVEL_IS_EXTRA, 20);
                     evol.forme = -1;
                     evol.level = 20;
@@ -716,7 +717,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.romType) + Gen7Constants.getFormeCount(romEntry.romType); i++) {
                 byte[] evoEntry = evoGARC.files.get(i).get(0);
                 Pokemon pk = pokes[i];
-                if (pk.number == 290) {
+                if (pk.number == Species.nincada) {
                     writeShedinjaEvolution();
                 }
                 int evosWritten = 0;
@@ -750,7 +751,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     private void writeShedinjaEvolution() {
-        Pokemon nincada = pokes[290];
+        Pokemon nincada = pokes[Species.nincada];
 
         // When the "Limit Pokemon" setting is enabled, we clear out the evolutions of
         // everything *not* in the pool, which could include Nincada. In that case,
@@ -2347,7 +2348,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     if (evo.type == EvolutionType.TRADE_ITEM) {
                         // Get the current item & evolution
                         int item = evo.extraInfo;
-                        if (evo.from.number == Gen7Constants.slowpokeIndex) {
+                        if (evo.from.number == Species.slowpoke) {
                             // Slowpoke is awkward - he already has a level evo
                             // So we can't do Level up w/ Held Item for him
                             // Put Water Stone instead
@@ -2374,8 +2375,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         // (22)
                         // Based on what species we're currently dealing with
                         evo.type = EvolutionType.LEVEL_WITH_OTHER;
-                        evo.extraInfo = (evo.from.number == Gen7Constants.karrablastIndex ? Gen7Constants.shelmetIndex
-                                : Gen7Constants.karrablastIndex);
+                        evo.extraInfo = (evo.from.number == Species.karrablast ? Species.shelmet : Species.karrablast);
                         addEvoUpdateParty(impossibleEvolutionUpdates, evo, pokes[evo.extraInfo].fullName());
                     }
                     // TBD: Pancham, Sliggoo? Sylveon?
@@ -2438,7 +2438,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 extraEvolutions.clear();
                 for (Evolution evo : pkmn.evolutionsFrom) {
                     if (evo.type == EvolutionType.HAPPINESS_DAY) {
-                        if (evo.from.number == Gen7Constants.eeveeIndex) {
+                        if (evo.from.number == Species.eevee) {
                             // We can't set Eevee to evolve into Espeon with happiness at night because that's how
                             // Umbreon works in the original game. Instead, make Eevee: == sun stone => Espeon
                             evo.type = EvolutionType.STONE;
@@ -2453,7 +2453,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             extraEvolutions.add(extraEntry);
                         }
                     } else if (evo.type == EvolutionType.HAPPINESS_NIGHT) {
-                        if (evo.from.number == Gen7Constants.eeveeIndex) {
+                        if (evo.from.number == Species.eevee) {
                             // We can't set Eevee to evolve into Umbreon with happiness at day because that's how
                             // Espeon works in the original game. Instead, make Eevee: == moon stone => Umbreon
                             evo.type = EvolutionType.STONE;
@@ -2490,7 +2490,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             extraEvolutions.add(extraEntry);
                         }
                     } else if (evo.type == EvolutionType.LEVEL_DAY) {
-                        if (evo.from.number == Gen7Constants.rockruffIndex) {
+                        if (evo.from.number == Species.rockruff) {
                             // We can't set Rockruff to evolve into Lycanroc-Midday with level at night because that's how
                             // Lycanroc-Midnight works in the original game. Instead, make Rockruff: == sun stone => Lycanroc-Midday
                             evo.type = EvolutionType.STONE;
@@ -2501,7 +2501,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             evo.type = EvolutionType.LEVEL;
                         }
                     } else if (evo.type == EvolutionType.LEVEL_NIGHT) {
-                        if (evo.from.number == Gen7Constants.rockruffIndex) {
+                        if (evo.from.number == Species.rockruff) {
                             // We can't set Rockruff to evolve into Lycanroc-Midnight with level at night because that's how
                             // Lycanroc-Midday works in the original game. Instead, make Rockruff: == moon stone => Lycanroc-Midnight
                             evo.type = EvolutionType.STONE;

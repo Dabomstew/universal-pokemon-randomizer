@@ -33,7 +33,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.dabomstew.pkrandom.*;
-import com.dabomstew.pkrandom.constants.GlobalConstants;
+import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.*;
 
@@ -100,68 +100,68 @@ public abstract class AbstractRomHandler implements RomHandler {
             List<Pokemon> allPokemon = this.getPokemon();
 
             if (restrictions.allow_gen1) {
-                addPokesFromRange(mainPokemonList, allPokemon, 1, 151);
-                if (restrictions.assoc_g1_g2 && allPokemon.size() > 251) {
-                    addEvosFromRange(mainPokemonList, 1, 151, 152, 251);
+                addPokesFromRange(mainPokemonList, allPokemon, Species.bulbasaur, Species.mew);
+                if (restrictions.assoc_g1_g2 && allPokemon.size() > Gen2Constants.pokemonCount) {
+                    addEvosFromRange(mainPokemonList, Species.bulbasaur, Species.mew, Species.chikorita, Species.celebi);
                 }
-                if (restrictions.assoc_g1_g4 && allPokemon.size() > 493) {
-                    addEvosFromRange(mainPokemonList, 1, 151, 387, 493);
+                if (restrictions.assoc_g1_g4 && allPokemon.size() > Gen4Constants.pokemonCount) {
+                    addEvosFromRange(mainPokemonList, Species.bulbasaur, Species.mew, Species.turtwig, Species.arceus);
                 }
                 if (restrictions.assoc_g1_g6 && allPokemon.size() > 721) {
-                    addEvosFromRange(mainPokemonList, 1, 151, 650, 721);
+                    addEvosFromRange(mainPokemonList, Species.bulbasaur, Species.mew, Species.chespin, Species.volcanion);
                 }
             }
 
-            if (restrictions.allow_gen2 && allPokemon.size() > 251) {
-                addPokesFromRange(mainPokemonList, allPokemon, 152, 251);
+            if (restrictions.allow_gen2 && allPokemon.size() > Gen2Constants.pokemonCount) {
+                addPokesFromRange(mainPokemonList, allPokemon, Species.chikorita, Species.celebi);
                 if (restrictions.assoc_g2_g1) {
-                    addEvosFromRange(mainPokemonList, 152, 251, 1, 151);
+                    addEvosFromRange(mainPokemonList, Species.chikorita, Species.celebi, Species.bulbasaur, Species.mew);
                 }
-                if (restrictions.assoc_g2_g3 && allPokemon.size() > 386) {
-                    addEvosFromRange(mainPokemonList, 152, 251, 252, 386);
+                if (restrictions.assoc_g2_g3 && allPokemon.size() > Gen3Constants.pokemonCount) {
+                    addEvosFromRange(mainPokemonList, Species.chikorita, Species.celebi, Species.treecko, Species.deoxys);
                 }
-                if (restrictions.assoc_g2_g4 && allPokemon.size() > 493) {
-                    addEvosFromRange(mainPokemonList, 152, 251, 387, 493);
+                if (restrictions.assoc_g2_g4 && allPokemon.size() > Gen4Constants.pokemonCount) {
+                    addEvosFromRange(mainPokemonList, Species.chikorita, Species.celebi, Species.turtwig, Species.arceus);
                 }
             }
 
-            if (restrictions.allow_gen3 && allPokemon.size() > 386) {
-                addPokesFromRange(mainPokemonList, allPokemon, 252, 386);
+            if (restrictions.allow_gen3 && allPokemon.size() > Gen3Constants.pokemonCount) {
+                addPokesFromRange(mainPokemonList, allPokemon, Species.treecko, Species.deoxys);
                 if (restrictions.assoc_g3_g2) {
-                    addEvosFromRange(mainPokemonList, 252, 386, 152, 251);
+                    addEvosFromRange(mainPokemonList, Species.treecko, Species.deoxys, Species.chikorita, Species.celebi);
                 }
-                if (restrictions.assoc_g3_g4 && allPokemon.size() > 493) {
-                    addEvosFromRange(mainPokemonList, 252, 386, 387, 493);
+                if (restrictions.assoc_g3_g4 && allPokemon.size() > Gen4Constants.pokemonCount) {
+                    addEvosFromRange(mainPokemonList, Species.treecko, Species.deoxys, Species.turtwig, Species.arceus);
                 }
             }
 
-            if (restrictions.allow_gen4 && allPokemon.size() > 493) {
-                addPokesFromRange(mainPokemonList, allPokemon, 387, 493);
+            if (restrictions.allow_gen4 && allPokemon.size() > Gen4Constants.pokemonCount) {
+                addPokesFromRange(mainPokemonList, allPokemon, Species.turtwig, Species.arceus);
                 if (restrictions.assoc_g4_g1) {
-                    addEvosFromRange(mainPokemonList, 387, 493, 1, 151);
+                    addEvosFromRange(mainPokemonList, Species.turtwig, Species.arceus, Species.bulbasaur, Species.mew);
                 }
                 if (restrictions.assoc_g4_g2) {
-                    addEvosFromRange(mainPokemonList, 387, 493, 152, 251);
+                    addEvosFromRange(mainPokemonList, Species.turtwig, Species.arceus, Species.chikorita, Species.celebi);
                 }
                 if (restrictions.assoc_g4_g3) {
-                    addEvosFromRange(mainPokemonList, 387, 493, 252, 386);
+                    addEvosFromRange(mainPokemonList, Species.turtwig, Species.arceus, Species.treecko, Species.deoxys);
                 }
             }
 
-            if (restrictions.allow_gen5 && allPokemon.size() > 649) {
-                addPokesFromRange(mainPokemonList, allPokemon, 494, 649);
+            if (restrictions.allow_gen5 && allPokemon.size() > Gen5Constants.pokemonCount) {
+                addPokesFromRange(mainPokemonList, allPokemon, Species.victini, Species.genesect);
             }
 
-            if (restrictions.allow_gen6 && allPokemon.size() > 721) {
-                addPokesFromRange(mainPokemonList, allPokemon, 650, 721);
+            if (restrictions.allow_gen6 && allPokemon.size() > Gen6Constants.pokemonCount) {
+                addPokesFromRange(mainPokemonList, allPokemon, Species.chespin, Species.volcanion);
                 if (restrictions.assoc_g6_g1) {
-                    addEvosFromRange(mainPokemonList, 650, 721, 1, 151);
+                    addEvosFromRange(mainPokemonList, Species.chespin, Species.volcanion, Species.bulbasaur, Species.mew);
                 }
             }
 
-            int maxGen7SpeciesID = isSM ? 802 : 807;
+            int maxGen7SpeciesID = isSM ? Species.marshadow : Species.zeraora;
             if (restrictions.allow_gen7 && allPokemon.size() > maxGen7SpeciesID) {
-                addPokesFromRange(mainPokemonList, allPokemon, 722, maxGen7SpeciesID);
+                addPokesFromRange(mainPokemonList, allPokemon, Species.rowlet, maxGen7SpeciesID);
             }
 
             // Now that mainPokemonList has all the selected Pokemon, update mainPokemonListInclFormes too
@@ -386,70 +386,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-
-//        // non-special stat gen1 pokemon
-//        pokes.get(15).attack = 90; // BEEDRILL
-//        pokes.get(18).speed = 101; // PIDGEOT
-//        pokes.get(25).defense = 40; // PIKACHU
-//        pokes.get(26).speed = 110; // RAICHU
-//        pokes.get(31).attack = 92; // NIDOQUEEN
-//        pokes.get(34).attack = 102; // NIDOKING
-//        pokes.get(62).attack = 95; // POLIWRATH
-//        pokes.get(76).attack = 120; // GOLEM
-//
-//        // behavior regarding special stat changes
-//        // depending on whether this is actually gen1 or not.
-//        if (generationOfPokemon() == 1) {
-//            // only update the pokemon who's updated stat was
-//            // equal to their Gen1 special stat.
-//
-//            pokes.get(12).special = 90; // BUTTERFREE
-//            // skip PIKACHU s.def
-//            pokes.get(36).special = 95; // CLEFABLE
-//            // skip WIGGLYTUFF s.atk
-//            pokes.get(45).special = 110; // VILEPLUME
-//            // skip ALAKAZAM s.def
-//            // skip VICTREEBEL s.def
-//        } else {
-//            // do the special stat changes then move on from gen2 onwards
-//
-//            pokes.get(12).spatk = 90; // BUTTERFREE
-//            pokes.get(25).spdef = 50; // PIKACHU
-//            pokes.get(36).spatk = 95; // CLEFABLE
-//            pokes.get(40).spatk = 85; // WIGGLYTUFF
-//            pokes.get(45).spatk = 110; // VILEPLUME
-//            pokes.get(65).spdef = 95; // ALAKAZAM
-//            pokes.get(71).spdef = 70; // VICTREEBEL
-//
-//            // gen 2
-//            pokes.get(181).defense = 85; // AMPHAROS
-//            pokes.get(182).defense = 95; // BELLOSSOM
-//            pokes.get(184).spatk = 60; // AZUMARILL
-//            pokes.get(189).spdef = 95; // JUMPLUFF
-//
-//            // gen 3
-//            if (generationOfPokemon() >= 3) {
-//                pokes.get(267).spatk = 100; // BEAUTIFLY
-//                pokes.get(295).spdef = 73; // EXPLOUD
-//            }
-//
-//            // gen 4
-//            if (generationOfPokemon() >= 4) {
-//                pokes.get(398).spdef = 60; // STARAPTOR
-//                pokes.get(407).defense = 65; // ROSERADE
-//            }
-//
-//            // gen 5
-//            if (generationOfPokemon() >= 5) {
-//                pokes.get(508).attack = 110; // STOUTLAND
-//                pokes.get(521).attack = 115; // UNFEZANT
-//                pokes.get(526).spdef = 80; // GIGALITH
-//                pokes.get(537).attack = 95; // SEISMITOAD
-//                pokes.get(542).spdef = 80; // LEAVANNY
-//                pokes.get(545).attack = 100; // SCOLIPEDE
-//                pokes.get(553).defense = 80; // KROOKODILE
-//            }
-//        }
     }
 
     public Pokemon randomPokemon() {
@@ -3092,7 +3028,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (StaticEncounter old : currentStaticPokemon) {
                 StaticEncounter newStatic = cloneStaticEncounter(old);
                 Pokemon newPK;
-                if (old.pkmn.number == 487 && ptGiratina) {
+                if (old.pkmn.number == Species.giratina && ptGiratina) {
                     newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
                     setPokemonAndFormeForStaticEncounter(newStatic, newPK);
                     legendariesLeft.remove(newPK);
@@ -3172,7 +3108,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     oldPK = getAltFormeOfPokemon(oldPK, old.forme);
                 }
                 Integer oldBST = oldPK.hp + oldPK.attack + oldPK.defense + oldPK.spatk + oldPK.spdef + oldPK.speed;
-                if (oldPK.number == 487 && ptGiratina) {
+                if (oldPK.number == Species.giratina && ptGiratina) {
                     newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
                     pokemonLeft.remove(newPK);
                     setPokemonAndFormeForStaticEncounter(newStatic, newPK);
@@ -3245,7 +3181,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (StaticEncounter old : currentStaticPokemon) {
                 StaticEncounter newStatic = cloneStaticEncounter(old);
                 Pokemon newPK;
-                if (old.pkmn.number == 487 && ptGiratina) {
+                if (old.pkmn.number == Species.giratina && ptGiratina) {
                     newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
                     pokemonLeft.remove(newPK);
                     setPokemonAndFormeForStaticEncounter(newStatic, newPK);
@@ -4435,9 +4371,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (Pokemon pk : pokemonPool) {
                 for (Evolution ev : pk.evolutionsFrom) {
                     oldEvoPairs.add(new EvolutionPair(ev.from, ev.to));
-                    if (generationOfPokemon() >= 7 && ev.from.number == 790) { // Special case for Cosmoem to add Lunala/Solgaleo since we remove the split evo
-                        int oppositeVersionLegendaryNumber = ev.to.number == 791 ? 792 : 791;
-                        Pokemon toPkmn = findPokemonInPoolWithSpeciesID(pokemonPool, oppositeVersionLegendaryNumber);
+                    if (generationOfPokemon() >= 7 && ev.from.number == Species.cosmoem) { // Special case for Cosmoem to add Lunala/Solgaleo since we remove the split evo
+                        int oppositeVersionLegendary = ev.to.number == Species.solgaleo ? Species.lunala : Species.solgaleo;
+                        Pokemon toPkmn = findPokemonInPoolWithSpeciesID(pokemonPool, oppositeVersionLegendary);
                         if (toPkmn != null) {
                             oldEvoPairs.add(new EvolutionPair(ev.from, toPkmn));
                         }
@@ -4552,7 +4488,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         Set<Pokemon> includeType = new HashSet<>();
                         for (Pokemon pk : replacements) {
                             // Special case for Eevee
-                            if (fromPK.number == 133) {
+                            if (fromPK.number == Species.eevee) {
                                 if (pk.primaryType == ev.to.primaryType
                                         || (pk.secondaryType != null) && pk.secondaryType == ev.to.primaryType) {
                                     includeType.add(pk);
@@ -5690,16 +5626,16 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (int i = 0; i < mainPokemonListInclFormes.size(); i++) {
             Pokemon pokemon = mainPokemonListInclFormes.get(i);
             if (pokemon.baseForme != null) {
-                if (pokemon.baseForme.number == 351) {
+                if (pokemon.baseForme.number == Species.castform) {
                     // All alternate Castform formes
                     abilityDependentFormes.add(pokemon);
-                } else if (pokemon.baseForme.number == 555 && pokemon.formeNumber == 1) {
+                } else if (pokemon.baseForme.number == Species.darmanitan && pokemon.formeNumber == 1) {
                     // Damanitan-Z
                     abilityDependentFormes.add(pokemon);
-                } else if (pokemon.baseForme.number == 681) {
+                } else if (pokemon.baseForme.number == Species.aegislash) {
                     // Aegislash-B
                     abilityDependentFormes.add(pokemon);
-                } else if (pokemon.baseForme.number == 746) {
+                } else if (pokemon.baseForme.number == Species.wishiwashi) {
                     // Wishiwashi-S
                     abilityDependentFormes.add(pokemon);
                 }
@@ -5714,11 +5650,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (int i = 0; i < mainPokemonListInclFormes.size(); i++) {
             Pokemon pokemon = mainPokemonListInclFormes.get(i);
             if (pokemon.baseForme != null) {
-                if (pokemon.baseForme.number == 487) {
+                if (pokemon.baseForme.number == Species.giratina) {
                     // Giratina-O is banned because it reverts back to Altered Forme if
                     // equipped with any item that isn't the Griseous Orb.
                     bannedFormes.add(pokemon);
-                } else if (pokemon.baseForme.number == 492) {
+                } else if (pokemon.baseForme.number == Species.shaymin) {
                     // Shaymin-S is banned because it reverts back to its original forme
                     // under a variety of circumstances, and can only be changed back
                     // with the Gracidea.

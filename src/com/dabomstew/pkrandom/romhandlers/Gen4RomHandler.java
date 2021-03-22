@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.constants.Species;
 import com.dabomstew.pkrandom.pokemon.*;
 import thenewpoketext.PokeTextData;
 import thenewpoketext.TextToPoke;
@@ -600,8 +601,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 int poke3 = readWord(arm9, starterOffset + 8);
                 return Arrays.asList(pokes[poke1], pokes[poke2], pokes[poke3]);
             } else {
-                return Arrays.asList(pokes[Gen4Constants.chikoritaIndex], pokes[Gen4Constants.cyndaquilIndex],
-                        pokes[Gen4Constants.totodileIndex]);
+                return Arrays.asList(pokes[Species.chikorita], pokes[Species.cyndaquil],
+                        pokes[Species.totodile]);
             }
         } else {
             try {
@@ -655,7 +656,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                         int secondBase = jumpAmount + baseOffset + 17;
                         // TODO find out what this constant 0x11 is and remove
                         // it
-                        if (file[secondBase] != 0x11 || (file[secondBase + 4] & 0xFF) != Gen4Constants.cyndaquilIndex) {
+                        if (file[secondBase] != 0x11 || (file[secondBase + 4] & 0xFF) != Species.cyndaquil) {
                             // This isn't what we were expecting...
                         } else {
                             // Replace 155 (cynda) with 2nd starter
@@ -757,7 +758,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                                 continue; // not a tag battle script
                             }
                             // Replace the two starter-words
-                            if (readWord(file, baseOffset + 0x21) == Gen4Constants.turtwigIndex) {
+                            if (readWord(file, baseOffset + 0x21) == Species.turtwig) {
                                 // first starter
                                 writeWord(file, baseOffset + 0x21, newStarters.get(0).number);
                             } else {
@@ -2978,7 +2979,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
                 byte[] evoEntry = evoNARC.files.get(i);
                 Pokemon pk = pokes[i];
-                if (pk.number == 290) {
+                if (pk.number == Species.nincada) {
                     writeShedinjaEvolution();
                 }
                 int evosWritten = 0;
@@ -3005,7 +3006,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     private void writeShedinjaEvolution() {
-        Pokemon nincada = pokes[290];
+        Pokemon nincada = pokes[Species.nincada];
 
         // When the "Limit Pokemon" setting is enabled, we clear out the evolutions of
         // everything *not* in the pool, which could include Nincada. In that case,
@@ -3118,7 +3119,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     if (evo.type == EvolutionType.TRADE_ITEM) {
                         // Get the current item & evolution
                         int item = evo.extraInfo;
-                        if (evo.from.number == Gen4Constants.slowpokeIndex) {
+                        if (evo.from.number == Species.slowpoke) {
                             // Slowpoke is awkward - he already has a level evo
                             // So we can't do Level up w/ Held Item for him
                             // Put Water Stone instead
@@ -3178,7 +3179,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 extraEvolutions.clear();
                 for (Evolution evo : pkmn.evolutionsFrom) {
                     if (evo.type == EvolutionType.HAPPINESS_DAY) {
-                        if (evo.from.number == Gen4Constants.eeveeIndex) {
+                        if (evo.from.number == Species.eevee) {
                             // We can't set Eevee to evolve into Espeon with happiness at night because that's how
                             // Umbreon works in the original game. Instead, make Eevee: == sun stone => Espeon
                             evo.type = EvolutionType.STONE;
@@ -3192,7 +3193,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                             extraEvolutions.add(extraEntry);
                         }
                     } else if (evo.type == EvolutionType.HAPPINESS_NIGHT) {
-                        if (evo.from.number == Gen4Constants.eeveeIndex) {
+                        if (evo.from.number == Species.eevee) {
                             // We can't set Eevee to evolve into Umbreon with happiness at day because that's how
                             // Espeon works in the original game. Instead, make Eevee: == moon stone => Umbreon
                             evo.type = EvolutionType.STONE;

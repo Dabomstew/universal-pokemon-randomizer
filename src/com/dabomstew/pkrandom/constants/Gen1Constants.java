@@ -41,8 +41,6 @@ public class Gen1Constants {
             bsExpYieldOffset = 9, bsFrontSpriteOffset = 11, bsLevel1MovesOffset = 15, bsGrowthCurveOffset = 19,
             bsTMHMCompatOffset = 20;
 
-    public static final int mewIndex = 151, marowakIndex = 105;
-
     public static final int encounterTableEnd = 0xFFFF, encounterTableSize = 10, yellowSuperRodTableSize = 4;
 
     public static final int trainerClassCount = 47;
