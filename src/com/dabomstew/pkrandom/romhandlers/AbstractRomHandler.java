@@ -4252,17 +4252,13 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (pk != null) {
                 for (Evolution checkEvo : pk.evolutionsFrom) {
                     if (checkEvo.type.usesLevel()) {
-                        // bring down the level of this evo if it exceeds max
-                        // level
-                        if (checkEvo.extraInfo > maxLevel) {
-                            checkEvo.extraInfo = maxLevel;
-                            addEvoUpdateCondensed(easierEvolutionUpdates, checkEvo, false);
-                        }
-
-                        // Now, seperately, if an intermediate level evo is too
-                        // high, bring it down
+                        // If evo is intermediate and too high, bring it down
+                        // Else if it's just too high, bring it down
                         if (checkEvo.extraInfo > maxIntermediateLevel && checkEvo.to.evolutionsFrom.size() > 0) {
                             checkEvo.extraInfo = maxIntermediateLevel;
+                            addEvoUpdateCondensed(easierEvolutionUpdates, checkEvo, false);
+                        } else if (checkEvo.extraInfo > maxLevel) {
+                            checkEvo.extraInfo = maxLevel;
                             addEvoUpdateCondensed(easierEvolutionUpdates, checkEvo, false);
                         }
                     }
