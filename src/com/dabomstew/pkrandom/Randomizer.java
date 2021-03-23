@@ -348,6 +348,12 @@ public class Randomizer {
             trainersChanged = true;
         }
 
+        if (trainersChanged) {
+            maybeLogTrainerChanges(log);
+        } else {
+            log.println("Trainers: Unchanged." + NEWLINE);
+        }
+
         // Trainer names & class names randomization
         // done before trainer log to add proper names
         if (romHandler.canChangeTrainerText()) {
@@ -358,12 +364,6 @@ public class Randomizer {
             if (settings.isRandomizeTrainerNames()) {
                 romHandler.randomizeTrainerNames(settings);
             }
-        }
-
-        if (trainersChanged) {
-            maybeLogTrainerChanges(log);
-        } else {
-            log.println("Trainers: Unchanged." + NEWLINE);
         }
 
         // Apply metronome only mode now that trainers have been dealt with
