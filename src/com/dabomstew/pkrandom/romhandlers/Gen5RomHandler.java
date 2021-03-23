@@ -70,8 +70,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public void changeCatchRates(Settings settings) {
+        int minimumCatchRateLevel = settings.getMinimumCatchRateLevel();
+
         int normalMin, legendaryMin;
-        switch (settings.getMinimumCatchRateLevel()) {
+        switch (minimumCatchRateLevel) {
             case 1:
             default:
                 normalMin = 50;
@@ -2377,7 +2379,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public void removeImpossibleEvolutions(Settings settings) {
-
         boolean changeMoveEvos = !(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED);
 
         Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
@@ -2458,7 +2459,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public void makeEvolutionsEasier(Settings settings) {
-
         boolean wildsRandomized = !settings.getWildPokemonMod().equals(Settings.WildPokemonMod.UNCHANGED);
 
         if (wildsRandomized) {

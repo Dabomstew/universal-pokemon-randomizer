@@ -2309,7 +2309,6 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public void removeImpossibleEvolutions(Settings settings) {
-
         boolean changeMoveEvos = !(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED);
 
         Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
@@ -2392,7 +2391,6 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public void makeEvolutionsEasier(Settings settings) {
-
         boolean wildsRandomized = !settings.getWildPokemonMod().equals(Settings.WildPokemonMod.UNCHANGED);
 
         for (Pokemon pkmn : pokes) {

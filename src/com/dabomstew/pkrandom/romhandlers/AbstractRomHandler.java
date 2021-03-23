@@ -77,7 +77,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     public void setPokemonPool(Settings settings) {
-
         GenRestrictions restrictions = null;
         if (settings != null) {
             restrictions = settings.getCurrentRestrictions();
@@ -268,7 +267,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void shufflePokemonStats(Settings settings) {
-
         boolean evolutionSanity = settings.isBaseStatsFollowEvolutions();
         boolean megaEvolutionSanity = settings.isBaseStatsFollowMegaEvolutions();
 
@@ -303,7 +301,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizePokemonStats(Settings settings) {
-
         boolean evolutionSanity = settings.isBaseStatsFollowEvolutions();
         boolean megaEvolutionSanity = settings.isBaseStatsFollowMegaEvolutions();
 
@@ -338,7 +335,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void updatePokemonStats(Settings settings) {
-
         int generation = settings.getUpdateBaseStatsToGeneration();
 
         List<Pokemon> pokes = getPokemonInclFormes();
@@ -458,7 +454,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizePokemonTypes(Settings settings) {
-
         boolean evolutionSanity = settings.getTypesMod() == Settings.TypesMod.RANDOM_FOLLOW_EVOLUTIONS;
         boolean megaEvolutionSanity = settings.isTypesFollowMegaEvolutions();
 
@@ -545,7 +540,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeAbilities(Settings settings) {
-
         boolean evolutionSanity = settings.isAbilitiesFollowEvolutions();
         boolean allowWonderGuard = settings.isAllowWonderGuard();
         boolean banTrappingAbilities = settings.isBanTrappingAbilities();
@@ -714,7 +708,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomEncounters(Settings settings) {
-
         boolean useTimeOfDay = settings.isUseTimeBasedEncounters();
         boolean catchEmAll = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL;
         boolean typeThemed = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS;
@@ -916,7 +909,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void area1to1Encounters(Settings settings) {
-
         boolean useTimeOfDay = settings.isUseTimeBasedEncounters();
 
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
@@ -932,7 +924,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private void area1to1EncountersImpl(List<EncounterSet> currentEncounters, Settings settings) {
-
         boolean catchEmAll = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL;
         boolean typeThemed = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS;
         boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
@@ -1143,7 +1134,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void game1to1Encounters(Settings settings) {
-
         boolean useTimeOfDay = settings.isUseTimeBasedEncounters();
         boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
         boolean noLegendaries = settings.isBlockWildLegendaries();
@@ -1271,7 +1261,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void onlyChangeWildLevels(Settings settings) {
-
         int levelModifier = settings.getWildLevelModifier();
 
         List<EncounterSet> currentEncounters = this.getEncounters(true);
@@ -1288,7 +1277,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private void enhanceRandomEncountersORAS(List<EncounterSet> collapsedEncounters, Settings settings) {
-
         boolean catchEmAll = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL;
         boolean typeThemed = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS;
         boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
@@ -1575,7 +1563,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeTrainerPokes(Settings settings) {
-
         boolean usePowerLevels = settings.isTrainersUsePokemonOfSimilarStrength();
         boolean noLegendaries = settings.isTrainersBlockLegendaries();
         boolean noEarlyWonderGuard = settings.isTrainersBlockEarlyWonderGuard();
@@ -1743,7 +1730,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void typeThemeTrainerPokes(Settings settings) {
-
         boolean usePowerLevels = settings.isTrainersUsePokemonOfSimilarStrength();
         boolean weightByFrequency = settings.isTrainersMatchTypingDistribution();
         boolean noLegendaries = settings.isTrainersBlockLegendaries();
@@ -1958,7 +1944,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void forceFullyEvolvedTrainerPokes(Settings settings) {
-
         int minLevel = settings.getTrainersForceFullyEvolvedLevel();
 
         checkPokemonRestrictions();
@@ -1981,7 +1966,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void onlyChangeTrainerLevels(Settings settings) {
-
         int levelModifier = settings.getTrainersLevelModifier();
 
         List<Trainer> currentTrainers = this.getTrainers();
@@ -1993,7 +1977,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void addTrainerPokemon(Settings settings) {
-
         int additionalNormal = settings.getAdditionalRegularTrainerPokemon();
         int additionalImportant = settings.getAdditionalImportantTrainerPokemon();
         int additionalBoss = settings.getAdditionalBossTrainerPokemon();
@@ -2203,7 +2186,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void updateMoves(Settings settings) {
-
         int generation = settings.getUpdateMovesToGeneration();
 
         List<Move> moves = this.getMoves();
@@ -2604,7 +2586,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeMovesLearnt(Settings settings) {
-
         boolean typeThemed = settings.getMovesetsMod() == Settings.MovesetsMod.RANDOM_PREFER_SAME_TYPE;
         boolean noBroken = settings.isBlockBrokenMovesetMoves();
         boolean forceStartingMoves = supportsFourStartingMoves() && settings.isStartWithGuaranteedMoves();
@@ -2892,7 +2873,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void customStarters(Settings settings) {
-
         int[] customStarters = settings.getCustomStarters();
         boolean allowAltFormes = settings.isAllowStarterAltFormes();
 
@@ -2929,7 +2909,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeStarters(Settings settings) {
-
         boolean abilitiesUnchanged = settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED;
         boolean allowAltFormes = settings.isAllowStarterAltFormes();
 
@@ -2952,7 +2931,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeBasicTwoEvosStarters(Settings settings) {
-
         boolean abilitiesUnchanged = settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED;
         boolean allowAltFormes = settings.isAllowStarterAltFormes();
 
@@ -2981,7 +2959,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeStaticPokemon(Settings settings) {
-
         boolean swapLegendaries = settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING;
         boolean similarStrength = settings.getStaticPokemonMod() == Settings.StaticPokemonMod.SIMILAR_STRENGTH;
         boolean limitMainGameLegendaries = settings.isLimitMainGameLegendaries();
@@ -3221,7 +3198,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void onlyChangeStaticLevels(Settings settings) {
-
         int levelModifier = settings.getStaticLevelModifier();
 
         List<StaticEncounter> currentStaticPokemon = this.getStaticPokemon();
@@ -3327,7 +3303,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeTMMoves(Settings settings) {
-
         boolean noBroken = settings.isBlockBrokenTMMoves();
         boolean preserveField = settings.isKeepFieldMoveTMs();
         double goodDamagingProbability = settings.isTmsForceGoodDamaging() ? settings.getTmsGoodDamagingPercent() / 100.0 : 0;
@@ -3408,7 +3383,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeTMHMCompatibility(Settings settings) {
-
         boolean preferSameType = settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.RANDOM_PREFER_TYPE;
         boolean followEvolutions = settings.isTmsFollowEvolutions();
 
@@ -3583,7 +3557,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeMoveTutorMoves(Settings settings) {
-
         boolean noBroken = settings.isBlockBrokenTutorMoves();
         boolean preserveField = settings.isKeepFieldMoveTutors();
         double goodDamagingProbability = settings.isTutorsForceGoodDamaging() ? settings.getTutorsGoodDamagingPercent() / 100.0 : 0;
@@ -3669,7 +3642,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeMoveTutorCompatibility(Settings settings) {
-
         boolean preferSameType = settings.getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.RANDOM_PREFER_TYPE;
         boolean followEvolutions = settings.isTutorFollowEvolutions();
 
@@ -3777,7 +3749,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     @SuppressWarnings("unchecked")
     @Override
     public void randomizeTrainerNames(Settings settings) {
-
         CustomNamesSet customNames = settings.getCustomNames();
 
         if (!this.canChangeTrainerText()) {
@@ -3903,7 +3874,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     @SuppressWarnings("unchecked")
     @Override
     public void randomizeTrainerClassNames(Settings settings) {
-
         CustomNamesSet customNames = settings.getCustomNames();
 
         if (!this.canChangeTrainerText()) {
@@ -3983,7 +3953,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeWildHeldItems(Settings settings) {
-
         boolean banBadItems = settings.isBanBadRandomWildPokemonHeldItems();
 
         List<Pokemon> pokemon = allPokemonInclFormesWithoutNull();
@@ -4085,7 +4054,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeStarterHeldItems(Settings settings) {
-
         boolean banBadItems = settings.isBanBadRandomStarterHeldItems();
 
         List<Integer> oldHeldItems = this.getStarterHeldItems();
@@ -4111,7 +4079,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeFieldItems(Settings settings) {
-
         boolean banBadItems = settings.isBanBadRandomFieldItems();
         boolean distributeItemsControl = settings.getFieldItemsMod() == Settings.FieldItemsMod.RANDOM_EVEN;
 
@@ -4130,7 +4097,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Integer> newTMs = new ArrayList<>(requiredTMs);
 
         // List<Integer> chosenItems = new ArrayList<Integer>(); // collecting chosenItems for later process
-        
+
         if (distributeItemsControl) {
             for (int i = 0; i < fieldItemCount; i++) {
                 int chosenItem = possibleItems.randomNonTM(this.random);
@@ -4168,7 +4135,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeIngameTrades(Settings settings) {
-
         boolean randomizeRequest = settings.getInGameTradesMod() == Settings.InGameTradesMod.RANDOMIZE_GIVEN_AND_REQUESTED;
         boolean randomNickname = settings.isRandomizeInGameTradesNicknames();
         boolean randomOT = settings.isRandomizeInGameTradesOTs();
@@ -4330,7 +4296,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeEvolutions(Settings settings) {
-
         boolean similarStrength = settings.isEvosSimilarStrength();
         boolean sameType = settings.isEvosSameTyping();
         boolean limitToThreeStages = settings.isEvosMaxThreeStages();
@@ -4569,8 +4534,10 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void changeCatchRates(Settings settings) {
+        int minimumCatchRateLevel = settings.getMinimumCatchRateLevel();
+
         int normalMin, legendaryMin;
-        switch (settings.getMinimumCatchRateLevel()) {
+        switch (minimumCatchRateLevel) {
             case 1:
             default:
                 normalMin = 75;
@@ -4617,7 +4584,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     // possible items, you will get owned by the while loop
     @Override
     public void randomizeShopItems(Settings settings) {
-
         boolean banBadItems = settings.isBanBadRandomShopItems();
         boolean banRegularShopItems = settings.isBanRegularShopItems();
         boolean banOPShopItems = settings.isBanOPShopItems();
@@ -4741,7 +4707,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void standardizeEXPCurves(Settings settings) {
-
         Settings.ExpCurveMod mod = settings.getExpCurveMod();
         ExpCurve expCurve = settings.getSelectedEXPCurve();
 
@@ -4954,7 +4919,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     /**
      * Check whether adding an evolution from one Pokemon to another will cause
      * an evolution cycle.
-     * 
+     *
      * @param from Pokemon that is evolving
      * @param to Pokemon to evolve to
      * @return True if there is an evolution cycle, else false
@@ -5667,7 +5632,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeTotemPokemon(Settings settings) {
-
         boolean randomizeTotem =
                 settings.getTotemPokemonMod() == Settings.TotemPokemonMod.RANDOM ||
                         settings.getTotemPokemonMod() == Settings.TotemPokemonMod.SIMILAR_STRENGTH;
@@ -5829,11 +5793,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
     }
-    
+
     private void setPlacementHistory(Pokemon newPK) {
         Integer history = getPlacementHistory(newPK);
 //         System.out.println("Current history: " + newPK.name + " : " + history);
-        placementHistory.put(newPK, history + 1);        
+        placementHistory.put(newPK, history + 1);
     }
 
     private int getPlacementHistory(Pokemon newPK) {
@@ -5843,40 +5807,40 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         else {
             return 0;
-        }        
+        }
     }
 
     private float getPlacementAverage() {
         List<Pokemon> placedPK = new ArrayList<>(placementHistory.keySet());
         int placedPKNum = 0;
         for (Pokemon p : placedPK) {
-            placedPKNum += placementHistory.get(p); 
+            placedPKNum += placementHistory.get(p);
         }
         return (float)placedPKNum / (float)placedPK.size();
         }
 
-        
+
     private List<Pokemon> getBelowAveragePlacements() {
         // This method will return a PK if the number of times a pokemon has been
         // placed is less than average of all placed pokemon's appearances
         // E.g., Charmander's been placed once, but the average for all pokemon is 2.2
         // So add to list and return 
-        
+
         List<Pokemon> toPlacePK = new ArrayList<>();
         List<Pokemon> placedPK = new ArrayList<>(placementHistory.keySet());
         List<Pokemon> allPK = cachedAllList;
         int placedPKNum = 0;
         for (Pokemon p : placedPK) {
-            placedPKNum += placementHistory.get(p); 
+            placedPKNum += placementHistory.get(p);
         }
         float placedAverage = Math.round((float)placedPKNum / (float)placedPK.size());
 
-        
-        
+
+
         if (placedAverage != placedAverage) { // this is checking for NaN, should only happen on first call
             placedAverage = 1;
         }
-        
+
         // now we've got placement average, iterate all pokemon and see if they qualify to be placed
 
         for (Pokemon newPK : allPK) {
@@ -5891,13 +5855,13 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             else {
                 toPlacePK.add(newPK); // if not placed at all, automatically flag true for placing
-                
+
             }
         }
 
         // System.out.println("Size: " + toPlacePK.size());
-        return toPlacePK; 
-        
+        return toPlacePK;
+
     }
 
     @Override
@@ -5906,16 +5870,16 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (Pokemon p : placedPK) {
             System.out.println(p.name+": "+ placementHistory.get(p));
         }
-        
-        
+
+
     }
-    
-    
+
+
     ///// Item functions
     private void setItemPlacementHistory(int newItem) {
         Integer history = getItemPlacementHistory(newItem);
         // System.out.println("Current history: " + newPK.name + " : " + history);
-        itemPlacementHistory.put(newItem, history + 1);        
+        itemPlacementHistory.put(newItem, history + 1);
     }
 
     private int getItemPlacementHistory(int newItem) {
@@ -5925,34 +5889,34 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         else {
             return 0;
-        }        
+        }
     }
-    
+
     private float getItemPlacementAverage() {
         // This method will return an integer of average for itemPlacementHistory
         // placed is less than average of all placed pokemon's appearances
         // E.g., Charmander's been placed once, but the average for all pokemon is 2.2
         // So add to list and return 
-        
+
         List<Integer> placedPK = new ArrayList<>(itemPlacementHistory.keySet());
         int placedPKNum = 0;
         for (Integer p : placedPK) {
-            placedPKNum += itemPlacementHistory.get(p); 
+            placedPKNum += itemPlacementHistory.get(p);
         }
         return (float)placedPKNum / (float)placedPK.size();
     }
-    
+
     private void reportItemHistory() {
         String[] itemNames = this.getItemNames();
         List<Integer> placedItem = new ArrayList<>(itemPlacementHistory.keySet());
         for (Integer p : placedItem) {
-            System.out.println(itemNames[p]+": "+ itemPlacementHistory.get(p)); 
+            System.out.println(itemNames[p]+": "+ itemPlacementHistory.get(p));
         }
     }
-    
-    
 
-    
+
+
+
     protected void log(String log) {
         if (logStream != null) {
             logStream.println(log);
@@ -6071,7 +6035,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void applyMiscTweaks(Settings settings) {
-
         int selectedMiscTweaks = settings.getCurrentMiscTweaks();
 
         int codeTweaksAvailable = miscTweaksAvailable();
