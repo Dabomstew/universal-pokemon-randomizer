@@ -355,7 +355,7 @@ public class Randomizer {
         }
 
         // Trainer names & class names randomization
-        // done before trainer log to add proper names
+        // done after trainer log for clarity
         if (romHandler.canChangeTrainerText()) {
             if (settings.isRandomizeTrainerClassNames()) {
                 romHandler.randomizeTrainerClassNames(settings);
