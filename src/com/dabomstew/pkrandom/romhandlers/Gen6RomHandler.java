@@ -2664,7 +2664,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
             }
         }
-        logBlankLine();
+
     }
 
     @Override

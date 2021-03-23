@@ -2453,7 +2453,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 }
             }
         }
-        logBlankLine();
+
     }
 
     @Override

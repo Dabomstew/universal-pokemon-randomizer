@@ -988,8 +988,8 @@ public class Randomizer {
         log.println("");
     }
 
-    private void logUpdatedEvolutions(final PrintStream log, Map<Integer,EvolutionUpdate> updatedEvolutions) {
-        for (EvolutionUpdate evo: updatedEvolutions.values()) {
+    private void logUpdatedEvolutions(final PrintStream log, List<EvolutionUpdate> updatedEvolutions) {
+        for (EvolutionUpdate evo: updatedEvolutions) {
             log.println(evo.toString());
         }
         log.println();

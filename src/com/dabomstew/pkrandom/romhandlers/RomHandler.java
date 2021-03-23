@@ -464,11 +464,11 @@ public interface RomHandler {
 
     void removeTimeBasedEvolutions();
 
-    Map<Integer,EvolutionUpdate> getImpossibleEvoUpdates();
+    List<EvolutionUpdate> getImpossibleEvoUpdates();
 
-    Map<Integer,EvolutionUpdate> getEasierEvoUpdates();
+    List<EvolutionUpdate> getEasierEvoUpdates();
 
-    Map<Integer,EvolutionUpdate> getTimeBasedEvoUpdates();
+    List<EvolutionUpdate> getTimeBasedEvoUpdates();
 
     void randomizeEvolutions(Settings settings);
 

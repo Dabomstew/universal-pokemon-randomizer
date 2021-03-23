@@ -2421,7 +2421,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 }
             }
         }
-        logBlankLine();
+
     }
 
     @Override

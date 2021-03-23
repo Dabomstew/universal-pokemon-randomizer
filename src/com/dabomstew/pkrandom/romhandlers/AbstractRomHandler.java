@@ -4314,17 +4314,17 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public Map<Integer, EvolutionUpdate> getImpossibleEvoUpdates() {
+    public List<EvolutionUpdate> getImpossibleEvoUpdates() {
         return impossibleEvolutionUpdates;
     }
 
     @Override
-    public Map<Integer, EvolutionUpdate> getEasierEvoUpdates() {
+    public List<EvolutionUpdate> getEasierEvoUpdates() {
         return easierEvolutionUpdates;
     }
 
     @Override
-    public Map<Integer, EvolutionUpdate> getTimeBasedEvoUpdates() {
+    public List<EvolutionUpdate> getTimeBasedEvoUpdates() {
         return timeBasedEvolutionUpdates;
     }
 
@@ -4826,52 +4826,52 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
-    protected Map<Integer, EvolutionUpdate> impossibleEvolutionUpdates = new TreeMap<>();
-    protected Map<Integer, EvolutionUpdate> timeBasedEvolutionUpdates = new TreeMap<>();
-    protected Map<Integer, EvolutionUpdate> easierEvolutionUpdates = new TreeMap<>();
+    protected List<EvolutionUpdate> impossibleEvolutionUpdates = new ArrayList<>();
+    protected List<EvolutionUpdate> timeBasedEvolutionUpdates = new ArrayList<>();
+    protected List<EvolutionUpdate> easierEvolutionUpdates = new ArrayList<>();
 
-    protected void addEvoUpdateLevel(Map<Integer, EvolutionUpdate> evolutionUpdates, Evolution evo) {
+    protected void addEvoUpdateLevel(List<EvolutionUpdate> evolutionUpdates, Evolution evo) {
         Pokemon pkFrom = evo.from;
         Pokemon pkTo = evo.to;
         int level = evo.extraInfo;
-        evolutionUpdates.put(pkFrom.number,
-                new EvolutionUpdate(pkFrom, pkTo, EvolutionType.LEVEL, String.valueOf(level), false, false));
+        evolutionUpdates.add(new EvolutionUpdate(pkFrom, pkTo, EvolutionType.LEVEL, String.valueOf(level),
+                false, false));
     }
 
-    protected void addEvoUpdateStone(Map<Integer, EvolutionUpdate> evolutionUpdates, Evolution evo, String item) {
+    protected void addEvoUpdateStone(List<EvolutionUpdate> evolutionUpdates, Evolution evo, String item) {
         Pokemon pkFrom = evo.from;
         Pokemon pkTo = evo.to;
-        evolutionUpdates.put(pkFrom.number,
-                new EvolutionUpdate(pkFrom, pkTo, EvolutionType.STONE, item, false, false));
+        evolutionUpdates.add(new EvolutionUpdate(pkFrom, pkTo, EvolutionType.STONE, item,
+                false, false));
     }
 
-    protected void addEvoUpdateHappiness(Map<Integer, EvolutionUpdate> evolutionUpdates, Evolution evo) {
+    protected void addEvoUpdateHappiness(List<EvolutionUpdate> evolutionUpdates, Evolution evo) {
         Pokemon pkFrom = evo.from;
         Pokemon pkTo = evo.to;
-        evolutionUpdates.put(pkFrom.number,
-                new EvolutionUpdate(pkFrom, pkTo, EvolutionType.HAPPINESS, "", false, false));
+        evolutionUpdates.add(new EvolutionUpdate(pkFrom, pkTo, EvolutionType.HAPPINESS, "",
+                false, false));
     }
 
-    protected void addEvoUpdateHeldItem(Map<Integer, EvolutionUpdate> evolutionUpdates, Evolution evo, String item) {
+    protected void addEvoUpdateHeldItem(List<EvolutionUpdate> evolutionUpdates, Evolution evo, String item) {
         Pokemon pkFrom = evo.from;
         Pokemon pkTo = evo.to;
-        evolutionUpdates.put(pkFrom.number,
-                new EvolutionUpdate(pkFrom, pkTo, EvolutionType.LEVEL_ITEM_DAY, item, false, false));
+        evolutionUpdates.add(new EvolutionUpdate(pkFrom, pkTo, EvolutionType.LEVEL_ITEM_DAY, item,
+                false, false));
     }
 
-    protected void addEvoUpdateParty(Map<Integer, EvolutionUpdate> evolutionUpdates, Evolution evo, String otherPk) {
+    protected void addEvoUpdateParty(List<EvolutionUpdate> evolutionUpdates, Evolution evo, String otherPk) {
         Pokemon pkFrom = evo.from;
         Pokemon pkTo = evo.to;
-        evolutionUpdates.put(pkFrom.number,
-                new EvolutionUpdate(pkFrom, pkTo, EvolutionType.LEVEL_WITH_OTHER, otherPk, false, false));
+        evolutionUpdates.add(new EvolutionUpdate(pkFrom, pkTo, EvolutionType.LEVEL_WITH_OTHER, otherPk,
+                false, false));
     }
 
-    protected void addEvoUpdateCondensed(Map<Integer, EvolutionUpdate> evolutionUpdates, Evolution evo, boolean additional) {
+    protected void addEvoUpdateCondensed(List<EvolutionUpdate> evolutionUpdates, Evolution evo, boolean additional) {
         Pokemon pkFrom = evo.from;
         Pokemon pkTo = evo.to;
         int level = evo.extraInfo;
-        evolutionUpdates.put(pkFrom.number,
-                new EvolutionUpdate(pkFrom, pkTo, EvolutionType.LEVEL, String.valueOf(level), true, additional));
+        evolutionUpdates.add(new EvolutionUpdate(pkFrom, pkTo, EvolutionType.LEVEL, String.valueOf(level),
+                true, additional));
     }
 
     private Pokemon pickEvoPowerLvlReplacement(List<Pokemon> pokemonPool, Pokemon current) {

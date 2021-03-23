@@ -3146,7 +3146,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 }
             }
         }
-        logBlankLine();
 
     }
 
