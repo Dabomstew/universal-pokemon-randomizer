@@ -90,6 +90,7 @@ public class Randomizer {
         boolean totemsChanged = false;
         boolean wildsChanged = false;
         boolean tmMovesChanged = false;
+        boolean moveTutorMovesChanged = false;
         boolean tradesChanged = false;
         boolean tmsHmsCompatChanged = false;
         boolean tutorCompatChanged = false;
@@ -145,32 +146,27 @@ public class Randomizer {
         }
 
         // Misc Tweaks
-
         if (settings.getCurrentMiscTweaks() != MiscTweak.NO_MISC_TWEAKS) {
             romHandler.applyMiscTweaks(settings);
         }
 
         // Update base stats to a future generation
-
         if (settings.isUpdateBaseStats()) {
             romHandler.updatePokemonStats(settings);
         }
 
         // Standardize EXP curves
-
         if (settings.isStandardizeEXPCurves()) {
             romHandler.standardizeEXPCurves(settings);
         }
 
         // Pokemon Types
-
         if (settings.getTypesMod() != Settings.TypesMod.UNCHANGED) {
             romHandler.randomizePokemonTypes(settings);
             pokemonTraitsChanged = true;
         }
 
         // Wild Held Items
-
         if (settings.isRandomizeWildPokemonHeldItems()) {
             romHandler.randomizeWildHeldItems(settings);
             pokemonTraitsChanged = true;
@@ -189,7 +185,6 @@ public class Randomizer {
         }
 
         // Base stat randomization
-
         switch (settings.getBaseStatisticsMod()) {
             case SHUFFLE:
                 romHandler.shufflePokemonStats(settings);
@@ -204,12 +199,12 @@ public class Randomizer {
         }
 
         // Abilities
-
         if (settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE) {
             romHandler.randomizeAbilities(settings);
             pokemonTraitsChanged = true;
         }
 
+        // Log Pokemon traits (stats, abilities, etc) if any have changed
         if (pokemonTraitsChanged) {
             logPokemonTraitChanges(log);
         } else {
@@ -247,7 +242,6 @@ public class Randomizer {
 
         // Starter Pokemon
         // Applied after type to update the strings correctly based on new types
-
         if (romHandler.canChangeStarters()) {
             switch(settings.getStartersMod()) {
                 case CUSTOM:
@@ -360,7 +354,6 @@ public class Randomizer {
 
         // Trainer names & class names randomization
         // done before trainer log to add proper names
-
         if (romHandler.canChangeTrainerText()) {
             if (settings.isRandomizeTrainerClassNames()) {
                 romHandler.randomizeTrainerClassNames(settings);
@@ -390,7 +383,6 @@ public class Randomizer {
         }
 
         // Static Pokemon
-
         if (romHandler.canChangeStaticPokemon()) {
             List<StaticEncounter> oldStatics = romHandler.getStaticPokemon();
             if (settings.getStaticPokemonMod() != Settings.StaticPokemonMod.UNCHANGED) { // Legendary for L
@@ -409,7 +401,6 @@ public class Randomizer {
         }
 
         // Totem Pokemon
-
         if (romHandler.generationOfPokemon() == 7) {
             List<TotemPokemon> oldTotems = romHandler.getTotemPokemon();
             if (settings.getTotemPokemonMod() != Settings.TotemPokemonMod.UNCHANGED ||
@@ -474,6 +465,7 @@ public class Randomizer {
         }
 
         // TMs
+
         if (!(settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY)
                 && settings.getTmsMod() == Settings.TMsMod.RANDOM) {
             romHandler.randomizeTMMoves(settings);
@@ -494,6 +486,7 @@ public class Randomizer {
         // 3. Follow evolutions
         // 4. Full HM compatibility
         // 5. Copy to cosmetic forms
+
         switch (settings.getTmsHmsCompatibilityMod()) {
             case COMPLETELY_RANDOM:
             case RANDOM_PREFER_TYPE:
@@ -526,8 +519,6 @@ public class Randomizer {
             romHandler.copyTMCompatibilityToCosmeticFormes();
             logTMHMCompatibility(log);
         }
-
-        boolean moveTutorMovesChanged = false;
 
         // Move Tutors
         if (romHandler.hasMoveTutors()) {
@@ -586,6 +577,7 @@ public class Randomizer {
         }
 
         // In-game trades
+
         List<IngameTrade> oldTrades = romHandler.getIngameTrades();
         switch(settings.getInGameTradesMod()) {
             case RANDOMIZE_GIVEN:
@@ -602,7 +594,6 @@ public class Randomizer {
         }
 
         // Field Items
-
         switch(settings.getFieldItemsMod()) {
             case SHUFFLE:
                 romHandler.shuffleFieldItems();
@@ -633,6 +624,7 @@ public class Randomizer {
         if (shopsChanged) {
             logShops(log);
         }
+
         // Test output for placement history
         // romHandler.renderPlacementHistory();
 
