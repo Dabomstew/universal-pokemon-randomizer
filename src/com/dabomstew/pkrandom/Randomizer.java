@@ -27,11 +27,7 @@ package com.dabomstew.pkrandom;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
@@ -980,7 +976,7 @@ public class Randomizer {
         log.println("");
     }
 
-    private void logUpdatedEvolutions(final PrintStream log, List<EvolutionUpdate> updatedEvolutions) {
+    private void logUpdatedEvolutions(final PrintStream log, Set<EvolutionUpdate> updatedEvolutions) {
         for (EvolutionUpdate evo: updatedEvolutions) {
             log.println(evo.toString());
         }

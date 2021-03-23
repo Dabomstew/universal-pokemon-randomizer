@@ -4244,11 +4244,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         this.setIngameTrades(trades);
     }
 
-    Set<Evolution> changedEvos;
-
     @Override
     public void condenseLevelEvolutions(int maxLevel, int maxIntermediateLevel) {
-        changedEvos = new TreeSet<>();
         List<Pokemon> allPokemon = this.getPokemon();
         // search for level evolutions
         for (Pokemon pk : allPokemon) {
@@ -4280,17 +4277,17 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public List<EvolutionUpdate> getImpossibleEvoUpdates() {
+    public Set<EvolutionUpdate> getImpossibleEvoUpdates() {
         return impossibleEvolutionUpdates;
     }
 
     @Override
-    public List<EvolutionUpdate> getEasierEvoUpdates() {
+    public Set<EvolutionUpdate> getEasierEvoUpdates() {
         return easierEvolutionUpdates;
     }
 
     @Override
-    public List<EvolutionUpdate> getTimeBasedEvoUpdates() {
+    public Set<EvolutionUpdate> getTimeBasedEvoUpdates() {
         return timeBasedEvolutionUpdates;
     }
 
@@ -4791,11 +4788,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
-    protected List<EvolutionUpdate> impossibleEvolutionUpdates = new ArrayList<>();
-    protected List<EvolutionUpdate> timeBasedEvolutionUpdates = new ArrayList<>();
-    protected List<EvolutionUpdate> easierEvolutionUpdates = new ArrayList<>();
+    protected Set<EvolutionUpdate> impossibleEvolutionUpdates = new TreeSet<>();
+    protected Set<EvolutionUpdate> timeBasedEvolutionUpdates = new TreeSet<>();
+    protected Set<EvolutionUpdate> easierEvolutionUpdates = new TreeSet<>();
 
-    protected void addEvoUpdateLevel(List<EvolutionUpdate> evolutionUpdates, Evolution evo) {
+    protected void addEvoUpdateLevel(Set<EvolutionUpdate> evolutionUpdates, Evolution evo) {
         Pokemon pkFrom = evo.from;
         Pokemon pkTo = evo.to;
         int level = evo.extraInfo;
@@ -4803,35 +4800,35 @@ public abstract class AbstractRomHandler implements RomHandler {
                 false, false));
     }
 
-    protected void addEvoUpdateStone(List<EvolutionUpdate> evolutionUpdates, Evolution evo, String item) {
+    protected void addEvoUpdateStone(Set<EvolutionUpdate> evolutionUpdates, Evolution evo, String item) {
         Pokemon pkFrom = evo.from;
         Pokemon pkTo = evo.to;
         evolutionUpdates.add(new EvolutionUpdate(pkFrom, pkTo, EvolutionType.STONE, item,
                 false, false));
     }
 
-    protected void addEvoUpdateHappiness(List<EvolutionUpdate> evolutionUpdates, Evolution evo) {
+    protected void addEvoUpdateHappiness(Set<EvolutionUpdate> evolutionUpdates, Evolution evo) {
         Pokemon pkFrom = evo.from;
         Pokemon pkTo = evo.to;
         evolutionUpdates.add(new EvolutionUpdate(pkFrom, pkTo, EvolutionType.HAPPINESS, "",
                 false, false));
     }
 
-    protected void addEvoUpdateHeldItem(List<EvolutionUpdate> evolutionUpdates, Evolution evo, String item) {
+    protected void addEvoUpdateHeldItem(Set<EvolutionUpdate> evolutionUpdates, Evolution evo, String item) {
         Pokemon pkFrom = evo.from;
         Pokemon pkTo = evo.to;
         evolutionUpdates.add(new EvolutionUpdate(pkFrom, pkTo, EvolutionType.LEVEL_ITEM_DAY, item,
                 false, false));
     }
 
-    protected void addEvoUpdateParty(List<EvolutionUpdate> evolutionUpdates, Evolution evo, String otherPk) {
+    protected void addEvoUpdateParty(Set<EvolutionUpdate> evolutionUpdates, Evolution evo, String otherPk) {
         Pokemon pkFrom = evo.from;
         Pokemon pkTo = evo.to;
         evolutionUpdates.add(new EvolutionUpdate(pkFrom, pkTo, EvolutionType.LEVEL_WITH_OTHER, otherPk,
                 false, false));
     }
 
-    protected void addEvoUpdateCondensed(List<EvolutionUpdate> evolutionUpdates, Evolution evo, boolean additional) {
+    protected void addEvoUpdateCondensed(Set<EvolutionUpdate> evolutionUpdates, Evolution evo, boolean additional) {
         Pokemon pkFrom = evo.from;
         Pokemon pkTo = evo.to;
         int level = evo.extraInfo;

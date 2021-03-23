@@ -30,6 +30,7 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.Settings;
@@ -464,11 +465,11 @@ public interface RomHandler {
 
     void removeTimeBasedEvolutions();
 
-    List<EvolutionUpdate> getImpossibleEvoUpdates();
+    Set<EvolutionUpdate> getImpossibleEvoUpdates();
 
-    List<EvolutionUpdate> getEasierEvoUpdates();
+    Set<EvolutionUpdate> getEasierEvoUpdates();
 
-    List<EvolutionUpdate> getTimeBasedEvoUpdates();
+    Set<EvolutionUpdate> getTimeBasedEvoUpdates();
 
     void randomizeEvolutions(Settings settings);
 
