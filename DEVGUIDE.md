@@ -25,6 +25,9 @@ Each test should attempt to cover the following cases
 If you have a less common radio button or slider, adjust the above criteria to exercise any conditions this could cover.
 It may be worthwhile to divide a test case into multiple functions. This is perfectly acceptable.
 
+There are some utility methods included to assist with generic patterns.
+* TestCheckboxBasedOnRadioButton - Allows testing when a checkbox is disabled on 1 radio button (default) and enabled on another (trigger). Requires appropriate method references to tie into Settings.
+
 # How do I write a unit test for my function?
 There's no one way of doing it. Most of the work is mocking or disabling features that break the regular flow but are not required for proving the function behaves as expected with a particular input.
 

@@ -234,7 +234,7 @@ public class Gen2Constants {
         tbc(allTrainers, 13, 0, "ELITE3");
         tbc(allTrainers, 14, 0, "ELITE4");
         tbc(allTrainers, 16, 0, "CHAMPION");
-        tbc(allTrainers, 63, 0, "UBER");
+        tbc(allTrainers, 63, 0, "UBER1");
 
         // Silver
         // Order in rom is BAYLEEF, QUILAVA, CROCONAW teams

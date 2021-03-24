@@ -474,7 +474,7 @@ public class Gen3Constants {
         tag(trs, "THEMED:SHELLY", 0x20, 0x21);
 
         // Steven
-        tag(trs, 0x324, "UBER");
+        tag(trs, 0x324, "UBER1");
 
     }
 

@@ -459,7 +459,7 @@ public class Gen4Constants {
         tag(trs, 0xf4, "CHAMPION");
 
         // Red
-        tag(trs, 0x104, "UBER");
+        tag(trs, 0x104, "UBER1");
 
         // Gym Rematches
         tag(trs, 0x2c8, "GYM1");

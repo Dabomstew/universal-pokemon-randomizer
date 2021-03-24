@@ -1056,7 +1056,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     }
 
-    private int readPointer(int offset) {
+    protected int readPointer(int offset) {
         return readLong(offset) - 0x8000000;
     }
 
@@ -1371,11 +1371,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int trOffset = baseOffset + i * entryLen;
             Trainer tr = new Trainer();
             tr.offset = trOffset;
-            int trainerclass = rom[trOffset + 1] & 0xFF;
-            tr.trainerclass = (rom[trOffset + 2] & 0x80) > 0 ? 1 : 0;
+            int trainerclass = readByte(trOffset + 1) & 0xFF;
+            tr.trainerclass = (readByte(trOffset + 2) & 0x80) > 0 ? 1 : 0;
 
-            int pokeDataType = rom[trOffset] & 0xFF;
-            int numPokes = rom[trOffset + (entryLen - 8)] & 0xFF;
+            int pokeDataType = readByte(trOffset) & 0xFF;
+            int numPokes = readByte(trOffset + (entryLen - 8)) & 0xFF;
             int pointerToPokes = readPointer(trOffset + (entryLen - 4));
             tr.poketype = pokeDataType;
             tr.name = this.readVariableLengthString(trOffset + 4);
@@ -1387,7 +1387,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     TrainerPokemon thisPoke = new TrainerPokemon();
                     thisPoke.AILevel = readWord(pointerToPokes + poke * 8);
                     thisPoke.level = readWord(pointerToPokes + poke * 8 + 2);
-                    thisPoke.pokemon = pokesInternal[readWord(pointerToPokes + poke * 8 + 4)];
+                    thisPoke.pokemon = getPokesInternal()[readWord(pointerToPokes + poke * 8 + 4)];
                     tr.pokemon.add(thisPoke);
                 }
             } else if (pokeDataType == 2) {
@@ -1396,7 +1396,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     TrainerPokemon thisPoke = new TrainerPokemon();
                     thisPoke.AILevel = readWord(pointerToPokes + poke * 8);
                     thisPoke.level = readWord(pointerToPokes + poke * 8 + 2);
-                    thisPoke.pokemon = pokesInternal[readWord(pointerToPokes + poke * 8 + 4)];
+                    thisPoke.pokemon = getPokesInternal()[readWord(pointerToPokes + poke * 8 + 4)];
                     thisPoke.heldItem = readWord(pointerToPokes + poke * 8 + 6);
                     tr.pokemon.add(thisPoke);
                 }
@@ -1406,7 +1406,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     TrainerPokemon thisPoke = new TrainerPokemon();
                     thisPoke.AILevel = readWord(pointerToPokes + poke * 16);
                     thisPoke.level = readWord(pointerToPokes + poke * 16 + 2);
-                    thisPoke.pokemon = pokesInternal[readWord(pointerToPokes + poke * 16 + 4)];
+                    thisPoke.pokemon = getPokesInternal()[readWord(pointerToPokes + poke * 16 + 4)];
                     thisPoke.move1 = readWord(pointerToPokes + poke * 16 + 6);
                     thisPoke.move2 = readWord(pointerToPokes + poke * 16 + 8);
                     thisPoke.move3 = readWord(pointerToPokes + poke * 16 + 10);
@@ -1419,7 +1419,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     TrainerPokemon thisPoke = new TrainerPokemon();
                     thisPoke.AILevel = readWord(pointerToPokes + poke * 16);
                     thisPoke.level = readWord(pointerToPokes + poke * 16 + 2);
-                    thisPoke.pokemon = pokesInternal[readWord(pointerToPokes + poke * 16 + 4)];
+                    thisPoke.pokemon = getPokesInternal()[readWord(pointerToPokes + poke * 16 + 4)];
                     thisPoke.heldItem = readWord(pointerToPokes + poke * 16 + 6);
                     thisPoke.move1 = readWord(pointerToPokes + poke * 16 + 8);
                     thisPoke.move2 = readWord(pointerToPokes + poke * 16 + 10);
@@ -3287,5 +3287,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     protected Pokemon[] getPokesInternal() {
         return pokesInternal;
+    }
+
+    protected int readByte(int offset) {
+        return rom[offset];
     }
 }

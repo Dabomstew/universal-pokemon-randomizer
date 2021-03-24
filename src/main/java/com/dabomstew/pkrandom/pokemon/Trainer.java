@@ -62,7 +62,10 @@ public class Trainer implements Comparable<Trainer> {
         if (this.fullDisplayName != null) {
             return this.fullDisplayName;
         }
-        return this.name;
+        if (this.name != null) {
+            return this.name;
+        }
+        return "No_Name_Found";
     }
 
     public int getOffset() {

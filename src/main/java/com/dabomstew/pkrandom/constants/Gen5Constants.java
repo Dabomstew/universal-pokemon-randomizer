@@ -456,11 +456,11 @@ public class Gen5Constants {
         tag(trs, 0x197, "CHAMPION"); // Alder
 
         // Ubers?
-        tag(trs, 0x21E, "UBER"); // Game Freak Guy
-        tag(trs, 0x237, "UBER"); // Cynthia
-        tag(trs, 0xE8, "UBER"); // Ghetsis
-        tag(trs, 0x24A, "UBER"); // N-White
-        tag(trs, 0x24B, "UBER"); // N-Black
+        tag(trs, 0x21E, "UBER1"); // Game Freak Guy
+        tag(trs, 0x237, "UBER2"); // Cynthia
+        tag(trs, 0xE8, "UBER3"); // Ghetsis
+        tag(trs, 0x24A, "UBER4"); // N-White
+        tag(trs, 0x24B, "UBER5"); // N-Black
 
         // Rival - Cheren
         tagRivalBW(trs, "RIVAL1", 0x35);
@@ -557,19 +557,19 @@ public class Gen5Constants {
         // Uber-Trainers
         // There are *fourteen* ubers of 17 allowed (incl. the champion)
         // It's a rather stacked game...
-        tag(trs, 0x246, "UBER"); // Alder
-        tag(trs, 0x1c8, "UBER"); // Cynthia
-        tag(trs, 0xca, "UBER"); // Benga/BlackTower
-        tag(trs, 0xc9, "UBER"); // Benga/WhiteTreehollow
-        tag(trs, 0x5, "UBER"); // N/Zekrom
-        tag(trs, 0x6, "UBER"); // N/Reshiram
-        tag(trs, 0x30e, "UBER"); // N/Spring
-        tag(trs, 0x30f, "UBER"); // N/Summer
-        tag(trs, 0x310, "UBER"); // N/Autumn
-        tag(trs, 0x311, "UBER"); // N/Winter
-        tag(trs, 0x159, "UBER"); // Ghetsis
-        tag(trs, 0x8c, "UBER"); // Game Freak Guy
-        tag(trs, 0x24f, "UBER"); // Game Freak Leftovers Guy
+        tag(trs, 0x246, "UBER1"); // Alder
+        tag(trs, 0x1c8, "UBER2"); // Cynthia
+        tag(trs, 0xca, "UBER3"); // Benga/BlackTower
+        tag(trs, 0xc9, "UBER4"); // Benga/WhiteTreehollow
+        tag(trs, 0x5, "UBER5"); // N/Zekrom
+        tag(trs, 0x6, "UBER6"); // N/Reshiram
+        tag(trs, 0x30e, "UBER7"); // N/Spring
+        tag(trs, 0x30f, "UBER8"); // N/Summer
+        tag(trs, 0x310, "UBER9"); // N/Autumn
+        tag(trs, 0x311, "UBER10"); // N/Winter
+        tag(trs, 0x159, "UBER11"); // Ghetsis
+        tag(trs, 0x8c, "UBER12"); // Game Freak Guy
+        tag(trs, 0x24f, "UBER13"); // Game Freak Leftovers Guy
 
     }
 

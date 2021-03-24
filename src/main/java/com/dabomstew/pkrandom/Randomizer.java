@@ -237,19 +237,16 @@ public class Randomizer {
 
         // Trainer Pokemon
         if (settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED){
-            romHandler.levelUpTrainerPokes(settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
+            romHandler.modifyTrainerPokes(settings.isTrainersRandomHeldItem(), settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
         }
-        if (settings.getTrainersMod() == Settings.TrainersMod.RANDOM) {
+        else {
             romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
-                    settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
-                    settings.isTrainersRandomHeldItem(),
-                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
-        } else if (settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED) {
-            romHandler.typeThemeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
-                    settings.isTrainersMatchTypingDistribution(), settings.isTrainersBlockLegendaries(),
-                    settings.isTrainersBlockEarlyWonderGuard(),
-                    (settings.getCurrentMiscTweaks() & MiscTweak.USE_RESISTANT_TYPE.getValue()) > 0,
-                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
+            settings.isTrainersMatchTypingDistribution(), settings.isTrainersBlockLegendaries(),
+            settings.isTrainersBlockEarlyWonderGuard(),
+            (settings.getCurrentMiscTweaks() & MiscTweak.USE_RESISTANT_TYPE.getValue()) > 0,
+            settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED, 
+            settings.isGymTypeTheme(), settings.isTrainersRandomHeldItem(),
+            settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
         }
 
         if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)
@@ -606,7 +603,8 @@ public class Randomizer {
     }
 
     private void maybeLogTrainerChanges(final RomHandler romHandler) {
-        if (settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED || settings.isRivalCarriesStarterThroughout()) {
+        if (settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED || settings.isRivalCarriesStarterThroughout()
+            || settings.isTrainersRandomHeldItem()) {
             romHandler.getTemplateData().put("originalTrainers", originalTrainers);
         }
     }

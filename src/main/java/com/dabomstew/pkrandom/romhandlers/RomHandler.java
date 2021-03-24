@@ -179,13 +179,11 @@ public interface RomHandler {
 
     public void setTrainers(List<Trainer> trainerData);
 
-    public void levelUpTrainerPokes(int levelModifier);
+    public void modifyTrainerPokes(boolean randomHeldItem, int levelModifier);
 
-    public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
-            boolean randomHeldItem, int levelModifier);
-
-    public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
-            boolean noEarlyWonderGuard, boolean useResistantType, int levelModifier);
+    public void randomizeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
+          boolean noEarlyWonderGuard, boolean useResistantType, boolean typeTheme, boolean gymTypeTheme, 
+          boolean randomHeldItem, int levelModifier);
 
     public void rivalCarriesStarter(boolean noLegendaries);
 

@@ -18,14 +18,20 @@ import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.EvolutionType;
 import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.pokemon.Trainer;
+import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 
 import org.junit.Test;
 
 public class Gen4Test {
+    private final int GET_FILE_LENGTH = 100;
 
     ArrayList<Pokemon> pokemonList;
+    ArrayList<Trainer> trainerList;
     Map<Pokemon, List<MoveLearnt>> movesList;
+    NARCArchive mockArch;
+    ArrayList<byte[]> mlList;
 
     /**
      * When removing trades, verify that LEVEL_HIGH_BEAUTY adds a new HAPPINESS
@@ -200,11 +206,33 @@ public class Gen4Test {
     }
 
     /**
+     * Test trainer random held item gives pokemon valid items
+     * @throws IOException
+     */
+    @Test
+    public void TestGen4TrainerRandomHeldItem() throws IOException {
+        Gen4RomHandler romhandler = spy(new Gen4RomHandler(new Random()));
+        doReturn(Gen4RomHandler.getRomFromSupportedRom("Diamond (U)")).when(romhandler).getRomEntry();
+        doReturn(mock(Map.class)).when(romhandler).getTemplateData();
+        resetDataModel(romhandler);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, 0);
+        for (Trainer t : romhandler.getTrainers()) {
+            for (TrainerPokemon tp : t.getPokemon()) {
+                assertTrue(tp.heldItem + " was not in Gen 4 allowed items.", 
+                    Gen4Constants.trainerItemList.isAllowed(tp.heldItem));
+            }
+        }
+    }
+
+    /**
      * Function for granular modification of data model
      */
     private void setUp() {
         pokemonList = spy(ArrayList.class);
+        trainerList = spy(ArrayList.class);
         movesList = new HashMap<Pokemon, List<MoveLearnt>>();
+        mockArch = mock(NARCArchive.class);
+        mlList = new ArrayList();
         for(int i = 0; i < Gen4Constants.pokemonCount + 1; i++) {
             Pokemon pk = new Pokemon();
             pk.number = i;
@@ -219,6 +247,13 @@ public class Gen4Test {
         Evolution ev = new Evolution(pokemonList.get(0), pokemonList.get(1), false, EvolutionType.LEVEL_HIGH_BEAUTY, 0);
         pokemonList.get(0).evolutionsFrom.add(ev);
 
+        while (trainerList.size() < GET_FILE_LENGTH) {
+            Trainer t = new Trainer();
+            TrainerPokemon tp = mock(TrainerPokemon.class);
+            doReturn(pokemonList.get(0)).when(tp).getPokemon();
+            t.pokemon.add(tp);
+            trainerList.add(t);
+        }
         for(int i = 0; i < pokemonList.size(); i++) {
             ArrayList<MoveLearnt> pMoveList = new ArrayList<MoveLearnt>();
             MoveLearnt ml = new MoveLearnt();
@@ -237,19 +272,27 @@ public class Gen4Test {
             ml.move = 4;
             ml.level = 4;
             pMoveList.add(ml4);
-            movesList.put(pokemonList.get(i), pMoveList);
-            
+            movesList.put(pokemonList.get(i), pMoveList);   
+        }
+        for (int i = 0; i < GET_FILE_LENGTH; i++) {
+            mlList.add(new byte[] { (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF });
         }
     }
 
     /**
      * Puts data model back to initial form and assigns mock and spy substitutions
      * @param romhandler The RomHandler under test
+     * @throws IOException
      */
-    private void resetDataModel(RomHandler romhandler) {
+    private void resetDataModel(Gen4RomHandler romhandler) throws IOException {
         setUp();
         doReturn(pokemonList).when(romhandler).getPokemon();
         doReturn(pokemonList.get(0)).when(romhandler).randomPokemon();
+        doReturn(trainerList).when(romhandler).getTrainers();
         doReturn(movesList).when(romhandler).getMovesLearnt();
+        doReturn(mlList).when(mockArch).getFiles();
+        doReturn(mockArch).when(romhandler).readNARC(anyString());
+        doReturn(mockArch).when(romhandler).getScriptNARC();
+        doNothing().when(romhandler).writeNARC(anyString(), any());
     }
 }

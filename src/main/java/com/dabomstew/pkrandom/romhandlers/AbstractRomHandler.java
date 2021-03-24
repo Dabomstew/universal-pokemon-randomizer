@@ -1099,27 +1099,38 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void levelUpTrainerPokes(int levelModifier) {
+    public ItemList getTrainerItems() {
+        return null;
+    }
+
+    private void applyChangeToTrainerPoke(TrainerPokemon tp, boolean randomHeldItem, int levelModifier) {
+        if (randomHeldItem) {
+            tp.heldItem = this.getTrainerItems().randomItem(this.random);
+        }
+        if (levelModifier != 0) {
+            tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
+        }
+    }
+
+    @Override
+    public void modifyTrainerPokes(boolean randomHeldItem, int levelModifier) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         for (Trainer t : currentTrainers) {
             for (TrainerPokemon tp : t.pokemon) {
-                if (levelModifier != 0) {
-                    tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
-                }
+                // NOTE: we do not reset moves here since we don't want to
+                // overwrite custom movesets
+                applyChangeToTrainerPoke(tp, randomHeldItem, levelModifier);
             }
         }
         this.setTrainers(currentTrainers);
     }
 
     @Override
-    public ItemList getTrainerItems() {
-        return null;
-    }
-
-    @Override
-    public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
+    public void randomizeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
+        boolean noEarlyWonderGuard, boolean useResistantType, boolean typeTheme, boolean gymTypeTheme, 
         boolean randomHeldItem, int levelModifier) {
+
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
 
@@ -1132,6 +1143,12 @@ public abstract class AbstractRomHandler implements RomHandler {
         cachedReplacementLists = new TreeMap<Type, List<Pokemon>>();
         cachedAllList = noLegendaries ? new ArrayList<Pokemon>(noLegendaryList)
                 : new ArrayList<Pokemon>(mainPokemonList);
+        typeWeightings = new TreeMap<Type, Integer>();
+        totalTypeWeighting = 0;
+
+        // Attempt to type theme tagged trainers. If gym type theming and type theming are false, set this to empty
+        Set<Trainer> assignedTrainers = gymTypeTheme || typeTheme ? assignTaggedTrainerTypeThemes(scrambledTrainers, weightByFrequency, noLegendaries, 
+            noEarlyWonderGuard, usePowerLevels, useResistantType, randomHeldItem, levelModifier) : Collections.emptySet();
 
         // Fully random is easy enough - randomize then worry about rival
         // carrying starter at the end
@@ -1139,37 +1156,29 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (t.tag != null && t.tag.equals("IRIVAL")) {
                 continue; // skip
             }
-            for (TrainerPokemon tp : t.pokemon) {
-                boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
-                tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, null, noLegendaries, wgAllowed);
-                tp.resetMoves = true;
-                if (levelModifier != 0) {
-                    tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
-                }
-                if (randomHeldItem && this.getTrainerItems() != null) {
-                    tp.heldItem = this.getTrainerItems().randomItem(this.random);
+
+            if (!assignedTrainers.contains(t)) {
+                // If type theming is true, pick a type. Otherwise null skips the type restriction
+                Type typeForTrainer = typeTheme ? pickType(weightByFrequency, noLegendaries) : null;
+                for (TrainerPokemon tp : t.pokemon) {
+                    boolean shedAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
+                    tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForTrainer, noLegendaries,
+                            shedAllowed);
+                    tp.resetMoves = true;
+                    applyChangeToTrainerPoke(tp, randomHeldItem, levelModifier);
                 }
             }
         }
 
         // Save it all up
         this.setTrainers(currentTrainers);
-        this.modifyTrainerText(null);
+        this.modifyTrainerText(gymTypeTheme ? groupTypesMap : null);
     }
 
-    @Override
-    public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
-            boolean noEarlyWonderGuard, boolean useResistantType, int levelModifier) {
-        checkPokemonRestrictions();
-        List<Trainer> currentTrainers = this.getTrainers();
-        cachedReplacementLists = new TreeMap<Type, List<Pokemon>>();
-        cachedAllList = noLegendaries ? new ArrayList<Pokemon>(noLegendaryList)
-                : new ArrayList<Pokemon>(mainPokemonList);
-        typeWeightings = new TreeMap<Type, Integer>();
-        totalTypeWeighting = 0;
-
+    // Type theme each tagged trainer
+    private Set<Trainer> assignTaggedTrainerTypeThemes(List<Trainer> currentTrainers, boolean weightByFrequency, boolean noLegendaries, boolean noEarlyWonderGuard,
+        boolean usePowerLevels, boolean useResistantType, boolean randomHeldItem, int levelModifier) {
         // Construct groupings for types
-        // Anything starting with GYM or ELITE or CHAMPION is a group
         Set<Trainer> assignedTrainers = new TreeSet<Trainer>();
         Map<String, List<Trainer>> groups = new TreeMap<String, List<Trainer>>();
         for (Trainer t : currentTrainers) {
@@ -1180,9 +1189,10 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (group.contains("-")) {
                 group = group.substring(0, group.indexOf('-'));
             }
+            // We use startsWith since most groups are numbers (i.e GYM1, GYM2)
             if (group.startsWith("GYM") || group.startsWith("ELITE") || group.startsWith("CHAMPION")
-                    || group.startsWith("THEMED") || group.startsWith("CILAN") || group.startsWith("CHILI")
-                    || group.startsWith("CRESS")) {
+                    || group.startsWith("UBER") || group.startsWith("THEMED") || group.startsWith("CILAN") 
+                    || group.startsWith("CHILI") || group.startsWith("CRESS")) {
                 // Yep this is a group
                 if (!groups.containsKey(group)) {
                     groups.put(group, new ArrayList<Trainer>());
@@ -1222,7 +1232,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 usedEliteTypes.add(typeForGroup);
             }
-            if (group.equals("CHAMPION")) {
+            if (group.equals("CHAMPION") || group.startsWith("UBER")) {
+                while (usedUberTypes.contains(typeForGroup)) {
+                    typeForGroup = pickType(weightByFrequency, noLegendaries);
+                }
                 usedUberTypes.add(typeForGroup);
             }
             // Themed groups just have a theme, no special criteria
@@ -1231,9 +1244,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
                     tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForGroup, noLegendaries, wgAllowed);
                     tp.resetMoves = true;
-                    if (levelModifier != 0) {
-                        tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
-                    }
+                    applyChangeToTrainerPoke(tp, randomHeldItem, levelModifier);
                 }
             }
             groupTypesMap.put(group, typeForGroup);
@@ -1277,49 +1288,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                         tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels,  groupTypesMap.get("GYM1"), noLegendaries, wgAllowed);
                     }
                     tp.resetMoves = true;
-                    if (levelModifier != 0) {
-                        tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
-                    }
+                    applyChangeToTrainerPoke(tp, randomHeldItem, levelModifier);
                 }
             }
         }
 
-        // New: randomize the order trainers are randomized in.
-        // Leads to less predictable results for various modifiers.
-        // Need to keep the original ordering around for saving though.
-        List<Trainer> scrambledTrainers = new ArrayList<Trainer>(currentTrainers);
-        Collections.shuffle(scrambledTrainers, this.random);
-
-        // Give a type to each unassigned trainer
-        for (Trainer t : scrambledTrainers) {
-            if (t.tag != null && t.tag.equals("IRIVAL")) {
-                continue; // skip
-            }
-
-            if (!assignedTrainers.contains(t)) {
-                Type typeForTrainer = pickType(weightByFrequency, noLegendaries);
-                // Ubers: can't have the same type as each other
-                if (t.tag != null && t.tag.equals("UBER")) {
-                    while (usedUberTypes.contains(typeForTrainer)) {
-                        typeForTrainer = pickType(weightByFrequency, noLegendaries);
-                    }
-                    usedUberTypes.add(typeForTrainer);
-                }
-                for (TrainerPokemon tp : t.pokemon) {
-                    boolean shedAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
-                    tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForTrainer, noLegendaries,
-                            shedAllowed);
-                    tp.resetMoves = true;
-                    if (levelModifier != 0) {
-                        tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
-                    }
-                }
-            }
-        }
-
-        // Save it all up
-        this.setTrainers(currentTrainers);
-        this.modifyTrainerText(groupTypesMap);
+        return assignedTrainers;
     }
 
     @Override

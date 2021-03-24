@@ -160,6 +160,7 @@ public class Settings {
     private boolean trainersLevelModified;
     private int trainersLevelModifier = 0; // -50 ~ 50
     private boolean trainersRandomHeldItem;
+    private boolean gymTypeTheme;
 
     public enum WildPokemonMod {
         UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING
@@ -1429,6 +1430,15 @@ public class Settings {
 
     public Settings setTrainersRandomHeldItem(boolean trainersRandomHeldItem) {
         this.trainersRandomHeldItem = trainersRandomHeldItem;
+        return this;
+    }
+
+    public boolean isGymTypeTheme() {
+        return gymTypeTheme;
+    }
+
+    public Settings setGymTypeTheme(boolean gymTypeTheme) {
+        this.gymTypeTheme = gymTypeTheme;
         return this;
     }
 

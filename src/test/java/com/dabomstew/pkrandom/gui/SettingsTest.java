@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.Settings;
@@ -123,10 +125,10 @@ public class SettingsTest extends AbstractUIBase {
     }
 
     /**
-     * Selecting "RANDOM" opens up the "Change Methods" option
-     * Change Methods correctly updates settings
-     * Toggling the "RANDOM" evolution mod radio button disables "Change Methods"
-     * 
+     * Selecting "RANDOM" enables the change methods checkbox
+     * Toggles the change methods checkbox
+     * Selecting "UNCHANGED" disables the change methods checkbox and resets state to false
+     * Verifies settings can be stored and loaded with no error and preserve state
      * @throws IOException
      */
     @Test(timeout = 4000)
@@ -134,61 +136,9 @@ public class SettingsTest extends AbstractUIBase {
         JRadioButtonFixture unchangedEvoRBFixture = getRadoiButtonByName("peUnchangedRB");
         JRadioButtonFixture randomEvoRBFixture = getRadoiButtonByName("peRandomRB");
         JCheckBoxFixture changeMethodsCBFixture = getCheckBoxByName("peChangeMethodsCB");
-        Settings settings = this.mainWindow.getCurrentSettings();
-        // Sanity check - should evaluate to false
-        assertFalse("Change Methods should not be set yet", settings.isEvosChangeMethod());
-        assertFalse("Change Methods should not be enabled yet", changeMethodsCBFixture.isEnabled());
-        assertTrue("Evolutions should be set to UNCHANGED but was not", settings.getEvolutionsMod() == Settings.EvolutionsMod.UNCHANGED);
-        // Sanity check - Should not fail with 0 options
-        String setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);
-        assertFalse("Change Methods was selected after reloading settings 0", settings.isEvosChangeMethod());
-        assertTrue("Evolutions was not UNCHANGED after reloading settings 0", settings.getEvolutionsMod() == Settings.EvolutionsMod.UNCHANGED);
-
-
-        // Turn randomEvos on
-        clickRBAndWait(randomEvoRBFixture);
-        settings = this.mainWindow.getCurrentSettings();
-        assertFalse("Change Methods should not be set yet", settings.isEvosChangeMethod());
-        assertTrue("Change Methods should be enabled now", changeMethodsCBFixture.isEnabled());
-        assertTrue("Evolutions were not set to RANDOM", settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM);
-        setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);
-        assertFalse("Change Methods was selected after reloading settings 1", settings.isEvosChangeMethod());
-        assertTrue("Evolutions was not RANDOM after reloading settings 1", settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM);
-
-        // Turn evosChangeMethod to true
-        changeMethodsCBFixture.requireVisible().requireEnabled().click();
-        settings = this.mainWindow.getCurrentSettings();
-        assertTrue("evosChangeMethod should evaluate to true", settings.isEvosChangeMethod());
-        setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);
-        assertTrue("Change Methods was not selected after reloading settings 2", settings.isEvosChangeMethod());
-        assertTrue("Evolutions was not RANDOM after reloading settings 2", settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM);
-
-        // Turn evosChangeMethod to false
-        changeMethodsCBFixture.requireVisible().requireEnabled().click();
-        settings = this.mainWindow.getCurrentSettings();
-        assertFalse("evosChangeMethod should evaluate to false", settings.isEvosChangeMethod());
-        setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);
-        assertFalse("Change Methods was selected after reloading settings 3", settings.isEvosChangeMethod());
-        assertTrue("Evolutions was not RANDOM after reloading settings 3", settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM);
-
-        // Turn randomEvos off while evosChangeMethod is true should turn evosChangeMethod to false
-        changeMethodsCBFixture.requireVisible().requireEnabled().click();
-        settings = this.mainWindow.getCurrentSettings();
-        assertTrue("evosChangeMethod should evaluate to true", settings.isEvosChangeMethod());
-        assertTrue("Evolutions should be set to RANDOM as state did not change", settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM);
-        clickRBAndWait(unchangedEvoRBFixture);
-        settings = this.mainWindow.getCurrentSettings();
-        assertFalse("evosChangeMethod should evaluate to false", settings.isEvosChangeMethod());
-        assertFalse("Change Methods should be disabled now", changeMethodsCBFixture.isEnabled());
-        assertTrue("Evolutions should be set to UNCHANGED but was not", settings.getEvolutionsMod() == Settings.EvolutionsMod.UNCHANGED);
-        setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);
-        assertFalse("Change Methods was selected after reloading settings 4", settings.isEvosChangeMethod());
-        assertTrue("Evolutions was not UNCHANGED after reloading settings 4", settings.getEvolutionsMod() == Settings.EvolutionsMod.UNCHANGED);
+        TestCheckboxBasedOnRadioButton(unchangedEvoRBFixture, randomEvoRBFixture, changeMethodsCBFixture, (settings) -> settings.isEvosChangeMethod(),
+        (evolutionMod) -> evolutionMod == Settings.EvolutionsMod.UNCHANGED, (evolutionMod) -> evolutionMod == Settings.EvolutionsMod.RANDOM,
+        (settings) -> settings.getEvolutionsMod(), "Evolutions");
     }
     
 
@@ -289,65 +239,9 @@ public class SettingsTest extends AbstractUIBase {
         JRadioButtonFixture unchangedStarterRBFixture = getRadoiButtonByName("spUnchangedRB");
         JRadioButtonFixture randomStarterRBFixture = getRadoiButtonByName("spRandomRB");
         JCheckBoxFixture exactEvoCBFixture = getCheckBoxByName("spExactEvoCB");
-        // Sanity check - should evaluate to false
-        Settings settings = this.mainWindow.getCurrentSettings();
-        assertFalse("Exact Evo should not be set yet", settings.isStartersExactEvo());
-        assertFalse("Exact Evo should not be enabled yet", exactEvoCBFixture.isEnabled());
-        assertTrue("Starters should be set to UNCHANGED but was not", settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
-        // Sanity check - Should not fail with 0 options
-        String setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);        
-        assertFalse("Exact Evo was not false after reloading settings 0", settings.isStartersExactEvo());
-        assertTrue("Starters was not UNCHANGED after reloading settings 0", settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
-
-        // Turn random starters on
-        clickRBAndWait(randomStarterRBFixture);
-        settings = this.mainWindow.getCurrentSettings();
-        assertFalse("Exact Evo should not be set yet", settings.isStartersExactEvo());
-        assertTrue("Exact Evo should be enabled now", exactEvoCBFixture.isEnabled());
-        assertTrue("Starters should be set to RANDOM but was not", settings.getStartersMod() == Settings.StartersMod.RANDOM);
-        setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);        
-        assertFalse("Exact Evo was not false after reloading settings 1", settings.isStartersExactEvo());
-        assertTrue("Starters was not RANDOM after reloading settings 1", settings.getStartersMod() == Settings.StartersMod.RANDOM);
-
-        // Toggle exact evo on
-        exactEvoCBFixture.requireVisible().requireEnabled().click();
-        settings = this.mainWindow.getCurrentSettings();
-        assertTrue("Exact Evo should be set now", settings.isStartersExactEvo());
-        assertTrue("Exact Evo should be enabled as state did not change", exactEvoCBFixture.isEnabled());
-        assertTrue("Starters should be set to RANDOM as state did not change", settings.getStartersMod() == Settings.StartersMod.RANDOM);
-        setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);        
-        assertTrue("Exact Evo was not true after reloading settings 2", settings.isStartersExactEvo());
-        assertTrue("Starters was not RANDOM after reloading settings 2", settings.getStartersMod() == Settings.StartersMod.RANDOM);
-
-        // Toggle exact evo off
-        exactEvoCBFixture.requireVisible().requireEnabled().click();
-        settings = this.mainWindow.getCurrentSettings();
-        assertFalse("Exact Evo should be unset now", settings.isStartersExactEvo());
-        assertTrue("Exact Evo should be enabled as state did not change", exactEvoCBFixture.isEnabled());
-        assertTrue("Starters should be set to RANDOM as state did not change", settings.getStartersMod() == Settings.StartersMod.RANDOM);
-        setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);        
-        assertFalse("Exact Evo was not false after reloading settings 3", settings.isStartersExactEvo());
-        assertTrue("Starters was not RANDOM after reloading settings 3", settings.getStartersMod() == Settings.StartersMod.RANDOM);
-
-        // Turn random starter off while exact evo is true should set exact evo to false
-        exactEvoCBFixture.requireVisible().requireEnabled().click();
-        settings = this.mainWindow.getCurrentSettings();
-        assertTrue("Exact Evo should be set now", settings.isStartersExactEvo());
-        assertTrue("Exact Evo should be enabled as state did not change", exactEvoCBFixture.isEnabled());
-        assertTrue("Starters should be set to RANDOM as state did not change", settings.getStartersMod() == Settings.StartersMod.RANDOM);
-        clickRBAndWait(unchangedStarterRBFixture);
-        settings = this.mainWindow.getCurrentSettings();
-        assertFalse("Exact Evo should be unset now", settings.isStartersExactEvo());
-        assertFalse("Exact Evo should be disabled now", exactEvoCBFixture.isEnabled());
-        assertTrue("Starters should be set to UNCHANGED but was not", settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
-        setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);        
-        assertFalse("Exact Evo was not false after reloading settings 4", settings.isStartersExactEvo());
-        assertTrue("Starters was not UNCHANGED after reloading settings 4", settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
+        TestCheckboxBasedOnRadioButton(unchangedStarterRBFixture, randomStarterRBFixture, exactEvoCBFixture, (settings) -> settings.isStartersExactEvo(),
+            (startersMod) -> startersMod == Settings.StartersMod.UNCHANGED, (startersMod) -> startersMod == Settings.StartersMod.RANDOM,
+            (settings) -> settings.getStartersMod(), "Starters");
     }
 
     /**
@@ -362,65 +256,9 @@ public class SettingsTest extends AbstractUIBase {
         JRadioButtonFixture unchangedStarterRBFixture = getRadoiButtonByName("spUnchangedRB");
         JRadioButtonFixture randomStarterRBFixture = getRadoiButtonByName("spRandomRB");
         JCheckBoxFixture noSplitCBFixture = getCheckBoxByName("spNoSplitCB");
-        // Sanity check - should evaluate to false
-        Settings settings = this.mainWindow.getCurrentSettings();
-        assertFalse("No Split Evo should not be set yet", settings.isStartersNoSplit());
-        assertFalse("No Split Evo should not be enabled yet", noSplitCBFixture.isEnabled());
-        assertTrue("Starters should be set to UNCHANGED but was not", settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
-        // Sanity check - Should not fail with 0 options
-        String setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);        
-        assertFalse("No Split Evo was not false after reloading settings 0", settings.isStartersNoSplit());
-        assertTrue("Starters was not UNCHANGED after reloading settings 0", settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
-
-        // Turn random starters on
-        clickRBAndWait(randomStarterRBFixture);
-        settings = this.mainWindow.getCurrentSettings();
-        assertFalse("No Split Evo should not be set yet", settings.isStartersNoSplit());
-        assertTrue("No Split Evo should be enabled now", noSplitCBFixture.isEnabled());
-        assertTrue("Starters should be set to RANDOM but was not", settings.getStartersMod() == Settings.StartersMod.RANDOM);
-        setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);        
-        assertFalse("No Split Evo was not false after reloading settings 1", settings.isStartersNoSplit());
-        assertTrue("Starters was not RANDOM after reloading settings 1", settings.getStartersMod() == Settings.StartersMod.RANDOM);
-
-        // Toggle No Split Evo on
-        noSplitCBFixture.requireVisible().requireEnabled().click();
-        settings = this.mainWindow.getCurrentSettings();
-        assertTrue("No Split Evo should be set now", settings.isStartersNoSplit());
-        assertTrue("No Split Evo should be enabled as state did not change", noSplitCBFixture.isEnabled());
-        assertTrue("Starters should be set to RANDOM as state did not change", settings.getStartersMod() == Settings.StartersMod.RANDOM);
-        setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);        
-        assertTrue("No Split Evo was not true after reloading settings 2", settings.isStartersNoSplit());
-        assertTrue("Starters was not RANDOM after reloading settings 2", settings.getStartersMod() == Settings.StartersMod.RANDOM);
-
-        // Toggle No Split Evo off
-        noSplitCBFixture.requireVisible().requireEnabled().click();
-        settings = this.mainWindow.getCurrentSettings();
-        assertFalse("No Split Evo should be unset now", settings.isStartersNoSplit());
-        assertTrue("No Split Evo should be enabled as state did not change", noSplitCBFixture.isEnabled());
-        assertTrue("Starters should be set to RANDOM as state did not change", settings.getStartersMod() == Settings.StartersMod.RANDOM);
-        setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);        
-        assertFalse("No Split Evo was not false after reloading settings 3", settings.isStartersNoSplit());
-        assertTrue("Starters was not RANDOM after reloading settings 3", settings.getStartersMod() == Settings.StartersMod.RANDOM);
-
-        // Turn random starter off while No Split Evo is true should set No Split Evo to false
-        noSplitCBFixture.requireVisible().requireEnabled().click();
-        settings = this.mainWindow.getCurrentSettings();
-        assertTrue("No Split Evo should be set now", settings.isStartersNoSplit());
-        assertTrue("No Split Evo should be enabled as state did not change", noSplitCBFixture.isEnabled());
-        assertTrue("Starters should be set to RANDOM as state did not change", settings.getStartersMod() == Settings.StartersMod.RANDOM);
-        clickRBAndWait(unchangedStarterRBFixture);
-        settings = this.mainWindow.getCurrentSettings();
-        assertFalse("No Split Evo should be unset now", settings.isStartersNoSplit());
-        assertFalse("No Split Evo should be disabled now", noSplitCBFixture.isEnabled());
-        assertTrue("Starters should be set to UNCHANGED but was not", settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
-        setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);        
-        assertFalse("No Split Evo was not false after reloading settings 4", settings.isStartersNoSplit());
-        assertTrue("Starters was not UNCHANGED after reloading settings 4", settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
+        TestCheckboxBasedOnRadioButton(unchangedStarterRBFixture, randomStarterRBFixture, noSplitCBFixture, (settings) -> settings.isStartersNoSplit(), 
+            (starterMod) -> starterMod == Settings.StartersMod.UNCHANGED, (starterMod) -> starterMod == Settings.StartersMod.RANDOM, 
+            (settings) -> settings.getStartersMod(), "Starters");
     }
 
     /**
@@ -456,6 +294,117 @@ public class SettingsTest extends AbstractUIBase {
         setttingsString = settings.toString();
         settings = Settings.fromString(setttingsString);
         assertFalse("Trainer Random Held Item was selected after reloading settings 2", settings.isTrainersRandomHeldItem());
+    }
+
+     /**
+     * Selecting "RANDOM" enables the Gym Type Theme checkbox
+     * Toggles the Gym Type Theme checkbox
+     * Selecting "UNCHANGED" or "TYPE THEME" disables the Gym Type Theme checkbox and resets state to false
+     * Verifies settings can be stored and loaded with no error and preserve state
+     * @throws IOException
+     */
+    @Test
+    public void TestGymTypeTheme() throws IOException {
+        JRadioButtonFixture unchangedTrainerRBFixture = getRadoiButtonByName("trUnchangedRB");
+        JRadioButtonFixture randomTrainerRBFixture = getRadoiButtonByName("trRandomRB");
+        JRadioButtonFixture typeThemeTrainerRBFixture = getRadoiButtonByName("trTypeThemeRB");
+        JCheckBoxFixture gymTypeThemeCBFixture = getCheckBoxByName("trGymTypeThemeCB");
+        TestCheckboxBasedOnRadioButton(unchangedTrainerRBFixture, randomTrainerRBFixture, gymTypeThemeCBFixture, (settings) -> settings.isGymTypeTheme(),
+            (trainersMod) -> trainersMod == Settings.TrainersMod.UNCHANGED, (trainersMod) -> trainersMod == Settings.TrainersMod.RANDOM,
+            (settings) -> settings.getTrainersMod(), "Trainers");
+
+        // Selecting Type Theme trainer should not enable Gym Type Theme
+        clickRBAndWait(typeThemeTrainerRBFixture);
+        Settings settings = this.mainWindow.getCurrentSettings();
+        assertFalse("Gym Type Theme should be unset still", settings.isGymTypeTheme());
+        assertFalse("Gym Type Theme should be disabled still", gymTypeThemeCBFixture.isEnabled());
+        assertTrue("Trainers should be set to TYPE THEMED but was not", settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED);
+        String setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertFalse("Gym Type Theme was not false after reloading settings 5", settings.isGymTypeTheme());
+        assertTrue("Trainers was not TYPE THEME after reloading settings 5", settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED);
+    }
+
+    /**
+     * Captures a common sequence of a checkbox being enabled or disabled based on radio button selection
+     * 
+     * @param defaultRB - The radio button fixture that disables the checkbox (usually the one that's on by default)
+     * @param triggerRB - The radio button fixture that enables the checkbox
+     * @param checkboxToTest - The checkbox fixture that is being tested
+     * @param settingsCheckboxFunction - The method in Settings.java that refers to the state of the checkbox
+     * @param defaultRBCondition - The enum value that represents the defaultRb in radio button group
+     * @param triggerRBCondition - The enum value that represents the triggerRB in the radio button group
+     * @param settingsRBFunction - The method in Settings.java that refers to the state of the enum
+     * @param buttonGroup - The name of the radio button group. Used for descriptive error messages.
+     * @throws IOException
+     */
+    private void TestCheckboxBasedOnRadioButton(JRadioButtonFixture defaultRB, JRadioButtonFixture triggerRB, JCheckBoxFixture checkboxToTest, Predicate<Settings> settingsCheckboxFunction,
+        Predicate<Enum> defaultRBCondition, Predicate<Enum> triggerRBCondition, Function<Settings, Enum> settingsRBFunction, String buttonGroup) throws IOException {
+        int settingsReloadCount = 0;
+        // Sanity check - should evaluate to false
+        Settings settings = this.mainWindow.getCurrentSettings();
+        assertFalse(checkboxToTest.text() + " should not be set yet", settingsCheckboxFunction.test(settings));
+        assertFalse(checkboxToTest.text() + " should not be enabled yet", checkboxToTest.isEnabled());
+        assertTrue(buttonGroup + " should be set to " + defaultRB.text() + " but was not", defaultRBCondition.test(settingsRBFunction.apply(settings)));
+        // Sanity check - Should not fail with 0 options
+        String setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertFalse(checkboxToTest.text() + " was not false after reloading settings " + settingsReloadCount, settingsCheckboxFunction.test(settings));
+        assertTrue(buttonGroup + " was not " + defaultRB.text() + " after reloading settings " + settingsReloadCount, defaultRBCondition.test(settingsRBFunction.apply(settings)));
+        settingsReloadCount++;
+
+        // Turn triggerRB on
+        clickRBAndWait(triggerRB);
+        settings = this.mainWindow.getCurrentSettings();
+        assertFalse(checkboxToTest.text() + " should not be set yet", settingsCheckboxFunction.test(settings));
+        assertTrue(checkboxToTest.text() + " should be enabled now", checkboxToTest.isEnabled());
+        assertTrue(buttonGroup + " should be set to " + triggerRB.text() + " but was not", triggerRBCondition.test(settingsRBFunction.apply(settings)));
+        setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertFalse(checkboxToTest.text() + " was not false after reloading settings " + settingsReloadCount, settingsCheckboxFunction.test(settings));
+        assertTrue(buttonGroup + " was not " + triggerRB.text() + " after reloading settings " + settingsReloadCount, triggerRBCondition.test(settingsRBFunction.apply(settings)));
+        settingsReloadCount++;
+
+        // Toggle checkboxToTest on
+        checkboxToTest.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue(checkboxToTest.text() + " should be set now", settingsCheckboxFunction.test(settings));
+        assertTrue(checkboxToTest.text() + " should be enabled as state did not change", checkboxToTest.isEnabled());
+        assertTrue(buttonGroup + " should be set to " + triggerRB.text() + " as state did not change", triggerRBCondition.test(settingsRBFunction.apply(settings)));
+        setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertTrue(checkboxToTest.text() + " was not true after reloading settings " + settingsReloadCount, settingsCheckboxFunction.test(settings));
+        assertTrue(buttonGroup + " was not " + triggerRB.text() + " after reloading settings " + settingsReloadCount, triggerRBCondition.test(settingsRBFunction.apply(settings)));
+        settingsReloadCount++;
+
+        // Toggle checkboxToTest off
+        checkboxToTest.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertFalse(checkboxToTest.text() + " should be unset now", settingsCheckboxFunction.test(settings));
+        assertTrue(checkboxToTest.text() + " should be enabled as state did not change", checkboxToTest.isEnabled());
+        assertTrue(buttonGroup + " should be set to " + triggerRB.text() + " as state did not change", triggerRBCondition.test(settingsRBFunction.apply(settings)));
+        setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertFalse(checkboxToTest.text() + " was not false after reloading settings " + settingsReloadCount, settingsCheckboxFunction.test(settings));
+        assertTrue(buttonGroup + " was not " + triggerRB.text() + " after reloading settings " + settingsReloadCount, triggerRBCondition.test(settingsRBFunction.apply(settings)));
+        settingsReloadCount++;
+
+        // Turn defaultRB on while checkboxToTest is true should set checkboxToTest to false
+        checkboxToTest.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue(checkboxToTest.text() + " should be set now", settingsCheckboxFunction.test(settings));
+        assertTrue(checkboxToTest.text() + " should be enabled as state did not change", checkboxToTest.isEnabled());
+        assertTrue(buttonGroup + " should be set to " + triggerRB.text() + " as state did not change", triggerRBCondition.test(settingsRBFunction.apply(settings)));
+        clickRBAndWait(defaultRB);
+        settings = this.mainWindow.getCurrentSettings();
+        assertFalse(checkboxToTest.text() + " should be unset now", settingsCheckboxFunction.test(settings));
+        assertFalse(checkboxToTest.text() + " should be disabled now", checkboxToTest.isEnabled());
+        assertTrue(buttonGroup + " should be set to " + defaultRB.text()+ " but was not", defaultRBCondition.test(settingsRBFunction.apply(settings)));
+        setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertFalse(checkboxToTest.text() + " was not false after reloading settings " + settingsReloadCount, settingsCheckboxFunction.test(settings));
+        assertTrue(buttonGroup + " was not " + defaultRB.text() + " after reloading settings " + settingsReloadCount, defaultRBCondition.test(settingsRBFunction.apply(settings)));
+        settingsReloadCount++;
     }
 
     /**

@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -72,7 +73,7 @@ public class AbstractRomTest {
         // **************************
         // Test offensive selection
         // **************************
-        romhandler.typeThemeTrainerPokes(false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, 0);
         ArrayList<Trainer> newTrainers = trainerCap.getValue();
         // Get gym1Type
         for (Trainer t : newTrainers.stream().filter(t -> t.tag.equals("GYM1")).collect(Collectors.toList())) {
@@ -143,7 +144,7 @@ public class AbstractRomTest {
         // **************************
         // Test defensive selection
         // **************************
-        romhandler.typeThemeTrainerPokes(false, false, false, false, true, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, true, false, true, false, 0);
         newTrainers = trainerCap.getValue();
         // Get gym1Type
         for (Trainer t : newTrainers.stream().filter(t -> t.tag.equals("GYM1")).collect(Collectors.toList())) {
@@ -314,7 +315,7 @@ public class AbstractRomTest {
         //**************************
         // Test Striaton offense selection
         //**************************
-        romhandler.typeThemeTrainerPokes(false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, 0);
         romhandler.randomizeStaticPokemon(false);
         Map<String, Type> taggedTypes = romhandler.getTaggedGroupTypes();
 
@@ -378,7 +379,7 @@ public class AbstractRomTest {
         //**************************
         // Test Striaton defense selection
         //**************************
-        romhandler.typeThemeTrainerPokes(false, false, false, false, true, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, true, false, true, false, 0);
         romhandler.randomizeStaticPokemon(false);
         taggedTypes = romhandler.getTaggedGroupTypes();
 
@@ -504,7 +505,130 @@ public class AbstractRomTest {
 
     @Test
     public void TestExactEvos() {
+        TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
+        resetDataModel(romhandler);
+        romhandler.randomStarterPokemon(false, false, false, 999, 0, true);
+        boolean pokemonWithZeroEvo = false, pokemonWithOneEvo = false, pokemonWithTwoEvo = false;
+        for(Pokemon pk : romhandler.getStarterPokes()) {
+            int evoLength = romhandler.evolutionChainSize(pk);
+            if (evoLength == 1) {
+                pokemonWithZeroEvo = true;
+            } else if (evoLength == 2) {
+                pokemonWithOneEvo = true;
+            } else if (evoLength > 2) {
+                pokemonWithTwoEvo = true;
+            }
+        }
+        assertTrue("Matches should be true: zeroEvo - " + pokemonWithZeroEvo + 
+            "\nMatches should be false: oneEvo - " + pokemonWithOneEvo
+            + ", twoEvo - " + pokemonWithTwoEvo, pokemonWithZeroEvo && !pokemonWithOneEvo && !pokemonWithTwoEvo);
+        pokemonWithZeroEvo = false;
+        pokemonWithOneEvo = false;
+        pokemonWithTwoEvo = false;
+        romhandler.clearStarterPokes();
+        romhandler.randomStarterPokemon(false, false, false, 999, 1, true);
+        for(Pokemon pk : romhandler.getStarterPokes()) {
+            int evoLength = romhandler.evolutionChainSize(pk);
+            if (evoLength == 1) {
+                pokemonWithZeroEvo = true;
+            } else if (evoLength == 2) {
+                pokemonWithOneEvo = true;
+            } else if (evoLength > 2) {
+                pokemonWithTwoEvo = true;
+            }
+        }
+        assertTrue("Matches should be false: zeroEvo - " + pokemonWithZeroEvo + ", twoEvo - " + pokemonWithTwoEvo
+        + "\nMatches should be true: oneEvo - " + pokemonWithOneEvo, !pokemonWithZeroEvo && pokemonWithOneEvo && !pokemonWithTwoEvo);
+        pokemonWithZeroEvo = false;
+        pokemonWithOneEvo = false;
+        pokemonWithTwoEvo = false;
+        boolean pokemonWithMoreThanTwoEvo = false;
+        romhandler.clearStarterPokes();
+        romhandler.randomStarterPokemon(false, false, false, 999, 2, true);
+        for(Pokemon pk : romhandler.getStarterPokes()) {
+            int evoLength = romhandler.evolutionChainSize(pk);
+            if (evoLength == 1) {
+                pokemonWithZeroEvo = true;
+            } else if (evoLength == 2) {
+                pokemonWithOneEvo = true;
+            } else if (evoLength == 3) {
+                pokemonWithTwoEvo = true;
+            } else if (evoLength > 3) {
+                pokemonWithMoreThanTwoEvo = true;
+            }
+        }
+        assertTrue("Matches should be false: zeroEvo - " + pokemonWithZeroEvo + ", oneEvo - " + pokemonWithOneEvo
+            + ", moreThanTwo - " + pokemonWithMoreThanTwoEvo
+            + "\nMatches should be true: twoEvo - " + pokemonWithTwoEvo, 
+            !pokemonWithZeroEvo && !pokemonWithOneEvo && pokemonWithTwoEvo && !pokemonWithMoreThanTwoEvo);
+    }
 
+    /**
+     * All trainers are type themed
+     */
+    @Test
+    public void TestTypeTheme() {
+        HashSet<Type> trainerType = new HashSet<Type>();
+        TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
+        resetDataModel(romhandler);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, true, false, false, 0);
+        for (Trainer t : romhandler.getTrainers()) {
+            for (TrainerPokemon tp : t.getPokemon()) {
+                // Initialize the set
+                if (trainerType.size() == 0) {
+                    trainerType.add(tp.pokemon.primaryType);
+                    if (tp.pokemon.secondaryType != null) {
+                        trainerType.add(tp.pokemon.secondaryType);
+                    }
+                }
+                // Only keep the shared type
+                else {
+                    HashSet<Type> intersect = new HashSet<Type>();
+                    intersect.add(tp.pokemon.primaryType);
+                    if (tp.pokemon.secondaryType != null) {
+                        intersect.add(tp.pokemon.secondaryType);
+                    }
+                    trainerType.retainAll(intersect);
+                }
+            }
+            assertTrue("More than 2 types found - " + Arrays.toString(trainerType.toArray()),
+                trainerType.size() < 3);
+        }
+    }
+
+    /**
+     * Only tagged trainers (like GYM, UBER) are type themed
+     */
+    @Test
+    public void TestGymTypeTheme() {
+        HashSet<Type> trainerType = new HashSet<Type>();
+        TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
+        resetDataModel(romhandler);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, 0);
+        for (Trainer t : romhandler.getTrainers()) {
+            if (t.tag != null) {
+                for (TrainerPokemon tp : t.getPokemon()) {
+                    // Initialize the set
+                    if (trainerType.size() == 0) {
+                        trainerType.add(tp.pokemon.primaryType);
+                        if (tp.pokemon.secondaryType != null) {
+                            trainerType.add(tp.pokemon.secondaryType);
+                        }
+                    }
+                    // Only keep the shared type
+                    else {
+                        HashSet<Type> intersect = new HashSet<Type>();
+                        intersect.add(tp.pokemon.primaryType);
+                        if (tp.pokemon.secondaryType != null) {
+                            intersect.add(tp.pokemon.secondaryType);
+                        }
+                        trainerType.retainAll(intersect);
+                    }
+                }
+                assertTrue("More than 2 types found - " + Arrays.toString(trainerType.toArray()),
+                    trainerType.size() < 3);
+            }
+        }
     }
 
     /**

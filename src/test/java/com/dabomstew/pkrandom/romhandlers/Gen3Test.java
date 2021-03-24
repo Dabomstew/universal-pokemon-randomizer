@@ -13,6 +13,8 @@ import com.dabomstew.pkrandom.constants.Gen3Constants;
 import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.EvolutionType;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.pokemon.Trainer;
+import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 
 import org.junit.Test;
@@ -21,6 +23,7 @@ import org.mockito.MockedStatic;
 public class Gen3Test {
 
     ArrayList<Pokemon> pokemonList;
+    ArrayList<Trainer> trainerList;
     
     /**
      * When removing trades, verify that LEVEL_HIGH_BEAUTY adds
@@ -130,10 +133,29 @@ public class Gen3Test {
     }
 
     /**
+     * Test trainer random held item gives pokemon valid items
+     */
+    @Test
+    public void TestGen3TrainerRandomHeldItem() {
+        Gen3RomHandler romhandler = spy(new Gen3RomHandler(new Random()));
+        doReturn(Gen3RomHandler.getRomFromSupportedRom("Ruby (U)")).when(romhandler).getRomEntry();
+        doReturn(mock(Map.class)).when(romhandler).getTemplateData();
+        resetDataModel(romhandler);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, 0);
+        for (Trainer t : romhandler.getTrainers()) {
+            for (TrainerPokemon tp : t.getPokemon()) {
+                assertTrue(tp.heldItem + " was not in Gen 3 allowed items.", 
+                    Gen3Constants.trainerItemList.isAllowed(tp.heldItem));
+            }
+        }
+    }
+
+    /**
      * Function for granular modification of data model
      */
     private void setUp() {
         pokemonList = spy(ArrayList.class);
+        trainerList = spy(ArrayList.class);
         for(int i = 0; i < Gen3Constants.unhackedRealPokedex; i++) {
             Pokemon pk = new Pokemon();
             pk.number = i;
@@ -147,15 +169,25 @@ public class Gen3Test {
         }
         Evolution ev = new Evolution(pokemonList.get(0), pokemonList.get(1), false, EvolutionType.LEVEL_HIGH_BEAUTY, 0);
         pokemonList.get(0).evolutionsFrom.add(ev);
+        
+        while (trainerList.size() < 693) {
+            Trainer t = new Trainer();
+            TrainerPokemon tp = mock(TrainerPokemon.class);
+            doReturn(pokemonList.get(0)).when(tp).getPokemon();
+            t.pokemon.add(tp);
+            trainerList.add(t);
+        }
     }
 
     /**
      * Puts data model back to initial form and assigns mock and spy substitutions
      * @param romhandler The RomHandler under test
      */
-    private void resetDataModel(RomHandler romhandler) {
+    private void resetDataModel(Gen3RomHandler romhandler) {
         setUp();
         doReturn(pokemonList).when(romhandler).getPokemon();
         doReturn(pokemonList.get(0)).when(romhandler).randomPokemon();
+        doReturn(trainerList).when(romhandler).getTrainers();
+        doNothing().when(romhandler).setTrainers(any());
     }
 }
