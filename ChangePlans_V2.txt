@@ -30,7 +30,7 @@ XX Choice not available until game is played XXStriaton City leaders use correct
 **No Split Evos does not enable unless "RANDOM"
 XXToo much workXXTrainer Class Names should be gender based (Rich Boy woman not allowed) (group all trainer names and determine a 1-1 swap)
 **Randomize trainer held items (limit to battle tower stuff)
-Type theme gyms with random trainers route trainers (keep gym trainers consistent)
+**Type theme gyms with random trainers route trainers (keep gym trainers consistent)
 Extra Challenge Mode - All leaders have 6 pokemon
 Extra E4 Challenge - Legendaries / BST of at least 600
 XXToo much workXXSignature Move - All leaders have a signature move on all pokes (same as TM?)

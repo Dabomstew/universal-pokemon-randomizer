@@ -415,7 +415,8 @@ public class Settings {
         write2ByteInt(out, starterBSTModifier - 1);
         
         // @ 40 Trainer and Wild Pokemon Overflow
-        out.write(makeByteSelected(rivalCarriesTeamThroughout, allowLowLevelEvolvedTypes, trainersRandomHeldItem));
+        out.write(makeByteSelected(rivalCarriesTeamThroughout, allowLowLevelEvolvedTypes, trainersRandomHeldItem,
+            gymTypeTheme));
 
         // @ 41 Evolution overflow
         out.write(makeByteSelected(evosChangeMethod));
@@ -654,6 +655,7 @@ public class Settings {
         settings.setRivalCarriesTeamThroughout(restoreState(data[40], 0));
         settings.setAllowLowLevelEvolvedTypes(restoreState(data[40], 1));
         settings.setTrainersRandomHeldItem(restoreState(data[40], 2));
+        settings.setGymTypeTheme(restoreState(data[40], 3));
 
         settings.setEvosChangeMethod(restoreState(data[41], 0));
         

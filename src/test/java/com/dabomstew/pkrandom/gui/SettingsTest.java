@@ -305,10 +305,10 @@ public class SettingsTest extends AbstractUIBase {
      */
     @Test
     public void TestGymTypeTheme() throws IOException {
-        JRadioButtonFixture unchangedTrainerRBFixture = getRadoiButtonByName("trUnchangedRB");
-        JRadioButtonFixture randomTrainerRBFixture = getRadoiButtonByName("trRandomRB");
-        JRadioButtonFixture typeThemeTrainerRBFixture = getRadoiButtonByName("trTypeThemeRB");
-        JCheckBoxFixture gymTypeThemeCBFixture = getCheckBoxByName("trGymTypeThemeCB");
+        JRadioButtonFixture unchangedTrainerRBFixture = getRadoiButtonByName("tpUnchangedRB");
+        JRadioButtonFixture randomTrainerRBFixture = getRadoiButtonByName("tpRandomRB");
+        JRadioButtonFixture typeThemeTrainerRBFixture = getRadoiButtonByName("tpTypeThemeRB");
+        JCheckBoxFixture gymTypeThemeCBFixture = getCheckBoxByName("tpGymTypeThemeCB");
         TestCheckboxBasedOnRadioButton(unchangedTrainerRBFixture, randomTrainerRBFixture, gymTypeThemeCBFixture, (settings) -> settings.isGymTypeTheme(),
             (trainersMod) -> trainersMod == Settings.TrainersMod.UNCHANGED, (trainersMod) -> trainersMod == Settings.TrainersMod.RANDOM,
             (settings) -> settings.getTrainersMod(), "Trainers");

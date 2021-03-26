@@ -79,3 +79,4 @@
  * Fix Starters No Split to only activate when Random Starters is selected
    * There was a bug discovered in version 1.81 where the values of Starter No Split and Starter Unique Types were restored in the wrong order. This has been corrected and should allow the settings file to be used as expected. 
  * Trainer pokemon held items can be randomized for Generation 3 or higher. Items are restricted to battle tower viable.
+ * Gyms and Elite 4 can be given a type theme when chosing Random for trainer pokemon
