@@ -2877,6 +2877,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         pokeLimitBtn = new javax.swing.JButton();
         raceModeCB = new javax.swing.JCheckBox();
         brokenMovesCB = new javax.swing.JCheckBox();
+        randomQSButton = new javax.swing.JButton();
         romInfoPanel = new javax.swing.JPanel();
         riRomNameLabel = new javax.swing.JLabel();
         riRomCodeLabel = new javax.swing.JLabel();
@@ -2945,6 +2946,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         spBSTLimitSlider = new javax.swing.JSlider();
         spRandomSlider = new javax.swing.JSlider();
         spExactEvoCB = new javax.swing.JCheckBox();
+        spSETriangleCB = new javax.swing.JCheckBox();
         staticPokemonPanel = new javax.swing.JPanel();
         stpUnchangedRB = new javax.swing.JRadioButton();
         stpRandomL4LRB = new javax.swing.JRadioButton();
@@ -2995,6 +2997,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         tpRivalCarriesTeamCB = new javax.swing.JCheckBox();
         tpRandomHeldItemCB = new javax.swing.JCheckBox();
         tpGymTypeThemeCB = new javax.swing.JCheckBox();
+        tpGlobalSwapRB = new javax.swing.JRadioButton();
         wildsInnerPanel = new javax.swing.JPanel();
         wildPokemonPanel = new javax.swing.JPanel();
         wpUnchangedRB = new javax.swing.JRadioButton();
@@ -3125,6 +3128,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
         brokenMovesCB.setText(bundle.getString("RandomizerGUI.brokenMovesCB.text")); // NOI18N
         brokenMovesCB.setToolTipText(bundle.getString("RandomizerGUI.brokenMovesCB.toolTipText")); // NOI18N
 
+        randomQSButton.setText(bundle.getString("RandomizerGUI.randomQSButton.text")); // NOI18N
+        randomQSButton.setToolTipText(bundle.getString("RandomizerGUI.randomQSButton.toolTipText")); // NOI18N
+        randomQSButton.setName(bundle.getString("RandomizerGUI.randomQSButton.name")); // NOI18N
+
         javax.swing.GroupLayout generalOptionsPanelLayout = new javax.swing.GroupLayout(generalOptionsPanel);
         generalOptionsPanel.setLayout(generalOptionsPanelLayout);
         generalOptionsPanelLayout.setHorizontalGroup(
@@ -3134,24 +3141,28 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addGroup(generalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(generalOptionsPanelLayout.createSequentialGroup()
                         .addComponent(pokeLimitCB)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(pokeLimitBtn))
                     .addComponent(raceModeCB)
-                    .addComponent(brokenMovesCB))
+                    .addComponent(brokenMovesCB)
+                    .addGroup(generalOptionsPanelLayout.createSequentialGroup()
+                        .addGap(21, 21, 21)
+                        .addComponent(randomQSButton)))
                 .addContainerGap(22, Short.MAX_VALUE))
         );
         generalOptionsPanelLayout.setVerticalGroup(
             generalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(generalOptionsPanelLayout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(3, 3, 3)
                 .addGroup(generalOptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(pokeLimitBtn)
                     .addComponent(pokeLimitCB))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(raceModeCB)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(brokenMovesCB)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(randomQSButton))
         );
 
         romInfoPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("RandomizerGUI.romInfoPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
@@ -3765,13 +3776,18 @@ public class RandomizerGUI extends javax.swing.JFrame {
         spExactEvoCB.setEnabled(false);
         spExactEvoCB.setName(bundle.getString("RandomizerGUI.spExactEvoCB.name")); // NOI18N
 
+        spSETriangleCB.setText(bundle.getString("RandomizerGUI.spSETriangleCB.text")); // NOI18N
+        spSETriangleCB.setToolTipText(bundle.getString("RandomizerGUI.spSETriangleCB.toolTipText")); // NOI18N
+        spSETriangleCB.setEnabled(false);
+        spSETriangleCB.setName(bundle.getString("RandomizerGUI.spSETriangleCB.name")); // NOI18N
+
         javax.swing.GroupLayout starterPokemonPanelLayout = new javax.swing.GroupLayout(starterPokemonPanel);
         starterPokemonPanel.setLayout(starterPokemonPanelLayout);
         starterPokemonPanelLayout.setHorizontalGroup(
             starterPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(starterPokemonPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(starterPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(starterPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(spUnchangedRB)
                     .addGroup(starterPokemonPanelLayout.createSequentialGroup()
                         .addComponent(spCustomRB)
@@ -3783,24 +3799,27 @@ public class RandomizerGUI extends javax.swing.JFrame {
                         .addComponent(spCustomPoke3Chooser, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(starterPokemonPanelLayout.createSequentialGroup()
                         .addComponent(spRandomRB)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(spRandomSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 282, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(18, 18, 18)
                 .addGroup(starterPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(spHeldItemsCB)
-                    .addGroup(starterPokemonPanelLayout.createSequentialGroup()
-                        .addComponent(spHeldItemsBanBadCB)
-                        .addGap(18, 18, 18)
-                        .addComponent(spExactEvoCB))
-                    .addComponent(spNoSplitCB)
                     .addComponent(spUniqueTypesCB)
                     .addGroup(starterPokemonPanelLayout.createSequentialGroup()
                         .addGroup(starterPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(spBSTLimitCB)
                             .addComponent(spBaseEvoCB))
                         .addGap(18, 18, 18)
-                        .addComponent(spBSTLimitSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(20, Short.MAX_VALUE))
+                        .addComponent(spBSTLimitSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(starterPokemonPanelLayout.createSequentialGroup()
+                        .addGroup(starterPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(spHeldItemsBanBadCB)
+                            .addComponent(spNoSplitCB))
+                        .addGap(18, 18, 18)
+                        .addGroup(starterPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(spSETriangleCB, javax.swing.GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE)
+                            .addComponent(spExactEvoCB))))
+                .addContainerGap(15, Short.MAX_VALUE))
         );
         starterPokemonPanelLayout.setVerticalGroup(
             starterPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -3820,7 +3839,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
                             .addComponent(spExactEvoCB))
                         .addGroup(starterPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(starterPokemonPanelLayout.createSequentialGroup()
-                                .addComponent(spNoSplitCB)
+                                .addGroup(starterPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(spNoSplitCB)
+                                    .addComponent(spSETriangleCB))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(spUniqueTypesCB)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -4302,6 +4323,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
         tpGymTypeThemeCB.setEnabled(false);
         tpGymTypeThemeCB.setName(bundle.getString("RandomizerGUI.tpGymTypeThemeCB.name")); // NOI18N
 
+        trainerPokesButtonGroup.add(tpGlobalSwapRB);
+        tpGlobalSwapRB.setText(bundle.getString("RandomizerGUI.tpGlobalSwapRB.text")); // NOI18N
+        tpGlobalSwapRB.setToolTipText(bundle.getString("RandomizerGUI.tpGlobalSwapRB.toolTipText")); // NOI18N
+        tpGlobalSwapRB.setName(bundle.getString("RandomizerGUI.tpGlobalSwapRB.name")); // NOI18N
+
         javax.swing.GroupLayout trainersPokemonPanelLayout = new javax.swing.GroupLayout(trainersPokemonPanel);
         trainersPokemonPanel.setLayout(trainersPokemonPanelLayout);
         trainersPokemonPanelLayout.setHorizontalGroup(
@@ -4311,8 +4337,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(tpUnchangedRB)
                     .addComponent(tpRandomRB)
-                    .addComponent(tpTypeThemedRB))
-                .addGap(35, 35, 35)
+                    .addComponent(tpTypeThemedRB)
+                    .addComponent(tpGlobalSwapRB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(33, 33, 33)
                 .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addComponent(tpTypeWeightingCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -4331,7 +4358,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(tpForceFullyEvolvedSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(tpLevelModifierCB)
                     .addComponent(tpLevelModifierSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(145, Short.MAX_VALUE))
+                .addContainerGap(122, Short.MAX_VALUE))
         );
         trainersPokemonPanelLayout.setVerticalGroup(
             trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -4356,7 +4383,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                         .addComponent(tpTypeWeightingCB)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(tpNoLegendariesCB))
-                    .addComponent(tpForceFullyEvolvedSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(tpForceFullyEvolvedSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(tpGlobalSwapRB))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(tpNoEarlyShedinjaCB)
@@ -5302,6 +5330,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JFileChooser qsOpenChooser;
     private javax.swing.JFileChooser qsSaveChooser;
     private javax.swing.JCheckBox raceModeCB;
+    private javax.swing.JButton randomQSButton;
     private javax.swing.JTabbedPane randomizerOptionsPane;
     private javax.swing.JLabel riRomCodeLabel;
     private javax.swing.JLabel riRomNameLabel;
@@ -5325,6 +5354,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox spNoSplitCB;
     private javax.swing.JRadioButton spRandomRB;
     private javax.swing.JSlider spRandomSlider;
+    private javax.swing.JCheckBox spSETriangleCB;
     private javax.swing.JRadioButton spUnchangedRB;
     private javax.swing.JCheckBox spUniqueTypesCB;
     private javax.swing.ButtonGroup starterPokemonButtonGroup;
@@ -5358,6 +5388,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JMenuItem toggleScrollPaneMenuItem;
     private javax.swing.JCheckBox tpForceFullyEvolvedCB;
     private javax.swing.JSlider tpForceFullyEvolvedSlider;
+    private javax.swing.JRadioButton tpGlobalSwapRB;
     private javax.swing.JCheckBox tpGymTypeThemeCB;
     private javax.swing.JCheckBox tpLevelModifierCB;
     private javax.swing.JSlider tpLevelModifierSlider;
