@@ -27,9 +27,12 @@ package com.dabomstew.pkrandom.romhandlers;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.newnds.NDSRom;
@@ -40,6 +43,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     protected String dataFolder;
     private NDSRom baseRom;
     private String loadedFN;
+    private boolean arm9Extended = false;
 
     public AbstractDSRomHandler(Random random, PrintStream logStream) {
         super(random, logStream);
@@ -282,6 +286,89 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         case BUG:
             return 610;
         }
+    }
+
+    private int find(byte[] data, String hexString) {
+        if (hexString.length() % 2 != 0) {
+            return -3; // error
+        }
+        byte[] searchFor = new byte[hexString.length() / 2];
+        for (int i = 0; i < searchFor.length; i++) {
+            searchFor[i] = (byte) Integer.parseInt(hexString.substring(i * 2, i * 2 + 2), 16);
+        }
+        List<Integer> found = RomFunctions.search(data, searchFor);
+        if (found.size() == 0) {
+            return -1; // not found
+        } else if (found.size() > 1) {
+            return -2; // not unique
+        } else {
+            return found.get(0);
+        }
+    }
+
+    protected byte[] extendARM9(byte[] arm9, int extendBy, String prefix) {
+        /*
+        Simply extending the ARM9 at the end doesn't work. Towards the end of the ARM9, the following sections exist:
+        1. A section that is copied to ITCM (Instruction Tightly Coupled Memory)
+        2. A section that is copied to DTCM (Data Tightly Coupled Memory)
+        3. Pointers specifying to where these sections should be copied as well as their sizes
+
+        All of these sections are later overwritten(!) and the area is used more or less like a regular RAM area.
+        This means that if any new code is put after these sections, it will also be overwritten.
+        Changing which area is overwritten is not viable. There are very many pointers to this area that would need to
+        be re-indexed.
+
+        Our solution is to extend the section that is to be copied to ITCM, so that any new code gets copied to
+        ITCM and can be executed from there. This means we have to shift all the data that is after this in order to
+        make space. Additionally, elsewhere in the ARM9, pointers are stored specifying from where the ITCM
+        section should be copied, as well as some other data. They are supposedly part of some sort of NDS library
+        functions and should work the same across games; look for "[SDK+NINTENDO:" in the ARM9 and these pointers should
+        be slightly before that. They are as follows (each pointer = 4 bytes):
+        1. Pointer specifying from where the destination pointers/sizes should be read (see point 3 above)
+        2. Pointer specifying the end address of the ARM9.
+        3. Pointer specifying from where data copying should start (since ITCM is first, this corresponds to the start
+           of the section that should be copied to ITCM).
+        4. Pointer specifying where data should start being overwritten. (should be identical to #3)
+        5. Pointer specifying where data should stop being overwritten (should correspond to start of ovl table).
+        6. ???
+
+        Out of these, we want to change #1 (it will be moved because we have to shift the end of the ARM9 to make space
+        for enlarging the "copy to ITCM" area) and #2 (since the ARM9 will be made larger). We also want to change the
+        specified size for the ITCM area since we're enlarging it.
+         */
+
+        if (arm9Extended) return arm9;  // Don't try to extend the ARM9 more than once
+
+        int tcmCopyingPointersOffset = find(arm9, prefix);
+        tcmCopyingPointersOffset += prefix.length() / 2; // because it was a prefix
+
+        int oldDestPointersOffset = FileFunctions.readFullIntLittleEndian(arm9, tcmCopyingPointersOffset) - 0x02000000;
+        int itcmSrcOffset =
+                FileFunctions.readFullIntLittleEndian(arm9, tcmCopyingPointersOffset + 8) - 0x02000000;
+        int itcmSizeOffset = oldDestPointersOffset + 4;
+        int oldITCMSize = FileFunctions.readFullIntLittleEndian(arm9, itcmSizeOffset);
+
+        int oldDTCMOffset = itcmSrcOffset + oldITCMSize;
+
+        byte[] newARM9 = Arrays.copyOf(arm9, arm9.length + extendBy);
+
+        // Change:
+        // 1. Pointer to destination pointers/sizes
+        // 2. ARM9 size
+        // 3. Size of the area copied to ITCM
+        FileFunctions.writeFullIntLittleEndian(newARM9, tcmCopyingPointersOffset,
+                oldDestPointersOffset + extendBy + 0x02000000);
+        FileFunctions.writeFullIntLittleEndian(newARM9, tcmCopyingPointersOffset + 4,
+                newARM9.length + 0x02000000);
+        FileFunctions.writeFullIntLittleEndian(newARM9, itcmSizeOffset, oldITCMSize + extendBy);
+
+        // Finally, shift everything
+        System.arraycopy(newARM9, oldDTCMOffset, newARM9, oldDTCMOffset + extendBy,
+                arm9.length - oldDTCMOffset);
+
+        arm9Extended = true;
+
+        return newARM9;
     }
 
 }
