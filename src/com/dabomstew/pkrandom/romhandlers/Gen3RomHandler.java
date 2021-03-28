@@ -116,6 +116,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         private List<StaticPokemon> staticPokemon = new ArrayList<StaticPokemon>();
         private List<TMOrMTTextEntry> tmmtTexts = new ArrayList<TMOrMTTextEntry>();
         private Map<String, String> codeTweaks = new HashMap<String, String>();
+        private List<Integer> plotlessItems = new ArrayList<Integer>();
 
         public RomEntry() {
             this.hash = null;
@@ -250,6 +251,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                                 tte.isMoveTutor = true;
                                 current.tmmtTexts.add(tte);
                             }
+                        } else if (r[0].equals("PlotlessKeyItems[]")) {
+                            current.plotlessItems.add(parseRIInt(r[1]));
                         } else if (r[0].equals("Game")) {
                             current.romCode = r[1];
                         } else if (r[0].equals("Version")) {
@@ -2859,6 +2862,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 }
             }
         }
+        // Plotless items
+        for (int itemOff : romEntry.plotlessItems) {
+            itemOffs.add(new ItemLocationInner(-1, -1, -1, -1, itemOff, false));
+        }
     }
 
     @Override
@@ -2957,6 +2964,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         for (ItemLocationInner il : itemOffs) {
             int itemHere = readWord(il.offset);
             if (Gen3Constants.allowedItems.isAllowed(itemHere) && !(Gen3Constants.allowedItems.isTM(itemHere))) {
+                fieldItems.add(new ItemLocation(il.toString(), itemHere));
+            } else if (romEntry.romCode.equals("MBDN") && itemHere == 355 /* CARD KEY */) {
                 fieldItems.add(new ItemLocation(il.toString(), itemHere));
             }
         }
