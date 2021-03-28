@@ -279,6 +279,10 @@ public interface RomHandler {
 
     List<Integer> getMainGameLegendaries();
 
+    List<Integer> getSpecialMusicStatics();
+
+    void applyCorrectStaticMusic(Map<Integer,Integer> specialMusicStaticChanges);
+
     // Randomizer: Totem Pokemon
 
     List<TotemPokemon> getTotemPokemon();

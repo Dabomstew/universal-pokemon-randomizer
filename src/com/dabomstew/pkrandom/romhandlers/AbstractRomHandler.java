@@ -2967,6 +2967,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean swapMegaEvos = settings.isSwapStaticMegaEvos();
         boolean abilitiesAreRandomized = settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE;
         int levelModifier = settings.isStaticLevelModified() ? settings.getStaticLevelModifier() : 0;
+        boolean correctStaticMusic = settings.isCorrectStaticMusic();
 
         // Load
         checkPokemonRestrictions();
@@ -2979,6 +2980,13 @@ public abstract class AbstractRomHandler implements RomHandler {
             banned.addAll(abilityDependentFormes);
         }
         boolean reallySwapMegaEvos = forceSwapStaticMegaEvos() || swapMegaEvos;
+
+        Map<Integer,Integer> specialMusicStaticChanges = new HashMap<>();
+        List<Integer> changeMusicStatics = new ArrayList<>();
+        if (correctStaticMusic) {
+            changeMusicStatics = getSpecialMusicStatics();
+        }
+
         if (swapLegendaries) {
             List<Pokemon> legendariesLeft = new ArrayList<>(onlyLegendaryList);
             if (allowAltFormes) {
@@ -3067,6 +3075,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                 }
                 replacements.add(newStatic);
+                if (changeMusicStatics.contains(old.pkmn.number)) {
+                    specialMusicStaticChanges.put(old.pkmn.number, newPK.number);
+                }
             }
         } else if (similarStrength) {
             List<Pokemon> listInclFormesExclCosmetics =
@@ -3146,6 +3157,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                     pokemonLeft.removeAll(banned);
                 }
                 replacements.add(newStatic);
+                if (changeMusicStatics.contains(old.pkmn.number)) {
+                    specialMusicStaticChanges.put(old.pkmn.number, newPK.number);
+                }
             }
         } else { // Completely random
             List<Pokemon> listInclFormesExclCosmetics =
@@ -3176,6 +3190,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                     pokemonLeft.removeAll(banned);
                 }
                 replacements.add(newStatic);
+                if (changeMusicStatics.contains(old.pkmn.number)) {
+                    specialMusicStaticChanges.put(old.pkmn.number, newPK.number);
+                }
             }
         }
 
@@ -3190,6 +3207,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                 }
             }
+        }
+
+        if (specialMusicStaticChanges.size() > 0) {
+            applyCorrectStaticMusic(specialMusicStaticChanges);
         }
 
         // Save

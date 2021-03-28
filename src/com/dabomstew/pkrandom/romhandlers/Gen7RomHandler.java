@@ -1743,6 +1743,16 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public List<Integer> getSpecialMusicStatics() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public void applyCorrectStaticMusic(Map<Integer, Integer> specialMusicStaticChanges) {
+
+    }
+
+    @Override
     public List<TotemPokemon> getTotemPokemon() {
         List<TotemPokemon> totems = new ArrayList<>();
         try {

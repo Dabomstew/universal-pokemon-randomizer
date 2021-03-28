@@ -210,6 +210,7 @@ public class Settings {
     private boolean swapStaticMegaEvos;
     private boolean staticLevelModified;
     private int staticLevelModifier = 0; // -50 ~ 50
+    private boolean correctStaticMusic;
 
     public enum TotemPokemonMod {
         UNCHANGED, RANDOM, SIMILAR_STRENGTH
@@ -455,8 +456,9 @@ public class Settings {
 
         // new 170
         // 25 move randomizers
+        // + static music
         out.write(makeByteSelected(randomizeMovePowers, randomizeMoveAccuracies, randomizeMovePPs, randomizeMoveTypes,
-                randomizeMoveCategory));
+                randomizeMoveCategory, correctStaticMusic));
 
         // 26 evolutions
         out.write(makeByteSelected(evolutionsMod == EvolutionsMod.UNCHANGED, evolutionsMod == EvolutionsMod.RANDOM,
@@ -732,6 +734,7 @@ public class Settings {
         settings.setRandomizeMovePPs(restoreState(data[25], 2));
         settings.setRandomizeMoveTypes(restoreState(data[25], 3));
         settings.setRandomizeMoveCategory(restoreState(data[25], 4));
+        settings.setCorrectStaticMusic(restoreState(data[25], 5));
 
         settings.setEvolutionsMod(restoreEnum(EvolutionsMod.class, data[26], 0, // UNCHANGED
                 1 // RANDOM
@@ -1772,6 +1775,15 @@ public class Settings {
     public void setStaticLevelModifier(int staticLevelModifier) {
         this.staticLevelModifier = staticLevelModifier;
     }
+
+    public boolean isCorrectStaticMusic() {
+        return correctStaticMusic;
+    }
+
+    public void setCorrectStaticMusic(boolean correctStaticMusic) {
+        this.correctStaticMusic = correctStaticMusic;
+    }
+
 
     public TotemPokemonMod getTotemPokemonMod() {
         return totemPokemonMod;

@@ -2902,6 +2902,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public List<Integer> getSpecialMusicStatics() {
+        return Arrays.stream(romEntry.arrayEntries.get("SpecialMusicStatics")).boxed().collect(Collectors.toList());
+    }
+
+    @Override
     public List<TotemPokemon> getTotemPokemon() {
         return new ArrayList<>();
     }
@@ -3915,6 +3920,29 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             // code to make you walk instead. This simply nops out this jump so the
             // game stops caring about the FLAG_SYS_B_DASH flag entirely.
             writeWord(arm9,offset + 0xE, 0);
+        }
+    }
+
+    @Override
+    public void applyCorrectStaticMusic(Map<Integer,Integer> specialMusicStaticChanges) {
+        arm9 = extendARM9(arm9, 240, romEntry.getString("TCMCopyingPrefix"));
+        genericIPSPatch(arm9, "NewIndexToMusicTweak");
+
+        String newIndexToMusicPrefix = romEntry.getString("NewIndexToMusicPrefix");
+        int newIndexToMusicPoolOffset = find(arm9, newIndexToMusicPrefix);
+        newIndexToMusicPoolOffset += newIndexToMusicPrefix.length() / 2;
+
+        List<Integer> replaced = new ArrayList<>();
+
+        for (int oldStatic: specialMusicStaticChanges.keySet()) {
+            int i = newIndexToMusicPoolOffset;
+            int index = readWord(arm9, i);
+            while (index != oldStatic || replaced.contains(i)) {
+                i += 4;
+                index = readWord(arm9, i);
+            }
+            writeWord(arm9, i, specialMusicStaticChanges.get(oldStatic));
+            replaced.add(i);
         }
     }
 
