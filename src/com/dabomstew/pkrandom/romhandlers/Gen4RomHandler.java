@@ -3930,8 +3930,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         int newIndexToMusicPoolOffset;
 
         switch(romEntry.romType) {
+            case Gen4Constants.Type_DP:
             case Gen4Constants.Type_Plat:
-                arm9 = extendARM9(arm9, 240, romEntry.getString("TCMCopyingPrefix"));
+                int extendBy = romEntry.getInt("NewIndexToMusicSize");
+                arm9 = extendARM9(arm9, extendBy, romEntry.getString("TCMCopyingPrefix"));
                 genericIPSPatch(arm9, "NewIndexToMusicTweak");
 
                 newIndexToMusicPrefix = romEntry.getString("NewIndexToMusicPrefix");
