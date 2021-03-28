@@ -305,9 +305,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
         allowedItems = Gen4Constants.allowedItems.copy();
         nonBadItems = Gen4Constants.nonBadItems.copy();
-        if (romEntry.romType == Gen4Constants.Type_Plat) {
-            ptGiratina = true;
-        }
     }
 
     private void loadMoves() {
@@ -2522,10 +2519,31 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     }
                 }
             }
+            if (romEntry.romType == Gen4Constants.Type_Plat) {
+                patchDistortionWorldGroundCheck();
+            }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
         return true;
+    }
+
+    private void patchDistortionWorldGroundCheck() throws IOException {
+        byte[] fieldOverlay = readOverlay(romEntry.getInt("FieldOvlNumber"));
+        int offset = find(fieldOverlay, Gen4Constants.distortionWorldGroundCheckPrefix);
+        if (offset > 0) {
+            offset += Gen4Constants.distortionWorldGroundCheckPrefix.length() / 2; // because it was a prefix
+
+            // We're now looking at a jump table in the field overlay that determines which intro graphic the game
+            // should display when encountering a Pokemon that does *not* have a special intro. The Giratina fight
+            // in the Distortion World uses ground type 23, and that particular ground type never initializes the
+            // variable that determines which graphic to use. As a result, if Giratina is replaced with a Pokemon
+            // that lacks a special intro, the game will use an uninitialized value for the intro graphic and crash.
+            // The below code simply patches the jump table entry for ground type 23 to take the same branch that
+            // regular grass encounters take, ensuring the intro graphic variable is initialized.
+            fieldOverlay[offset + (2 * 23)] = 0x30;
+            writeOverlay(romEntry.getInt("FieldOvlNumber"), fieldOverlay);
+        }
     }
 
     @Override
@@ -2893,7 +2911,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     @Override
     public boolean hasMainGameLegendaries() {
-        return !ptGiratina;
+        return true;
     }
 
     @Override

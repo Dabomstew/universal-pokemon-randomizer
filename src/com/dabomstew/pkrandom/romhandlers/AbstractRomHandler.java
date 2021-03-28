@@ -52,10 +52,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     private final Random cosmeticRandom;
     protected PrintStream logStream;
     private List<Pokemon> alreadyPicked = new ArrayList<>();
-    private List<Pokemon> giratinaPicks;
     private Map<Pokemon, Integer> placementHistory = new HashMap<>();
     private Map<Integer, Integer> itemPlacementHistory = new HashMap<>();
-    boolean ptGiratina = false;
     boolean isORAS = false;
     boolean isSM = false;
     int perfectAccuracy = 100;
@@ -181,7 +179,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         onlyLegendaryListInclFormes = new ArrayList<>();
         noLegendaryAltsList = new ArrayList<>();
         onlyLegendaryAltsList = new ArrayList<>();
-        giratinaPicks = new ArrayList<>();
         ultraBeastList = new ArrayList<>();
 
         for (Pokemon p : mainPokemonList) {
@@ -191,12 +188,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 ultraBeastList.add(p);
             } else {
                 noLegendaryList.add(p);
-            }
-            for (int specialIntro : GlobalConstants.ptSpecialIntros) {
-                if (p.number == specialIntro) {
-                    giratinaPicks.add(p);
-                    break;
-                }
             }
         }
         for (Pokemon p : mainPokemonListInclFormes) {
@@ -3013,18 +3004,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (StaticEncounter old : currentStaticPokemon) {
                 StaticEncounter newStatic = cloneStaticEncounter(old);
                 Pokemon newPK;
-                if (old.pkmn.number == Species.giratina && ptGiratina) {
-                    newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
-                    setPokemonAndFormeForStaticEncounter(newStatic, newPK);
-                    legendariesLeft.remove(newPK);
-                    if (legendariesLeft.size() == 0) {
-                        legendariesLeft.addAll(onlyLegendaryList);
-                        if (allowAltFormes) {
-                            legendariesLeft.addAll(onlyLegendaryAltsList);
-                        }
-                        legendariesLeft.removeAll(banned);
-                    }
-                } else if (old.pkmn.isLegendary()) {
+                if (old.pkmn.isLegendary()) {
                     if (reallySwapMegaEvos && old.canMegaEvolve()) {
                         newPK = getMegaEvoPokemon(onlyLegendaryList, legendariesLeft, newStatic);
                     } else {
@@ -3096,11 +3076,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     oldPK = getAltFormeOfPokemon(oldPK, old.forme);
                 }
                 Integer oldBST = oldPK.hp + oldPK.attack + oldPK.defense + oldPK.spatk + oldPK.spdef + oldPK.speed;
-                if (oldPK.number == Species.giratina && ptGiratina) {
-                    newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
-                    pokemonLeft.remove(newPK);
-                    setPokemonAndFormeForStaticEncounter(newStatic, newPK);
-                } else if (oldBST >= 600 && limit600) {
+                if (oldBST >= 600 && limit600) {
                     if (reallySwapMegaEvos && old.canMegaEvolve()) {
                         newPK = getMegaEvoPokemon(mainPokemonList, pokemonLeft, newStatic);
                     } else {
@@ -3172,19 +3148,13 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (StaticEncounter old : currentStaticPokemon) {
                 StaticEncounter newStatic = cloneStaticEncounter(old);
                 Pokemon newPK;
-                if (old.pkmn.number == Species.giratina && ptGiratina) {
-                    newPK = giratinaPicks.remove(this.random.nextInt(giratinaPicks.size()));
-                    pokemonLeft.remove(newPK);
-                    setPokemonAndFormeForStaticEncounter(newStatic, newPK);
+                if (reallySwapMegaEvos && old.canMegaEvolve()) {
+                    newPK = getMegaEvoPokemon(mainPokemonList, pokemonLeft, newStatic);
                 } else {
-                    if (reallySwapMegaEvos && old.canMegaEvolve()) {
-                        newPK = getMegaEvoPokemon(mainPokemonList, pokemonLeft, newStatic);
-                    } else {
-                        newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
-                    }
-                    pokemonLeft.remove(newPK);
-                    setPokemonAndFormeForStaticEncounter(newStatic, newPK);
+                    newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
                 }
+                pokemonLeft.remove(newPK);
+                setPokemonAndFormeForStaticEncounter(newStatic, newPK);
                 if (pokemonLeft.size() == 0) {
                     pokemonLeft.addAll(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
                     pokemonLeft.removeAll(banned);

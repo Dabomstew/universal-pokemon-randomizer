@@ -332,6 +332,8 @@ public class Gen4Constants {
 
     private static final String runningShoesCheckPrefixDPPt = "281C0C24", runningShoesCheckPrefixHGSS = "301C0C24";
 
+    public static final String distortionWorldGroundCheckPrefix = "23D849187944C988090409148F44";
+
     private static final int trophyGardenGrassEncounterIndexDP = 304, trophyGardenGrassEncounterIndexPt = 308;
     private static final List<Integer> marshGrassEncounterIndicesDP = Arrays.asList(76, 82, 88, 94, 100, 102),
             marshGrassEncounterIndicesPt = Arrays.asList(76, 82, 88, 94, 100, 106);
