@@ -31,6 +31,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.GBConstants;
@@ -129,28 +131,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                         }
                         r[1] = r[1].trim();
                         r[0] = r[0].trim();
-                        // Static Pokemon?
-                        if (r[0].equals("StaticPokemon[]")) {
-                            if (r[1].startsWith("[") && r[1].endsWith("]")) {
-                                String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
-                                int[] offs = new int[offsets.length];
-                                int c = 0;
-                                for (String off : offsets) {
-                                    offs[c++] = parseRIInt(off);
-                                }
-                                current.staticPokemon.add(new StaticPokemon(offs));
-                            } else {
-                                int offs = parseRIInt(r[1]);
-                                current.staticPokemon.add(new StaticPokemon(offs));
-                            }
-                        } else if (r[0].equals("StaticPokemonGameCorner[]")) {
-                            String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
-                            int[] offs = new int[offsets.length];
-                            int c = 0;
-                            for (String off : offsets) {
-                                offs[c++] = parseRIInt(off);
-                            }
-                            current.staticPokemon.add(new StaticPokemonGameCorner(offs));
+                        if (r[0].equals("StaticPokemon{}")) {
+                            current.staticPokemon.add(parseStaticPokemon(r[1], false));
+                        } else if (r[0].equals("StaticPokemonGameCorner{}")) {
+                            current.staticPokemon.add(parseStaticPokemon(r[1], true));
                         } else if (r[0].equals("TMText[]")) {
                             if (r[1].startsWith("[") && r[1].endsWith("]")) {
                                 String[] parts = r[1].substring(1, r[1].length() - 1).split(",", 3);
@@ -222,6 +206,35 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             System.err.println("File not found!");
         }
 
+    }
+
+    private static StaticPokemon parseStaticPokemon(String staticPokemonString, boolean isGameCorner) {
+        StaticPokemon sp;
+        if (isGameCorner) {
+            sp = new StaticPokemonGameCorner();
+        } else {
+            sp = new StaticPokemon();
+        }
+        String pattern = "[A-z]+=\\[(0x[0-9a-fA-F]+,?\\s?)+]";
+        Pattern r = Pattern.compile(pattern);
+        Matcher m = r.matcher(staticPokemonString);
+        while (m.find()) {
+            String[] segments = m.group().split("=");
+            String[] romOffsets = segments[1].substring(1, segments[1].length() - 1).split(",");
+            int[] offsets = new int [romOffsets.length];
+            for (int i = 0; i < offsets.length; i++) {
+                offsets[i] = parseRIInt(romOffsets[i]);
+            }
+            switch (segments[0]) {
+                case "Species":
+                    sp.speciesOffsets = offsets;
+                    break;
+                case "Level":
+                    sp.levelOffsets = offsets;
+                    break;
+            }
+        }
+        return sp;
     }
 
     private static int parseRIInt(String off) {
@@ -1020,54 +1033,77 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private static class StaticPokemon {
-        protected int[] offsets;
+        protected int[] speciesOffsets;
+        protected int[] levelOffsets;
 
-        public StaticPokemon(int... offsets) {
-            this.offsets = offsets;
+        public StaticPokemon() {
+            this.speciesOffsets = new int[0];
+            this.levelOffsets = new int[0];
         }
 
         public Pokemon getPokemon(Gen2RomHandler rh) {
-            return rh.pokes[rh.rom[offsets[0]] & 0xFF];
+            return rh.pokes[rh.rom[speciesOffsets[0]] & 0xFF];
         }
 
         public void setPokemon(Gen2RomHandler rh, Pokemon pkmn) {
-            for (int offset : offsets) {
+            for (int offset : speciesOffsets) {
                 rh.rom[offset] = (byte) pkmn.number;
+            }
+        }
+
+        public int getLevel(byte[] rom, int i) {
+            if (levelOffsets.length <= i) {
+                return 1;
+            }
+            return rom[levelOffsets[i]];
+        }
+
+        public void setLevel(byte[] rom, int level, int i) {
+            if (levelOffsets.length > i) { // Might not have a level entry e.g., it's an egg
+                rom[levelOffsets[i]] = (byte) level;
             }
         }
     }
 
     private static class StaticPokemonGameCorner extends StaticPokemon {
-
-        public StaticPokemonGameCorner(int... offsets) {
-            super(offsets);
-        }
-
         @Override
         public void setPokemon(Gen2RomHandler rh, Pokemon pkmn) {
             // Last offset is a pointer to the name
-            int offsetSize = offsets.length;
+            int offsetSize = speciesOffsets.length;
             for (int i = 0; i < offsetSize - 1; i++) {
-                rh.rom[offsets[i]] = (byte) pkmn.number;
+                rh.rom[speciesOffsets[i]] = (byte) pkmn.number;
             }
             rh.writePaddedPokemonName(pkmn.name, rh.romEntry.getValue("GameCornerPokemonNameLength"),
-                    offsets[offsetSize - 1]);
+                    speciesOffsets[offsetSize - 1]);
         }
     }
 
     @Override
     public List<StaticEncounter> getStaticPokemon() {
         List<StaticEncounter> statics = new ArrayList<>();
+        int[] staticEggOffsets = new int[0];
+        if (romEntry.arrayEntries.containsKey("StaticEggPokemonOffsets")) {
+            staticEggOffsets = romEntry.arrayEntries.get("StaticEggPokemonOffsets");
+        }
         if (romEntry.getValue("StaticPokemonSupport") > 0) {
-            for (StaticPokemon sp : romEntry.staticPokemon) {
-                statics.add(new StaticEncounter(sp.getPokemon(this)));
+            for (int i = 0; i < romEntry.staticPokemon.size(); i++) {
+                int currentOffset = i;
+                StaticPokemon sp = romEntry.staticPokemon.get(i);
+                StaticEncounter se = new StaticEncounter();
+                se.pkmn = sp.getPokemon(this);
+                se.level = sp.getLevel(rom, 0);
+                se.isEgg = Arrays.stream(staticEggOffsets).anyMatch(x-> x == currentOffset);
+                statics.add(se);
             }
         }
         if (romEntry.getValue("StaticPokemonOddEggOffset") > 0) {
             int oeOffset = romEntry.getValue("StaticPokemonOddEggOffset");
             int oeSize = romEntry.getValue("StaticPokemonOddEggDataSize");
             for (int i = 0; i < Gen2Constants.oddEggPokemonCount; i++) {
-                statics.add(new StaticEncounter(pokes[rom[oeOffset + i * oeSize] & 0xFF]));
+                StaticEncounter se = new StaticEncounter();
+                se.pkmn = pokes[rom[oeOffset + i * oeSize] & 0xFF];
+                se.isEgg = true;
+                statics.add(se);
             }
         }
         return statics;
@@ -1092,8 +1128,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
 
         Iterator<StaticEncounter> statics = staticPokemon.iterator();
-        for (StaticPokemon sp : romEntry.staticPokemon) {
-            sp.setPokemon(this, statics.next().pkmn);
+        for (int i = 0; i < romEntry.staticPokemon.size(); i++) {
+            StaticEncounter currentStatic = statics.next();
+            StaticPokemon sp = romEntry.staticPokemon.get(i);
+            sp.setPokemon(this, currentStatic.pkmn);
+            sp.setLevel(rom, currentStatic.level, 0);
         }
 
         if (romEntry.getValue("StaticPokemonOddEggOffset") > 0) {
