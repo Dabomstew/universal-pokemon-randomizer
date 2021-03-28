@@ -2015,7 +2015,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 int oldPointer = readPointer(tte.actualOffset);
                 if (oldPointer < 0 || oldPointer >= rom.length) {
                     throw new RandomizationException(
-                            "Move Tutor Text update failed: couldn't read a move tutor text pointer.");
+                            String.format("Move Tutor Text update failed: couldn't read a move tutor text pointer.\n" +
+                            "Tutor no: %d\n" +
+                            "Pointer: 0x%X\n" +
+                            "Old pointer: 0x%X", tte.number, tte.actualOffset, oldPointer));
                 }
                 String moveName = this.moves[moves.get(tte.number)].name;
                 // temporarily use underscores to stop the move name being split
