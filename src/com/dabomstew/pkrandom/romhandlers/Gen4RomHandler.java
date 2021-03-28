@@ -3925,24 +3925,49 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     @Override
     public void applyCorrectStaticMusic(Map<Integer,Integer> specialMusicStaticChanges) {
-        arm9 = extendARM9(arm9, 240, romEntry.getString("TCMCopyingPrefix"));
-        genericIPSPatch(arm9, "NewIndexToMusicTweak");
-
-        String newIndexToMusicPrefix = romEntry.getString("NewIndexToMusicPrefix");
-        int newIndexToMusicPoolOffset = find(arm9, newIndexToMusicPrefix);
-        newIndexToMusicPoolOffset += newIndexToMusicPrefix.length() / 2;
-
         List<Integer> replaced = new ArrayList<>();
+        String newIndexToMusicPrefix;
+        int newIndexToMusicPoolOffset;
 
-        for (int oldStatic: specialMusicStaticChanges.keySet()) {
-            int i = newIndexToMusicPoolOffset;
-            int index = readWord(arm9, i);
-            while (index != oldStatic || replaced.contains(i)) {
-                i += 4;
-                index = readWord(arm9, i);
-            }
-            writeWord(arm9, i, specialMusicStaticChanges.get(oldStatic));
-            replaced.add(i);
+        switch(romEntry.romType) {
+            case Gen4Constants.Type_Plat:
+                arm9 = extendARM9(arm9, 240, romEntry.getString("TCMCopyingPrefix"));
+                genericIPSPatch(arm9, "NewIndexToMusicTweak");
+
+                newIndexToMusicPrefix = romEntry.getString("NewIndexToMusicPrefix");
+                newIndexToMusicPoolOffset = find(arm9, newIndexToMusicPrefix);
+                newIndexToMusicPoolOffset += newIndexToMusicPrefix.length() / 2;
+
+                for (int oldStatic: specialMusicStaticChanges.keySet()) {
+                    int i = newIndexToMusicPoolOffset;
+                    int index = readWord(arm9, i);
+                    while (index != oldStatic || replaced.contains(i)) {
+                        i += 4;
+                        index = readWord(arm9, i);
+                    }
+                    writeWord(arm9, i, specialMusicStaticChanges.get(oldStatic));
+                    replaced.add(i);
+                }
+                break;
+            case Gen4Constants.Type_HGSS:
+                newIndexToMusicPrefix  = romEntry.getString("IndexToMusicPrefix");
+                newIndexToMusicPoolOffset = find(arm9, newIndexToMusicPrefix);
+                newIndexToMusicPoolOffset += newIndexToMusicPrefix.length() / 2;
+
+                for (int oldStatic: specialMusicStaticChanges.keySet()) {
+                    int i = newIndexToMusicPoolOffset;
+                    int indexEtc = readWord(arm9, i);
+                    int index = indexEtc & 0x3FF;
+                    while (index != oldStatic || replaced.contains(i)) {
+                        i += 2;
+                        indexEtc = readWord(arm9, i);
+                        index = indexEtc & 0x3FF;
+                    }
+                    int newIndexEtc = specialMusicStaticChanges.get(oldStatic) | (indexEtc & 0xFC00);
+                    writeWord(arm9, i, newIndexEtc);
+                    replaced.add(i);
+                }
+                break;
         }
     }
 
