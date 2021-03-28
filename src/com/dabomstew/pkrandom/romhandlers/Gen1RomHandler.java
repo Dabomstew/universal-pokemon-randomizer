@@ -1147,7 +1147,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public boolean typeInGame(Type type) {
-        if (!type.isHackOnly && (type != Type.DARK && type != Type.STEEL)) {
+        if (!type.isHackOnly && (type != Type.DARK && type != Type.STEEL && type != Type.FAIRY)) {
             return true;
         }
         return romEntry.extraTypeReverse.containsKey(type);
