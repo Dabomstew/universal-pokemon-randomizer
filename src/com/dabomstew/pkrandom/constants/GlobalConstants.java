@@ -233,10 +233,6 @@ public class GlobalConstants {
 
     /* @formatter:on */
 
-    public static final int[] ptSpecialIntros = { Species.regirock, Species.regice, Species.registeel, Species.rotom,
-            Species.uxie, Species.azelf, Species.dialga, Species.palkia, Species.heatran, Species.regigigas,
-            Species.giratina, Species.darkrai, Species.shaymin, Species.arceus };
-
     public static final List<Integer> xItems = Arrays.asList(55, 56, 57, 58, 59, 60, 61, 62);
 
     public static final List<Integer> battleTrappingAbilities = Arrays.asList(23, 42, 71);
