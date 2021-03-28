@@ -2966,9 +2966,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
         for (ItemLocationInner il : itemOffs) {
             int itemHere = readWord(il.offset);
-            if (Gen3Constants.allowedItems.isAllowed(itemHere) && !(Gen3Constants.allowedItems.isTM(itemHere))) {
-                fieldItems.add(new ItemLocation(il.toString(), itemHere));
-            } else if (romEntry.romCode.equals("MBDN") && itemHere == 355 /* CARD KEY */) {
+            if (il.mapBank == -1 /* is plotless key item */ || (Gen3Constants.allowedItems.isAllowed(itemHere) && !(Gen3Constants.allowedItems.isTM(itemHere)))) {
                 fieldItems.add(new ItemLocation(il.toString(), itemHere));
             }
         }
