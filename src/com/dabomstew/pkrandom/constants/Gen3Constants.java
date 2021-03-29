@@ -160,7 +160,7 @@ public class Gen3Constants {
 
     public static final int evolutionMethodCount = 15;
 
-    public static final int sunStoneIndex = 93, moonStoneIndex = 94, waterStoneIndex = 97;
+    public static final int sunStoneIndex = 93, moonStoneIndex = 94, waterStoneIndex = 97, deepSeaToothIndex = 192, deepSeaScaleIndex = 193;
 
     public static final int highestAbilityIndex = 77;
 
