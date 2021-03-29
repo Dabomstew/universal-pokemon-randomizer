@@ -526,7 +526,7 @@ public interface RomHandler {
 
     int internalStringLength(String string);
 
-    void applySignature();
+    void randomizeIntroPokemon();
 
     BufferedImage getMascotImage();
 

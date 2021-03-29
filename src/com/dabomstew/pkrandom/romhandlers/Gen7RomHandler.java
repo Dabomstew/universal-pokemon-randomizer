@@ -2649,7 +2649,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void applySignature() {
+    public void randomizeIntroPokemon() {
         // For now, do nothing.
     }
 

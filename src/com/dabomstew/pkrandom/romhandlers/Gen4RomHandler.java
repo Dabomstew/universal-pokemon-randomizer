@@ -3458,9 +3458,23 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public void applySignature() {
-        // For now, do nothing.
-
+    public void randomizeIntroPokemon() {
+        try {
+            if (romEntry.romType == Gen4Constants.Type_DP || romEntry.romType == Gen4Constants.Type_Plat) {
+                int introPokemon = randomPokemon().number;
+                byte[] introOverlay = readOverlay(romEntry.getInt("IntroOvlNumber"));
+                for (String prefix : Gen4Constants.dpptIntroPrefixes) {
+                    int offset = find(introOverlay, prefix);
+                    if (offset > 0) {
+                        offset += prefix.length() / 2; // because it was a prefix
+                        writeWord(introOverlay, offset, introPokemon);
+                    }
+                }
+                writeOverlay(romEntry.getInt("IntroOvlNumber"), introOverlay);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     @Override
