@@ -399,7 +399,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             rom[Gen3Constants.headerChecksumOffset] = 0x66;
         }
         // Wild Pokemon header
-        if (find(rom, Gen3Constants.wildPokemonPointerPrefix) == -1 && !romCode(rom, "SPDC")) {
+        if (find(rom, Gen3Constants.wildPokemonPointerPrefix) == -1 && !(romCode(rom, "SPDC") || romCode(rom, "MBDN"))) {
             return false;
         }
         // Map Banks header
@@ -483,7 +483,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         loadMoves();
 
         // Get wild Pokemon offset
-        if (!("SPDC".equals(romEntry.romCode))) {
+        if (!(romEntry.romCode.matches("^(SPDC|MBDN)$"))) {
             int baseWPOffset = findMultiple(rom, Gen3Constants.wildPokemonPointerPrefix).get(0);
             romEntry.entries.put("WildPokemon", readPointer(baseWPOffset + 12));
         }
@@ -1283,7 +1283,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // Add pokemanz
             if (grassPokes >= 0 && grassPokes < rom.length && rom[grassPokes] != 0
                     && !seenOffsets.contains(readPointer(grassPokes + 4))) {
-                int numSlots = "SPDC".equals(romEntry.romCode) ? 6 : Gen3Constants.grassSlots;
+                int numSlots = romEntry.romCode.matches("^(SPDC|MBDN)$") ? 6 : Gen3Constants.grassSlots;
                 encounterAreas.add(readWildArea(grassPokes, numSlots, mapName + " Grass/Cave"));
                 seenOffsets.add(readPointer(grassPokes + 4));
             }
@@ -1356,7 +1356,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         // Grab the *real* pointer to data
         int dataOffset = readPointer(offset + 4);
 
-        if ("SPDC".equals(romEntry.romCode)) // speedchoice
+        if (romEntry.romCode.matches("^(SPDC|MBDN)$")) // speedchoice
         {
             numOfEntries = 2; // no memes allowed
         }
@@ -1402,8 +1402,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // Add pokemanz
             if (grassPokes >= 0 && grassPokes < rom.length && rom[grassPokes] != 0
                     && !seenOffsets.contains(readPointer(grassPokes + 4))) {
-                int numSlots = "SPDC".equals(romEntry.romCode) ? 6 : Gen3Constants.grassSlots;
-                writeWildArea(grassPokes, numSlots, encounterAreas.next(), "SPDC".equals(romEntry.romCode));
+                int numSlots = romEntry.romCode.matches("^(SPDC|MBDN)$") ? 6 : Gen3Constants.grassSlots;
+                writeWildArea(grassPokes, numSlots, encounterAreas.next(), romEntry.romCode.matches("^(SPDC|MBDN)$"));
                 seenOffsets.add(readPointer(grassPokes + 4));
             }
             if (waterPokes >= 0 && waterPokes < rom.length && rom[waterPokes] != 0
@@ -1622,7 +1622,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private void writeWildAreaFishing(int offset, int numOfEntries, EncounterSet encounters) {
         // Grab the *real* pointer to data
         int dataOffset = readPointer(offset + 4);
-        if ("SPDC".equals(romEntry.romCode)) // speedchoice
+        if (romEntry.romCode.matches("^(SPDC|MBDN)$")) // speedchoice
         {
             numOfEntries = 2;
         }
@@ -1632,7 +1632,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // min, max, species, species
             writeWord(dataOffset + i * 4 + 2, pokedexToInternal[enc.pokemon.number]);
             // Speedchoice duplication.. 4 extra times
-            if ("SPDC".equals(romEntry.romCode)) // speedchoice
+            if (romEntry.romCode.matches("^(SPDC|MBDN)$")) // speedchoice
             {
                 writeWord(dataOffset + (i + numOfEntries) * 4 + 2, pokedexToInternal[enc.pokemon.number]);
                 writeWord(dataOffset + (i + numOfEntries * 2) * 4 + 2, pokedexToInternal[enc.pokemon.number]);
@@ -2218,7 +2218,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         if (romEntry.romType == Gen3Constants.RomType_Ruby || romEntry.romType == Gen3Constants.RomType_Sapp) {
             // Find the original pokedex script
             int pkDexOffset = 0;
-            if ("SPDC".equals(romEntry.romCode)) // speedchoice
+            if (romEntry.romCode.matches("^(SPDC|MBDN)$")) // speedchoice
             {
                 pkDexOffset = find(Gen3Constants.rsSpeedchoiceNatDexScriptPart2);
             } else {
