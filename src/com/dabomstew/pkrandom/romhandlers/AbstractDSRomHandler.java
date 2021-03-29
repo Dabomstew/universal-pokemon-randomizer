@@ -306,7 +306,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         }
     }
 
-    protected byte[] extendARM9(byte[] arm9, int extendBy, String prefix) {
+    protected byte[] extendARM9(byte[] arm9, int extendBy, String prefix, int arm9Offset) {
         /*
         Simply extending the ARM9 at the end doesn't work. Towards the end of the ARM9, the following sections exist:
         1. A section that is copied to ITCM (Instruction Tightly Coupled Memory)
@@ -342,9 +342,9 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         int tcmCopyingPointersOffset = find(arm9, prefix);
         tcmCopyingPointersOffset += prefix.length() / 2; // because it was a prefix
 
-        int oldDestPointersOffset = FileFunctions.readFullIntLittleEndian(arm9, tcmCopyingPointersOffset) - 0x02000000;
+        int oldDestPointersOffset = FileFunctions.readFullIntLittleEndian(arm9, tcmCopyingPointersOffset) - arm9Offset;
         int itcmSrcOffset =
-                FileFunctions.readFullIntLittleEndian(arm9, tcmCopyingPointersOffset + 8) - 0x02000000;
+                FileFunctions.readFullIntLittleEndian(arm9, tcmCopyingPointersOffset + 8) - arm9Offset;
         int itcmSizeOffset = oldDestPointersOffset + 4;
         int oldITCMSize = FileFunctions.readFullIntLittleEndian(arm9, itcmSizeOffset);
 
@@ -357,9 +357,9 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         // 2. ARM9 size
         // 3. Size of the area copied to ITCM
         FileFunctions.writeFullIntLittleEndian(newARM9, tcmCopyingPointersOffset,
-                oldDestPointersOffset + extendBy + 0x02000000);
+                oldDestPointersOffset + extendBy + arm9Offset);
         FileFunctions.writeFullIntLittleEndian(newARM9, tcmCopyingPointersOffset + 4,
-                newARM9.length + 0x02000000);
+                newARM9.length + arm9Offset);
         FileFunctions.writeFullIntLittleEndian(newARM9, itcmSizeOffset, oldITCMSize + extendBy);
 
         // Finally, shift everything

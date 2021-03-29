@@ -245,7 +245,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                                     }
                                     current.arrayEntries.put(r[0], offs);
                                 }
-                            } else if (r[0].endsWith("Offset") || r[0].endsWith("Count") || r[0].endsWith("Number")) {
+                            } else if (r[0].endsWith("Offset") || r[0].endsWith("Count") || r[0].endsWith("Number")
+                                    || r[0].endsWith("Size") || r[0].endsWith("Index")) {
                                 int offs = parseRIInt(r[1]);
                                 current.numbers.put(r[0], offs);
                             } else {
@@ -1592,11 +1593,40 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public List<Integer> getSpecialMusicStatics() {
-        return new ArrayList<>();
+        return Arrays.stream(romEntry.arrayEntries.get("SpecialMusicStatics")).boxed().collect(Collectors.toList());
     }
 
     @Override
     public void applyCorrectStaticMusic(Map<Integer, Integer> specialMusicStaticChanges) {
+
+        try {
+            byte[] fieldOverlay = readOverlay(romEntry.getInt("FieldOvlNumber"));
+            genericIPSPatch(fieldOverlay, "NewIndexToMusicOvlTweak");
+            writeOverlay(romEntry.getInt("FieldOvlNumber"), fieldOverlay);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        int extendBy = romEntry.getInt("NewIndexToMusicSize");
+        arm9 = extendARM9(arm9, extendBy, romEntry.getString("TCMCopyingPrefix"), Gen5Constants.arm9Offset);
+        genericIPSPatch(arm9, "NewIndexToMusicTweak");
+
+        String newIndexToMusicPrefix = romEntry.getString("NewIndexToMusicPrefix");
+        int newIndexToMusicPoolOffset = find(arm9, newIndexToMusicPrefix);
+        newIndexToMusicPoolOffset += newIndexToMusicPrefix.length() / 2;
+
+        List<Integer> replaced = new ArrayList<>();
+
+        for (int oldStatic: specialMusicStaticChanges.keySet()) {
+            int i = newIndexToMusicPoolOffset;
+            int index = readWord(arm9, i);
+            while (index != oldStatic || replaced.contains(i)) {
+                i += 4;
+                index = readWord(arm9, i);
+            }
+            writeWord(arm9, i, specialMusicStaticChanges.get(oldStatic));
+            replaced.add(i);
+        }
 
     }
 
@@ -1680,7 +1710,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     private void fixBoxLegendaryBW1(int boxLegendarySpecies) throws IOException {
-        byte[] boxLegendaryOverlay = readOverlay(romEntry.getInt("BoxLegendaryOvlNumber"));
+        byte[] boxLegendaryOverlay = readOverlay(romEntry.getInt("FieldOvlNumber"));
         if (romEntry.isBlack) {
             // In Black, Reshiram's species ID is always retrieved via a pc-relative
             // load to some constant. All we need to is replace these constants with
@@ -1750,7 +1780,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 boxLegendaryOverlay[secondFunctionOffset + 81] = 0x00;
             }
         }
-        writeOverlay(romEntry.getInt("BoxLegendaryOvlNumber"), boxLegendaryOverlay);
+        writeOverlay(romEntry.getInt("FieldOvlNumber"), boxLegendaryOverlay);
     }
 
     @Override

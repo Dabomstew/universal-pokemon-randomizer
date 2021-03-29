@@ -37,6 +37,8 @@ public class Gen4Constants {
     public static final int Type_Plat = 1;
     public static final int Type_HGSS = 2;
 
+    public static final int arm9Offset = 0x02000000;
+
     public static final int pokemonCount = 493, moveCount = 467;
     private static final int dpFormeCount = 5, platHgSsFormeCount = 12;
     public static final int formeOffset = 2;
