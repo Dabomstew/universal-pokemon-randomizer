@@ -54,6 +54,7 @@ public class Version {
         map.put(311,"4.0.0");
         map.put(312,"4.0.1");
         map.put(313,"4.0.2");
+        map.put(314,"4.1.0");
 
         // Latest version - when version is updated, add the old version as an explicit put
         map.put(VERSION, VERSION_STRING);
