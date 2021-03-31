@@ -624,8 +624,8 @@ public class Randomizer {
         // Test output for placement history
         // romHandler.renderPlacementHistory();
 
-        // Signature...
-        romHandler.applySignature();
+        // Intro Pokemon...
+        romHandler.randomizeIntroPokemon();
 
         // Record check value?
         romHandler.writeCheckValueToROM(checkValue);

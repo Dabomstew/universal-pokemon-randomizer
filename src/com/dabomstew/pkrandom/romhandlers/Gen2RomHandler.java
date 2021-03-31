@@ -1848,7 +1848,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void applySignature() {
+    public void randomizeIntroPokemon() {
         // Intro sprite
 
         // Pick a pokemon

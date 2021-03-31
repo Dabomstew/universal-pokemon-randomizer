@@ -1836,7 +1836,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void applySignature() {
+    public void randomizeIntroPokemon() {
         // First off, intro Pokemon
         // 160 add yellow intro random
         int introPokemon = pokeNumToRBYTable[this.randomPokemon().number];
