@@ -1617,15 +1617,38 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         List<Integer> replaced = new ArrayList<>();
 
-        for (int oldStatic: specialMusicStaticChanges.keySet()) {
-            int i = newIndexToMusicPoolOffset;
-            int index = readWord(arm9, i);
-            while (index != oldStatic || replaced.contains(i)) {
-                i += 4;
-                index = readWord(arm9, i);
-            }
-            writeWord(arm9, i, specialMusicStaticChanges.get(oldStatic));
-            replaced.add(i);
+        switch(romEntry.romType) {
+            case Gen5Constants.Type_BW:
+                for (int oldStatic: specialMusicStaticChanges.keySet()) {
+                    int i = newIndexToMusicPoolOffset;
+                    int index = readWord(arm9, i);
+                    while (index != oldStatic || replaced.contains(i)) {
+                        i += 4;
+                        index = readWord(arm9, i);
+                    }
+                    writeWord(arm9, i, specialMusicStaticChanges.get(oldStatic));
+                    replaced.add(i);
+                }
+                break;
+            case Gen5Constants.Type_BW2:
+                for (int oldStatic: specialMusicStaticChanges.keySet()) {
+                    int i = newIndexToMusicPoolOffset;
+                    int index = readWord(arm9, i);
+                    while (index != oldStatic || replaced.contains(i)) {
+                        i += 4;
+                        index = readWord(arm9, i);
+                    }
+                    // Special Kyurem-B/W handling
+                    if (index > Gen5Constants.pokemonCount) {
+                        writeWord(arm9, i - 0xFE, 0);
+                        writeWord(arm9, i - 0xFC, 0);
+                        writeWord(arm9, i - 0xFA, 0);
+                        writeWord(arm9, i - 0xF8, 0x4290);
+                    }
+                    writeWord(arm9, i, specialMusicStaticChanges.get(oldStatic));
+                    replaced.add(i);
+                }
+                break;
         }
 
     }
