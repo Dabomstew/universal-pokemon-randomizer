@@ -25,6 +25,7 @@ package com.dabomstew.pkrandom.newgui;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import cli.CliRandomizer;
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.EncryptedROMException;
@@ -3480,24 +3481,33 @@ public class NewRandomizerGUI {
     }
 
     public static void main(String[] args) {
-        launcherInput = args.length > 0 ? args[0] : "";
-        if (launcherInput.equals("please-use-the-launcher")) usedLauncher = true;
-        SwingUtilities.invokeLater(() -> {
-            frame = new JFrame("NewRandomizerGUI");
-            try {
-                String lafName = javax.swing.UIManager.getSystemLookAndFeelClassName();
-                // NEW: Only set Native LaF on windows.
-                if (lafName.equalsIgnoreCase("com.sun.java.swing.plaf.windows.WindowsLookAndFeel")) {
-                    javax.swing.UIManager.setLookAndFeel(lafName);
+        String firstCliArg = args.length > 0 ? args[0] : "";
+        // invoke as CLI program
+        if (firstCliArg.equals("cli")) {
+            // snip the "cli" flag arg off the args array and invoke command
+            String[] commandArgs = Arrays.copyOfRange(args, 1, args.length);
+            int exitCode = CliRandomizer.invoke(commandArgs);
+            System.exit(exitCode);
+        } else {
+            launcherInput = firstCliArg;
+            if (launcherInput.equals("please-use-the-launcher")) usedLauncher = true;
+            SwingUtilities.invokeLater(() -> {
+                frame = new JFrame("NewRandomizerGUI");
+                try {
+                    String lafName = javax.swing.UIManager.getSystemLookAndFeelClassName();
+                    // NEW: Only set Native LaF on windows.
+                    if (lafName.equalsIgnoreCase("com.sun.java.swing.plaf.windows.WindowsLookAndFeel")) {
+                        javax.swing.UIManager.setLookAndFeel(lafName);
+                    }
+                } catch (ClassNotFoundException | InstantiationException | UnsupportedLookAndFeelException | IllegalAccessException ex) {
+                    java.util.logging.Logger.getLogger(NewRandomizerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                            ex);
                 }
-            } catch (ClassNotFoundException | InstantiationException | UnsupportedLookAndFeelException | IllegalAccessException ex) {
-                java.util.logging.Logger.getLogger(NewRandomizerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null,
-                        ex);
-            }
-            frame.setContentPane(new NewRandomizerGUI().mainPanel);
-            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-            frame.pack();
-            frame.setVisible(true);
-        });
+                frame.setContentPane(new NewRandomizerGUI().mainPanel);
+                frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+                frame.pack();
+                frame.setVisible(true);
+            });
+        }
     }
 }
