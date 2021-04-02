@@ -2723,8 +2723,63 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public void randomizeIntroPokemon() {
-        // For now, do nothing.
+        try {
+            int introPokemon = randomPokemon().number;
+            byte[] introGraphicOverlay = readOverlay(romEntry.getInt("IntroGraphicOvlNumber"));
+            int offset = find(introGraphicOverlay, Gen5Constants.introGraphicPrefix);
+            if (offset > 0) {
+                offset += Gen5Constants.introGraphicPrefix.length() / 2; // because it was a prefix
+                // offset is now pointing at the species constant that gets pc-relative
+                // loaded to determine what sprite to load.
+                writeWord(introGraphicOverlay, offset, introPokemon);
+                writeOverlay(romEntry.getInt("IntroGraphicOvlNumber"), introGraphicOverlay);
+            }
 
+            if (romEntry.romType == Gen5Constants.Type_BW) {
+                byte[] introCryOverlay = readOverlay(romEntry.getInt("IntroCryOvlNumber"));
+                offset = find(introCryOverlay, Gen5Constants.bw1IntroCryPrefix);
+                if (offset > 0) {
+                    offset += Gen5Constants.bw1IntroCryPrefix.length() / 2; // because it was a prefix
+                    // The function starting from the offset looks like this:
+                    // mov r0, #0x8f
+                    // str r1, [sp, #local_94]
+                    // lsl r0, r0, #0x2
+                    // mov r2, #0x40
+                    // mov r3, #0x0
+                    // bl PlayCry
+                    // [rest of the function...]
+                    // pop { r3, r4, r5, r6, r7, pc }
+                    // C0 46 (these are useless padding bytes)
+                    // To make this more extensible, we want to pc-relative load a species ID into r0 instead.
+                    // Start by moving everything below the left shift up by 2 bytes. We won't need the left
+                    // shift later, and it will give us 4 bytes after the pop to use for the ID.
+                    for (int i = offset + 6; i < offset + 40; i++) {
+                        introCryOverlay[i - 2] = introCryOverlay[i];
+                    }
+
+                    // The call to PlayCry needs to be adjusted as well, since it got moved.
+                    introCryOverlay[offset + 10]++;
+
+                    // Now write the species ID in the 4 bytes of space now available at the bottom,
+                    // and then write a pc-relative load to this species ID at the offset.
+                    FileFunctions.writeFullIntLittleEndian(introCryOverlay, offset + 38, introPokemon);
+                    introCryOverlay[offset] = 0x9;
+                    introCryOverlay[offset + 1] = 0x48;
+                    writeOverlay(romEntry.getInt("IntroCryOvlNumber"), introCryOverlay);
+                }
+            } else {
+                byte[] introCryOverlay = readOverlay(romEntry.getInt("IntroCryOvlNumber"));
+                offset = find(introCryOverlay, Gen5Constants.bw2IntroCryLocator);
+                if (offset > 0) {
+                    // offset is now pointing at the species constant that gets pc-relative
+                    // loaded to determine what cry to play.
+                    writeWord(introCryOverlay, offset, introPokemon);
+                    writeOverlay(romEntry.getInt("IntroCryOvlNumber"), introCryOverlay);
+                }
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     @Override
