@@ -337,6 +337,8 @@ public class Gen5Constants {
     private static final int bw1FieldOverlayNumber = 21, bw2FieldOverlayNumber = 36;
     public static final String runningShoesPrefix = "01D0012008BD002008BD63";
 
+    public static final String introGraphicPrefix = "5A0000010000001700000001000000", bw1IntroCryPrefix = "0021009101910291", bw2IntroCryLocator = "3D020000F8B51C1C";
+
     private static Type[] constructTypeTable() {
         Type[] table = new Type[256];
         table[0x00] = Type.NORMAL;
