@@ -8,6 +8,7 @@ import com.dabomstew.pkrandom.SysConstants;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
 
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import cuecompressors.BLZCoder;
 
 /*----------------------------------------------------------------------------*/
@@ -46,7 +47,8 @@ public class NDSRom {
     private boolean writingEnabled;
     private boolean arm9_open, arm9_changed, arm9_has_footer;
     private boolean arm9_compressed;
-    private int arm9_szmode, arm9_szoffset;
+    private int arm9_ramoffset;
+    private int arm9_szoffset;
     private byte[] arm9_footer;
     private byte[] arm9_ramstored;
     private long originalArm9CRC;
@@ -101,6 +103,9 @@ public class NDSRom {
         byte[] sig = new byte[4];
         baseRom.readFully(sig);
         this.romCode = new String(sig, "US-ASCII");
+
+        baseRom.seek(0x28);
+        this.arm9_ramoffset = readFromFile(baseRom, 4);
 
         baseRom.seek(0x40);
         int fntOffset = readFromFile(baseRom, 4);
@@ -236,8 +241,8 @@ public class NDSRom {
             if (arm9_compressed) {
                 newARM9 = new BLZCoder(null).BLZ_EncodePub(newARM9, true, false, "arm9.bin");
                 if (arm9_szoffset > 0) {
-                    int newValue = arm9_szmode == 1 ? newARM9.length : newARM9.length + 0x4000;
-                    writeToByteArr(newARM9, arm9_szoffset, 3, newValue);
+                    int newValue = newARM9.length + arm9_ramoffset;
+                    writeToByteArr(newARM9, arm9_szoffset, 4, newValue);
                 }
             }
             arm9_size = newARM9.length;
@@ -511,20 +516,13 @@ public class NDSRom {
                 int compSize = readFromByteArr(arm9, arm9.length - 8, 3);
                 if (compSize > (arm9.length * 9 / 10) && compSize < (arm9.length * 11 / 10)) {
                     arm9_compressed = true;
-                    byte[] compLength = new byte[3];
-                    writeToByteArr(compLength, 0, 3, arm9.length);
+                    byte[] compLength = new byte[4];
+                    writeToByteArr(compLength, 0, 4, arm9.length + arm9_ramoffset);
                     List<Integer> foundOffsets = RomFunctions.search(arm9, compLength);
                     if (foundOffsets.size() == 1) {
-                        arm9_szmode = 1;
                         arm9_szoffset = foundOffsets.get(0);
                     } else {
-                        byte[] compLength2 = new byte[3];
-                        writeToByteArr(compLength2, 0, 3, arm9.length + 0x4000);
-                        List<Integer> foundOffsets2 = RomFunctions.search(arm9, compLength2);
-                        if (foundOffsets2.size() == 1) {
-                            arm9_szmode = 2;
-                            arm9_szoffset = foundOffsets2.get(0);
-                        }
+                        throw new RandomizerIOException("Could not read ARM9 size offset. May be a bad ROM.");
                     }
                 }
             }
