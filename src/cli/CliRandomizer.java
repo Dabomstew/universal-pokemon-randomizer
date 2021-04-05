@@ -3,12 +3,13 @@ package cli;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.Randomizer;
+import com.dabomstew.pkrandom.romhandlers.*;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import com.dabomstew.pkrandom.Randomizer;
-import com.dabomstew.pkrandom.romhandlers.*;
+import java.util.ResourceBundle;
 
 public class CliRandomizer {
 
@@ -18,6 +19,9 @@ public class CliRandomizer {
             String destinationRomFilePath
     ) {
 
+        // instantiate bundle so we can use consistent messaging where applicable
+        ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/newgui/Bundle");
+        
         // borrowed directly from NewRandomizerGUI()
         RomHandler.Factory[] checkHandlers = new RomHandler.Factory[] {
                 new Gen1RomHandler.Factory(),
@@ -54,7 +58,7 @@ public class CliRandomizer {
             }
             fis.close();
             // if we get here it means no rom handlers matched the ROM file
-            System.err.println("Couldn't identify a handler for your ROM file, please confirm it is valid and try again.");
+            System.err.printf(bundle.getString("GUI.unsupportedRom"), romFileHandler.getName());
         }  catch (IOException ex) {
             ex.printStackTrace();
         }
