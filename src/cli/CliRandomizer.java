@@ -6,22 +6,23 @@ import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.Randomizer;
 import com.dabomstew.pkrandom.romhandlers.*;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class CliRandomizer {
+
+    private final static ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/newgui/Bundle");
 
     private static boolean performDirectRandomization(
             String settingsFilePath,
             String sourceRomFilePath,
             String destinationRomFilePath
     ) {
-
-        // instantiate bundle so we can use consistent messaging where applicable
-        ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/newgui/Bundle");
-        
         // borrowed directly from NewRandomizerGUI()
         RomHandler.Factory[] checkHandlers = new RomHandler.Factory[] {
                 new Gen1RomHandler.Factory(),
@@ -33,14 +34,29 @@ public class CliRandomizer {
                 new Gen7RomHandler.Factory()
         };
 
+        Settings settings;
         try {
             File fh = new File(settingsFilePath);
             FileInputStream fis = new FileInputStream(fh);
-            Settings settings = Settings.read(fis);
-
+            settings = Settings.read(fis);
             // taken from com.dabomstew.pkrandom.newgui.NewRandomizerGUI.saveROM, set distinctly from all other settings
             settings.setCustomNames(FileFunctions.getCustomNames());
+            fis.close();
+        } catch (UnsupportedOperationException ex) {
+            ex.printStackTrace();
+            System.err.println(ex.getMessage());
+            return false;
+        } catch (IllegalArgumentException ex) {
+            ex.printStackTrace();
+            System.err.println(bundle.getString("GUI.invalidSettingsFile"));
+            return false;
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            System.err.println(bundle.getString("GUI.settingsLoadFailed"));
+            return false;
+        }
 
+        try {
             File romFileHandler = new File(sourceRomFilePath);
             RomHandler romHandler;
 
@@ -48,21 +64,32 @@ public class CliRandomizer {
                 if (rhf.isLoadable(romFileHandler.getAbsolutePath())) {
                     romHandler = rhf.create(RandomSource.instance());
                     romHandler.loadRom(romFileHandler.getAbsolutePath());
+
+                    CliRandomizer.displaySettingsWarnings(settings, romHandler);
+
                     Randomizer randomizer = new Randomizer(settings, romHandler, false);
                     randomizer.randomize(destinationRomFilePath);
-                    fis.close();
                     System.out.println("Randomized succesfully!");
                     // this is the only successful exit, everything else will return false at the end of the function
                     return true;
                 }
             }
-            fis.close();
             // if we get here it means no rom handlers matched the ROM file
             System.err.printf(bundle.getString("GUI.unsupportedRom"), romFileHandler.getName());
-        }  catch (IOException ex) {
-            ex.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return false;
+    }
+
+    private static void displaySettingsWarnings(Settings settings, RomHandler romHandler) {
+        Settings.TweakForROMFeedback feedback = settings.tweakForRom(romHandler);
+        if (feedback.isChangedStarter() && settings.getStartersMod() == Settings.StartersMod.CUSTOM) {
+            System.out.println(bundle.getString("GUI.starterUnavailable"));
+        }
+        if (settings.isUpdatedFromOldVersion()) {
+            System.out.println(bundle.getString("GUI.settingsFileOlder"));
+        }
     }
 
     public static int invoke(String[] args) {
