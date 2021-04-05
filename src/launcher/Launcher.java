@@ -22,6 +22,8 @@ package launcher;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import com.dabomstew.pkrandom.SysConstants;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentEvent;
@@ -30,7 +32,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.*;
 import java.net.URI;
-import java.nio.file.Files;
 
 public class Launcher {
 
@@ -40,11 +41,11 @@ public class Launcher {
     public static void main(String[] args) {
         try {
             ProcessBuilder pb = new ProcessBuilder("java", "-Xmx4096M", "-jar", "./PokeRandoZX.jar", "please-use-the-launcher");
-            File log = new File("launcher-log.txt");
+            File log = new File(SysConstants.ROOT_PATH + "launcher-log.txt");
             if (!log.exists()) {
                 log.createNewFile();
             }
-            if (Files.isWritable(log.toPath())) {
+            if (log.canWrite()) {
                 pb.redirectErrorStream(true);
                 pb.redirectOutput(ProcessBuilder.Redirect.to(log));
                 logEnabled = true;
