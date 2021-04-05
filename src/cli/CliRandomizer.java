@@ -54,9 +54,8 @@ public class CliRandomizer {
             }
             fis.close();
             // if we get here it means no rom handlers matched the ROM file
-            System.out.println("Couldn't identify a handler for your ROM file, please confirm it is valid and try again.");
+            System.err.println("Couldn't identify a handler for your ROM file, please confirm it is valid and try again.");
         }  catch (IOException ex) {
-            System.out.println("Error! Most likely couldn't read the supplied settings file.");
             ex.printStackTrace();
         }
         return false;
@@ -73,22 +72,22 @@ public class CliRandomizer {
         String settingsFilePath = args[0];
         String sourceRomFilePath = args[1];
         if (!new File(settingsFilePath).exists()) {
-            System.out.println("Error: could not read settings file");
+            System.err.println("Error: could not read settings file");
             System.out.println(CliRandomizer.usage());
             return 1;
         }
 
         // check that everything is readable/writable as appropriate
         if (!new File(sourceRomFilePath).exists()) {
-            System.out.println("Error: could not read source ROM file");
+            System.err.println("Error: could not read source ROM file");
             System.out.println(CliRandomizer.usage());
             return 1;
         }
 
         String outputRomFilePath = args[2];
         // java will return false for a non-existent file, have to check the parent directory
-        if (!new File(outputRomFilePath).getParentFile().canWrite()) {
-            System.out.println("Error: destination ROM path not writable");
+        if (!new File(outputRomFilePath).getAbsoluteFile().getParentFile().canWrite()) {
+            System.err.println("Error: destination ROM path not writable");
             System.out.println(CliRandomizer.usage());
             return 1;
         }
@@ -99,7 +98,7 @@ public class CliRandomizer {
                 outputRomFilePath
         );
         if (!processResult) {
-            System.out.println("Error: randomization failed");
+            System.err.println("Error: randomization failed");
             System.out.println(CliRandomizer.usage());
             return 1;
         }
