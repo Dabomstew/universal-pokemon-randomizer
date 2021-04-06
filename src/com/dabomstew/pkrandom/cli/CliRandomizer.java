@@ -1,12 +1,11 @@
-package cli;
+package com.dabomstew.pkrandom.cli;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RandomSource;
-import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.Randomizer;
+import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.romhandlers.*;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
