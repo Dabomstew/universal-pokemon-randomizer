@@ -10,6 +10,7 @@ import javax.swing.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -22,6 +23,15 @@ public class CliRandomizer {
             String settingsFilePath,
             String sourceRomFilePath,
             String destinationRomFilePath
+    ) {
+        return CliRandomizer.performDirectRandomization(settingsFilePath, sourceRomFilePath, destinationRomFilePath, false);
+    }
+
+    private static boolean performDirectRandomization(
+            String settingsFilePath,
+            String sourceRomFilePath,
+            String destinationRomFilePath,
+            boolean saveAsDirectory
     ) {
         // borrowed directly from NewRandomizerGUI()
         RomHandler.Factory[] checkHandlers = new RomHandler.Factory[] {
@@ -48,11 +58,11 @@ public class CliRandomizer {
             return false;
         } catch (IllegalArgumentException ex) {
             ex.printStackTrace();
-            System.err.println(bundle.getString("GUI.invalidSettingsFile"));
+            System.err.println(bundle.getString("GUI.invalidSettingsFile") + "%n");
             return false;
         } catch (IOException ex) {
             ex.printStackTrace();
-            System.err.println(bundle.getString("GUI.settingsLoadFailed"));
+            System.err.println(bundle.getString("GUI.settingsLoadFailed") + "%n");
             return false;
         }
 
@@ -64,10 +74,25 @@ public class CliRandomizer {
                 if (rhf.isLoadable(romFileHandler.getAbsolutePath())) {
                     romHandler = rhf.create(RandomSource.instance());
                     romHandler.loadRom(romFileHandler.getAbsolutePath());
+                    if (saveAsDirectory && romHandler.generationOfPokemon() != 6 && romHandler.generationOfPokemon() != 7) {
+                        saveAsDirectory = false;
+                        System.out.println("WARNING: Saving as directory does not make sense for generations other than 6 and 7, ignoring...");
+                    }
 
                     CliRandomizer.displaySettingsWarnings(settings, romHandler);
 
-                    Randomizer randomizer = new Randomizer(settings, romHandler, false);
+                    List<String> extensions = new ArrayList<>(Arrays.asList("sgb", "gbc", "gba", "nds", "cxi"));
+                    extensions.remove(romHandler.getDefaultExtension());
+                    File fh = FileFunctions.fixFilename(romFileHandler, romHandler.getDefaultExtension(), extensions);
+                    if (romHandler instanceof AbstractDSRomHandler || romHandler instanceof Abstract3DSRomHandler) {
+                        String currentFN = romHandler.loadedFilename();
+                        if (currentFN.equals(fh.getAbsolutePath())) {
+                            System.err.println(bundle.getString("GUI.cantOverwriteDS") + "%n");
+                            return false;
+                        }
+                    }
+
+                    Randomizer randomizer = new Randomizer(settings, romHandler, saveAsDirectory);
                     randomizer.randomize(destinationRomFilePath);
                     System.out.println("Randomized succesfully!");
                     // this is the only successful exit, everything else will return false at the end of the function
@@ -75,7 +100,7 @@ public class CliRandomizer {
                 }
             }
             // if we get here it means no rom handlers matched the ROM file
-            System.err.printf(bundle.getString("GUI.unsupportedRom"), romFileHandler.getName());
+            System.err.printf(bundle.getString("GUI.unsupportedRom") + "%n", romFileHandler.getName());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -85,23 +110,50 @@ public class CliRandomizer {
     private static void displaySettingsWarnings(Settings settings, RomHandler romHandler) {
         Settings.TweakForROMFeedback feedback = settings.tweakForRom(romHandler);
         if (feedback.isChangedStarter() && settings.getStartersMod() == Settings.StartersMod.CUSTOM) {
-            System.out.println(bundle.getString("GUI.starterUnavailable"));
+            System.out.println(bundle.getString("GUI.starterUnavailable") + "%n");
         }
         if (settings.isUpdatedFromOldVersion()) {
-            System.out.println(bundle.getString("GUI.settingsFileOlder"));
+            System.out.println(bundle.getString("GUI.settingsFileOlder") + "%n");
         }
     }
 
     public static int invoke(String[] args) {
-        // perform a couple checks to ensure the integrity of the arguments so the actual business logic doesn't have to
-        if (args.length < 3) {
-            System.out.println("Error: missing argument");
-            System.out.println(CliRandomizer.usage());
-            return 1;
+        String settingsFilePath = null;
+        String sourceRomFilePath = null;
+        String outputRomFilePath = null;
+        boolean saveAsDirectory = false;
+
+        List<String> allowedFlags = Arrays.asList("-i", "-o", "-s", "-d");
+        for (int i = 0; i < args.length; i++) {
+            if (allowedFlags.contains(args[i])) {
+                int flagValueIndex = i + 1;
+
+                switch(args[i]) {
+                    case "-i":
+                        sourceRomFilePath = args[i + 1];
+                        break;
+                    case "-o":
+                        outputRomFilePath = args[i + 1];
+                        break;
+                    case "-s":
+                        settingsFilePath = args[i + 1];
+                        break;
+                    case "-d":
+                        saveAsDirectory = true;
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
+
+        if (settingsFilePath == null || sourceRomFilePath == null || outputRomFilePath == null) {
+            System.err.println("Missing required argument");
+            return 1;
+
+        }
+
         // now we know we have the right number of args...
-        String settingsFilePath = args[0];
-        String sourceRomFilePath = args[1];
         if (!new File(settingsFilePath).exists()) {
             System.err.println("Error: could not read settings file");
             System.out.println(CliRandomizer.usage());
@@ -115,7 +167,6 @@ public class CliRandomizer {
             return 1;
         }
 
-        String outputRomFilePath = args[2];
         // java will return false for a non-existent file, have to check the parent directory
         if (!new File(outputRomFilePath).getAbsoluteFile().getParentFile().canWrite()) {
             System.err.println("Error: destination ROM path not writable");
@@ -126,7 +177,8 @@ public class CliRandomizer {
         boolean processResult = CliRandomizer.performDirectRandomization(
                 settingsFilePath,
                 sourceRomFilePath,
-                outputRomFilePath
+                outputRomFilePath,
+                saveAsDirectory
         );
         if (!processResult) {
             System.err.println("Error: randomization failed");
@@ -137,6 +189,6 @@ public class CliRandomizer {
     }
 
     private static String usage() {
-        return "Usage: java -jar PokeRandoZX.jar cli <path to settings file> <path to source ROM> <path for new ROM>";
+        return "Usage: java -jar PokeRandoZX.jar cli -s <path to settings file> -i <path to source ROM> -o <path for new ROM> [-d save as directory]";
     }
 }
