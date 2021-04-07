@@ -280,6 +280,7 @@ public class NewRandomizerGUI {
     private JCheckBox stpPercentageLevelModifierCheckBox;
     private JSlider stpPercentageLevelModifierSlider;
     private JCheckBox stpFixMusicCheckBox;
+    private JCheckBox miscFasterHPAndEXPBarsCheckBox;
 
     private static JFrame frame;
 

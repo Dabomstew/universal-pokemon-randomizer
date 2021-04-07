@@ -3909,6 +3909,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             available |= MiscTweak.NATIONAL_DEX_AT_START.getValue();
         }
         available |= MiscTweak.RUN_WITHOUT_RUNNING_SHOES.getValue();
+        available |= MiscTweak.FASTER_HP_AND_EXP_BARS.getValue();
         return available;
     }
 
@@ -3927,6 +3928,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             patchForNationalDex();
         } else if (tweak == MiscTweak.RUN_WITHOUT_RUNNING_SHOES) {
             applyRunWithoutRunningShoesPatch();
+        } else if (tweak == MiscTweak.FASTER_HP_AND_EXP_BARS) {
+            patchFasterBars();
         }
     }
 
@@ -3983,6 +3986,54 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             // code to make you walk instead. This simply nops out this jump so the
             // game stops caring about the FLAG_SYS_B_DASH flag entirely.
             writeWord(arm9,offset + 0xE, 0);
+        }
+    }
+
+    private void patchFasterBars() {
+        // To understand what this code is patching, take a look at the CalcNewBarValue
+        // and MoveBattleBar functions in this file from the Emerald decompilation:
+        // https://github.com/pret/pokeemerald/blob/master/src/battle_interface.c
+        // The code in Gen 4 is almost identical outside of one single constant; the
+        // reason the bars scroll slower is because Gen 4 runs at 30 FPS instead of 60.
+        try {
+            byte[] battleOverlay = readOverlay(romEntry.getInt("BattleOvlNumber"));
+            int offset = find(battleOverlay, Gen4Constants.hpBarSpeedPrefix);
+            if (offset > 0) {
+                offset += Gen4Constants.hpBarSpeedPrefix.length() / 2; // because it was a prefix
+                // For the HP bar, the original game passes 1 for the toAdd parameter of CalcNewBarValue.
+                // We want to pass 2 instead, so we simply change the mov instruction at offset.
+                battleOverlay[offset] = 0x02;
+            }
+
+            offset = find(battleOverlay, Gen4Constants.expBarSpeedPrefix);
+            if (offset > 0) {
+                offset += Gen4Constants.expBarSpeedPrefix.length() / 2; // because it was a prefix
+                // For the EXP bar, the original game passes expFraction for the toAdd parameter. The
+                // game calculates expFraction by doing a division, and to do *that*, it has to load
+                // receivedValue into r0 so it can call the division function with it as the first
+                // parameter. It gets the value from r6 like so:
+                // add r0, r6, #0
+                // Since we ultimately want toAdd (and thus expFraction) to be doubled, we can double
+                // receivedValue when it gets loaded into r0 by tweaking the add to be:
+                // add r0, r6, r6
+                battleOverlay[offset] = (byte) 0xB0;
+                battleOverlay[offset + 1] = 0x19;
+            }
+
+            offset = find(battleOverlay, Gen4Constants.bothBarsSpeedPrefix);
+            if (offset > 0) {
+                offset += Gen4Constants.bothBarsSpeedPrefix.length() / 2; // because it was a prefix
+                // For both HP and EXP bars, a different set of logic is used when the maxValue has
+                // fewer pixels than the whole bar; this logic ignores the toAdd parameter entirely and
+                // calculates its *own* toAdd by doing maxValue << 8 / scale. If we instead do
+                // maxValue << 9, the new toAdd becomes doubled as well.
+                battleOverlay[offset] = 0x40;
+            }
+
+            writeOverlay(romEntry.getInt("BattleOvlNumber"), battleOverlay);
+
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
         }
     }
 
