@@ -45,7 +45,7 @@ import javax.swing.event.DocumentListener;
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RandomSource;
-import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.settings.Settings;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 

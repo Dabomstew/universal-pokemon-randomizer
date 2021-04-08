@@ -1,4 +1,4 @@
-package com.dabomstew.pkrandom;
+package com.dabomstew.pkrandom.settings;
 
 /*----------------------------------------------------------------------------*/
 /*--  Settings.java - encapsulates a configuration of settings used by the  --*/
@@ -31,9 +31,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.ResourceBundle;
+import java.util.stream.IntStream;
 import java.util.zip.CRC32;
 
+import com.dabomstew.pkrandom.CustomNamesSet;
+import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.SettingsUpdater;
+import com.dabomstew.pkrandom.SysConstants;
+import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
@@ -48,99 +59,40 @@ public class Settings {
 
     public static final int LENGTH_OF_SETTINGS_DATA = 42;
 
+    public static final ResourceBundle bundle = ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle");
+
     private CustomNamesSet customNames;
 
     private String romName;
     private boolean updatedFromOldVersion = false;
-    private GenRestrictions currentRestrictions;
-    private int currentMiscTweaks;
 
-    private boolean changeImpossibleEvolutions;
-    private boolean makeEvolutionsEasier;
-    private boolean raceMode;
-    private boolean blockBrokenMoves;
-    private boolean limitPokemon;
+    private SettingsMap settingsMap;
+    private int currentMiscTweaks;
 
     public enum BaseStatisticsMod {
         UNCHANGED, SHUFFLE_ORDER, SHUFFLE_BST, SHUFFLE_ALL, RANDOM_WITHIN_BST, RANDOM_UNRESTRICTED, RANDOM_COMPLETELY
     }
 
-    private BaseStatisticsMod baseStatisticsMod = BaseStatisticsMod.UNCHANGED;
-    private boolean standardizeEXPCurves;
-    private boolean baseStatsFollowEvolutions;
-    private boolean updateBaseStats;
-    private boolean statsRandomizeFirst;
-
     public enum AbilitiesMod {
         UNCHANGED, RANDOMIZE
     }
-
-    private AbilitiesMod abilitiesMod = AbilitiesMod.UNCHANGED;
-    private boolean allowWonderGuard = true;
-    private boolean abilitiesFollowEvolutions;
-    private boolean banTrappingAbilities;
-    private boolean banNegativeAbilities;
 
     public enum StartersMod {
         UNCHANGED, CUSTOM, RANDOM
     }
 
-    private StartersMod startersMod = StartersMod.UNCHANGED;
-
-    // index in the rom's list of pokemon
-    // offset from the dropdown index from RandomizerGUI by 1
-    private int[] customStarters = new int[3];
-    private boolean randomizeStartersHeldItems;
-    private boolean banBadRandomStarterHeldItems;
-    private boolean startersNoSplit;
-    private boolean startersUniqueTypes;
-    private boolean starterLimitBST;
-    private boolean startersBaseEvoOnly;
-    private int starterBSTModifier;
-    private boolean startersExactEvos;
-    private int startersMinimumEvos;
-
     public enum TypesMod {
         UNCHANGED, RANDOM_RETAIN, COMPLETELY_RANDOM, SHUFFLE
     }
-
-    private TypesMod typesMod = TypesMod.UNCHANGED;
-    private boolean typesRandomizeFirst;
-    private boolean typesFollowEvos;
 
     // Evolutions
     public enum EvolutionsMod {
         UNCHANGED, RANDOM
     }
 
-    private EvolutionsMod evolutionsMod = EvolutionsMod.UNCHANGED;
-    private boolean evosSimilarStrength;
-    private boolean evosSameTyping;
-    private boolean evosChangeMethod;
-    private boolean evosMaxThreeStages;
-    private boolean evosForceChange;
-    private boolean evosNoConverge;
-    private boolean evosForceGrowth;
-
-    // Move data
-    private boolean randomizeMovePowers;
-    private boolean randomizeMoveAccuracies;
-    private boolean randomizeMovePPs;
-    private boolean randomizeMoveTypes;
-    private boolean randomizeMoveCategory;
-    private boolean updateMoves;
-    private boolean updateMovesLegacy;
-
     public enum MovesetsMod {
         UNCHANGED, RANDOM_PREFER_SAME_TYPE, COMPLETELY_RANDOM, METRONOME_ONLY
     }
-
-    private MovesetsMod movesetsMod = MovesetsMod.UNCHANGED;
-    private boolean startWithGuaranteedMoves;
-    private int guaranteedMoveCount = 2;
-    private boolean reorderDamagingMoves;
-    private boolean movesetsForceGoodDamaging;
-    private int movesetsGoodDamagingPercent = 0;
 
     public enum TrainersMod {
         UNCHANGED, RANDOM, TYPE_THEMED
@@ -236,6 +188,237 @@ public class Settings {
     private FieldItemsMod fieldItemsMod = FieldItemsMod.UNCHANGED;
     private boolean banBadRandomFieldItems;
 
+    @SuppressWarnings({"rawtypes"})
+    public Settings() {
+        this.settingsMap = new SettingsMap();
+        SettingsOptionFactory.setSettingsMap(settingsMap);
+
+        // General Options
+        SettingsOptionComposite limitPokemon = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.LIMIT_POKEMON, false));
+        SettingsOptionComposite currentRestrictions = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.CURRENT_RESTRICTIONS,
+            new GenRestrictions()).addMatches(new PredicatePair(limitPokemon, PredicatePair.BOOLEAN_TRUE)));
+        SettingsOptionComposite blockBrokenMoves = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.BLOCK_BROKEN_MOVES, false));
+        SettingsOptionComposite raceMode = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.RACE_MODE, false));
+
+        // Base statistics
+        SettingsOptionComposite baseStatisticsMod = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.BASE_STATISTICS_MOD, BaseStatisticsMod.UNCHANGED));
+        SettingsOptionComposite standardizeEXPCurves = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.STANDARDIZE_EXP_CURVES, false));
+        SettingsOptionComposite updateBaseStats = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.UPDATE_BASE_STATS, false));
+        SettingsOptionComposite baseStatsFollowEvolutions = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.BASE_STATS_FOLLOW_EVOLUTIONS,
+            false).addMatches(new PredicatePair(baseStatisticsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite statsRandomizeFirst = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.STATS_RANDOMIZE_FIRST,
+            false).addMatches(new PredicatePair(baseStatsFollowEvolutions, PredicatePair.BOOLEAN_TRUE)));
+
+        // Abilities
+        SettingsOptionComposite abilitiesMod = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.ABILITIES_MOD, AbilitiesMod.UNCHANGED));
+        SettingsOptionComposite allowWonderGuard = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.ALLOW_WONDER_GUARD, false)
+            .addMatches(new PredicatePair(abilitiesMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite abilitiesFollowEvolutions = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.ABILITIES_FOLLOW_EVOLUTIONS,
+            false).addMatches(new PredicatePair(abilitiesMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite banTrappingAbilities = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.BAN_TRAPPING_ABILITIES,
+            false).addMatches(new PredicatePair(abilitiesMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite banNegativeAbilities = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.BAN_NEGATIVE_ABILITIES,
+            false).addMatches(new PredicatePair(abilitiesMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+
+        // Types
+        SettingsOptionComposite typesMod = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TYPES_MOD, TypesMod.UNCHANGED));
+        SettingsOptionComposite typesFollowEvos = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TYPES_FOLLOW_EVOS, false)
+            .addMatches(new PredicatePair(typesMod, PredicatePair.TYPES_MOD_RANDOM)));
+        SettingsOptionComposite typesRandomizeFirst = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TYPES_RANDOMIZE_FIRST,
+            false).addMatches(new PredicatePair(typesFollowEvos, PredicatePair.BOOLEAN_TRUE)));
+
+        // Evos
+        SettingsOptionComposite evolutionsMod = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.EVOLUTIONS_MOD, EvolutionsMod.UNCHANGED));
+        SettingsOptionComposite changeImpossibleEvolutions = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.CHANGE_IMPOSSIBLE_EVOLUTIONS, false));
+        SettingsOptionComposite makeEvolutionsEasier = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.MAKE_EVOLUTIONS_EASIER, false));
+        SettingsOptionComposite evosSimilarStrength = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.EVOS_SIMILAR_STRENGTH, 
+            false).addMatches(new PredicatePair(evolutionsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite evosSameTyping = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.EVOS_SAME_TYPING,
+            false).addMatches(new PredicatePair(evolutionsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite evosChangeMethod = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.EVOS_CHANGE_METHOD,
+            false).addMatches(new PredicatePair(evolutionsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite evosMaxThreeStages = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.EVOS_MAX_THREE_STAGES,
+            false).addMatches(new PredicatePair(evolutionsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite evosForceChange = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.EVOS_FORCE_CHANGE,
+            false).addMatches(new PredicatePair(evolutionsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite evosNoConverge = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.EVOS_NO_CONVERGE,
+            false).addMatches(new PredicatePair(evolutionsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite evosForceGrowth = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.EVOS_FORCE_GROWTH,
+            false).addMatches(new PredicatePair(evolutionsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+
+        // Starters
+        SettingsOptionComposite startersMod = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.STARTERS_MOD, StartersMod.UNCHANGED));
+        SettingsOptionComposite customStarters = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.CUSTOM_STARTERS, new int[]{-1, -1, -1})
+            .addMatches(new PredicatePair(startersMod, PredicatePair.STARTERS_MOD_CUSTOM))
+            .addValidInts(IntStream.range(0, 0)));
+        SettingsOptionComposite randomizeStartersHeldItems = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.RANDOMIZE_STARTERS_HELD_ITEMS, false));
+        SettingsOptionComposite banBadRandomStarterHeldItems = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.BAN_BAD_RANDOM_STARTER_HELD_ITEMS, false)
+            .addMatches(new PredicatePair(randomizeStartersHeldItems, PredicatePair.BOOLEAN_TRUE)));
+        SettingsOptionComposite startersNoSplit = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.STARTERS_NO_SPLIT, false)
+            .addMatches(new PredicatePair(startersMod, PredicatePair.STARTERS_MOD_RANDOM)));
+        SettingsOptionComposite startersUniqueTypes = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.STARTERS_UNIQUE_TYPES, false)
+            .addMatches(new PredicatePair(startersMod, PredicatePair.STARTERS_MOD_RANDOM)));
+        SettingsOptionComposite starterLimitBST = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.STARTERS_LIMIT_BST, false)
+            .addMatches(new PredicatePair(startersMod, PredicatePair.STARTERS_MOD_RANDOM)));
+        SettingsOptionComposite starterBSTModifier = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.STARTERS_BST_MODIFIER, SettingsConstants.BST_MINIMUM_INT)
+            .addMatches(new PredicatePair(starterLimitBST, PredicatePair.BOOLEAN_TRUE))
+            .addValidInts(IntStream.range(SettingsConstants.BST_MINIMUM_INT, SettingsConstants.BST_MAXIMUM_INT)));
+        SettingsOptionComposite startersBaseEvoOnly = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.STARTERS_BASE_EVO_ONLY, false)
+            .addMatches(new PredicatePair(startersMod, PredicatePair.STARTERS_MOD_RANDOM)));
+        SettingsOptionComposite startersExactEvos = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.STARTERS_EXACT_EVOS, false)
+            .addMatches(new PredicatePair(startersMod, PredicatePair.STARTERS_MOD_RANDOM)));
+        SettingsOptionComposite startersMinimumEvos = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.STARTERS_MINIMUM_EVOS, 0)
+            .addMatches(new PredicatePair(startersMod, PredicatePair.STARTERS_MOD_RANDOM))
+            .addValidInts(IntStream.range(0, 3)));
+
+        // Moves
+        SettingsOptionComposite randomizeMovePowers = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.RANDOMIZE_MOVE_POWERS, false));
+        SettingsOptionComposite randomizeMoveAccuracies = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.RANDOMIZE_MOVE_ACCURACIES, false));
+        SettingsOptionComposite randomizeMovePPs = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.RANDOMIZE_MOVE_PPS, false));
+        SettingsOptionComposite randomizeMoveTypes = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.RANDOMIZE_MOVE_TYPES, false));
+        SettingsOptionComposite randomizeMoveCategory = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.RANDOMIZE_MOVE_CATEGORY, false));
+        SettingsOptionComposite updateMoves = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.UPDATE_MOVES, false));
+        SettingsOptionComposite updateMovesLegacy = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.UPDATE_MOVES_LEGACY, false));
+
+        // Movesets
+        SettingsOptionComposite movesetsMod = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.MOVESETS_MOD, MovesetsMod.UNCHANGED));
+        SettingsOptionComposite startWithGuaranteedMoves = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.START_WITH_GUARANTEED_MOVES, false)
+            .addMatches(new PredicatePair(movesetsMod, PredicatePair.MOVESETS_MOD_RANDOM)));
+        SettingsOptionComposite guaranteedMoveCount = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.GUARANTEED_MOVE_COUNT, 2)
+            .addMatches(new PredicatePair(startWithGuaranteedMoves, PredicatePair.BOOLEAN_TRUE))
+            .addValidInts(IntStream.range(2, 4)));
+        SettingsOptionComposite reorderDamagingMoves = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.REORDER_DAMAGING_MOVES, false)
+            .addMatches(new PredicatePair(movesetsMod, PredicatePair.MOVESETS_MOD_RANDOM)));
+        SettingsOptionComposite movesetsForceGoodDamaging = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.MOVESETS_FORCE_GOOD_DAMAGING, false)
+            .addMatches(new PredicatePair(movesetsMod, PredicatePair.MOVESETS_MOD_RANDOM)));
+        SettingsOptionComposite movesetsGoodDamagingPercent = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.MOVESETS_GOOD_DAMAGING_PERCENT, 0)
+            .addMatches(new PredicatePair(movesetsForceGoodDamaging, PredicatePair.BOOLEAN_TRUE))
+            .addValidInts(IntStream.range(0, 100)));
+
+        // Trainer pokemon
+        // choose radio button 
+        // rival carries starter
+        // // rival carries team
+        // sim strength
+        // weight type by #
+        // no legends
+        // no wonder guard
+        // gym type theme
+        // random held item
+        // random names
+        // random class
+        // fully evolve at
+        // // choose slider
+        // level mod
+        // // choose slider
+
+        // Wild Pokemon
+        // choose radio button
+        // choose additional radio button
+        // time based encounters
+        // no legendaries
+        // min catch rate
+        // choose slider
+        // random held item
+        // ban bad
+        // allow low level evos
+
+        // Static Pokemon
+        // choose radio button
+        
+        // TM/HM
+        // choose radio button
+        // full hm compatibility
+        // tm/levelup move sanity
+        // keep field moves
+        // force % good damage
+        // // choose slider
+        // choose radio button compatibility
+
+        // Move tutors
+        // choose radio button
+        // tutor/levelup move sanity
+        // keep field move tutors
+        // force % good amage
+        // // choose slider
+        // choose radio button compatibility
+
+        // Trades
+        // choose radio button
+        // random nickname
+        // random OT
+        // random IV
+        // random items
+
+        // Field items
+        // choose radio button
+        // ban bad items
+        
+        // Misc tweaks
+    }
+
+    public void randomSettings(Random random) {
+        // List of keys that should not have a random option applied
+        List<String> bannedKeys = Arrays.asList("raceMode");
+
+        settingsMap.forEachParent((option) -> {
+            if (!bannedKeys.contains(option.getKey())) {
+                option.getValue().randomValue(random);
+            }
+        });  
+    }
+
     // to and from strings etc
     public void write(FileOutputStream out) throws IOException {
         out.write(VERSION);
@@ -269,44 +452,73 @@ public class Settings {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         // 0: general options #1 + trainer/class names
-        out.write(makeByteSelected(changeImpossibleEvolutions, updateMoves, updateMovesLegacy, randomizeTrainerNames,
-                randomizeTrainerClassNames, makeEvolutionsEasier));
+        out.write(makeByteSelected(
+                settingsMap.getValue(SettingsConstants.CHANGE_IMPOSSIBLE_EVOLUTIONS),
+                settingsMap.getValue(SettingsConstants.UPDATE_MOVES),
+                settingsMap.getValue(SettingsConstants.UPDATE_MOVES_LEGACY),
+                randomizeTrainerNames,
+                randomizeTrainerClassNames,
+                settingsMap.getValue(SettingsConstants.MAKE_EVOLUTIONS_EASIER)));
 
         // 1: pokemon base stats (see byte 36 for additional options)
-        out.write(makeByteSelected(baseStatsFollowEvolutions, baseStatisticsMod == BaseStatisticsMod.RANDOM_WITHIN_BST,
-                baseStatisticsMod == BaseStatisticsMod.SHUFFLE_ORDER, baseStatisticsMod == BaseStatisticsMod.UNCHANGED,
-                standardizeEXPCurves, updateBaseStats, baseStatisticsMod == BaseStatisticsMod.RANDOM_UNRESTRICTED,
-                baseStatisticsMod == BaseStatisticsMod.RANDOM_COMPLETELY));
+        out.write(makeByteSelected(
+                settingsMap.getValue(SettingsConstants.BASE_STATS_FOLLOW_EVOLUTIONS),
+                settingsMap.getValue(SettingsConstants.BASE_STATISTICS_MOD) == BaseStatisticsMod.RANDOM_WITHIN_BST,
+                settingsMap.getValue(SettingsConstants.BASE_STATISTICS_MOD) == BaseStatisticsMod.SHUFFLE_ORDER,
+                settingsMap.getValue(SettingsConstants.BASE_STATISTICS_MOD) == BaseStatisticsMod.UNCHANGED,
+                settingsMap.getValue(SettingsConstants.STANDARDIZE_EXP_CURVES), 
+                settingsMap.getValue(SettingsConstants.UPDATE_BASE_STATS),
+                settingsMap.getValue(SettingsConstants.BASE_STATISTICS_MOD) == BaseStatisticsMod.RANDOM_UNRESTRICTED,
+                settingsMap.getValue(SettingsConstants.BASE_STATISTICS_MOD) == BaseStatisticsMod.RANDOM_COMPLETELY));
 
         // 2: pokemon types & more general options (see byte 36 for additional options)
-        out.write(makeByteSelected(typesMod == TypesMod.RANDOM_RETAIN,
-                typesMod == TypesMod.COMPLETELY_RANDOM, typesMod == TypesMod.UNCHANGED, raceMode, blockBrokenMoves,
-                limitPokemon, typesRandomizeFirst, typesMod == TypesMod.SHUFFLE));
+        out.write(makeByteSelected(
+                settingsMap.getValue(SettingsConstants.TYPES_MOD) == TypesMod.RANDOM_RETAIN,
+                settingsMap.getValue(SettingsConstants.TYPES_MOD) == TypesMod.COMPLETELY_RANDOM,
+                settingsMap.getValue(SettingsConstants.TYPES_MOD) == TypesMod.UNCHANGED,
+                settingsMap.getValue(SettingsConstants.RACE_MODE),
+                settingsMap.getValue(SettingsConstants.BLOCK_BROKEN_MOVES),
+                settingsMap.getValue(SettingsConstants.LIMIT_POKEMON),
+                settingsMap.getValue(SettingsConstants.TYPES_RANDOMIZE_FIRST),
+                settingsMap.getValue(SettingsConstants.TYPES_MOD) == TypesMod.SHUFFLE));
 
         // 3: v171: changed to the abilities byte
-        out.write(makeByteSelected(abilitiesMod == AbilitiesMod.UNCHANGED, abilitiesMod == AbilitiesMod.RANDOMIZE,
-                allowWonderGuard, abilitiesFollowEvolutions, banTrappingAbilities, banNegativeAbilities));
+        out.write(makeByteSelected(
+                settingsMap.getValue(SettingsConstants.ABILITIES_MOD) == AbilitiesMod.UNCHANGED,
+                settingsMap.getValue(SettingsConstants.ABILITIES_MOD) == AbilitiesMod.RANDOMIZE,
+                settingsMap.getValue(SettingsConstants.ALLOW_WONDER_GUARD),
+                settingsMap.getValue(SettingsConstants.ABILITIES_FOLLOW_EVOLUTIONS),
+                settingsMap.getValue(SettingsConstants.BAN_TRAPPING_ABILITIES),
+                settingsMap.getValue(SettingsConstants.BAN_NEGATIVE_ABILITIES)));
 
         // 4: starter pokemon stuff (see byte 37 for additional options)
-        out.write(makeByteSelected(startersMod == StartersMod.CUSTOM, 
-                startersMod == StartersMod.RANDOM && startersMinimumEvos == 0,
-                startersMod == StartersMod.UNCHANGED, 
-                startersMod == StartersMod.RANDOM && startersMinimumEvos == 2,
-                randomizeStartersHeldItems, banBadRandomStarterHeldItems, startersExactEvos));
+        out.write(makeByteSelected(
+                settingsMap.getValue(SettingsConstants.STARTERS_MOD) == StartersMod.CUSTOM, 
+                settingsMap.getValue(SettingsConstants.STARTERS_MOD) == StartersMod.RANDOM && (int)settingsMap.getValue(SettingsConstants.STARTERS_MINIMUM_EVOS) == 0,
+                settingsMap.getValue(SettingsConstants.STARTERS_MOD) == StartersMod.UNCHANGED, 
+                settingsMap.getValue(SettingsConstants.STARTERS_MOD) == StartersMod.RANDOM && (int)settingsMap.getValue(SettingsConstants.STARTERS_MINIMUM_EVOS) == 2,
+                settingsMap.getValue(SettingsConstants.RANDOMIZE_STARTERS_HELD_ITEMS),
+                settingsMap.getValue(SettingsConstants.BAN_BAD_RANDOM_STARTER_HELD_ITEMS),
+                settingsMap.getValue(SettingsConstants.STARTERS_EXACT_EVOS)));
 
         // @5 dropdowns
+        int[] customStarters = settingsMap.getValue(SettingsConstants.CUSTOM_STARTERS);
         write2ByteInt(out, customStarters[0] - 1);
         write2ByteInt(out, customStarters[1] - 1);
         write2ByteInt(out, customStarters[2] - 1);
 
         // 11 movesets
-        out.write(makeByteSelected(movesetsMod == MovesetsMod.COMPLETELY_RANDOM,
-                movesetsMod == MovesetsMod.RANDOM_PREFER_SAME_TYPE, movesetsMod == MovesetsMod.UNCHANGED,
-                movesetsMod == MovesetsMod.METRONOME_ONLY, startWithGuaranteedMoves, reorderDamagingMoves)
-                | ((guaranteedMoveCount - 2) << 6));
+        out.write(makeByteSelected(
+                settingsMap.getValue(SettingsConstants.MOVESETS_MOD) == MovesetsMod.COMPLETELY_RANDOM,
+                settingsMap.getValue(SettingsConstants.MOVESETS_MOD) == MovesetsMod.RANDOM_PREFER_SAME_TYPE,
+                settingsMap.getValue(SettingsConstants.MOVESETS_MOD) == MovesetsMod.UNCHANGED,
+                settingsMap.getValue(SettingsConstants.MOVESETS_MOD) == MovesetsMod.METRONOME_ONLY,
+                settingsMap.getValue(SettingsConstants.START_WITH_GUARANTEED_MOVES),
+                settingsMap.getValue(SettingsConstants.REORDER_DAMAGING_MOVES))
+                | (((int)settingsMap.getValue(SettingsConstants.GUARANTEED_MOVE_COUNT) - 2) << 6));
 
         // 12 movesets good damaging
-        out.write((movesetsForceGoodDamaging ? 0x80 : 0) | movesetsGoodDamagingPercent);
+        out.write(((boolean)settingsMap.getValue(SettingsConstants.MOVESETS_FORCE_GOOD_DAMAGING) ? 0x80 : 0) | (int)settingsMap.getValue(SettingsConstants.MOVESETS_GOOD_DAMAGING_PERCENT));
 
         // 13 trainer pokemon (see byte 40 for additional options)
         // changed 160
@@ -376,15 +588,27 @@ public class Settings {
 
         // new 170
         // 25 move randomizers
-        out.write(makeByteSelected(randomizeMovePowers, randomizeMoveAccuracies, randomizeMovePPs, randomizeMoveTypes,
-                randomizeMoveCategory));
+        out.write(makeByteSelected(
+            settingsMap.getValue(SettingsConstants.RANDOMIZE_MOVE_POWERS),
+            settingsMap.getValue(SettingsConstants.RANDOMIZE_MOVE_ACCURACIES),
+            settingsMap.getValue(SettingsConstants.RANDOMIZE_MOVE_PPS),
+            settingsMap.getValue(SettingsConstants.RANDOMIZE_MOVE_TYPES),
+            settingsMap.getValue(SettingsConstants.RANDOMIZE_MOVE_CATEGORY)));
 
-        // 26 evolutions
-        out.write(makeByteSelected(evolutionsMod == EvolutionsMod.UNCHANGED, evolutionsMod == EvolutionsMod.RANDOM,
-                evosSimilarStrength, evosSameTyping, evosMaxThreeStages, evosForceChange, evosNoConverge, evosForceGrowth));
+        // 26 evolutions (see byte 41 for additional options)
+        out.write(makeByteSelected(
+            settingsMap.getValue(SettingsConstants.EVOLUTIONS_MOD) == EvolutionsMod.UNCHANGED,
+            settingsMap.getValue(SettingsConstants.EVOLUTIONS_MOD) == EvolutionsMod.RANDOM,
+            settingsMap.getValue(SettingsConstants.EVOS_SIMILAR_STRENGTH),
+            settingsMap.getValue(SettingsConstants.EVOS_SAME_TYPING),
+            settingsMap.getValue(SettingsConstants.EVOS_MAX_THREE_STAGES),
+            settingsMap.getValue(SettingsConstants.EVOS_FORCE_CHANGE),
+            settingsMap.getValue(SettingsConstants.EVOS_NO_CONVERGE),
+            settingsMap.getValue(SettingsConstants.EVOS_FORCE_GROWTH)));
 
         // @ 27 pokemon restrictions
         try {
+            GenRestrictions currentRestrictions = settingsMap.getValue(SettingsConstants.CURRENT_RESTRICTIONS);
             if (currentRestrictions != null) {
                 writeFullInt(out, currentRestrictions.toInt());
             } else {
@@ -404,22 +628,29 @@ public class Settings {
         out.write((trainersLevelModified ? 0x80 : 0) | (trainersLevelModifier+50));
 
         // @ 36 Base Statistics and Types Overflow
-        out.write(makeByteSelected(statsRandomizeFirst, baseStatisticsMod == BaseStatisticsMod.SHUFFLE_BST, 
-            baseStatisticsMod == BaseStatisticsMod.SHUFFLE_ALL, typesFollowEvos));
+        out.write(makeByteSelected(
+            settingsMap.getValue(SettingsConstants.STATS_RANDOMIZE_FIRST),
+            settingsMap.getValue(SettingsConstants.BASE_STATISTICS_MOD) == BaseStatisticsMod.SHUFFLE_BST, 
+            settingsMap.getValue(SettingsConstants.BASE_STATISTICS_MOD) == BaseStatisticsMod.SHUFFLE_ALL,
+            settingsMap.getValue(SettingsConstants.TYPES_FOLLOW_EVOS)));
 
         // @ 37 Starter Pokemon Overflow
-        out.write(makeByteSelected(startersMod == StartersMod.RANDOM && startersMinimumEvos == 1, 
-            startersNoSplit, startersUniqueTypes, starterLimitBST, startersBaseEvoOnly));
+        out.write(makeByteSelected(
+            settingsMap.getValue(SettingsConstants.STARTERS_MOD) == StartersMod.RANDOM && (int)settingsMap.getValue(SettingsConstants.STARTERS_MINIMUM_EVOS) == 1, 
+            settingsMap.getValue(SettingsConstants.STARTERS_NO_SPLIT),
+            settingsMap.getValue(SettingsConstants.STARTERS_UNIQUE_TYPES),
+            settingsMap.getValue(SettingsConstants.STARTERS_LIMIT_BST),
+            settingsMap.getValue(SettingsConstants.STARTERS_BASE_EVO_ONLY)));
 
         // @ 38 Starter Pokemon BST Modifier
-        write2ByteInt(out, starterBSTModifier - 1);
+        write2ByteInt(out, (int)settingsMap.getValue(SettingsConstants.STARTERS_BST_MODIFIER) - 1);
         
         // @ 40 Trainer and Wild Pokemon Overflow
         out.write(makeByteSelected(rivalCarriesTeamThroughout, allowLowLevelEvolvedTypes, trainersRandomHeldItem,
             gymTypeTheme));
 
         // @ 41 Evolution overflow
-        out.write(makeByteSelected(evosChangeMethod));
+        out.write(makeByteSelected(settingsMap.getValue(SettingsConstants.EVOS_CHANGE_METHOD)));
 
         // @ 42 Rom Title Name (update LENGTH_OF_SETTINGS_DATA if this changes)
         try {
@@ -703,24 +934,30 @@ public class Settings {
         // starters
         List<Pokemon> romPokemon = rh.getPokemon();
         List<Pokemon> romStarters = rh.getStarters();
+        // set the custom starters option with the correct integers for random selection
+        SettingsOption customStartersOption = ((SettingsOptionComposite)settingsMap.getOption(SettingsConstants.CUSTOM_STARTERS)).getCompositeValue();
+        ((IntArraySettingsOption)customStartersOption).setAllowedValues(IntStream.range(1, romPokemon.size()));
+        // update the custom starters option current value to use the starters of this rom
         for (int starter = 0; starter < 3; starter++) {
-            if (this.customStarters[starter] < 0 || this.customStarters[starter] >= romPokemon.size()) {
+            int[] customStarters = settingsMap.getValue(SettingsConstants.CUSTOM_STARTERS);
+            if (customStarters[starter] < 0 || customStarters[starter] >= romPokemon.size()) {
                 // invalid starter for this game
                 feedback.setChangedStarter(true);
                 if (starter >= romStarters.size()) {
-                    this.customStarters[starter] = 1;
+                    customStarters[starter] = 1;
                 } else {
-                    this.customStarters[starter] = romPokemon.indexOf(romStarters.get(starter));
+                    customStarters[starter] = romPokemon.indexOf(romStarters.get(starter));
                 }
             }
         }
 
         // gen restrictions
+        GenRestrictions genRes = settingsMap.getValue(SettingsConstants.CURRENT_RESTRICTIONS);
         if (rh instanceof Gen1RomHandler || rh.isROMHack()) {
-            this.currentRestrictions = null;
-            this.setLimitPokemon(false);
-        } else if (this.currentRestrictions != null) {
-            this.currentRestrictions.limitToGen(rh.generationOfPokemon());
+            settingsMap.putValue(SettingsConstants.CURRENT_RESTRICTIONS, null);
+            settingsMap.putValue(SettingsConstants.LIMIT_POKEMON, false);
+        } else if (genRes != null) {
+            genRes.limitToGen(rh.generationOfPokemon());
         }
 
         // misc tweaks
@@ -787,6 +1024,489 @@ public class Settings {
 
     // getters and setters
 
+    public boolean isLimitPokemon() {
+        return settingsMap.getValue(SettingsConstants.LIMIT_POKEMON);
+    }
+
+    public Settings setLimitPokemon(boolean limitPokemon) {
+        settingsMap.putValue(SettingsConstants.LIMIT_POKEMON, limitPokemon);
+        return this;
+    }
+
+    public GenRestrictions getCurrentRestrictions() {
+        return settingsMap.getValue(SettingsConstants.CURRENT_RESTRICTIONS);
+    }
+
+    public Settings setCurrentRestrictions(GenRestrictions currentRestrictions) {
+        settingsMap.putValue(SettingsConstants.CURRENT_RESTRICTIONS, currentRestrictions);
+        return this;
+    }
+
+    public boolean isRaceMode() {
+        return settingsMap.getValue(SettingsConstants.RACE_MODE);
+    }
+
+    public Settings setRaceMode(boolean raceMode) {
+        settingsMap.putValue(SettingsConstants.RACE_MODE, raceMode);
+        return this;
+    }
+
+    public boolean doBlockBrokenMoves() {
+        return settingsMap.getValue(SettingsConstants.BLOCK_BROKEN_MOVES);
+    }
+
+    public Settings setBlockBrokenMoves(boolean blockBrokenMoves) {
+        settingsMap.putValue(SettingsConstants.BLOCK_BROKEN_MOVES, blockBrokenMoves);
+        return this;
+    }
+
+    public BaseStatisticsMod getBaseStatisticsMod() {
+        return settingsMap.getValue(SettingsConstants.BASE_STATISTICS_MOD);
+    }
+
+    public Settings setBaseStatisticsMod(BaseStatisticsMod baseStatisticsMod) {
+        settingsMap.putValue(SettingsConstants.BASE_STATISTICS_MOD, baseStatisticsMod);
+        return this;
+    }
+
+    public Settings setBaseStatisticsMod(boolean... bools) {
+        return setBaseStatisticsMod(getEnum(BaseStatisticsMod.class, bools));
+    }
+
+    public boolean isStandardizeEXPCurves() {
+        return settingsMap.getValue(SettingsConstants.STANDARDIZE_EXP_CURVES);
+    }
+
+    public Settings setStandardizeEXPCurves(boolean standardizeEXPCurves) {
+        settingsMap.putValue(SettingsConstants.STANDARDIZE_EXP_CURVES, standardizeEXPCurves);
+        return this;
+    }
+
+    public boolean isUpdateBaseStats() {
+        return settingsMap.getValue(SettingsConstants.UPDATE_BASE_STATS);
+    }
+
+    public Settings setUpdateBaseStats(boolean updateBaseStats) {
+        settingsMap.putValue(SettingsConstants.UPDATE_BASE_STATS, updateBaseStats);
+        return this;
+    }
+
+    public boolean isBaseStatsFollowEvolutions() {
+        return settingsMap.getValue(SettingsConstants.BASE_STATS_FOLLOW_EVOLUTIONS);
+    }
+
+    public Settings setBaseStatsFollowEvolutions(boolean baseStatsFollowEvolutions) {
+        settingsMap.putValue(SettingsConstants.BASE_STATS_FOLLOW_EVOLUTIONS, baseStatsFollowEvolutions);
+        return this;
+    }
+
+    public boolean isStatsRandomizeFirst() {
+        return settingsMap.getValue(SettingsConstants.STATS_RANDOMIZE_FIRST);
+    }
+
+    public Settings setStatsRandomizeFirst(boolean statsRandomizeFirst) {
+        settingsMap.putValue(SettingsConstants.STATS_RANDOMIZE_FIRST, statsRandomizeFirst);
+        return this;
+    }
+
+    public AbilitiesMod getAbilitiesMod() {
+        return settingsMap.getValue(SettingsConstants.ABILITIES_MOD);
+    }
+
+    public Settings setAbilitiesMod(AbilitiesMod abilitiesMod) {
+        settingsMap.putValue(SettingsConstants.ABILITIES_MOD, abilitiesMod);
+        return this;
+    }
+
+    public Settings setAbilitiesMod(boolean... bools) {
+        return setAbilitiesMod(getEnum(AbilitiesMod.class, bools));
+    }
+
+    public boolean isAllowWonderGuard() {
+        return settingsMap.getValue(SettingsConstants.ALLOW_WONDER_GUARD);
+    }
+
+    public Settings setAllowWonderGuard(boolean allowWonderGuard) {
+        settingsMap.putValue(SettingsConstants.ALLOW_WONDER_GUARD, allowWonderGuard);
+        return this;
+    }
+
+    public boolean isAbilitiesFollowEvolutions() {
+        return settingsMap.getValue(SettingsConstants.ABILITIES_FOLLOW_EVOLUTIONS);
+    }
+
+    public Settings setAbilitiesFollowEvolutions(boolean abilitiesFollowEvolutions) {
+        settingsMap.putValue(SettingsConstants.ABILITIES_FOLLOW_EVOLUTIONS, abilitiesFollowEvolutions);
+        return this;
+    }
+
+    public boolean isBanTrappingAbilities() {
+        return settingsMap.getValue(SettingsConstants.BAN_TRAPPING_ABILITIES);
+    }
+
+    public Settings setBanTrappingAbilities(boolean banTrappingAbilities) {
+        settingsMap.putValue(SettingsConstants.BAN_TRAPPING_ABILITIES, banTrappingAbilities);
+        return this;
+    }
+
+    public boolean isBanNegativeAbilities() {
+        return settingsMap.getValue(SettingsConstants.BAN_NEGATIVE_ABILITIES);
+    }
+
+    public Settings setBanNegativeAbilities(boolean banNegativeAbilities) {
+        settingsMap.putValue(SettingsConstants.BAN_NEGATIVE_ABILITIES, banNegativeAbilities);
+        return this;
+    }
+
+    public TypesMod getTypesMod() {
+        return settingsMap.getValue(SettingsConstants.TYPES_MOD);
+    }
+
+    public Settings setTypesMod(TypesMod typesMod) {
+        settingsMap.putValue(SettingsConstants.TYPES_MOD, typesMod);
+        return this;
+    }
+
+    public Settings setTypesMod(boolean... bools) {
+        return setTypesMod(getEnum(TypesMod.class, bools));
+    }
+
+    public boolean isTypesFollowEvolutions() {
+        return settingsMap.getValue(SettingsConstants.TYPES_FOLLOW_EVOS);
+    }
+
+    public Settings setTypesFollowEvos(boolean typesFollowEvos) {
+        settingsMap.putValue(SettingsConstants.TYPES_FOLLOW_EVOS, typesFollowEvos);
+        return this;
+    }
+
+    public boolean isTypesRandomizeFirst() {
+        return settingsMap.getValue(SettingsConstants.TYPES_RANDOMIZE_FIRST);
+    }
+
+    public Settings setTypesRandomizeFirst(boolean typesRandomizeFirst) {
+        settingsMap.putValue(SettingsConstants.TYPES_RANDOMIZE_FIRST, typesRandomizeFirst);
+        return this;
+    }
+
+    public EvolutionsMod getEvolutionsMod() {
+        return settingsMap.getValue(SettingsConstants.EVOLUTIONS_MOD);
+    }
+
+    public Settings setEvolutionsMod(EvolutionsMod evolutionsMod) {
+        settingsMap.putValue(SettingsConstants.EVOLUTIONS_MOD, evolutionsMod);
+        return this;
+    }
+
+    public Settings setEvolutionsMod(boolean... bools) {
+        return setEvolutionsMod(getEnum(EvolutionsMod.class, bools));
+    }
+
+    public boolean isChangeImpossibleEvolutions() {
+        return settingsMap.getValue(SettingsConstants.CHANGE_IMPOSSIBLE_EVOLUTIONS);
+    }
+
+    public Settings setChangeImpossibleEvolutions(boolean changeImpossibleEvolutions) {
+        settingsMap.putValue(SettingsConstants.CHANGE_IMPOSSIBLE_EVOLUTIONS, changeImpossibleEvolutions);
+        return this;
+    }
+
+    public boolean isMakeEvolutionsEasier() {
+        return settingsMap.getValue(SettingsConstants.MAKE_EVOLUTIONS_EASIER);
+    }
+
+    public Settings setMakeEvolutionsEasier(boolean makeEvolutionsEasier) {
+        settingsMap.putValue(SettingsConstants.MAKE_EVOLUTIONS_EASIER, makeEvolutionsEasier);
+        return this;
+    }
+
+    public boolean isEvosSimilarStrength() {
+        return settingsMap.getValue(SettingsConstants.EVOS_SIMILAR_STRENGTH);
+    }
+
+    public Settings setEvosSimilarStrength(boolean evosSimilarStrength) {
+        settingsMap.putValue(SettingsConstants.EVOS_SIMILAR_STRENGTH, evosSimilarStrength);
+        return this;
+    }
+
+    public boolean isEvosSameTyping() {
+        return settingsMap.getValue(SettingsConstants.EVOS_SAME_TYPING);
+    }
+
+    public Settings setEvosSameTyping(boolean evosSameTyping) {
+        settingsMap.putValue(SettingsConstants.EVOS_SAME_TYPING, evosSameTyping);
+        return this;
+    }
+
+    public boolean isEvosChangeMethod() {
+        return settingsMap.getValue(SettingsConstants.EVOS_CHANGE_METHOD);
+    }
+
+    public Settings setEvosChangeMethod(boolean evosChangeMethod) {
+        settingsMap.putValue(SettingsConstants.EVOS_CHANGE_METHOD, evosChangeMethod);
+        return this;
+    }
+
+    public boolean isEvosMaxThreeStages() {
+        return settingsMap.getValue(SettingsConstants.EVOS_MAX_THREE_STAGES);
+    }
+
+    public Settings setEvosMaxThreeStages(boolean evosMaxThreeStages) {
+        settingsMap.putValue(SettingsConstants.EVOS_MAX_THREE_STAGES, evosMaxThreeStages);
+        return this;
+    }
+
+    public boolean isEvosForceChange() {
+        return settingsMap.getValue(SettingsConstants.EVOS_FORCE_CHANGE);
+    }
+
+    public Settings setEvosForceChange(boolean evosForceChange) {
+        settingsMap.putValue(SettingsConstants.EVOS_FORCE_CHANGE, evosForceChange);
+        return this;
+    }
+
+    public boolean isEvosNoConverge() {
+        return settingsMap.getValue(SettingsConstants.EVOS_NO_CONVERGE);
+    }
+
+    public Settings setEvosNoConverge(boolean evosNoConverge) {
+        settingsMap.putValue(SettingsConstants.EVOS_NO_CONVERGE, evosNoConverge);
+        return this;
+    }
+    
+    public boolean isEvosForceGrowth() {
+        return settingsMap.getValue(SettingsConstants.EVOS_FORCE_GROWTH);
+    }
+
+    public Settings setEvosForceGrowth(boolean evosForceGrowth) {
+        settingsMap.putValue(SettingsConstants.EVOS_FORCE_GROWTH, evosForceGrowth);
+        return this;
+    }
+
+    public StartersMod getStartersMod() {
+        return settingsMap.getValue(SettingsConstants.STARTERS_MOD);
+    }
+
+    public Settings setStartersMod(StartersMod startersMod) {
+        settingsMap.putValue(SettingsConstants.STARTERS_MOD, startersMod);
+        return this;
+    }
+
+    public Settings setStartersMod(boolean... bools) {
+        return setStartersMod(getEnum(StartersMod.class, bools));
+    }
+
+    public int[] getCustomStarters() {
+        return settingsMap.getValue(SettingsConstants.CUSTOM_STARTERS);
+    }
+
+    public Settings setCustomStarters(int[] customStarters) {
+        settingsMap.putValue(SettingsConstants.CUSTOM_STARTERS, customStarters);
+        return this;
+    }
+
+    public boolean isRandomizeStartersHeldItems() {
+        return settingsMap.getValue(SettingsConstants.RANDOMIZE_STARTERS_HELD_ITEMS);
+    }
+
+    public Settings setRandomizeStartersHeldItems(boolean randomizeStartersHeldItems) {
+        settingsMap.putValue(SettingsConstants.RANDOMIZE_STARTERS_HELD_ITEMS, randomizeStartersHeldItems);
+        return this;
+    }
+
+    public boolean isBanBadRandomStarterHeldItems() {
+        return settingsMap.getValue(SettingsConstants.BAN_BAD_RANDOM_STARTER_HELD_ITEMS);
+    }
+
+    public Settings setBanBadRandomStarterHeldItems(boolean banBadRandomStarterHeldItems) {
+        settingsMap.putValue(SettingsConstants.BAN_BAD_RANDOM_STARTER_HELD_ITEMS, banBadRandomStarterHeldItems);
+        return this;
+    }
+
+    public boolean isStartersNoSplit() {
+        return settingsMap.getValue(SettingsConstants.STARTERS_NO_SPLIT);
+    }
+
+    public Settings setStartersNoSplit(boolean startersNoSplit) {
+        settingsMap.putValue(SettingsConstants.STARTERS_NO_SPLIT, startersNoSplit);
+        return this;
+    }
+
+    public boolean isStartersUniqueTypes() {
+        return settingsMap.getValue(SettingsConstants.STARTERS_UNIQUE_TYPES);
+    }
+    
+    public Settings setStartersUniqueTypes(boolean startersUniqueTypes) {
+        settingsMap.putValue(SettingsConstants.STARTERS_UNIQUE_TYPES, startersUniqueTypes);
+        return this;
+    }
+
+    public boolean isStartersLimitBST() {
+        return settingsMap.getValue(SettingsConstants.STARTERS_LIMIT_BST);
+    }
+
+    public Settings setStartersLimitBST(boolean starterLimitBST) {
+        settingsMap.putValue(SettingsConstants.STARTERS_LIMIT_BST, starterLimitBST);
+        return this;
+    }
+
+    public int getStartersBSTLimitModifier() {
+        return settingsMap.getValue(SettingsConstants.STARTERS_BST_MODIFIER);
+    }
+
+    public Settings setStartersBSTLimitModifier(int starterBSTModifier) {
+        settingsMap.putValue(SettingsConstants.STARTERS_BST_MODIFIER, starterBSTModifier);
+        return this;
+    }
+
+    public boolean isStartersBaseEvoOnly() {
+        return settingsMap.getValue(SettingsConstants.STARTERS_BASE_EVO_ONLY);
+    }
+
+    public Settings setStartersBaseEvoOnly(boolean startersBaseEvoOnly) {
+        settingsMap.putValue(SettingsConstants.STARTERS_BASE_EVO_ONLY, startersBaseEvoOnly);
+        return this;
+    }
+
+    public boolean isStartersExactEvo() {
+        return settingsMap.getValue(SettingsConstants.STARTERS_EXACT_EVOS);
+    }
+
+    public Settings setStartersExactEvos(boolean startersExactEvos) {
+        settingsMap.putValue(SettingsConstants.STARTERS_EXACT_EVOS, startersExactEvos);
+        return this;
+    }
+
+    public int getStartersMinimumEvos() {
+        return settingsMap.getValue(SettingsConstants.STARTERS_MINIMUM_EVOS);
+    }
+
+    public Settings setStartersMinimumEvos(int startersMinimumEvos) {
+        settingsMap.putValue(SettingsConstants.STARTERS_MINIMUM_EVOS, startersMinimumEvos);
+        return this;
+    }
+
+    public boolean isRandomizeMovePowers() {
+        return settingsMap.getValue(SettingsConstants.RANDOMIZE_MOVE_POWERS);
+    }
+
+    public Settings setRandomizeMovePowers(boolean randomizeMovePowers) {
+        settingsMap.putValue(SettingsConstants.RANDOMIZE_MOVE_POWERS, randomizeMovePowers);
+        return this;
+    }
+
+    public boolean isRandomizeMoveAccuracies() {
+        return settingsMap.getValue(SettingsConstants.RANDOMIZE_MOVE_ACCURACIES);
+    }
+
+    public Settings setRandomizeMoveAccuracies(boolean randomizeMoveAccuracies) {
+        settingsMap.putValue(SettingsConstants.RANDOMIZE_MOVE_ACCURACIES, randomizeMoveAccuracies);
+        return this;
+    }
+
+    public boolean isRandomizeMovePPs() {
+        return settingsMap.getValue(SettingsConstants.RANDOMIZE_MOVE_PPS);
+    }
+
+    public Settings setRandomizeMovePPs(boolean randomizeMovePPs) {
+        settingsMap.putValue(SettingsConstants.RANDOMIZE_MOVE_PPS, randomizeMovePPs);
+        return this;
+    }
+
+    public boolean isRandomizeMoveTypes() {
+        return settingsMap.getValue(SettingsConstants.RANDOMIZE_MOVE_TYPES);
+    }
+
+    public Settings setRandomizeMoveTypes(boolean randomizeMoveTypes) {
+        settingsMap.putValue(SettingsConstants.RANDOMIZE_MOVE_TYPES, randomizeMoveTypes);
+        return this;
+    }
+
+    public boolean isRandomizeMoveCategory() {
+        return settingsMap.getValue(SettingsConstants.RANDOMIZE_MOVE_CATEGORY);
+    }
+
+    public Settings setRandomizeMoveCategory(boolean randomizeMoveCategory) {
+        settingsMap.putValue(SettingsConstants.RANDOMIZE_MOVE_CATEGORY, randomizeMoveCategory);
+        return this;
+    }
+
+    public boolean isUpdateMoves() {
+        return settingsMap.getValue(SettingsConstants.UPDATE_MOVES);
+    }
+
+    public Settings setUpdateMoves(boolean updateMoves) {
+        settingsMap.putValue(SettingsConstants.UPDATE_MOVES, updateMoves);
+        return this;
+    }
+
+    public boolean isUpdateMovesLegacy() {
+        return settingsMap.getValue(SettingsConstants.UPDATE_MOVES_LEGACY);
+    }
+
+    public Settings setUpdateMovesLegacy(boolean updateMovesLegacy) {
+        settingsMap.putValue(SettingsConstants.UPDATE_MOVES_LEGACY, updateMovesLegacy);
+        return this;
+    }
+
+    public MovesetsMod getMovesetsMod() {
+        return settingsMap.getValue(SettingsConstants.MOVESETS_MOD);
+    }
+
+    public Settings setMovesetsMod(MovesetsMod movesetsMod) {
+        settingsMap.putValue(SettingsConstants.MOVESETS_FORCE_GOOD_DAMAGING, movesetsMod);
+        return this;
+    }
+
+    public Settings setMovesetsMod(boolean... bools) {
+        return setMovesetsMod(getEnum(MovesetsMod.class, bools));
+    }
+
+    public boolean isStartWithGuaranteedMoves() {
+        return settingsMap.getValue(SettingsConstants.START_WITH_GUARANTEED_MOVES);
+    }
+
+    public Settings setStartWithGuaranteedMoves(boolean startWithGuaranteedMoves) {
+        settingsMap.putValue(SettingsConstants.START_WITH_GUARANTEED_MOVES, startWithGuaranteedMoves);
+        return this;
+    }
+
+    public int getGuaranteedMoveCount() {
+        return settingsMap.getValue(SettingsConstants.GUARANTEED_MOVE_COUNT);
+    }
+
+    public Settings setGuaranteedMoveCount(int guaranteedMoveCount) {
+        settingsMap.putValue(SettingsConstants.GUARANTEED_MOVE_COUNT, guaranteedMoveCount);
+        return this;
+    }
+
+    public boolean isReorderDamagingMoves() {
+        return settingsMap.getValue(SettingsConstants.REORDER_DAMAGING_MOVES);
+    }
+
+    public Settings setReorderDamagingMoves(boolean reorderDamagingMoves) {
+        settingsMap.putValue(SettingsConstants.REORDER_DAMAGING_MOVES, reorderDamagingMoves);
+        return this;
+    }
+
+    public boolean isMovesetsForceGoodDamaging() {
+        return settingsMap.getValue(SettingsConstants.MOVESETS_FORCE_GOOD_DAMAGING);
+    }
+
+    public Settings setMovesetsForceGoodDamaging(boolean movesetsForceGoodDamaging) {
+        settingsMap.putValue(SettingsConstants.MOVESETS_FORCE_GOOD_DAMAGING, movesetsForceGoodDamaging);
+        return this;
+    }
+
+    public int getMovesetsGoodDamagingPercent() {
+        return settingsMap.getValue(SettingsConstants.MOVESETS_GOOD_DAMAGING_PERCENT);
+    }
+
+    public Settings setMovesetsGoodDamagingPercent(int movesetsGoodDamagingPercent) {
+        settingsMap.putValue(SettingsConstants.MOVESETS_GOOD_DAMAGING_PERCENT, movesetsGoodDamagingPercent);
+        return this;
+    }
+
     public CustomNamesSet getCustomNames() {
         return customNames;
     }
@@ -814,14 +1534,7 @@ public class Settings {
         return this;
     }
 
-    public GenRestrictions getCurrentRestrictions() {
-        return currentRestrictions;
-    }
 
-    public Settings setCurrentRestrictions(GenRestrictions currentRestrictions) {
-        this.currentRestrictions = currentRestrictions;
-        return this;
-    }
 
     public int getCurrentMiscTweaks() {
         return currentMiscTweaks;
@@ -832,478 +1545,10 @@ public class Settings {
         return this;
     }
 
-    public boolean isUpdateMoves() {
-        return updateMoves;
-    }
 
-    public Settings setUpdateMoves(boolean updateMoves) {
-        this.updateMoves = updateMoves;
-        return this;
-    }
 
-    public boolean isUpdateMovesLegacy() {
-        return updateMovesLegacy;
-    }
 
-    public Settings setUpdateMovesLegacy(boolean updateMovesLegacy) {
-        this.updateMovesLegacy = updateMovesLegacy;
-        return this;
-    }
 
-    public boolean isChangeImpossibleEvolutions() {
-        return changeImpossibleEvolutions;
-    }
-
-    public Settings setChangeImpossibleEvolutions(boolean changeImpossibleEvolutions) {
-        this.changeImpossibleEvolutions = changeImpossibleEvolutions;
-        return this;
-    }
-
-    public boolean isMakeEvolutionsEasier() {
-        return makeEvolutionsEasier;
-    }
-
-    public Settings setMakeEvolutionsEasier(boolean makeEvolutionsEasier) {
-        this.makeEvolutionsEasier = makeEvolutionsEasier;
-        return this;
-    }
-
-    public boolean isRaceMode() {
-        return raceMode;
-    }
-
-    public Settings setRaceMode(boolean raceMode) {
-        this.raceMode = raceMode;
-        return this;
-    }
-
-    public boolean doBlockBrokenMoves() {
-        return blockBrokenMoves;
-    }
-
-    public Settings setBlockBrokenMoves(boolean blockBrokenMoves) {
-        this.blockBrokenMoves = blockBrokenMoves;
-        return this;
-    }
-
-    public boolean isLimitPokemon() {
-        return limitPokemon;
-    }
-
-    public Settings setLimitPokemon(boolean limitPokemon) {
-        this.limitPokemon = limitPokemon;
-        return this;
-    }
-
-    public BaseStatisticsMod getBaseStatisticsMod() {
-        return baseStatisticsMod;
-    }
-
-    public Settings setBaseStatisticsMod(BaseStatisticsMod baseStatisticsMod) {
-        this.baseStatisticsMod = baseStatisticsMod;
-        return this;
-    }
-
-    public Settings setBaseStatisticsMod(boolean... bools) {
-        return setBaseStatisticsMod(getEnum(BaseStatisticsMod.class, bools));
-    }
-
-    public boolean isBaseStatsFollowEvolutions() {
-        return baseStatsFollowEvolutions;
-    }
-
-    public Settings setBaseStatsFollowEvolutions(boolean baseStatsFollowEvolutions) {
-        this.baseStatsFollowEvolutions = baseStatsFollowEvolutions;
-        return this;
-    }
-
-    public boolean isStandardizeEXPCurves() {
-        return standardizeEXPCurves;
-    }
-
-    public Settings setStandardizeEXPCurves(boolean standardizeEXPCurves) {
-        this.standardizeEXPCurves = standardizeEXPCurves;
-        return this;
-    }
-
-    public boolean isUpdateBaseStats() {
-        return updateBaseStats;
-    }
-
-    public Settings setUpdateBaseStats(boolean updateBaseStats) {
-        this.updateBaseStats = updateBaseStats;
-        return this;
-    }
-
-    public boolean isStatsRandomizeFirst() {
-        return statsRandomizeFirst;
-    }
-
-    public Settings setStatsRandomizeFirst(boolean statsRandomizeFirst) {
-        this.statsRandomizeFirst = statsRandomizeFirst;
-        return this;
-    }
-
-    public AbilitiesMod getAbilitiesMod() {
-        return abilitiesMod;
-    }
-
-    public Settings setAbilitiesMod(AbilitiesMod abilitiesMod) {
-        this.abilitiesMod = abilitiesMod;
-        return this;
-    }
-
-    public Settings setAbilitiesMod(boolean... bools) {
-        return setAbilitiesMod(getEnum(AbilitiesMod.class, bools));
-    }
-
-    public boolean isAllowWonderGuard() {
-        return allowWonderGuard;
-    }
-
-    public Settings setAllowWonderGuard(boolean allowWonderGuard) {
-        this.allowWonderGuard = allowWonderGuard;
-        return this;
-    }
-
-    public boolean isAbilitiesFollowEvolutions() {
-        return abilitiesFollowEvolutions;
-    }
-
-    public Settings setAbilitiesFollowEvolutions(boolean abilitiesFollowEvolutions) {
-        this.abilitiesFollowEvolutions = abilitiesFollowEvolutions;
-        return this;
-    }
-
-    public boolean isBanTrappingAbilities() {
-        return banTrappingAbilities;
-    }
-
-    public Settings setBanTrappingAbilities(boolean banTrappingAbilities) {
-        this.banTrappingAbilities = banTrappingAbilities;
-        return this;
-    }
-
-    public boolean isBanNegativeAbilities() {
-        return banNegativeAbilities;
-    }
-
-    public Settings setBanNegativeAbilities(boolean banNegativeAbilities) {
-        this.banNegativeAbilities = banNegativeAbilities;
-        return this;
-    }
-
-    public StartersMod getStartersMod() {
-        return startersMod;
-    }
-
-    public Settings setStartersMod(StartersMod startersMod) {
-        this.startersMod = startersMod;
-        return this;
-    }
-
-    public Settings setStartersMod(boolean... bools) {
-        return setStartersMod(getEnum(StartersMod.class, bools));
-    }
-
-    public int[] getCustomStarters() {
-        return customStarters;
-    }
-
-    public Settings setCustomStarters(int[] customStarters) {
-        this.customStarters = customStarters;
-        return this;
-    }
-
-    public boolean isRandomizeStartersHeldItems() {
-        return randomizeStartersHeldItems;
-    }
-
-    public Settings setRandomizeStartersHeldItems(boolean randomizeStartersHeldItems) {
-        this.randomizeStartersHeldItems = randomizeStartersHeldItems;
-        return this;
-    }
-
-    public boolean isBanBadRandomStarterHeldItems() {
-        return banBadRandomStarterHeldItems;
-    }
-
-    public Settings setBanBadRandomStarterHeldItems(boolean banBadRandomStarterHeldItems) {
-        this.banBadRandomStarterHeldItems = banBadRandomStarterHeldItems;
-        return this;
-    }
-
-    public boolean isStartersNoSplit() {
-        return startersNoSplit;
-    }
-
-    public Settings setStartersNoSplit(boolean startersNoSplit) {
-        this.startersNoSplit = startersNoSplit;
-        return this;
-    }
-
-    public boolean isStartersUniqueTypes() {
-        return startersUniqueTypes;
-    }
-    
-    public Settings setStartersUniqueTypes(boolean startersUniqueTypes) {
-        this.startersUniqueTypes = startersUniqueTypes;
-        return this;
-    }
-    
-    public boolean isStartersLimitBST() {
-        return starterLimitBST;
-    }
-
-    public Settings setStartersLimitBST(boolean starterLimitBST) {
-        this.starterLimitBST = starterLimitBST;
-        return this;
-    }
-
-    public boolean isStartersBaseEvoOnly() {
-        return startersBaseEvoOnly;
-    }
-
-    public Settings setStartersBaseEvoOnly(boolean startersBaseEvoOnly) {
-        this.startersBaseEvoOnly = startersBaseEvoOnly;
-        return this;
-    }
-
-    public int getStartersBSTLimitModifier() {
-        return starterBSTModifier;
-    }
-
-    public Settings setStartersBSTLimitModifier(int starterBSTModifier) {
-        this.starterBSTModifier = starterBSTModifier;
-        return this;
-    }
-
-    public boolean isStartersExactEvo() {
-        return startersExactEvos;
-    }
-
-    public Settings setStartersExactEvos(boolean startersExactEvos) {
-        this.startersExactEvos = startersExactEvos;
-        return this;
-    }
-
-    public int getStartersMinimumEvos() {
-        return startersMinimumEvos;
-    }
-
-    public Settings setStartersMinimumEvos(int startersMinimumEvos) {
-        this.startersMinimumEvos = startersMinimumEvos;
-        return this;
-    }
-
-    public TypesMod getTypesMod() {
-        return typesMod;
-    }
-
-    public Settings setTypesMod(TypesMod typesMod) {
-        this.typesMod = typesMod;
-        return this;
-    }
-
-    public Settings setTypesMod(boolean... bools) {
-        return setTypesMod(getEnum(TypesMod.class, bools));
-    }
-
-    public boolean isTypesRandomizeFirst() {
-        return typesRandomizeFirst;
-    }
-
-    public Settings setTypesRandomizeFirst(boolean typesRandomizeFirst) {
-        this.typesRandomizeFirst = typesRandomizeFirst;
-        return this;
-    }
-
-    public boolean isTypesFollowEvolutions() {
-        return typesFollowEvos;
-    }
-
-    public Settings setTypesFollowEvos(boolean typesFollowEvos) {
-        this.typesFollowEvos = typesFollowEvos;
-        return this;
-    }
-
-    public EvolutionsMod getEvolutionsMod() {
-        return evolutionsMod;
-    }
-
-    public Settings setEvolutionsMod(EvolutionsMod evolutionsMod) {
-        this.evolutionsMod = evolutionsMod;
-        return this;
-    }
-
-    public Settings setEvolutionsMod(boolean... bools) {
-        return setEvolutionsMod(getEnum(EvolutionsMod.class, bools));
-    }
-
-    public boolean isEvosSimilarStrength() {
-        return evosSimilarStrength;
-    }
-
-    public Settings setEvosSimilarStrength(boolean evosSimilarStrength) {
-        this.evosSimilarStrength = evosSimilarStrength;
-        return this;
-    }
-
-    public boolean isEvosSameTyping() {
-        return evosSameTyping;
-    }
-
-    public Settings setEvosSameTyping(boolean evosSameTyping) {
-        this.evosSameTyping = evosSameTyping;
-        return this;
-    }
-
-    public boolean isEvosChangeMethod() {
-        return evosChangeMethod;
-    }
-
-    public Settings setEvosChangeMethod(boolean evosChangeMethod) {
-        this.evosChangeMethod = evosChangeMethod;
-        return this;
-    }
-
-    public boolean isEvosMaxThreeStages() {
-        return evosMaxThreeStages;
-    }
-
-    public Settings setEvosMaxThreeStages(boolean evosMaxThreeStages) {
-        this.evosMaxThreeStages = evosMaxThreeStages;
-        return this;
-    }
-
-    public boolean isEvosForceChange() {
-        return evosForceChange;
-    }
-
-    public Settings setEvosForceChange(boolean evosForceChange) {
-        this.evosForceChange = evosForceChange;
-        return this;
-    }
-
-    public boolean isEvosNoConverge() {
-        return evosNoConverge;
-    }
-
-    public Settings setEvosNoConverge(boolean evosNoConverge) {
-        this.evosNoConverge= evosNoConverge;
-        return this;
-    }
-    
-    public boolean isEvosForceGrowth() {
-        return evosForceGrowth;
-    }
-
-    public Settings setEvosForceGrowth(boolean evosForceGrowth) {
-        this.evosForceGrowth= evosForceGrowth;
-        return this;
-    }
-
-    public boolean isRandomizeMovePowers() {
-        return randomizeMovePowers;
-    }
-
-    public Settings setRandomizeMovePowers(boolean randomizeMovePowers) {
-        this.randomizeMovePowers = randomizeMovePowers;
-        return this;
-    }
-
-    public boolean isRandomizeMoveAccuracies() {
-        return randomizeMoveAccuracies;
-    }
-
-    public Settings setRandomizeMoveAccuracies(boolean randomizeMoveAccuracies) {
-        this.randomizeMoveAccuracies = randomizeMoveAccuracies;
-        return this;
-    }
-
-    public boolean isRandomizeMovePPs() {
-        return randomizeMovePPs;
-    }
-
-    public Settings setRandomizeMovePPs(boolean randomizeMovePPs) {
-        this.randomizeMovePPs = randomizeMovePPs;
-        return this;
-    }
-
-    public boolean isRandomizeMoveTypes() {
-        return randomizeMoveTypes;
-    }
-
-    public Settings setRandomizeMoveTypes(boolean randomizeMoveTypes) {
-        this.randomizeMoveTypes = randomizeMoveTypes;
-        return this;
-    }
-
-    public boolean isRandomizeMoveCategory() {
-        return randomizeMoveCategory;
-    }
-
-    public Settings setRandomizeMoveCategory(boolean randomizeMoveCategory) {
-        this.randomizeMoveCategory = randomizeMoveCategory;
-        return this;
-    }
-
-    public MovesetsMod getMovesetsMod() {
-        return movesetsMod;
-    }
-
-    public Settings setMovesetsMod(MovesetsMod movesetsMod) {
-        this.movesetsMod = movesetsMod;
-        return this;
-    }
-
-    public Settings setMovesetsMod(boolean... bools) {
-        return setMovesetsMod(getEnum(MovesetsMod.class, bools));
-    }
-
-    public boolean isStartWithGuaranteedMoves() {
-        return startWithGuaranteedMoves;
-    }
-
-    public Settings setStartWithGuaranteedMoves(boolean startWithGuaranteedMoves) {
-        this.startWithGuaranteedMoves = startWithGuaranteedMoves;
-        return this;
-    }
-
-    public int getGuaranteedMoveCount() {
-        return guaranteedMoveCount;
-    }
-    public Settings setGuaranteedMoveCount(int guaranteedMoveCount) {
-        this.guaranteedMoveCount = guaranteedMoveCount;
-        return this;
-    }
-
-    public boolean isReorderDamagingMoves() {
-        return reorderDamagingMoves;
-    }
-
-    public Settings setReorderDamagingMoves(boolean reorderDamagingMoves) {
-        this.reorderDamagingMoves = reorderDamagingMoves;
-        return this;
-    }
-
-    public boolean isMovesetsForceGoodDamaging() {
-        return movesetsForceGoodDamaging;
-    }
-
-    public Settings setMovesetsForceGoodDamaging(boolean movesetsForceGoodDamaging) {
-        this.movesetsForceGoodDamaging = movesetsForceGoodDamaging;
-        return this;
-    }
-
-    public int getMovesetsGoodDamagingPercent() {
-        return movesetsGoodDamagingPercent;
-    }
-
-    public Settings setMovesetsGoodDamagingPercent(int movesetsGoodDamagingPercent) {
-        this.movesetsGoodDamagingPercent = movesetsGoodDamagingPercent;
-        return this;
-    }
 
     public TrainersMod getTrainersMod() {
         return trainersMod;

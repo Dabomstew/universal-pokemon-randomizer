@@ -43,7 +43,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import com.dabomstew.pkrandom.FileFunctions;
-import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.settings.Settings;
 import com.dabomstew.pkrandom.SysConstants;
 
 /**

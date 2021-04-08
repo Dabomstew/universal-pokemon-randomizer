@@ -36,7 +36,7 @@ Extra E4 Challenge - Legendaries / BST of at least 600
 XXToo much workXXSignature Move - All leaders have a signature move on all pokes (same as TM?)
 All leader/rival pokemon are nicknamed
 XXToo much workXXType by ace (one of dual type, or if mono type, keeps mono) (keep type but change team)
-RSE Gen 3 - Patch both Arco and Mach
+XXToo much workXXRSE Gen 3 - Patch both Arco and Mach
 XXToo much workXXRedo code to use PokemonSet
 Explicit type starter selection (filter in/out one or more) (option for one from each)
 Checkbox if super-effective starter order (FLYING > FIGHTING > ROCK)

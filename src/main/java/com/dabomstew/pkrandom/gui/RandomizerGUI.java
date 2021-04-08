@@ -80,7 +80,7 @@ import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.Randomizer;
-import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.settings.Settings;
 import com.dabomstew.pkrandom.SysConstants;
 import com.dabomstew.pkrandom.Utils;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
@@ -727,6 +727,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         this.loadQSButton.setEnabled(false);
         this.saveQSButton.setEnabled(false);
+        this.randomQSButton.setEnabled(false);
 
         this.pbsChangesUnchangedRB.setEnabled(false);
         this.pbsChangesRandomRB.setEnabled(false);
@@ -1125,6 +1126,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
             this.loadQSButton.setEnabled(true);
             this.saveQSButton.setEnabled(true);
+            this.randomQSButton.setEnabled(true);
 
             this.pbsChangesUnchangedRB.setEnabled(true);
             this.pbsChangesUnchangedRB.setSelected(true);
@@ -2366,6 +2368,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     ps.println("ROM: " + romHandler.getROMName());
                     ps.println("Code: " + romHandler.getROMCode());
                     ps.println("Reported Support Level: " + romHandler.getSupportLevel());
+                    ps.println("Settings String: " + getCurrentSettings().toString());
                     ps.println();
                 } catch (Exception ex2) {
                     // Do nothing, just don't fail
@@ -2513,6 +2516,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.currentRestrictions = gld.getChoice();
         }
     }// GEN-LAST:event_pokeLimitBtnActionPerformed
+
+    private void randomQSButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_randomQSButtonActionPerformed
+        Settings rnd_settings = new Settings();
+        rnd_settings.tweakForRom(this.romHandler);
+        rnd_settings.randomSettings(RandomSource.instance());
+        this.restoreStateFromSettings(rnd_settings);
+    }// GEN-LAST:event_randomQSButtonActionPerformed
 
     private void pokeLimitCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pokeLimitCBActionPerformed
         this.enableOrDisableSubControls();
@@ -2689,10 +2699,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private void fiRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_fiRandomRBActionPerformed
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_fiRandomRBActionPerformed
-    
-    private void spRandom2EvosRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spRandom2EvosRBActionPerformed
-        this.enableOrDisableSubControls();
-    }// GEN-LAST:event_spRandom2EvosRBActionPerformed
 
     private void goCondenseEvosCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_goCondenseEvosCheckBoxActionPerformed
         this.enableOrDisableSubControls();
@@ -3131,6 +3137,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
         randomQSButton.setText(bundle.getString("RandomizerGUI.randomQSButton.text")); // NOI18N
         randomQSButton.setToolTipText(bundle.getString("RandomizerGUI.randomQSButton.toolTipText")); // NOI18N
         randomQSButton.setName(bundle.getString("RandomizerGUI.randomQSButton.name")); // NOI18N
+        randomQSButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                randomQSButtonActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout generalOptionsPanelLayout = new javax.swing.GroupLayout(generalOptionsPanel);
         generalOptionsPanel.setLayout(generalOptionsPanelLayout);
@@ -3755,12 +3766,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
         });
 
         spBSTLimitSlider.setMajorTickSpacing(100);
-        spBSTLimitSlider.setMaximum(600);
-        spBSTLimitSlider.setMinimum(200);
+        spBSTLimitSlider.setMaximum(Integer.parseInt(bundle.getString("RandomizerGUI.spBSTLimitSlider.maximum")));
+        spBSTLimitSlider.setMinimum(Integer.parseInt(bundle.getString("RandomizerGUI.spBSTLimitSlider.minimum")));
         spBSTLimitSlider.setMinorTickSpacing(25);
         spBSTLimitSlider.setPaintLabels(true);
         spBSTLimitSlider.setPaintTicks(true);
         spBSTLimitSlider.setSnapToTicks(true);
+        spBSTLimitSlider.setToolTipText(bundle.getString("RandomizerGUI.spBSTLimitSlider.toolTipText")); // NOI18N
 
         spRandomSlider.setMajorTickSpacing(1);
         spRandomSlider.setMaximum(2);

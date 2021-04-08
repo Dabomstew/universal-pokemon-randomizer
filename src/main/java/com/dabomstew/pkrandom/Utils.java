@@ -39,6 +39,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
 import com.dabomstew.pkrandom.gui.RandomizerGUI;
+import com.dabomstew.pkrandom.settings.Settings;
 
 public class Utils {
 

@@ -8,7 +8,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.dabomstew.pkrandom.MiscTweak;
-import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.settings.Settings;
 
 import org.assertj.swing.fixture.JCheckBoxFixture;
 import org.assertj.swing.fixture.JRadioButtonFixture;
