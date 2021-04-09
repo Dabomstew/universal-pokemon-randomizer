@@ -48,6 +48,8 @@ public class Gen4Constants {
             bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14, bsGrowthCurveOffset = 19,
             bsAbility1Offset = 22, bsAbility2Offset = 23, bsTMHMCompatOffset = 28;
 
+    public static final String starterCriesPrefix = "0004000C10BD0000000000000000000000E000000000000000E0000000000200";
+
     public static final byte[] hgssStarterCodeSuffix = { 0x03, 0x03, 0x1A, 0x12, 0x1, 0x23, 0x0, 0x0 };
 
     public static final int[] hgssFilesWithRivalScript = { 7, 23, 96, 110, 819, 850, 866 };

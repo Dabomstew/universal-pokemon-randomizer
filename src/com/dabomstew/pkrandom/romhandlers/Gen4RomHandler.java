@@ -675,6 +675,24 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     spStrings.set(i + 4, altStarterDesc);
                 }
                 setStrings(romEntry.getInt("StarterScreenTextOffset"), spStrings);
+
+
+                try {
+                    // Fix starter cries
+                    byte[] starterPokemonOverlay = readOverlay(romEntry.getInt("StarterPokemonOvlNumber"));
+                    String spCriesPrefix = Gen4Constants.starterCriesPrefix;
+                    int offset = find(starterPokemonOverlay, spCriesPrefix);
+                    if (offset > 0) {
+                        offset += spCriesPrefix.length() / 2; // because it was a prefix
+                        for (Pokemon newStarter: newStarters) {
+                            writeLong(starterPokemonOverlay, offset, newStarter.number);
+                            offset += 4;
+                        }
+                    }
+                    writeOverlay(romEntry.getInt("StarterPokemonOvlNumber"), starterPokemonOverlay);
+                } catch (IOException e) {
+                    throw new RandomizerIOException(e);
+                }
                 return true;
             } else {
                 return false;
