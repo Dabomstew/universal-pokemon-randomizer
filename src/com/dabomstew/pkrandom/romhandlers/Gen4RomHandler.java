@@ -2406,7 +2406,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 }
             }
             if (romEntry.getInt("MysteryEggOffset") > 0) {
-                byte[] ovOverlay = readOverlay(romEntry.getInt("MoveTutorMovesOvlNumber"));
+                byte[] ovOverlay = readOverlay(romEntry.getInt("AssortedFieldOvlNumber"));
                 StaticEncounter se = new StaticEncounter(pokes[ovOverlay[romEntry.getInt("MysteryEggOffset")] & 0xFF]);
                 se.isEgg = true;
                 sp.add(se);
@@ -2492,9 +2492,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 if (pokenum > 255) {
                     pokenum = this.random.nextInt(255) + 1;
                 }
-                byte[] ovOverlay = readOverlay(romEntry.getInt("MoveTutorMovesOvlNumber"));
+                byte[] ovOverlay = readOverlay(romEntry.getInt("AssortedFieldOvlNumber"));
                 ovOverlay[romEntry.getInt("MysteryEggOffset")] = (byte) pokenum;
-                writeOverlay(romEntry.getInt("MoveTutorMovesOvlNumber"), ovOverlay);
+                writeOverlay(romEntry.getInt("AssortedFieldOvlNumber"), ovOverlay);
             }
             if (romEntry.getInt("FossilTableOffset") > 0) {
                 int baseOffset = romEntry.getInt("FossilTableOffset");
@@ -2693,7 +2693,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         int bytesPer = romEntry.getInt("MoveTutorBytesCount");
         List<Integer> mtMoves = new ArrayList<>();
         try {
-            byte[] mtFile = readOverlay(romEntry.getInt("MoveTutorMovesOvlNumber"));
+            byte[] mtFile = readOverlay(romEntry.getInt("AssortedFieldOvlNumber"));
             for (int i = 0; i < amount; i++) {
                 mtMoves.add(readWord(mtFile, baseOffset + i * bytesPer));
             }
@@ -2715,11 +2715,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             return;
         }
         try {
-            byte[] mtFile = readOverlay(romEntry.getInt("MoveTutorMovesOvlNumber"));
+            byte[] mtFile = readOverlay(romEntry.getInt("AssortedFieldOvlNumber"));
             for (int i = 0; i < amount; i++) {
                 writeWord(mtFile, baseOffset + i * bytesPer, moves.get(i));
             }
-            writeOverlay(romEntry.getInt("MoveTutorMovesOvlNumber"), mtFile);
+            writeOverlay(romEntry.getInt("AssortedFieldOvlNumber"), mtFile);
 
             // In HGSS, Headbutt is the last tutor move, but the tutor teaches it
             // to you via a hardcoded script rather than looking at this data
@@ -3471,6 +3471,19 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     }
                 }
                 writeOverlay(romEntry.getInt("IntroOvlNumber"), introOverlay);
+            } else if (romEntry.romType == Gen4Constants.Type_HGSS) {
+                int marillReplacement = this.random.nextInt(548) + 297;
+                while (Gen4Constants.hgssBannedOverworldPokemon.contains(marillReplacement)) {
+                    marillReplacement = this.random.nextInt(548) + 297;
+                }
+                byte[] assortedFieldOverlay = readOverlay(romEntry.getInt("AssortedFieldOvlNumber"));
+                String prefix = Gen4Constants.lyraEthanMarillSpritePrefix;
+                int offset = find(assortedFieldOverlay, prefix);
+                if (offset > 0) {
+                    offset += prefix.length() / 2; // because it was a prefix
+                    writeWord(assortedFieldOverlay, offset, marillReplacement);
+                }
+                writeOverlay(romEntry.getInt("AssortedFieldOvlNumber"), assortedFieldOverlay);
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);

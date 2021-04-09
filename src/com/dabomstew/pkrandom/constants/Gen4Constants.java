@@ -268,6 +268,71 @@ public class Gen4Constants {
         return absolutePokeNumsByBaseForme.getOrDefault(baseForme,dummyAbsolutePokeNums).getOrDefault(formNum,baseForme);
     }
 
+    public static final String lyraEthanMarillSpritePrefix = "274E0604C301274E0704E101274E0804";
+
+    public static final List<Integer> hgssBannedOverworldPokemon = Arrays.asList(
+            // Unown alts (to avoid 28x chance of getting Unown)
+            // Too large Pokemon (box legendaries, Steelix, Wailord, Regigigas and Arceus)
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514,
+            515,
+            516,
+            517,
+            518,
+            519,
+            520,
+            521,
+            522,
+            523,
+            524,
+            525,
+            526,
+            527,
+            528,
+            536,
+            537,
+            579,
+            580,
+            651,
+            712,
+            713,
+            714,
+            833,
+            834,
+            836,
+            837,
+            838,
+            845,
+            846,
+            847,
+            848,
+            849,
+            850,
+            851,
+            852,
+            853,
+            854,
+            855,
+            856,
+            857,
+            858,
+            859,
+            860,
+            861,
+            862
+    );
+
     // The original slot each of the 20 "alternate" slots is mapped to
     // swarmx2, dayx2, nightx2, pokeradarx4, GBAx10
     // NOTE: in the game data there are 6 fillers between pokeradar and GBA
