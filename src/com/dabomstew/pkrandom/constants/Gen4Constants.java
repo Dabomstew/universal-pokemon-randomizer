@@ -335,6 +335,117 @@ public class Gen4Constants {
             862
     );
 
+    public static final int convertOverworldSpriteToSpecies(int overworldSpriteID) {
+        int speciesID = overworldSpriteID - 296;
+
+        // Venusaur
+        if (overworldSpriteID >= 300) {
+            speciesID -= 1;
+        }
+
+        // Pikachu
+        if (overworldSpriteID >= 323) {
+            speciesID -= 1;
+        }
+
+        // Meganium
+        if (overworldSpriteID >= 453) {
+            speciesID -= 1;
+        }
+
+        // Pichu
+        if (overworldSpriteID >= 472) {
+            speciesID -= 1;
+        }
+
+        // Unown
+        if (overworldSpriteID >= 528) {
+            speciesID -= 27;
+        } else if (overworldSpriteID > 501) {
+            speciesID -= (overworldSpriteID - 501);
+        }
+
+        // Wobbuffet
+        if (overworldSpriteID >= 530) {
+            speciesID -= 1;
+        }
+
+        // Steelix
+        if (overworldSpriteID >= 537) {
+            speciesID -= 1;
+        }
+
+        // Heracross
+        if (overworldSpriteID >= 544) {
+            speciesID -= 1;
+        }
+
+        // Deoxys
+        if (overworldSpriteID >= 719) {
+            speciesID -= 3;
+        } else if (overworldSpriteID > 716) {
+            speciesID -= (overworldSpriteID - 716);
+        }
+
+        // Burmy
+        if (overworldSpriteID >= 747) {
+            speciesID -= 2;
+        } else if (overworldSpriteID > 745) {
+            speciesID -= (overworldSpriteID - 745);
+        }
+
+        // Wormadam
+        if (overworldSpriteID >= 750) {
+            speciesID -= 2;
+        } else if (overworldSpriteID > 748) {
+            speciesID -= (overworldSpriteID - 748);
+        }
+
+        // Combee
+        if (overworldSpriteID >= 753) {
+            speciesID -= 1;
+        }
+
+        // Shellos
+        if (overworldSpriteID >= 761) {
+            speciesID -= 1;
+        }
+
+        // Gastrodon
+        if (overworldSpriteID >= 763) {
+            speciesID -= 1;
+        }
+
+        // Hippopotas
+        if (overworldSpriteID >= 793) {
+            speciesID -= 1;
+        }
+
+        // Hippowdon
+        if (overworldSpriteID >= 795) {
+            speciesID -= 1;
+        }
+
+        // Rotom
+        if (overworldSpriteID >= 829) {
+            speciesID -= 5;
+        } else if (overworldSpriteID > 824) {
+            speciesID -= (overworldSpriteID - 824);
+        }
+
+        // Giratina
+        if (overworldSpriteID >= 838) {
+            speciesID -= 1;
+        }
+
+        // Arceus
+        if (overworldSpriteID > 845) {
+            speciesID -= (overworldSpriteID - 845);
+        }
+
+        return speciesID;
+    }
+
     // The original slot each of the 20 "alternate" slots is mapped to
     // swarmx2, dayx2, nightx2, pokeradarx4, GBAx10
     // NOTE: in the game data there are 6 fillers between pokeradar and GBA
