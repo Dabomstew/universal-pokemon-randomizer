@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JRadioButton;
 import javax.swing.JSlider;
@@ -13,6 +14,7 @@ import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.edt.GuiQuery;
 import org.assertj.swing.fixture.FrameFixture;
+import org.assertj.swing.fixture.JButtonFixture;
 import org.assertj.swing.fixture.JCheckBoxFixture;
 import org.assertj.swing.fixture.JRadioButtonFixture;
 import org.assertj.swing.fixture.JSliderFixture;
@@ -106,7 +108,7 @@ public class AbstractUIBase extends AssertJSwingTestCaseTemplate {
      * @param name - Name of the JRadioButton (different than variable name)
      * @return JRadioButtonFixture with the given name
      */
-    public JRadioButtonFixture getRadoiButtonByName(String name) {
+    public JRadioButtonFixture getRadioButtonByName(String name) {
         JRadioButtonFixture jRadioButtonFixture = this.frame.radioButton(new GenericTypeMatcher(JRadioButton.class, true) {
             @Override
             protected boolean isMatching(Component component) {
@@ -135,6 +137,24 @@ public class AbstractUIBase extends AssertJSwingTestCaseTemplate {
             }
         });
         return jSliderFixture;
+    }
+
+    /**
+     * Returns a JButtonFixture where the JButton has the requested component name
+     * @param name - Name of the JButton (different than variable name)
+     * @return JButtonFixture with the given name
+     */
+    public JButtonFixture getButtonByName(String name) {
+        JButtonFixture jButtonFixture = this.frame.button(new GenericTypeMatcher(JButton.class, true) {
+            @Override
+            protected boolean isMatching(Component component) {
+                if (component.getName() != null && component.getName().equals(name)) {
+                    return true;
+                }
+                return false;
+            }
+        });
+        return jButtonFixture;
     }
 
     /**

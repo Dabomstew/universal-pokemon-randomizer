@@ -46,7 +46,7 @@ Trainer random a 1-1 swap similar to global replace
 XXToo much workXXSelect full team instead of only starter (is it possible to prestock a pc?)
 XXToo much workXXShift abilities to left or right instead of randomizing (thus activating hidden abilities)
 XXToo much workXXEnable patching randomization formulas
-Random settings (each applicable choice is given a randomized selection. still required confirming save to allow modification)
+**Random settings (each applicable choice is given a randomized selection. still required confirming save to allow modification)
 Minimum Catch Rate can be applied outside of WildPokemonMod
 Tutor Move Sanity shoudl be disabled after deselecting
 XXToo much workXXEvolution level randomized into a range based on the resulting BST

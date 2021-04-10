@@ -1664,7 +1664,7 @@ public class Settings {
     }
 
     public Settings setRandomizeTrainerClassNames(boolean randomizeTrainerClassNames) {
-        settingsMap.putValue(SettingsConstants.RANDOMIZE_TRAINER_NAMES, randomizeTrainerClassNames);
+        settingsMap.putValue(SettingsConstants.RANDOMIZE_TRAINER_CLASS_NAMES, randomizeTrainerClassNames);
         return this;
     }
 

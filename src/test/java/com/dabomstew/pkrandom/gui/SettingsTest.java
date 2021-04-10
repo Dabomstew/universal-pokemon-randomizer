@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.settings.Settings;
 
+import org.assertj.swing.fixture.JButtonFixture;
 import org.assertj.swing.fixture.JCheckBoxFixture;
 import org.assertj.swing.fixture.JRadioButtonFixture;
 import org.assertj.swing.fixture.JSliderFixture;
@@ -133,8 +134,8 @@ public class SettingsTest extends AbstractUIBase {
      */
     @Test(timeout = 4000)
     public void TestChangeMethods() throws IOException {
-        JRadioButtonFixture unchangedEvoRBFixture = getRadoiButtonByName("peUnchangedRB");
-        JRadioButtonFixture randomEvoRBFixture = getRadoiButtonByName("peRandomRB");
+        JRadioButtonFixture unchangedEvoRBFixture = getRadioButtonByName("peUnchangedRB");
+        JRadioButtonFixture randomEvoRBFixture = getRadioButtonByName("peRandomRB");
         JCheckBoxFixture changeMethodsCBFixture = getCheckBoxByName("peChangeMethodsCB");
         TestCheckboxBasedOnRadioButton(unchangedEvoRBFixture, randomEvoRBFixture, changeMethodsCBFixture, (settings) -> settings.isEvosChangeMethod(),
         (evolutionMod) -> evolutionMod == Settings.EvolutionsMod.UNCHANGED, (evolutionMod) -> evolutionMod == Settings.EvolutionsMod.RANDOM,
@@ -151,8 +152,8 @@ public class SettingsTest extends AbstractUIBase {
      */
     @Test(timeout = 4000)
     public void TestStartersMinimumEvos() throws IOException {
-        JRadioButtonFixture unchangedStarterRBFixture = getRadoiButtonByName("spUnchangedRB");
-        JRadioButtonFixture randomStarterRBFixture = getRadoiButtonByName("spRandomRB");
+        JRadioButtonFixture unchangedStarterRBFixture = getRadioButtonByName("spUnchangedRB");
+        JRadioButtonFixture randomStarterRBFixture = getRadioButtonByName("spRandomRB");
         JSliderFixture startersMinimumEvosFixture = getSliderByName("spRandomSlider");
         Settings settings = this.mainWindow.getCurrentSettings();
         // Sanity check - should evaluate to defaults
@@ -236,8 +237,8 @@ public class SettingsTest extends AbstractUIBase {
      */
     @Test(timeout = 4000)
     public void TestExactEvo() throws IOException {
-        JRadioButtonFixture unchangedStarterRBFixture = getRadoiButtonByName("spUnchangedRB");
-        JRadioButtonFixture randomStarterRBFixture = getRadoiButtonByName("spRandomRB");
+        JRadioButtonFixture unchangedStarterRBFixture = getRadioButtonByName("spUnchangedRB");
+        JRadioButtonFixture randomStarterRBFixture = getRadioButtonByName("spRandomRB");
         JCheckBoxFixture exactEvoCBFixture = getCheckBoxByName("spExactEvoCB");
         TestCheckboxBasedOnRadioButton(unchangedStarterRBFixture, randomStarterRBFixture, exactEvoCBFixture, (settings) -> settings.isStartersExactEvo(),
             (startersMod) -> startersMod == Settings.StartersMod.UNCHANGED, (startersMod) -> startersMod == Settings.StartersMod.RANDOM,
@@ -251,10 +252,10 @@ public class SettingsTest extends AbstractUIBase {
      * Verifies settings can be stored and loaded with no error and preserve state
      * @throws IOException
      */
-    @Test
+    @Test(timeout = 4000)
     public void TestNoSplitEvos() throws IOException {
-        JRadioButtonFixture unchangedStarterRBFixture = getRadoiButtonByName("spUnchangedRB");
-        JRadioButtonFixture randomStarterRBFixture = getRadoiButtonByName("spRandomRB");
+        JRadioButtonFixture unchangedStarterRBFixture = getRadioButtonByName("spUnchangedRB");
+        JRadioButtonFixture randomStarterRBFixture = getRadioButtonByName("spRandomRB");
         JCheckBoxFixture noSplitCBFixture = getCheckBoxByName("spNoSplitCB");
         TestCheckboxBasedOnRadioButton(unchangedStarterRBFixture, randomStarterRBFixture, noSplitCBFixture, (settings) -> settings.isStartersNoSplit(), 
             (starterMod) -> starterMod == Settings.StartersMod.UNCHANGED, (starterMod) -> starterMod == Settings.StartersMod.RANDOM, 
@@ -303,11 +304,11 @@ public class SettingsTest extends AbstractUIBase {
      * Verifies settings can be stored and loaded with no error and preserve state
      * @throws IOException
      */
-    @Test
+    @Test(timeout = 4000)
     public void TestGymTypeTheme() throws IOException {
-        JRadioButtonFixture unchangedTrainerRBFixture = getRadoiButtonByName("tpUnchangedRB");
-        JRadioButtonFixture randomTrainerRBFixture = getRadoiButtonByName("tpRandomRB");
-        JRadioButtonFixture typeThemeTrainerRBFixture = getRadoiButtonByName("tpTypeThemeRB");
+        JRadioButtonFixture unchangedTrainerRBFixture = getRadioButtonByName("tpUnchangedRB");
+        JRadioButtonFixture randomTrainerRBFixture = getRadioButtonByName("tpRandomRB");
+        JRadioButtonFixture typeThemeTrainerRBFixture = getRadioButtonByName("tpTypeThemeRB");
         JCheckBoxFixture gymTypeThemeCBFixture = getCheckBoxByName("tpGymTypeThemeCB");
         TestCheckboxBasedOnRadioButton(unchangedTrainerRBFixture, randomTrainerRBFixture, gymTypeThemeCBFixture, (settings) -> settings.isGymTypeTheme(),
             (trainersMod) -> trainersMod == Settings.TrainersMod.UNCHANGED, (trainersMod) -> trainersMod == Settings.TrainersMod.RANDOM,
@@ -323,6 +324,22 @@ public class SettingsTest extends AbstractUIBase {
         settings = Settings.fromString(setttingsString);        
         assertFalse("Gym Type Theme was not false after reloading settings 5", settings.isGymTypeTheme());
         assertTrue("Trainers was not TYPE THEME after reloading settings 5", settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED);
+    }
+
+    /**
+     * Clicking the random settings button results in a successful operation.
+     * Settings can be saved and restored without issue
+     * @throws IOException
+     */
+    @Test(timeout = 4000)
+    public void TestRandomSettingsButton() throws IOException {
+        JButtonFixture randomQSButton = getButtonByName("randomQSButton");
+        randomQSButton.click();
+        Settings settings = this.mainWindow.getCurrentSettings();
+        String settingsString = settings.toString();
+        settings = Settings.fromString(settingsString);
+        assertTrue("Settings do not match after reload - \nBefore: " + settingsString + "\nAfter: " + settings.toString(),
+            settingsString.equals(settings.toString()));
     }
 
     /**

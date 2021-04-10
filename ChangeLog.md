@@ -40,7 +40,7 @@
  * Added section to show new evolution chains through the 3rd form.
  * Added seed and settings to log (as opposed to just at the end of randomization).
 
- ## 1.8.2
+ ## 1.9.0
  * When random retaining types with follow evolutions checked, Pokemon with two types evolving into Pokemon with one type now passes the new type instead of retaining the shared type. Fixes issue where Weepinbell could evolve into Snorlax and not share any types.
  * Added code tests to ensure new features do not break existing features
    * Settings are now tested using a robot framework from AssertJ Swing
@@ -80,3 +80,4 @@
    * There was a bug discovered in version 1.81 where the values of Starter No Split and Starter Unique Types were restored in the wrong order. This has been corrected and should allow the settings file to be used as expected. 
  * Trainer pokemon held items can be randomized for Generation 3 or higher. Items are restricted to battle tower viable.
  * Gyms and Elite 4 can be given a type theme when chosing Random for trainer pokemon
+ * A new `Randomize Settings` button has been added. This will randomly select settings available for the game (randomize the randomizer). You will still be required to click `Randomize (Save)` to confirm the settings and generate the ROM.
