@@ -72,11 +72,11 @@ public class CliRandomizer {
 
                     CliRandomizer.displaySettingsWarnings(settings, romHandler);
 
+                    File fh = new File(destinationRomFilePath);
                     if (!saveAsDirectory) {
                         List<String> extensions = new ArrayList<>(Arrays.asList("sgb", "gbc", "gba", "nds", "cxi"));
                         extensions.remove(romHandler.getDefaultExtension());
 
-                        File fh = new File(destinationRomFilePath);
                         fh = FileFunctions.fixFilename(fh, romHandler.getDefaultExtension(), extensions);
                         if (romHandler instanceof AbstractDSRomHandler || romHandler instanceof Abstract3DSRomHandler) {
                             String currentFN = romHandler.loadedFilename();
@@ -89,7 +89,7 @@ public class CliRandomizer {
 
 
                     Randomizer randomizer = new Randomizer(settings, romHandler, saveAsDirectory);
-                    randomizer.randomize(destinationRomFilePath);
+                    randomizer.randomize(fh.getAbsolutePath());
                     System.out.println("Randomized succesfully!");
                     // this is the only successful exit, everything else will return false at the end of the function
                     return true;
@@ -119,6 +119,11 @@ public class CliRandomizer {
         String outputRomFilePath = null;
         boolean saveAsDirectory = false;
 
+        if (args.length > 0 && Arrays.asList(args).contains("--help")) {
+            printUsage();
+            return 0;
+        }
+
         List<String> allowedFlags = Arrays.asList("-i", "-o", "-s", "-d");
         for (int i = 0; i < args.length; i++) {
             if (allowedFlags.contains(args[i])) {
@@ -143,6 +148,7 @@ public class CliRandomizer {
 
         if (settingsFilePath == null || sourceRomFilePath == null || outputRomFilePath == null) {
             System.err.println("Missing required argument");
+            CliRandomizer.printUsage();
             return 1;
 
         }
@@ -183,6 +189,7 @@ public class CliRandomizer {
     }
 
     private static void printUsage() {
-        System.err.println("Usage: java -jar PokeRandoZX.jar cli -s <path to settings file> -i <path to source ROM> -o <path for new ROM> [-d save as directory]");
+        System.err.println("Usage: java -jar PokeRandoZX.jar cli -s <path to settings file> -i <path to source ROM> -o <path for new ROM> [-d]");
+        System.err.println("-d: Save 3DS game as directory (LayeredFS)");
     }
 }
