@@ -1898,7 +1898,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
         int[] customStarters = settings.getCustomStarters();
         this.spCustomPoke1Chooser.setSelectedIndex(customStarters[0] - 1);
         this.spCustomPoke2Chooser.setSelectedIndex(customStarters[1] - 1);
-        this.spCustomPoke3Chooser.setSelectedIndex(customStarters[2] - 1);
+        if (!romHandler.isYellow()) {
+            this.spCustomPoke3Chooser.setSelectedIndex(customStarters[2] - 1);
+        }
 
         this.peUnchangedRB.setSelected(settings.getEvolutionsMod() == Settings.EvolutionsMod.UNCHANGED);
         this.peRandomRB.setSelected(settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM);
@@ -2520,7 +2522,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private void randomQSButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_randomQSButtonActionPerformed
         Settings rnd_settings = new Settings();
         rnd_settings.tweakForRom(this.romHandler);
-        rnd_settings.randomSettings(RandomSource.instance());
+        rnd_settings.randomSettings();
         this.restoreStateFromSettings(rnd_settings);
     }// GEN-LAST:event_randomQSButtonActionPerformed
 
@@ -4296,8 +4298,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         });
 
         tpForceFullyEvolvedSlider.setMajorTickSpacing(5);
-        tpForceFullyEvolvedSlider.setMaximum(65);
-        tpForceFullyEvolvedSlider.setMinimum(30);
+        tpForceFullyEvolvedSlider.setMaximum(Integer.parseInt(bundle.getString("RandomizerGUI.tpForceFullyEvolvedSlider.maximum")));
+        tpForceFullyEvolvedSlider.setMinimum(Integer.parseInt(bundle.getString("RandomizerGUI.tpForceFullyEvolvedSlider.minimum")));
         tpForceFullyEvolvedSlider.setMinorTickSpacing(1);
         tpForceFullyEvolvedSlider.setPaintLabels(true);
         tpForceFullyEvolvedSlider.setPaintTicks(true);
@@ -4313,8 +4315,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         });
 
         tpLevelModifierSlider.setMajorTickSpacing(10);
-        tpLevelModifierSlider.setMaximum(50);
-        tpLevelModifierSlider.setMinimum(-50);
+        tpLevelModifierSlider.setMaximum(Integer.parseInt(bundle.getString("RandomizerGUI.tpLevelModifierSlider.maximum")));
+        tpLevelModifierSlider.setMinimum(Integer.parseInt(bundle.getString("RandomizerGUI.tpLevelModifierSlider.minimum")));
         tpLevelModifierSlider.setMinorTickSpacing(2);
         tpLevelModifierSlider.setPaintLabels(true);
         tpLevelModifierSlider.setPaintTicks(true);
@@ -4576,8 +4578,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         wpHeldItemsBanBadCB.setToolTipText(bundle.getString("RandomizerGUI.wpHeldItemsBanBadCB.toolTipText")); // NOI18N
 
         wpCatchRateSlider.setMajorTickSpacing(1);
-        wpCatchRateSlider.setMaximum(4);
-        wpCatchRateSlider.setMinimum(1);
+        wpCatchRateSlider.setMaximum(Integer.parseInt(bundle.getString("RandomizerGUI.wpCatchRateSlider.maximum")));
+        wpCatchRateSlider.setMinimum(Integer.parseInt(bundle.getString("RandomizerGUI.wpCatchRateSlider.minimum")));
         wpCatchRateSlider.setPaintLabels(true);
         wpCatchRateSlider.setToolTipText(bundle.getString("RandomizerGUI.wpCatchRateSlider.toolTipText")); // NOI18N
         wpCatchRateSlider.setValue(1);

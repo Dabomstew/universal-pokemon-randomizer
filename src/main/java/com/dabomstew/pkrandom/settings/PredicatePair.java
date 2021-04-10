@@ -30,6 +30,7 @@ import java.util.function.Predicate;
 
 import com.dabomstew.pkrandom.settings.Settings.MovesetsMod;
 import com.dabomstew.pkrandom.settings.Settings.StartersMod;
+import com.dabomstew.pkrandom.settings.Settings.TrainersMod;
 import com.dabomstew.pkrandom.settings.Settings.TypesMod;
 
 public class PredicatePair {
@@ -43,6 +44,8 @@ public class PredicatePair {
         item == TypesMod.RANDOM_RETAIN || item == TypesMod.COMPLETELY_RANDOM;
     public static final Predicate<MovesetsMod> MOVESETS_MOD_RANDOM = (item) ->
         item == MovesetsMod.RANDOM_PREFER_SAME_TYPE || item == MovesetsMod.COMPLETELY_RANDOM;
+    public static final Predicate<TrainersMod> TRAINERS_MOD_RANDOM = (item) -> 
+        item == TrainersMod.RANDOM;
 
     private SettingsOptionComposite parent;
     private Predicate parentState;
@@ -53,6 +56,8 @@ public class PredicatePair {
     }
 
     public Boolean test(SettingsOption item) {
+        // Parent is allowed to be null, but if declared then
+        // item must match it
         if (parent != null && item != parent) {
             return false;
         }

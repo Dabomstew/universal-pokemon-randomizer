@@ -32,9 +32,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.stream.IntStream;
@@ -42,9 +40,9 @@ import java.util.zip.CRC32;
 
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.SettingsUpdater;
 import com.dabomstew.pkrandom.SysConstants;
-import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
@@ -67,7 +65,6 @@ public class Settings {
     private boolean updatedFromOldVersion = false;
 
     private SettingsMap settingsMap;
-    private int currentMiscTweaks;
 
     public enum BaseStatisticsMod {
         UNCHANGED, SHUFFLE_ORDER, SHUFFLE_BST, SHUFFLE_ALL, RANDOM_WITHIN_BST, RANDOM_UNRESTRICTED, RANDOM_COMPLETELY
@@ -85,7 +82,6 @@ public class Settings {
         UNCHANGED, RANDOM_RETAIN, COMPLETELY_RANDOM, SHUFFLE
     }
 
-    // Evolutions
     public enum EvolutionsMod {
         UNCHANGED, RANDOM
     }
@@ -98,22 +94,6 @@ public class Settings {
         UNCHANGED, RANDOM, TYPE_THEMED
     }
 
-    private TrainersMod trainersMod = TrainersMod.UNCHANGED;
-    private boolean rivalCarriesStarterThroughout;
-    private boolean rivalCarriesTeamThroughout;
-    private boolean trainersUsePokemonOfSimilarStrength;
-    private boolean trainersMatchTypingDistribution;
-    private boolean trainersBlockLegendaries = true;
-    private boolean trainersBlockEarlyWonderGuard = true;
-    private boolean randomizeTrainerNames;
-    private boolean randomizeTrainerClassNames;
-    private boolean trainersForceFullyEvolved;
-    private int trainersForceFullyEvolvedLevel = 30;
-    private boolean trainersLevelModified;
-    private int trainersLevelModifier = 0; // -50 ~ 50
-    private boolean trainersRandomHeldItem;
-    private boolean gymTypeTheme;
-
     public enum WildPokemonMod {
         UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING
     }
@@ -122,71 +102,33 @@ public class Settings {
         NONE, SIMILAR_STRENGTH, CATCH_EM_ALL, TYPE_THEME_AREAS, MATCH_TYPING_DISTRIBUTION
     }
 
-    private WildPokemonMod wildPokemonMod = WildPokemonMod.UNCHANGED;
-    private WildPokemonRestrictionMod wildPokemonRestrictionMod = WildPokemonRestrictionMod.NONE;
-    private boolean useTimeBasedEncounters;
-    private boolean blockWildLegendaries = true;
-    private boolean useMinimumCatchRate;
-    private int minimumCatchRateLevel = 1;
-    private boolean randomizeWildPokemonHeldItems;
-    private boolean banBadRandomWildPokemonHeldItems;
-    private boolean allowLowLevelEvolvedTypes;
-
     public enum StaticPokemonMod {
         UNCHANGED, RANDOM_MATCHING, COMPLETELY_RANDOM
     }
-
-    private StaticPokemonMod staticPokemonMod = StaticPokemonMod.UNCHANGED;
 
     public enum TMsMod {
         UNCHANGED, RANDOM
     }
 
-    private TMsMod tmsMod = TMsMod.UNCHANGED;
-    private boolean tmLevelUpMoveSanity;
-    private boolean keepFieldMoveTMs;
-    private boolean fullHMCompat;
-    private boolean tmsForceGoodDamaging;
-    private int tmsGoodDamagingPercent = 0;
-
     public enum TMsHMsCompatibilityMod {
         UNCHANGED, RANDOM_PREFER_TYPE, COMPLETELY_RANDOM, FULL
     }
-
-    private TMsHMsCompatibilityMod tmsHmsCompatibilityMod = TMsHMsCompatibilityMod.UNCHANGED;
 
     public enum MoveTutorMovesMod {
         UNCHANGED, RANDOM
     }
 
-    private MoveTutorMovesMod moveTutorMovesMod = MoveTutorMovesMod.UNCHANGED;
-    private boolean tutorLevelUpMoveSanity;
-    private boolean keepFieldMoveTutors;
-    private boolean tutorsForceGoodDamaging;
-    private int tutorsGoodDamagingPercent = 0;
-
     public enum MoveTutorsCompatibilityMod {
         UNCHANGED, RANDOM_PREFER_TYPE, COMPLETELY_RANDOM, FULL
     }
-
-    private MoveTutorsCompatibilityMod moveTutorsCompatibilityMod = MoveTutorsCompatibilityMod.UNCHANGED;
 
     public enum InGameTradesMod {
         UNCHANGED, RANDOMIZE_GIVEN, RANDOMIZE_GIVEN_AND_REQUESTED
     }
 
-    private InGameTradesMod inGameTradesMod = InGameTradesMod.UNCHANGED;
-    private boolean randomizeInGameTradesNicknames;
-    private boolean randomizeInGameTradesOTs;
-    private boolean randomizeInGameTradesIVs;
-    private boolean randomizeInGameTradesItems;
-
     public enum FieldItemsMod {
         UNCHANGED, SHUFFLE, RANDOM
     }
-
-    private FieldItemsMod fieldItemsMod = FieldItemsMod.UNCHANGED;
-    private boolean banBadRandomFieldItems;
 
     @SuppressWarnings({"rawtypes"})
     public Settings() {
@@ -279,7 +221,7 @@ public class Settings {
         SettingsOptionComposite customStarters = SettingsOptionFactory.createSettingsOption(
             new SettingsOption.Builder(SettingsConstants.CUSTOM_STARTERS, new int[]{-1, -1, -1})
             .addMatches(new PredicatePair(startersMod, PredicatePair.STARTERS_MOD_CUSTOM))
-            .addValidInts(IntStream.range(0, 0)));
+            .addValidInts(0, 0));
         SettingsOptionComposite randomizeStartersHeldItems = SettingsOptionFactory.createSettingsOption(
             new SettingsOption.Builder(SettingsConstants.RANDOMIZE_STARTERS_HELD_ITEMS, false));
         SettingsOptionComposite banBadRandomStarterHeldItems = SettingsOptionFactory.createSettingsOption(
@@ -297,7 +239,7 @@ public class Settings {
         SettingsOptionComposite starterBSTModifier = SettingsOptionFactory.createSettingsOption(
             new SettingsOption.Builder(SettingsConstants.STARTERS_BST_MODIFIER, SettingsConstants.BST_MINIMUM_INT)
             .addMatches(new PredicatePair(starterLimitBST, PredicatePair.BOOLEAN_TRUE))
-            .addValidInts(IntStream.range(SettingsConstants.BST_MINIMUM_INT, SettingsConstants.BST_MAXIMUM_INT)));
+            .addValidInts(SettingsConstants.BST_MINIMUM_INT, SettingsConstants.BST_MAXIMUM_INT));
         SettingsOptionComposite startersBaseEvoOnly = SettingsOptionFactory.createSettingsOption(
             new SettingsOption.Builder(SettingsConstants.STARTERS_BASE_EVO_ONLY, false)
             .addMatches(new PredicatePair(startersMod, PredicatePair.STARTERS_MOD_RANDOM)));
@@ -307,7 +249,7 @@ public class Settings {
         SettingsOptionComposite startersMinimumEvos = SettingsOptionFactory.createSettingsOption(
             new SettingsOption.Builder(SettingsConstants.STARTERS_MINIMUM_EVOS, 0)
             .addMatches(new PredicatePair(startersMod, PredicatePair.STARTERS_MOD_RANDOM))
-            .addValidInts(IntStream.range(0, 3)));
+            .addValidInts(0, 2));
 
         // Moves
         SettingsOptionComposite randomizeMovePowers = SettingsOptionFactory.createSettingsOption(
@@ -334,7 +276,7 @@ public class Settings {
         SettingsOptionComposite guaranteedMoveCount = SettingsOptionFactory.createSettingsOption(
             new SettingsOption.Builder(SettingsConstants.GUARANTEED_MOVE_COUNT, 2)
             .addMatches(new PredicatePair(startWithGuaranteedMoves, PredicatePair.BOOLEAN_TRUE))
-            .addValidInts(IntStream.range(2, 4)));
+            .addValidInts(2, 4));
         SettingsOptionComposite reorderDamagingMoves = SettingsOptionFactory.createSettingsOption(
             new SettingsOption.Builder(SettingsConstants.REORDER_DAMAGING_MOVES, false)
             .addMatches(new PredicatePair(movesetsMod, PredicatePair.MOVESETS_MOD_RANDOM)));
@@ -344,73 +286,154 @@ public class Settings {
         SettingsOptionComposite movesetsGoodDamagingPercent = SettingsOptionFactory.createSettingsOption(
             new SettingsOption.Builder(SettingsConstants.MOVESETS_GOOD_DAMAGING_PERCENT, 0)
             .addMatches(new PredicatePair(movesetsForceGoodDamaging, PredicatePair.BOOLEAN_TRUE))
-            .addValidInts(IntStream.range(0, 100)));
+            .addValidInts(0, 100));
 
         // Trainer pokemon
-        // choose radio button 
-        // rival carries starter
-        // // rival carries team
-        // sim strength
-        // weight type by #
-        // no legends
-        // no wonder guard
-        // gym type theme
-        // random held item
-        // random names
-        // random class
-        // fully evolve at
-        // // choose slider
-        // level mod
-        // // choose slider
+        SettingsOptionComposite trainersMod = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TRAINERS_MOD, TrainersMod.UNCHANGED));
+        SettingsOptionComposite rivalCarriesStarterThroughout = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.RIVAL_CARRIES_STARTER_THROUGHOUT, false)
+            .addMatches(new PredicatePair(trainersMod, PredicatePair.ENUM_NOT_UNCHANGED),
+            new PredicatePair(startersMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite rivalCarriesTeamThroughout = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.RIVAL_CARRIES_TEAM_THROUGHOUT, false)
+            .addMatches(new PredicatePair(rivalCarriesStarterThroughout, PredicatePair.BOOLEAN_TRUE)));
+        SettingsOptionComposite trainersUsePokemonOfSimilarStrength = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TRAINERS_USE_POKEMON_OF_SIMILAR_STRENGTH, false)
+            .addMatches(new PredicatePair(trainersMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite trainersMatchTypingDistribution = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TRAINERS_MATCH_TYPING_DISTRIBUTION, false)
+            .addMatches(new PredicatePair(trainersMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite trainersBlockLegendaries = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TRAINERS_BLOCK_LEGENDARIES, true)
+            .addMatches(new PredicatePair(trainersMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite trainersBlockEarlyWonderGuard = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TRAINERS_BLOCK_EARLY_WONDER_GUARD, true)
+            .addMatches(new PredicatePair(trainersMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite gymTypeTheme = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.GYM_TYPE_THEME, false)
+            .addMatches(new PredicatePair(trainersMod, PredicatePair.TRAINERS_MOD_RANDOM)));
+        SettingsOptionComposite trainersRandomHeldItem = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TRAINERS_RANDOM_HELD_ITEM, false));
+        SettingsOptionComposite randomizeTrainerNames = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.RANDOMIZE_TRAINER_NAMES, false));
+        SettingsOptionComposite randomizeTrainerClassNames = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.RANDOMIZE_TRAINER_CLASS_NAMES, false));
+        SettingsOptionComposite trainersForceFullyEvolved = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TRAINERS_FORCE_FULLY_EVOLVED, false));
+        SettingsOptionComposite trainersForceFullyEvolvedLevel = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TRAINERS_FORCE_FULLY_EVOLVED_LEVEL, SettingsConstants.FULLY_EVOLVED_MINIMUM_INT)
+            .addMatches(new PredicatePair(trainersForceFullyEvolved, PredicatePair.BOOLEAN_TRUE))
+            .addValidInts(SettingsConstants.FULLY_EVOLVED_MINIMUM_INT, SettingsConstants.FULLY_EVOLVED_MAXIMUM_INT));
+        SettingsOptionComposite trainersLevelModified = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TRAINERS_LEVEL_MODIFIED, false));
+        SettingsOptionComposite trainersLevelModifier = SettingsOptionFactory.createSettingsOption(
+            // 0 is used here since the minimum is -50 and we don't want that
+            new SettingsOption.Builder(SettingsConstants.TRAINERS_LEVEL_MODIFIER, 0)
+            .addMatches(new PredicatePair(trainersLevelModified, PredicatePair.BOOLEAN_TRUE))
+            .addValidInts(SettingsConstants.LEVEL_MODIFIER_MINIMUM_INT, SettingsConstants.LEVEL_MODIFIER_MAXIMUM_INT));
 
         // Wild Pokemon
-        // choose radio button
-        // choose additional radio button
-        // time based encounters
-        // no legendaries
-        // min catch rate
-        // choose slider
-        // random held item
-        // ban bad
-        // allow low level evos
+        SettingsOptionComposite wildPokemonMod = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.WILD_POKEMON_MOD, WildPokemonMod.UNCHANGED));
+        SettingsOptionComposite wildPokemonRestrictionMod = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.WILD_POKEMON_RESTRICTION_MOD, WildPokemonRestrictionMod.NONE)
+            .addMatches(new PredicatePair(wildPokemonMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite useTimeBasedEncounters = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.USE_TIME_BASED_ENCOUNTERS, false)
+            .addMatches(new PredicatePair(wildPokemonMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite blockWildLegendaries = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.BLOCK_WILD_LEGENDARIES, true)
+            .addMatches(new PredicatePair(wildPokemonMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite useMinimumCatchRate = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.USE_MINIMUM_CATCH_RATE, false));
+        SettingsOptionComposite minimumCatchRateLevel = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.MINIMUM_CATCH_RATE_LEVEL, SettingsConstants.MINIMUM_CATCH_MINIMUM_INT)
+            .addMatches(new PredicatePair(useMinimumCatchRate, PredicatePair.BOOLEAN_TRUE))
+            .addValidInts(SettingsConstants.MINIMUM_CATCH_MINIMUM_INT, SettingsConstants.MINIMUM_CATCH_MAXIMUM_INT));
+        SettingsOptionComposite randomizeWildPokemonHeldItems = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.RANDOMIZE_WILD_POKEMON_HELD_ITEMS, false));
+        SettingsOptionComposite banBadRandomWildPokemonHeldItems = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.BAN_BAD_RANDOM_WILD_POKEMON_HELD_ITEMS, false)
+            .addMatches(new PredicatePair(randomizeWildPokemonHeldItems, PredicatePair.BOOLEAN_TRUE)));
+        SettingsOptionComposite allowLowLevelEvolvedTypes = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.ALLOW_LOW_LEVEL_EVOLVED_TYPES, true)
+            .addMatches(new PredicatePair(wildPokemonMod, PredicatePair.ENUM_NOT_UNCHANGED)));
 
         // Static Pokemon
-        // choose radio button
-        
+        SettingsOptionComposite staticPokemonMod = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.STATIC_POKEMON_MOD, StaticPokemonMod.UNCHANGED));
+
         // TM/HM
-        // choose radio button
-        // full hm compatibility
-        // tm/levelup move sanity
-        // keep field moves
-        // force % good damage
-        // // choose slider
-        // choose radio button compatibility
+        SettingsOptionComposite tmsMod = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TMS_MOD, TMsMod.UNCHANGED));
+        SettingsOptionComposite tmLevelUpMoveSanity = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TM_LEVEL_UP_MOVE_SANITY, false)
+            .addMatches(new PredicatePair(tmsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite keepFieldMoveTMs = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.KEEP_FIELD_MOVE_TMS, false)
+            .addMatches(new PredicatePair(tmsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite fullHMCompat = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.FULL_HM_COMPAT, false)
+            .addMatches(new PredicatePair(tmsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite tmsForceGoodDamaging = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TMS_FORCE_GOOD_DAMAGING, false)
+            .addMatches(new PredicatePair(tmsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite tmsGoodDamagingPercent = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TMS_GOOD_DAMAGING_PERCENT, 0)
+            .addMatches(new PredicatePair(tmsForceGoodDamaging, PredicatePair.BOOLEAN_TRUE))
+            .addValidInts(0, 100));
+        SettingsOptionComposite tmsHmsCompatibilityMod = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TMS_HMS_COMPATIBILITY_MOD, TMsHMsCompatibilityMod.UNCHANGED));
 
         // Move tutors
-        // choose radio button
-        // tutor/levelup move sanity
-        // keep field move tutors
-        // force % good amage
-        // // choose slider
-        // choose radio button compatibility
+        SettingsOptionComposite moveTutorMovesMod = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.MOVE_TUTOR_MOVES_MOD, MoveTutorMovesMod.UNCHANGED));
+        SettingsOptionComposite tutorLevelUpMoveSanity = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TUTOR_LEVEL_UP_MOVE_SANITY, false)
+            .addMatches(new PredicatePair(moveTutorMovesMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite keepFieldMoveTutors = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.KEEP_FIELD_MOVE_TUTORS, false)
+            .addMatches(new PredicatePair(moveTutorMovesMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite tutorsForceGoodDamaging = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TUTORS_FORCE_GOOD_DAMAGING, false)
+            .addMatches(new PredicatePair(moveTutorMovesMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite tutorsGoodDamagingPercent = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TUTORS_GOOD_DAMAGING_PERCENT, 0)
+            .addMatches(new PredicatePair(tutorsForceGoodDamaging, PredicatePair.BOOLEAN_TRUE))
+            .addValidInts(0, 100));
+        SettingsOptionComposite moveTutorsCompatibilityMod = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.MOVE_TUTORS_COMPATIBILITY_MOD, MoveTutorsCompatibilityMod.UNCHANGED));
 
         // Trades
-        // choose radio button
-        // random nickname
-        // random OT
-        // random IV
-        // random items
+        SettingsOptionComposite inGameTradesMod = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.IN_GAME_TRADES_MOD, InGameTradesMod.UNCHANGED));
+        SettingsOptionComposite randomizeInGameTradesNicknames = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.RANDOMIZE_IN_GAME_TRADES_NICKNAMES, false));
+        SettingsOptionComposite randomizeInGameTradesOTs = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.RANDOMIZE_IN_GAME_TRADES_OTS, false));
+        SettingsOptionComposite randomizeInGameTradesIVs = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.RANDOMIZE_IN_GAME_TRADES_IVS, false));
+        SettingsOptionComposite randomizeInGameTradesItems = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.RANDOMIZE_IN_GAME_TRADES_ITEMS, false));
 
         // Field items
-        // choose radio button
-        // ban bad items
+        SettingsOptionComposite fieldItemsMod = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.FIELD_ITEMS_MOD, FieldItemsMod.UNCHANGED));
+        SettingsOptionComposite banBadRandomFieldItems = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.BAN_BAD_RANDOM_FIELD_ITEMS, false)
+            .addMatches(new PredicatePair(fieldItemsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
         
         // Misc tweaks
+        SettingsOptionComposite currentMiscTweaks = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.CURRENT_MISC_TWEAKS, 0)
+            .addValidInts(0, MiscTweak.getHighestBitValue()));
     }
 
-    public void randomSettings(Random random) {
+    public void randomSettings() {
         // List of keys that should not have a random option applied
         List<String> bannedKeys = Arrays.asList("raceMode");
+        Random random = new Random();
 
         settingsMap.forEachParent((option) -> {
             if (!bannedKeys.contains(option.getKey())) {
@@ -456,8 +479,8 @@ public class Settings {
                 settingsMap.getValue(SettingsConstants.CHANGE_IMPOSSIBLE_EVOLUTIONS),
                 settingsMap.getValue(SettingsConstants.UPDATE_MOVES),
                 settingsMap.getValue(SettingsConstants.UPDATE_MOVES_LEGACY),
-                randomizeTrainerNames,
-                randomizeTrainerClassNames,
+                settingsMap.getValue(SettingsConstants.RANDOMIZE_TRAINER_NAMES),
+                settingsMap.getValue(SettingsConstants.RANDOMIZE_TRAINER_CLASS_NAMES),
                 settingsMap.getValue(SettingsConstants.MAKE_EVOLUTIONS_EASIER)));
 
         // 1: pokemon base stats (see byte 36 for additional options)
@@ -522,69 +545,100 @@ public class Settings {
 
         // 13 trainer pokemon (see byte 40 for additional options)
         // changed 160
-        out.write(makeByteSelected(trainersUsePokemonOfSimilarStrength, trainersMod == TrainersMod.RANDOM,
-                rivalCarriesStarterThroughout, trainersMod == TrainersMod.TYPE_THEMED, trainersMatchTypingDistribution,
-                trainersMod == TrainersMod.UNCHANGED, trainersBlockLegendaries, trainersBlockEarlyWonderGuard));
+        out.write(makeByteSelected(
+                settingsMap.getValue(SettingsConstants.TRAINERS_USE_POKEMON_OF_SIMILAR_STRENGTH),
+                settingsMap.getValue(SettingsConstants.TRAINERS_MOD) == TrainersMod.RANDOM,
+                settingsMap.getValue(SettingsConstants.RIVAL_CARRIES_STARTER_THROUGHOUT),
+                settingsMap.getValue(SettingsConstants.TRAINERS_MOD) == TrainersMod.TYPE_THEMED,
+                settingsMap.getValue(SettingsConstants.TRAINERS_MATCH_TYPING_DISTRIBUTION),
+                settingsMap.getValue(SettingsConstants.TRAINERS_MOD) == TrainersMod.UNCHANGED,
+                settingsMap.getValue(SettingsConstants.TRAINERS_BLOCK_LEGENDARIES),
+                settingsMap.getValue(SettingsConstants.TRAINERS_BLOCK_EARLY_WONDER_GUARD)));
 
         // 14 trainer pokemon force evolutions
-        out.write((trainersForceFullyEvolved ? 0x80 : 0) | trainersForceFullyEvolvedLevel);
+        out.write(((boolean)settingsMap.getValue(SettingsConstants.TRAINERS_FORCE_FULLY_EVOLVED) ? 0x80 : 0) | (int)settingsMap.getValue(SettingsConstants.TRAINERS_FORCE_FULLY_EVOLVED_LEVEL));
 
         // 15 wild pokemon
-        out.write(makeByteSelected(wildPokemonRestrictionMod == WildPokemonRestrictionMod.CATCH_EM_ALL,
-                wildPokemonMod == WildPokemonMod.AREA_MAPPING,
-                wildPokemonRestrictionMod == WildPokemonRestrictionMod.NONE,
-                wildPokemonRestrictionMod == WildPokemonRestrictionMod.TYPE_THEME_AREAS,
-                wildPokemonMod == WildPokemonMod.GLOBAL_MAPPING, wildPokemonMod == WildPokemonMod.RANDOM,
-                wildPokemonMod == WildPokemonMod.UNCHANGED, useTimeBasedEncounters));
+        out.write(makeByteSelected(
+                settingsMap.getValue(SettingsConstants.WILD_POKEMON_RESTRICTION_MOD) == WildPokemonRestrictionMod.CATCH_EM_ALL,
+                settingsMap.getValue(SettingsConstants.WILD_POKEMON_MOD) == WildPokemonMod.AREA_MAPPING,
+                settingsMap.getValue(SettingsConstants.WILD_POKEMON_RESTRICTION_MOD) == WildPokemonRestrictionMod.NONE,
+                settingsMap.getValue(SettingsConstants.WILD_POKEMON_RESTRICTION_MOD) == WildPokemonRestrictionMod.TYPE_THEME_AREAS,
+                settingsMap.getValue(SettingsConstants.WILD_POKEMON_MOD) == WildPokemonMod.GLOBAL_MAPPING,
+                settingsMap.getValue(SettingsConstants.WILD_POKEMON_MOD) == WildPokemonMod.RANDOM,
+                settingsMap.getValue(SettingsConstants.WILD_POKEMON_MOD) == WildPokemonMod.UNCHANGED,
+                settingsMap.getValue(SettingsConstants.USE_TIME_BASED_ENCOUNTERS)));
 
-        // 16 wild pokemon 2
+        // 16 wild pokemon 2 (see byte 40 for additional options)
         // bugfix 161
-        out.write(makeByteSelected(useMinimumCatchRate, blockWildLegendaries,
-                wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_STRENGTH, randomizeWildPokemonHeldItems,
-                banBadRandomWildPokemonHeldItems, wildPokemonRestrictionMod == WildPokemonRestrictionMod.MATCH_TYPING_DISTRIBUTION)
-                | ((minimumCatchRateLevel - 1) << 6));
+        out.write(makeByteSelected(
+                settingsMap.getValue(SettingsConstants.USE_MINIMUM_CATCH_RATE),
+                settingsMap.getValue(SettingsConstants.BLOCK_WILD_LEGENDARIES),
+                settingsMap.getValue(SettingsConstants.WILD_POKEMON_RESTRICTION_MOD) == WildPokemonRestrictionMod.SIMILAR_STRENGTH,
+                settingsMap.getValue(SettingsConstants.RANDOMIZE_WILD_POKEMON_HELD_ITEMS),
+                settingsMap.getValue(SettingsConstants.BAN_BAD_RANDOM_WILD_POKEMON_HELD_ITEMS),
+                settingsMap.getValue(SettingsConstants.WILD_POKEMON_RESTRICTION_MOD) == WildPokemonRestrictionMod.MATCH_TYPING_DISTRIBUTION)
+                | (((int)settingsMap.getValue(SettingsConstants.MINIMUM_CATCH_RATE_LEVEL) - 1) << 6));
 
         // 17 static pokemon
-        out.write(makeByteSelected(staticPokemonMod == StaticPokemonMod.UNCHANGED,
-                staticPokemonMod == StaticPokemonMod.RANDOM_MATCHING,
-                staticPokemonMod == StaticPokemonMod.COMPLETELY_RANDOM));
+        out.write(makeByteSelected(
+                settingsMap.getValue(SettingsConstants.STATIC_POKEMON_MOD) == StaticPokemonMod.UNCHANGED,
+                settingsMap.getValue(SettingsConstants.STATIC_POKEMON_MOD) == StaticPokemonMod.RANDOM_MATCHING,
+                settingsMap.getValue(SettingsConstants.STATIC_POKEMON_MOD) == StaticPokemonMod.COMPLETELY_RANDOM));
 
         // 18 tm randomization
         // new stuff 162
-        out.write(makeByteSelected(tmsHmsCompatibilityMod == TMsHMsCompatibilityMod.COMPLETELY_RANDOM,
-                tmsHmsCompatibilityMod == TMsHMsCompatibilityMod.RANDOM_PREFER_TYPE,
-                tmsHmsCompatibilityMod == TMsHMsCompatibilityMod.UNCHANGED, tmsMod == TMsMod.RANDOM,
-                tmsMod == TMsMod.UNCHANGED, tmLevelUpMoveSanity, keepFieldMoveTMs,
-                tmsHmsCompatibilityMod == TMsHMsCompatibilityMod.FULL));
+        out.write(makeByteSelected(
+                settingsMap.getValue(SettingsConstants.TMS_HMS_COMPATIBILITY_MOD) == TMsHMsCompatibilityMod.COMPLETELY_RANDOM,
+                settingsMap.getValue(SettingsConstants.TMS_HMS_COMPATIBILITY_MOD) == TMsHMsCompatibilityMod.RANDOM_PREFER_TYPE,
+                settingsMap.getValue(SettingsConstants.TMS_HMS_COMPATIBILITY_MOD) == TMsHMsCompatibilityMod.UNCHANGED,
+                settingsMap.getValue(SettingsConstants.TMS_MOD) == TMsMod.RANDOM,
+                settingsMap.getValue(SettingsConstants.TMS_MOD) == TMsMod.UNCHANGED,
+                settingsMap.getValue(SettingsConstants.TM_LEVEL_UP_MOVE_SANITY),
+                settingsMap.getValue(SettingsConstants.KEEP_FIELD_MOVE_TMS),
+                settingsMap.getValue(SettingsConstants.TMS_HMS_COMPATIBILITY_MOD) == TMsHMsCompatibilityMod.FULL));
 
         // 19 tms part 2
         // new in 170
-        out.write(makeByteSelected(fullHMCompat));
+        out.write(makeByteSelected(
+            (Boolean)settingsMap.getValue(SettingsConstants.FULL_HM_COMPAT)));
 
         // 20 tms good damaging
-        out.write((tmsForceGoodDamaging ? 0x80 : 0) | tmsGoodDamagingPercent);
+        out.write(((boolean)settingsMap.getValue(SettingsConstants.TMS_FORCE_GOOD_DAMAGING) ? 0x80 : 0) | 
+            (int)settingsMap.getValue(SettingsConstants.TMS_GOOD_DAMAGING_PERCENT));
 
         // 21 move tutor randomization
-        out.write(makeByteSelected(moveTutorsCompatibilityMod == MoveTutorsCompatibilityMod.COMPLETELY_RANDOM,
-                moveTutorsCompatibilityMod == MoveTutorsCompatibilityMod.RANDOM_PREFER_TYPE,
-                moveTutorsCompatibilityMod == MoveTutorsCompatibilityMod.UNCHANGED,
-                moveTutorMovesMod == MoveTutorMovesMod.RANDOM, moveTutorMovesMod == MoveTutorMovesMod.UNCHANGED,
-                tutorLevelUpMoveSanity, keepFieldMoveTutors,
-                moveTutorsCompatibilityMod == MoveTutorsCompatibilityMod.FULL));
+        out.write(makeByteSelected(
+                settingsMap.getValue(SettingsConstants.MOVE_TUTORS_COMPATIBILITY_MOD) == MoveTutorsCompatibilityMod.COMPLETELY_RANDOM,
+                settingsMap.getValue(SettingsConstants.MOVE_TUTORS_COMPATIBILITY_MOD) == MoveTutorsCompatibilityMod.RANDOM_PREFER_TYPE,
+                settingsMap.getValue(SettingsConstants.MOVE_TUTORS_COMPATIBILITY_MOD) == MoveTutorsCompatibilityMod.UNCHANGED,
+                settingsMap.getValue(SettingsConstants.MOVE_TUTOR_MOVES_MOD) == MoveTutorMovesMod.RANDOM,
+                settingsMap.getValue(SettingsConstants.MOVE_TUTOR_MOVES_MOD) == MoveTutorMovesMod.UNCHANGED,
+                settingsMap.getValue(SettingsConstants.TUTOR_LEVEL_UP_MOVE_SANITY),
+                settingsMap.getValue(SettingsConstants.KEEP_FIELD_MOVE_TUTORS),
+                settingsMap.getValue(SettingsConstants.MOVE_TUTORS_COMPATIBILITY_MOD) == MoveTutorsCompatibilityMod.FULL));
 
         // 22 tutors good damaging
-        out.write((tutorsForceGoodDamaging ? 0x80 : 0) | tutorsGoodDamagingPercent);
+        out.write(((boolean)settingsMap.getValue(SettingsConstants.TUTORS_FORCE_GOOD_DAMAGING) ? 0x80 : 0) | 
+            (int)settingsMap.getValue(SettingsConstants.TUTORS_GOOD_DAMAGING_PERCENT));
 
         // new 150
         // 23 in game trades
-        out.write(makeByteSelected(inGameTradesMod == InGameTradesMod.RANDOMIZE_GIVEN_AND_REQUESTED,
-                inGameTradesMod == InGameTradesMod.RANDOMIZE_GIVEN, randomizeInGameTradesItems,
-                randomizeInGameTradesIVs, randomizeInGameTradesNicknames, randomizeInGameTradesOTs,
-                inGameTradesMod == InGameTradesMod.UNCHANGED));
+        out.write(makeByteSelected(
+                settingsMap.getValue(SettingsConstants.IN_GAME_TRADES_MOD) == InGameTradesMod.RANDOMIZE_GIVEN_AND_REQUESTED,
+                settingsMap.getValue(SettingsConstants.IN_GAME_TRADES_MOD) == InGameTradesMod.RANDOMIZE_GIVEN,
+                settingsMap.getValue(SettingsConstants.RANDOMIZE_IN_GAME_TRADES_ITEMS),
+                settingsMap.getValue(SettingsConstants.RANDOMIZE_IN_GAME_TRADES_IVS),
+                settingsMap.getValue(SettingsConstants.RANDOMIZE_IN_GAME_TRADES_NICKNAMES),
+                settingsMap.getValue(SettingsConstants.RANDOMIZE_IN_GAME_TRADES_OTS),
+                settingsMap.getValue(SettingsConstants.IN_GAME_TRADES_MOD) == InGameTradesMod.UNCHANGED));
 
         // 24 field items
-        out.write(makeByteSelected(fieldItemsMod == FieldItemsMod.RANDOM, fieldItemsMod == FieldItemsMod.SHUFFLE,
-                fieldItemsMod == FieldItemsMod.UNCHANGED, banBadRandomFieldItems));
+        out.write(makeByteSelected(
+                settingsMap.getValue(SettingsConstants.FIELD_ITEMS_MOD) == FieldItemsMod.RANDOM,
+                settingsMap.getValue(SettingsConstants.FIELD_ITEMS_MOD) == FieldItemsMod.SHUFFLE,
+                settingsMap.getValue(SettingsConstants.FIELD_ITEMS_MOD) == FieldItemsMod.UNCHANGED,
+                settingsMap.getValue(SettingsConstants.BAN_BAD_RANDOM_FIELD_ITEMS)));
 
         // new 170
         // 25 move randomizers
@@ -619,13 +673,13 @@ public class Settings {
 
         // @ 31 misc tweaks
         try {
-            writeFullInt(out, currentMiscTweaks);
+            writeFullInt(out, settingsMap.getValue(SettingsConstants.CURRENT_MISC_TWEAKS));
         } catch (IOException e) {
 
         }
 
         // @ 35 trainer pokemon level modifier
-        out.write((trainersLevelModified ? 0x80 : 0) | (trainersLevelModifier+50));
+        out.write(((boolean)settingsMap.getValue(SettingsConstants.TRAINERS_LEVEL_MODIFIED) ? 0x80 : 0) | ((int)settingsMap.getValue(SettingsConstants.TRAINERS_LEVEL_MODIFIER)+50));
 
         // @ 36 Base Statistics and Types Overflow
         out.write(makeByteSelected(
@@ -646,11 +700,15 @@ public class Settings {
         write2ByteInt(out, (int)settingsMap.getValue(SettingsConstants.STARTERS_BST_MODIFIER) - 1);
         
         // @ 40 Trainer and Wild Pokemon Overflow
-        out.write(makeByteSelected(rivalCarriesTeamThroughout, allowLowLevelEvolvedTypes, trainersRandomHeldItem,
-            gymTypeTheme));
+        out.write(makeByteSelected(
+            settingsMap.getValue(SettingsConstants.RIVAL_CARRIES_TEAM_THROUGHOUT),
+            settingsMap.getValue(SettingsConstants.ALLOW_LOW_LEVEL_EVOLVED_TYPES),
+            settingsMap.getValue(SettingsConstants.TRAINERS_RANDOM_HELD_ITEM),
+            settingsMap.getValue(SettingsConstants.GYM_TYPE_THEME)));
 
         // @ 41 Evolution overflow
-        out.write(makeByteSelected(settingsMap.getValue(SettingsConstants.EVOS_CHANGE_METHOD)));
+        out.write(makeByteSelected(
+            (Boolean)settingsMap.getValue(SettingsConstants.EVOS_CHANGE_METHOD)));
 
         // @ 42 Rom Title Name (update LENGTH_OF_SETTINGS_DATA if this changes)
         try {
@@ -961,10 +1019,10 @@ public class Settings {
         }
 
         // misc tweaks
-        int oldMiscTweaks = this.currentMiscTweaks;
-        this.currentMiscTweaks &= rh.miscTweaksAvailable();
+        int oldMiscTweaks = settingsMap.getValue(SettingsConstants.CURRENT_MISC_TWEAKS);
+        settingsMap.putValue(SettingsConstants.CURRENT_MISC_TWEAKS, oldMiscTweaks & rh.miscTweaksAvailable());
 
-        if (oldMiscTweaks != this.currentMiscTweaks) {
+        if (oldMiscTweaks != (int)settingsMap.getValue(SettingsConstants.CURRENT_MISC_TWEAKS)) {
             feedback.setRemovedCodeTweaks(true);
         }
 
@@ -1507,6 +1565,460 @@ public class Settings {
         return this;
     }
 
+    public TrainersMod getTrainersMod() {
+        return settingsMap.getValue(SettingsConstants.TRAINERS_MOD);
+    }
+
+    public Settings setTrainersMod(TrainersMod trainersMod) {
+        settingsMap.putValue(SettingsConstants.TRAINERS_MOD, trainersMod);
+        return this;
+    }
+
+    public Settings setTrainersMod(boolean... bools) {
+        return setTrainersMod(getEnum(TrainersMod.class, bools));
+    }
+
+    public boolean isRivalCarriesStarterThroughout() {
+        return settingsMap.getValue(SettingsConstants.RIVAL_CARRIES_STARTER_THROUGHOUT);
+    }
+
+    public Settings setRivalCarriesStarterThroughout(boolean rivalCarriesStarterThroughout) {
+        settingsMap.putValue(SettingsConstants.RIVAL_CARRIES_STARTER_THROUGHOUT, rivalCarriesStarterThroughout);
+        return this;
+    }
+
+    public boolean isRivalCarriesTeamThroughout() {
+        return settingsMap.getValue(SettingsConstants.RIVAL_CARRIES_TEAM_THROUGHOUT);
+    }
+
+    public Settings setRivalCarriesTeamThroughout(boolean rivalCarriesTeamThroughout) {
+        settingsMap.putValue(SettingsConstants.RIVAL_CARRIES_TEAM_THROUGHOUT, rivalCarriesTeamThroughout);
+        return this;
+    }
+
+    public boolean isTrainersUsePokemonOfSimilarStrength() {
+        return settingsMap.getValue(SettingsConstants.TRAINERS_USE_POKEMON_OF_SIMILAR_STRENGTH);
+    }
+
+    public Settings setTrainersUsePokemonOfSimilarStrength(boolean trainersUsePokemonOfSimilarStrength) {
+        settingsMap.putValue(SettingsConstants.TRAINERS_USE_POKEMON_OF_SIMILAR_STRENGTH, trainersUsePokemonOfSimilarStrength);
+        return this;
+    }
+
+    public boolean isTrainersMatchTypingDistribution() {
+        return settingsMap.getValue(SettingsConstants.TRAINERS_MATCH_TYPING_DISTRIBUTION);
+    }
+
+    public Settings setTrainersMatchTypingDistribution(boolean trainersMatchTypingDistribution) {
+        settingsMap.putValue(SettingsConstants.TRAINERS_MATCH_TYPING_DISTRIBUTION, trainersMatchTypingDistribution);
+        return this;
+    }
+
+    public boolean isTrainersBlockLegendaries() {
+        return settingsMap.getValue(SettingsConstants.TRAINERS_BLOCK_LEGENDARIES);
+    }
+
+    public Settings setTrainersBlockLegendaries(boolean trainersBlockLegendaries) {
+        settingsMap.putValue(SettingsConstants.TRAINERS_BLOCK_LEGENDARIES, trainersBlockLegendaries);
+        return this;
+    }
+
+    public boolean isTrainersBlockEarlyWonderGuard() {
+        return settingsMap.getValue(SettingsConstants.TRAINERS_BLOCK_EARLY_WONDER_GUARD);
+    }
+
+    public Settings setTrainersBlockEarlyWonderGuard(boolean trainersBlockEarlyWonderGuard) {
+        settingsMap.putValue(SettingsConstants.TRAINERS_BLOCK_EARLY_WONDER_GUARD, trainersBlockEarlyWonderGuard);
+        return this;
+    }
+
+    public boolean isGymTypeTheme() {
+        return settingsMap.getValue(SettingsConstants.GYM_TYPE_THEME);
+    }
+
+    public Settings setGymTypeTheme(boolean gymTypeTheme) {
+        settingsMap.putValue(SettingsConstants.GYM_TYPE_THEME, gymTypeTheme);
+        return this;
+    }
+
+    public boolean isTrainersRandomHeldItem() {
+        return settingsMap.getValue(SettingsConstants.TRAINERS_RANDOM_HELD_ITEM);
+    }
+
+    public Settings setTrainersRandomHeldItem(boolean trainersRandomHeldItem) {
+        settingsMap.putValue(SettingsConstants.TRAINERS_RANDOM_HELD_ITEM, trainersRandomHeldItem);
+        return this;
+    }
+
+    public boolean isRandomizeTrainerNames() {
+        return settingsMap.getValue(SettingsConstants.RANDOMIZE_TRAINER_NAMES);
+    }
+
+    public Settings setRandomizeTrainerNames(boolean randomizeTrainerNames) {
+        settingsMap.putValue(SettingsConstants.RANDOMIZE_TRAINER_NAMES, randomizeTrainerNames);
+        return this;
+    }
+
+    public boolean isRandomizeTrainerClassNames() {
+        return settingsMap.getValue(SettingsConstants.RANDOMIZE_TRAINER_CLASS_NAMES);
+    }
+
+    public Settings setRandomizeTrainerClassNames(boolean randomizeTrainerClassNames) {
+        settingsMap.putValue(SettingsConstants.RANDOMIZE_TRAINER_NAMES, randomizeTrainerClassNames);
+        return this;
+    }
+
+    public boolean isTrainersForceFullyEvolved() {
+        return settingsMap.getValue(SettingsConstants.TRAINERS_FORCE_FULLY_EVOLVED);
+    }
+
+    public Settings setTrainersForceFullyEvolved(boolean trainersForceFullyEvolved) {
+        settingsMap.putValue(SettingsConstants.TRAINERS_FORCE_FULLY_EVOLVED, trainersForceFullyEvolved);
+        return this;
+    }
+
+    public int getTrainersForceFullyEvolvedLevel() {
+        return settingsMap.getValue(SettingsConstants.TRAINERS_FORCE_FULLY_EVOLVED_LEVEL);
+    }
+
+    public Settings setTrainersForceFullyEvolvedLevel(int trainersForceFullyEvolvedLevel) {
+        settingsMap.putValue(SettingsConstants.TRAINERS_FORCE_FULLY_EVOLVED_LEVEL, trainersForceFullyEvolvedLevel);
+        return this;
+    }
+
+    public boolean isTrainersLevelModified() {
+        return settingsMap.getValue(SettingsConstants.TRAINERS_LEVEL_MODIFIED);
+    }
+
+    public Settings setTrainersLevelModified(boolean trainersLevelModified) {
+        settingsMap.putValue(SettingsConstants.TRAINERS_LEVEL_MODIFIED, trainersLevelModified);
+        return this;
+    }
+
+    public int getTrainersLevelModifier() {
+        return settingsMap.getValue(SettingsConstants.TRAINERS_LEVEL_MODIFIER);
+    }
+
+    public Settings setTrainersLevelModifier(int trainersLevelModifier) {
+        settingsMap.putValue(SettingsConstants.TRAINERS_LEVEL_MODIFIER, trainersLevelModifier);
+        return this;
+    }
+
+    public WildPokemonMod getWildPokemonMod() {
+        return settingsMap.getValue(SettingsConstants.WILD_POKEMON_MOD);
+    }
+
+    public Settings setWildPokemonMod(WildPokemonMod wildPokemonMod) {
+        settingsMap.putValue(SettingsConstants.WILD_POKEMON_MOD, wildPokemonMod);
+        return this;
+    }
+
+    public Settings setWildPokemonMod(boolean... bools) {
+        return setWildPokemonMod(getEnum(WildPokemonMod.class, bools));
+    }
+
+    public WildPokemonRestrictionMod getWildPokemonRestrictionMod() {
+        return settingsMap.getValue(SettingsConstants.WILD_POKEMON_RESTRICTION_MOD);
+    }
+
+    public Settings setWildPokemonRestrictionMod(WildPokemonRestrictionMod wildPokemonRestrictionMod) {
+        settingsMap.putValue(SettingsConstants.WILD_POKEMON_RESTRICTION_MOD, wildPokemonRestrictionMod);
+        return this;
+    }
+
+    public Settings setWildPokemonRestrictionMod(boolean... bools) {
+        return setWildPokemonRestrictionMod(getEnum(WildPokemonRestrictionMod.class, bools));
+    }
+
+    public boolean isUseTimeBasedEncounters() {
+        return settingsMap.getValue(SettingsConstants.USE_TIME_BASED_ENCOUNTERS);
+    }
+
+    public Settings setUseTimeBasedEncounters(boolean useTimeBasedEncounters) {
+        settingsMap.putValue(SettingsConstants.USE_TIME_BASED_ENCOUNTERS, useTimeBasedEncounters);
+        return this;
+    }
+
+    public boolean isBlockWildLegendaries() {
+        return settingsMap.getValue(SettingsConstants.BLOCK_WILD_LEGENDARIES);
+    }
+
+    public Settings setBlockWildLegendaries(boolean blockWildLegendaries) {
+        settingsMap.putValue(SettingsConstants.BLOCK_WILD_LEGENDARIES, blockWildLegendaries);
+        return this;
+    }
+
+    public boolean isUseMinimumCatchRate() {
+        return settingsMap.getValue(SettingsConstants.USE_MINIMUM_CATCH_RATE);
+    }
+
+    public Settings setUseMinimumCatchRate(boolean useMinimumCatchRate) {
+        settingsMap.putValue(SettingsConstants.USE_MINIMUM_CATCH_RATE, useMinimumCatchRate);
+        return this;
+    }
+
+    public int getMinimumCatchRateLevel() {
+        return settingsMap.getValue(SettingsConstants.MINIMUM_CATCH_RATE_LEVEL);
+    }
+
+    public Settings setMinimumCatchRateLevel(int minimumCatchRateLevel) {
+        settingsMap.putValue(SettingsConstants.MINIMUM_CATCH_RATE_LEVEL, minimumCatchRateLevel);
+        return this;
+    }
+
+    public boolean isRandomizeWildPokemonHeldItems() {
+        return settingsMap.getValue(SettingsConstants.RANDOMIZE_WILD_POKEMON_HELD_ITEMS);
+    }
+
+    public Settings setRandomizeWildPokemonHeldItems(boolean randomizeWildPokemonHeldItems) {
+        settingsMap.putValue(SettingsConstants.RANDOMIZE_WILD_POKEMON_HELD_ITEMS, randomizeWildPokemonHeldItems);
+        return this;
+    }
+
+    public boolean isBanBadRandomWildPokemonHeldItems() {
+        return settingsMap.getValue(SettingsConstants.BAN_BAD_RANDOM_WILD_POKEMON_HELD_ITEMS);
+    }
+
+    public Settings setBanBadRandomWildPokemonHeldItems(boolean banBadRandomWildPokemonHeldItems) {
+        settingsMap.putValue(SettingsConstants.BAN_BAD_RANDOM_WILD_POKEMON_HELD_ITEMS, banBadRandomWildPokemonHeldItems);
+        return this;
+    }
+
+    public boolean isAllowLowLevelEvolvedTypes() {
+        return settingsMap.getValue(SettingsConstants.ALLOW_LOW_LEVEL_EVOLVED_TYPES);
+    }
+
+    public Settings setAllowLowLevelEvolvedTypes(boolean allowLowLevelEvolvedTypes) {
+        settingsMap.putValue(SettingsConstants.ALLOW_LOW_LEVEL_EVOLVED_TYPES, allowLowLevelEvolvedTypes);
+        return this;
+    }
+
+    public StaticPokemonMod getStaticPokemonMod() {
+        return settingsMap.getValue(SettingsConstants.STATIC_POKEMON_MOD);
+    }
+
+    public Settings setStaticPokemonMod(StaticPokemonMod staticPokemonMod) {
+        settingsMap.putValue(SettingsConstants.STATIC_POKEMON_MOD, staticPokemonMod);
+        return this;
+    }
+
+    public Settings setStaticPokemonMod(boolean... bools) {
+        return setStaticPokemonMod(getEnum(StaticPokemonMod.class, bools));
+    }
+
+    public TMsMod getTmsMod() {
+        return settingsMap.getValue(SettingsConstants.TMS_MOD);
+    }
+
+    public Settings setTmsMod(TMsMod tmsMod) {
+        settingsMap.putValue(SettingsConstants.TMS_MOD, tmsMod);
+        return this;
+    }
+
+    public Settings setTmsMod(boolean... bools) {
+        return setTmsMod(getEnum(TMsMod.class, bools));
+    }
+
+    public boolean isTmLevelUpMoveSanity() {
+        return settingsMap.getValue(SettingsConstants.TM_LEVEL_UP_MOVE_SANITY);
+    }
+
+    public Settings setTmLevelUpMoveSanity(boolean tmLevelUpMoveSanity) {
+        settingsMap.putValue(SettingsConstants.TM_LEVEL_UP_MOVE_SANITY, tmLevelUpMoveSanity);
+        return this;
+    }
+
+    public boolean isKeepFieldMoveTMs() {
+        return settingsMap.getValue(SettingsConstants.KEEP_FIELD_MOVE_TMS);
+    }
+
+    public Settings setKeepFieldMoveTMs(boolean keepFieldMoveTMs) {
+        settingsMap.putValue(SettingsConstants.KEEP_FIELD_MOVE_TMS, keepFieldMoveTMs);
+        return this;
+    }
+
+    public boolean isFullHMCompat() {
+        return settingsMap.getValue(SettingsConstants.FULL_HM_COMPAT);
+    }
+
+    public Settings setFullHMCompat(boolean fullHMCompat) {
+        settingsMap.putValue(SettingsConstants.FULL_HM_COMPAT, fullHMCompat);
+        return this;
+    }
+
+    public boolean isTmsForceGoodDamaging() {
+        return settingsMap.getValue(SettingsConstants.TMS_FORCE_GOOD_DAMAGING);
+    }
+
+    public Settings setTmsForceGoodDamaging(boolean tmsForceGoodDamaging) {
+        settingsMap.putValue(SettingsConstants.TMS_FORCE_GOOD_DAMAGING, tmsForceGoodDamaging);
+        return this;
+    }
+
+    public int getTmsGoodDamagingPercent() {
+        return settingsMap.getValue(SettingsConstants.TMS_GOOD_DAMAGING_PERCENT);
+    }
+
+    public Settings setTmsGoodDamagingPercent(int tmsGoodDamagingPercent) {
+        settingsMap.putValue(SettingsConstants.TMS_GOOD_DAMAGING_PERCENT, tmsGoodDamagingPercent);
+        return this;
+    }
+
+    public TMsHMsCompatibilityMod getTmsHmsCompatibilityMod() {
+        return settingsMap.getValue(SettingsConstants.TMS_HMS_COMPATIBILITY_MOD);
+    }
+
+    public Settings setTmsHmsCompatibilityMod(TMsHMsCompatibilityMod tmsHmsCompatibilityMod) {
+        settingsMap.putValue(SettingsConstants.TMS_HMS_COMPATIBILITY_MOD, tmsHmsCompatibilityMod);
+        return this;
+    }
+
+    public Settings setTmsHmsCompatibilityMod(boolean... bools) {
+        return setTmsHmsCompatibilityMod(getEnum(TMsHMsCompatibilityMod.class, bools));
+    }
+
+    public MoveTutorMovesMod getMoveTutorMovesMod() {
+        return settingsMap.getValue(SettingsConstants.MOVE_TUTOR_MOVES_MOD);
+    }
+
+    public Settings setMoveTutorMovesMod(MoveTutorMovesMod moveTutorMovesMod) {
+        settingsMap.putValue(SettingsConstants.MOVE_TUTOR_MOVES_MOD, moveTutorMovesMod);
+        return this;
+    }
+
+    public Settings setMoveTutorMovesMod(boolean... bools) {
+        return setMoveTutorMovesMod(getEnum(MoveTutorMovesMod.class, bools));
+    }
+
+    public boolean isTutorLevelUpMoveSanity() {
+        return settingsMap.getValue(SettingsConstants.TUTOR_LEVEL_UP_MOVE_SANITY);
+    }
+
+    public Settings setTutorLevelUpMoveSanity(boolean tutorLevelUpMoveSanity) {
+        settingsMap.putValue(SettingsConstants.TUTOR_LEVEL_UP_MOVE_SANITY, tutorLevelUpMoveSanity);
+        return this;
+    }
+
+    public boolean isKeepFieldMoveTutors() {
+        return settingsMap.getValue(SettingsConstants.KEEP_FIELD_MOVE_TUTORS);
+    }
+
+    public Settings setKeepFieldMoveTutors(boolean keepFieldMoveTutors) {
+        settingsMap.putValue(SettingsConstants.KEEP_FIELD_MOVE_TUTORS, keepFieldMoveTutors);
+        return this;
+    }
+
+    public boolean isTutorsForceGoodDamaging() {
+        return settingsMap.getValue(SettingsConstants.TUTORS_FORCE_GOOD_DAMAGING);
+    }
+
+    public Settings setTutorsForceGoodDamaging(boolean tutorsForceGoodDamaging) {
+        settingsMap.putValue(SettingsConstants.TUTORS_FORCE_GOOD_DAMAGING, tutorsForceGoodDamaging);
+        return this;
+    }
+
+    public int getTutorsGoodDamagingPercent() {
+        return settingsMap.getValue(SettingsConstants.TUTORS_GOOD_DAMAGING_PERCENT);
+    }
+
+    public Settings setTutorsGoodDamagingPercent(int tutorsGoodDamagingPercent) {
+        settingsMap.putValue(SettingsConstants.TUTORS_GOOD_DAMAGING_PERCENT, tutorsGoodDamagingPercent);
+        return this;
+    }
+
+    public MoveTutorsCompatibilityMod getMoveTutorsCompatibilityMod() {
+        return settingsMap.getValue(SettingsConstants.MOVE_TUTORS_COMPATIBILITY_MOD);
+    }
+
+    public Settings setMoveTutorsCompatibilityMod(MoveTutorsCompatibilityMod moveTutorsCompatibilityMod) {
+        settingsMap.putValue(SettingsConstants.MOVE_TUTORS_COMPATIBILITY_MOD, moveTutorsCompatibilityMod);
+        return this;
+    }
+
+    public Settings setMoveTutorsCompatibilityMod(boolean... bools) {
+        return setMoveTutorsCompatibilityMod(getEnum(MoveTutorsCompatibilityMod.class, bools));
+    }
+
+    public InGameTradesMod getInGameTradesMod() {
+        return settingsMap.getValue(SettingsConstants.IN_GAME_TRADES_MOD);
+    }
+
+    public Settings setInGameTradesMod(InGameTradesMod inGameTradesMod) {
+        settingsMap.putValue(SettingsConstants.IN_GAME_TRADES_MOD, inGameTradesMod);
+        return this;
+    }
+
+    public Settings setInGameTradesMod(boolean... bools) {
+        return setInGameTradesMod(getEnum(InGameTradesMod.class, bools));
+    }
+
+    public boolean isRandomizeInGameTradesNicknames() {
+        return settingsMap.getValue(SettingsConstants.RANDOMIZE_IN_GAME_TRADES_NICKNAMES);
+    }
+
+    public Settings setRandomizeInGameTradesNicknames(boolean randomizeInGameTradesNicknames) {
+        settingsMap.putValue(SettingsConstants.RANDOMIZE_IN_GAME_TRADES_NICKNAMES, randomizeInGameTradesNicknames);
+        return this;
+    }
+
+    public boolean isRandomizeInGameTradesOTs() {
+        return settingsMap.getValue(SettingsConstants.RANDOMIZE_IN_GAME_TRADES_OTS);
+    }
+
+    public Settings setRandomizeInGameTradesOTs(boolean randomizeInGameTradesOTs) {
+        settingsMap.putValue(SettingsConstants.RANDOMIZE_IN_GAME_TRADES_OTS, randomizeInGameTradesOTs);
+        return this;
+    }
+
+    public boolean isRandomizeInGameTradesIVs() {
+        return settingsMap.getValue(SettingsConstants.RANDOMIZE_IN_GAME_TRADES_IVS);
+    }
+
+    public Settings setRandomizeInGameTradesIVs(boolean randomizeInGameTradesIVs) {
+        settingsMap.putValue(SettingsConstants.RANDOMIZE_IN_GAME_TRADES_IVS, randomizeInGameTradesIVs);
+        return this;
+    }
+
+    public boolean isRandomizeInGameTradesItems() {
+        return settingsMap.getValue(SettingsConstants.RANDOMIZE_IN_GAME_TRADES_ITEMS);
+    }
+
+    public Settings setRandomizeInGameTradesItems(boolean randomizeInGameTradesItems) {
+        settingsMap.putValue(SettingsConstants.RANDOMIZE_IN_GAME_TRADES_ITEMS, randomizeInGameTradesItems);
+        return this;
+    }
+
+    public FieldItemsMod getFieldItemsMod() {
+        return settingsMap.getValue(SettingsConstants.FIELD_ITEMS_MOD);
+    }
+
+    public Settings setFieldItemsMod(FieldItemsMod fieldItemsMod) {
+        settingsMap.putValue(SettingsConstants.FIELD_ITEMS_MOD, fieldItemsMod);
+        return this;
+    }
+
+    public Settings setFieldItemsMod(boolean... bools) {
+        return setFieldItemsMod(getEnum(FieldItemsMod.class, bools));
+    }
+
+    public boolean isBanBadRandomFieldItems() {
+        return settingsMap.getValue(SettingsConstants.BAN_BAD_RANDOM_FIELD_ITEMS);
+    }
+
+    public Settings setBanBadRandomFieldItems(boolean banBadRandomFieldItems) {
+        settingsMap.putValue(SettingsConstants.BAN_BAD_RANDOM_FIELD_ITEMS, banBadRandomFieldItems);
+        return this;
+    }
+
+    public int getCurrentMiscTweaks() {
+        return settingsMap.getValue(SettingsConstants.CURRENT_MISC_TWEAKS);
+    }
+
+    public Settings setCurrentMiscTweaks(int currentMiscTweaks) {
+        settingsMap.putValue(SettingsConstants.CURRENT_MISC_TWEAKS, currentMiscTweaks);
+        return this;
+    }
+
     public CustomNamesSet getCustomNames() {
         return customNames;
     }
@@ -1531,467 +2043,6 @@ public class Settings {
 
     public Settings setUpdatedFromOldVersion(boolean updatedFromOldVersion) {
         this.updatedFromOldVersion = updatedFromOldVersion;
-        return this;
-    }
-
-
-
-    public int getCurrentMiscTweaks() {
-        return currentMiscTweaks;
-    }
-
-    public Settings setCurrentMiscTweaks(int currentMiscTweaks) {
-        this.currentMiscTweaks = currentMiscTweaks;
-        return this;
-    }
-
-
-
-
-
-
-    public TrainersMod getTrainersMod() {
-        return trainersMod;
-    }
-
-    public Settings setTrainersMod(TrainersMod trainersMod) {
-        this.trainersMod = trainersMod;
-        return this;
-    }
-
-    public Settings setTrainersMod(boolean... bools) {
-        return setTrainersMod(getEnum(TrainersMod.class, bools));
-    }
-
-    public boolean isRivalCarriesStarterThroughout() {
-        return rivalCarriesStarterThroughout;
-    }
-
-    public Settings setRivalCarriesStarterThroughout(boolean rivalCarriesStarterThroughout) {
-        this.rivalCarriesStarterThroughout = rivalCarriesStarterThroughout;
-        return this;
-    }
-
-    public boolean isRivalCarriesTeamThroughout() {
-        return rivalCarriesTeamThroughout;
-    }
-
-    public Settings setRivalCarriesTeamThroughout(boolean rivalCarriesTeamThroughout) {
-        this.rivalCarriesTeamThroughout = rivalCarriesTeamThroughout;
-        return this;
-    }
-
-    public boolean isTrainersUsePokemonOfSimilarStrength() {
-        return trainersUsePokemonOfSimilarStrength;
-    }
-
-    public Settings setTrainersUsePokemonOfSimilarStrength(boolean trainersUsePokemonOfSimilarStrength) {
-        this.trainersUsePokemonOfSimilarStrength = trainersUsePokemonOfSimilarStrength;
-        return this;
-    }
-
-    public boolean isTrainersMatchTypingDistribution() {
-        return trainersMatchTypingDistribution;
-    }
-
-    public Settings setTrainersMatchTypingDistribution(boolean trainersMatchTypingDistribution) {
-        this.trainersMatchTypingDistribution = trainersMatchTypingDistribution;
-        return this;
-    }
-
-    public boolean isTrainersBlockLegendaries() {
-        return trainersBlockLegendaries;
-    }
-
-    public Settings setTrainersBlockLegendaries(boolean trainersBlockLegendaries) {
-        this.trainersBlockLegendaries = trainersBlockLegendaries;
-        return this;
-    }
-
-    public boolean isTrainersBlockEarlyWonderGuard() {
-        return trainersBlockEarlyWonderGuard;
-    }
-
-    public Settings setTrainersBlockEarlyWonderGuard(boolean trainersBlockEarlyWonderGuard) {
-        this.trainersBlockEarlyWonderGuard = trainersBlockEarlyWonderGuard;
-        return this;
-    }
-
-    public boolean isRandomizeTrainerNames() {
-        return randomizeTrainerNames;
-    }
-
-    public Settings setRandomizeTrainerNames(boolean randomizeTrainerNames) {
-        this.randomizeTrainerNames = randomizeTrainerNames;
-        return this;
-    }
-
-    public boolean isRandomizeTrainerClassNames() {
-        return randomizeTrainerClassNames;
-    }
-
-    public Settings setRandomizeTrainerClassNames(boolean randomizeTrainerClassNames) {
-        this.randomizeTrainerClassNames = randomizeTrainerClassNames;
-        return this;
-    }
-
-    public boolean isTrainersForceFullyEvolved() {
-        return trainersForceFullyEvolved;
-    }
-
-    public Settings setTrainersForceFullyEvolved(boolean trainersForceFullyEvolved) {
-        this.trainersForceFullyEvolved = trainersForceFullyEvolved;
-        return this;
-    }
-
-    public int getTrainersForceFullyEvolvedLevel() {
-        return trainersForceFullyEvolvedLevel;
-    }
-
-    public Settings setTrainersForceFullyEvolvedLevel(int trainersForceFullyEvolvedLevel) {
-        this.trainersForceFullyEvolvedLevel = trainersForceFullyEvolvedLevel;
-        return this;
-    }
-
-    public boolean isTrainersLevelModified() {
-        return trainersLevelModified;
-    }
-
-    public Settings setTrainersLevelModified(boolean trainersLevelModified) {
-        this.trainersLevelModified = trainersLevelModified;
-        return this;
-    }
-
-    public int getTrainersLevelModifier() {
-        return trainersLevelModifier;
-    }
-
-    public Settings setTrainersLevelModifier(int trainersLevelModifier) {
-        this.trainersLevelModifier = trainersLevelModifier;
-        return this;
-    }
-
-    public boolean isTrainersRandomHeldItem() {
-        return trainersRandomHeldItem;
-    }
-
-    public Settings setTrainersRandomHeldItem(boolean trainersRandomHeldItem) {
-        this.trainersRandomHeldItem = trainersRandomHeldItem;
-        return this;
-    }
-
-    public boolean isGymTypeTheme() {
-        return gymTypeTheme;
-    }
-
-    public Settings setGymTypeTheme(boolean gymTypeTheme) {
-        this.gymTypeTheme = gymTypeTheme;
-        return this;
-    }
-
-    public WildPokemonMod getWildPokemonMod() {
-        return wildPokemonMod;
-    }
-
-    public Settings setWildPokemonMod(WildPokemonMod wildPokemonMod) {
-        this.wildPokemonMod = wildPokemonMod;
-        return this;
-    }
-
-    public Settings setWildPokemonMod(boolean... bools) {
-        return setWildPokemonMod(getEnum(WildPokemonMod.class, bools));
-    }
-
-    public WildPokemonRestrictionMod getWildPokemonRestrictionMod() {
-        return wildPokemonRestrictionMod;
-    }
-
-    public Settings setWildPokemonRestrictionMod(WildPokemonRestrictionMod wildPokemonRestrictionMod) {
-        this.wildPokemonRestrictionMod = wildPokemonRestrictionMod;
-        return this;
-    }
-
-    public Settings setWildPokemonRestrictionMod(boolean... bools) {
-        return setWildPokemonRestrictionMod(getEnum(WildPokemonRestrictionMod.class, bools));
-    }
-
-    public boolean isUseTimeBasedEncounters() {
-        return useTimeBasedEncounters;
-    }
-
-    public Settings setUseTimeBasedEncounters(boolean useTimeBasedEncounters) {
-        this.useTimeBasedEncounters = useTimeBasedEncounters;
-        return this;
-    }
-
-    public boolean isBlockWildLegendaries() {
-        return blockWildLegendaries;
-    }
-
-    public Settings setBlockWildLegendaries(boolean blockWildLegendaries) {
-        this.blockWildLegendaries = blockWildLegendaries;
-        return this;
-    }
-
-    public boolean isUseMinimumCatchRate() {
-        return useMinimumCatchRate;
-    }
-
-    public Settings setUseMinimumCatchRate(boolean useMinimumCatchRate) {
-        this.useMinimumCatchRate = useMinimumCatchRate;
-        return this;
-    }
-
-    public int getMinimumCatchRateLevel() {
-        return minimumCatchRateLevel;
-    }
-
-    public Settings setMinimumCatchRateLevel(int minimumCatchRateLevel) {
-        this.minimumCatchRateLevel = minimumCatchRateLevel;
-        return this;
-    }
-
-    public boolean isRandomizeWildPokemonHeldItems() {
-        return randomizeWildPokemonHeldItems;
-    }
-
-    public Settings setRandomizeWildPokemonHeldItems(boolean randomizeWildPokemonHeldItems) {
-        this.randomizeWildPokemonHeldItems = randomizeWildPokemonHeldItems;
-        return this;
-    }
-
-    public boolean isBanBadRandomWildPokemonHeldItems() {
-        return banBadRandomWildPokemonHeldItems;
-    }
-
-    public Settings setBanBadRandomWildPokemonHeldItems(boolean banBadRandomWildPokemonHeldItems) {
-        this.banBadRandomWildPokemonHeldItems = banBadRandomWildPokemonHeldItems;
-        return this;
-    }
-
-    public boolean isAllowLowLevelEvolvedTypes() {
-        return allowLowLevelEvolvedTypes;
-    }
-
-    public Settings setAllowLowLevelEvolvedTypes(boolean allowLowLevelEvolvedTypes) {
-        this.allowLowLevelEvolvedTypes = allowLowLevelEvolvedTypes;
-        return this;
-    }
-
-    public StaticPokemonMod getStaticPokemonMod() {
-        return staticPokemonMod;
-    }
-
-    public Settings setStaticPokemonMod(StaticPokemonMod staticPokemonMod) {
-        this.staticPokemonMod = staticPokemonMod;
-        return this;
-    }
-
-    public Settings setStaticPokemonMod(boolean... bools) {
-        return setStaticPokemonMod(getEnum(StaticPokemonMod.class, bools));
-    }
-
-    public TMsMod getTmsMod() {
-        return tmsMod;
-    }
-
-    public Settings setTmsMod(TMsMod tmsMod) {
-        this.tmsMod = tmsMod;
-        return this;
-    }
-
-    public Settings setTmsMod(boolean... bools) {
-        return setTmsMod(getEnum(TMsMod.class, bools));
-    }
-
-    public boolean isTmLevelUpMoveSanity() {
-        return tmLevelUpMoveSanity;
-    }
-
-    public Settings setTmLevelUpMoveSanity(boolean tmLevelUpMoveSanity) {
-        this.tmLevelUpMoveSanity = tmLevelUpMoveSanity;
-        return this;
-    }
-
-    public boolean isKeepFieldMoveTMs() {
-        return keepFieldMoveTMs;
-    }
-
-    public Settings setKeepFieldMoveTMs(boolean keepFieldMoveTMs) {
-        this.keepFieldMoveTMs = keepFieldMoveTMs;
-        return this;
-    }
-
-    public boolean isFullHMCompat() {
-        return fullHMCompat;
-    }
-
-    public Settings setFullHMCompat(boolean fullHMCompat) {
-        this.fullHMCompat = fullHMCompat;
-        return this;
-    }
-
-    public boolean isTmsForceGoodDamaging() {
-        return tmsForceGoodDamaging;
-    }
-
-    public Settings setTmsForceGoodDamaging(boolean tmsForceGoodDamaging) {
-        this.tmsForceGoodDamaging = tmsForceGoodDamaging;
-        return this;
-    }
-
-    public int getTmsGoodDamagingPercent() {
-        return tmsGoodDamagingPercent;
-    }
-
-    public Settings setTmsGoodDamagingPercent(int tmsGoodDamagingPercent) {
-        this.tmsGoodDamagingPercent = tmsGoodDamagingPercent;
-        return this;
-    }
-
-    public TMsHMsCompatibilityMod getTmsHmsCompatibilityMod() {
-        return tmsHmsCompatibilityMod;
-    }
-
-    public Settings setTmsHmsCompatibilityMod(TMsHMsCompatibilityMod tmsHmsCompatibilityMod) {
-        this.tmsHmsCompatibilityMod = tmsHmsCompatibilityMod;
-        return this;
-    }
-
-    public Settings setTmsHmsCompatibilityMod(boolean... bools) {
-        return setTmsHmsCompatibilityMod(getEnum(TMsHMsCompatibilityMod.class, bools));
-    }
-
-    public MoveTutorMovesMod getMoveTutorMovesMod() {
-        return moveTutorMovesMod;
-    }
-
-    public Settings setMoveTutorMovesMod(MoveTutorMovesMod moveTutorMovesMod) {
-        this.moveTutorMovesMod = moveTutorMovesMod;
-        return this;
-    }
-
-    public Settings setMoveTutorMovesMod(boolean... bools) {
-        return setMoveTutorMovesMod(getEnum(MoveTutorMovesMod.class, bools));
-    }
-
-    public boolean isTutorLevelUpMoveSanity() {
-        return tutorLevelUpMoveSanity;
-    }
-
-    public Settings setTutorLevelUpMoveSanity(boolean tutorLevelUpMoveSanity) {
-        this.tutorLevelUpMoveSanity = tutorLevelUpMoveSanity;
-        return this;
-    }
-
-    public boolean isKeepFieldMoveTutors() {
-        return keepFieldMoveTutors;
-    }
-
-    public Settings setKeepFieldMoveTutors(boolean keepFieldMoveTutors) {
-        this.keepFieldMoveTutors = keepFieldMoveTutors;
-        return this;
-    }
-
-    public boolean isTutorsForceGoodDamaging() {
-        return tutorsForceGoodDamaging;
-    }
-
-    public Settings setTutorsForceGoodDamaging(boolean tutorsForceGoodDamaging) {
-        this.tutorsForceGoodDamaging = tutorsForceGoodDamaging;
-        return this;
-    }
-
-    public int getTutorsGoodDamagingPercent() {
-        return tutorsGoodDamagingPercent;
-    }
-
-    public Settings setTutorsGoodDamagingPercent(int tutorsGoodDamagingPercent) {
-        this.tutorsGoodDamagingPercent = tutorsGoodDamagingPercent;
-        return this;
-    }
-
-    public MoveTutorsCompatibilityMod getMoveTutorsCompatibilityMod() {
-        return moveTutorsCompatibilityMod;
-    }
-
-    public Settings setMoveTutorsCompatibilityMod(MoveTutorsCompatibilityMod moveTutorsCompatibilityMod) {
-        this.moveTutorsCompatibilityMod = moveTutorsCompatibilityMod;
-        return this;
-    }
-
-    public Settings setMoveTutorsCompatibilityMod(boolean... bools) {
-        return setMoveTutorsCompatibilityMod(getEnum(MoveTutorsCompatibilityMod.class, bools));
-    }
-
-    public InGameTradesMod getInGameTradesMod() {
-        return inGameTradesMod;
-    }
-
-    public Settings setInGameTradesMod(InGameTradesMod inGameTradesMod) {
-        this.inGameTradesMod = inGameTradesMod;
-        return this;
-    }
-
-    public Settings setInGameTradesMod(boolean... bools) {
-        return setInGameTradesMod(getEnum(InGameTradesMod.class, bools));
-    }
-
-    public boolean isRandomizeInGameTradesNicknames() {
-        return randomizeInGameTradesNicknames;
-    }
-
-    public Settings setRandomizeInGameTradesNicknames(boolean randomizeInGameTradesNicknames) {
-        this.randomizeInGameTradesNicknames = randomizeInGameTradesNicknames;
-        return this;
-    }
-
-    public boolean isRandomizeInGameTradesOTs() {
-        return randomizeInGameTradesOTs;
-    }
-
-    public Settings setRandomizeInGameTradesOTs(boolean randomizeInGameTradesOTs) {
-        this.randomizeInGameTradesOTs = randomizeInGameTradesOTs;
-        return this;
-    }
-
-    public boolean isRandomizeInGameTradesIVs() {
-        return randomizeInGameTradesIVs;
-    }
-
-    public Settings setRandomizeInGameTradesIVs(boolean randomizeInGameTradesIVs) {
-        this.randomizeInGameTradesIVs = randomizeInGameTradesIVs;
-        return this;
-    }
-
-    public boolean isRandomizeInGameTradesItems() {
-        return randomizeInGameTradesItems;
-    }
-
-    public Settings setRandomizeInGameTradesItems(boolean randomizeInGameTradesItems) {
-        this.randomizeInGameTradesItems = randomizeInGameTradesItems;
-        return this;
-    }
-
-    public FieldItemsMod getFieldItemsMod() {
-        return fieldItemsMod;
-    }
-
-    public Settings setFieldItemsMod(FieldItemsMod fieldItemsMod) {
-        this.fieldItemsMod = fieldItemsMod;
-        return this;
-    }
-
-    public Settings setFieldItemsMod(boolean... bools) {
-        return setFieldItemsMod(getEnum(FieldItemsMod.class, bools));
-    }
-
-    public boolean isBanBadRandomFieldItems() {
-        return banBadRandomFieldItems;
-    }
-
-    public Settings setBanBadRandomFieldItems(boolean banBadRandomFieldItems) {
-        this.banBadRandomFieldItems = banBadRandomFieldItems;
         return this;
     }
 

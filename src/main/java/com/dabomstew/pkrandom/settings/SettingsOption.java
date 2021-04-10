@@ -61,8 +61,8 @@ public interface SettingsOption<T> {
             return this;
         }
 
-        public Builder addValidInts(IntStream validInts) {
-            this.validInts = validInts;
+        public Builder addValidInts(int min, int max) {
+            this.validInts = IntStream.rangeClosed(min, max);
             return this;
         }
 

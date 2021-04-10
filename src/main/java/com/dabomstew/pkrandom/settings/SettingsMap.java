@@ -28,14 +28,13 @@ package com.dabomstew.pkrandom.settings;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class SettingsMap {
     Map<String, SettingsOption> map;
 
     public SettingsMap() {
-        map = new HashMap<String, SettingsOption>();
+        map = new HashMap<String, SettingsOption>(256, 0.75f);
     }
 
     public SettingsOption getOption(String option) {
