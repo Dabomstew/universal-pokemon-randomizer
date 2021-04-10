@@ -1,4 +1,4 @@
-Universal Pokemon Randomizer 1.8.2
+Universal Pokemon Randomizer 1.9.0
 by Dabomstew, 2012-16
 by brentspector, 2019-20
 
@@ -119,14 +119,7 @@ interface.
 
 When using a premade seed and settings string, the "CustomNames.rncn" file must be
 stored in the same directory/folder as the JAR or EXE. Failure to do so will result 
-in default custom names being used, which may lead to unexpected consequences. 
-
-NOTE: When importing settings from 1.8.0 into 1.8.1 (current version)
-In Version 1.8.0, there is a bug that caused the values for "minimum catch rate"
-and "allow low level wilds" to be saved incorrectly. In an effort to remedy this,
-the button for "Weight types by # of pokemon" has been set to false. Additionally,
-the values for "minimum catch rate" and "allow low level wilds" may be set 
-incorrectly. 
+in default custom names being used, which may lead to unexpected consequences.
 
 
 Games/ROMs supported

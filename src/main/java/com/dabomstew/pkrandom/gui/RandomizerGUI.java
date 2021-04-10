@@ -1229,6 +1229,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 this.wpUseTimeCB.setVisible(false);
             }
             this.wpCatchRateCB.setEnabled(true);
+            this.wpCatchRateCB.setSelected(false);
 
             this.wpHeldItemsCB.setSelected(false);
             this.wpHeldItemsCB.setEnabled(true);
@@ -1565,15 +1566,12 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.wpNoLegendariesCB.setSelected(false);
             this.wpAllowEvosCB.setEnabled(false);
             this.wpAllowEvosCB.setSelected(false);
-            this.wpCatchRateCB.setEnabled(false);
-            this.wpCatchRateCB.setSelected(false);
             this.wpCatchRateSlider.setEnabled(false);
             this.wpCatchRateSlider.setValue(this.wpCatchRateSlider.getMinimum());
         } else {
             this.wpUseTimeCB.setEnabled(true);
             this.wpNoLegendariesCB.setEnabled(true);
             this.wpAllowEvosCB.setEnabled(true);
-            this.wpCatchRateCB.setEnabled(true);
             this.wpCatchRateSlider.setEnabled(true);
         }
 
@@ -4436,6 +4434,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         wildPokesButtonGroup.add(wpUnchangedRB);
         wpUnchangedRB.setSelected(true);
+        wpUnchangedRB.setName(bundle.getString("RandomizerGUI.wpUnchangedRB.name")); // NOI18N
         wpUnchangedRB.setText(bundle.getString("RandomizerGUI.wpUnchangedRB.text")); // NOI18N
         wpUnchangedRB.setToolTipText(bundle.getString("RandomizerGUI.wpUnchangedRB.toolTipText")); // NOI18N
         wpUnchangedRB.addActionListener(new java.awt.event.ActionListener() {
@@ -4445,6 +4444,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         });
 
         wildPokesButtonGroup.add(wpRandomRB);
+        wpRandomRB.setName(bundle.getString("RandomizerGUI.wpRandomRB.name")); // NOI18N
         wpRandomRB.setText(bundle.getString("RandomizerGUI.wpRandomRB.text")); // NOI18N
         wpRandomRB.setToolTipText(bundle.getString("RandomizerGUI.wpRandomRB.toolTipText")); // NOI18N
         wpRandomRB.addActionListener(new java.awt.event.ActionListener() {
@@ -4558,6 +4558,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         wpNoLegendariesCB.setText(bundle.getString("RandomizerGUI.wpNoLegendariesCB.text")); // NOI18N
 
+        wpCatchRateCB.setName(bundle.getString("RandomizerGUI.wpCatchRateCB.name")); // NOI18N
         wpCatchRateCB.setText(bundle.getString("RandomizerGUI.wpCatchRateCB.text")); // NOI18N
         wpCatchRateCB.setToolTipText(bundle.getString("RandomizerGUI.wpCatchRateCB.toolTipText")); // NOI18N
         wpCatchRateCB.addActionListener(new java.awt.event.ActionListener() {

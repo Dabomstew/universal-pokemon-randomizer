@@ -328,18 +328,91 @@ public class SettingsTest extends AbstractUIBase {
 
     /**
      * Clicking the random settings button results in a successful operation.
-     * Settings can be saved and restored without issue
+     * Verifies settings can be stored and loaded with no error and preserve state
      * @throws IOException
      */
     @Test(timeout = 4000)
     public void TestRandomSettingsButton() throws IOException {
-        JButtonFixture randomQSButton = getButtonByName("randomQSButton");
-        randomQSButton.click();
+        JButtonFixture randomQSButtonFixture = getButtonByName("randomQSButton");
+        randomQSButtonFixture.requireVisible().requireEnabled().click();
         Settings settings = this.mainWindow.getCurrentSettings();
         String settingsString = settings.toString();
         settings = Settings.fromString(settingsString);
         assertTrue("Settings do not match after reload - \nBefore: " + settingsString + "\nAfter: " + settings.toString(),
             settingsString.equals(settings.toString()));
+    }
+
+    /**
+     * Minimum Catch Rate Checkbox is enabled regardless of radio button selection
+     * Verifies settings can be stored and loaded with no error and preserve state
+     * @throws IOException
+     */
+    @Test(timeout = 4000)
+    public void TestMinimumCatchRateCB() throws IOException {
+        JRadioButtonFixture unchangedWildPokemonRBFixture = getRadioButtonByName("wpUnchangedRB");
+        JRadioButtonFixture randomWildPokemonRBFixture = getRadioButtonByName("wpRandomRB");
+        JCheckBoxFixture minimumCatchRateCBFixture = getCheckBoxByName("wpCatchRateCB");
+        int settingsReloadCount = 0;
+        // Sanity check - should evaluate to false
+        Settings settings = this.mainWindow.getCurrentSettings();
+        assertFalse(minimumCatchRateCBFixture.text() + " should not be set yet", settings.isUseMinimumCatchRate());
+        assertTrue(minimumCatchRateCBFixture.text() + " should be enabled", minimumCatchRateCBFixture.isEnabled());
+        assertTrue("Wild Pokemon should be set to " + unchangedWildPokemonRBFixture.text() + " but was not", settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
+        // Sanity check - Should not fail with 0 options
+        String setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertFalse(minimumCatchRateCBFixture.text() + " was not false after reloading settings " + settingsReloadCount, settings.isUseMinimumCatchRate());
+        assertTrue("Wild Pokemon was not " + unchangedWildPokemonRBFixture.text() + " after reloading settings " + settingsReloadCount, settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
+        settingsReloadCount++;
+
+        // Turn Minimum Catch Rate on
+        minimumCatchRateCBFixture.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue(minimumCatchRateCBFixture.text() + " should be set now", settings.isUseMinimumCatchRate());
+        assertTrue(minimumCatchRateCBFixture.text() + " should be enabled", minimumCatchRateCBFixture.isEnabled());
+        assertTrue("Wild Pokemon should be set to " + unchangedWildPokemonRBFixture.text() + " but was not", settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
+        setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertTrue(minimumCatchRateCBFixture.text() + " was not true after reloading settings " + settingsReloadCount, settings.isUseMinimumCatchRate());
+        assertTrue("Wild Pokemon was not " + unchangedWildPokemonRBFixture.text() + " after reloading settings " + settingsReloadCount, settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
+        settingsReloadCount++;
+
+        // Turn Random RB on
+        randomWildPokemonRBFixture.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue(minimumCatchRateCBFixture.text() + " should still be set", settings.isUseMinimumCatchRate());
+        assertTrue(minimumCatchRateCBFixture.text() + " should be enabled", minimumCatchRateCBFixture.isEnabled());
+        assertTrue("Wild Pokemon should be set to " + randomWildPokemonRBFixture.text() + " but was not", settings.getWildPokemonMod() == Settings.WildPokemonMod.RANDOM);
+        setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertTrue(minimumCatchRateCBFixture.text() + " was not true after reloading settings " + settingsReloadCount, settings.isUseMinimumCatchRate());
+        assertTrue("Wild Pokemon was not " + randomWildPokemonRBFixture.text() + " after reloading settings " + settingsReloadCount, settings.getWildPokemonMod() == Settings.WildPokemonMod.RANDOM);
+        settingsReloadCount++;
+
+        // Turn Unchanged RB on
+        unchangedWildPokemonRBFixture.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue(minimumCatchRateCBFixture.text() + " should still be set", settings.isUseMinimumCatchRate());
+        assertTrue(minimumCatchRateCBFixture.text() + " should be enabled", minimumCatchRateCBFixture.isEnabled());
+        assertTrue("Wild Pokemon should be set to " + unchangedWildPokemonRBFixture.text() + " but was not", settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
+        setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertTrue(minimumCatchRateCBFixture.text() + " was not true after reloading settings " + settingsReloadCount, settings.isUseMinimumCatchRate());
+        assertTrue("Wild Pokemon was not " + unchangedWildPokemonRBFixture.text() + " after reloading settings " + settingsReloadCount, settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
+        settingsReloadCount++;
+
+        // Turn Minimum Catch Rate off
+        minimumCatchRateCBFixture.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertFalse(minimumCatchRateCBFixture.text() + " should not be set", settings.isUseMinimumCatchRate());
+        assertTrue(minimumCatchRateCBFixture.text() + " should be enabled", minimumCatchRateCBFixture.isEnabled());
+        assertTrue("Wild Pokemon should be set to " + unchangedWildPokemonRBFixture.text() + " but was not", settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
+        // Sanity check - Should not fail with 0 options
+        setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertFalse(minimumCatchRateCBFixture.text() + " was not false after reloading settings " + settingsReloadCount, settings.isUseMinimumCatchRate());
+        assertTrue("Wild Pokemon was not " + unchangedWildPokemonRBFixture.text() + " after reloading settings " + settingsReloadCount, settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
+        settingsReloadCount++;
     }
 
     /**
