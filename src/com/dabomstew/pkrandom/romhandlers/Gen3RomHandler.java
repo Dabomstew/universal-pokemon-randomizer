@@ -1428,7 +1428,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public List<Pokemon> bannedForWildEncounters() {
-        if (romEntry.romType == Gen3Constants.RomType_FRLG) {
+        if (romEntry.romType == Gen3Constants.RomType_FRLG && !romEntry.romCode.equals("MBDN")) {
             return Arrays.asList(pokes[Gen3Constants.unownIndex]); // Unown
                                                                    // banned
         } else {
