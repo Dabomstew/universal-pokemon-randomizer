@@ -286,7 +286,7 @@ public class Randomizer {
 
         List<Trainer> trainers = romHandler.getTrainers();
         for (Trainer t : trainers) {
-            for (TrainerPokemon tpk : t.pokemon) {
+            for (TrainerPokemon tpk : t.getPokemon()) {
                 checkValue = addToCV(checkValue, tpk.level, tpk.pokemon.number);
             }
         }

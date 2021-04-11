@@ -31,7 +31,7 @@ XX Choice not available until game is played XXStriaton City leaders use correct
 XXToo much workXXTrainer Class Names should be gender based (Rich Boy woman not allowed) (group all trainer names and determine a 1-1 swap)
 **Randomize trainer held items (limit to battle tower stuff)
 **Type theme gyms with random trainers route trainers (keep gym trainers consistent)
-Extra Challenge Mode - All leaders have 6 pokemon
+XXROM LENGTH VIOLATIONXXExtra Challenge Mode - All leaders have 6 pokemon
 Extra E4 Challenge - Legendaries / BST of at least 600
 XXToo much workXXSignature Move - All leaders have a signature move on all pokes (same as TM?)
 All leader/rival pokemon are nicknamed
@@ -48,7 +48,6 @@ XXToo much workXXShift abilities to left or right instead of randomizing (thus a
 XXToo much workXXEnable patching randomization formulas
 **Random settings (each applicable choice is given a randomized selection. still required confirming save to allow modification)
 **Minimum Catch Rate can be applied outside of WildPokemonMod
-Tutor Move Sanity shoudl be disabled after deselecting
 XXToo much workXXEvolution level randomized into a range based on the resulting BST
 XXToo much workXXRandomize attack effects (romHandler.saveMoves)
 XXToo much workXXMove prefixes (DEFDN-Leer)

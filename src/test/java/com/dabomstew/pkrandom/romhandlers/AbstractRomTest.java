@@ -76,8 +76,8 @@ public class AbstractRomTest {
         romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, 0);
         ArrayList<Trainer> newTrainers = trainerCap.getValue();
         // Get gym1Type
-        for (Trainer t : newTrainers.stream().filter(t -> t.tag.equals("GYM1")).collect(Collectors.toList())) {
-            for (TrainerPokemon tp : t.pokemon) {
+        for (Trainer t : newTrainers.stream().filter(t -> t.getTag().equals("GYM1")).collect(Collectors.toList())) {
+            for (TrainerPokemon tp : t.getPokemon()) {
                 // Initialize the set
                 if (gym1Type.size() == 0) {
                     gym1Type.add(tp.pokemon.primaryType);
@@ -101,43 +101,43 @@ public class AbstractRomTest {
         // Check CHILI, CRESS, CILAN share 1 type with GYM1
         for (Trainer t : newTrainers) {
             // CHILI fights the first starter (index 0)
-            if (t.tag.equals("CHILI")) {
+            if (t.getTag().equals("CHILI")) {
                 // Electric-Steel like Magnemite should fight Ground
-                assertTrue("No GROUND type found for CHILI", t.pokemon.stream().anyMatch(
+                assertTrue("No GROUND type found for CHILI", t.getPokemon().stream().anyMatch(
                         tp -> tp.pokemon.primaryType == Type.GROUND || tp.pokemon.secondaryType == Type.GROUND));
                 // Find out how many pokemon share a type with GYM1, subtract it from the total
                 // number of pokemon on the team, and ensure either 0 or 1 pokemon don't share
                 // the type. 0 is possible due to the shared type and trump type
                 // being the same or a dual-typed pokemon sharing one from each.
                 assertTrue("More than 1 CHILI pokemon did not match the GYM1 type",
-                        t.pokemon.size() - t.pokemon.stream().filter(tp -> gym1Type.contains(tp.pokemon.primaryType)
+                        t.getPokemon().size() - t.getPokemon().stream().filter(tp -> gym1Type.contains(tp.pokemon.primaryType)
                                 || gym1Type.contains(tp.pokemon.secondaryType)).count() < 2);
             }
             // CRESS fights the second starter (index 1)
-            else if (t.tag.equals("CRESS")) {
+            else if (t.getTag().equals("CRESS")) {
                 // Pure Fire type like Ponyta should fight random weakness
                 assertTrue("No type found that is in STRONG_AGAINST_FIRE for CRESS",
-                        t.pokemon.stream().anyMatch(tp -> Type.STRONG_AGAINST_FIRE.contains(tp.pokemon.primaryType)
+                        t.getPokemon().stream().anyMatch(tp -> Type.STRONG_AGAINST_FIRE.contains(tp.pokemon.primaryType)
                                 || Type.STRONG_AGAINST_FIRE.contains(tp.pokemon.secondaryType)));
                 // Find out how many pokemon share a type with GYM1, subtract it from the total
                 // number of pokemon on the team, and ensure either 0 or 1 pokemon don't share
                 // the type. 0 is possible due to the shared type and trump type
                 // being the same or a dual-typed pokemon sharing one from each.
                 assertTrue("More than 1 CRESS pokemon did not match the GYM1 type",
-                        t.pokemon.size() - t.pokemon.stream().filter(tp -> gym1Type.contains(tp.pokemon.primaryType)
+                        t.getPokemon().size() - t.getPokemon().stream().filter(tp -> gym1Type.contains(tp.pokemon.primaryType)
                                 || gym1Type.contains(tp.pokemon.secondaryType)).count() < 2);
             }
             // CILAN fights the last starter (index 2)
-            else if (t.tag.equals("CILAN")) {
+            else if (t.getTag().equals("CILAN")) {
                 // Pure Normal type like Rattata should fight Fighting
-                assertTrue("No FIGHTING type found for CILAN", t.pokemon.stream().anyMatch(
+                assertTrue("No FIGHTING type found for CILAN", t.getPokemon().stream().anyMatch(
                         tp -> tp.pokemon.primaryType == Type.FIGHTING || tp.pokemon.secondaryType == Type.FIGHTING));
                 // Find out how many pokemon share a type with GYM1, subtract it from the total
                 // number of pokemon on the team, and ensure either 0 or 1 pokemon don't share
                 // the type. 0 is possible due to the shared type and trump type
                 // being the same or a dual-typed pokemon sharing one from each.
                 assertTrue("More than 1 CILAN pokemon did not match the GYM1 type",
-                        t.pokemon.size() - t.pokemon.stream().filter(tp -> gym1Type.contains(tp.pokemon.primaryType)
+                        t.getPokemon().size() - t.getPokemon().stream().filter(tp -> gym1Type.contains(tp.pokemon.primaryType)
                                 || gym1Type.contains(tp.pokemon.secondaryType)).count() < 2);
             }
         }
@@ -147,8 +147,8 @@ public class AbstractRomTest {
         romhandler.randomizeTrainerPokes(false, false, false, false, true, false, true, false, 0);
         newTrainers = trainerCap.getValue();
         // Get gym1Type
-        for (Trainer t : newTrainers.stream().filter(t -> t.tag.equals("GYM1")).collect(Collectors.toList())) {
-            for (TrainerPokemon tp : t.pokemon) {
+        for (Trainer t : newTrainers.stream().filter(t -> t.getTag().equals("GYM1")).collect(Collectors.toList())) {
+            for (TrainerPokemon tp : t.getPokemon()) {
                 // Initialize the set
                 if (gym1Type.size() == 0) {
                     gym1Type.add(tp.pokemon.primaryType);
@@ -172,44 +172,44 @@ public class AbstractRomTest {
         // Check CHILI, CRESS, CILAN share 1 type with GYM1
         for (Trainer t : newTrainers) {
             // CHILI fights the first starter (index 0)
-            if (t.tag.equals("CHILI")) {
+            if (t.getTag().equals("CHILI")) {
                 // Electric-Steel like Magnemite should fight Electric
-                assertTrue("No ELECTRIC type found for CHILI", t.pokemon.stream().anyMatch(
+                assertTrue("No ELECTRIC type found for CHILI", t.getPokemon().stream().anyMatch(
                         tp -> tp.pokemon.primaryType == Type.ELECTRIC || tp.pokemon.secondaryType == Type.ELECTRIC));
                 // Find out how many pokemon share a type with GYM1, subtract it from the total
                 // number of pokemon on the team, and ensure either 0 or 1 pokemon don't share
                 // the type. 0 is possible due to the shared type and trump type
                 // being the same or a dual-typed pokemon sharing one from each.
                 assertTrue("More than 1 CHILI pokemon did not match the GYM1 type",
-                        t.pokemon.size() - t.pokemon.stream().filter(tp -> gym1Type.contains(tp.pokemon.primaryType)
+                        t.getPokemon().size() - t.getPokemon().stream().filter(tp -> gym1Type.contains(tp.pokemon.primaryType)
                                 || gym1Type.contains(tp.pokemon.secondaryType)).count() < 2);
             }
             // CRESS fights the second starter (index 1)
-            else if (t.tag.equals("CRESS")) {
+            else if (t.getTag().equals("CRESS")) {
                 // Pure Fire type like Ponyta should fight random weakness
                 assertTrue("No type found that is in RESISTANT_TO_FIRE for CRESS",
-                        t.pokemon.stream().anyMatch(tp -> Type.RESISTANT_TO_FIRE.contains(tp.pokemon.primaryType)
+                        t.getPokemon().stream().anyMatch(tp -> Type.RESISTANT_TO_FIRE.contains(tp.pokemon.primaryType)
                                 || Type.RESISTANT_TO_FIRE.contains(tp.pokemon.secondaryType)));
                 // Find out how many pokemon share a type with GYM1, subtract it from the total
                 // number of pokemon on the team, and ensure either 0 or 1 pokemon don't share
                 // the type. 0 is possible due to the shared type and trump type
                 // being the same or a dual-typed pokemon sharing one from each.
                 assertTrue("More than 1 CRESS pokemon did not match the GYM1 type",
-                        t.pokemon.size() - t.pokemon.stream().filter(tp -> gym1Type.contains(tp.pokemon.primaryType)
+                        t.getPokemon().size() - t.getPokemon().stream().filter(tp -> gym1Type.contains(tp.pokemon.primaryType)
                                 || gym1Type.contains(tp.pokemon.secondaryType)).count() < 2);
             }
             // CILAN fights the last starter (index 2)
-            else if (t.tag.equals("CILAN")) {
+            else if (t.getTag().equals("CILAN")) {
                 // Pure Normal type like Rattata should fight random weakness
                 assertTrue("No type found that is in RESISTANT_TO_NORMAL for CILAN",
-                        t.pokemon.stream().anyMatch(tp -> Type.RESISTANT_TO_NORMAL.contains(tp.pokemon.primaryType)
+                        t.getPokemon().stream().anyMatch(tp -> Type.RESISTANT_TO_NORMAL.contains(tp.pokemon.primaryType)
                                 || Type.RESISTANT_TO_NORMAL.contains(tp.pokemon.secondaryType)));
                 // Find out how many pokemon share a type with GYM1, subtract it from the total
                 // number of pokemon on the team, and ensure either 0 or 1 pokemon don't share
                 // the type. 0 is possible due to the shared type and trump type
                 // being the same or a dual-typed pokemon sharing one from each.
                 assertTrue("More than 1 CILAN pokemon did not match the GYM1 type",
-                        t.pokemon.size() - t.pokemon.stream().filter(tp -> gym1Type.contains(tp.pokemon.primaryType)
+                        t.getPokemon().size() - t.getPokemon().stream().filter(tp -> gym1Type.contains(tp.pokemon.primaryType)
                                 || gym1Type.contains(tp.pokemon.secondaryType)).count() < 2);
             }
         }
@@ -606,7 +606,7 @@ public class AbstractRomTest {
         resetDataModel(romhandler);
         romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, 0);
         for (Trainer t : romhandler.getTrainers()) {
-            if (t.tag != null) {
+            if (t.getTag() != null) {
                 for (TrainerPokemon tp : t.getPokemon()) {
                     // Initialize the set
                     if (trainerType.size() == 0) {
@@ -655,9 +655,9 @@ public class AbstractRomTest {
         }
         for(String tag: new String[]{"GYM1", "CILAN", "CHILI", "CRESS"}) {
             Trainer t = new Trainer();
-            t.tag = tag;
-            t.pokemon.add(new TrainerPokemon());
-            t.pokemon.add(new TrainerPokemon());
+            t.setTag(tag);
+            t.getPokemon().add(new TrainerPokemon());
+            t.getPokemon().add(new TrainerPokemon());
             trainerList.add(t);
         }
         for(int i = 0; i < 3; i++) {

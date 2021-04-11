@@ -983,12 +983,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 byte[] trainer = trainers.files.get(i);
                 byte[] trpoke = trpokes.files.get(i);
                 Trainer tr = new Trainer();
-                tr.poketype = trainer[0] & 0xFF;
-                tr.offset = i;
-                tr.trainerclass = trainer[1] & 0xFF;
+                tr.setPoketype(trainer[0] & 0xFF);
+                tr.setOffset(i);
+                tr.setTrainerclass(trainer[1] & 0xFF);
                 int numPokes = trainer[3] & 0xFF;
                 int pokeOffs = 0;
-                tr.fullDisplayName = tclasses.get(tr.trainerclass) + " " + tnames.get(i - 1);
+                tr.setFullDisplayName(tclasses.get(tr.getTrainerclass()) + " " + tnames.get(i - 1));
                 // printBA(trpoke);
                 for (int poke = 0; poke < numPokes; poke++) {
                     // Structure is
@@ -1013,12 +1013,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     tpk.AILevel = ailevel;
                     tpk.ability = trpoke[pokeOffs + 1] & 0xFF;
                     pokeOffs += 8;
-                    if ((tr.poketype & 2) == 2) {
+                    if ((tr.getPoketype() & 2) == 2) {
                         int heldItem = readWord(trpoke, pokeOffs);
                         tpk.heldItem = heldItem;
                         pokeOffs += 2;
                     }
-                    if ((tr.poketype & 1) == 1) {
+                    if ((tr.getPoketype() & 1) == 1) {
                         int attack1 = readWord(trpoke, pokeOffs);
                         int attack2 = readWord(trpoke, pokeOffs + 2);
                         int attack3 = readWord(trpoke, pokeOffs + 4);
@@ -1029,7 +1029,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         tpk.move4 = attack4;
                         pokeOffs += 8;
                     }
-                    tr.pokemon.add(tpk);
+                    tr.getPokemon().add(tpk);
                 }
                 allTrainers.add(tr);
             }
@@ -1040,8 +1040,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     NARCArchive driftveil = this.readNARC(getRomEntry().getString("DriftveilPokemon"));
                     for (int trno = 0; trno < 2; trno++) {
                         Trainer tr = new Trainer();
-                        tr.poketype = 3;
-                        tr.offset = 0;
+                        tr.setPoketype(3);
+                        tr.setOffset(0);
                         for (int poke = 0; poke < 3; poke++) {
                             byte[] pkmndata = driftveil.files.get(trno * 3 + poke + 1);
                             TrainerPokemon tpk = new TrainerPokemon();
@@ -1053,7 +1053,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                             tpk.move2 = readWord(pkmndata, 4);
                             tpk.move3 = readWord(pkmndata, 6);
                             tpk.move4 = readWord(pkmndata, 8);
-                            tr.pokemon.add(tpk);
+                            tr.getPokemon().add(tpk);
                         }
                         allTrainers.add(tr);
                     }
@@ -1082,20 +1082,20 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 byte[] trainer = trainers.getFiles().get(i);
                 Trainer tr = allTrainers.next();
                 // preserve original poketype for held item & moves
-                trainer[0] = (byte) tr.poketype;
-                int numPokes = tr.pokemon.size();
+                trainer[0] = (byte) tr.getPoketype();
+                int numPokes = tr.getPokemon().size();
                 trainer[3] = (byte) numPokes;
 
                 int bytesNeeded = 8 * numPokes;
-                if ((tr.poketype & 1) == 1) {
+                if ((tr.getPoketype() & 1) == 1) {
                     bytesNeeded += 8 * numPokes;
                 }
-                if ((tr.poketype & 2) == 2) {
+                if ((tr.getPoketype() & 2) == 2) {
                     bytesNeeded += 2 * numPokes;
                 }
                 byte[] trpoke = new byte[bytesNeeded];
                 int pokeOffs = 0;
-                Iterator<TrainerPokemon> tpokes = tr.pokemon.iterator();
+                Iterator<TrainerPokemon> tpokes = tr.getPokemon().iterator();
                 for (int poke = 0; poke < numPokes; poke++) {
                     TrainerPokemon tp = tpokes.next();
                     trpoke[pokeOffs] = (byte) tp.AILevel;
@@ -1104,11 +1104,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     writeWord(trpoke, pokeOffs + 4, tp.getPokemon().number);
                     // no form info, so no byte 6/7
                     pokeOffs += 8;
-                    if ((tr.poketype & 2) == 2) {
+                    if ((tr.getPoketype() & 2) == 2) {
                         writeWord(trpoke, pokeOffs, tp.heldItem);
                         pokeOffs += 2;
                     }
-                    if ((tr.poketype & 1) == 1) {
+                    if ((tr.getPoketype() & 1) == 1) {
                         if (tp.resetMoves) {
                             int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon, movesets, tp.level);
                             for (int m = 0; m < 4; m++) {
@@ -1132,7 +1132,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 NARCArchive driftveil = this.readNARC(getRomEntry().getString("DriftveilPokemon"));
                 for (int trno = 0; trno < 2; trno++) {
                     Trainer tr = allTrainers.next();
-                    Iterator<TrainerPokemon> tpks = tr.pokemon.iterator();
+                    Iterator<TrainerPokemon> tpks = tr.getPokemon().iterator();
                     for (int poke = 0; poke < 3; poke++) {
                         byte[] pkmndata = driftveil.files.get(trno * 3 + poke + 1);
                         TrainerPokemon tp = tpks.next();

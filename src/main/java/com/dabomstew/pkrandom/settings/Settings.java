@@ -367,6 +367,8 @@ public class Settings {
         // TM/HM
         SettingsOptionComposite tmsMod = SettingsOptionFactory.createSettingsOption(
             new SettingsOption.Builder(SettingsConstants.TMS_MOD, TMsMod.UNCHANGED));
+        SettingsOptionComposite tmsHmsCompatibilityMod = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TMS_HMS_COMPATIBILITY_MOD, TMsHMsCompatibilityMod.UNCHANGED));
         SettingsOptionComposite tmLevelUpMoveSanity = SettingsOptionFactory.createSettingsOption(
             new SettingsOption.Builder(SettingsConstants.TM_LEVEL_UP_MOVE_SANITY, false)
             .addMatches(new PredicatePair(tmsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
@@ -383,15 +385,17 @@ public class Settings {
             new SettingsOption.Builder(SettingsConstants.TMS_GOOD_DAMAGING_PERCENT, 0)
             .addMatches(new PredicatePair(tmsForceGoodDamaging, PredicatePair.BOOLEAN_TRUE))
             .addValidInts(0, 100));
-        SettingsOptionComposite tmsHmsCompatibilityMod = SettingsOptionFactory.createSettingsOption(
-            new SettingsOption.Builder(SettingsConstants.TMS_HMS_COMPATIBILITY_MOD, TMsHMsCompatibilityMod.UNCHANGED));
 
         // Move tutors
         SettingsOptionComposite moveTutorMovesMod = SettingsOptionFactory.createSettingsOption(
             new SettingsOption.Builder(SettingsConstants.MOVE_TUTOR_MOVES_MOD, MoveTutorMovesMod.UNCHANGED));
+        SettingsOptionComposite moveTutorsCompatibilityMod = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.MOVE_TUTORS_COMPATIBILITY_MOD, MoveTutorsCompatibilityMod.UNCHANGED));
         SettingsOptionComposite tutorLevelUpMoveSanity = SettingsOptionFactory.createSettingsOption(
             new SettingsOption.Builder(SettingsConstants.TUTOR_LEVEL_UP_MOVE_SANITY, false)
-            .addMatches(new PredicatePair(moveTutorMovesMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+            .addMatches(new PredicatePair(moveTutorMovesMod, PredicatePair.ENUM_NOT_UNCHANGED),
+            new PredicatePair(moveTutorsCompatibilityMod, PredicatePair.ENUM_NOT_UNCHANGED),
+            new PredicatePair(movesetsMod, PredicatePair.MOVESETS_MOD_RANDOM)));
         SettingsOptionComposite keepFieldMoveTutors = SettingsOptionFactory.createSettingsOption(
             new SettingsOption.Builder(SettingsConstants.KEEP_FIELD_MOVE_TUTORS, false)
             .addMatches(new PredicatePair(moveTutorMovesMod, PredicatePair.ENUM_NOT_UNCHANGED)));
@@ -402,8 +406,6 @@ public class Settings {
             new SettingsOption.Builder(SettingsConstants.TUTORS_GOOD_DAMAGING_PERCENT, 0)
             .addMatches(new PredicatePair(tutorsForceGoodDamaging, PredicatePair.BOOLEAN_TRUE))
             .addValidInts(0, 100));
-        SettingsOptionComposite moveTutorsCompatibilityMod = SettingsOptionFactory.createSettingsOption(
-            new SettingsOption.Builder(SettingsConstants.MOVE_TUTORS_COMPATIBILITY_MOD, MoveTutorsCompatibilityMod.UNCHANGED));
 
         // Trades
         SettingsOptionComposite inGameTradesMod = SettingsOptionFactory.createSettingsOption(

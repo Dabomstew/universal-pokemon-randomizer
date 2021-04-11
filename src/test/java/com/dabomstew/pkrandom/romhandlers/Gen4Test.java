@@ -251,7 +251,7 @@ public class Gen4Test {
             Trainer t = new Trainer();
             TrainerPokemon tp = mock(TrainerPokemon.class);
             doReturn(pokemonList.get(0)).when(tp).getPokemon();
-            t.pokemon.add(tp);
+            t.getPokemon().add(tp);
             trainerList.add(t);
         }
         for(int i = 0; i < pokemonList.size(); i++) {

@@ -526,40 +526,40 @@ public class Gen4Constants {
     }
 
     private static void tag(List<Trainer> allTrainers, int number, String tag) {
-        allTrainers.get(number - 1).tag = tag;
+        allTrainers.get(number - 1).setTag(tag);
     }
 
     private static void tag(List<Trainer> allTrainers, String tag, int... numbers) {
         for (int num : numbers) {
-            allTrainers.get(num - 1).tag = tag;
+            allTrainers.get(num - 1).setTag(tag);
         }
     }
 
     private static void tagRivalConsecutive(List<Trainer> allTrainers, String tag, int offsetFire) {
-        allTrainers.get(offsetFire - 1).tag = tag + "-0";
-        allTrainers.get(offsetFire).tag = tag + "-1";
-        allTrainers.get(offsetFire - 2).tag = tag + "-2";
+        allTrainers.get(offsetFire - 1).setTag(tag + "-0");
+        allTrainers.get(offsetFire).setTag(tag + "-1");
+        allTrainers.get(offsetFire - 2).setTag(tag + "-2");
 
     }
 
     private static void tagFriendConsecutive(List<Trainer> allTrainers, String tag, int offsetGrass) {
-        allTrainers.get(offsetGrass - 1).tag = tag + "-1";
-        allTrainers.get(offsetGrass).tag = tag + "-2";
-        allTrainers.get(offsetGrass + 1).tag = tag + "-0";
+        allTrainers.get(offsetGrass - 1).setTag(tag + "-1");
+        allTrainers.get(offsetGrass).setTag(tag + "-2");
+        allTrainers.get(offsetGrass + 1).setTag(tag + "-0");
 
     }
 
     private static void tagFriendConsecutive2(List<Trainer> allTrainers, String tag, int offsetWater) {
-        allTrainers.get(offsetWater - 1).tag = tag + "-0";
-        allTrainers.get(offsetWater).tag = tag + "-1";
-        allTrainers.get(offsetWater + 1).tag = tag + "-2";
+        allTrainers.get(offsetWater - 1).setTag(tag + "-0");
+        allTrainers.get(offsetWater).setTag(tag + "-1");
+        allTrainers.get(offsetWater + 1).setTag(tag + "-2");
 
     }
 
     private static void tagAsDoubleRivalConsecutive(List<Trainer> allTrainers, int offsetFire) {
-        allTrainers.get(offsetFire - 1).isDoubleBattle = true;
-        allTrainers.get(offsetFire).isDoubleBattle = true;
-        allTrainers.get(offsetFire - 2).isDoubleBattle = true;
+        allTrainers.get(offsetFire - 1).setIsDoubleBattle(true);
+        allTrainers.get(offsetFire).setIsDoubleBattle(true);
+        allTrainers.get(offsetFire - 2).setIsDoubleBattle(true);
 
     }
 }

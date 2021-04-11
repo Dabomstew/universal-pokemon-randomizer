@@ -1370,16 +1370,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         for (int i = 1; i < amount; i++) {
             int trOffset = baseOffset + i * entryLen;
             Trainer tr = new Trainer();
-            tr.offset = trOffset;
+            tr.setOffset(trOffset);
             int trainerclass = readByte(trOffset + 1) & 0xFF;
-            tr.trainerclass = (readByte(trOffset + 2) & 0x80) > 0 ? 1 : 0;
+            tr.setTrainerclass((readByte(trOffset + 2) & 0x80) > 0 ? 1 : 0);
 
             int pokeDataType = readByte(trOffset) & 0xFF;
             int numPokes = readByte(trOffset + (entryLen - 8)) & 0xFF;
             int pointerToPokes = readPointer(trOffset + (entryLen - 4));
-            tr.poketype = pokeDataType;
-            tr.name = this.readVariableLengthString(trOffset + 4);
-            tr.fullDisplayName = tcnames.get(trainerclass) + " " + tr.name;
+            tr.setPoketype(pokeDataType);
+            tr.setName(this.readVariableLengthString(trOffset + 4));
+            tr.setFullDisplayName(tcnames.get(trainerclass) + " " + tr.getName());
             // Pokemon data!
             if (pokeDataType == 0) {
                 // blocks of 8 bytes
@@ -1388,7 +1388,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     thisPoke.AILevel = readWord(pointerToPokes + poke * 8);
                     thisPoke.level = readWord(pointerToPokes + poke * 8 + 2);
                     thisPoke.pokemon = getPokesInternal()[readWord(pointerToPokes + poke * 8 + 4)];
-                    tr.pokemon.add(thisPoke);
+                    tr.getPokemon().add(thisPoke);
                 }
             } else if (pokeDataType == 2) {
                 // blocks of 8 bytes
@@ -1398,7 +1398,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     thisPoke.level = readWord(pointerToPokes + poke * 8 + 2);
                     thisPoke.pokemon = getPokesInternal()[readWord(pointerToPokes + poke * 8 + 4)];
                     thisPoke.heldItem = readWord(pointerToPokes + poke * 8 + 6);
-                    tr.pokemon.add(thisPoke);
+                    tr.getPokemon().add(thisPoke);
                 }
             } else if (pokeDataType == 1) {
                 // blocks of 16 bytes
@@ -1411,7 +1411,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     thisPoke.move2 = readWord(pointerToPokes + poke * 16 + 8);
                     thisPoke.move3 = readWord(pointerToPokes + poke * 16 + 10);
                     thisPoke.move4 = readWord(pointerToPokes + poke * 16 + 12);
-                    tr.pokemon.add(thisPoke);
+                    tr.getPokemon().add(thisPoke);
                 }
             } else if (pokeDataType == 3) {
                 // blocks of 16 bytes
@@ -1425,7 +1425,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     thisPoke.move2 = readWord(pointerToPokes + poke * 16 + 10);
                     thisPoke.move3 = readWord(pointerToPokes + poke * 16 + 12);
                     thisPoke.move4 = readWord(pointerToPokes + poke * 16 + 14);
-                    tr.pokemon.add(thisPoke);
+                    tr.getPokemon().add(thisPoke);
                 }
             }
             theTrainers.add(tr);
@@ -1459,12 +1459,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // Do we need to repoint this trainer's data?
             int oldPokeType = rom[trOffset] & 0xFF;
             int oldPokeCount = rom[trOffset + (entryLen - 8)] & 0xFF;
-            int newPokeCount = tr.pokemon.size();
-            int newDataSize = newPokeCount * ((tr.poketype & 1) == 1 ? 16 : 8);
+            int newPokeCount = tr.getPokemon().size();
+            int newDataSize = newPokeCount * ((tr.getPoketype() & 1) == 1 ? 16 : 8);
             int oldDataSize = oldPokeCount * ((oldPokeType & 1) == 1 ? 16 : 8);
 
             // write out new data first...
-            rom[trOffset] = (byte) tr.poketype;
+            rom[trOffset] = (byte) tr.getPoketype();
             rom[trOffset + (entryLen - 8)] = (byte) newPokeCount;
 
             // now, do we need to repoint?
@@ -1480,10 +1480,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 pointerToPokes = readPointer(trOffset + (entryLen - 4));
             }
 
-            Iterator<TrainerPokemon> pokes = tr.pokemon.iterator();
+            Iterator<TrainerPokemon> pokes = tr.getPokemon().iterator();
 
             // Write out Pokemon data!
-            if ((tr.poketype & 1) == 1) {
+            if ((tr.getPoketype() & 1) == 1) {
                 // custom moves, blocks of 16 bytes
                 for (int poke = 0; poke < newPokeCount; poke++) {
                     TrainerPokemon tp = pokes.next();
@@ -1491,7 +1491,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     writeWord(pointerToPokes + poke * 16 + 2, tp.level);
                     writeWord(pointerToPokes + poke * 16 + 4, getPokedexToInternal()[tp.pokemon.number]);
                     int movesStart;
-                    if ((tr.poketype & 2) == 2) {
+                    if ((tr.getPoketype() & 2) == 2) {
                         writeWord(pointerToPokes + poke * 16 + 6, tp.heldItem);
                         movesStart = 8;
                     } else {
@@ -1517,7 +1517,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     writeWord(pointerToPokes + poke * 8, tp.AILevel);
                     writeWord(pointerToPokes + poke * 8 + 2, tp.level);
                     writeWord(pointerToPokes + poke * 8 + 4, getPokedexToInternal()[tp.pokemon.number]);
-                    if ((tr.poketype & 2) == 2) {
+                    if ((tr.getPoketype() & 2) == 2) {
                         writeWord(pointerToPokes + poke * 8 + 6, tp.heldItem);
                     } else {
                         writeWord(pointerToPokes + poke * 8 + 6, 0);

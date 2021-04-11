@@ -850,14 +850,14 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             int limit = trainerclasslimits[i];
             for (int trnum = 0; trnum < limit; trnum++) {
                 Trainer tr = new Trainer();
-                tr.offset = offs;
-                tr.trainerclass = i;
+                tr.setOffset(offs);
+                tr.setTrainerclass(i);
                 String name = readVariableLengthString(offs, false);
-                tr.name = name;
-                tr.fullDisplayName = tcnames.get(i) + " " + name;
+                tr.setName(name);
+                tr.setFullDisplayName(tcnames.get(i) + " " + name);
                 offs += lengthOfStringAt(offs, false) + 1;
                 int dataType = rom[offs] & 0xFF;
-                tr.poketype = dataType;
+                tr.setPoketype(dataType);
                 offs++;
                 while ((rom[offs] & 0xFF) != 0xFF) {
                     TrainerPokemon tp = new TrainerPokemon();
@@ -875,7 +875,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                         tp.move4 = rom[offs + 3] & 0xFF;
                         offs += 4;
                     }
-                    tr.pokemon.add(tp);
+                    tr.getPokemon().add(tp);
                 }
                 allTrainers.add(tr);
                 offs++;
@@ -914,26 +914,26 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             int limit = trainerclasslimits[i];
             for (int trnum = 0; trnum < limit; trnum++) {
                 Trainer tr = allTrainers.next();
-                if (tr.trainerclass != i) {
-                    System.err.println("Trainer mismatch: " + tr.name);
+                if (tr.getTrainerclass() != i) {
+                    System.err.println("Trainer mismatch: " + tr.getName());
                 }
                 // Write their name
-                int trnamelen = internalStringLength(tr.name);
-                writeFixedLengthString(tr.name, offs, trnamelen + 1);
+                int trnamelen = internalStringLength(tr.getName());
+                writeFixedLengthString(tr.getName(), offs, trnamelen + 1);
                 offs += trnamelen + 1;
                 // Write out new trainer data
-                rom[offs++] = (byte) tr.poketype;
-                Iterator<TrainerPokemon> tPokes = tr.pokemon.iterator();
-                for (int tpnum = 0; tpnum < tr.pokemon.size(); tpnum++) {
+                rom[offs++] = (byte) tr.getPoketype();
+                Iterator<TrainerPokemon> tPokes = tr.getPokemon().iterator();
+                for (int tpnum = 0; tpnum < tr.getPokemon().size(); tpnum++) {
                     TrainerPokemon tp = tPokes.next();
                     rom[offs] = (byte) tp.level;
                     rom[offs + 1] = (byte) tp.pokemon.number;
                     offs += 2;
-                    if ((tr.poketype & 2) == 2) {
+                    if ((tr.getPoketype() & 2) == 2) {
                         rom[offs] = (byte) tp.heldItem;
                         offs++;
                     }
-                    if ((tr.poketype & 1) == 1) {
+                    if ((tr.getPoketype() & 1) == 1) {
                         if (tp.resetMoves) {
                             int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon, movesets, tp.level);
                             for (int m = 0; m < 4; m++) {

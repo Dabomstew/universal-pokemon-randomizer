@@ -1117,7 +1117,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         for (Trainer t : currentTrainers) {
-            for (TrainerPokemon tp : t.pokemon) {
+            for (TrainerPokemon tp : t.getPokemon()) {
                 // NOTE: we do not reset moves here since we don't want to
                 // overwrite custom movesets
                 applyChangeToTrainerPoke(tp, randomHeldItem, levelModifier);
@@ -1153,14 +1153,14 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Fully random is easy enough - randomize then worry about rival
         // carrying starter at the end
         for (Trainer t : scrambledTrainers) {
-            if (t.tag != null && t.tag.equals("IRIVAL")) {
+            if (t.getTag() != null && t.getTag().equals("IRIVAL")) {
                 continue; // skip
             }
 
             if (!assignedTrainers.contains(t)) {
                 // If type theming is true, pick a type. Otherwise null skips the type restriction
                 Type typeForTrainer = typeTheme ? pickType(weightByFrequency, noLegendaries) : null;
-                for (TrainerPokemon tp : t.pokemon) {
+                for (TrainerPokemon tp : t.getPokemon()) {
                     boolean shedAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
                     tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForTrainer, noLegendaries,
                             shedAllowed);
@@ -1182,10 +1182,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         Set<Trainer> assignedTrainers = new TreeSet<Trainer>();
         Map<String, List<Trainer>> groups = new TreeMap<String, List<Trainer>>();
         for (Trainer t : currentTrainers) {
-            if (t.tag != null && t.tag.equals("IRIVAL")) {
+            if (t.getTag() != null && t.getTag().equals("IRIVAL")) {
                 continue; // skip
             }
-            String group = t.tag == null ? "" : t.tag;
+            String group = t.getTag() == null ? "" : t.getTag();
             if (group.contains("-")) {
                 group = group.substring(0, group.indexOf('-'));
             }
@@ -1240,7 +1240,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             // Themed groups just have a theme, no special criteria
             for (Trainer t : trainersInGroup) {
-                for (TrainerPokemon tp : t.pokemon) {
+                for (TrainerPokemon tp : t.getPokemon()) {
                     boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
                     tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForGroup, noLegendaries, wgAllowed);
                     tp.resetMoves = true;
@@ -1261,11 +1261,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             // Shuffle ordering within group to promote randomness
             Collections.shuffle(trainersInGroup, random);
             for (Trainer t : trainersInGroup) {
-                for (int i=0; i < t.pokemon.size(); i++) {
-                    TrainerPokemon tp = t.pokemon.get(i);
+                for (int i=0; i < t.getPokemon().size(); i++) {
+                    TrainerPokemon tp = t.getPokemon().get(i);
                     boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
                     // This is the last pokemon. Use the superior type
-                    if (i == t.pokemon.size()-1) {
+                    if (i == t.getPokemon().size()-1) {
                         // Get the starters
                         // us 0 1 2 => CHILI CRESS CILAN
                         Type superiorType;
@@ -1323,7 +1323,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         for (Trainer t : currentTrainers) {
-            for (TrainerPokemon tp : t.pokemon) {
+            for (TrainerPokemon tp : t.getPokemon()) {
                 if (tp.level >= minLevel) {
                     Pokemon newPokemon = fullyEvolve(tp.pokemon);
                     if (newPokemon != tp.pokemon) {
@@ -2095,7 +2095,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Trainer> trainers = this.getTrainers();
 
         for (Trainer t : trainers) {
-            for (TrainerPokemon tpk : t.pokemon) {
+            for (TrainerPokemon tpk : t.getPokemon()) {
                 tpk.resetMoves = true;
             }
         }
@@ -3724,9 +3724,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Find the highest rival battle #
         int highestRivalNum = 0;
         for (Trainer t : currentTrainers) {
-            if (t.tag != null && t.tag.startsWith(prefix)) {
+            if (t.getTag() != null && t.getTag().startsWith(prefix)) {
                 highestRivalNum = Math.max(highestRivalNum,
-                        Integer.parseInt(t.tag.substring(prefix.length(), t.tag.indexOf('-'))));
+                        Integer.parseInt(t.getTag().substring(prefix.length(), t.getTag().indexOf('-'))));
             }
         }
 
@@ -3834,13 +3834,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         HashMap<String, ArrayList<Trainer>> rivalTrainer = new HashMap<String, ArrayList<Trainer>>();
         int highestRivalNum = 0;
         for (Trainer t : currentTrainers) {
-            if (t.tag != null && t.tag.startsWith(prefix)) {
-                if (!rivalTrainer.containsKey(t.tag)) {
-                    rivalTrainer.put(t.tag, new ArrayList<Trainer>());
+            if (t.getTag() != null && t.getTag().startsWith(prefix)) {
+                if (!rivalTrainer.containsKey(t.getTag())) {
+                    rivalTrainer.put(t.getTag(), new ArrayList<Trainer>());
                 }
-                rivalTrainer.get(t.tag).add(t);
+                rivalTrainer.get(t.getTag()).add(t);
                 highestRivalNum = Math.max(highestRivalNum,
-                        Integer.parseInt(t.tag.substring(prefix.length(), t.tag.indexOf('-'))));
+                        Integer.parseInt(t.getTag().substring(prefix.length(), t.getTag().indexOf('-'))));
             }
         }
 
@@ -3863,11 +3863,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 for (int t = 0; t < currList.size(); t++) {
                     // Last modified team - first round is lowest team
-                    List<TrainerPokemon> tpkList = currList.get(t).pokemon;
+                    List<TrainerPokemon> tpkList = currList.get(t).getPokemon();
                     tpkList.sort(Comparator.comparing(TrainerPokemon::getLevel));
 
                     // Get the team that comes after the last modified team
-                    List<TrainerPokemon> tpkNextList = rivalTrainer.get(prefix + (j + 1) + "-" + i).get(t).pokemon;
+                    List<TrainerPokemon> tpkNextList = rivalTrainer.get(prefix + (j + 1) + "-" + i).get(t).getPokemon();
                     tpkNextList.sort(Comparator.comparing(TrainerPokemon::getLevel));
 
                     // Skip replacing for team size 1
@@ -3883,8 +3883,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
 
                     // Special Tag Battles
-                    if (currList.get(t).isDoubleBattle) {
-                        tpkList = rivalTrainer.get(prefix + (j - 1) + "-" + i).get(t).pokemon;
+                    if (currList.get(t).getIsDoubleBattle()) {
+                        tpkList = rivalTrainer.get(prefix + (j - 1) + "-" + i).get(t).getPokemon();
                     }
 
                     // Skip the weakest mons of the next team
@@ -3914,7 +3914,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
 
                     // Shuffle after finished
-                    Collections.shuffle(currList.get(t).pokemon, random);
+                    Collections.shuffle(currList.get(t).getPokemon(), random);
                 }
             }
             // Shuffle and alter the last rival fight
@@ -3925,12 +3925,12 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (Trainer trainer : trainerList) {
                 if (this instanceof Gen3RomHandler && isGen1()) {
                     // Randomize two pokemon
-                    trainer.pokemon.sort(Comparator.comparing(TrainerPokemon::getLevel));
-                    trainer.pokemon.get(0).pokemon = randomPokemon();
-                    trainer.pokemon.get(1).pokemon = randomPokemon();
+                    trainer.getPokemon().sort(Comparator.comparing(TrainerPokemon::getLevel));
+                    trainer.getPokemon().get(0).pokemon = randomPokemon();
+                    trainer.getPokemon().get(1).pokemon = randomPokemon();
                     noRepeatTaggedTeam(trainer, null);
                 }
-                Collections.shuffle(trainer.pokemon, random);
+                Collections.shuffle(trainer.getPokemon(), random);
             }
         }
     }
@@ -3955,19 +3955,19 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private int getLevelOfStarter(List<Trainer> currentTrainers, String tag) {
         for (Trainer t : currentTrainers) {
-            if (t.tag != null && t.tag.equals(tag)) {
+            if (t.getTag() != null && t.getTag().equals(tag)) {
                 // Bingo, get highest level
                 // last pokemon is given priority +2 but equal priority
                 // = first pokemon wins, so its effectively +1
                 // If it's tagged the same we can assume it's the same team
                 // just the opposite gender or something like that...
                 // So no need to check other trainers with same tag.
-                int highestLevel = t.pokemon.get(0).level;
-                int trainerPkmnCount = t.pokemon.size();
+                int highestLevel = t.getPokemon().get(0).level;
+                int trainerPkmnCount = t.getPokemon().size();
                 for (int i = 1; i < trainerPkmnCount; i++) {
                     int levelBonus = (i == trainerPkmnCount - 1) ? 2 : 0;
-                    if (t.pokemon.get(i).level + levelBonus > highestLevel) {
-                        highestLevel = t.pokemon.get(i).level;
+                    if (t.getPokemon().get(i).level + levelBonus > highestLevel) {
+                        highestLevel = t.getPokemon().get(i).level;
                     }
                 }
                 return highestLevel;
@@ -3978,18 +3978,18 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private void changeStarterWithTag(List<Trainer> currentTrainers, String tag, Pokemon starter) {
         for (Trainer t : currentTrainers) {
-            if (t.tag != null && t.tag.equals(tag)) {
+            if (t.getTag() != null && t.getTag().equals(tag)) {
                 // Bingo
                 // Change the highest level pokemon, not the last.
                 // BUT: last gets +2 lvl priority (effectively +1)
                 // same as above, equal priority = earlier wins
                 noRepeatTaggedTeam(t, starter);
-                TrainerPokemon bestPoke = t.pokemon.get(0);
-                int trainerPkmnCount = t.pokemon.size();
+                TrainerPokemon bestPoke = t.getPokemon().get(0);
+                int trainerPkmnCount = t.getPokemon().size();
                 for (int i = 1; i < trainerPkmnCount; i++) {
                     int levelBonus = (i == trainerPkmnCount - 1) ? 2 : 0;
-                    if (t.pokemon.get(i).level + levelBonus > bestPoke.level) {
-                        bestPoke = t.pokemon.get(i);
+                    if (t.getPokemon().get(i).level + levelBonus > bestPoke.level) {
+                        bestPoke = t.getPokemon().get(i);
                     }
                 }
                 bestPoke.pokemon = starter;
@@ -4003,13 +4003,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         int tries = 0;
         Pokemon fullyEvolved = starter == null ? null : fullyEvolve(starter);
         // Loop over entire team.
-        for (int i = 0; i < trainer.pokemon.size(); i++) {
+        for (int i = 0; i < trainer.getPokemon().size(); i++) {
             if (tries > 100) {
                 System.out.println("Unable to prevent rival from duplicating team.");
                 break;
             }
             // Current suspect pokemon based on 'i'
-            TrainerPokemon tp = trainer.pokemon.get(i);
+            TrainerPokemon tp = trainer.getPokemon().get(i);
             // Check if suspect pokemon matches the starter or its full evolution
             if (tp.pokemon == starter || tp.pokemon == fullyEvolved) {
                 // Randomize this pokemon
@@ -4022,7 +4022,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             // Loop over the beginning of the team.
             for (int j = 0; j < i; j++) {
-                if (tp.pokemon == trainer.pokemon.get(j).pokemon) {
+                if (tp.pokemon == trainer.getPokemon().get(j).pokemon) {
                     // Randomize this pokemon
                     tp.pokemon = pickReplacement(tp.pokemon, true, null, true, true);
                     tp.resetMoves = true;

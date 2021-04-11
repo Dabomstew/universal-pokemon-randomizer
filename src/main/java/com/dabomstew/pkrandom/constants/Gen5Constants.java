@@ -574,22 +574,22 @@ public class Gen5Constants {
     }
 
     private static void tagRivalBW(List<Trainer> allTrainers, String tag, int offset) {
-        allTrainers.get(offset - 1).tag = tag + "-0";
-        allTrainers.get(offset).tag = tag + "-1";
-        allTrainers.get(offset + 1).tag = tag + "-2";
+        allTrainers.get(offset - 1).setTag(tag + "-0");
+        allTrainers.get(offset).setTag(tag + "-1");
+        allTrainers.get(offset + 1).setTag(tag + "-2");
 
     }
 
     private static void tag(List<Trainer> allTrainers, int number, String tag) {
         if (allTrainers.size() > (number - 1)) {
-            allTrainers.get(number - 1).tag = tag;
+            allTrainers.get(number - 1).setTag(tag);
         }
     }
 
     private static void tag(List<Trainer> allTrainers, String tag, int... numbers) {
         for (int num : numbers) {
             if (allTrainers.size() > (num - 1)) {
-                allTrainers.get(num - 1).tag = tag;
+                allTrainers.get(num - 1).setTag(tag);
             }
         }
     }

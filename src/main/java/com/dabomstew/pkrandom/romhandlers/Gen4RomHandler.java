@@ -1288,12 +1288,12 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 byte[] trainer = trainers.files.get(i);
                 byte[] trpoke = trpokes.files.get(i);
                 Trainer tr = new Trainer();
-                tr.poketype = trainer[0] & 0xFF;
-                tr.trainerclass = trainer[1] & 0xFF;
-                tr.offset = i;
+                tr.setPoketype(trainer[0] & 0xFF);
+                tr.setTrainerclass(trainer[1] & 0xFF);
+                tr.setOffset(i);
                 int numPokes = trainer[3] & 0xFF;
                 int pokeOffs = 0;
-                tr.fullDisplayName = tclasses.get(tr.trainerclass) + " " + tnames.get(i - 1);
+                tr.setFullDisplayName(tclasses.get(tr.getTrainerclass()) + " " + tnames.get(i - 1));
                 // printBA(trpoke);
                 for (int poke = 0; poke < numPokes; poke++) {
                     int ailevel = trpoke[pokeOffs] & 0xFF;
@@ -1306,12 +1306,12 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     tpk.AILevel = ailevel;
                     tpk.ability = trpoke[pokeOffs + 1] & 0xFF;
                     pokeOffs += 6;
-                    if ((tr.poketype & 2) == 2) {
+                    if ((tr.getPoketype() & 2) == 2) {
                         int heldItem = readWord(trpoke, pokeOffs);
                         tpk.heldItem = heldItem;
                         pokeOffs += 2;
                     }
-                    if ((tr.poketype & 1) == 1) {
+                    if ((tr.getPoketype() & 1) == 1) {
                         int attack1 = readWord(trpoke, pokeOffs);
                         int attack2 = readWord(trpoke, pokeOffs + 2);
                         int attack3 = readWord(trpoke, pokeOffs + 4);
@@ -1326,7 +1326,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     if (getRomEntry().romType != Gen4Constants.Type_DP) {
                         pokeOffs += 2;
                     }
-                    tr.pokemon.add(tpk);
+                    tr.getPokemon().add(tpk);
                 }
                 allTrainers.add(tr);
             }
@@ -1361,34 +1361,34 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 byte[] trainer = trainers.getFiles().get(i);
                 Trainer tr = allTrainers.next();
                 // preserve original poketype
-                trainer[0] = (byte) tr.poketype;
-                int numPokes = tr.pokemon.size();
+                trainer[0] = (byte) tr.getPoketype();
+                int numPokes = tr.getPokemon().size();
                 trainer[3] = (byte) numPokes;
 
                 int bytesNeeded = 6 * numPokes;
                 if (getRomEntry().romType != Gen4Constants.Type_DP) {
                     bytesNeeded += 2 * numPokes;
                 }
-                if ((tr.poketype & 1) == 1) {
+                if ((tr.getPoketype() & 1) == 1) {
                     bytesNeeded += 8 * numPokes;
                 }
-                if ((tr.poketype & 2) == 2) {
+                if ((tr.getPoketype() & 2) == 2) {
                     bytesNeeded += 2 * numPokes;
                 }
                 byte[] trpoke = new byte[bytesNeeded];
                 int pokeOffs = 0;
-                Iterator<TrainerPokemon> tpokes = tr.pokemon.iterator();
+                Iterator<TrainerPokemon> tpokes = tr.getPokemon().iterator();
                 for (int poke = 0; poke < numPokes; poke++) {
                     TrainerPokemon tp = tpokes.next();
                     writeWord(trpoke, pokeOffs, tp.AILevel);
                     writeWord(trpoke, pokeOffs + 2, tp.level);
                     writeWord(trpoke, pokeOffs + 4, tp.pokemon.number);
                     pokeOffs += 6;
-                    if ((tr.poketype & 2) == 2) {
+                    if ((tr.getPoketype() & 2) == 2) {
                         writeWord(trpoke, pokeOffs, tp.heldItem);
                         pokeOffs += 2;
                     }
-                    if ((tr.poketype & 1) == 1) {
+                    if ((tr.getPoketype() & 1) == 1) {
                         if (tp.resetMoves) {
                             int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon, movesets, tp.level);
                             for (int m = 0; m < 4; m++) {

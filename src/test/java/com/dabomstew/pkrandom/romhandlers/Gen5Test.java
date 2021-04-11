@@ -551,13 +551,13 @@ public class Gen5Test {
         }
         for(String tag: new String[]{"GYM1", "CILAN", "CHILI", "CRESS"}) {
             Trainer t = new Trainer();
-            t.tag = tag;
+            t.setTag(tag);
             TrainerPokemon tp1 = mock(TrainerPokemon.class);
             TrainerPokemon tp2 = mock(TrainerPokemon.class);
             doReturn(pokemonList.get(0)).when(tp1).getPokemon();
             doReturn(pokemonList.get(0)).when(tp2).getPokemon();
-            t.pokemon.add(tp1);
-            t.pokemon.add(tp2);
+            t.getPokemon().add(tp1);
+            t.getPokemon().add(tp2);
             trainerList.add(t);
         }
         // Fill in the rest to match length of getFile()
@@ -565,7 +565,7 @@ public class Gen5Test {
             Trainer t = new Trainer();
             TrainerPokemon tp = mock(TrainerPokemon.class);
             doReturn(pokemonList.get(0)).when(tp).getPokemon();
-            t.pokemon.add(tp);
+            t.getPokemon().add(tp);
             trainerList.add(t);
         }
         for (int i = 0; i < GET_FILE_LENGTH; i++) {

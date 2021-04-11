@@ -174,7 +174,7 @@ public class Gen3Test {
             Trainer t = new Trainer();
             TrainerPokemon tp = mock(TrainerPokemon.class);
             doReturn(pokemonList.get(0)).when(tp).getPokemon();
-            t.pokemon.add(tp);
+            t.getPokemon().add(tp);
             trainerList.add(t);
         }
     }

@@ -339,10 +339,10 @@ public class Gen1Constants {
     private static void tbc(List<Trainer> allTrainers, int classNum, int number, String tag) {
         int currnum = -1;
         for (Trainer t : allTrainers) {
-            if (t.trainerclass == classNum) {
+            if (t.getTrainerclass() == classNum) {
                 currnum++;
                 if (currnum == number) {
-                    t.tag = tag;
+                    t.setTag(tag);
                     return;
                 }
             }

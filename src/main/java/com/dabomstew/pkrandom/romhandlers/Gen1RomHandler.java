@@ -984,30 +984,30 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             String tcname = tcnames.get(i - 1);
             for (int trnum = 0; trnum < limit; trnum++) {
                 Trainer tr = new Trainer();
-                tr.offset = offs;
-                tr.trainerclass = i;
-                tr.fullDisplayName = tcname;
+                tr.setOffset(offs);
+                tr.setTrainerclass(i);
+                tr.setFullDisplayName(tcname);
                 int dataType = rom[offs] & 0xFF;
                 if (dataType == 0xFF) {
                     // "Special" trainer
-                    tr.poketype = 1;
+                    tr.setPoketype(1);
                     offs++;
                     while (rom[offs] != 0x0) {
                         TrainerPokemon tpk = new TrainerPokemon();
                         tpk.level = rom[offs] & 0xFF;
                         tpk.pokemon = pokes[getPokeRBYToNumTable()[rom[offs + 1] & 0xFF]];
-                        tr.pokemon.add(tpk);
+                        tr.getPokemon().add(tpk);
                         offs += 2;
                     }
                 } else {
-                    tr.poketype = 0;
+                    tr.setPoketype(0);
                     int fixedLevel = dataType;
                     offs++;
                     while (rom[offs] != 0x0) {
                         TrainerPokemon tpk = new TrainerPokemon();
                         tpk.level = fixedLevel;
                         tpk.pokemon = pokes[getPokeRBYToNumTable()[rom[offs] & 0xFF]];
-                        tr.pokemon.add(tpk);
+                        tr.getPokemon().add(tpk);
                         offs++;
                     }
                 }
@@ -1041,14 +1041,14 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             int limit = trainerclasslimits[i];
             for (int trnum = 0; trnum < limit; trnum++) {
                 Trainer tr = allTrainers.next();
-                if (tr.trainerclass != i) {
-                    System.err.println("Trainer mismatch: " + tr.name);
+                if (tr.getTrainerclass() != i) {
+                    System.err.println("Trainer mismatch: " + tr.getName());
                 }
-                Iterator<TrainerPokemon> tPokes = tr.pokemon.iterator();
+                Iterator<TrainerPokemon> tPokes = tr.getPokemon().iterator();
                 // Write their pokemon based on poketype
-                if (tr.poketype == 0) {
+                if (tr.getPoketype() == 0) {
                     // Regular trainer
-                    int fixedLevel = tr.pokemon.get(0).level;
+                    int fixedLevel = tr.getPokemon().get(0).level;
                     rom[offs] = (byte) fixedLevel;
                     offs++;
                     while (tPokes.hasNext()) {
