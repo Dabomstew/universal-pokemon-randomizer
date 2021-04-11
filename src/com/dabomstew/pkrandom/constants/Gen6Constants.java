@@ -52,6 +52,14 @@ public class Gen6Constants {
             815, 816, 817, 818, 819, 820 // Cosplay Pikachu
     );
 
+    public static final String criesTablePrefixXY = "60000A006B000A0082000A003D010A00";
+
+    public static final String introPokemonModelOffsetXY = "01000400020002000200000003000000";
+    public static final String introInitialCryOffset1XY = "3AFEFFEB000055E31400D40507005001";
+    public static final String introInitialCryOffset2XY = "0800A0E110FEFFEB000057E31550C405";
+    public static final String introInitialCryOffset3XY = "0020E0E30310A0E1E4FDFFEB0000A0E3";
+    public static final String introRepeatedCryOffsetXY = "1080BDE800002041000000008D001000";
+
     public static final Map<Integer,List<Integer>> speciesToMegaStoneXY = setupSpeciesToMegaStone(Type_XY);
     public static final Map<Integer,List<Integer>> speciesToMegaStoneORAS = setupSpeciesToMegaStone(Type_ORAS);
 
