@@ -2501,9 +2501,9 @@ public class NewRandomizerGUI {
                 stpLimitMainGameLegendariesCheckBox.setEnabled(false);
                 stpAllowAltFormesCheckBox.setVisible(romHandler.hasStaticAltFormes());
                 stpSwapMegaEvosCheckBox.setVisible(pokemonGeneration == 6 && !romHandler.forceSwapStaticMegaEvos());
-                stpPercentageLevelModifierCheckBox.setVisible(pokemonGeneration >= 2);
-                stpPercentageLevelModifierCheckBox.setEnabled(pokemonGeneration >= 2);
-                stpPercentageLevelModifierSlider.setVisible(pokemonGeneration >= 2);
+                stpPercentageLevelModifierCheckBox.setVisible(true);
+                stpPercentageLevelModifierCheckBox.setEnabled(true);
+                stpPercentageLevelModifierSlider.setVisible(true);
                 stpPercentageLevelModifierSlider.setEnabled(false);
                 stpFixMusicCheckBox.setVisible(pokemonGeneration >= 3 && pokemonGeneration <= 5);
                 stpFixMusicCheckBox.setEnabled(false);
