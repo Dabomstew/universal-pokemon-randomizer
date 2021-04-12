@@ -276,7 +276,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
 
         allowedItems = Gen6Constants.getAllowedItems(romEntry.romType).copy();
-        nonBadItems = Gen6Constants.nonBadItems.copy();
+        nonBadItems = Gen6Constants.getNonBadItems(romEntry.romType).copy();
     }
 
     private void loadPokemonStats() {

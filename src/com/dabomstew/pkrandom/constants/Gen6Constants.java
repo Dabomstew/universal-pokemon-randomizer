@@ -663,7 +663,7 @@ public class Gen6Constants {
         return m;
     }
 
-    public static ItemList allowedItemsXY, allowedItemsORAS, nonBadItems;
+    public static ItemList allowedItemsXY, allowedItemsORAS, nonBadItemsXY, nonBadItemsORAS;
     public static List<Integer> regularShopItems, opShopItems;
 
     static {
@@ -709,17 +709,29 @@ public class Gen6Constants {
 
         // non-bad items
         // ban specific pokemon hold items, berries, apricorns, mail
-        nonBadItems = allowedItemsXY.copy();
+        nonBadItemsXY = allowedItemsXY.copy();
 
-        nonBadItems.banSingles(0x6F, 0x70, 0xE1, 0xEC, 0x9B, 0x112, 0x23F, 0x2BB, 0x2C0);
-        nonBadItems.banRange(0x5F, 4); // mulch
-        nonBadItems.banRange(0x87, 2); // orbs
-        nonBadItems.banRange(0x89, 12); // mails
-        nonBadItems.banRange(0x9F, 25); // berries without useful battle effects
-        nonBadItems.banRange(0x100, 4); // pokemon specific
-        nonBadItems.banRange(0x104, 5); // contest scarves
-        nonBadItems.banRange(0x248,7); // relic items
-        nonBadItems.banRange(0x28C,4); // more mulch
+        nonBadItemsXY.banSingles(0x6F, 0x70, 0xE1, 0xEC, 0x9B, 0x112, 0x23F, 0x2BB, 0x2C0);
+        nonBadItemsXY.banRange(0x5F, 4); // mulch
+        nonBadItemsXY.banRange(0x87, 2); // orbs
+        nonBadItemsXY.banRange(0x89, 12); // mails
+        nonBadItemsXY.banRange(0x9F, 25); // berries without useful battle effects
+        nonBadItemsXY.banRange(0x100, 4); // pokemon specific
+        nonBadItemsXY.banRange(0x104, 5); // contest scarves
+        nonBadItemsXY.banRange(0x248,7); // relic items
+        nonBadItemsXY.banRange(0x28C,4); // more mulch
+
+        nonBadItemsORAS = allowedItemsORAS.copy();
+
+        nonBadItemsORAS.banSingles(0x6F, 0x70, 0xE1, 0xEC, 0x9B, 0x112, 0x23F, 0x2BB, 0x2C0);
+        nonBadItemsORAS.banRange(0x5F, 4); // mulch
+        nonBadItemsORAS.banRange(0x87, 2); // orbs
+        nonBadItemsORAS.banRange(0x89, 12); // mails
+        nonBadItemsORAS.banRange(0x9F, 25); // berries without useful battle effects
+        nonBadItemsORAS.banRange(0x100, 4); // pokemon specific
+        nonBadItemsORAS.banRange(0x104, 5); // contest scarves
+        nonBadItemsORAS.banRange(0x248,7); // relic items
+        nonBadItemsORAS.banRange(0x28C,4); // more mulch
 
         regularShopItems = new ArrayList<>();
 
@@ -748,6 +760,14 @@ public class Gen6Constants {
             return allowedItemsXY;
         } else {
             return allowedItemsORAS;
+        }
+    }
+
+    public static ItemList getNonBadItems(int romType) {
+        if (romType == Type_XY) {
+            return nonBadItemsXY;
+        } else {
+            return nonBadItemsORAS;
         }
     }
 
