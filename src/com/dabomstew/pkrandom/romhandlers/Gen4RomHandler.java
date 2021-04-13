@@ -77,7 +77,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         private Map<String, int[]> arrayEntries = new HashMap<>();
         private List<StaticPokemon> staticPokemon = new ArrayList<>();
         private List<ScriptEntry> marillCryScriptEntries = new ArrayList<>();
-        private List<TextEntry> marillTextEntries = new ArrayList<>();
 
         private int getInt(String key) {
             if (!numbers.containsKey(key)) {
@@ -158,9 +157,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                                     } else {
                                         current.staticPokemonSupport = false;
                                     }
-                                    if (current.copyText) {
-                                        current.marillTextEntries.addAll(otherEntry.marillTextEntries);
-                                    }
                                     current.marillCryScriptEntries.addAll(otherEntry.marillCryScriptEntries);
                                 }
                             }
@@ -186,13 +182,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                                 ScriptEntry entry = new ScriptEntry(file, offset);
                                 current.marillCryScriptEntries.add(entry);
                             }
-                        } else if (r[0].equals("MarillText[]")) {
-                            String[] parts = r[1].substring(1, r[1].length() - 1).split(",", 3);
-                            TextEntry entry = new TextEntry();
-                            entry.textFile = parseRIInt(parts[0]);
-                            entry.stringNumber = parseRIInt(parts[1]);
-                            entry.template = parts[2].trim();
-                            current.marillTextEntries.add(entry);
                         } else {
                             if (r[1].startsWith("[") && r[1].endsWith("]")) {
                                 String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
@@ -3543,12 +3532,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     scriptNarc.files.set(entry.scriptFile, script);
                 }
 
-                // Modify the text too (if the ROM supports it) for additional consistency
-                for (TextEntry entry : romEntry.marillTextEntries) {
-                    List<String> stringsForEntry = getStrings(entry.textFile);
-                    String newString = entry.template.replace("[species]", pokes[marillReplacementId].name);
-                    stringsForEntry.set(entry.stringNumber, newString);
-                    setStrings(entry.textFile, stringsForEntry);
+                // Modify the text too for additional consistency
+                int[] textOffsets = romEntry.arrayEntries.get("MarillTextFiles");
+                String originalSpeciesString = pokes[Species.marill].name.toUpperCase();
+                String newSpeciesString = pokes[marillReplacementId].name;
+                Map<String, String> replacements = new TreeMap<>();
+                replacements.put(originalSpeciesString, newSpeciesString);
+                for (int i = 0; i < textOffsets.length; i++) {
+                    replaceAllStringsInEntry(textOffsets[i], replacements, Gen4Constants.textCharsPerLine);
                 }
             }
         } catch (IOException e) {
@@ -3863,15 +3854,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     private void replaceAllStringsInEntry(int entry, Map<String, String> replacements, int lineLength) {
-        List<String> thisTradeStrings = this.getStrings(entry);
-        int ttsCount = thisTradeStrings.size();
-        for (int strNum = 0; strNum < ttsCount; strNum++) {
-            String oldString = thisTradeStrings.get(strNum);
+        List<String> strings = this.getStrings(entry);
+        for (int strNum = 0; strNum < strings.size(); strNum++) {
+            String oldString = strings.get(strNum);
             String newString = RomFunctions.formatTextWithReplacements(oldString, replacements, "\\n", "\\l", "\\p",
                     lineLength, ssd);
-            thisTradeStrings.set(strNum, newString);
+            strings.set(strNum, newString);
         }
-        this.setStrings(entry, thisTradeStrings);
+        this.setStrings(entry, strings);
     }
 
     @Override
