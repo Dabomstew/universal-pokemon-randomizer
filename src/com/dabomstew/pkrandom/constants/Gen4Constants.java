@@ -416,6 +416,21 @@ public class Gen4Constants {
             speciesID -= 1;
         }
 
+        // Gible
+        if (overworldSpriteID >= 784) {
+            speciesID -= 1;
+        }
+
+        // Gabite
+        if (overworldSpriteID >= 786) {
+            speciesID -= 1;
+        }
+
+        // Garchomp
+        if (overworldSpriteID >= 788) {
+            speciesID -= 1;
+        }
+
         // Hippopotas
         if (overworldSpriteID >= 793) {
             speciesID -= 1;
