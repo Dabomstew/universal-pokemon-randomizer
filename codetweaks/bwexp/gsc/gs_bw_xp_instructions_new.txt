@@ -1,9 +1,0 @@
-Gold/Silver B/W-style XP patch (new)
-3ECE1 : C3 00 7F (bootstrap)
-3ED44 : C3 19 7F (jump for XP adding)
-3EF0D : C3 0D 7F (jumps for participants copy)
-191E29 & 191E3F : F1 D0 38 (shows D0F1 with 3 bytes big endian & max 8 digits)
-191E31 & 191E47 : E7 58 (cuts the message down to X EXP! so it fits with >4 digits)
-
-3FF00 - 3FF4D: copy 0x4E bytes raw
-16AB00 - 16B060: copy 0x561 bytes raw

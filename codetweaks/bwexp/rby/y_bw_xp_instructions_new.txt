@@ -1,7 +1,0 @@
-Yellow B/W-style XP patch
-552B0 : C3 00 6B (jumps to the new code)
-5548C : C3 44 70 (jumps to the participants hook)
-9FAD9 : EC CF 38 (shows CFEC with 3 bytes big endian & max 8 digits)
-9FAE1 : E7 58 (cuts the message down to X EXP! so it fits with >4 digits)
-
-56B00-5704F: copy 0x550 bytes raw

@@ -70,12 +70,13 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         private String name;
         private String romCode;
         private int romType;
-        private boolean staticPokemonSupport = false, copyStaticPokemon = false;
+        private boolean staticPokemonSupport = false, copyStaticPokemon = false, copyText = false;
         private Map<String, String> strings = new HashMap<>();
         private Map<String, String> tweakFiles = new HashMap<>();
         private Map<String, Integer> numbers = new HashMap<>();
         private Map<String, int[]> arrayEntries = new HashMap<>();
         private List<StaticPokemon> staticPokemon = new ArrayList<>();
+        private List<ScriptEntry> marillCryScriptEntries = new ArrayList<>();
 
         private int getInt(String key) {
             if (!numbers.containsKey(key)) {
@@ -90,6 +91,12 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             }
             return strings.get(key);
         }
+    }
+
+    private static class TextEntry {
+        private int textFile;
+        private int stringNumber;
+        private String template;
     }
 
     private static List<RomEntry> roms;
@@ -150,6 +157,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                                     } else {
                                         current.staticPokemonSupport = false;
                                     }
+                                    current.marillCryScriptEntries.addAll(otherEntry.marillCryScriptEntries);
                                 }
                             }
                         } else if (r[0].equals("StaticPokemon{}")) {
@@ -160,8 +168,20 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                         } else if (r[0].equals("CopyStaticPokemon")) {
                             int csp = parseRIInt(r[1]);
                             current.copyStaticPokemon = (csp > 0);
+                        } else if (r[0].equals("CopyText")) {
+                            int ct = parseRIInt(r[1]);
+                            current.copyText = (ct > 0);
                         } else if (r[0].endsWith("Tweak")) {
                             current.tweakFiles.put(r[0], r[1]);
+                        } else if (r[0].endsWith("MarillCryScripts")) {
+                            String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
+                            for (String off : offsets) {
+                                String[] parts = off.split(":");
+                                int file = parseRIInt(parts[0]);
+                                int offset = parseRIInt(parts[1]);
+                                ScriptEntry entry = new ScriptEntry(file, offset);
+                                current.marillCryScriptEntries.add(entry);
+                            }
                         } else {
                             if (r[1].startsWith("[") && r[1].endsWith("]")) {
                                 String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
@@ -305,6 +325,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
         allowedItems = Gen4Constants.allowedItems.copy();
         nonBadItems = Gen4Constants.nonBadItems.copy();
+
+        // We want to guarantee that the catching tutorial in HGSS has Ethan/Lyra's new Pokemon. We also
+        // want to allow the option of randomizing the enemy Pokemon too. Unfortunately, the latter can
+        // occur *before* the former, but there's no guarantee that it will even happen. Since we *know*
+        // we'll need to do this patch eventually, just expand the arm9 here to make things easy.
+        if (romEntry.romType == Gen4Constants.Type_HGSS) {
+            int extendBy = romEntry.getInt("NewCatchingTutorialSubroutineSize");
+            arm9 = extendARM9(arm9, extendBy, romEntry.getString("TCMCopyingPrefix"), Gen4Constants.arm9Offset);
+            genericIPSPatch(arm9, "NewCatchingTutorialSubroutineTweak");
+        }
     }
 
     private void loadMoves() {
@@ -2424,7 +2454,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 }
             }
             if (romEntry.getInt("MysteryEggOffset") > 0) {
-                byte[] ovOverlay = readOverlay(romEntry.getInt("AssortedFieldOvlNumber"));
+                byte[] ovOverlay = readOverlay(romEntry.getInt("FieldOvlNumber"));
                 StaticEncounter se = new StaticEncounter(pokes[ovOverlay[romEntry.getInt("MysteryEggOffset")] & 0xFF]);
                 se.isEgg = true;
                 sp.add(se);
@@ -2510,9 +2540,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 if (pokenum > 255) {
                     pokenum = this.random.nextInt(255) + 1;
                 }
-                byte[] ovOverlay = readOverlay(romEntry.getInt("AssortedFieldOvlNumber"));
+                byte[] ovOverlay = readOverlay(romEntry.getInt("FieldOvlNumber"));
                 ovOverlay[romEntry.getInt("MysteryEggOffset")] = (byte) pokenum;
-                writeOverlay(romEntry.getInt("AssortedFieldOvlNumber"), ovOverlay);
+                writeOverlay(romEntry.getInt("FieldOvlNumber"), ovOverlay);
             }
             if (romEntry.getInt("FossilTableOffset") > 0) {
                 int baseOffset = romEntry.getInt("FossilTableOffset");
@@ -2711,7 +2741,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         int bytesPer = romEntry.getInt("MoveTutorBytesCount");
         List<Integer> mtMoves = new ArrayList<>();
         try {
-            byte[] mtFile = readOverlay(romEntry.getInt("AssortedFieldOvlNumber"));
+            byte[] mtFile = readOverlay(romEntry.getInt("FieldOvlNumber"));
             for (int i = 0; i < amount; i++) {
                 mtMoves.add(readWord(mtFile, baseOffset + i * bytesPer));
             }
@@ -2733,11 +2763,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             return;
         }
         try {
-            byte[] mtFile = readOverlay(romEntry.getInt("AssortedFieldOvlNumber"));
+            byte[] mtFile = readOverlay(romEntry.getInt("FieldOvlNumber"));
             for (int i = 0; i < amount; i++) {
                 writeWord(mtFile, baseOffset + i * bytesPer, moves.get(i));
             }
-            writeOverlay(romEntry.getInt("AssortedFieldOvlNumber"), mtFile);
+            writeOverlay(romEntry.getInt("FieldOvlNumber"), mtFile);
 
             // In HGSS, Headbutt is the last tutor move, but the tutor teaches it
             // to you via a hardcoded script rather than looking at this data
@@ -3490,18 +3520,48 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 }
                 writeOverlay(romEntry.getInt("IntroOvlNumber"), introOverlay);
             } else if (romEntry.romType == Gen4Constants.Type_HGSS) {
+                // Modify the sprite used for Ethan/Lyra's Marill
                 int marillReplacement = this.random.nextInt(548) + 297;
                 while (Gen4Constants.hgssBannedOverworldPokemon.contains(marillReplacement)) {
                     marillReplacement = this.random.nextInt(548) + 297;
                 }
-                byte[] assortedFieldOverlay = readOverlay(romEntry.getInt("AssortedFieldOvlNumber"));
+                byte[] fieldOverlay = readOverlay(romEntry.getInt("FieldOvlNumber"));
                 String prefix = Gen4Constants.lyraEthanMarillSpritePrefix;
-                int offset = find(assortedFieldOverlay, prefix);
+                int offset = find(fieldOverlay, prefix);
                 if (offset > 0) {
                     offset += prefix.length() / 2; // because it was a prefix
-                    writeWord(assortedFieldOverlay, offset, marillReplacement);
+                    writeWord(fieldOverlay, offset, marillReplacement);
                 }
-                writeOverlay(romEntry.getInt("AssortedFieldOvlNumber"), assortedFieldOverlay);
+                writeOverlay(romEntry.getInt("FieldOvlNumber"), fieldOverlay);
+
+                // Now modify the Marill's cry in every script it appears in to ensure consistency
+                int marillReplacementId = Gen4Constants.convertOverworldSpriteToSpecies(marillReplacement);
+                for (ScriptEntry entry : romEntry.marillCryScriptEntries) {
+                    byte[] script = scriptNarc.files.get(entry.scriptFile);
+                    writeWord(script, entry.scriptOffset, marillReplacementId);
+                    scriptNarc.files.set(entry.scriptFile, script);
+                }
+
+                // Modify the text too for additional consistency
+                int[] textOffsets = romEntry.arrayEntries.get("MarillTextFiles");
+                String originalSpeciesString = pokes[Species.marill].name.toUpperCase();
+                String newSpeciesString = pokes[marillReplacementId].name;
+                Map<String, String> replacements = new TreeMap<>();
+                replacements.put(originalSpeciesString, newSpeciesString);
+                for (int i = 0; i < textOffsets.length; i++) {
+                    replaceAllStringsInEntry(textOffsets[i], replacements, Gen4Constants.textCharsPerLine);
+                }
+
+                // Lastly, modify the catching tutorial to use the new Pokemon
+                String catchingTutorialMonTablePrefix = romEntry.getString("CatchingTutorialMonTablePrefix");
+                offset = find(arm9, catchingTutorialMonTablePrefix);
+                if (offset > 0) {
+                    offset += catchingTutorialMonTablePrefix.length() / 2; // because it was a prefix
+
+                    // As part of our catching tutorial patch, the player Pokemon's ID is just pc-relative
+                    // loaded, and offset is now pointing to it.
+                    writeWord(arm9, offset, marillReplacementId);
+                }
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
@@ -3820,15 +3880,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     private void replaceAllStringsInEntry(int entry, Map<String, String> replacements, int lineLength) {
-        List<String> thisTradeStrings = this.getStrings(entry);
-        int ttsCount = thisTradeStrings.size();
-        for (int strNum = 0; strNum < ttsCount; strNum++) {
-            String oldString = thisTradeStrings.get(strNum);
+        List<String> strings = this.getStrings(entry);
+        for (int strNum = 0; strNum < strings.size(); strNum++) {
+            String oldString = strings.get(strNum);
             String newString = RomFunctions.formatTextWithReplacements(oldString, replacements, "\\n", "\\l", "\\p",
                     lineLength, ssd);
-            thisTradeStrings.set(strNum, newString);
+            strings.set(strNum, newString);
         }
-        this.setStrings(entry, thisTradeStrings);
+        this.setStrings(entry, strings);
     }
 
     @Override
@@ -3942,15 +4001,18 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         int opponentOffset = romEntry.getInt("CatchingTutorialOpponentMonOffset");
 
         if (romEntry.romType == Gen4Constants.Type_HGSS) {
-            // Can randomize player mon too, but both limited to 1-255
-            int playerOffset = romEntry.getInt("CatchingTutorialPlayerMonOffset");
+            String catchingTutorialMonTablePrefix = romEntry.getString("CatchingTutorialMonTablePrefix");
+            int offset = find(arm9, catchingTutorialMonTablePrefix);
+            if (offset > 0) {
+                offset += catchingTutorialMonTablePrefix.length() / 2; // because it was a prefix
 
-            Pokemon opponent = randomPokemonLimited(255, false);
-            Pokemon player = randomPokemonLimited(255, false);
-
-            if (opponent != null && player != null) {
-                arm9[opponentOffset] = (byte) opponent.number;
-                arm9[playerOffset] = (byte) player.number;
+                // The player's mon is randomized as part of randomizing Lyra/Ethan's Pokemon (see
+                // randomizeIntroPokemon), so we just care about the enemy mon. As part of our catching
+                // tutorial patch, the player and enemy species IDs are pc-relative loaded, with the
+                // enemy ID occurring right after the player ID (which is what offset is pointing to).
+                Pokemon opponent = randomPokemonLimited(Integer.MAX_VALUE, false);
+                // writeWord(arm9, offset + 4, opponent.number);
+                writeWord(arm9, offset + 4, opponent.number);
             }
         } else {
             // Only opponent, but enough space for any mon
