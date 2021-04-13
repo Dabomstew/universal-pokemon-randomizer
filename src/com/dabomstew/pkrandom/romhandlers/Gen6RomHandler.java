@@ -2985,6 +2985,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public List<Integer> getUniqueNoSellItems() {
+        return Gen6Constants.uniqueNoSellItems;
+    }
+
+    @Override
     public List<Integer> getRegularShopItems() {
         return Gen6Constants.regularShopItems;
     }

@@ -31,6 +31,7 @@ package com.dabomstew.pkrandom.romhandlers;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
@@ -4072,11 +4073,13 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void randomizeFieldItems(Settings settings) {
         boolean banBadItems = settings.isBanBadRandomFieldItems();
         boolean distributeItemsControl = settings.getFieldItemsMod() == Settings.FieldItemsMod.RANDOM_EVEN;
+        boolean uniqueItems = !settings.isBalanceShopPrices();
 
-        ItemList possibleItems = banBadItems ? this.getNonBadItems() : this.getAllowedItems();
+        ItemList possibleItems = banBadItems ? this.getNonBadItems().copy() : this.getAllowedItems().copy();
         List<Integer> currentItems = this.getRegularFieldItems();
         List<Integer> currentTMs = this.getCurrentFieldTMs();
         List<Integer> requiredTMs = this.getRequiredFieldTMs();
+        List<Integer> uniqueNoSellItems = this.getUniqueNoSellItems();
         // System.out.println("distributeItemsControl: "+ distributeItemsControl);
 
         int fieldItemCount = currentItems.size();
@@ -4098,11 +4101,19 @@ public abstract class AbstractRomHandler implements RomHandler {
                     iterNum +=1;
                 }
                 newItems.add(chosenItem);
-                this.setItemPlacementHistory(chosenItem);
+                if (uniqueItems && uniqueNoSellItems.contains(chosenItem)) {
+                    possibleItems.banSingles(chosenItem);
+                } else {
+                    this.setItemPlacementHistory(chosenItem);
+                }
             }
         } else {
             for (int i = 0; i < fieldItemCount; i++) {
-                newItems.add(possibleItems.randomNonTM(this.random));
+                int chosenItem = possibleItems.randomNonTM(this.random);
+                newItems.add(chosenItem);
+                if (uniqueItems && uniqueNoSellItems.contains(chosenItem)) {
+                    possibleItems.banSingles(chosenItem);
+                }
             }
         }
 

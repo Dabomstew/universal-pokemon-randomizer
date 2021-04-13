@@ -771,6 +771,10 @@ public class Gen6Constants {
         }
     }
 
+    public static final List<Integer> uniqueNoSellItems = Arrays.asList(656, 657, 658, 659, 660, 661, 662, 663, 664,
+            665, 666, 667, 668, 669, 670, 671, 672, 673, 674, 675, 676, 677, 678, 679, 680, 681, 682, 683, 684, 685,
+            752, 753, 754, 755, 756, 757, 758, 759, 760, 761, 762, 763, 764, 767, 768, 769, 770);
+
     private static Map<Integer,List<Integer>> setupSpeciesToMegaStone(int romType) {
         Map<Integer,List<Integer>> map = new TreeMap<>();
 

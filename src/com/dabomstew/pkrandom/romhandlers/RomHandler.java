@@ -407,6 +407,8 @@ public interface RomHandler {
 
     ItemList getNonBadItems();
 
+    List<Integer> getUniqueNoSellItems();
+
     List<Integer> getRegularShopItems();
 
     List<Integer> getOPShopItems();

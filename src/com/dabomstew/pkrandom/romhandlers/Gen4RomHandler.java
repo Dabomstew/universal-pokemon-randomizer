@@ -3519,6 +3519,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public List<Integer> getUniqueNoSellItems() {
+        return new ArrayList<>();
+    }
+
+    @Override
     public List<Integer> getRegularShopItems() {
         return Gen4Constants.regularShopItems;
     }

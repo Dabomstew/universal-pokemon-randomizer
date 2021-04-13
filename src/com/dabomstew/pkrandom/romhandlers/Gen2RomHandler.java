@@ -1874,6 +1874,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public List<Integer> getUniqueNoSellItems() {
+        return new ArrayList<>();
+    }
+
+    @Override
     public List<Integer> getRegularShopItems() {
         return null; // Not implemented
     }

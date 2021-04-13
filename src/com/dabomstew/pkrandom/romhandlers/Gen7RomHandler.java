@@ -2664,6 +2664,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public List<Integer> getUniqueNoSellItems() {
+        return new ArrayList<>();
+    }
+
+    @Override
     public List<Integer> getRegularShopItems() {
         return Gen7Constants.getRegularShopItems(romEntry.romType);
     }

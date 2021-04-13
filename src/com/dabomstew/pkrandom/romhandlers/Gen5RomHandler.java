@@ -2793,6 +2793,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public List<Integer> getUniqueNoSellItems() {
+        return new ArrayList<>();
+    }
+
+    @Override
     public List<Integer> getRegularShopItems() {
         return regularShopItems;
     }

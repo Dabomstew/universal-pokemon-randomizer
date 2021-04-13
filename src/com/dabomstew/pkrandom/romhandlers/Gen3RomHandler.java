@@ -2903,6 +2903,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    public List<Integer> getUniqueNoSellItems() {
+        return new ArrayList<>();
+    }
+
+    @Override
     public List<Integer> getRegularShopItems() {
         return null; // Not implemented
     }
