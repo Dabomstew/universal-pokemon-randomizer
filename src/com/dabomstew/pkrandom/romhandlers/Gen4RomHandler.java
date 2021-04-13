@@ -70,12 +70,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         private String name;
         private String romCode;
         private int romType;
-        private boolean staticPokemonSupport = false, copyStaticPokemon = false;
+        private boolean staticPokemonSupport = false, copyStaticPokemon = false, copyText = false;
         private Map<String, String> strings = new HashMap<>();
         private Map<String, String> tweakFiles = new HashMap<>();
         private Map<String, Integer> numbers = new HashMap<>();
         private Map<String, int[]> arrayEntries = new HashMap<>();
         private List<StaticPokemon> staticPokemon = new ArrayList<>();
+        private List<ScriptEntry> marillCryScriptEntries = new ArrayList<>();
+        private List<TextEntry> marillTextEntries = new ArrayList<>();
 
         private int getInt(String key) {
             if (!numbers.containsKey(key)) {
@@ -90,6 +92,12 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             }
             return strings.get(key);
         }
+    }
+
+    private static class TextEntry {
+        private int textFile;
+        private int stringNumber;
+        private String template;
     }
 
     private static List<RomEntry> roms;
@@ -150,6 +158,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                                     } else {
                                         current.staticPokemonSupport = false;
                                     }
+                                    if (current.copyText) {
+                                        current.marillTextEntries.addAll(otherEntry.marillTextEntries);
+                                    }
+                                    current.marillCryScriptEntries.addAll(otherEntry.marillCryScriptEntries);
                                 }
                             }
                         } else if (r[0].equals("StaticPokemon{}")) {
@@ -160,8 +172,27 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                         } else if (r[0].equals("CopyStaticPokemon")) {
                             int csp = parseRIInt(r[1]);
                             current.copyStaticPokemon = (csp > 0);
+                        } else if (r[0].equals("CopyText")) {
+                            int ct = parseRIInt(r[1]);
+                            current.copyText = (ct > 0);
                         } else if (r[0].endsWith("Tweak")) {
                             current.tweakFiles.put(r[0], r[1]);
+                        } else if (r[0].endsWith("MarillCryScripts")) {
+                            String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
+                            for (String off : offsets) {
+                                String[] parts = off.split(":");
+                                int file = parseRIInt(parts[0]);
+                                int offset = parseRIInt(parts[1]);
+                                ScriptEntry entry = new ScriptEntry(file, offset);
+                                current.marillCryScriptEntries.add(entry);
+                            }
+                        } else if (r[0].equals("MarillText[]")) {
+                            String[] parts = r[1].substring(1, r[1].length() - 1).split(",", 3);
+                            TextEntry entry = new TextEntry();
+                            entry.textFile = parseRIInt(parts[0]);
+                            entry.stringNumber = parseRIInt(parts[1]);
+                            entry.template = parts[2].trim();
+                            current.marillTextEntries.add(entry);
                         } else {
                             if (r[1].startsWith("[") && r[1].endsWith("]")) {
                                 String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
@@ -2424,7 +2455,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 }
             }
             if (romEntry.getInt("MysteryEggOffset") > 0) {
-                byte[] ovOverlay = readOverlay(romEntry.getInt("AssortedFieldOvlNumber"));
+                byte[] ovOverlay = readOverlay(romEntry.getInt("FieldOvlNumber"));
                 StaticEncounter se = new StaticEncounter(pokes[ovOverlay[romEntry.getInt("MysteryEggOffset")] & 0xFF]);
                 se.isEgg = true;
                 sp.add(se);
@@ -2510,9 +2541,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 if (pokenum > 255) {
                     pokenum = this.random.nextInt(255) + 1;
                 }
-                byte[] ovOverlay = readOverlay(romEntry.getInt("AssortedFieldOvlNumber"));
+                byte[] ovOverlay = readOverlay(romEntry.getInt("FieldOvlNumber"));
                 ovOverlay[romEntry.getInt("MysteryEggOffset")] = (byte) pokenum;
-                writeOverlay(romEntry.getInt("AssortedFieldOvlNumber"), ovOverlay);
+                writeOverlay(romEntry.getInt("FieldOvlNumber"), ovOverlay);
             }
             if (romEntry.getInt("FossilTableOffset") > 0) {
                 int baseOffset = romEntry.getInt("FossilTableOffset");
@@ -2711,7 +2742,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         int bytesPer = romEntry.getInt("MoveTutorBytesCount");
         List<Integer> mtMoves = new ArrayList<>();
         try {
-            byte[] mtFile = readOverlay(romEntry.getInt("AssortedFieldOvlNumber"));
+            byte[] mtFile = readOverlay(romEntry.getInt("FieldOvlNumber"));
             for (int i = 0; i < amount; i++) {
                 mtMoves.add(readWord(mtFile, baseOffset + i * bytesPer));
             }
@@ -2733,11 +2764,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             return;
         }
         try {
-            byte[] mtFile = readOverlay(romEntry.getInt("AssortedFieldOvlNumber"));
+            byte[] mtFile = readOverlay(romEntry.getInt("FieldOvlNumber"));
             for (int i = 0; i < amount; i++) {
                 writeWord(mtFile, baseOffset + i * bytesPer, moves.get(i));
             }
-            writeOverlay(romEntry.getInt("AssortedFieldOvlNumber"), mtFile);
+            writeOverlay(romEntry.getInt("FieldOvlNumber"), mtFile);
 
             // In HGSS, Headbutt is the last tutor move, but the tutor teaches it
             // to you via a hardcoded script rather than looking at this data
@@ -3490,18 +3521,35 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 }
                 writeOverlay(romEntry.getInt("IntroOvlNumber"), introOverlay);
             } else if (romEntry.romType == Gen4Constants.Type_HGSS) {
+                // Modify the sprite used for Ethan/Lyra's Marill
                 int marillReplacement = this.random.nextInt(548) + 297;
                 while (Gen4Constants.hgssBannedOverworldPokemon.contains(marillReplacement)) {
                     marillReplacement = this.random.nextInt(548) + 297;
                 }
-                byte[] assortedFieldOverlay = readOverlay(romEntry.getInt("AssortedFieldOvlNumber"));
+                byte[] fieldOverlay = readOverlay(romEntry.getInt("FieldOvlNumber"));
                 String prefix = Gen4Constants.lyraEthanMarillSpritePrefix;
-                int offset = find(assortedFieldOverlay, prefix);
+                int offset = find(fieldOverlay, prefix);
                 if (offset > 0) {
                     offset += prefix.length() / 2; // because it was a prefix
-                    writeWord(assortedFieldOverlay, offset, marillReplacement);
+                    writeWord(fieldOverlay, offset, marillReplacement);
                 }
-                writeOverlay(romEntry.getInt("AssortedFieldOvlNumber"), assortedFieldOverlay);
+                writeOverlay(romEntry.getInt("FieldOvlNumber"), fieldOverlay);
+
+                // Now modify the Marill's cry in every script it appears in to ensure consistency
+                int marillReplacementId = Gen4Constants.convertOverworldSpriteToSpecies(marillReplacement);
+                for (ScriptEntry entry : romEntry.marillCryScriptEntries) {
+                    byte[] script = scriptNarc.files.get(entry.scriptFile);
+                    writeWord(script, entry.scriptOffset, marillReplacementId);
+                    scriptNarc.files.set(entry.scriptFile, script);
+                }
+
+                // Modify the text too (if the ROM supports it) for additional consistency
+                for (TextEntry entry : romEntry.marillTextEntries) {
+                    List<String> stringsForEntry = getStrings(entry.textFile);
+                    String newString = entry.template.replace("[species]", pokes[marillReplacementId].name);
+                    stringsForEntry.set(entry.stringNumber, newString);
+                    setStrings(entry.textFile, stringsForEntry);
+                }
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
