@@ -462,51 +462,34 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public Pokemon randomStarterPokemon(boolean noSplitEvos, boolean uniqueTypes, boolean baseOnly, int bstLimit,
-        int minimumEvos, boolean exactEvos) {
+        int minimumEvos, boolean exactEvos, List<Type> starterType) {
         if (starterPokes == null) {
             // Prepare the list
             starterPokes = new PokemonSet();
+            switch(minimumEvos) {
+                case 0:
+                    this.getTemplateData().put("logStarters", "random");
+                    break;
+                case 1:
+                    this.getTemplateData().put("logStarters", "1or2evo");
+                    break;
+                case 2:
+                    this.getTemplateData().put("logStarters", "2evo");
+                    break;
+            }
             for (Pokemon pk : this.getPokemon()) {
                 if (pk != null) {
                     int length = evolutionChainSize(pk);
-                    switch (minimumEvos) {
-                        case 0:
-                            this.getTemplateData().put("logStarters", "random");
-                            if (!exactEvos && (pk.evolutionsFrom.size() < 2 || !noSplitEvos) && (pk.evolutionsTo.size() == 0 || !baseOnly)
-                                    && !(pk.bstForPowerLevels() > bstLimit))
-                                // Candidate
-                                starterPokes.add(pk);
-                            else if (exactEvos && length == 1 && (pk.evolutionsFrom.size() < 2 || !noSplitEvos) 
-                                && (pk.evolutionsTo.size() == 0 || !baseOnly) && !(pk.bstForPowerLevels() > bstLimit))
-                                //Candidate with exactly 0 evo
-                                starterPokes.add(pk);
-                            break;
-                        case 1:
-                            this.getTemplateData().put("logStarters", "1or2evo");
-                             // Stages counts base pokemon, hence a pokemon with no evolutions has length 1
-                            if (!exactEvos && length > 1 && (pk.evolutionsFrom.size() < 2 || !noSplitEvos)
-                                && (pk.evolutionsTo.size() == 0 || !baseOnly) && !(pk.bstForPowerLevels() > bstLimit))
-                                // Candidate
-                                starterPokes.add(pk);
-                            // A pokemon 1 evolution has length 2
-                            else if (exactEvos && length == 2 && (pk.evolutionsFrom.size() < 2 || !noSplitEvos)
-                                && (pk.evolutionsTo.size() == 0 || !baseOnly) && !(pk.bstForPowerLevels() > bstLimit))
-                                // Candidate with exactly 1 evo
-                                starterPokes.add(pk);
-                            break;
-                        case 2:
-                            this.getTemplateData().put("logStarters", "2evo");
-                            // Stages count as base pokemon, hence a pokemon with 1 evolution has length 2
-                            if (!exactEvos && length > 2 && (pk.evolutionsFrom.size() < 2 || !noSplitEvos)
-                                && (pk.evolutionsTo.size() == 0 || !baseOnly) && !(pk.bstForPowerLevels() > bstLimit))
-                                // Candidate
-                                starterPokes.add(pk);
-                            // A pokemon with 2 evolutions has length 3
-                            else if (exactEvos && length == 3 && (pk.evolutionsFrom.size() < 2 || !noSplitEvos)
-                                && (pk.evolutionsTo.size() == 0 || !baseOnly) && !(pk.bstForPowerLevels() > bstLimit))
-                                // Candidate with exactly 2 evo
-                                starterPokes.add(pk);
-                            break;
+                    // Check if starter has correct evo count
+                    // ExactEvos means minimum evos must equal length. Stages counts base pokemon, hence
+                    // a pokemon with no evolutions has length 1
+                    if (((exactEvos && length == minimumEvos+1) || (!exactEvos && length > minimumEvos)) &&
+                        (pk.evolutionsFrom.size() < 2 || !noSplitEvos) &&
+                        (pk.evolutionsTo.size() == 0 || !baseOnly) && 
+                        !(pk.bstForPowerLevels() > bstLimit) &&
+                        (starterType == null || (starterType.contains(pk.primaryType) || starterType.contains(pk.secondaryType)))) {
+                        // Candidate
+                        starterPokes.add(pk);
                     }
                 }
             }

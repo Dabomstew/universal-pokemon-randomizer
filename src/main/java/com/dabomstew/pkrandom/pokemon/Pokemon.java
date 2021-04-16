@@ -158,6 +158,16 @@ public class Pokemon implements Comparable<Pokemon> {
         return Type.randomWeakness(random, useResistantType, this.primaryType, this.secondaryType);
     }
 
+    public boolean isWeakTo(Pokemon pkmn) {
+        boolean isWeak = Type.STRONG_AGAINST.get(this.primaryType.ordinal()).contains(pkmn.primaryType) ||
+            Type.STRONG_AGAINST.get(this.primaryType.ordinal()).contains(pkmn.secondaryType);
+        if (this.secondaryType != null && !isWeak) {
+            isWeak = Type.STRONG_AGAINST.get(this.secondaryType.ordinal()).contains(pkmn.primaryType) ||
+            Type.STRONG_AGAINST.get(this.secondaryType.ordinal()).contains(pkmn.secondaryType);
+        }
+        return isWeak;
+    }
+
     public int minimumLevel() {
         int min = 1;
         for (Evolution evo : evolutionsTo) {

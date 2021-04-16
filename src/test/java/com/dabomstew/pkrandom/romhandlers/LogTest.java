@@ -702,13 +702,13 @@ public class LogTest {
     public void TestRandomStarter() {
         TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler, 250);
-        romhandler.randomStarterPokemon(false, false, false, 999, 0, false);
+        romhandler.randomStarterPokemon(false, false, false, 999, 0, false, null);
         assertEquals("random", romhandler.getTemplateData().get("logStarters"));
         romhandler.clearStarterPokes();
-        romhandler.randomStarterPokemon(false, false, false, 999, 1, false);
+        romhandler.randomStarterPokemon(false, false, false, 999, 1, false, null);
         assertEquals("1or2evo", romhandler.getTemplateData().get("logStarters"));
         romhandler.clearStarterPokes();
-        romhandler.randomStarterPokemon(false, false, false, 999, 2, false);
+        romhandler.randomStarterPokemon(false, false, false, 999, 2, false, null);
         assertEquals("2evo", romhandler.getTemplateData().get("logStarters"));
     }
     
@@ -765,7 +765,7 @@ public class LogTest {
         romhandler.generateTableOfContents();
         assertArrayEquals(((ArrayList<String[]>)romhandler.getTemplateData().get("toc")).get(0), 
             new String[]{"cle", "Condensed Evos"});
-        romhandler.randomStarterPokemon(false, false, false, 999, 0, false);
+        romhandler.randomStarterPokemon(false, false, false, 999, 0, false, null);
         romhandler.generateTableOfContents();
         assertArrayEquals(((ArrayList<String[]>)romhandler.getTemplateData().get("toc")).get(1), 
             new String[]{"rs", "Starters"});

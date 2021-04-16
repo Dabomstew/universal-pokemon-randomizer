@@ -39,7 +39,7 @@ XXToo much workXXType by ace (one of dual type, or if mono type, keeps mono) (ke
 XXToo much workXXRSE Gen 3 - Patch both Arco and Mach
 XXToo much workXXRedo code to use PokemonSet
 Explicit type starter selection (filter in/out one or more) (option for one from each)
-Checkbox if super-effective starter order (FLYING > FIGHTING > ROCK)
+**Checkbox if super-effective starter order (FLYING > FIGHTING > ROCK)
 XXToo much workXXTM text updates for Gen 5 (use new names)
 Trainer pokemon evolve at appropriate level (if at level, evolve. if not, unevolve. non-level base off bst)
 Trainer random a 1-1 swap similar to global replace

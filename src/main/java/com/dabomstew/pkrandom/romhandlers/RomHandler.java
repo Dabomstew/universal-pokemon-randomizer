@@ -126,7 +126,7 @@ public interface RomHandler {
 
     // Give a random Pokemon who is eligible as a starter
     public Pokemon randomStarterPokemon(boolean noSplitEvos, boolean uniqueTypes, boolean baseOnly,
-        int bstLimit, int minimumEvos, boolean exactEvos);
+        int bstLimit, int minimumEvos, boolean exactEvos, List<Type> starterTypes);
 
     // Randomizer: types
     // return a random type valid in this game.

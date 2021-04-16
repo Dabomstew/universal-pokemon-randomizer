@@ -792,6 +792,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.spRandomSlider.setValue(this.spRandomSlider.getMinimum());
         this.spBaseEvoCB.setEnabled(false);
         this.spBaseEvoCB.setSelected(false);
+        this.spSETriangleCB.setEnabled(false);
+        this.spSETriangleCB.setSelected(false);
 
         this.mdRandomAccuracyCB.setEnabled(false);
         this.mdRandomAccuracyCB.setSelected(false);
@@ -1395,6 +1397,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.spBSTLimitCB.setEnabled(true);
             this.spExactEvoCB.setEnabled(true);
             this.spRandomSlider.setEnabled(true);
+            this.spSETriangleCB.setEnabled(true);
         } else {
             this.spUniqueTypesCB.setSelected(false);
             this.spUniqueTypesCB.setEnabled(false);
@@ -1406,6 +1409,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.spExactEvoCB.setSelected(false);
             this.spRandomSlider.setEnabled(false);
             this.spRandomSlider.setValue(this.spRandomSlider.getMinimum());
+            this.spSETriangleCB.setEnabled(false);
+            this.spSETriangleCB.setSelected(false);
         }
         
         if (this.pbsChangesUnchangedRB.isSelected()) {
@@ -2074,6 +2079,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setStartersBaseEvoOnly(spBaseEvoCB.isSelected());
         settings.setStartersExactEvos(spExactEvoCB.isSelected());
         settings.setStartersMinimumEvos(spRandomSlider.getValue());
+        settings.setStartersSETriangle(spSETriangleCB.isSelected());
 
         int[] customStarters = new int[] { spCustomPoke1Chooser.getSelectedIndex() + 1,
                 spCustomPoke2Chooser.getSelectedIndex() + 1, spCustomPoke3Chooser.getSelectedIndex() + 1 };

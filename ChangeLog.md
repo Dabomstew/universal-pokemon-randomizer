@@ -82,3 +82,6 @@
  * Gyms and Elite 4 can be given a type theme when chosing Random for trainer pokemon
  * A new `Randomize Settings` button has been added. This will randomly select settings available for the game (randomize the randomizer). You will still be required to click `Randomize (Save)` to confirm the settings and generate the ROM.
  * Fix Minimum Catch Rate checkbox to be selectable regardless of what the Wild Pokemon radio button is set to
+ * Starters can now be required to be a Super Effective triangle
+   * For instance, the traditional triangle is grass-fire-water, but this could make it electric-ground-water or flying-rock-fighting
+   * While this generally creates a perfect triangle, there are edge cases that were deliberately skipped to save runtime. Better chances can be obtained by selecting "Unique Types" in addition to "SE Triangle"

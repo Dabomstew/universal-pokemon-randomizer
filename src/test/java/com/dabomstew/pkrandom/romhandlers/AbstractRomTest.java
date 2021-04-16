@@ -446,7 +446,7 @@ public class AbstractRomTest {
     public void TestMinimumEvos() {
         TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler);
-        romhandler.randomStarterPokemon(false, false, false, 999, 0, false);
+        romhandler.randomStarterPokemon(false, false, false, 999, 0, false, null);
         boolean pokemonWithZeroEvo = false, pokemonWithOneEvo = false, pokemonWithTwoEvo = false;
         for(Pokemon pk : romhandler.getStarterPokes()) {
             int evoLength = romhandler.evolutionChainSize(pk);
@@ -469,7 +469,7 @@ public class AbstractRomTest {
         pokemonWithOneEvo = false;
         pokemonWithTwoEvo = false;
         romhandler.clearStarterPokes();
-        romhandler.randomStarterPokemon(false, false, false, 999, 1, false);
+        romhandler.randomStarterPokemon(false, false, false, 999, 1, false, null);
         for(Pokemon pk : romhandler.getStarterPokes()) {
             int evoLength = romhandler.evolutionChainSize(pk);
             if (evoLength == 1) {
@@ -487,7 +487,7 @@ public class AbstractRomTest {
         pokemonWithOneEvo = false;
         pokemonWithTwoEvo = false;
         romhandler.clearStarterPokes();
-        romhandler.randomStarterPokemon(false, false, false, 999, 2, false);
+        romhandler.randomStarterPokemon(false, false, false, 999, 2, false, null);
         for(Pokemon pk : romhandler.getStarterPokes()) {
             int evoLength = romhandler.evolutionChainSize(pk);
             if (evoLength == 1) {
@@ -507,7 +507,7 @@ public class AbstractRomTest {
     public void TestExactEvos() {
         TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler);
-        romhandler.randomStarterPokemon(false, false, false, 999, 0, true);
+        romhandler.randomStarterPokemon(false, false, false, 999, 0, true, null);
         boolean pokemonWithZeroEvo = false, pokemonWithOneEvo = false, pokemonWithTwoEvo = false;
         for(Pokemon pk : romhandler.getStarterPokes()) {
             int evoLength = romhandler.evolutionChainSize(pk);
@@ -526,7 +526,7 @@ public class AbstractRomTest {
         pokemonWithOneEvo = false;
         pokemonWithTwoEvo = false;
         romhandler.clearStarterPokes();
-        romhandler.randomStarterPokemon(false, false, false, 999, 1, true);
+        romhandler.randomStarterPokemon(false, false, false, 999, 1, true, null);
         for(Pokemon pk : romhandler.getStarterPokes()) {
             int evoLength = romhandler.evolutionChainSize(pk);
             if (evoLength == 1) {
@@ -544,7 +544,7 @@ public class AbstractRomTest {
         pokemonWithTwoEvo = false;
         boolean pokemonWithMoreThanTwoEvo = false;
         romhandler.clearStarterPokes();
-        romhandler.randomStarterPokemon(false, false, false, 999, 2, true);
+        romhandler.randomStarterPokemon(false, false, false, 999, 2, true, null);
         for(Pokemon pk : romhandler.getStarterPokes()) {
             int evoLength = romhandler.evolutionChainSize(pk);
             if (evoLength == 1) {
@@ -625,10 +625,40 @@ public class AbstractRomTest {
                         trainerType.retainAll(intersect);
                     }
                 }
+                // Test for 2 since there could be only 1 pokemon with 2 types, or all pokemon
+                // share the same 2 types even though the gym only requires 1 of those types
                 assertTrue("More than 2 types found - " + Arrays.toString(trainerType.toArray()),
                     trainerType.size() < 3);
             }
         }
+    }
+
+    /**
+     * Test that starters are filtered by type when a type is provided, or ignores type filtering
+     * when the types argument is null
+     */
+    @Test
+    public void TestStartersTypeRestriction() {
+        TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
+        resetDataModel(romhandler);
+        // Test null first
+        romhandler.randomStarterPokemon(false, false, false, 999, 0, false, null);
+        assertTrue("Starters list did not contain all available pokemon", 
+            // Subtract due to randomStarterPokemon doing a pop operation and reducing by 1
+            romhandler.getStarterPokes().size() == pokemonList.size()-1);
+        
+        // Test with 1 type
+        romhandler.clearStarterPokes();
+        romhandler.randomStarterPokemon(false, false, false, 999, 0, false, Arrays.asList(Type.FIRE));
+        assertTrue("Starters list did not contain only FIRE types", 
+            romhandler.getStarterPokes().stream().allMatch(pk -> pk.primaryType == Type.FIRE || pk.secondaryType == Type.FIRE));
+
+        // Test with 3 types
+        romhandler.clearStarterPokes();
+        ArrayList<Type> typesArr = new ArrayList<Type>(Arrays.asList(Type.FIRE, Type.BUG, Type.DARK));
+        romhandler.randomStarterPokemon(false, false, false, 999, 0, false, typesArr);
+        assertTrue("Starters list did not contain only FIRE, BUG, and DARK types",
+            romhandler.getStarterPokes().stream().allMatch(pk -> typesArr.contains(pk.primaryType) || typesArr.contains(pk.secondaryType)));
     }
 
     /**

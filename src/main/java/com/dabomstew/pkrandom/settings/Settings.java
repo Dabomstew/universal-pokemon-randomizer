@@ -250,6 +250,9 @@ public class Settings {
             new SettingsOption.Builder(SettingsConstants.STARTERS_MINIMUM_EVOS, 0)
             .addMatches(new PredicatePair(startersMod, PredicatePair.STARTERS_MOD_RANDOM))
             .addValidInts(0, 2));
+        SettingsOptionComposite startersSETriangle = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.STARTERS_SE_TRIANGLE, false)
+            .addMatches(new PredicatePair(startersMod, PredicatePair.STARTERS_MOD_RANDOM)));
 
         // Moves
         SettingsOptionComposite randomizeMovePowers = SettingsOptionFactory.createSettingsOption(
@@ -696,7 +699,8 @@ public class Settings {
             settingsMap.getValue(SettingsConstants.STARTERS_NO_SPLIT),
             settingsMap.getValue(SettingsConstants.STARTERS_UNIQUE_TYPES),
             settingsMap.getValue(SettingsConstants.STARTERS_LIMIT_BST),
-            settingsMap.getValue(SettingsConstants.STARTERS_BASE_EVO_ONLY)));
+            settingsMap.getValue(SettingsConstants.STARTERS_BASE_EVO_ONLY),
+            settingsMap.getValue(SettingsConstants.STARTERS_SE_TRIANGLE)));
 
         // @ 38 Starter Pokemon BST Modifier
         write2ByteInt(out, (int)settingsMap.getValue(SettingsConstants.STARTERS_BST_MODIFIER) - 1);
@@ -940,6 +944,7 @@ public class Settings {
         settings.setStartersUniqueTypes(restoreState(data[37], 2));
         settings.setStartersLimitBST(restoreState(data[37], 3));
         settings.setStartersBaseEvoOnly(restoreState(data[37], 4));
+        settings.setStartersSETriangle(restoreState(data[37], 5));
 
         settings.setStartersBSTLimitModifier(FileFunctions.read2ByteInt(data, 38) + 1);
 
@@ -1443,6 +1448,15 @@ public class Settings {
 
     public Settings setStartersMinimumEvos(int startersMinimumEvos) {
         settingsMap.putValue(SettingsConstants.STARTERS_MINIMUM_EVOS, startersMinimumEvos);
+        return this;
+    }
+
+    public boolean isStartersSETriangle() {
+        return settingsMap.getValue(SettingsConstants.STARTERS_SE_TRIANGLE);
+    }
+
+    public Settings setStartersSETriangle(boolean startersSETriangle) {
+        settingsMap.putValue(SettingsConstants.STARTERS_SE_TRIANGLE, startersSETriangle);
         return this;
     }
 

@@ -416,6 +416,23 @@ public class SettingsTest extends AbstractUIBase {
     }
 
     /**
+     * Selecting "RANDOM" enables the SE Triangle checkbox
+     * Toggles the SE Triangle checkbox
+     * Selecting "UNCHANGED" disables the SE Triangle checkbox and resets state to false
+     * Verifies settings can be stored and loaded with no error and preserve state
+     * @throws IOException
+     */
+    @Test(timeout = 4000)
+    public void TestStartersSETriangle() throws IOException {
+        JRadioButtonFixture unchangedStarterRBFixture = getRadioButtonByName("spUnchangedRB");
+        JRadioButtonFixture randomStarterRBFixture = getRadioButtonByName("spRandomRB");
+        JCheckBoxFixture seTriangleCBFixture = getCheckBoxByName("spSETriangleCB");
+        TestCheckboxBasedOnRadioButton(unchangedStarterRBFixture, randomStarterRBFixture, seTriangleCBFixture, (settings) -> settings.isStartersSETriangle(), 
+            (starterMod) -> starterMod == Settings.StartersMod.UNCHANGED, (starterMod) -> starterMod == Settings.StartersMod.RANDOM, 
+            (settings) -> settings.getStartersMod(), "Starters");
+    }
+
+    /**
      * Captures a common sequence of a checkbox being enabled or disabled based on radio button selection
      * 
      * @param defaultRB - The radio button fixture that disables the checkbox (usually the one that's on by default)

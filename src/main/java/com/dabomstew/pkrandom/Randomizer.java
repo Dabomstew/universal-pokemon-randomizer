@@ -562,11 +562,12 @@ public class Randomizer {
             } else if (settings.getStartersMod() == Settings.StartersMod.RANDOM) {
                 int starterCount = romHandler.isYellow() ? 2 : 3;
                 List<Pokemon> starters = new ArrayList<Pokemon>();
+                ArrayList<Type> typeArr = getSETriangleTypes();
                 selectRandomStarter(starterCount, starters, () -> romHandler.randomStarterPokemon(
                     settings.isStartersNoSplit(), settings.isStartersUniqueTypes(), 
                     settings.isStartersBaseEvoOnly(),
                     settings.isStartersLimitBST() ? settings.getStartersBSTLimitModifier() : 9999,
-                    settings.getStartersMinimumEvos(), settings.isStartersExactEvo()));
+                    settings.getStartersMinimumEvos(), settings.isStartersExactEvo(), typeArr));
 
                 romHandler.setStarters(starters);
                 romHandler.getTemplateData().put("startersList", starters);
@@ -580,12 +581,15 @@ public class Randomizer {
     private void selectRandomStarter(int starterCount, List<Pokemon> starters, 
             Supplier<Pokemon> randomPicker) {
         Set<Type> typesUsed = new HashSet<Type>();
-        for (int i = 0; i < starterCount; i++) {
+        starters.add(randomPicker.get());
+        for (int i = 1; i < starterCount; i++) {
             Pokemon pkmn = randomPicker.get();
             while (starters.contains(pkmn) || 
                    (settings.isStartersUniqueTypes() &&
                    (typesUsed.contains(pkmn.primaryType) || 
-                    pkmn.secondaryType != null && typesUsed.contains(pkmn.secondaryType)))) {
+                    pkmn.secondaryType != null && typesUsed.contains(pkmn.secondaryType)) ||
+                    (settings.isStartersSETriangle() &&
+                    (!starters.get(i-1).isWeakTo(pkmn))))) {
                 pkmn = randomPicker.get();
             }
             starters.add(pkmn);
@@ -594,6 +598,36 @@ public class Randomizer {
                 typesUsed.add(pkmn.secondaryType);
             }
         }
+    }
+
+    private ArrayList<Type> getSETriangleTypes() {
+        if (!settings.isStartersSETriangle()) {
+            return null;
+        }
+        ArrayList<Type> typeArr = new ArrayList<Type>();
+        // Iterate until type triangle is found
+        boolean found = false;
+        while(!found) {
+            // Optimistic break
+            found = true;
+            for(int i = 0; i < 3; i++) {
+                if (typeArr.size() > i) {
+                    Type currentType = typeArr.get(i);
+                    Type checkType = typeArr.get((i+2)%3);
+                    if (Type.STRONG_AGAINST.get(checkType.ordinal()).contains(currentType)) {
+                        continue;
+                    } else {
+                        found = false;
+                        typeArr.set(i, Type.randomWeakness(RandomSource.instance(), false, checkType));
+                    }
+                } else {
+                    found = false;
+                    typeArr.add(romHandler.randomType());
+                }
+            }
+        }
+
+        return typeArr;
     }
 
     private void maybeLogWildPokemonChanges(final RomHandler romHandler) {
