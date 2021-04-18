@@ -182,8 +182,8 @@ public interface RomHandler {
     public void modifyTrainerPokes(boolean randomHeldItem, int levelModifier);
 
     public void randomizeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
-          boolean noEarlyWonderGuard, boolean useResistantType, boolean typeTheme, boolean gymTypeTheme, 
-          boolean randomHeldItem, int levelModifier);
+          boolean noEarlyWonderGuard, boolean useResistantType, boolean typeTheme, boolean globalSwap,
+          boolean gymTypeTheme, boolean randomHeldItem, int levelModifier);
 
     public void rivalCarriesStarter(boolean noLegendaries);
 

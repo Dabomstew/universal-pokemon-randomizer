@@ -245,7 +245,8 @@ public class Randomizer {
             settings.isTrainersMatchTypingDistribution(), settings.isTrainersBlockLegendaries(),
             settings.isTrainersBlockEarlyWonderGuard(),
             (settings.getCurrentMiscTweaks() & MiscTweak.USE_RESISTANT_TYPE.getValue()) > 0,
-            settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED, 
+            settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED,
+            settings.getTrainersMod() == Settings.TrainersMod.GLOBAL_MAPPING, 
             settings.isGymTypeTheme(), settings.isTrainersRandomHeldItem(),
             settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
         }

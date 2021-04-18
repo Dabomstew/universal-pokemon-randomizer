@@ -835,16 +835,17 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.ptFollowEvosCB.setEnabled(false);
         this.ptFollowEvosCB.setSelected(false);
 
-        this.tpPowerLevelsCB.setEnabled(false);
+        this.tpUnchangedRB.setEnabled(false);
         this.tpRandomRB.setEnabled(false);
-        this.tpRivalCarriesStarterCB.setEnabled(false);
-        this.tpRivalCarriesTeamCB.setEnabled(false);
         this.tpTypeThemedRB.setEnabled(false);
+        this.tpGlobalSwapRB.setEnabled(false);
+        this.tpPowerLevelsCB.setEnabled(false);
+        this.tpRivalCarriesStarterCB.setEnabled(false);
+        this.tpRivalCarriesTeamCB.setEnabled(false);        
         this.tpTypeWeightingCB.setEnabled(false);
         this.tpNoLegendariesCB.setEnabled(false);
         this.tpNoEarlyShedinjaCB.setEnabled(false);
         this.tpNoEarlyShedinjaCB.setVisible(true);
-        this.tpUnchangedRB.setEnabled(false);
         this.tpForceFullyEvolvedCB.setEnabled(false);
         this.tpForceFullyEvolvedSlider.setEnabled(false);
         this.tpLevelModifierCB.setEnabled(false);
@@ -1198,10 +1199,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.ptUnchangedRB.setEnabled(true);
             this.ptUnchangedRB.setSelected(true);
 
-            this.tpRandomRB.setEnabled(true);
-            this.tpTypeThemedRB.setEnabled(true);
             this.tpUnchangedRB.setEnabled(true);
             this.tpUnchangedRB.setSelected(true);
+            this.tpRandomRB.setEnabled(true);
+            this.tpTypeThemedRB.setEnabled(true);
+            this.tpGlobalSwapRB.setEnabled(true);
             this.tpLevelModifierCB.setEnabled(true);
             this.tpForceFullyEvolvedCB.setEnabled(true);
             this.tnRandomizeCB.setEnabled(romHandler.canChangeTrainerText());
@@ -1931,13 +1933,14 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.pmsForceGoodDamagingCB.setSelected(settings.isMovesetsForceGoodDamaging());
         this.pmsForceGoodDamagingSlider.setValue(settings.getMovesetsGoodDamagingPercent());
 
-        this.tpPowerLevelsCB.setSelected(settings.isTrainersUsePokemonOfSimilarStrength());
+        this.tpUnchangedRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED);
         this.tpRandomRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.RANDOM);
+        this.tpTypeThemedRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED);
+        this.tpGlobalSwapRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.GLOBAL_MAPPING);
+        this.tpPowerLevelsCB.setSelected(settings.isTrainersUsePokemonOfSimilarStrength());
         this.tpRivalCarriesStarterCB.setSelected(settings.isRivalCarriesStarterThroughout());
         this.tpRivalCarriesTeamCB.setSelected(settings.isRivalCarriesTeamThroughout());
-        this.tpTypeThemedRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED);
-        this.tpTypeWeightingCB.setSelected(settings.isTrainersMatchTypingDistribution());
-        this.tpUnchangedRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED);
+        this.tpTypeWeightingCB.setSelected(settings.isTrainersMatchTypingDistribution());        
         this.tpNoLegendariesCB.setSelected(settings.isTrainersBlockLegendaries());
         this.tpNoEarlyShedinjaCB.setSelected(settings.isTrainersBlockEarlyWonderGuard());
         this.tpRandomHeldItemCB.setSelected(settings.isTrainersRandomHeldItem());
@@ -2109,7 +2112,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setMovesetsForceGoodDamaging(pmsForceGoodDamagingCB.isSelected());
         settings.setMovesetsGoodDamagingPercent(pmsForceGoodDamagingSlider.getValue());
 
-        settings.setTrainersMod(tpUnchangedRB.isSelected(), tpRandomRB.isSelected(), tpTypeThemedRB.isSelected());
+        settings.setTrainersMod(tpUnchangedRB.isSelected(), tpRandomRB.isSelected(), tpTypeThemedRB.isSelected(),
+            tpGlobalSwapRB.isSelected());
         settings.setTrainersUsePokemonOfSimilarStrength(tpPowerLevelsCB.isSelected());
         settings.setRivalCarriesStarterThroughout(tpRivalCarriesStarterCB.isSelected());
         settings.setRivalCarriesTeamThroughout(tpRivalCarriesTeamCB.isSelected());
@@ -2617,6 +2621,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private void tpTypeThemedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tpTypeThemedRBActionPerformed
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_tpTypeThemedRBActionPerformed
+
+    private void tpGlobalSwapRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tpGlobalSwapRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_tpGlobalSwapRBActionPerformed
 
     private void spUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spUnchangedRBActionPerformed
         this.enableOrDisableSubControls();
@@ -4345,6 +4353,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
         tpGlobalSwapRB.setText(bundle.getString("RandomizerGUI.tpGlobalSwapRB.text")); // NOI18N
         tpGlobalSwapRB.setToolTipText(bundle.getString("RandomizerGUI.tpGlobalSwapRB.toolTipText")); // NOI18N
         tpGlobalSwapRB.setName(bundle.getString("RandomizerGUI.tpGlobalSwapRB.name")); // NOI18N
+        tpGlobalSwapRB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tpGlobalSwapRBActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout trainersPokemonPanelLayout = new javax.swing.GroupLayout(trainersPokemonPanel);
         trainersPokemonPanel.setLayout(trainersPokemonPanelLayout);
@@ -4356,7 +4369,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(tpUnchangedRB)
                     .addComponent(tpRandomRB)
                     .addComponent(tpTypeThemedRB)
-                    .addComponent(tpGlobalSwapRB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(tpGlobalSwapRB))
                 .addGap(33, 33, 33)
                 .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(trainersPokemonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)

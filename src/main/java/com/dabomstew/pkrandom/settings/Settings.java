@@ -91,7 +91,7 @@ public class Settings {
     }
 
     public enum TrainersMod {
-        UNCHANGED, RANDOM, TYPE_THEMED
+        UNCHANGED, RANDOM, TYPE_THEMED, GLOBAL_MAPPING
     }
 
     public enum WildPokemonMod {
@@ -710,7 +710,8 @@ public class Settings {
             settingsMap.getValue(SettingsConstants.RIVAL_CARRIES_TEAM_THROUGHOUT),
             settingsMap.getValue(SettingsConstants.ALLOW_LOW_LEVEL_EVOLVED_TYPES),
             settingsMap.getValue(SettingsConstants.TRAINERS_RANDOM_HELD_ITEM),
-            settingsMap.getValue(SettingsConstants.GYM_TYPE_THEME)));
+            settingsMap.getValue(SettingsConstants.GYM_TYPE_THEME),
+            settingsMap.getValue(SettingsConstants.TRAINERS_MOD) == TrainersMod.GLOBAL_MAPPING));
 
         // @ 41 Evolution overflow
         out.write(makeByteSelected(
@@ -819,9 +820,10 @@ public class Settings {
         settings.setMovesetsGoodDamagingPercent(data[12] & 0x7F);
 
         // changed 160
-        settings.setTrainersMod(restoreEnum(TrainersMod.class, data[13], 5, // UNCHANGED
-                1, // RANDOM
-                3 // TYPE_THEMED
+        settings.setTrainersMod(getEnum(TrainersMod.class, restoreState(data[13], 5), // UNCHANGED
+                restoreState(data[13], 1), // RANDOM
+                restoreState(data[13], 3), // TYPE_THEMED
+                restoreState(data[40], 4)  // GLOBAL_MAPPING
         ));
         settings.setTrainersUsePokemonOfSimilarStrength(restoreState(data[13], 0));
         settings.setRivalCarriesStarterThroughout(restoreState(data[13], 2));

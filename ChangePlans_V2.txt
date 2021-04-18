@@ -42,7 +42,7 @@ Explicit type starter selection (filter in/out one or more) (option for one from
 **Checkbox if super-effective starter order (FLYING > FIGHTING > ROCK)
 XXToo much workXXTM text updates for Gen 5 (use new names)
 Trainer pokemon evolve at appropriate level (if at level, evolve. if not, unevolve. non-level base off bst)
-Trainer random a 1-1 swap similar to global replace
+**Trainer random a 1-1 swap similar to global replace
 XXToo much workXXSelect full team instead of only starter (is it possible to prestock a pc?)
 XXToo much workXXShift abilities to left or right instead of randomizing (thus activating hidden abilities)
 XXToo much workXXEnable patching randomization formulas

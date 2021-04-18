@@ -27,6 +27,7 @@ public class TrainerPokemon {
 
     public Pokemon pokemon;
     public int level;
+    private String nickname;
 
     public int move1;
     public int move2;
@@ -44,6 +45,7 @@ public class TrainerPokemon {
     public TrainerPokemon(TrainerPokemon tp) {
         this.pokemon = tp.pokemon;
         this.level = tp.level;
+        this.nickname = tp.getNickname();
         this.move1 = tp.move1;
         this.move2 = tp.move2;
         this.move3 = tp.move3;
@@ -67,6 +69,14 @@ public class TrainerPokemon {
     
     public void setLevel(int level) {
     	this.level = level;
+    }
+
+    public String getNickname() {
+        return this.nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public int getHeldItem() {

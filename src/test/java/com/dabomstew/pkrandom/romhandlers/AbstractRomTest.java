@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
@@ -73,10 +74,11 @@ public class AbstractRomTest {
         // **************************
         // Test offensive selection
         // **************************
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, 0);
         ArrayList<Trainer> newTrainers = trainerCap.getValue();
         // Get gym1Type
-        for (Trainer t : newTrainers.stream().filter(t -> t.getTag().equals("GYM1")).collect(Collectors.toList())) {
+        for (Trainer t : newTrainers.stream().filter(t -> t.getTag() != null)
+            .filter(t -> t.getTag().equals("GYM1")).collect(Collectors.toList())) {
             for (TrainerPokemon tp : t.getPokemon()) {
                 // Initialize the set
                 if (gym1Type.size() == 0) {
@@ -100,6 +102,9 @@ public class AbstractRomTest {
         // Check CHILI, CRESS, CILAN against starters
         // Check CHILI, CRESS, CILAN share 1 type with GYM1
         for (Trainer t : newTrainers) {
+            if (t.getTag() == null) {
+                continue;
+            }
             // CHILI fights the first starter (index 0)
             if (t.getTag().equals("CHILI")) {
                 // Electric-Steel like Magnemite should fight Ground
@@ -144,10 +149,11 @@ public class AbstractRomTest {
         // **************************
         // Test defensive selection
         // **************************
-        romhandler.randomizeTrainerPokes(false, false, false, false, true, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, true, false, false, true, false, 0);
         newTrainers = trainerCap.getValue();
         // Get gym1Type
-        for (Trainer t : newTrainers.stream().filter(t -> t.getTag().equals("GYM1")).collect(Collectors.toList())) {
+        for (Trainer t : newTrainers.stream().filter(t -> t.getTag() != null)
+            .filter(t -> t.getTag().equals("GYM1")).collect(Collectors.toList())) {
             for (TrainerPokemon tp : t.getPokemon()) {
                 // Initialize the set
                 if (gym1Type.size() == 0) {
@@ -171,6 +177,9 @@ public class AbstractRomTest {
         // Check CHILI, CRESS, CILAN against starters
         // Check CHILI, CRESS, CILAN share 1 type with GYM1
         for (Trainer t : newTrainers) {
+            if (t.getTag() == null) {
+                continue;
+            }
             // CHILI fights the first starter (index 0)
             if (t.getTag().equals("CHILI")) {
                 // Electric-Steel like Magnemite should fight Electric
@@ -211,6 +220,308 @@ public class AbstractRomTest {
                 assertTrue("More than 1 CILAN pokemon did not match the GYM1 type",
                         t.getPokemon().size() - t.getPokemon().stream().filter(tp -> gym1Type.contains(tp.pokemon.primaryType)
                                 || gym1Type.contains(tp.pokemon.secondaryType)).count() < 2);
+            }
+        }
+    }
+
+    /**
+     * Black/White Cilan/Chili/Cress use a type that is either offensively superior
+     * or defensively resistant to the starter of the player
+     * This should also adhere to global swap rules
+     */
+    @Test
+    public void TestGlobalSwapCilanChiliCressTrumpStarter() {
+        // Magnemite should fight ground offense or electric defense
+        // Ponyta should return a random element from the Fire listing
+        // All 3 have 1 pokemon with a shared type
+        HashMap<Pokemon, Pokemon> pokemonSwap = new HashMap<Pokemon, Pokemon>(Gen5Constants.pokemonCount + 1);
+        HashSet<Type> gym1Type = new HashSet<Type>();
+        Gen5RomHandler romhandler = spy(new Gen5RomHandler(new Random()));
+        resetDataModel(romhandler);
+        startersList.get(0).primaryType = Type.ELECTRIC;
+        startersList.get(0).secondaryType = Type.STEEL;
+        startersList.get(1).primaryType = Type.FIRE;
+        startersList.get(2).primaryType = Type.NORMAL;
+        doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
+        doReturn(mock(Gen5TextHandler.class)).when(romhandler).getTextHandler();
+        doNothing().when(romhandler).setTrainers(trainerCap.capture());
+        ArrayList<Trainer> originalTrainer;
+
+        // **************************
+        // Test offensive selection
+        // **************************
+        originalTrainer = new ArrayList();
+        for(Trainer t : romhandler.getTrainers()) {
+            originalTrainer.add(new Trainer(t));
+        }
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, true, false, 0);
+        ArrayList<Trainer> newTrainers = trainerCap.getValue();
+        // Get gym1Type
+        for (Trainer t : newTrainers.stream().filter(t -> t.getTag() != null)
+            .filter(t -> t.getTag().equals("GYM1")).collect(Collectors.toList())) {
+            for (TrainerPokemon tp : t.getPokemon()) {
+                // Initialize the set
+                if (gym1Type.size() == 0) {
+                    gym1Type.add(tp.pokemon.primaryType);
+                    if (tp.pokemon.secondaryType != null) {
+                        gym1Type.add(tp.pokemon.secondaryType);
+                    }
+                }
+                // Only keep the shared type
+                else {
+                    HashSet<Type> intersect = new HashSet<Type>();
+                    intersect.add(tp.pokemon.primaryType);
+                    if (tp.pokemon.secondaryType != null) {
+                        intersect.add(tp.pokemon.secondaryType);
+                    }
+                    gym1Type.retainAll(intersect);
+                }
+            }
+        }
+        // Check CHILI, CRESS, CILAN against starters
+        // Check CHILI, CRESS, CILAN share 1 type with GYM1
+        // Reverse order so tagged trainers go last
+        for (int i = newTrainers.size() - 1; i >= 0 ; i--) {
+            Trainer newT = newTrainers.get(i);
+            Trainer oldT = originalTrainer.get(i);
+            assertTrue("Trainer did not match name. Make sure the trainer list is ordered the same",
+                newT.getName().equals(oldT.getName()));
+            if (newT.getTag() != null) {
+                // CHILI fights the first starter (index 0)
+                if (newT.getTag().equals("CHILI")) {
+                    // Electric-Steel like Magnemite should fight Ground
+                    assertTrue("No GROUND type found for CHILI", newT.getPokemon().stream().anyMatch(
+                            tp -> tp.pokemon.primaryType == Type.GROUND || tp.pokemon.secondaryType == Type.GROUND));
+                    // Find out how many pokemon share a type with GYM1, subtract it from the total
+                    // number of pokemon on the team, and ensure either 0 or 1 pokemon don't share
+                    // the type. 0 is possible due to the shared type and trump type
+                    // being the same or a dual-typed pokemon sharing one from each.
+                    assertTrue("More than 1 CHILI pokemon did not match the GYM1 type",
+                            newT.getPokemon().size() - newT.getPokemon().stream().filter(tp -> gym1Type.contains(tp.pokemon.primaryType)
+                                    || gym1Type.contains(tp.pokemon.secondaryType)).count() < 2);
+                }
+                // CRESS fights the second starter (index 1)
+                else if (newT.getTag().equals("CRESS")) {
+                    // Pure Fire type like Ponyta should fight random weakness
+                    assertTrue("No type found that is in STRONG_AGAINST_FIRE for CRESS",
+                            newT.getPokemon().stream().anyMatch(tp -> Type.STRONG_AGAINST_FIRE.contains(tp.pokemon.primaryType)
+                                    || Type.STRONG_AGAINST_FIRE.contains(tp.pokemon.secondaryType)));
+                    // Find out how many pokemon share a type with GYM1, subtract it from the total
+                    // number of pokemon on the team, and ensure either 0 or 1 pokemon don't share
+                    // the type. 0 is possible due to the shared type and trump type
+                    // being the same or a dual-typed pokemon sharing one from each.
+                    assertTrue("More than 1 CRESS pokemon did not match the GYM1 type",
+                            newT.getPokemon().size() - newT.getPokemon().stream().filter(tp -> gym1Type.contains(tp.pokemon.primaryType)
+                                    || gym1Type.contains(tp.pokemon.secondaryType)).count() < 2);
+                }
+                // CILAN fights the last starter (index 2)
+                else if (newT.getTag().equals("CILAN")) {
+                    // Pure Normal type like Rattata should fight Fighting
+                    assertTrue("No FIGHTING type found for CILAN", newT.getPokemon().stream().anyMatch(
+                            tp -> tp.pokemon.primaryType == Type.FIGHTING || tp.pokemon.secondaryType == Type.FIGHTING));
+                    // Find out how many pokemon share a type with GYM1, subtract it from the total
+                    // number of pokemon on the team, and ensure either 0 or 1 pokemon don't share
+                    // the type. 0 is possible due to the shared type and trump type
+                    // being the same or a dual-typed pokemon sharing one from each.
+                    assertTrue("More than 1 CILAN pokemon did not match the GYM1 type",
+                            newT.getPokemon().size() - newT.getPokemon().stream().filter(tp -> gym1Type.contains(tp.pokemon.primaryType)
+                                    || gym1Type.contains(tp.pokemon.secondaryType)).count() < 2);
+                }
+            }
+            Collections.sort(newT.getPokemon(), (o1, o2) -> o1.getNickname().compareTo(o2.getNickname()));
+            Collections.sort(oldT.getPokemon(), (o1, o2) -> o1.getNickname().compareTo(o2.getNickname()));
+            for (int j = 0; j < newT.getPokemon().size(); j++) {
+                TrainerPokemon newTp = newT.getPokemon().get(j);
+                TrainerPokemon oldTp = oldT.getPokemon().get(j);
+                // Initialize the set or check the value
+                if (pokemonSwap.containsKey(oldTp.pokemon)) {
+                    Pokemon cached = pokemonSwap.get(oldTp.pokemon);
+                    if (newT.getTag() == null) {
+                        assertTrue("Pokemon did not match the replacement - " +
+                            oldTp.pokemon.number + " gave " + cached.number + " but newTp was " +
+                            newTp.pokemon.number,
+                            cached.equals(newTp.pokemon));
+                    } else {
+                        // Only tagged teams can ignore global swap
+                        switch (newT.getTag()) {
+                            case "GYM1":
+                                assertTrue("Pokemon did not match the replacement - " +
+                                oldTp.pokemon.number + " gave " + cached.number + " but newTp was " +
+                                newTp.pokemon.number + " and type did not match GYM1",
+                                cached.equals(newTp.pokemon) || gym1Type.contains(newTp.pokemon.primaryType)
+                                || gym1Type.contains(newTp.pokemon.secondaryType));
+                                break;
+                            case "CHILI":
+                                assertTrue("Pokemon did not match the replacement - " +
+                                oldTp.pokemon.number + " gave " + cached.number + " but newTp was " +
+                                newTp.pokemon.number + " and type did not match GYM1 or GROUND",
+                                cached.equals(newTp.pokemon) || gym1Type.contains(newTp.pokemon.primaryType)
+                                || gym1Type.contains(newTp.pokemon.secondaryType) 
+                                || newTp.pokemon.primaryType == Type.GROUND || newTp.pokemon.secondaryType == Type.GROUND);
+                                break;
+                            case "CRESS":
+                                assertTrue("Pokemon did not match the replacement - " +
+                                oldTp.pokemon.number + " gave " + cached.number + " but newTp was " +
+                                newTp.pokemon.number + " and type did not match GYM1 or STRONG_AGAINST_FIRE",
+                                cached.equals(newTp.pokemon) || gym1Type.contains(newTp.pokemon.primaryType)
+                                || gym1Type.contains(newTp.pokemon.secondaryType) 
+                                || Type.STRONG_AGAINST_FIRE.contains(newTp.pokemon.primaryType)
+                                || Type.STRONG_AGAINST_FIRE.contains(newTp.pokemon.secondaryType));
+                                break;
+                            case "CILAN":
+                                assertTrue("Pokemon did not match the replacement - " +
+                                oldTp.pokemon.number + " gave " + cached.number + " but newTp was " +
+                                newTp.pokemon.number + " and type did not match GYM1 or FIGHTING",
+                                cached.equals(newTp.pokemon) || gym1Type.contains(newTp.pokemon.primaryType)
+                                || gym1Type.contains(newTp.pokemon.secondaryType) 
+                                || newTp.pokemon.primaryType == Type.FIGHTING 
+                                || newTp.pokemon.secondaryType == Type.FIGHTING);
+                                break;
+                        }
+                    }
+                } else {
+                    pokemonSwap.put(oldTp.pokemon, newTp.pokemon);
+                }
+            } 
+        }
+        // **************************
+        // Test defensive selection
+        // **************************
+        pokemonSwap = new HashMap<Pokemon, Pokemon>(Gen5Constants.pokemonCount + 1);
+        originalTrainer = new ArrayList();
+        for(Trainer t : romhandler.getTrainers()) {
+            originalTrainer.add(new Trainer(t));
+        }
+        romhandler.randomizeTrainerPokes(false, false, false, false, true, false, true, true, false, 0);
+        newTrainers = trainerCap.getValue();
+        // Get gym1Type
+        for (Trainer t : newTrainers.stream().filter(t -> t.getTag() != null)
+            .filter(t -> t.getTag().equals("GYM1")).collect(Collectors.toList())) {
+            for (TrainerPokemon tp : t.getPokemon()) {
+                // Initialize the set
+                if (gym1Type.size() == 0) {
+                    gym1Type.add(tp.pokemon.primaryType);
+                    if (tp.pokemon.secondaryType != null) {
+                        gym1Type.add(tp.pokemon.secondaryType);
+                    }
+                }
+                // Only keep the shared type
+                else {
+                    HashSet<Type> intersect = new HashSet<Type>();
+                    intersect.add(tp.pokemon.primaryType);
+                    if (tp.pokemon.secondaryType != null) {
+                        intersect.add(tp.pokemon.secondaryType);
+                    }
+                    gym1Type.retainAll(intersect);
+                }
+            }
+        }
+
+        // Check CHILI, CRESS, CILAN against starters
+        // Check CHILI, CRESS, CILAN share 1 type with GYM1
+        // Reverse order so tagged trainers go last
+        for (int i = newTrainers.size() - 1; i >= 0; i--) {
+            Trainer newT = newTrainers.get(i);
+            Trainer oldT = originalTrainer.get(i);
+            assertTrue("Trainer did not match name. Make sure the trainer list is ordered the same",
+                newT.getName().equals(oldT.getName()));
+            if (newT.getTag() != null) {
+                // CHILI fights the first starter (index 0)
+                if (newT.getTag().equals("CHILI")) {
+                    // Electric-Steel like Magnemite should fight Electric
+                    assertTrue("No ELECTRIC type found for CHILI", newT.getPokemon().stream().anyMatch(
+                            tp -> tp.pokemon.primaryType == Type.ELECTRIC || tp.pokemon.secondaryType == Type.ELECTRIC));
+                    // Find out how many pokemon share a type with GYM1, subtract it from the total
+                    // number of pokemon on the team, and ensure either 0 or 1 pokemon don't share
+                    // the type. 0 is possible due to the shared type and trump type
+                    // being the same or a dual-typed pokemon sharing one from each.
+                    assertTrue("More than 1 CHILI pokemon did not match the GYM1 type",
+                            newT.getPokemon().size() - newT.getPokemon().stream().filter(tp -> gym1Type.contains(tp.pokemon.primaryType)
+                                    || gym1Type.contains(tp.pokemon.secondaryType)).count() < 2);
+                }
+                // CRESS fights the second starter (index 1)
+                else if (newT.getTag().equals("CRESS")) {
+                    // Pure Fire type like Ponyta should fight random weakness
+                    assertTrue("No type found that is in RESISTANT_TO_FIRE for CRESS",
+                            newT.getPokemon().stream().anyMatch(tp -> Type.RESISTANT_TO_FIRE.contains(tp.pokemon.primaryType)
+                                    || Type.RESISTANT_TO_FIRE.contains(tp.pokemon.secondaryType)));
+                    // Find out how many pokemon share a type with GYM1, subtract it from the total
+                    // number of pokemon on the team, and ensure either 0 or 1 pokemon don't share
+                    // the type. 0 is possible due to the shared type and trump type
+                    // being the same or a dual-typed pokemon sharing one from each.
+                    assertTrue("More than 1 CRESS pokemon did not match the GYM1 type",
+                            newT.getPokemon().size() - newT.getPokemon().stream().filter(tp -> gym1Type.contains(tp.pokemon.primaryType)
+                                    || gym1Type.contains(tp.pokemon.secondaryType)).count() < 2);
+                }
+                // CILAN fights the last starter (index 2)
+                else if (newT.getTag().equals("CILAN")) {
+                    // Pure Normal type like Rattata should fight random weakness
+                    assertTrue("No type found that is in RESISTANT_TO_NORMAL for CILAN",
+                            newT.getPokemon().stream().anyMatch(tp -> Type.RESISTANT_TO_NORMAL.contains(tp.pokemon.primaryType)
+                                    || Type.RESISTANT_TO_NORMAL.contains(tp.pokemon.secondaryType)));
+                    // Find out how many pokemon share a type with GYM1, subtract it from the total
+                    // number of pokemon on the team, and ensure either 0 or 1 pokemon don't share
+                    // the type. 0 is possible due to the shared type and trump type
+                    // being the same or a dual-typed pokemon sharing one from each.
+                    assertTrue("More than 1 CILAN pokemon did not match the GYM1 type",
+                            newT.getPokemon().size() - newT.getPokemon().stream().filter(tp -> gym1Type.contains(tp.pokemon.primaryType)
+                                    || gym1Type.contains(tp.pokemon.secondaryType)).count() < 2);
+                }
+            }
+            Collections.sort(newT.getPokemon(), (o1, o2) -> o1.getNickname().compareTo(o2.getNickname()));
+            Collections.sort(oldT.getPokemon(), (o1, o2) -> o1.getNickname().compareTo(o2.getNickname()));
+            for (int j = 0; j < newT.getPokemon().size(); j++) {
+                TrainerPokemon newTp = newT.getPokemon().get(j);
+                TrainerPokemon oldTp = oldT.getPokemon().get(j);
+                // Initialize the set or check the value
+                if (pokemonSwap.containsKey(oldTp.pokemon)) {
+                    Pokemon cached = pokemonSwap.get(oldTp.pokemon);
+                    if (newT.getTag() == null) {
+                        assertTrue("Pokemon did not match the replacement - " +
+                            oldTp.pokemon.number + " gave " + cached.number + " but newTp was " +
+                            newTp.pokemon.number,
+                            cached.equals(newTp.pokemon));
+                    } else {
+                        // Only tagged teams can ignore global swap
+                        switch (newT.getTag()) {
+                            case "GYM1":
+                                assertTrue("Pokemon did not match the replacement - " +
+                                oldTp.pokemon.number + " gave " + cached.number + " but newTp was " +
+                                newTp.pokemon.number + " and type did not match GYM1",
+                                cached.equals(newTp.pokemon) || gym1Type.contains(newTp.pokemon.primaryType)
+                                || gym1Type.contains(newTp.pokemon.secondaryType));
+                                break;
+                            case "CHILI":
+                                assertTrue("Pokemon did not match the replacement - " +
+                                oldTp.pokemon.number + " gave " + cached.number + " but newTp was " +
+                                newTp.pokemon.number + " and type did not match GYM1 or ELECTRIC",
+                                cached.equals(newTp.pokemon) || gym1Type.contains(newTp.pokemon.primaryType)
+                                || gym1Type.contains(newTp.pokemon.secondaryType) 
+                                || newTp.pokemon.primaryType == Type.ELECTRIC || newTp.pokemon.secondaryType == Type.ELECTRIC);
+                                break;
+                            case "CRESS":
+                                assertTrue("Pokemon did not match the replacement - " +
+                                oldTp.pokemon.number + " gave " + cached.number + " but newTp was " +
+                                newTp.pokemon.number + " and type did not match GYM1 or RESISTANT_TO_FIRE",
+                                cached.equals(newTp.pokemon) || gym1Type.contains(newTp.pokemon.primaryType)
+                                || gym1Type.contains(newTp.pokemon.secondaryType) 
+                                || Type.RESISTANT_TO_FIRE.contains(newTp.pokemon.primaryType)
+                                || Type.RESISTANT_TO_FIRE.contains(newTp.pokemon.secondaryType));
+                                break;
+                            case "CILAN":
+                                assertTrue("Pokemon did not match the replacement - " +
+                                oldTp.pokemon.number + " gave " + cached.number + " but newTp was " +
+                                newTp.pokemon.number + " and type did not match GYM1 or RESISTANT_TO_NORMAL",
+                                cached.equals(newTp.pokemon) || gym1Type.contains(newTp.pokemon.primaryType)
+                                || gym1Type.contains(newTp.pokemon.secondaryType) 
+                                || Type.RESISTANT_TO_NORMAL.contains(newTp.pokemon.primaryType)
+                                || Type.RESISTANT_TO_NORMAL.contains(newTp.pokemon.secondaryType));
+                                break;
+                        }
+                    }
+                } else {
+                    pokemonSwap.put(oldTp.pokemon, newTp.pokemon);
+                }
             }
         }
     }
@@ -315,7 +626,7 @@ public class AbstractRomTest {
         //**************************
         // Test Striaton offense selection
         //**************************
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, 0);
         romhandler.randomizeStaticPokemon(false);
         Map<String, Type> taggedTypes = romhandler.getTaggedGroupTypes();
 
@@ -379,7 +690,7 @@ public class AbstractRomTest {
         //**************************
         // Test Striaton defense selection
         //**************************
-        romhandler.randomizeTrainerPokes(false, false, false, false, true, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, true, false, false, true, false, 0);
         romhandler.randomizeStaticPokemon(false);
         taggedTypes = romhandler.getTaggedGroupTypes();
 
@@ -571,7 +882,7 @@ public class AbstractRomTest {
         HashSet<Type> trainerType = new HashSet<Type>();
         TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler);
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, true, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, true, false, false, false, 0);
         for (Trainer t : romhandler.getTrainers()) {
             for (TrainerPokemon tp : t.getPokemon()) {
                 // Initialize the set
@@ -601,12 +912,15 @@ public class AbstractRomTest {
      */
     @Test
     public void TestGymTypeTheme() {
-        HashSet<Type> trainerType = new HashSet<Type>();
         TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler);
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, 0);
+        HashSet<Type> trainerType;
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, 0);
         for (Trainer t : romhandler.getTrainers()) {
-            if (t.getTag() != null) {
+            // Skip anyone that is not tagged
+            // Skip CHILI, CRESS, CILAN due to unique requirements to have different types
+            if (t.getTag() != null && !Arrays.asList("CHILI", "CRESS", "CILAN").contains(t.getTag())) {
+                trainerType = new HashSet<Type>();
                 for (TrainerPokemon tp : t.getPokemon()) {
                     // Initialize the set
                     if (trainerType.size() == 0) {
@@ -629,6 +943,10 @@ public class AbstractRomTest {
                 // share the same 2 types even though the gym only requires 1 of those types
                 assertTrue("More than 2 types found - " + Arrays.toString(trainerType.toArray()),
                     trainerType.size() < 3);
+
+                // Test to make sure at least 1 type was found
+                assertTrue("Less than 1 type found - " + Arrays.toString(trainerType.toArray()),
+                trainerType.size() > 0);
             }
         }
     }
@@ -662,6 +980,132 @@ public class AbstractRomTest {
     }
 
     /**
+     * Pokemon are always replaced with the same thing
+     */
+    @Test
+    public void TestGlobalSwap() {
+        HashMap<Pokemon, Pokemon> pokemonSwap = new HashMap<Pokemon, Pokemon>(Gen5Constants.pokemonCount + 1);
+        TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
+        resetDataModel(romhandler);
+        doNothing().when(romhandler).setTrainers(trainerCap.capture());
+        ArrayList<Trainer> originalTrainer = new ArrayList();
+        for(Trainer t : romhandler.getTrainers()) {
+            originalTrainer.add(new Trainer(t));
+        }
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, false, 0);
+        for (int i = 0; i < trainerCap.getValue().size(); i++) {
+            Trainer newT = trainerCap.getValue().get(i);
+            Trainer oldT = originalTrainer.get(i);
+            assertTrue("Trainer did not match name. Make sure the trainer list is ordered the same",
+                newT.getName().equals(oldT.getName()));
+            Collections.sort(newT.getPokemon(), (o1, o2) -> o1.getNickname().compareTo(o2.getNickname()));
+            Collections.sort(oldT.getPokemon(), (o1, o2) -> o1.getNickname().compareTo(o2.getNickname()));
+            for (int j = 0; j < newT.getPokemon().size(); j++) {
+                TrainerPokemon newTp = newT.getPokemon().get(j);
+                TrainerPokemon oldTp = oldT.getPokemon().get(j);
+                // Initialize the set
+                if (pokemonSwap.containsKey(oldTp.pokemon)) {
+                    Pokemon cached = pokemonSwap.get(oldTp.pokemon);
+                    assertTrue("Pokemon did not match the replacement - " +
+                        oldTp.pokemon.number + " gave " + cached.number + " but newTp was " +
+                        newTp.pokemon.number,
+                        cached.equals(newTp.pokemon));
+                } else {
+                    pokemonSwap.put(oldTp.pokemon, newTp.pokemon);
+                }
+            }
+        }
+    }
+
+    /**
+     * Pokemon are always replaced with the same thing
+     * Gyms are stil appropriately type themed
+     */
+    @Test
+    public void TestGlobalSwapGymTypeTheme() {
+        HashMap<Pokemon, Pokemon> pokemonSwap = new HashMap<Pokemon, Pokemon>(Gen5Constants.pokemonCount + 1);
+        TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
+        resetDataModel(romhandler);
+        doNothing().when(romhandler).setTrainers(trainerCap.capture());
+        ArrayList<Trainer> originalTrainer = new ArrayList();
+        HashSet<Type> trainerType = null;
+        for(Trainer t : romhandler.getTrainers()) {
+            originalTrainer.add(new Trainer(t));
+        }
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, true, false, 0);
+        // Reverse order so tagged trainers are last, preventing them from caching the wrong pokemon
+        for (int i = trainerCap.getValue().size()-1; i >= 0 ; i--) {
+            Trainer newT = trainerCap.getValue().get(i);
+            Trainer oldT = originalTrainer.get(i);
+            assertTrue("Trainer did not match name. Make sure the trainer list is ordered the same",
+            newT.getName().equals(oldT.getName()));
+            // Skip CHILI, CRESS, CILAN due to unique requirements to have different types
+            if (Arrays.asList("CHILI", "CRESS", "CILAN").contains(newT.getTag())) {
+                continue;
+            }
+            // Only tagged trainers are required to have a single type
+            // Everyone else is just required to obey the global swap
+            if (newT.getTag() != null) {
+                trainerType = new HashSet<Type>();
+                for (TrainerPokemon tp : newT.getPokemon()) {
+                    // Initialize the set
+                    if (trainerType.size() == 0) {
+                        trainerType.add(tp.pokemon.primaryType);
+                        if (tp.pokemon.secondaryType != null) {
+                            trainerType.add(tp.pokemon.secondaryType);
+                        }
+                    }
+                    // Only keep the shared type
+                    else {
+                        HashSet<Type> intersect = new HashSet<Type>();
+                        intersect.add(tp.pokemon.primaryType);
+                        if (tp.pokemon.secondaryType != null) {
+                            intersect.add(tp.pokemon.secondaryType);
+                        }
+                        trainerType.retainAll(intersect);
+                    }
+                }
+                // Test for 2 since there could be only 1 pokemon with 2 types, or all pokemon
+                // share the same 2 types even though the gym only requires 1 of those types
+                assertTrue("More than 2 types found - " + Arrays.toString(trainerType.toArray()),
+                    trainerType.size() < 3);
+                
+                // Test to make sure at least 1 type was found
+                assertTrue("Less than 1 type found - " + Arrays.toString(trainerType.toArray()),
+                trainerType.size() > 0);
+            }
+            Collections.sort(newT.getPokemon(), (o1, o2) -> o1.getNickname().compareTo(o2.getNickname()));
+            Collections.sort(oldT.getPokemon(), (o1, o2) -> o1.getNickname().compareTo(o2.getNickname()));
+            for (int j = 0; j < newT.getPokemon().size(); j++) {
+                TrainerPokemon newTp = newT.getPokemon().get(j);
+                TrainerPokemon oldTp = oldT.getPokemon().get(j);
+                // Initialize the set or check the value
+                if (pokemonSwap.containsKey(oldTp.pokemon)) {
+                    Pokemon cached = pokemonSwap.get(oldTp.pokemon);
+                    if (newT.getTag() == null) {
+                        assertTrue("Pokemon did not match the replacement - " +
+                            oldTp.pokemon.number + " gave " + cached.number + " but newTp was " +
+                            newTp.pokemon.number,
+                            cached.equals(newTp.pokemon));
+                    } else {
+                        // Verify trainerType has been initialized
+                        assertFalse("Tagged trainer " + newT.getTag() + " did not have types initialized",
+                            trainerType == null);
+                        // Only tagged teams get permission to override global swap
+                        assertTrue("Pokemon did not match the replacement - " +
+                        oldTp.pokemon.number + " gave " + cached.number + " but newTp was " +
+                        newTp.pokemon.number + " and type was not found",
+                        cached.equals(newTp.pokemon) || trainerType.contains(newTp.pokemon.primaryType)
+                        || trainerType.contains(newTp.pokemon.secondaryType));
+                    }
+                } else {
+                    pokemonSwap.put(oldTp.pokemon, newTp.pokemon);
+                }
+            }            
+        }
+    }
+
+    /**
      * Function for granular modification of data model
      */
     private void setUp() {
@@ -686,8 +1130,26 @@ public class AbstractRomTest {
         for(String tag: new String[]{"GYM1", "CILAN", "CHILI", "CRESS"}) {
             Trainer t = new Trainer();
             t.setTag(tag);
-            t.getPokemon().add(new TrainerPokemon());
-            t.getPokemon().add(new TrainerPokemon());
+            t.setName(tag);
+            t.setOffset(trainerList.size());
+            while (t.getPokemon().size() < 2) {
+                TrainerPokemon tp = new TrainerPokemon();
+                tp.pokemon = pokemonList.get(t.getPokemon().size());
+                tp.setNickname("number"+t.getPokemon().size());
+                t.getPokemon().add(tp);
+            }
+            trainerList.add(t);
+        }
+        while (trainerList.size() < 100) {
+            Trainer t = new Trainer();
+            t.setName("generic"+trainerList.size());
+            t.setOffset(trainerList.size());
+            while (t.getPokemon().size() < 2) {
+                TrainerPokemon tp = new TrainerPokemon();
+                tp.pokemon = pokemonList.get(new Random().nextInt(pokemonList.size()));
+                tp.setNickname("number"+t.getPokemon().size());
+                t.getPokemon().add(tp);
+            }
             trainerList.add(t);
         }
         for(int i = 0; i < 3; i++) {

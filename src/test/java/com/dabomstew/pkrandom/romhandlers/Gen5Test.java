@@ -101,11 +101,11 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1StriatonCityTextModifications(isNull());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, 0);
         verify(mockTextHandler, times(1)).bw1StriatonCityTextModifications(isNotNull());
     }
 
@@ -124,11 +124,11 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1NacreneCityTextModifications(isNull(), any());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, 0);
         verify(mockTextHandler, times(1)).bw1NacreneCityTextModifications(isNotNull(), any());
     }
 
@@ -163,11 +163,11 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1CasteliaCityPraiseTextModifications(isNull());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, 0);
         verify(mockTextHandler, times(1)).bw1CasteliaCityPraiseTextModifications(isNotNull());
     }
 
@@ -187,11 +187,11 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1CasteliaCityBurghTextModifications(isNull());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, 0);
         verify(mockTextHandler, times(1)).bw1CasteliaCityBurghTextModifications(isNotNull());
     }
 
@@ -211,11 +211,11 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1CherenBurghTextModifications(isNull());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, 0);
         verify(mockTextHandler, times(1)).bw1CherenBurghTextModifications(isNotNull());
     }
 
@@ -234,11 +234,11 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1NimbasaCityTextModifications(isNull(), any());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, 0);
         verify(mockTextHandler, times(1)).bw1NimbasaCityTextModifications(isNotNull(), any());
     }  
     
@@ -258,11 +258,11 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1JuniperTextModifications(isNull());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, 0);
         verify(mockTextHandler, times(1)).bw1JuniperTextModifications(isNotNull());
     }
 
@@ -281,11 +281,11 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1DriftveilCityTextModifications(isNull(), any());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, 0);
         verify(mockTextHandler, times(1)).bw1DriftveilCityTextModifications(isNotNull(), any());
     }
     
@@ -305,11 +305,11 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1MistraltonCityTextModifications(isNull());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, 0);
         verify(mockTextHandler, times(1)).bw1MistraltonCityTextModifications(isNotNull());
     }    
 
@@ -329,11 +329,11 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1PinwheelForestTextModifications(isNull());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, 0);
         verify(mockTextHandler, times(1)).bw1PinwheelForestTextModifications(isNotNull());
     }  
 
@@ -353,11 +353,11 @@ public class Gen5Test {
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
         
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, 0);
         verify(mockTextHandler, times(1)).bw1CelestialTowerTextModifications(isNull());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, 0);
         verify(mockTextHandler, times(1)).bw1CelestialTowerTextModifications(isNotNull());
     }  
             
@@ -519,7 +519,7 @@ public class Gen5Test {
         doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
         doReturn(mock(Map.class)).when(romhandler).getTemplateData();
         resetDataModel(romhandler);
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, true, 0);
         for (Trainer t : romhandler.getTrainers()) {
             for (TrainerPokemon tp : t.getPokemon()) {
                 assertTrue(tp.heldItem + " was not in Gen 5 allowed items.", 

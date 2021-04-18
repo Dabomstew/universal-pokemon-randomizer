@@ -433,6 +433,53 @@ public class SettingsTest extends AbstractUIBase {
     }
 
     /**
+     * Selecting "GLOBAL SWAP" toggles the radio button group
+     * Selecting "UNCHANGED" toggles the radio button group away from GLOBAL_MAPPING
+     * Verifies settings can be stored and loaded with no error and preserve state
+     * @throws IOException
+     */
+    @Test(timeout = 4000)
+    public void TestGlobalSwap() throws IOException {
+        int settingsReloadCount = 0;
+        JRadioButtonFixture unchangedTrainerRBFixture = getRadioButtonByName("tpUnchangedRB");
+        JRadioButtonFixture globalSwapRBFixture = getRadioButtonByName("tpGlobalSwapRB");
+        // Sanity check - should evaluate to false
+        Settings settings = this.mainWindow.getCurrentSettings();
+        assertTrue("Global Swap RB should be false", globalSwapRBFixture.requireNotSelected() == globalSwapRBFixture);
+        assertTrue("Trainers should be set to UNCHANGED but was not", settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED);
+        // Sanity check - Should not fail with 0 options
+        String setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertTrue("Global Swap RB was not false after reloading settings " + settingsReloadCount, globalSwapRBFixture.requireNotSelected() == globalSwapRBFixture);
+        assertTrue("Trainers was not UNCHANGED after reloading settings " + settingsReloadCount, settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED);
+        settingsReloadCount++;
+
+        // Turn Global Swap on
+        clickRBAndWait(globalSwapRBFixture);
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue("Global Swap RB should be true", globalSwapRBFixture.requireSelected() == globalSwapRBFixture);
+        assertTrue("Trainers should be set to GLOBAL_MAPPING but was not", settings.getTrainersMod() == Settings.TrainersMod.GLOBAL_MAPPING);
+        // Reloading settings
+        setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertTrue("Global Swap RB was not true after reloading settings " + settingsReloadCount, globalSwapRBFixture.requireSelected() == globalSwapRBFixture);
+        assertTrue("Trainers was not GLOBAL_MAPPING after reloading settings " + settingsReloadCount, settings.getTrainersMod() == Settings.TrainersMod.GLOBAL_MAPPING);
+        settingsReloadCount++;
+
+        // Turn Unchanged on
+        clickRBAndWait(unchangedTrainerRBFixture);
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue("Global Swap RB should be false", globalSwapRBFixture.requireNotSelected() == globalSwapRBFixture);
+        assertTrue("Trainers should be set to UNCHANGED but was not", settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED);
+        // Reloading settings
+        setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertTrue("Global Swap RB was not false after reloading settings " + settingsReloadCount, globalSwapRBFixture.requireNotSelected() == globalSwapRBFixture);
+        assertTrue("Trainers was not UNCHANGED after reloading settings " + settingsReloadCount, settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED);
+        settingsReloadCount++;
+    }
+
+    /**
      * Captures a common sequence of a checkbox being enabled or disabled based on radio button selection
      * 
      * @param defaultRB - The radio button fixture that disables the checkbox (usually the one that's on by default)

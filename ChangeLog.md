@@ -85,3 +85,5 @@
  * Starters can now be required to be a Super Effective triangle
    * For instance, the traditional triangle is grass-fire-water, but this could make it electric-ground-water or flying-rock-fighting
    * While this generally creates a perfect triangle, there are edge cases that were deliberately skipped to save runtime. Better chances can be obtained by selecting "Unique Types" in addition to "SE Triangle"
+* Trainers can now have pokemon swapped in a global 1 for 1, similar to the global mapping option of Wild Pokemon
+   * Gym type theming is respected by prioritizing type consistency over global swap mapping. This should create a fresher game experience by making route trainers adhere to global swap rules while making gyms, elite 4, champion, and other themed teams stick to one type.

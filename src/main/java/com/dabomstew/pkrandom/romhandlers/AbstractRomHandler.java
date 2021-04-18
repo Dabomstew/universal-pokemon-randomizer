@@ -1023,7 +1023,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // Build the full 1-to-1 map
-        Map<Pokemon, Pokemon> translateMap = new TreeMap<Pokemon, Pokemon>();
+        Map<Pokemon, Pokemon> translateMap = new HashMap<Pokemon, Pokemon>(getPokemon().size());
         PokemonSet fromSet = new PokemonSet(mainPokemonList).filterList(banned);
         PokemonSet toSet = null;
 
@@ -1111,10 +1111,14 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
-        boolean noEarlyWonderGuard, boolean useResistantType, boolean typeTheme, boolean gymTypeTheme, 
-        boolean randomHeldItem, int levelModifier) {
+        boolean noEarlyWonderGuard, boolean useResistantType, boolean typeTheme, boolean globalSwap,
+        boolean gymTypeTheme, boolean randomHeldItem, int levelModifier) {
 
         checkPokemonRestrictions();
+        if (globalSwap) {
+            initializeTrainerGlobalSwapMap();
+        }
+
         List<Trainer> currentTrainers = this.getTrainers();
 
         // New: randomize the order trainers are randomized in.
@@ -1236,11 +1240,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Now that GYM1 has a group, we can assign Cilan, Chili, and Cress
         for (String group: new String[]{"CILAN", "CHILI", "CRESS"}) {
             List<Trainer> trainersInGroup = groups.get(group);
-            // All 3 groups must exist, so we skip this loop entirely
-            // if any are missing
-            if (trainersInGroup == null) {
-                break;
-            }
+
             // Shuffle ordering within group to promote randomness
             Collections.shuffle(trainersInGroup, random);
             for (Trainer t : trainersInGroup) {
@@ -4114,12 +4114,29 @@ public abstract class AbstractRomHandler implements RomHandler {
         return results;
     }
 
+    private HashMap<Pokemon, Pokemon> translateMap;
+
+    private void initializeTrainerGlobalSwapMap() {
+        translateMap = new HashMap<Pokemon, Pokemon>(getPokemon().size());
+    }
+
+    // TODO: Replace with PokemonSet
     private Map<Type, List<Pokemon>> cachedReplacementLists;
     private List<Pokemon> cachedAllList;
 
     private Pokemon pickReplacement(Pokemon current, boolean usePowerLevels, Type type, boolean noLegendaries,
             boolean wonderGuardAllowed) {
         List<Pokemon> pickFrom = getCachedAllList();
+        Pokemon chosenPoke = null;
+
+        if (translateMap != null && translateMap.containsKey(current)) {
+            chosenPoke = translateMap.get(current);
+            // Type selection takes priority over global swap
+            if (type == null || chosenPoke.primaryType == type || chosenPoke.secondaryType == type) {
+                return chosenPoke;
+            }
+        }
+
         if (type != null) {
             if (!cachedReplacementLists.containsKey(type)) {
                 cachedReplacementLists.put(type, pokemonOfType(type, noLegendaries));
@@ -4148,20 +4165,27 @@ public abstract class AbstractRomHandler implements RomHandler {
                 maxTarget += currentBST / 20;
                 expandRounds++;
             }
-            return canPick.get(this.random.nextInt(canPick.size()));
+            chosenPoke = canPick.get(this.random.nextInt(canPick.size()));
         } else {
             if (wonderGuardAllowed) {
-                return pickFrom.get(this.random.nextInt(pickFrom.size()));
+                chosenPoke = pickFrom.get(this.random.nextInt(pickFrom.size()));
             } else {
-                Pokemon pk = pickFrom.get(this.random.nextInt(pickFrom.size()));
-                while (pk.ability1 == GlobalConstants.WONDER_GUARD_INDEX
-                        || pk.ability2 == GlobalConstants.WONDER_GUARD_INDEX
-                        || pk.ability3 == GlobalConstants.WONDER_GUARD_INDEX) {
-                    pk = pickFrom.get(this.random.nextInt(pickFrom.size()));
+                chosenPoke = pickFrom.get(this.random.nextInt(pickFrom.size()));
+                while (chosenPoke.ability1 == GlobalConstants.WONDER_GUARD_INDEX
+                        || chosenPoke.ability2 == GlobalConstants.WONDER_GUARD_INDEX
+                        || chosenPoke.ability3 == GlobalConstants.WONDER_GUARD_INDEX) {
+                    chosenPoke = pickFrom.get(this.random.nextInt(pickFrom.size()));
                 }
-                return pk;
             }
         }
+
+        // Don't override original selections
+        // Prevent type conflicts from replacing global swap
+        if (translateMap != null && !translateMap.containsKey(current)) {
+            translateMap.put(current, chosenPoke);
+        }
+
+        return chosenPoke;
     }
 
     /* Helper methods used by subclasses and/or this class */

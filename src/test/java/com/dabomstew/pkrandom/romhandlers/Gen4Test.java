@@ -215,7 +215,7 @@ public class Gen4Test {
         doReturn(Gen4RomHandler.getRomFromSupportedRom("Diamond (U)")).when(romhandler).getRomEntry();
         doReturn(mock(Map.class)).when(romhandler).getTemplateData();
         resetDataModel(romhandler);
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, true, 0);
         for (Trainer t : romhandler.getTrainers()) {
             for (TrainerPokemon tp : t.getPokemon()) {
                 assertTrue(tp.heldItem + " was not in Gen 4 allowed items.", 
