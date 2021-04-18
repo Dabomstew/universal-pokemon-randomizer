@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="../.." default="build" name="universal-pokemon-randomizer">
+    <property environment="env"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.6"/>
+    <property name="source" value="1.6"/>
+    <property name="mainclass" value="com.dabomstew.pkrandom.gui.RandomizerGUI" />
+    <property name="l4j-location" value="launch4j" />
+    <tstamp>
+        <format property="TODAY" pattern="yyyyMMdd" />
+    </tstamp>
+    <property name="builddir" value="build/${TODAY}" />
+    <taskdef name="launch4j"
+             classname="net.sf.launch4j.ant.Launch4jTask"
+             classpath="${l4j-location}/launch4j.jar
+	        :${l4j-location}/lib/xstream.jar" />
+    <path id="universal-pokemon-randomizer.classpath">
+        <pathelement location="${builddir}/working"/>
+    </path>
+    <target name="init">
+        <mkdir dir="${builddir}/working" />
+        <mkdir dir="${builddir}/settings" />
+        <copy includeemptydirs="false" todir="${builddir}/working">
+            <fileset dir="src">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+                <exclude name="**/*.form"/>
+                <exclude name="com/dabomstew/pkrandom/localtests/*"/>
+            </fileset>
+        </copy>
+        <copy includeemptydirs="false" todir="${builddir}/settings">
+            <fileset dir="settings" />
+        </copy>
+        <copy file="LICENSE.txt" todir="${builddir}/" />
+        <copy file="readme.txt" todir="${builddir}/" />
+    </target>
+    <target name="clean">
+        <delete dir="${builddir}/working" />
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="build-subprojects,build-project" name="build"/>
+    <target name="build-subprojects"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="${builddir}/working" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src"/>
+            <exclude name="com/dabomstew/pkrandom/localtests/*" />
+            <classpath refid="universal-pokemon-randomizer.classpath"/>
+        </javac>
+    </target>
+    <target name="createbinaries">
+        <jar destfile="${builddir}/randomizer.jar" basedir="${builddir}/working">
+            <manifest>
+                <attribute name="Main-Class" value="${mainclass}"/>
+            </manifest>
+        </jar>
+        <launch4j configFile="build/randomizer.xml"
+                  jar="${builddir}/randomizer.jar"
+                  outfile="${builddir}/randomizer.exe" />
+        <delete dir="${builddir}/working" />
+    </target>
+
+</project>
