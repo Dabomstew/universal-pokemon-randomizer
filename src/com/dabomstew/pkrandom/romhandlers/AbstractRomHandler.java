@@ -31,7 +31,6 @@ package com.dabomstew.pkrandom.romhandlers;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
@@ -1923,6 +1922,67 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Save it all up
         this.setTrainers(currentTrainers, false);
+    }
+
+    @Override
+    public void randomizeTrainerHeldItems(Settings settings) {
+        boolean giveToBossPokemon = settings.isRandomizeHeldItemsForBossTrainerPokemon();
+        boolean giveToImportantPokemon = settings.isRandomizeHeldItemsForBossTrainerPokemon();
+        boolean giveToRegularPokemon = settings.isRandomizeHeldItemsForBossTrainerPokemon();
+        boolean highestLevelOnly = settings.isHighestLevelGetsItemsForTrainers();
+        List<Trainer> currentTrainers = this.getTrainers();
+        for (Trainer t : currentTrainers) {
+            if (!giveToRegularPokemon && (!t.isImportant() && !t.isBoss())) {
+                continue;
+            }
+            if (!giveToImportantPokemon && t.isImportant()) {
+                continue;
+            }
+            if (!giveToBossPokemon && t.isBoss()) {
+                continue;
+            }
+            t.setPokemonHaveItems(true);
+            if (highestLevelOnly) {
+                int maxLevel = -1;
+                TrainerPokemon highestLevelPoke = null;
+                for (TrainerPokemon tp : t.pokemon) {
+                    if (tp.level > maxLevel) {
+                        highestLevelPoke = tp;
+                        maxLevel = tp.level;
+                    }
+                }
+                if (highestLevelPoke == null) {
+                    continue; // should never happen - trainer had zero pokes
+                }
+                randomizeHeldItem(highestLevelPoke, settings);
+            } else {
+                for (TrainerPokemon tp : t.pokemon) {
+                    randomizeHeldItem(tp, settings);
+                }
+            }
+        }
+        this.setTrainers(currentTrainers, false);
+    }
+
+    private void randomizeHeldItem(TrainerPokemon tp, Settings settings) {
+        boolean sensibleItemsOnly = settings.isSensibleItemsOnlyForTrainers();
+        boolean consumableItemsOnly = settings.isConsumableItemsOnlyForTrainers();
+        boolean swapMegaEvolutions = settings.isSwapTrainerMegaEvos()
+        if (tp.hasZCrystal) {
+            return; // Don't overwrite existing Z Crystals.
+        }
+        if (tp.hasMegaStone && swapMegaEvolutions) {
+            return; // Don't overwrite mega stones if another setting handled that.
+        }
+        List<Integer> toChooseFrom;
+        if (sensibleItemsOnly) {
+            toChooseFrom = getSensibleHeldItemsFor(tp, consumableItemsOnly);
+        } else if (consumableItemsOnly) {
+            toChooseFrom = getAllConsumableHeldItems();
+        } else {
+            toChooseFrom = getAllHeldItems();
+        }
+        tp.heldItem = toChooseFrom.get(random.nextInt(toChooseFrom.size()));
     }
 
     @Override
@@ -5759,7 +5819,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             if (randomizeHeldItems) {
                 if (old.heldItem != 0) {
-                    newTotem.heldItem = randomHeldItem();
+                    List<Integer> consumableList = getAllConsumableHeldItems();
+                    newTotem.heldItem = consumableList.get(this.random.nextInt(consumableList.size()));
                 }
             }
 
@@ -6002,7 +6063,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public List<Integer> getGameBreakingMoves() {
-        // Sonicboom & drage
+        // Sonicboom & Dragon Rage
         return Arrays.asList(49, 82);
     }
 
@@ -6053,5 +6114,20 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void applyMiscTweak(MiscTweak tweak) {
         // default: do nothing
+    }
+
+    @Override
+    public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, boolean consumableOnly) {
+        return Arrays.asList(0);
+    }
+
+    @Override
+    public List<Integer> getAllConsumableHeldItems() {
+        return Arrays.asList(0);
+    }
+
+    @Override
+    public List<Integer> getAllHeldItems() {
+        return Arrays.asList(0);
     }
 }

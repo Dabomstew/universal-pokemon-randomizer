@@ -200,6 +200,44 @@ public class Gen3Constants {
     
     public static final int luckyEggIndex = 0xC5;
 
+    // https://bulbapedia.bulbagarden.net/wiki/List_of_items_by_index_number_(Generation_III)
+    // Berries that can be eaten in battle listed. They are in numeric order and roughly categorized.
+    public static final int
+        // status effect berries
+        cheriBerry = 0x85, chestoBerry = 0x86, pechaBerry = 0x87, rawstBerry = 0x88, aspearBerry = 0x89,
+        leppaBerry = 0x8a, oranBerry = 0x8b, persimBerry = 0x8c, lumBerry = 0x8d, sitrusBerry = 0x8e,
+        // Restore 1/8 HP when below 50% but may cause confusion
+        figyBerry = 0x8f, wikiBerry = 0x90, magoBerry = 0x91, aguavBerry = 0x92, iapapaBerry = 0x93,
+        // Increase stat (or other buff) when below 25%
+        liechiBerry = 0xa8, ganlonBerry = 0xa9, salacBerry = 0xaa, petayaBerry = 0xab, apicotBerry = 0xac,
+        lansatBerry = 0xad, starfBerry = 0xae;
+    // Other consumable held items
+    public static final int berryJuice = 0x2c, whiteHerb = 0xb4, mentalHerb = 0xb9;
+    // non-consumable held items with in-battle NPC effect (not specific to one pokemon family)
+    public static final int brightPowder = 0x0b3, quickClaw = 0x0b7, choiceBand = 0x0ba, kingsRock = 0x0bb,
+            silverPowder = 0x0bc, focusBand = 0x0c4, scopeLens = 0x0c6, metalCoat = 0x0c7, leftovers = 0x0c8,
+            softSand = 0x0cb, hardStone = 0x0cc, miracleSeed = 0x0cd, blackGlasses = 0x0ce, blackBelt = 0x0cf,
+            magnet = 0x0d0, mysticWater = 0x0d1, sharpBeak = 0x0d2, poisonBarb = 0x0d3, neverMeltIce = 0x0d4,
+            spellTag = 0x0d5, twistedSpoon = 0x0d6, charcoal = 0x0d7, dragonFang = 0x0d8, silkScarf = 0x0d9,
+            shellBell = 0x0db, seaIncense = 0x0dc, laxIncense = 0x0de;
+
+    public static final List<Integer> consumableHeldItems = Arrays.asList(
+            cheriBerry, chestoBerry, pechaBerry, rawstBerry, aspearBerry, leppaBerry, oranBerry, persimBerry,
+            lumBerry, sitrusBerry, figyBerry, wikiBerry, magoBerry, aguavBerry, iapapaBerry, liechiBerry,
+            ganlonBerry, salacBerry, petayaBerry, apicotBerry, lansatBerry, starfBerry, berryJuice, whiteHerb,
+            mentalHerb);
+
+    public static final List<Integer> allHeldItems = setupAllHeldItems();
+
+    private static List<Integer> setupAllHeldItems() {
+        List<Integer> list = new ArrayList<>();
+        list.addAll(Arrays.asList(brightPowder, quickClaw, choiceBand, kingsRock, silverPowder, focusBand,
+                scopeLens, metalCoat, leftovers, softSand, hardStone, miracleSeed, blackGlasses, blackBelt, magnet,
+                mysticWater, sharpBeak, poisonBarb, neverMeltIce, spellTag, twistedSpoon, charcoal, dragonFang,
+                silkScarf, shellBell, seaIncense, laxIncense));
+        list.addAll(consumableHeldItems);
+        return list;
+    }
 
     private static Type[] constructTypeTable() {
         Type[] table = new Type[256];

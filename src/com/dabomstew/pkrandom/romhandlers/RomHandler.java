@@ -201,6 +201,14 @@ public interface RomHandler {
 
     void typeThemeTrainerPokes(Settings settings);
 
+    void randomizeTrainerHeldItems(Settings settings);
+
+    List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, boolean consumableOnly);
+
+    List<Integer> getAllConsumableHeldItems();
+
+    List<Integer> getAllHeldItems();
+
     void rivalCarriesStarter();
 
     void forceFullyEvolvedTrainerPokes(Settings settings);
@@ -494,8 +502,6 @@ public interface RomHandler {
     void setShopPrices();
 
     List<Integer> getMainGameShops();
-
-    int randomHeldItem();
 
     // stats stuff
     void minimumCatchRate(int rateNonLegendary, int rateLegendary);

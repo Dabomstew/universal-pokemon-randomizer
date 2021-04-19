@@ -36,6 +36,8 @@ public class TrainerPokemon {
 
     public int AILevel;
     public int heldItem = 0;
+    public boolean hasMegaStone;
+    public boolean hasZCrystal;
     public int ability;
     public int forme;
     public String formeSuffix = "";
@@ -54,7 +56,13 @@ public class TrainerPokemon {
     public boolean resetMoves = false;
 
     public String toString() {
-        return pokemon.name + formeSuffix + " Lv" + level;
+        String s = pokemon.name + formeSuffix;
+        if (heldItem != 0) {
+            // This can be filled in with the actual name when written to the log.
+            s += "@%s";
+        }
+        s+= " Lv" + level;
+        return s;
     }
 
     public boolean canMegaEvolve() {

@@ -1501,7 +1501,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             Iterator<TrainerPokemon> pokes = tr.pokemon.iterator();
 
             // Write out Pokemon data!
-            if ((tr.poketype & 1) == 1) {
+            if (tr.pokemonHaveCustomMoves()) {
                 // custom moves, blocks of 16 bytes
                 for (int poke = 0; poke < newPokeCount; poke++) {
                     TrainerPokemon tp = pokes.next();
@@ -1509,7 +1509,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     writeWord(pointerToPokes + poke * 16 + 2, tp.level);
                     writeWord(pointerToPokes + poke * 16 + 4, pokedexToInternal[tp.pokemon.number]);
                     int movesStart;
-                    if ((tr.poketype & 2) == 2) {
+                    if (tr.pokemonHaveItems()) {
                         writeWord(pointerToPokes + poke * 16 + 6, tp.heldItem);
                         movesStart = 8;
                     } else {
@@ -1535,7 +1535,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     writeWord(pointerToPokes + poke * 8, tp.AILevel);
                     writeWord(pointerToPokes + poke * 8 + 2, tp.level);
                     writeWord(pointerToPokes + poke * 8 + 4, pokedexToInternal[tp.pokemon.number]);
-                    if ((tr.poketype & 2) == 2) {
+                    if (tr.pokemonHaveItems()) {
                         writeWord(pointerToPokes + poke * 8 + 6, tp.heldItem);
                     } else {
                         writeWord(pointerToPokes + poke * 8 + 6, 0);
@@ -2473,11 +2473,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public int randomHeldItem() {
-        return 0;
-    }
-
-    @Override
     public boolean canChangeTrainerText() {
         return true;
     }
@@ -3325,5 +3320,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
         // Make image, 4bpp
         return GFXFunctions.drawTiledImage(trueFrontSprite, convPalette, 64, 64, 4);
+    }
+
+    @Override
+    public List<Integer> getAllHeldItems() {
+        return Gen3Constants.allHeldItems;
+    }
+
+    @Override
+    public List<Integer> getAllConsumableHeldItems() {
+        return Gen3Constants.consumableHeldItems;
     }
 }
