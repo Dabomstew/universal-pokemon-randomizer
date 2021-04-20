@@ -2181,32 +2181,34 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         List<Move> moves = this.getMoves();
 
-        // gen1
-        // Karate Chop => FIGHTING (gen1)
-        updateMoveType(moves, 2, Type.FIGHTING);
-        // Gust => FLYING (gen1)
-        updateMoveType(moves, 16, Type.FLYING);
-        // Wing Attack => 60 power (gen1)
-        updateMovePower(moves, 17, 60);
-        // Whirlwind => 100 accuracy (gen1)
-        updateMoveAccuracy(moves, 18, 100);
-        // Sand Attack => GROUND (gen1)
-        updateMoveType(moves, 28, Type.GROUND);
-        // Double-Edge => 120 power (gen1)
-        updateMovePower(moves, 38, 120);
-        // Move 44, Bite, becomes dark (but doesn't exist anyway)
-        // Blizzard => 70% accuracy (gen1)
-        updateMoveAccuracy(moves, 59, 70);
-        // Rock Throw => 90% accuracy (gen1)
-        updateMoveAccuracy(moves, 88, 90);
-        // Hypnosis => 60% accuracy (gen1)
-        updateMoveAccuracy(moves, 95, 60);
-        // SelfDestruct => 200power (gen1)
-        updateMovePower(moves, 120, 200);
-        // Explosion => 250 power (gen1)
-        updateMovePower(moves, 153, 250);
-        // Dig => 60 power (gen1)
-        updateMovePower(moves, 91, 60);
+        if (generation >= 2 && generationOfPokemon() < 2) {
+            // gen1
+            // Karate Chop => FIGHTING (gen1)
+            updateMoveType(moves, 2, Type.FIGHTING);
+            // Gust => FLYING (gen1)
+            updateMoveType(moves, 16, Type.FLYING);
+            // Wing Attack => 60 power (gen1)
+            updateMovePower(moves, 17, 60);
+            // Whirlwind => 100 accuracy (gen1)
+            updateMoveAccuracy(moves, 18, 100);
+            // Sand Attack => GROUND (gen1)
+            updateMoveType(moves, 28, Type.GROUND);
+            // Double-Edge => 120 power (gen1)
+            updateMovePower(moves, 38, 120);
+            // Move 44, Bite, becomes dark (but doesn't exist anyway)
+            // Blizzard => 70% accuracy (gen1)
+            updateMoveAccuracy(moves, 59, 70);
+            // Rock Throw => 90% accuracy (gen1)
+            updateMoveAccuracy(moves, 88, 90);
+            // Hypnosis => 60% accuracy (gen1)
+            updateMoveAccuracy(moves, 95, 60);
+            // SelfDestruct => 200power (gen1)
+            updateMovePower(moves, 120, 200);
+            // Explosion => 250 power (gen1)
+            updateMovePower(moves, 153, 250);
+            // Dig => 60 power (gen1)
+            updateMovePower(moves, 91, 60);
+        }
 
         if (generation >= 3 && generationOfPokemon() < 3) {
             // Razor Wind => 100% accuracy (gen1/2)
