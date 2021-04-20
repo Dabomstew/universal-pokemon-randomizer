@@ -2571,7 +2571,7 @@ public class NewRandomizerGUI {
             tpDoubleBattleModeCheckBox.setVisible(pokemonGeneration >= 4);
             tpDoubleBattleModeCheckBox.setEnabled(pokemonGeneration >= 4);
 
-            boolean additionalPokemonAvailable = pokemonGeneration >= 4;
+            boolean additionalPokemonAvailable = pokemonGeneration >= 3;
 
             tpAdditionalPokemonForLabel.setVisible(additionalPokemonAvailable);
             tpBossTrainersCheckBox.setVisible(additionalPokemonAvailable);
