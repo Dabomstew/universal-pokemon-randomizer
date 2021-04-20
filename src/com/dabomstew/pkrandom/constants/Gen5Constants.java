@@ -87,7 +87,7 @@ public class Gen5Constants {
     public static final int w2Route4EncounterFile = 105, w2VRExclusiveRoom1 = 78, w2VRExclusiveRoom2 = 79,
             w2ReversalMountainStart = 55, w2ReversalMountainEnd = 60;
 
-    public static final int[] bw2HiddenHollowUnovaPokemon = { Species.watchog, Species.herdier, Species.liepard,
+    public static final List<Integer> bw2HiddenHollowUnovaPokemon = Arrays.asList(Species.watchog, Species.herdier, Species.liepard,
             Species.pansage, Species.pansear, Species.panpour, Species.pidove, Species.zebstrika, Species.boldore,
             Species.woobat, Species.drilbur, Species.audino, Species.gurdurr, Species.tympole, Species.throh,
             Species.sawk, Species.leavanny, Species.scolipede, Species.cottonee, Species.petilil, Species.basculin,
@@ -96,7 +96,7 @@ public class Gen5Constants {
             Species.emolga, Species.karrablast, Species.alomomola, Species.galvantula, Species.klinklang, Species.elgyem,
             Species.litwick, Species.axew, Species.cubchoo, Species.shelmet, Species.stunfisk, Species.mienfoo,
             Species.druddigon, Species.golett, Species.pawniard, Species.bouffalant, Species.braviary, Species.mandibuzz,
-            Species.heatmor, Species.durant };
+            Species.heatmor, Species.durant);
 
     public static final String tmDataPrefix = "87038803";
 

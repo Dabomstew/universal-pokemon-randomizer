@@ -321,6 +321,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private ItemList allowedItems, nonBadItems;
     private List<Integer> regularShopItems;
     private List<Integer> opShopItems;
+    private int hiddenHollowCount = 0;
+    private boolean hiddenHollowCounted = false;
     
     private NARCArchive pokeNarc, moveNarc, stringsNarc, storyTextNarc, scriptNarc, shopNarc;
 
@@ -1691,6 +1693,54 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
             sp.add(se);
         }
+        if (romEntry.romType == Gen5Constants.Type_BW2) {
+
+            List<Pokemon> allowedHiddenHollowPokemon = new ArrayList<>();
+            allowedHiddenHollowPokemon.addAll(Arrays.asList(Arrays.copyOfRange(pokes,1,494)));
+            allowedHiddenHollowPokemon.addAll(
+                    Gen5Constants.bw2HiddenHollowUnovaPokemon.stream().map(i -> pokes[i]).collect(Collectors.toList()));
+
+            try {
+                NARCArchive hhNARC = this.readNARC(romEntry.getString("HiddenHollows"));
+                for (byte[] hhEntry : hhNARC.files) {
+                    for (int version = 0; version < 2; version++) {
+                        if (version != romEntry.getInt("HiddenHollowIndex")) continue;
+                        for (int raritySlot = 0; raritySlot < 3; raritySlot++) {
+                            List<StaticEncounter> encountersInGroup = new ArrayList<>();
+                            for (int group = 0; group < 4; group++) {
+                                StaticEncounter se = new StaticEncounter();
+                                Pokemon newPK = pokes[readWord(hhEntry, version * 78 + raritySlot * 26 + group * 2)];
+                                newPK = getAltFormeOfPokemon(newPK, hhEntry[version * 78 + raritySlot * 26 + 20 + group]);
+                                se.pkmn = newPK;
+                                se.level = hhEntry[version * 78 + raritySlot * 26 + 12 + group];
+                                se.maxLevel = hhEntry[version * 78 + raritySlot * 26 + 8 + group];
+                                se.isEgg = false;
+                                se.restrictedPool = true;
+                                se.restrictedList = allowedHiddenHollowPokemon;
+                                boolean originalEncounter = true;
+                                for (StaticEncounter encounterInGroup: encountersInGroup) {
+                                    if (encounterInGroup.pkmn.equals(se.pkmn)) {
+                                        encounterInGroup.linkedEncounters.add(se);
+                                        originalEncounter = false;
+                                        break;
+                                    }
+                                }
+                                if (originalEncounter) {
+                                    encountersInGroup.add(se);
+                                    sp.add(se);
+                                    if (!hiddenHollowCounted) {
+                                        hiddenHollowCount++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                throw new RandomizerIOException(e);
+            }
+        }
+        hiddenHollowCounted = true;
         return sp;
     }
 
@@ -1699,7 +1749,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         if (!romEntry.staticPokemonSupport) {
             return false;
         }
-        if (staticPokemon.size() != romEntry.staticPokemon.size()) {
+        if (staticPokemon.size() != (romEntry.staticPokemon.size() + hiddenHollowCount)) {
             return false;
         }
         Iterator<StaticEncounter> statics = staticPokemon.iterator();
@@ -1712,6 +1762,40 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             for (int i = 0; i < se.linkedEncounters.size(); i++) {
                 StaticEncounter linkedStatic = se.linkedEncounters.get(i);
                 statP.setLevel(scriptNARC, linkedStatic.level, i + 1);
+            }
+        }
+
+        if (romEntry.romType == Gen5Constants.Type_BW2) {
+            try {
+                NARCArchive hhNARC = this.readNARC(romEntry.getString("HiddenHollows"));
+                for (byte[] hhEntry : hhNARC.files) {
+                    for (int version = 0; version < 2; version++) {
+                        if (version != romEntry.getInt("HiddenHollowIndex")) continue;
+                        for (int raritySlot = 0; raritySlot < 3; raritySlot++) {
+                            for (int group = 0; group < 4; group++) {
+                                StaticEncounter se = statics.next();
+                                writeWord(hhEntry, version * 78 + raritySlot * 26 + group * 2, se.pkmn.number);
+                                int genderRatio = this.random.nextInt(101);
+                                hhEntry[version * 78 + raritySlot * 26 + 16 + group] = (byte) genderRatio;
+                                hhEntry[version * 78 + raritySlot * 26 + 20 + group] = (byte) se.forme; // forme
+                                hhEntry[version * 78 + raritySlot * 26 + 12 + group] = (byte) se.level;
+                                hhEntry[version * 78 + raritySlot * 26 + 8 + group] = (byte) se.maxLevel;
+                                for (int i = 0; i < se.linkedEncounters.size(); i++) {
+                                    StaticEncounter linkedStatic = se.linkedEncounters.get(i);
+                                    group++;
+                                    writeWord(hhEntry, version * 78 + raritySlot * 26 + group * 2, linkedStatic.pkmn.number);
+                                    hhEntry[version * 78 + raritySlot * 26 + 16 + group] = (byte) genderRatio;
+                                    hhEntry[version * 78 + raritySlot * 26 + 20 + group] = (byte) linkedStatic.forme; // forme
+                                    hhEntry[version * 78 + raritySlot * 26 + 12 + group] = (byte) linkedStatic.level;
+                                    hhEntry[version * 78 + raritySlot * 26 + 8 + group] = (byte) linkedStatic.maxLevel;
+                                }
+                            }
+                        }
+                    }
+                }
+                this.writeNARC(romEntry.getString("HiddenHollows"), hhNARC);
+            } catch (IOException e) {
+                throw new RandomizerIOException(e);
             }
         }
 
@@ -1809,9 +1893,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     public int miscTweaksAvailable() {
         int available = 0;
-        if (romEntry.romType == Gen5Constants.Type_BW2) {
-            available |= MiscTweak.RANDOMIZE_HIDDEN_HOLLOWS.getValue();
-        }
         if (romEntry.tweakFiles.get("FastestTextTweak") != null) {
             available |= MiscTweak.FASTEST_TEXT.getValue();
         }
@@ -1830,9 +1911,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public void applyMiscTweak(MiscTweak tweak) {
-        if (tweak == MiscTweak.RANDOMIZE_HIDDEN_HOLLOWS) {
-            randomizeHiddenHollowPokemon();
-        } else if (tweak == MiscTweak.FASTEST_TEXT) {
+        if (tweak == MiscTweak.FASTEST_TEXT) {
             applyFastestText();
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
             allowedItems.banSingles(Gen5Constants.luckyEggIndex);
@@ -1899,37 +1978,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     break;
                 }
             }
-        }
-    }
-
-    private void randomizeHiddenHollowPokemon() {
-        if (romEntry.romType != Gen5Constants.Type_BW2) {
-            return;
-        }
-        int[] allowedUnovaPokemon = Gen5Constants.bw2HiddenHollowUnovaPokemon;
-        int randomSize = Gen5Constants.nonUnovaPokemonCount + allowedUnovaPokemon.length;
-        try {
-            NARCArchive hhNARC = this.readNARC(romEntry.getString("HiddenHollows"));
-            for (byte[] hhEntry : hhNARC.files) {
-                for (int version = 0; version < 2; version++) {
-                    for (int rarityslot = 0; rarityslot < 3; rarityslot++) {
-                        for (int group = 0; group < 4; group++) {
-                            int pokeChoice = this.random.nextInt(randomSize) + 1;
-                            if (pokeChoice > Gen5Constants.nonUnovaPokemonCount) {
-                                pokeChoice = allowedUnovaPokemon[pokeChoice - (Gen5Constants.nonUnovaPokemonCount + 1)];
-                            }
-                            writeWord(hhEntry, version * 78 + rarityslot * 26 + group * 2, pokeChoice);
-                            int genderRatio = this.random.nextInt(101);
-                            hhEntry[version * 78 + rarityslot * 26 + 16 + group] = (byte) genderRatio;
-                            hhEntry[version * 78 + rarityslot * 26 + 20 + group] = 0; // forme
-                        }
-                    }
-                }
-                // the rest of the file is items
-            }
-            this.writeNARC(romEntry.getString("HiddenHollows"), hhNARC);
-        } catch (IOException e) {
-            throw new RandomizerIOException(e);
         }
     }
 

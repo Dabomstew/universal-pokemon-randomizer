@@ -31,7 +31,6 @@ package com.dabomstew.pkrandom.romhandlers;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
@@ -3002,6 +3001,12 @@ public abstract class AbstractRomHandler implements RomHandler {
             legendariesLeft.removeAll(banned);
             nonlegsLeft.removeAll(banned);
             ultraBeastsLeft.removeAll(banned);
+
+            // Full pools for easier refilling later
+            List<Pokemon> legendariesPool = new ArrayList<>(legendariesLeft);
+            List<Pokemon> nonlegsPool = new ArrayList<>(nonlegsLeft);
+            List<Pokemon> ultraBeastsPool = new ArrayList<>(ultraBeastsLeft);
+
             for (StaticEncounter old : currentStaticPokemon) {
                 StaticEncounter newStatic = cloneStaticEncounter(old);
                 Pokemon newPK;
@@ -3009,50 +3014,44 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (reallySwapMegaEvos && old.canMegaEvolve()) {
                         newPK = getMegaEvoPokemon(onlyLegendaryList, legendariesLeft, newStatic);
                     } else {
-                        newPK = legendariesLeft.remove(this.random.nextInt(legendariesLeft.size()));
+                        if (old.restrictedPool) {
+                            newPK = getRestrictedPokemon(legendariesPool, legendariesLeft, old);
+                        } else {
+                            newPK = legendariesLeft.remove(this.random.nextInt(legendariesLeft.size()));
+                        }
                     }
 
                     setPokemonAndFormeForStaticEncounter(newStatic, newPK);
 
                     if (legendariesLeft.size() == 0) {
-                        legendariesLeft.addAll(onlyLegendaryList);
-                        if (allowAltFormes) {
-                            legendariesLeft.addAll(onlyLegendaryAltsList);
-                            legendariesLeft =
-                                    legendariesLeft
-                                            .stream()
-                                            .filter(pk -> !pk.actuallyCosmetic)
-                                            .collect(Collectors.toList());
-                        }
-                        legendariesLeft.removeAll(banned);
+                        legendariesLeft.addAll(legendariesPool);
                     }
                 } else if (ultraBeastList.contains(old.pkmn)) {
-                    newPK = ultraBeastsLeft.remove(this.random.nextInt(ultraBeastsLeft.size()));
+                    if (old.restrictedPool) {
+                        newPK = getRestrictedPokemon(ultraBeastsPool, ultraBeastsLeft, old);
+                    } else {
+                        newPK = ultraBeastsLeft.remove(this.random.nextInt(ultraBeastsLeft.size()));
+                    }
 
                     setPokemonAndFormeForStaticEncounter(newStatic, newPK);
 
                     if (ultraBeastsLeft.size() == 0) {
-                        ultraBeastsLeft.addAll(ultraBeastList);
+                        ultraBeastsLeft.addAll(ultraBeastsPool);
                     }
                 } else {
                     if (reallySwapMegaEvos && old.canMegaEvolve()) {
                         newPK = getMegaEvoPokemon(noLegendaryList, nonlegsLeft, newStatic);
                     } else {
-                        newPK = nonlegsLeft.remove(this.random.nextInt(nonlegsLeft.size()));
+                        if (old.restrictedPool) {
+                            newPK = getRestrictedPokemon(nonlegsPool, nonlegsLeft, old);
+                        } else {
+                            newPK = nonlegsLeft.remove(this.random.nextInt(nonlegsLeft.size()));
+                        }
                     }
                     setPokemonAndFormeForStaticEncounter(newStatic, newPK);
 
                     if (nonlegsLeft.size() == 0) {
-                        nonlegsLeft.addAll(noLegendaryList);
-                        if (allowAltFormes) {
-                            nonlegsLeft.addAll(noLegendaryAltsList);
-                            nonlegsLeft =
-                                    nonlegsLeft
-                                            .stream()
-                                            .filter(pk -> !pk.actuallyCosmetic)
-                                            .collect(Collectors.toList());
-                        }
-                        nonlegsLeft.removeAll(banned);
+                        nonlegsLeft.addAll(nonlegsPool);
                     }
                 }
                 replacements.add(newStatic);
@@ -3068,6 +3067,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                             .collect(Collectors.toList());
             List<Pokemon> pokemonLeft = new ArrayList<>(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
             pokemonLeft.removeAll(banned);
+
+            List<Pokemon> pokemonPool = new ArrayList<>(pokemonLeft);
+
             List<Integer> mainGameLegendaries = getMainGameLegendaries();
             for (StaticEncounter old : currentStaticPokemon) {
                 StaticEncounter newStatic = cloneStaticEncounter(old);
@@ -3081,7 +3083,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (reallySwapMegaEvos && old.canMegaEvolve()) {
                         newPK = getMegaEvoPokemon(mainPokemonList, pokemonLeft, newStatic);
                     } else {
-                        newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
+                        if (old.restrictedPool) {
+                            newPK = getRestrictedPokemon(pokemonPool, pokemonLeft, old);
+                        } else {
+                            newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
+                        }
                     }
                     setPokemonAndFormeForStaticEncounter(newStatic, newPK);
                 } else {
@@ -3111,27 +3117,42 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 megaEvoPokemonLeft,
                                 oldPK,
                                 true,
-                                replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
                                 limitBST);
                         newStatic.heldItem = newPK
                                 .megaEvolutionsFrom
                                 .get(this.random.nextInt(newPK.megaEvolutionsFrom.size()))
                                 .argument;
                     } else {
-                        newPK = pickStaticPowerLvlReplacement(
-                                pokemonLeft,
-                                oldPK,
-                                true,
-                                replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
-                                limitBST);
+                        if (old.restrictedPool) {
+                            List<Pokemon> restrictedPool = pokemonLeft
+                                            .stream()
+                                            .filter(pk -> old.restrictedList.contains(pk))
+                                            .collect(Collectors.toList());
+                            if (restrictedPool.isEmpty()) {
+                                restrictedPool = pokemonPool
+                                        .stream()
+                                        .filter(pk -> old.restrictedList.contains(pk))
+                                        .collect(Collectors.toList());
+                            }
+                            newPK = pickStaticPowerLvlReplacement(
+                                    restrictedPool,
+                                    oldPK,
+                                    false, // Allow same Pokemon just in case
+                                    limitBST);
+                        } else {
+                            newPK = pickStaticPowerLvlReplacement(
+                                    pokemonLeft,
+                                    oldPK,
+                                    true,
+                                    limitBST);
+                        }
                     }
                     pokemonLeft.remove(newPK);
                     setPokemonAndFormeForStaticEncounter(newStatic, newPK);
                 }
 
                 if (pokemonLeft.size() == 0) {
-                    pokemonLeft.addAll(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
-                    pokemonLeft.removeAll(banned);
+                    pokemonLeft.addAll(pokemonPool);
                 }
                 replacements.add(newStatic);
                 if (changeMusicStatics.contains(old.pkmn.number)) {
@@ -3146,19 +3167,25 @@ public abstract class AbstractRomHandler implements RomHandler {
                             .collect(Collectors.toList());
             List<Pokemon> pokemonLeft = new ArrayList<>(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
             pokemonLeft.removeAll(banned);
+
+            List<Pokemon> pokemonPool = new ArrayList<>(pokemonLeft);
+
             for (StaticEncounter old : currentStaticPokemon) {
                 StaticEncounter newStatic = cloneStaticEncounter(old);
                 Pokemon newPK;
                 if (reallySwapMegaEvos && old.canMegaEvolve()) {
                     newPK = getMegaEvoPokemon(mainPokemonList, pokemonLeft, newStatic);
                 } else {
-                    newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
+                    if (old.restrictedPool) {
+                        newPK = getRestrictedPokemon(pokemonPool, pokemonLeft, old);
+                    } else {
+                        newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
+                    }
                 }
                 pokemonLeft.remove(newPK);
                 setPokemonAndFormeForStaticEncounter(newStatic, newPK);
                 if (pokemonLeft.size() == 0) {
-                    pokemonLeft.addAll(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
-                    pokemonLeft.removeAll(banned);
+                    pokemonLeft.addAll(pokemonPool);
                 }
                 replacements.add(newStatic);
                 if (changeMusicStatics.contains(old.pkmn.number)) {
@@ -3171,9 +3198,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (StaticEncounter se : replacements) {
                 if (!se.isEgg) {
                     se.level = Math.min(100, (int) Math.round(se.level * (1 + levelModifier / 100.0)));
+                    se.maxLevel = Math.min(100, (int) Math.round(se.maxLevel * (1 + levelModifier / 100.0)));
                     for (StaticEncounter linkedStatic : se.linkedEncounters) {
                         if (!linkedStatic.isEgg) {
                             linkedStatic.level = Math.min(100, (int) Math.round(linkedStatic.level * (1 + levelModifier / 100.0)));
+                            linkedStatic.maxLevel = Math.min(100, (int) Math.round(linkedStatic.maxLevel * (1 + levelModifier / 100.0)));
                         }
                     }
                 }
@@ -3186,6 +3215,20 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Save
         this.setStaticPokemon(replacements);
+    }
+
+    private Pokemon getRestrictedPokemon(List<Pokemon> fullList, List<Pokemon> pokemonLeft, StaticEncounter old) {
+        Pokemon newPK;
+        List<Pokemon> restrictedPool = pokemonLeft.stream().filter(pk -> old.restrictedList.contains(pk)).collect(Collectors.toList());
+        if (restrictedPool.isEmpty()) {
+            restrictedPool = fullList
+                            .stream()
+                            .filter(pk -> old.restrictedList.contains(pk))
+                            .collect(Collectors.toList());
+        }
+        newPK = restrictedPool.remove(this.random.nextInt(restrictedPool.size()));
+        pokemonLeft.remove(newPK);
+        return newPK;
     }
 
     @Override
@@ -3211,6 +3254,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         StaticEncounter newStatic = new StaticEncounter();
         newStatic.pkmn = old.pkmn;
         newStatic.level = old.level;
+        newStatic.maxLevel = old.maxLevel;
         newStatic.heldItem = old.heldItem;
         newStatic.isEgg = old.isEgg;
         newStatic.resetMoves = true;
@@ -3218,6 +3262,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             StaticEncounter newLinked = new StaticEncounter();
             newLinked.pkmn = oldLinked.pkmn;
             newLinked.level = oldLinked.level;
+            newLinked.maxLevel = oldLinked.maxLevel;
             newLinked.heldItem = oldLinked.heldItem;
             newLinked.isEgg = oldLinked.isEgg;
             newLinked.resetMoves = true;
@@ -5557,7 +5602,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private Pokemon pickStaticPowerLvlReplacement(List<Pokemon> pokemonPool, Pokemon current, boolean banSamePokemon,
-                                                List<Pokemon> usedUp, boolean limitBST) {
+                                                  boolean limitBST) {
         // start with within 10% and add 5% either direction till we find
         // something
         int currentBST = current.bstForPowerLevels();
@@ -5568,8 +5613,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 3)) {
             for (Pokemon pk : pokemonPool) {
                 if (pk.bstForPowerLevels() >= minTarget && pk.bstForPowerLevels() <= maxTarget
-                        && (!banSamePokemon || pk != current) && (usedUp == null || !usedUp.contains(pk))
-                        && !canPick.contains(pk)) {
+                        && (!banSamePokemon || pk != current) && !canPick.contains(pk)) {
                     canPick.add(pk);
                 }
             }
@@ -5674,7 +5718,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                             pokemonLeft,
                             oldPK,
                             true,
-                            replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
                             false);
                 } else {
                     newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
@@ -5716,7 +5759,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 pokemonLeft,
                                 oldAllyPK,
                                 true,
-                                replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
                                 false);
                     } else {
                         newAllyPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));

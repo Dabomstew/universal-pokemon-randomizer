@@ -204,7 +204,6 @@ public class NewRandomizerGUI {
     private JCheckBox miscAllowPikachuEvolutionCheckBox;
     private JCheckBox miscGiveNationalDexAtCheckBox;
     private JCheckBox miscUpdateTypeEffectivenessCheckBox;
-    private JCheckBox miscRandomizeHiddenHollowsCheckBox;
     private JCheckBox miscLowerCasePokemonNamesCheckBox;
     private JCheckBox miscRandomizeCatchingTutorialCheckBox;
     private JCheckBox miscBanLuckyEggCheckBox;
@@ -2362,9 +2361,6 @@ public class NewRandomizerGUI {
         miscUpdateTypeEffectivenessCheckBox.setVisible(true);
         miscUpdateTypeEffectivenessCheckBox.setEnabled(false);
         miscUpdateTypeEffectivenessCheckBox.setSelected(false);
-        miscRandomizeHiddenHollowsCheckBox.setVisible(true);
-        miscRandomizeHiddenHollowsCheckBox.setEnabled(false);
-        miscRandomizeHiddenHollowsCheckBox.setSelected(false);
         miscLowerCasePokemonNamesCheckBox.setVisible(true);
         miscLowerCasePokemonNamesCheckBox.setEnabled(false);
         miscLowerCasePokemonNamesCheckBox.setSelected(false);

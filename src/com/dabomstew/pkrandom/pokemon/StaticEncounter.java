@@ -30,9 +30,12 @@ public class StaticEncounter {
     public Pokemon pkmn;
     public int forme = 0;
     public int level;
+    public int maxLevel = 0;
     public int heldItem;
     public boolean isEgg = false;
     public boolean resetMoves = false;
+    public boolean restrictedPool = false;
+    public List<Pokemon> restrictedList = new ArrayList<>();
 
     // In the games, sometimes what is logically an encounter or set of encounters with one specific Pokemon
     // can actually consist of multiple encounters internally. This can happen because:
@@ -65,6 +68,9 @@ public class StaticEncounter {
             return pkmn.fullName();
         }
         StringBuilder levelStringBuilder = new StringBuilder("Lv" + level);
+        if (maxLevel > 0) {
+            levelStringBuilder.append("-").append(maxLevel);
+        }
         boolean needToDisplayLinkedLevels = false;
         for (int i = 0; i < linkedEncounters.size(); i++) {
             if (level != linkedEncounters.get(i).level) {
