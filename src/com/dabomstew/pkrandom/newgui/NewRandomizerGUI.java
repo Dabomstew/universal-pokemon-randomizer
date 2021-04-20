@@ -280,6 +280,13 @@ public class NewRandomizerGUI {
     private JSlider stpPercentageLevelModifierSlider;
     private JCheckBox stpFixMusicCheckBox;
     private JCheckBox miscFasterHPAndEXPBarsCheckBox;
+    private JCheckBox tpBossTrainersItemsCheckBox;
+    private JCheckBox tpImportantTrainersItemsCheckBox;
+    private JCheckBox tpRegularTrainersItemsCheckBox;
+    private JLabel tpHeldItemsLabel;
+    private JCheckBox tpConsumableItemsOnlyCheckBox;
+    private JCheckBox tpSensibleItemsCheckBox;
+    private JCheckBox tpHighestLevelGetsItemCheckBox;
 
     private static JFrame frame;
 
@@ -490,6 +497,9 @@ public class NewRandomizerGUI {
         tpBossTrainersCheckBox.addActionListener(e -> enableOrDisableSubControls());
         tpImportantTrainersCheckBox.addActionListener(e -> enableOrDisableSubControls());
         tpRegularTrainersCheckBox.addActionListener(e -> enableOrDisableSubControls());
+        tpBossTrainersItemsCheckBox.addActionListener(e -> enableOrDisableSubControls());
+        tpImportantTrainersItemsCheckBox.addActionListener(e -> enableOrDisableSubControls());
+        tpRegularTrainersItemsCheckBox.addActionListener(e -> enableOrDisableSubControls());
         totpUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         totpRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
         totpRandomSimilarStrengthRadioButton.addActionListener(e -> enableOrDisableSubControls());
@@ -1361,6 +1371,13 @@ public class NewRandomizerGUI {
         tpImportantTrainersSpinner.setValue(settings.getAdditionalImportantTrainerPokemon() > 0 ? settings.getAdditionalImportantTrainerPokemon() : 1);
         tpRegularTrainersCheckBox.setSelected(settings.getAdditionalRegularTrainerPokemon() > 0);
         tpRegularTrainersSpinner.setValue(settings.getAdditionalRegularTrainerPokemon() > 0 ? settings.getAdditionalRegularTrainerPokemon() : 1);
+        tpBossTrainersItemsCheckBox.setSelected(settings.isRandomizeHeldItemsForBossTrainerPokemon());
+        tpImportantTrainersItemsCheckBox.setSelected(settings.isRandomizeHeldItemsForImportantTrainerPokemon());
+        tpRegularTrainersItemsCheckBox.setSelected(settings.isRandomizeHeldItemsForRegularTrainerPokemon());
+        tpConsumableItemsOnlyCheckBox.setSelected(settings.isConsumableItemsOnlyForTrainers());
+        tpSensibleItemsCheckBox.setSelected(settings.isSensibleItemsOnlyForTrainers());
+        tpHighestLevelGetsItemCheckBox.setSelected(settings.isHighestLevelGetsItemsForTrainers());
+
         tpRandomShinyTrainerPokemonCheckBox.setSelected(settings.isShinyChance());
 
         totpUnchangedRadioButton.setSelected(settings.getTotemPokemonMod() == Settings.TotemPokemonMod.UNCHANGED);
@@ -1580,6 +1597,12 @@ public class NewRandomizerGUI {
         settings.setAdditionalImportantTrainerPokemon(tpImportantTrainersCheckBox.isVisible() && tpImportantTrainersCheckBox.isSelected() ? (int)tpImportantTrainersSpinner.getValue() : 0);
         settings.setAdditionalRegularTrainerPokemon(tpRegularTrainersCheckBox.isVisible() && tpRegularTrainersCheckBox.isSelected() ? (int)tpRegularTrainersSpinner.getValue() : 0);
         settings.setShinyChance(tpRandomShinyTrainerPokemonCheckBox.isVisible() && tpRandomShinyTrainerPokemonCheckBox.isSelected());
+        settings.setRandomizeHeldItemsForBossTrainerPokemon(tpBossTrainersItemsCheckBox.isVisible() && tpBossTrainersItemsCheckBox.isSelected());
+        settings.setRandomizeHeldItemsForImportantTrainerPokemon(tpImportantTrainersItemsCheckBox.isVisible() && tpImportantTrainersItemsCheckBox.isSelected());
+        settings.setRandomizeHeldItemsForRegularTrainerPokemon(tpRegularTrainersItemsCheckBox.isVisible() && tpRegularTrainersItemsCheckBox.isSelected());
+        settings.setConsumableItemsOnlyForTrainers(tpConsumableItemsOnlyCheckBox.isVisible() && tpConsumableItemsOnlyCheckBox.isSelected());
+        settings.setSensibleItemsOnlyForTrainers(tpSensibleItemsCheckBox.isVisible() && tpSensibleItemsCheckBox.isSelected());
+        settings.setHighestLevelGetsItemsForTrainers(tpHighestLevelGetsItemCheckBox.isVisible() && tpHighestLevelGetsItemCheckBox.isSelected());
 
         settings.setTotemPokemonMod(totpUnchangedRadioButton.isSelected(), totpRandomRadioButton.isSelected(), totpRandomSimilarStrengthRadioButton.isSelected());
         settings.setAllyPokemonMod(totpAllyUnchangedRadioButton.isSelected(), totpAllyRandomRadioButton.isSelected(), totpAllyRandomSimilarStrengthRadioButton.isSelected());
@@ -2119,6 +2142,25 @@ public class NewRandomizerGUI {
         tpRegularTrainersSpinner.setEnabled(false);
         tpRegularTrainersSpinner.setValue(1);
         tpAdditionalPokemonForLabel.setVisible(true);
+        tpHeldItemsLabel.setVisible(true);
+        tpBossTrainersItemsCheckBox.setVisible(true);
+        tpBossTrainersItemsCheckBox.setEnabled(false);
+        tpBossTrainersItemsCheckBox.setSelected(false);
+        tpImportantTrainersItemsCheckBox.setVisible(true);
+        tpImportantTrainersItemsCheckBox.setEnabled(false);
+        tpImportantTrainersItemsCheckBox.setSelected(false);
+        tpRegularTrainersItemsCheckBox.setVisible(true);
+        tpRegularTrainersItemsCheckBox.setEnabled(false);
+        tpRegularTrainersItemsCheckBox.setSelected(false);
+        tpConsumableItemsOnlyCheckBox.setVisible(true);
+        tpConsumableItemsOnlyCheckBox.setEnabled(false);
+        tpConsumableItemsOnlyCheckBox.setSelected(false);
+        tpSensibleItemsCheckBox.setVisible(true);
+        tpSensibleItemsCheckBox.setEnabled(false);
+        tpSensibleItemsCheckBox.setSelected(false);
+        tpHighestLevelGetsItemCheckBox.setVisible(true);
+        tpHighestLevelGetsItemCheckBox.setEnabled(false);
+        tpHighestLevelGetsItemCheckBox.setSelected(false);
         tpRandomShinyTrainerPokemonCheckBox.setVisible(true);
         tpRandomShinyTrainerPokemonCheckBox.setEnabled(false);
         totpPanel.setVisible(true);
@@ -2580,6 +2622,21 @@ public class NewRandomizerGUI {
             tpRegularTrainersCheckBox.setEnabled(false);
             tpRegularTrainersSpinner.setVisible(additionalPokemonAvailable);
 
+            boolean trainersHeldItemSupport = pokemonGeneration >= 3;
+            tpHeldItemsLabel.setVisible(trainersHeldItemSupport);
+            tpBossTrainersItemsCheckBox.setVisible(trainersHeldItemSupport);
+            tpBossTrainersItemsCheckBox.setEnabled(false);
+            tpImportantTrainersItemsCheckBox.setVisible(trainersHeldItemSupport);
+            tpImportantTrainersItemsCheckBox.setEnabled(false);
+            tpRegularTrainersItemsCheckBox.setVisible(trainersHeldItemSupport);
+            tpRegularTrainersItemsCheckBox.setEnabled(false);
+            tpConsumableItemsOnlyCheckBox.setVisible(trainersHeldItemSupport);
+            tpConsumableItemsOnlyCheckBox.setEnabled(false);
+            tpSensibleItemsCheckBox.setVisible(trainersHeldItemSupport);
+            tpSensibleItemsCheckBox.setEnabled(false);
+            tpHighestLevelGetsItemCheckBox.setVisible(trainersHeldItemSupport);
+            tpHighestLevelGetsItemCheckBox.setEnabled(false);
+
             tpRandomizeTrainerNamesCheckBox.setEnabled(true);
             tpRandomizeTrainerClassNamesCheckBox.setEnabled(true);
             tpNoEarlyWonderGuardCheckBox.setVisible(pokemonGeneration >= 3);
@@ -2952,6 +3009,18 @@ public class NewRandomizerGUI {
             tpImportantTrainersCheckBox.setSelected(false);
             tpRegularTrainersCheckBox.setEnabled(false);
             tpRegularTrainersCheckBox.setSelected(false);
+            tpBossTrainersItemsCheckBox.setEnabled(false);
+            tpBossTrainersItemsCheckBox.setSelected(false);
+            tpImportantTrainersItemsCheckBox.setEnabled(false);
+            tpImportantTrainersItemsCheckBox.setSelected(false);
+            tpRegularTrainersItemsCheckBox.setEnabled(false);
+            tpRegularTrainersItemsCheckBox.setSelected(false);
+            tpConsumableItemsOnlyCheckBox.setEnabled(false);
+            tpConsumableItemsOnlyCheckBox.setSelected(false);
+            tpSensibleItemsCheckBox.setEnabled(false);
+            tpSensibleItemsCheckBox.setSelected(false);
+            tpHighestLevelGetsItemCheckBox.setEnabled(false);
+            tpHighestLevelGetsItemCheckBox.setSelected(false);
         } else {
             tpSimilarStrengthCheckBox.setEnabled(true);
             tpDontUseLegendariesCheckBox.setEnabled(true);
@@ -2967,6 +3036,9 @@ public class NewRandomizerGUI {
             tpBossTrainersCheckBox.setEnabled(tpBossTrainersCheckBox.isVisible());
             tpImportantTrainersCheckBox.setEnabled(tpImportantTrainersCheckBox.isVisible());
             tpRegularTrainersCheckBox.setEnabled(tpRegularTrainersCheckBox.isVisible());
+            tpBossTrainersItemsCheckBox.setEnabled(tpBossTrainersItemsCheckBox.isVisible());
+            tpImportantTrainersItemsCheckBox.setEnabled(tpImportantTrainersItemsCheckBox.isVisible());
+            tpRegularTrainersItemsCheckBox.setEnabled(tpRegularTrainersItemsCheckBox.isVisible());
         }
 
         if (tpForceFullyEvolvedAtCheckBox.isSelected()) {
@@ -3002,6 +3074,17 @@ public class NewRandomizerGUI {
         } else {
             tpRegularTrainersSpinner.setEnabled(false);
             tpRegularTrainersSpinner.setValue(1);
+        }
+
+        if (tpBossTrainersItemsCheckBox.isSelected() || tpImportantTrainersItemsCheckBox.isSelected() ||
+                tpRegularTrainersItemsCheckBox.isSelected()) {
+            tpConsumableItemsOnlyCheckBox.setEnabled(true);
+            tpSensibleItemsCheckBox.setEnabled(false); // not implemented yet
+            tpHighestLevelGetsItemCheckBox.setEnabled(true);
+        } else {
+            tpConsumableItemsOnlyCheckBox.setEnabled(false);
+            tpSensibleItemsCheckBox.setEnabled(false);
+            tpHighestLevelGetsItemCheckBox.setEnabled(false);
         }
 
         if (!spUnchangedRadioButton.isSelected() || !this.tpUnchangedRadioButton.isSelected()) {

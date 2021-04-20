@@ -187,6 +187,44 @@ public class Gen7Constants {
         }
     }
 
+    // https://bulbapedia.bulbagarden.net/wiki/List_of_items_by_index_number_(Generation_VII)
+    // Held items we randomize from Gen 7 are a superset of the held items from Gen 6. Thus, we list only the
+    // new ones here.
+    // New consumable held items.
+    public static final int adrenalineOrb = 0x34e, electricSeed = 0x371, psychicSeed = 0x372,
+            mistySeed = 0x373, grassySeed = 0x374;
+    // New non-consumable held items with in-battle NPC effect (not specific to one pokemon family or one move)
+    public static final int terrainExtender = 0x36F, protectivePads = 0x370;
+
+    public static final List<Integer> consumableHeldItems = setupAllConsumableItems();
+
+    private static List<Integer> setupAllConsumableItems() {
+        List<Integer> list = new ArrayList<>();
+        list.addAll(Gen6Constants.consumableHeldItems);
+        list.addAll(Arrays.asList(adrenalineOrb, electricSeed, psychicSeed, mistySeed, grassySeed));
+        return list;
+    }
+
+    public static final List<Integer> allHeldItems = setupAllHeldItems();
+
+    private static List<Integer> setupAllHeldItems() {
+        // We intentionally do not include Z Crystals in this list. Adding Z-Crystals to random trainers should
+        // probably require its own setting if desired.
+        List<Integer> list = new ArrayList<>();
+        list.addAll(Gen6Constants.allHeldItems);
+        list.addAll(Arrays.asList(adrenalineOrb, electricSeed, psychicSeed, mistySeed, grassySeed));
+        list.addAll(Arrays.asList(terrainExtender, protectivePads));
+        return list;
+    }
+
+    public static boolean isZCrystal(int itemIndex) {
+        // From https://bulbapedia.bulbagarden.net/wiki/List_of_items_by_index_number_(Generation_VII)
+        return (itemIndex >= 0x308 && itemIndex <= 0x31A) ||
+                (itemIndex >= 0x31E && itemIndex <= 0x344) ||
+                (itemIndex >= 0x399 && itemIndex <= 0x3a4);
+
+    }
+
     public static List<String> getShopNames(int romType) {
         List<String> shopNames = new ArrayList<>();
         shopNames.add("Primary 0 Trials");
@@ -744,47 +782,6 @@ public class Gen7Constants {
             return allowedItemsUSUM;
         }
     }
-
-    public static List<Integer> validConsumableHeldItems = Arrays.asList(
-            0x95,
-            0x96,
-            0x97,
-            0x98,
-            0x99,
-            0x9A,
-            0x9B,
-            0x9C,
-            0x9D,
-            0x9E,
-            0x9F,
-            0xA0,
-            0xA1,
-            0xA2,
-            0xA3,
-            0xC8,
-            0xC9,
-            0xCA,
-            0xCB,
-            0xCC,
-            0xCD,
-            0xCE,
-            0xCF,
-            0xD0,
-            0xD1,
-            0xD2,
-            0xD3,
-            0xD4,
-            0xD6,
-            0x113,
-            0x21D,
-            0x221,
-            0x222,
-            0x27F,
-            0x288,
-            0x289,
-            0x2AF,
-            0x2B0
-    );
 
     private static final List<Integer> requiredFieldTMsSM = Arrays.asList(
             80, 49, 5, 83, 64, 62, 100, 31, 46, 88, 57, 41, 59, 73, 53, 61, 28, 39, 55, 86, 30, 93, 81, 84, 74, 85, 72,

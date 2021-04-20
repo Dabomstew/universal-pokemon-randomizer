@@ -339,6 +339,42 @@ public class Gen5Constants {
 
     public static final String introGraphicPrefix = "5A0000010000001700000001000000", bw1IntroCryPrefix = "0021009101910291", bw2IntroCryLocator = "3D020000F8B51C1C";
 
+    // https://bulbapedia.bulbagarden.net/wiki/List_of_items_by_index_number_(Generation_V)
+    // Held items we randomize from Gen 5 are a superset of the held items from Gen 4. Thus, we list only the
+    // new ones here.
+    // New consumable held items.
+    public static final int airBalloon = 0x21d, redCard = 0x21e, absorbBulb = 0x221, cellBattery = 0x222,
+            ejectButton = 0x223, fireGem = 0x224, waterGem = 0x225, electricGem = 0x226, grassGem = 0x227,
+            iceGem = 0x228, fightingGem = 0x229, poisonGem = 0x22a, groundGem = 0x22b, flyingGem = 0x22c,
+            psychicGem = 0x22d, bugGem = 0x22e, rockGem = 0x22f, ghostGem = 0x230, dragonGem = 0x231,
+            darkGem = 0x232, steelGem = 0x233, normalGem = 0x234;
+    // New non-consumable held items with in-battle NPC effect (not specific to one pokemon family or one move)
+    public static final int eviolite = 0x21a, floatStone = 0x21b, rockyHelmet = 0x21c, ringTarget = 0x21f,
+            bindingBand = 0x220;
+
+    public static final List<Integer> consumableHeldItems = setupAllConsumableItems();
+
+    private static List<Integer> setupAllConsumableItems() {
+        List<Integer> list = new ArrayList<>();
+        list.addAll(Gen4Constants.consumableHeldItems);
+        list.addAll(Arrays.asList(airBalloon, redCard, absorbBulb, cellBattery, ejectButton, fireGem, waterGem,
+                electricGem, grassGem, iceGem, fightingGem, poisonGem, groundGem, flyingGem, psychicGem, bugGem,
+                rockGem, ghostGem, dragonGem, darkGem, steelGem, normalGem));
+        return list;
+    }
+
+    public static final List<Integer> allHeldItems = setupAllHeldItems();
+
+    private static List<Integer> setupAllHeldItems() {
+        List<Integer> list = new ArrayList<>();
+        list.addAll(Gen4Constants.allHeldItems);
+        list.addAll(Arrays.asList(airBalloon, redCard, absorbBulb, cellBattery, ejectButton, fireGem, waterGem,
+                electricGem, grassGem, iceGem, fightingGem, poisonGem, groundGem, flyingGem, psychicGem, bugGem,
+                rockGem, ghostGem, dragonGem, darkGem, steelGem, normalGem));
+        list.addAll(Arrays.asList(eviolite, floatStone, rockyHelmet, ringTarget, bindingBand));
+        return list;
+    }
+
     private static Type[] constructTypeTable() {
         Type[] table = new Type[256];
         table[0x00] = Type.NORMAL;

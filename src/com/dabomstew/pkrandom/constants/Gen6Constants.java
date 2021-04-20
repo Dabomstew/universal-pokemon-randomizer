@@ -237,6 +237,34 @@ public class Gen6Constants {
     public static final int[] rayquazaScriptOffsetsORAS = new int[]{ 3334, 14734 }, rayquazaCodeOffsetsORAS = new int[]{ 136, 292, 576 };
     public static final String nationalDexFunctionLocator = "080094E5010000E21080BDE8170F122F", xyGetDexFlagFunctionLocator = "000055E30100A0030A00000A";
 
+    // https://bulbapedia.bulbagarden.net/wiki/List_of_items_by_index_number_(Generation_VI)
+    // Held items we randomize from Gen 6 are a superset of the held items from Gen 5. Thus, we list only the
+    // new ones here.
+    // New consumable held items.
+    public static final int weaknessPolicy = 0x27f, luminousMoss = 0x288, snowball = 0x289, roseliBerry = 0x2ae,
+            keeBerry = 0x2af, marangaBerry = 0x2b0, fairyGem = 0x02cb;
+    // New non-consumable held items with in-battle NPC effect (not specific to one pokemon family or one move)
+    public static final int assaultVest = 0x280, pixiePlate = 0x284, safetyGoggles = 0x28a;
+
+    public static final List<Integer> consumableHeldItems = setupAllConsumableItems();
+
+    private static List<Integer> setupAllConsumableItems() {
+        List<Integer> list = new ArrayList<>();
+        list.addAll(Gen5Constants.consumableHeldItems);
+        list.addAll(Arrays.asList(weaknessPolicy, luminousMoss, snowball, roseliBerry, keeBerry, marangaBerry, fairyGem));
+        return list;
+    }
+
+    public static final List<Integer> allHeldItems = setupAllHeldItems();
+
+    private static List<Integer> setupAllHeldItems() {
+        List<Integer> list = new ArrayList<>();
+        list.addAll(Gen5Constants.allHeldItems);
+        list.addAll(Arrays.asList(weaknessPolicy, snowball, roseliBerry, keeBerry, marangaBerry, fairyGem));
+        list.addAll(Arrays.asList(assaultVest, pixiePlate, safetyGoggles));
+        return list;
+    }
+
     public static String getIngameTradesPrefix(int romType) {
         if (romType == Type_XY) {
             return ingameTradesPrefixXY;
@@ -365,6 +393,13 @@ public class Gen6Constants {
             return shopItemsLocatorORAS;
         }
         return shopItemsLocatorXY;
+    }
+
+    public static boolean isMegaStone(int itemIndex) {
+        // These values come from https://bulbapedia.bulbagarden.net/wiki/List_of_items_by_index_number_(Generation_VI)
+        return (itemIndex >= 0x0290 && itemIndex <= 0x02AD) ||
+                (itemIndex >= 0x02F0 && itemIndex <= 0x02FC) ||
+                (itemIndex >= 0x02FF && itemIndex <= 0x0302);
     }
 
     private static Type[] constructTypeTable() {

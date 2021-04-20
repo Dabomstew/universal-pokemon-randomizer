@@ -348,6 +348,13 @@ public class Randomizer {
             trainersChanged = true;
         }
 
+        if (settings.isRandomizeHeldItemsForBossTrainerPokemon()
+                || settings.isRandomizeHeldItemsForImportantTrainerPokemon()
+                || settings.isRandomizeHeldItemsForRegularTrainerPokemon()) {
+            romHandler.randomizeTrainerHeldItems(settings);
+            trainersChanged = true;
+        }
+
         if (trainersChanged) {
             maybeLogTrainerChanges(log);
         } else {
@@ -1081,11 +1088,12 @@ public class Randomizer {
             }
             log.print(" - ");
             boolean first = true;
+            String[] itemNames = romHandler.getItemNames();
             for (TrainerPokemon tpk : t.pokemon) {
                 if (!first) {
                     log.print(", ");
                 }
-                log.print(tpk.toString());
+                log.printf(tpk.toString(), itemNames[tpk.heldItem]);
                 first = false;
             }
             log.println();

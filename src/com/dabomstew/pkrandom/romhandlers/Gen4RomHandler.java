@@ -2104,11 +2104,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     tpk.formeSuffix = Gen4Constants.getFormeSuffixByBaseForme(species,formnum);
                     tpk.absolutePokeNumber = Gen4Constants.getAbsolutePokeNumByBaseForme(species,formnum);
                     pokeOffs += 6;
-                    if ((tr.poketype & 2) == 2) {
+                    if (tr.pokemonHaveItems()) {
                         tpk.heldItem = readWord(trpoke, pokeOffs);
                         pokeOffs += 2;
                     }
-                    if ((tr.poketype & 1) == 1) {
+                    if (tr.pokemonHaveCustomMoves()) {
                         int attack1 = readWord(trpoke, pokeOffs);
                         int attack2 = readWord(trpoke, pokeOffs + 2);
                         int attack3 = readWord(trpoke, pokeOffs + 4);
@@ -2194,10 +2194,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 if (romEntry.romType != Gen4Constants.Type_DP) {
                     bytesNeeded += 2 * numPokes;
                 }
-                if ((tr.poketype & 1) == 1) {
-                    bytesNeeded += 8 * numPokes;
+                if (tr.pokemonHaveCustomMoves()) {
+                    bytesNeeded += 8 * numPokes; // 2 bytes * 4 moves
                 }
-                if ((tr.poketype & 2) == 2) {
+                if (tr.pokemonHaveItems()) {
                     bytesNeeded += 2 * numPokes;
                 }
                 byte[] trpoke = new byte[bytesNeeded];
@@ -2210,11 +2210,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     writeWord(trpoke, pokeOffs + 4, tp.pokemon.number);
                     trpoke[pokeOffs + 5] |= (tp.forme << 2);
                     pokeOffs += 6;
-                    if ((tr.poketype & 2) == 2) {
+                    if (tr.pokemonHaveItems()) {
                         writeWord(trpoke, pokeOffs, tp.heldItem);
                         pokeOffs += 2;
                     }
-                    if ((tr.poketype & 1) == 1) {
+                    if (tr.pokemonHaveCustomMoves()) {
                         if (tp.resetMoves) {
                             int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.absolutePokeNumber, movesets, tp.level);
                             for (int m = 0; m < 4; m++) {
@@ -3402,11 +3402,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public int randomHeldItem() {
-        return 0;
-    }
-
-    @Override
     public boolean canChangeTrainerText() {
         return true;
     }
@@ -4242,5 +4237,15 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+    }
+
+    @Override
+    public List<Integer> getAllConsumableHeldItems() {
+        return Gen4Constants.consumableHeldItems;
+    }
+
+    @Override
+    public List<Integer> getAllHeldItems() {
+        return Gen4Constants.allHeldItems;
     }
 }

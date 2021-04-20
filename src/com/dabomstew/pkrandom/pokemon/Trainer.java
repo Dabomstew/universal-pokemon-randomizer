@@ -32,6 +32,7 @@ public class Trainer implements Comparable<Trainer> {
     public List<TrainerPokemon> pokemon = new ArrayList<>();
     public String tag;
     public boolean importantTrainer;
+    // This value has some flags about the trainer's pokemon (e.g. if they have items or custom moves)
     public int poketype;
     public String name;
     public int trainerclass;
@@ -102,5 +103,24 @@ public class Trainer implements Comparable<Trainer> {
 
     public boolean skipImportant() {
         return ((tag != null) && (tag.startsWith("RIVAL1-") || tag.startsWith("FRIEND1-") || tag.endsWith("NOTSTRONG")));
+    }
+
+    public void setPokemonHaveItems(boolean haveItems) {
+        if (haveItems) {
+            this.poketype |= 2;
+        } else {
+            // https://stackoverflow.com/a/1073328
+            this.poketype = poketype & ~2;
+        }
+    }
+
+    public boolean pokemonHaveItems() {
+        // This flag seems consistent for all gens
+        return (this.poketype & 2) == 2;
+    }
+
+    public boolean pokemonHaveCustomMoves() {
+        // This flag seems consistent for all gens
+        return (this.poketype & 1) == 1;
     }
 }

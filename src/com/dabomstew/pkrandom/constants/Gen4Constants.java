@@ -95,7 +95,73 @@ public class Gen4Constants {
 
     public static final int highestAbilityIndex = 123;
 
+    // https://projectpokemon.org/home/docs/gen-4/list-of-items-by-index-number-r23/
+    // Berries that can be eaten in battle listed. They are in numeric order and roughly categorized.
+    public static final int
+            // status effect berries
+            cheriBerry = 0x95, chestoBerry = 0x96, pechaBerry = 0x97, rawstBerry = 0x98, aspearBerry = 0x99,
+            leppaBerry = 0x9a, oranBerry = 0x9b, persimBerry = 0x9c, lumBerry = 0x9d, sitrusBerry = 0x9e,
+            // Restore 1/8 HP when below 50% but may cause confusion
+            figyBerry = 0x9f, wikiBerry = 0xa0, magoBerry = 0xa1, aguavBerry = 0xa2, iapapaBerry = 0xa3,
+            // Reduce damage from supereffective damage
+            occaBerry = 0xb8, passhoBerry = 0xb9, wacanBerry = 0xba, rindoBerry = 0xbb, yacheBerry = 0xbc,
+            chopleBerry = 0xbd, kebiaBerry = 0xbe, shucaBerry = 0xbf, cobaBerry = 0xc0, payapaBerry = 0xc1,
+            tangaBerry = 0xc2, chartiBerry = 0xc3, kasibBerry = 0xc4, habanBerry = 0xc5, colburBerry = 0xc6,
+            babiriBerry = 0xc7, chilanBerry = 0xc8,
+            // Increase stat (or other buff) when below 25%
+            liechiBerry = 0xc9, ganlonBerry = 0xca, salacBerry = 0xcb, petayaBerry = 0xcc, apicotBerry = 0xcd,
+            lansatBerry = 0xce, starfBerry = 0xcf, enigmaBerry = 0xd0, micleBerry = 0xd1, custapBerry = 0xd2,
+            // retaliate berries
+            jabocaBerry = 0xd3, rowapBerry = 0xd4;
+    // Other consumable held items
+    public static final int berryJuice = 0x2b, whiteHerb = 0xd6, mentalHerb = 0xdb, powerHerb = 0x10f,
+            focusSash = 0x113;
+    // non-consumable held items with in-battle NPC effect (not specific to one pokemon family)
+    public static final int brightPowder = 0x0d5, quickClaw = 0x0d9, choiceBand = 0x0dc, kingsRock = 0x0dd,
+            silverPowder = 0x0de, focusBand = 0x0e6, scopeLens = 0x0e8, metalCoat = 0x0e9, leftovers = 0x0ea,
+            softSand = 0x0ed, hardStone = 0x0ee, miracleSeed = 0x0ef, blackGlasses = 0x0f0, blackBelt = 0x0f1,
+            magnet = 0x0f2, mysticWater = 0x0f3, sharpBeak = 0x0f4, poisonBarb = 0x0f5, neverMeltIce = 0x0f6,
+            spellTag = 0x0f7, twistedSpoon = 0x0f8, charcoal = 0x0f9, dragonFang = 0x0fa, silkScarf = 0x0fb,
+            shellBell = 0x0fd, seaIncense = 0x0fe, laxIncense = 0x0ff, wideLens = 0x109, muscleBand = 0x10a,
+            wiseGlasses = 0x10b, expertBelt = 0x10c, lightClay = 0x10d, lifeOrb = 0x10e, toxicOrb = 0x110,
+            flameOrb = 0x111, quickPowder = 0x112, zoomLens = 0x114, metronome = 0x115, ironBall = 0x116,
+            laggingTail = 0x117, destinyKnot = 0x118, blackSludge = 0x119, icyRock = 0x11a, smoothRock = 0x11b,
+            heatRock = 0x11c, dampRock = 0x11d, gripClaw = 0x11e, choiceScarf = 0x11f, stickyBarb = 0x120,
+            shedShell = 0x127, bigRoot = 0x128, choiceSpecs = 0x129, flamePlate = 0x12a, splashPlate = 0x12b,
+            zapPlate = 0x12c, meadowPlate = 0x12d, iciclePlate = 0x12e, fistPlate = 0x12f, toxicPlate = 0x130,
+            earthPlate = 0x131, skyPlate = 0x132, mindPlate = 0x133, insectPlate = 0x134, stonePlate = 0x135,
+            spookyPlate = 0x136, dracoPlate = 0x137, dreadPlate = 0x138, ironPlate = 0x139, oddIncense = 0x13a,
+            rockIncense = 0x13b, fullIncense = 0x13c, waveIncense = 0x13d, roseIncense = 0x13e, pureIncense = 0x140,
+            razorClaw = 0x146, razorFang = 0x147;
+
+    public static final List<Integer> consumableHeldItems = Arrays.asList(
+            cheriBerry, chestoBerry, pechaBerry, rawstBerry, aspearBerry, leppaBerry, oranBerry, persimBerry,
+            lumBerry, sitrusBerry, figyBerry, wikiBerry, magoBerry, aguavBerry, iapapaBerry, occaBerry, passhoBerry,
+            wacanBerry, rindoBerry, yacheBerry, chopleBerry, kebiaBerry, shucaBerry, cobaBerry, payapaBerry,
+            tangaBerry, chartiBerry, kasibBerry, habanBerry, colburBerry, babiriBerry, chilanBerry, liechiBerry,
+            ganlonBerry, salacBerry, petayaBerry, apicotBerry, lansatBerry, starfBerry, enigmaBerry, micleBerry,
+             custapBerry, jabocaBerry, rowapBerry, berryJuice, whiteHerb, mentalHerb, powerHerb, focusSash);
+
+    public static final List<Integer> allHeldItems = setupAllHeldItems();
+
+    private static List<Integer> setupAllHeldItems() {
+        List<Integer> list = new ArrayList<>();
+        list.addAll(Arrays.asList(brightPowder, quickClaw, choiceBand, kingsRock, silverPowder, focusBand,
+                scopeLens, metalCoat, leftovers, softSand, hardStone, miracleSeed, blackGlasses, blackBelt, magnet,
+                mysticWater, sharpBeak, poisonBarb, neverMeltIce, spellTag, twistedSpoon, charcoal, dragonFang,
+                silkScarf, shellBell, seaIncense, laxIncense, wideLens, muscleBand, wiseGlasses, expertBelt, lightClay,
+                lifeOrb, toxicOrb, flameOrb, quickPowder, zoomLens, metronome, ironBall, laggingTail, destinyKnot,
+                blackSludge, icyRock, smoothRock, heatRock, dampRock, gripClaw, choiceScarf, stickyBarb, shedShell,
+                bigRoot, choiceSpecs, flamePlate, splashPlate, zapPlate, meadowPlate, iciclePlate, fistPlate,
+                toxicPlate, earthPlate, skyPlate, mindPlate, insectPlate, stonePlate, spookyPlate, dracoPlate,
+                dreadPlate, ironPlate, oddIncense, rockIncense, fullIncense, waveIncense, roseIncense, pureIncense,
+                razorClaw, razorFang));
+        list.addAll(consumableHeldItems);
+        return list;
+    }
+
     public static final Map<Integer,List<Integer>> abilityVariations = setupAbilityVariations();
+
 
     private static Map<Integer,List<Integer>> setupAbilityVariations() {
         Map<Integer,List<Integer>> map = new HashMap<>();

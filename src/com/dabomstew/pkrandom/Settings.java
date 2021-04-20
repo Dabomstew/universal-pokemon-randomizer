@@ -49,7 +49,7 @@ public class Settings {
 
     public static final int VERSION = Version.VERSION;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 48;
+    public static final int LENGTH_OF_SETTINGS_DATA = 49;
 
     private CustomNamesSet customNames;
 
@@ -176,6 +176,12 @@ public class Settings {
     private int additionalBossTrainerPokemon = 0;
     private int additionalImportantTrainerPokemon = 0;
     private int additionalRegularTrainerPokemon = 0;
+    private boolean randomizeHeldItemsForBossTrainerPokemon;
+    private boolean randomizeHeldItemsForImportantTrainerPokemon;
+    private boolean randomizeHeldItemsForRegularTrainerPokemon;
+    private boolean consumableItemsOnlyForTrainerPokemon;
+    private boolean sensibleItemsOnlyForTrainerPokemon;
+    private boolean highestLevelOnlyGetsItemsForTrainerPokemon;
     private boolean doubleBattleMode;
     private boolean shinyChance;
 
@@ -473,8 +479,6 @@ public class Settings {
                 swapTrainerMegaEvos,
                 shinyChance));
 
-        
-
         // @ 28 pokemon restrictions
         try {
             if (currentRestrictions != null) {
@@ -485,17 +489,15 @@ public class Settings {
         } catch (IOException e) {
             e.printStackTrace(); // better than nothing
         }
-        
 
-
-        // @ 31 misc tweaks
+        // @ 32 misc tweaks
         try {
             writeFullInt(out, currentMiscTweaks);
         } catch (IOException e) {
             e.printStackTrace(); // better than nothing
         }
 
-        // @ 35 trainer pokemon level modifier
+        // @ 36 trainer pokemon level modifier
         out.write((trainersLevelModified ? 0x80 : 0) | (trainersLevelModifier+50));
 
         out.write(makeByteSelected(shopItemsMod == ShopItemsMod.RANDOM, shopItemsMod == ShopItemsMod.SHUFFLE,
@@ -513,6 +515,7 @@ public class Settings {
                 allowTrainerAlternateFormes,
                 allowWildAltFormes));
 
+        // 40
         out.write((doubleBattleMode ? 0x1 : 0) |
                 (additionalBossTrainerPokemon << 1) |
                 (additionalImportantTrainerPokemon << 4) |
@@ -546,6 +549,14 @@ public class Settings {
         out.write(selectedEXPCurve.toByte());
 
         out.write((staticLevelModified ? 0x80 : 0) | (staticLevelModifier+50));
+
+        // 48 trainer pokemon held items.
+        out.write(makeByteSelected(randomizeHeldItemsForBossTrainerPokemon,
+                randomizeHeldItemsForImportantTrainerPokemon,
+                randomizeHeldItemsForRegularTrainerPokemon,
+                consumableItemsOnlyForTrainerPokemon,
+                sensibleItemsOnlyForTrainerPokemon,
+                highestLevelOnlyGetsItemsForTrainerPokemon));
 
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -754,7 +765,6 @@ public class Settings {
         settings.setSwapTrainerMegaEvos(restoreState(data[27], 5));
         settings.setShinyChance(restoreState(data[27], 6));
 
-        
         // gen restrictions
         int genLimit = FileFunctions.readFullInt(data, 28);
         GenRestrictions restrictions = null;
@@ -817,6 +827,13 @@ public class Settings {
 
         settings.setStaticLevelModified(restoreState(data[47],7));
         settings.setStaticLevelModifier((data[47] & 0x7F) - 50);
+
+        settings.setRandomizeHeldItemsForBossTrainerPokemon(restoreState(data[48], 0));
+        settings.setRandomizeHeldItemsForImportantTrainerPokemon(restoreState(data[48], 1));
+        settings.setRandomizeHeldItemsForRegularTrainerPokemon(restoreState(data[48], 2));
+        settings.setConsumableItemsOnlyForTrainers(restoreState(data[48], 3));
+        settings.setSensibleItemsOnlyForTrainers(restoreState(data[48], 4));
+        settings.setHighestLevelGetsItemsForTrainers(restoreState(data[48], 5));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1594,6 +1611,54 @@ public class Settings {
 
     public void setAdditionalRegularTrainerPokemon(int additional) {
         this.additionalRegularTrainerPokemon = additional;
+    }
+
+    public boolean isRandomizeHeldItemsForBossTrainerPokemon() {
+        return randomizeHeldItemsForBossTrainerPokemon;
+    }
+
+    public void setRandomizeHeldItemsForBossTrainerPokemon(boolean bossTrainers) {
+        this.randomizeHeldItemsForBossTrainerPokemon = bossTrainers;
+    }
+
+    public boolean isRandomizeHeldItemsForImportantTrainerPokemon() {
+        return randomizeHeldItemsForImportantTrainerPokemon;
+    }
+
+    public void setRandomizeHeldItemsForImportantTrainerPokemon(boolean importantTrainers) {
+        this.randomizeHeldItemsForImportantTrainerPokemon = importantTrainers;
+    }
+
+    public boolean isRandomizeHeldItemsForRegularTrainerPokemon() {
+        return randomizeHeldItemsForRegularTrainerPokemon;
+    }
+
+    public void setRandomizeHeldItemsForRegularTrainerPokemon(boolean regularTrainers) {
+        this.randomizeHeldItemsForRegularTrainerPokemon = regularTrainers;
+    }
+
+    public boolean isConsumableItemsOnlyForTrainers() {
+        return consumableItemsOnlyForTrainerPokemon;
+    }
+
+    public void setConsumableItemsOnlyForTrainers(boolean consumableOnly) {
+        this.consumableItemsOnlyForTrainerPokemon = consumableOnly;
+    }
+
+    public boolean isSensibleItemsOnlyForTrainers() {
+        return sensibleItemsOnlyForTrainerPokemon;
+    }
+
+    public void setSensibleItemsOnlyForTrainers(boolean sensibleOnly) {
+        this.sensibleItemsOnlyForTrainerPokemon = sensibleOnly;
+    }
+
+    public boolean isHighestLevelGetsItemsForTrainers() {
+        return highestLevelOnlyGetsItemsForTrainerPokemon;
+    }
+
+    public void setHighestLevelGetsItemsForTrainers(boolean highestOnly) {
+        this.highestLevelOnlyGetsItemsForTrainerPokemon = highestOnly;
     }
 
     public boolean isDoubleBattleMode() {

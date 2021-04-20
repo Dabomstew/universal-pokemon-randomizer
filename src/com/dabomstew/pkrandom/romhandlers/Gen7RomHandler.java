@@ -27,6 +27,7 @@ import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.constants.Gen6Constants;
 import com.dabomstew.pkrandom.constants.Gen7Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.constants.Species;
@@ -1497,6 +1498,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             .getOrDefault(formnum,species);
                     pokeOffs += 20;
                     tpk.heldItem = readWord(trpoke, pokeOffs);
+                    tpk.hasMegaStone = Gen6Constants.isMegaStone(tpk.heldItem);
+                    tpk.hasZCrystal = Gen7Constants.isZCrystal(tpk.heldItem);
                     pokeOffs += 4;
                     int attack1 = readWord(trpoke, pokeOffs);
                     int attack2 = readWord(trpoke, pokeOffs + 2);
@@ -3139,11 +3142,6 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public int randomHeldItem() {
-        return Gen7Constants.validConsumableHeldItems.get(this.random.nextInt(Gen7Constants.validConsumableHeldItems.size()));
-    }
-
-    @Override
     public BufferedImage getMascotImage() {
         try {
             GARCArchive pokespritesGARC = this.readGARC(romEntry.getString("PokemonGraphics"), false);
@@ -3187,5 +3185,15 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         public AreaData() {
             encounterTables = new ArrayList<>();
         }
+    }
+
+    @Override
+    public List<Integer> getAllConsumableHeldItems() {
+        return Gen7Constants.consumableHeldItems;
+    }
+
+    @Override
+    public List<Integer> getAllHeldItems() {
+        return Gen7Constants.allHeldItems;
     }
 }

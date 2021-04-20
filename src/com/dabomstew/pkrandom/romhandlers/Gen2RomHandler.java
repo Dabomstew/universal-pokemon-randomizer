@@ -935,11 +935,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                     rom[offs] = (byte) tp.level;
                     rom[offs + 1] = (byte) tp.pokemon.number;
                     offs += 2;
-                    if ((tr.poketype & 2) == 2) {
+                    if (tr.pokemonHaveItems()) {
                         rom[offs] = (byte) tp.heldItem;
                         offs++;
                     }
-                    if ((tr.poketype & 1) == 1) {
+                    if (tr.pokemonHaveCustomMoves()) {
                         if (tp.resetMoves) {
                             int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon.number, movesets, tp.level);
                             for (int m = 0; m < 4; m++) {
@@ -1544,11 +1544,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public List<Integer> getMainGameShops() {
         return new ArrayList<>();
-    }
-
-    @Override
-    public int randomHeldItem() {
-        return 0;
     }
 
     @Override
