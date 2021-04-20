@@ -1380,6 +1380,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             tr.trainerclass = (rom[trOffset + 2] & 0x80) > 0 ? 1 : 0;
 
             int pokeDataType = rom[trOffset] & 0xFF;
+            boolean doubleBattle = rom[trOffset + (entryLen - 16)] == 0x01;
             int numPokes = rom[trOffset + (entryLen - 8)] & 0xFF;
             int pointerToPokes = readPointer(trOffset + (entryLen - 4));
             tr.poketype = pokeDataType;
@@ -1484,6 +1485,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // write out new data first...
             rom[trOffset] = (byte) tr.poketype;
             rom[trOffset + (entryLen - 8)] = (byte) newPokeCount;
+            if (doubleBattleMode) {
+                if (!tr.skipImportant()) {
+                    rom[trOffset + (entryLen - 16)] = 0x01;
+                }
+            }
 
             // now, do we need to repoint?
             int pointerToPokes;

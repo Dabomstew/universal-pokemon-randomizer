@@ -2568,8 +2568,8 @@ public class NewRandomizerGUI {
             tpForceFullyEvolvedAtCheckBox.setEnabled(true);
             tpPercentageLevelModifierCheckBox.setEnabled(true);
             tpSwapMegaEvosCheckBox.setVisible(romHandler.hasMegaEvolutions());
-            tpDoubleBattleModeCheckBox.setVisible(pokemonGeneration >= 4);
-            tpDoubleBattleModeCheckBox.setEnabled(pokemonGeneration >= 4);
+            tpDoubleBattleModeCheckBox.setVisible(pokemonGeneration >= 3);
+            tpDoubleBattleModeCheckBox.setEnabled(pokemonGeneration >= 3);
 
             boolean additionalPokemonAvailable = pokemonGeneration >= 3;
 
