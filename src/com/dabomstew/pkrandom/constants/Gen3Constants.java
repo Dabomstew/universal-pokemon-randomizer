@@ -324,14 +324,14 @@ public class Gen3Constants {
         tag(trs, "GYM8", 0x82, 0x266, 0x83, 0x12D, 0x81, 0x74, 0x80, 0x265);
 
         // Gym Leaders
-        tag(trs, 0x109, "GYM1");
-        tag(trs, 0x10A, "GYM2");
-        tag(trs, 0x10B, "GYM3");
-        tag(trs, 0x10C, "GYM4");
-        tag(trs, 0x10D, "GYM5");
-        tag(trs, 0x10E, "GYM6");
-        tag(trs, 0x10F, "GYM7");
-        tag(trs, 0x110, "GYM8");
+        tag(trs, 0x109, "GYM1-LEADER");
+        tag(trs, 0x10A, "GYM2-LEADER");
+        tag(trs, 0x10B, "GYM3-LEADER");
+        tag(trs, 0x10C, "GYM4-LEADER");
+        tag(trs, 0x10D, "GYM5-LEADER");
+        tag(trs, 0x10E, "GYM6-LEADER");
+        tag(trs, 0x10F, "GYM7-LEADER");
+        tag(trs, 0x110, "GYM8-LEADER");
         // Elite 4
         tag(trs, 0x105, "ELITE1");
         tag(trs, 0x106, "ELITE2");
@@ -373,13 +373,13 @@ public class Gen3Constants {
         tag(trs, 0x29A, "RIVAL4-1");
 
         if (romType == RomType_Ruby) {
-            tag(trs, "THEMED:MAXIE", 0x259, 0x25A);
-            tag(trs, "THEMED:COURTNEY", 0x257, 0x258);
-            tag(trs, "THEMED:TABITHA", 0x254, 0x255);
+            tag(trs, "THEMED:MAXIE-LEADER", 0x259, 0x25A);
+            tag(trs, "THEMED:COURTNEY-STRONG", 0x257, 0x258);
+            tag(trs, "THEMED:TABITHA-STRONG", 0x254, 0x255);
         } else {
-            tag(trs, "THEMED:ARCHIE", 0x23, 0x22);
-            tag(trs, "THEMED:MATT", 0x1E, 0x1F);
-            tag(trs, "THEMED:SHELLY", 0x20, 0x21);
+            tag(trs, "THEMED:ARCHIE-LEADER", 0x23, 0x22);
+            tag(trs, "THEMED:MATT-STRONG", 0x1E, 0x1F);
+            tag(trs, "THEMED:SHELLY-STRONG", 0x20, 0x21);
         }
 
     }
@@ -396,14 +396,14 @@ public class Gen3Constants {
         tag(trs, "GYM8", 0x265, 0x80, 0x1F6, 0x73, 0x81, 0x76, 0x82, 0x12D, 0x83, 0x266);
 
         // Gym Leaders + Emerald Rematches!
-        tag(trs, "GYM1", 0x109, 0x302, 0x303, 0x304, 0x305);
-        tag(trs, "GYM2", 0x10A, 0x306, 0x307, 0x308, 0x309);
-        tag(trs, "GYM3", 0x10B, 0x30A, 0x30B, 0x30C, 0x30D);
-        tag(trs, "GYM4", 0x10C, 0x30E, 0x30F, 0x310, 0x311);
-        tag(trs, "GYM5", 0x10D, 0x312, 0x313, 0x314, 0x315);
-        tag(trs, "GYM6", 0x10E, 0x316, 0x317, 0x318, 0x319);
-        tag(trs, "GYM7", 0x10F, 0x31A, 0x31B, 0x31C, 0x31D);
-        tag(trs, "GYM8", 0x110, 0x31E, 0x31F, 0x320, 0x321);
+        tag(trs, "GYM1-LEADER", 0x109, 0x302, 0x303, 0x304, 0x305);
+        tag(trs, "GYM2-LEADER", 0x10A, 0x306, 0x307, 0x308, 0x309);
+        tag(trs, "GYM3-LEADER", 0x10B, 0x30A, 0x30B, 0x30C, 0x30D);
+        tag(trs, "GYM4-LEADER", 0x10C, 0x30E, 0x30F, 0x310, 0x311);
+        tag(trs, "GYM5-LEADER", 0x10D, 0x312, 0x313, 0x314, 0x315);
+        tag(trs, "GYM6-LEADER", 0x10E, 0x316, 0x317, 0x318, 0x319);
+        tag(trs, "GYM7-LEADER", 0x10F, 0x31A, 0x31B, 0x31C, 0x31D);
+        tag(trs, "GYM8-LEADER", 0x110, 0x31E, 0x31F, 0x320, 0x321);
 
         // Elite 4
         tag(trs, 0x105, "ELITE1");
@@ -455,11 +455,11 @@ public class Gen3Constants {
         tag(trs, 0x29A, "RIVAL5-1");
 
         // Themed
-        tag(trs, "THEMED:MAXIE", 0x259, 0x25A, 0x2DE);
-        tag(trs, "THEMED:TABITHA", 0x202, 0x255, 0x2DC);
-        tag(trs, "THEMED:ARCHIE", 0x22);
-        tag(trs, "THEMED:MATT", 0x1E);
-        tag(trs, "THEMED:SHELLY", 0x20, 0x21);
+        tag(trs, "THEMED:MAXIE-LEADER", 0x259, 0x25A, 0x2DE);
+        tag(trs, "THEMED:TABITHA-STRONG", 0x202, 0x255, 0x2DC);
+        tag(trs, "THEMED:ARCHIE-LEADER", 0x22);
+        tag(trs, "THEMED:MATT-STRONG", 0x1E);
+        tag(trs, "THEMED:SHELLY-STRONG", 0x20, 0x21);
 
         // Steven
         tag(trs, 0x324, "UBER");
@@ -479,18 +479,18 @@ public class Gen3Constants {
         tag(trs, "GYM8", 0x129, 0x143, 0x188, 0x190, 0x142, 0x128, 0x191, 0x144);
 
         // Gym Leaders
-        tag(trs, 0x19E, "GYM1");
-        tag(trs, 0x19F, "GYM2");
-        tag(trs, 0x1A0, "GYM3");
-        tag(trs, 0x1A1, "GYM4");
-        tag(trs, 0x1A2, "GYM5");
-        tag(trs, 0x1A4, "GYM6");
-        tag(trs, 0x1A3, "GYM7");
-        tag(trs, 0x15E, "GYM8");
+        tag(trs, 0x19E, "GYM1-LEADER");
+        tag(trs, 0x19F, "GYM2-LEADER");
+        tag(trs, 0x1A0, "GYM3-LEADER");
+        tag(trs, 0x1A1, "GYM4-LEADER");
+        tag(trs, 0x1A2, "GYM5-LEADER");
+        tag(trs, 0x1A4, "GYM6-LEADER");
+        tag(trs, 0x1A3, "GYM7-LEADER");
+        tag(trs, 0x15E, "GYM8-LEADER");
 
         // Giovanni
-        tag(trs, 0x15C, "GIO1");
-        tag(trs, 0x15D, "GIO2");
+        tag(trs, 0x15C, "GIO1-LEADER");
+        tag(trs, 0x15D, "GIO2-LEADER");
 
         // E4 Round 1
         tag(trs, 0x19A, "ELITE1-1");
