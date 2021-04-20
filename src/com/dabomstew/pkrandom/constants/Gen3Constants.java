@@ -372,6 +372,9 @@ public class Gen3Constants {
         tag(trs, 0x299, "RIVAL4-0");
         tag(trs, 0x29A, "RIVAL4-1");
 
+        // Wally
+        tag(trs, "THEMED:WALLY-STRONG", 0x207, 0x290, 0x291, 0x292, 0x293, 0x294);
+
         if (romType == RomType_Ruby) {
             tag(trs, "THEMED:MAXIE-LEADER", 0x259, 0x25A);
             tag(trs, "THEMED:COURTNEY-STRONG", 0x257, 0x258);
@@ -460,6 +463,7 @@ public class Gen3Constants {
         tag(trs, "THEMED:ARCHIE-LEADER", 0x22);
         tag(trs, "THEMED:MATT-STRONG", 0x1E);
         tag(trs, "THEMED:SHELLY-STRONG", 0x20, 0x21);
+        tag(trs, "THEMED:WALLY-STRONG", 0x207, 0x290, 0x291, 0x292, 0x293, 0x294);
 
         // Steven
         tag(trs, 0x324, "UBER");
