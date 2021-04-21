@@ -288,6 +288,8 @@ public class SettingsUpdater {
 
             FileFunctions.writeFullInt(dataBlock, 32, oldTweaks);
 
+            insertExtraByte(48, (byte) 0);
+
         }
 
         // fix checksum
