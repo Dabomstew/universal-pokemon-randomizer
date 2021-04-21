@@ -1967,7 +1967,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private void randomizeHeldItem(TrainerPokemon tp, Settings settings) {
         boolean sensibleItemsOnly = settings.isSensibleItemsOnlyForTrainers();
         boolean consumableItemsOnly = settings.isConsumableItemsOnlyForTrainers();
-        boolean swapMegaEvolutions = settings.isSwapTrainerMegaEvos()
+        boolean swapMegaEvolutions = settings.isSwapTrainerMegaEvos();
         if (tp.hasZCrystal) {
             return; // Don't overwrite existing Z Crystals.
         }
