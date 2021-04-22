@@ -1765,8 +1765,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             statics.add(se);
         }
 
-        // If it's Emerald, read in and randomize the static starting Zigzagoon fight
-        if (romEntry.romType == Gen3Constants.RomType_Em && romEntry.codeTweaks.get("StaticFirstBattleTweak") != null) {
+        // If it's RSE, read in and randomize the static starting Poochyena/Zigzagoon fight
+        if (romEntry.romType != Gen3Constants.RomType_FRLG && romEntry.codeTweaks.get("StaticFirstBattleTweak") != null) {
             int startingSpeciesOffset = romEntry.getValue("StaticFirstBattleSpeciesOffset");
             int species = readWord(startingSpeciesOffset);
             if (species == 0xFFFF) {
@@ -1797,7 +1797,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
         List<StaticPokemon> staticsHere = romEntry.staticPokemon;
         int hardcodedStaticSize = 0;
-        if (romEntry.romType == Gen3Constants.RomType_Em && romEntry.codeTweaks.get("StaticFirstBattleTweak") != null) {
+        if (romEntry.romType != Gen3Constants.RomType_FRLG && romEntry.codeTweaks.get("StaticFirstBattleTweak") != null) {
             hardcodedStaticSize = 1;
         }
         if (staticPokemon.size() != staticsHere.size() + hardcodedStaticSize) {
@@ -1809,7 +1809,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             staticsHere.get(i).setLevel(rom, staticPokemon.get(i).level, 0);
         }
 
-        if (romEntry.romType == Gen3Constants.RomType_Em && romEntry.codeTweaks.get("StaticFirstBattleTweak") != null) {
+        if (romEntry.romType != Gen3Constants.RomType_FRLG && romEntry.codeTweaks.get("StaticFirstBattleTweak") != null) {
             StaticEncounter hardcodedStatic = staticPokemon.get(staticPokemon.size() - 1);
             int startingSpeciesOffset = romEntry.getValue("StaticFirstBattleSpeciesOffset");
             writeWord(startingSpeciesOffset, pokedexToInternal[hardcodedStatic.pkmn.number]);
