@@ -12,11 +12,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
+import com.dabomstew.pkrandom.exceptions.RandomizationException;
+import com.dabomstew.pkrandom.pokemon.Encounter;
+import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.EvolutionType;
+import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
@@ -36,12 +41,16 @@ public class AbstractRomTest {
     ArrayList<Pokemon> pokemonList;
     ArrayList<Trainer> trainerList;
     ArrayList<Pokemon> startersList;
+    ArrayList<EncounterSet> encountersList;
 
     @Captor
     ArgumentCaptor<ArrayList<Trainer>> trainerCap;
 
     @Captor
     ArgumentCaptor<ArrayList<Pokemon>> pokemonCap;
+
+    @Captor
+    ArgumentCaptor<ArrayList<EncounterSet>> encounterCap;
 
     /**
      * Initializes any annotated mockito objects
@@ -1106,12 +1115,115 @@ public class AbstractRomTest {
     }
 
     /**
+     * If a GenRestrictions is given such that no pokemon exist in the main list
+     * at the end, it should throw an exception and stop execution
+     */
+    @Test(expected=RandomizationException.class)
+    public void TestGenRestrictionsThrowsException() {
+        TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
+        resetDataModel(romhandler);
+        GenRestrictions restrictions = new GenRestrictions();
+        romhandler.setPokemonPool(restrictions);
+    }
+
+    /**
+     * For valid permutations of GenRestrictions, Game1To1Encounters
+     * should not set any encounter to null and encounters must be
+     * appropriate for the generations allowed
+     */
+    @Test
+    public void TestGenRestrictionGame1To1Encounters() {
+        TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
+        resetDataModel(romhandler);
+        doNothing().when(romhandler).setEncounters(anyBoolean(), encounterCap.capture());
+        GenRestrictions restrictions = new GenRestrictions();
+        ArrayList<Integer> allowedNumbers = new ArrayList();
+        ArrayList<Integer> gen1Numbers = new ArrayList<Integer>(
+            IntStream.range(1, 152).boxed().collect(Collectors.toList()));
+        ArrayList<Integer> gen2Numbers = new ArrayList<Integer>(
+            IntStream.range(152, 252).boxed().collect(Collectors.toList()));
+        ArrayList<Integer> gen3Numbers = new ArrayList<Integer>(
+            IntStream.range(252, 387).boxed().collect(Collectors.toList()));
+        ArrayList<Integer> gen4Numbers = new ArrayList<Integer>(
+            IntStream.range(387, 494).boxed().collect(Collectors.toList()));
+        ArrayList<Integer> gen5Numbers = new ArrayList<Integer>(
+            IntStream.range(494, 650).boxed().collect(Collectors.toList()));
+        for(int a = 0; a < 2; a++) {
+            restrictions.allow_gen1 = 1 - a == 0 ? true : false;
+            for(int b = 0; b < 2; b++) {
+                restrictions.allow_gen2 = 1 - b == 0 ? true : false;
+                for(int c = 0; c < 2; c++) {
+                    restrictions.allow_gen3 = 1 - c == 0 ? true : false;
+                    for(int d = 0; d < 2; d++) {
+                        restrictions.allow_gen4 = 1 - d == 0 ? true : false;
+                        for(int e = 0; e < 2; e++) {
+                            restrictions.allow_gen5 = 1 - e == 0 ? true : false;
+                            // If everything is 0, then we have all false
+                            // This throws an exception, which is not desirable
+                            // So we skip this condition
+                            if (a+b+c+d+e == 0) {
+                                continue;
+                            }
+                            if (restrictions.allow_gen1) {
+                                allowedNumbers.addAll(gen1Numbers);
+                            } else {
+                                allowedNumbers.removeAll(gen1Numbers);
+                            }
+                            if (restrictions.allow_gen2) {
+                                allowedNumbers.addAll(gen2Numbers);
+                            } else {
+                                allowedNumbers.removeAll(gen2Numbers);
+                            }
+                            if (restrictions.allow_gen3) {
+                                allowedNumbers.addAll(gen3Numbers);
+                            } else {
+                                allowedNumbers.removeAll(gen3Numbers);
+                            }
+                            if (restrictions.allow_gen4) {
+                                allowedNumbers.addAll(gen4Numbers);
+                            } else {
+                                allowedNumbers.removeAll(gen4Numbers);
+                            }
+                            if (restrictions.allow_gen5) {
+                                allowedNumbers.addAll(gen5Numbers);
+                            } else {
+                                allowedNumbers.removeAll(gen5Numbers);
+                            }
+                            romhandler.setPokemonPool(restrictions);
+                            romhandler.game1to1Encounters(false, false, true);
+                            for (EncounterSet es : encounterCap.getValue()) {
+                                for (Encounter enc : es.getEncounters()) {
+                                    assertFalse("A null encounter was found", enc.getPokemon() == null);
+                                    assertTrue(enc.getPokemon().getNumber() + " was found with these restrictions " +
+                                        restrictions,
+                                        allowedNumbers.contains(enc.getPokemon().getNumber()));
+                                }
+                            }
+                            romhandler.game1to1Encounters(false, false, false);
+                            for (EncounterSet es : encounterCap.getValue()) {
+                                for (Encounter enc : es.getEncounters()) {
+                                    assertFalse("A null encounter was found", enc.getPokemon() == null);
+                                    assertTrue(enc.getPokemon().getNumber() + " was found with these restrictions " +
+                                        restrictions,
+                                        allowedNumbers.contains(enc.getPokemon().getNumber()));
+                                }
+                            }
+                        }
+                    }            
+                }            
+            }            
+        }
+    }
+
+    /**
      * Function for granular modification of data model
      */
     private void setUp() {
-        pokemonList = spy(ArrayList.class);
-        trainerList = spy(ArrayList.class);
-        startersList = spy(ArrayList.class);
+        pokemonList = new ArrayList();
+        trainerList = new ArrayList();
+        startersList = new ArrayList();
+        encountersList = new ArrayList();
+
         for(int i = 0; i < Gen5Constants.pokemonCount + 1; i++) {
             Pokemon pk = new Pokemon();
             pk.number = i;
@@ -1154,7 +1266,15 @@ public class AbstractRomTest {
         }
         for(int i = 0; i < 3; i++) {
             startersList.add(new Pokemon());
-        }        
+        }
+        
+        for (int i = 0; i < 5; i++) {
+            EncounterSet es = new EncounterSet();
+            Encounter e1 = new Encounter();
+            e1.setPokemon(pokemonList.get(new Random().nextInt(pokemonList.size())));
+            es.setEncounters(Arrays.asList(e1));
+            encountersList.add(es);
+        }
     }
 
     /**
@@ -1167,6 +1287,7 @@ public class AbstractRomTest {
         doReturn(pokemonList.get(0)).when(romhandler).randomPokemon();
         doReturn(trainerList).when(romhandler).getTrainers();
         doReturn(startersList).when(romhandler).getStarters();
+        doReturn(encountersList).when(romhandler).getEncounters(anyBoolean());
         doReturn(mock(Map.class)).when(romhandler).getTemplateData();
     }
 }

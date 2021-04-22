@@ -1287,7 +1287,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
 
         if (getRomEntry().romType == Gen5Constants.Type_BW) {
-            getTextHandler().bw1MonkeyTextModifications(staticPokemon, groupTypesMap, this.random);
+            getTextHandler().bw1MonkeyTextModifications(staticPokemon, getTaggedGroupTypes(), this.random);
         }
 
         return true;

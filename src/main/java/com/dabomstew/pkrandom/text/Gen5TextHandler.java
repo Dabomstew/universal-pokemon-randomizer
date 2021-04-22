@@ -624,7 +624,7 @@ public class Gen5TextHandler {
                 // Static Pokemon order is GRASS FIRE WATER
                 int staticPointer = (i + 1) % 3;
                 Type superiorType = null, staticType = newStatics.get(staticPointer).primaryType;
-                if (taggedGroupTypes != null) {
+                if (taggedGroupTypes != null && taggedGroupTypes.containsKey(striatonStrings.get(staticPointer))) {
                     superiorType = taggedGroupTypes.get(striatonStrings.get(staticPointer));
                     // Check if the primary type is strong against the superior type
                     // If not, use the secondary type

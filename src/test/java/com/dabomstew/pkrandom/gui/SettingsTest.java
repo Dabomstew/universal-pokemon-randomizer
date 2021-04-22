@@ -298,21 +298,29 @@ public class SettingsTest extends AbstractUIBase {
     }
 
      /**
-     * Selecting "RANDOM" enables the Gym Type Theme checkbox
+     * Selecting "RANDOM" or "GLOBAL SWAP" enables the Gym Type Theme checkbox
      * Toggles the Gym Type Theme checkbox
      * Selecting "UNCHANGED" or "TYPE THEME" disables the Gym Type Theme checkbox and resets state to false
      * Verifies settings can be stored and loaded with no error and preserve state
      * @throws IOException
      */
-    @Test(timeout = 4000)
+    @Test(timeout = 8000)
     public void TestGymTypeTheme() throws IOException {
         JRadioButtonFixture unchangedTrainerRBFixture = getRadioButtonByName("tpUnchangedRB");
         JRadioButtonFixture randomTrainerRBFixture = getRadioButtonByName("tpRandomRB");
         JRadioButtonFixture typeThemeTrainerRBFixture = getRadioButtonByName("tpTypeThemeRB");
+        JRadioButtonFixture globalSwapRBFixture = getRadioButtonByName("tpGlobalSwapRB");
         JCheckBoxFixture gymTypeThemeCBFixture = getCheckBoxByName("tpGymTypeThemeCB");
+
+        // Check basic case of UNCHANGED and RANDOM
         TestCheckboxBasedOnRadioButton(unchangedTrainerRBFixture, randomTrainerRBFixture, gymTypeThemeCBFixture, (settings) -> settings.isGymTypeTheme(),
             (trainersMod) -> trainersMod == Settings.TrainersMod.UNCHANGED, (trainersMod) -> trainersMod == Settings.TrainersMod.RANDOM,
             (settings) -> settings.getTrainersMod(), "Trainers");
+
+        // Check UNCHANGED and GLOBAL_MAPPING
+        TestCheckboxBasedOnRadioButton(unchangedTrainerRBFixture, globalSwapRBFixture, gymTypeThemeCBFixture, (settings) -> settings.isGymTypeTheme(),
+        (trainersMod) -> trainersMod == Settings.TrainersMod.UNCHANGED, (trainersMod) -> trainersMod == Settings.TrainersMod.GLOBAL_MAPPING,
+        (settings) -> settings.getTrainersMod(), "Trainers");
 
         // Selecting Type Theme trainer should not enable Gym Type Theme
         clickRBAndWait(typeThemeTrainerRBFixture);

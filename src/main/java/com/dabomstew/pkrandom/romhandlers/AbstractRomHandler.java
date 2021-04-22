@@ -51,6 +51,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     protected boolean ptGiratina = false;
     protected PokemonSet starterPokes;
     protected Map<String, Type> groupTypesMap = new HashMap<String, Type>();
+    private HashMap<Pokemon, Pokemon> trainerTranslateMap;
+    private PokemonSet cachedReplacementLists;
 
     /* Constructor */
     public AbstractRomHandler(Random random) {
@@ -131,6 +133,10 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             if (restrictions.allow_gen5 && allPokemon.size() > 649) {
                 addPokesFromRange(mainPokemonList, allPokemon, 494, 649);
+            }
+
+            if (mainPokemonList.size() == 0) {
+                throw new RandomizationException("No pokemon are in the main list. Please reduce the GenRestrictions.");
             }
         }
 
@@ -1023,13 +1029,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // Build the full 1-to-1 map
-        Map<Pokemon, Pokemon> translateMap = new HashMap<Pokemon, Pokemon>(getPokemon().size());
-        PokemonSet fromSet = new PokemonSet(mainPokemonList).filterList(banned);
+        Map<Pokemon, Pokemon> wildTranslateMap = new HashMap<Pokemon, Pokemon>(getPokemon().size());
+        PokemonSet fromSet = new PokemonSet(allPokemonWithoutNull()).filterList(banned);
         PokemonSet toSet = null;
 
         // Banned pokemon should be mapped to themselves
         for (Pokemon pk : banned) {
-            translateMap.put(pk, pk);
+            wildTranslateMap.put(pk, pk);
         }
 
         while (fromSet.size() > 0) {
@@ -1052,15 +1058,15 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
 
             toSet.remove(to);
-            translateMap.put(from, to);
+            wildTranslateMap.put(from, to);
         }
-
+        
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
 
         for (EncounterSet area : currentEncounters) {
             for (Encounter enc : area.encounters) {
                 // Apply the map
-                enc.pokemon = translateMap.get(enc.pokemon);
+                enc.pokemon = wildTranslateMap.get(enc.pokemon);
                 if (area.bannedPokemon.contains(enc.pokemon)) {
                     // Ignore the map and put a random non-banned poke
                     PokemonSet areaSet = new PokemonSet(globalSet).filterSet(area.bannedPokemon);
@@ -1127,9 +1133,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Trainer> scrambledTrainers = new ArrayList<Trainer>(currentTrainers);
         Collections.shuffle(scrambledTrainers, this.random);
 
-        cachedReplacementLists = new TreeMap<Type, List<Pokemon>>();
-        cachedAllList = noLegendaries ? new ArrayList<Pokemon>(noLegendaryList)
-                : new ArrayList<Pokemon>(mainPokemonList);
+        cachedReplacementLists = new PokemonSet();
+        cachedReplacementLists.addAll(noLegendaries ? noLegendaryList : mainPokemonList);
         typeWeightings = new TreeMap<Type, Integer>();
         totalTypeWeighting = 0;
 
@@ -1241,6 +1246,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (String group: new String[]{"CILAN", "CHILI", "CRESS"}) {
             List<Trainer> trainersInGroup = groups.get(group);
 
+            // If any list is null, break this loop
+            if (trainersInGroup == null || trainersInGroup.size() < 1) {
+                break;
+            }
+
             // Shuffle ordering within group to promote randomness
             Collections.shuffle(trainersInGroup, random);
             for (Trainer t : trainersInGroup) {
@@ -1283,9 +1293,9 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void rivalCarriesStarter(boolean noLegendaries) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
-        if (cachedAllList == null) {
-            cachedAllList = noLegendaries ? new ArrayList<Pokemon>(noLegendaryList)
-                    : new ArrayList<Pokemon>(mainPokemonList);
+        if (cachedReplacementLists == null) {
+            cachedReplacementLists = new PokemonSet();
+            cachedReplacementLists.addAll(noLegendaries ? noLegendaryList : mainPokemonList);
         }
         rivalCarriesStarterUpdate(currentTrainers, "RIVAL", 1);
         rivalCarriesStarterUpdate(currentTrainers, "FRIEND", 2);
@@ -4114,23 +4124,17 @@ public abstract class AbstractRomHandler implements RomHandler {
         return results;
     }
 
-    private HashMap<Pokemon, Pokemon> translateMap;
-
     private void initializeTrainerGlobalSwapMap() {
-        translateMap = new HashMap<Pokemon, Pokemon>(getPokemon().size());
+        trainerTranslateMap = new HashMap<Pokemon, Pokemon>(getPokemon().size());
     }
-
-    // TODO: Replace with PokemonSet
-    private Map<Type, List<Pokemon>> cachedReplacementLists;
-    private List<Pokemon> cachedAllList;
 
     private Pokemon pickReplacement(Pokemon current, boolean usePowerLevels, Type type, boolean noLegendaries,
             boolean wonderGuardAllowed) {
-        List<Pokemon> pickFrom = getCachedAllList();
+        List<Pokemon> pickFrom = cachedReplacementLists.getPokes();
         Pokemon chosenPoke = null;
 
-        if (translateMap != null && translateMap.containsKey(current)) {
-            chosenPoke = translateMap.get(current);
+        if (trainerTranslateMap != null && trainerTranslateMap.containsKey(current)) {
+            chosenPoke = trainerTranslateMap.get(current);
             // Type selection takes priority over global swap
             if (type == null || chosenPoke.primaryType == type || chosenPoke.secondaryType == type) {
                 return chosenPoke;
@@ -4138,10 +4142,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         if (type != null) {
-            if (!cachedReplacementLists.containsKey(type)) {
-                cachedReplacementLists.put(type, pokemonOfType(type, noLegendaries));
-            }
-            pickFrom = cachedReplacementLists.get(type);
+            pickFrom = cachedReplacementLists.getPokesByType().get(type);
         }
 
         if (usePowerLevels) {
@@ -4181,8 +4182,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Don't override original selections
         // Prevent type conflicts from replacing global swap
-        if (translateMap != null && !translateMap.containsKey(current)) {
-            translateMap.put(current, chosenPoke);
+        if (trainerTranslateMap != null && !trainerTranslateMap.containsKey(current)) {
+            trainerTranslateMap.put(current, chosenPoke);
         }
 
         return chosenPoke;
@@ -4397,9 +4398,5 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void applyMiscTweak(MiscTweak tweak) {
         // default: do nothing
-    }
-
-    protected List<Pokemon> getCachedAllList() {
-        return this.cachedAllList;
     }
 }

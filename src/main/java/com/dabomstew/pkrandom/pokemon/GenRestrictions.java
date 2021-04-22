@@ -105,4 +105,10 @@ public class GenRestrictions {
         return initial;
     }
 
+    @Override
+    public String toString() {
+        return "1-" + allow_gen1 + ", 2-" + allow_gen2 +
+        ", 3-" + allow_gen3 + ", 4-" + allow_gen4 +
+        ", 5-" + allow_gen5;
+    }
 }

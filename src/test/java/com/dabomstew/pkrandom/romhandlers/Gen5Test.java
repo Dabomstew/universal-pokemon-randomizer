@@ -603,7 +603,6 @@ public class Gen5Test {
     private void resetDataModel(Gen5RomHandler romhandler) throws IOException {
         setUp();
         doReturn(pokemonList).when(romhandler).getPokemon();
-        doReturn(pokemonList).when(romhandler).getCachedAllList();
         doReturn(pokemonList.get(0)).when(romhandler).randomPokemon();
         doReturn(trainerList).when(romhandler).getTrainers();
         doReturn(mockTextHandler).when(romhandler).getTextHandler();

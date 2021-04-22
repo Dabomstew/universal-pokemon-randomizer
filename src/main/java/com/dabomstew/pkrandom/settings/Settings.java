@@ -62,6 +62,7 @@ public class Settings {
     private CustomNamesSet customNames;
 
     private String romName;
+    private Integer generationOfRom = 1;
     private boolean updatedFromOldVersion = false;
 
     private SettingsMap settingsMap;
@@ -317,7 +318,8 @@ public class Settings {
             new SettingsOption.Builder(SettingsConstants.GYM_TYPE_THEME, false)
             .addMatches(new PredicatePair(trainersMod, PredicatePair.TRAINERS_MOD_RANDOM)));
         SettingsOptionComposite trainersRandomHeldItem = SettingsOptionFactory.createSettingsOption(
-            new SettingsOption.Builder(SettingsConstants.TRAINERS_RANDOM_HELD_ITEM, false));
+            new SettingsOption.Builder(SettingsConstants.TRAINERS_RANDOM_HELD_ITEM, false)
+            .addGenRestriction(3, 4, 5));
         SettingsOptionComposite randomizeTrainerNames = SettingsOptionFactory.createSettingsOption(
             new SettingsOption.Builder(SettingsConstants.RANDOMIZE_TRAINER_NAMES, false));
         SettingsOptionComposite randomizeTrainerClassNames = SettingsOptionFactory.createSettingsOption(
@@ -442,7 +444,7 @@ public class Settings {
 
         settingsMap.forEachParent((option) -> {
             if (!bannedKeys.contains(option.getKey())) {
-                option.getValue().randomValue(random);
+                option.getValue().randomValue(random, generationOfRom);
             }
         });  
     }
@@ -991,6 +993,9 @@ public class Settings {
 
         TweakForROMFeedback feedback = new TweakForROMFeedback();
 
+        // update the generation
+        generationOfRom = rh.generationOfPokemon();
+
         // move update check
         if (this.isUpdateMovesLegacy() && rh instanceof Gen5RomHandler) {
             // don't actually update moves
@@ -1025,6 +1030,12 @@ public class Settings {
             settingsMap.putValue(SettingsConstants.LIMIT_POKEMON, false);
         } else if (genRes != null) {
             genRes.limitToGen(rh.generationOfPokemon());
+        }
+
+        // trainers
+        // held items are only randomized in gen3 and higher
+        if (rh.generationOfPokemon() < 3) {
+            this.setTrainersRandomHeldItem(false);
         }
 
         // misc tweaks

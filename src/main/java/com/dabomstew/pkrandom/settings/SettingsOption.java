@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.IntStream;
 
+import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 
 public interface SettingsOption<T> {
@@ -39,8 +40,8 @@ public interface SettingsOption<T> {
     public Boolean isChild();
     public void setIsChild(Boolean bool);
     public ArrayList<PredicatePair> getMatches();
-    public void randomValue(Random random);
-    public void attemptRandomValue(Random random, SettingsOption item);
+    public void randomValue(Random random, Integer generationOfRom);
+    public void attemptRandomValue(Random random, SettingsOption item, Integer generationOfRom);
 
     public static class Builder {
         // Required parameters
@@ -50,6 +51,7 @@ public interface SettingsOption<T> {
         // Optional parameters
         private PredicatePair[] matches;
         private IntStream validInts;
+        private Integer[] validGenerations;
 
         public Builder(String name, Object value) {
             this.name = name;
@@ -66,17 +68,22 @@ public interface SettingsOption<T> {
             return this;
         }
 
+        public Builder addGenRestriction(Integer... validGenerations) {
+            this.validGenerations = validGenerations;
+            return this;
+        }
+
         public SettingsOptionComposite build() {
             if (value instanceof Boolean) {
-                return new SettingsOptionComposite<Boolean>(new BooleanSettingsOption(name, (Boolean)value, matches));
+                return new SettingsOptionComposite<Boolean>(new BooleanSettingsOption(name, (Boolean)value, matches, validGenerations));
             } else if (value instanceof GenRestrictions) {
-                return new SettingsOptionComposite<GenRestrictions>(new GenRestrictionsSettingsOption(name, (GenRestrictions)value, matches));
+                return new SettingsOptionComposite<GenRestrictions>(new GenRestrictionsSettingsOption(name, (GenRestrictions)value, matches, validGenerations));
             } else if (value instanceof Enum) {
-                return new SettingsOptionComposite<Enum>(new EnumSettingsOption(name, (Enum)value, matches));
+                return new SettingsOptionComposite<Enum>(new EnumSettingsOption(name, (Enum)value, matches, validGenerations));
             } else if (value instanceof int[]) {
-                return new SettingsOptionComposite<int[]>(new IntArraySettingsOption(name, (int[])value, validInts, matches));
+                return new SettingsOptionComposite<int[]>(new IntArraySettingsOption(name, (int[])value, validInts, matches, validGenerations));
             } else if (value instanceof Integer) {
-                return new SettingsOptionComposite<Integer>(new IntSettingsOption(name, (Integer)value, validInts, matches));
+                return new SettingsOptionComposite<Integer>(new IntSettingsOption(name, (Integer)value, validInts, matches, validGenerations));
             } else {
                 throw new RuntimeException(value.getClass() + " has no supported factory.");
             }
@@ -91,8 +98,9 @@ abstract class AbstractSettingsOption<T> implements SettingsOption<T> {
     protected T value;
     protected Boolean isChild;
     protected ArrayList<PredicatePair> matches;
+    protected ArrayList<Integer> validGenerations;
 
-    protected AbstractSettingsOption(String name, T value, PredicatePair... matches) {
+    protected AbstractSettingsOption(String name, T value, PredicatePair[] matches, Integer[] validGenerations) {
         this.name = name;
         this.defaultValue = value;
         this.value = value;
@@ -101,6 +109,11 @@ abstract class AbstractSettingsOption<T> implements SettingsOption<T> {
             this.matches = new ArrayList<PredicatePair>(Arrays.asList(matches));
         } else {
             this.matches = new ArrayList<PredicatePair>();
+        }
+        if (validGenerations != null) {
+            this.validGenerations = new ArrayList<Integer>(Arrays.asList(validGenerations));
+        } else {
+            this.validGenerations = new ArrayList<Integer>(GlobalConstants.SUPPORTED_GENERATIONS);
         }
     }
 
@@ -135,9 +148,9 @@ abstract class AbstractSettingsOption<T> implements SettingsOption<T> {
     }
 
     @Override
-    public void attemptRandomValue(Random random, SettingsOption item) {
+    public void attemptRandomValue(Random random, SettingsOption item, Integer generationOfRom) {
         if (matches.stream().anyMatch((match) -> match.test(item))) {
-            randomValue(random);
+            randomValue(random, generationOfRom);
         } else {
             setItem(defaultValue);
         }
@@ -146,38 +159,43 @@ abstract class AbstractSettingsOption<T> implements SettingsOption<T> {
 
 class BooleanSettingsOption extends AbstractSettingsOption<Boolean> {
 
-    public BooleanSettingsOption(String name, Boolean value, PredicatePair... matches) {
-        super(name, value, matches);
+    public BooleanSettingsOption(String name, Boolean value, PredicatePair[] matches, Integer[] validGenerations) {
+        super(name, value, matches, validGenerations);
     }
 
     @Override
-    public void randomValue(Random random) {
-        setItem(random.nextInt(2) > 0 ? true : false);    
+    public void randomValue(Random random, Integer generationOfRom) {
+        if (validGenerations.contains(generationOfRom)) {
+            setItem(random.nextInt(2) > 0 ? true : false);
+        } 
     }    
 }
 
 class EnumSettingsOption extends AbstractSettingsOption<Enum> {
 
-    public EnumSettingsOption(String name, Enum value, PredicatePair... matches) {
-        super(name, value, matches);
+    public EnumSettingsOption(String name, Enum value, PredicatePair[] matches, Integer[] validGenerations) {
+        super(name, value, matches, validGenerations);
     }
 
     /**
      * Uses Java reflection to get the values of the actual Enum
      */
     @Override
-    public void randomValue(Random random) {
-        Enum[] values = ((Enum)value).getClass().getEnumConstants();
-        value = values[random.nextInt(values.length)];        
-    }    
+    public void randomValue(Random random, Integer generationOfRom) {
+        if (validGenerations.contains(generationOfRom)) {
+            Enum[] values = ((Enum)value).getClass().getEnumConstants();
+            setItem(values[random.nextInt(values.length)]);
+        } 
+    }
 }
 
 class IntArraySettingsOption extends AbstractSettingsOption<int[]> {
 
     private IntStream allowedValues;
 
-    public IntArraySettingsOption(String name, int[] value, IntStream allowedValues, PredicatePair... matches) {
-        super(name, value, matches);
+    public IntArraySettingsOption(String name, int[] value, IntStream allowedValues, PredicatePair[] matches,
+        Integer[] validGenerations) {
+        super(name, value, matches, validGenerations);
         if (allowedValues == null) {
             throw new IllegalArgumentException("IntArraySettingsOption must contain a non-null allowedValues");
         }
@@ -185,12 +203,16 @@ class IntArraySettingsOption extends AbstractSettingsOption<int[]> {
     }
 
     @Override
-    public void randomValue(Random random) {
-        int[] allowedInts = allowedValues.toArray();
-        for(int i = 0; i < value.length; i++) {
-            value[i] = allowedInts[random.nextInt(allowedInts.length)];
-        }
-    }   
+    public void randomValue(Random random, Integer generationOfRom) {
+        if (validGenerations.contains(generationOfRom)) {
+            int[] allowedInts = allowedValues.toArray();
+            int[] newVal = new int[value.length];
+            for(int i = 0; i < value.length; i++) {
+                newVal[i] = allowedInts[random.nextInt(allowedInts.length)];
+            }
+            setItem(newVal);
+        } 
+    } 
     
     public void setAllowedValues(IntStream validInts) {
         this.allowedValues = validInts;
@@ -201,8 +223,9 @@ class IntSettingsOption extends AbstractSettingsOption<Integer> {
 
     private IntStream allowedValues;
 
-    public IntSettingsOption(String name, int value, IntStream allowedValues, PredicatePair... matches) {
-        super(name, value, matches);
+    public IntSettingsOption(String name, int value, IntStream allowedValues, PredicatePair[] matches,
+        Integer[] validGenerations) {
+        super(name, value, matches, validGenerations);
         if (allowedValues == null) {
             throw new IllegalArgumentException("IntSettingsOption must contain a non-null allowedValues");
         }
@@ -210,26 +233,39 @@ class IntSettingsOption extends AbstractSettingsOption<Integer> {
     }
 
     @Override
-    public void randomValue(Random random) {
-        int[] allowedInts = allowedValues.toArray();
-        value = allowedInts[random.nextInt(allowedInts.length)];
-    }    
+    public void randomValue(Random random, Integer generationOfRom) {
+        if (validGenerations.contains(generationOfRom)) {
+            int[] allowedInts = allowedValues.toArray();
+            setItem(allowedInts[random.nextInt(allowedInts.length)]);
+        } 
+    } 
 }
 
 class GenRestrictionsSettingsOption extends AbstractSettingsOption<GenRestrictions> {
 
-    public GenRestrictionsSettingsOption(String name, GenRestrictions value, PredicatePair... matches) {
-        super(name, value, matches);
+    public GenRestrictionsSettingsOption(String name, GenRestrictions value, PredicatePair[] matches, Integer[] validGenerations) {
+        super(name, value, matches, validGenerations);
     }
 
     @Override
-    public void randomValue(Random random) {
+    public void randomValue(Random random, Integer generationOfRom) {
         GenRestrictions newRestrictions = new GenRestrictions();
-        newRestrictions.allow_gen1 = random.nextInt(2) % 2 == 1 ? true : false;
-        newRestrictions.allow_gen2 = random.nextInt(2) % 2 == 1 ? true : false;
-        newRestrictions.allow_gen3 = random.nextInt(2) % 2 == 1 ? true : false;
-        newRestrictions.allow_gen4 = random.nextInt(2) % 2 == 1 ? true : false;
-        newRestrictions.allow_gen5 = random.nextInt(2) % 2 == 1 ? true : false;
+        // Deliberately fall through to capture all valid selections
+        // E.g. Gen 3 will capture gen 3, gen 2, and gen 1 leaving 4 and 5 false by default
+        switch (generationOfRom) {
+            case 5:
+                newRestrictions.allow_gen5 = random.nextInt(2) % 2 == 1 ? true : false;
+            case 4:
+                newRestrictions.allow_gen4 = random.nextInt(2) % 2 == 1 ? true : false;
+            case 3:
+                newRestrictions.allow_gen3 = random.nextInt(2) % 2 == 1 ? true : false;
+            case 2:
+                newRestrictions.allow_gen2 = random.nextInt(2) % 2 == 1 ? true : false;
+            case 1:
+                newRestrictions.allow_gen1 = random.nextInt(2) % 2 == 1 ? true : false;
+                break;
+        }
+
         // Automatically accept all related Gen 1 options if this is true
         // Any optional associations are random
         if (newRestrictions.allow_gen1) {
@@ -321,15 +357,15 @@ class SettingsOptionComposite<T> implements SettingsOption<T> {
     }
     
     @Override
-    public void randomValue(Random random) {
-        value.randomValue(random);
-        childOptions.forEach((option) -> option.attemptRandomValue(random, this));
+    public void randomValue(Random random, Integer generationOfRom) {
+        value.randomValue(random, generationOfRom);
+        childOptions.forEach((option) -> option.attemptRandomValue(random, this, generationOfRom));
     }
 
     @Override
-    public void attemptRandomValue(Random random, SettingsOption item) {
-        value.attemptRandomValue(random, item);
-        childOptions.forEach((option) -> option.attemptRandomValue(random, this));
+    public void attemptRandomValue(Random random, SettingsOption item, Integer generationOfRom) {
+        value.attemptRandomValue(random, item, generationOfRom);
+        childOptions.forEach((option) -> option.attemptRandomValue(random, this, generationOfRom));
     }
 
     public void add(SettingsOption childOption) {

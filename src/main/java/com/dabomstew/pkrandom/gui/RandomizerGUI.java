@@ -1500,7 +1500,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.tpLevelModifierCB.setEnabled(true);
         }
 
-        if (this.tpRandomRB.isSelected()) {
+        if (this.tpRandomRB.isSelected() || this.tpGlobalSwapRB.isSelected()) {
             this.tpGymTypeThemeCB.setEnabled(true);
         } else {
             this.tpGymTypeThemeCB.setEnabled(false);
@@ -2379,6 +2379,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     ps.println("Code: " + romHandler.getROMCode());
                     ps.println("Reported Support Level: " + romHandler.getSupportLevel());
                     ps.println("Settings String: " + getCurrentSettings().toString());
+                    ps.println("Random Seed: " + RandomSource.getSeed());
                     ps.println();
                 } catch (Exception ex2) {
                     // Do nothing, just don't fail
