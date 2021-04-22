@@ -1764,6 +1764,29 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             se.isEgg = Arrays.stream(staticEggOffsets).anyMatch(x-> x == currentOffset);
             statics.add(se);
         }
+
+        // If it's Emerald, read in and randomize the static starting Zigzagoon fight
+        if (romEntry.romType == Gen3Constants.RomType_Em && romEntry.codeTweaks.get("StaticFirstBattleTweak") != null) {
+            int startingSpeciesOffset = romEntry.getValue("StaticFirstBattleSpeciesOffset");
+            int species = readWord(startingSpeciesOffset);
+            if (species == 0xFFFF) {
+                // Patch hasn't been applied, so apply it first
+                try {
+                    FileFunctions.applyPatch(rom, romEntry.codeTweaks.get("StaticFirstBattleTweak"));
+                    species = readWord(startingSpeciesOffset);
+                } catch (IOException e) {
+                    throw new RandomizerIOException(e);
+                }
+            }
+            Pokemon pkmn = pokesInternal[species];
+            int startingLevelOffset = romEntry.getValue("StaticFirstBattleLevelOffset");
+            int level = rom[startingLevelOffset];
+            StaticEncounter se = new StaticEncounter();
+            se.pkmn = pkmn;
+            se.level = level;
+            statics.add(se);
+        }
+
         return statics;
     }
 
@@ -1773,7 +1796,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         attemptObedienceEvolutionPatches();
 
         List<StaticPokemon> staticsHere = romEntry.staticPokemon;
-        if (staticPokemon.size() != staticsHere.size()) {
+        int hardcodedStaticSize = 0;
+        if (romEntry.romType == Gen3Constants.RomType_Em && romEntry.codeTweaks.get("StaticFirstBattleTweak") != null) {
+            hardcodedStaticSize = 1;
+        }
+        if (staticPokemon.size() != staticsHere.size() + hardcodedStaticSize) {
             return false;
         }
 
@@ -1781,6 +1808,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             staticsHere.get(i).setPokemon(this, staticPokemon.get(i).pkmn);
             staticsHere.get(i).setLevel(rom, staticPokemon.get(i).level, 0);
         }
+
+        if (romEntry.romType == Gen3Constants.RomType_Em && romEntry.codeTweaks.get("StaticFirstBattleTweak") != null) {
+            StaticEncounter hardcodedStatic = staticPokemon.get(staticPokemon.size() - 1);
+            int startingSpeciesOffset = romEntry.getValue("StaticFirstBattleSpeciesOffset");
+            writeWord(startingSpeciesOffset, pokedexToInternal[hardcodedStatic.pkmn.number]);
+            int startingLevelOffset = romEntry.getValue("StaticFirstBattleLevelOffset");
+            rom[startingLevelOffset] = (byte) hardcodedStatic.level;
+        }
+
         return true;
     }
 
