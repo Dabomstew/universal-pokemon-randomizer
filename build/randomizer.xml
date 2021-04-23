@@ -2,8 +2,6 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>C:\Users\scott\IdeaProjects\universal-pokemon-randomizer\classes\artifacts\randomizer_jar\randomizer.jar</jar>
-  <outfile>C:\Users\scott\IdeaProjects\universal-pokemon-randomizer\classes\artifacts\randomizer_jar\randomizer.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
@@ -19,7 +17,7 @@
     <bundledJre64Bit>false</bundledJre64Bit>
     <bundledJreAsFallback>false</bundledJreAsFallback>
     <minVersion>1.6</minVersion>
-    <maxVersion></maxVersion>
+    <maxVersion>1.8</maxVersion>
     <jdkPreference>preferJre</jdkPreference>
     <runtimeBits>64/32</runtimeBits>
   </jre>
