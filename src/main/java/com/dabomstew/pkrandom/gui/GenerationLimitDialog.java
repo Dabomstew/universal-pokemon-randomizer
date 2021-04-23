@@ -295,7 +295,7 @@ public class GenerationLimitDialog extends javax.swing.JDialog {
                         .addGap(134, 134, 134))))
             .addGroup(layout.createSequentialGroup()
                 .addGap(20, 20, 20)
-                .addComponent(warningRomHackLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(warningRomHackLabel)
                 .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -334,7 +334,7 @@ public class GenerationLimitDialog extends javax.swing.JDialog {
                     .addComponent(okButton)
                     .addComponent(cancelButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(warningRomHackLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(warningRomHackLabel)
                 .addContainerGap())
         );
 

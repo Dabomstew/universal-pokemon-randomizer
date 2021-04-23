@@ -136,6 +136,8 @@ public interface RomHandler {
     public int getTypeSize();
 
     public boolean typeInGame(Type type);
+    
+    public List<Type> getTypesInGame();
 
     // randomise Pokemon types, with a switch on whether evolutions
     // should follow the same types or not.

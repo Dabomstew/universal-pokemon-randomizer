@@ -52,7 +52,7 @@ XXToo much workXXEvolution level randomized into a range based on the resulting 
 XXToo much workXXRandomize attack effects (romHandler.saveMoves)
 XXToo much workXXMove prefixes (DEFDN-Leer)
 XXToo much workXXAdd PokemonEmerald Party Randomizer
-
+Change type size and pickType to use the new type list
 
 Java output to excel
 

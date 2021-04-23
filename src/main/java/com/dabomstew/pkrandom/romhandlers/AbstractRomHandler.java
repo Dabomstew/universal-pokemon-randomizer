@@ -4223,6 +4223,12 @@ public abstract class AbstractRomHandler implements RomHandler {
     public boolean typeInGame(Type type) {
         return type.isHackOnly == false;
     }
+    
+    @Override
+    public List<Type> getTypesInGame() {
+        return Arrays.asList(Type.values()).stream().filter(t -> typeInGame(t))
+                .collect(Collectors.toList());
+    }
 
     @Override
     public String abilityName(int number) {
