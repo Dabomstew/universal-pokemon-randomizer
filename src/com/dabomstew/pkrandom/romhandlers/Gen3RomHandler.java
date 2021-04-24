@@ -1356,9 +1356,13 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         // Grab the *real* pointer to data
         int dataOffset = readPointer(offset + 4);
 
-        if (romEntry.romCode.matches("^(SPDC|MBDN)$")) // speedchoice
+        if (romEntry.romCode.equals("SPDC")) // Emerald speedchoice
         {
             numOfEntries = 2; // no memes allowed
+        }
+        else if (romEntry.romCode.equals("MBDN")) // FireRed speedchoice
+        {
+            numOfEntries = 6; // limited memes allowed
         }
 
         // Read the entries
