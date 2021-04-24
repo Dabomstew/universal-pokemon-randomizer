@@ -34,7 +34,7 @@ XXToo much workXXTrainer Class Names should be gender based (Rich Boy woman not 
 XXROM LENGTH VIOLATIONXXExtra Challenge Mode - All leaders have 6 pokemon
 Extra E4 Challenge - Legendaries / BST of at least 600
 XXToo much workXXSignature Move - All leaders have a signature move on all pokes (same as TM?)
-All leader/rival pokemon are nicknamed
+XXNot SupportedXXAll leader/rival pokemon are nicknamed
 XXToo much workXXType by ace (one of dual type, or if mono type, keeps mono) (keep type but change team)
 XXToo much workXXRSE Gen 3 - Patch both Arco and Mach
 XXToo much workXXRedo code to use PokemonSet
@@ -53,6 +53,12 @@ XXToo much workXXRandomize attack effects (romHandler.saveMoves)
 XXToo much workXXMove prefixes (DEFDN-Leer)
 XXToo much workXXAdd PokemonEmerald Party Randomizer
 Change type size and pickType to use the new type list
+
+Change TypeFormDialog to add names for the Dialog, and all components (labels, list, buttons)
+All versions to 190
+Update settings updater
+Verify docs
+Build exe and zip into github
 
 Java output to excel
 

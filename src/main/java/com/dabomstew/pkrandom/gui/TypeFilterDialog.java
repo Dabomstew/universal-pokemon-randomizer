@@ -49,10 +49,11 @@ public class TypeFilterDialog extends javax.swing.JDialog {
     /**
      * Creates new form TypeFilterDialog
      */
-    public TypeFilterDialog(java.awt.Frame parent, List typesInGame) {
+    public TypeFilterDialog(java.awt.Frame parent, List<com.dabomstew.pkrandom.pokemon.Type> selectedStarterTypes,
+        List<com.dabomstew.pkrandom.pokemon.Type> typesInGame) {
         super(parent, true);
         initComponents();
-        initialState(typesInGame);
+        initialState(selectedStarterTypes, typesInGame);
         pressedOk = false;
         setLocationRelativeTo(parent);
         setVisible(true);
@@ -82,6 +83,7 @@ public class TypeFilterDialog extends javax.swing.JDialog {
         includeTypeHeader.setText(bundle.getString("TypeFilterDialog.includeTypeHeader.text")); // NOI18N
 
         okButton.setText(bundle.getString("TypeFilterDialog.okButton.text")); // NOI18N
+        okButton.setName("okButton");
         okButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 okButtonActionPerformed(evt);
@@ -90,7 +92,10 @@ public class TypeFilterDialog extends javax.swing.JDialog {
 
         jScrollPane1.setViewportView(typeCheckboxList);
 
+        typeCheckboxList.setName("typeCheckboxList");
+
         cancelButton.setText(bundle.getString("TypeFilterDialog.cancelButton.text")); // NOI18N
+        cancelButton.setName("cancelButton");
         cancelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cancelButtonActionPerformed(evt);
@@ -98,6 +103,7 @@ public class TypeFilterDialog extends javax.swing.JDialog {
         });
 
         deselectAll.setText(bundle.getString("TypeFilterDialog.deselectAll.text")); // NOI18N
+        deselectAll.setName("deselectAllButton");
         deselectAll.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 deselectAllActionPerformed(evt);
@@ -105,6 +111,7 @@ public class TypeFilterDialog extends javax.swing.JDialog {
         });
 
         selectAll.setText(bundle.getString("TypeFilterDialog.selectAll.text")); // NOI18N
+        selectAll.setName("selectAllButton");
         selectAll.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 selectAllActionPerformed(evt);
@@ -155,6 +162,12 @@ public class TypeFilterDialog extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Allows the JList to render JCheckBox as items
+     * instead of String. Updates the state of JCheckBox
+     * when the JList item is selected and highlights
+     * the checkbox
+     */
     private class CellRenderer implements ListCellRenderer
     {
         private final Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
@@ -179,11 +192,24 @@ public class TypeFilterDialog extends javax.swing.JDialog {
         }
     }
     
-    private void initialState(List typesInGame) {
+    /**
+     * Initializes the JList with JCheckBox and applies the
+     * CellRender to appropriately interact with the JList
+     * Adds mouse listener to translate clicks into selection
+     * on the JCheckBox, then updates the screen (repaints)
+     * to reflect the change.
+     * 
+     * @param selectedStarterTypes - Previously selected starter types
+     * to prevent deselection upon reopening the dialog
+     * @param typesInGame - List of all available types that should have
+     * a checkbox
+     */
+    private void initialState(List<com.dabomstew.pkrandom.pokemon.Type> selectedStarterTypes,
+        List<com.dabomstew.pkrandom.pokemon.Type> typesInGame) {
         typeCheckboxList.setCellRenderer(new CellRenderer());
         typeCheckboxList.addMouseListener(new MouseAdapter()
            {
-               JList mainList = TypeFilterDialog.this.typeCheckboxList;
+              JList mainList = TypeFilterDialog.this.typeCheckboxList;
               public void mousePressed(MouseEvent e)
               {
                  int index = mainList.locationToIndex(e.getPoint());
@@ -200,17 +226,30 @@ public class TypeFilterDialog extends javax.swing.JDialog {
         typeCheckboxList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         typeCheckboxArray = new ArrayList<JCheckBox>();
         for (int i = 0; i < typesInGame.size(); i++) {
-            typeCheckboxArray.add(new JCheckBox(typesInGame.get(i).toString()));
+            JCheckBox typeCB = new JCheckBox(typesInGame.get(i).toString());
+            typeCB.setName(typesInGame.get(i).toString());
+            if (selectedStarterTypes != null) {
+                typeCB.setSelected(selectedStarterTypes.contains(typesInGame.get(i)));
+            }
+            typeCheckboxArray.add(typeCB);
         }
         this.typeCheckboxList.setListData(typeCheckboxArray.toArray(
                 new JCheckBox[typesInGame.size()]));
     }
     
-    public List<String> getChoice() {
+    /**
+     * 
+     * @return - List of Types corresponding to selected checkboxes
+     */
+    public List<com.dabomstew.pkrandom.pokemon.Type> getChoice() {
         return typeCheckboxArray.stream().filter(cb -> cb.isSelected())
-                .map(cb -> cb.getText()).collect(Collectors.toList());
+                .map(cb -> com.dabomstew.pkrandom.pokemon.Type.valueOf(cb.getText())).collect(Collectors.toList());
     }
     
+    /**
+     * Allows outside querying to see if the "OK" button was pressed
+     * @return True if OK was pressed, False if not
+     */
     public boolean pressedOK() {
         return pressedOk;
     }

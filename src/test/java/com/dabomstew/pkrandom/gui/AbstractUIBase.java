@@ -6,6 +6,8 @@ import java.awt.Point;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JList;
 import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 
@@ -16,8 +18,10 @@ import org.assertj.swing.edt.GuiQuery;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.fixture.JButtonFixture;
 import org.assertj.swing.fixture.JCheckBoxFixture;
+import org.assertj.swing.fixture.JListFixture;
 import org.assertj.swing.fixture.JRadioButtonFixture;
 import org.assertj.swing.fixture.JSliderFixture;
+import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.testing.AssertJSwingTestCaseTemplate;
 import org.junit.After;
 import org.junit.Assume;
@@ -155,6 +159,42 @@ public class AbstractUIBase extends AssertJSwingTestCaseTemplate {
             }
         });
         return jButtonFixture;
+    }
+
+    /**
+     * Returns a JListFixture where the JList has the requested component name
+     * @param name - Name of the JList (different than variable name)
+     * @return JListFixture with the given name
+     */
+    public JListFixture getListByName(String name) {
+        JListFixture jListFixture = this.frame.list(new GenericTypeMatcher(JList.class, true) {
+            @Override
+            protected boolean isMatching(Component component) {
+                if (component.getName() != null && component.getName().equals(name)) {
+                    return true;
+                }
+                return false;
+            }
+        });
+        return jListFixture;
+    }
+
+/**
+     * Returns a DialogFixture where the JDialog has the requested component class
+     * @param clazz - Class type of the JDialog
+     * @return DialogFixture with the given name
+     */
+    public DialogFixture getDialogByClass(Class<?> clazz) {
+        DialogFixture dialogFixture = this.frame.dialog(new GenericTypeMatcher(JDialog.class, true) {
+            @Override
+            protected boolean isMatching(Component component) {
+                if (component.getClass().equals(clazz)) {
+                    return true;
+                }
+                return false;
+            }
+        });
+        return dialogFixture;
     }
 
     /**

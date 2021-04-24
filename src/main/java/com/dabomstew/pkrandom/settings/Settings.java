@@ -31,6 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -45,6 +46,7 @@ import com.dabomstew.pkrandom.SettingsUpdater;
 import com.dabomstew.pkrandom.SysConstants;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen2RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen3RomHandler;
@@ -55,7 +57,7 @@ public class Settings {
 
     public static final int VERSION = 181;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 42;
+    public static final int LENGTH_OF_SETTINGS_DATA = 46;
 
     public static final ResourceBundle bundle = ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle");
 
@@ -254,6 +256,10 @@ public class Settings {
         SettingsOptionComposite startersSETriangle = SettingsOptionFactory.createSettingsOption(
             new SettingsOption.Builder(SettingsConstants.STARTERS_SE_TRIANGLE, false)
             .addMatches(new PredicatePair(startersMod, PredicatePair.STARTERS_MOD_RANDOM)));
+        SettingsOptionComposite startersTypeFilter = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.STARTERS_TYPE_FILTER, new ArrayList<Type>())
+            .addMatches(new PredicatePair(startersSETriangle, PredicatePair.BOOLEAN_FALSE))
+            .addValidItems((Object[])Type.values()));
 
         // Moves
         SettingsOptionComposite randomizeMovePowers = SettingsOptionFactory.createSettingsOption(
@@ -719,7 +725,14 @@ public class Settings {
         out.write(makeByteSelected(
             (Boolean)settingsMap.getValue(SettingsConstants.EVOS_CHANGE_METHOD)));
 
-        // @ 42 Rom Title Name (update LENGTH_OF_SETTINGS_DATA if this changes)
+        // @ 42 Starter Types
+        try {
+            int typesInt = Type.typesToInt(settingsMap.getValue(SettingsConstants.STARTERS_TYPE_FILTER));
+            writeFullInt(out, typesInt);
+        } catch (IOException e) {
+        }
+
+        // @ 46 Rom Title Name (update LENGTH_OF_SETTINGS_DATA if this changes)
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
             out.write(romName.length);
@@ -959,6 +972,8 @@ public class Settings {
 
         settings.setEvosChangeMethod(restoreState(data[41], 0));
         
+        settings.setStarterTypes(Type.intToTypes(FileFunctions.readFullInt(data, 42)));
+
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
         settings.setRomName(romName);
@@ -1470,6 +1485,15 @@ public class Settings {
 
     public Settings setStartersSETriangle(boolean startersSETriangle) {
         settingsMap.putValue(SettingsConstants.STARTERS_SE_TRIANGLE, startersSETriangle);
+        return this;
+    }
+
+    public List<Type> getStarterTypes() {
+        return settingsMap.getValue(SettingsConstants.STARTERS_TYPE_FILTER);
+    }
+
+    public Settings setStarterTypes(List<Type> starterTypes) {
+        settingsMap.putValue(SettingsConstants.STARTERS_TYPE_FILTER, starterTypes);
         return this;
     }
 

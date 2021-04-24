@@ -35,6 +35,7 @@ import com.dabomstew.pkrandom.settings.Settings.TypesMod;
 
 public class PredicatePair {
     public static final Predicate<Boolean> BOOLEAN_TRUE = (item) -> item.equals(true);
+    public static final Predicate<Boolean> BOOLEAN_FALSE = (item) -> item.equals(false);
     public static final Predicate<Enum> ENUM_NOT_UNCHANGED = (item) -> !isEnumDefault(item);
     public static final Predicate<StartersMod> STARTERS_MOD_CUSTOM = (item) ->
         item == StartersMod.CUSTOM;

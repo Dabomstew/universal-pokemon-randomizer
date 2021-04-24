@@ -65,6 +65,7 @@ public class SettingsConstants {
     public static final String STARTERS_EXACT_EVOS = "startersExactEvos";
     public static final String STARTERS_MINIMUM_EVOS = "startersMinimumEvos";
     public static final String STARTERS_SE_TRIANGLE = "startersSETriangle";
+    public static final String STARTERS_TYPE_FILTER = "startersTypeFilter";
     public static final String RANDOMIZE_MOVE_POWERS = "randomizeMovePowers";
     public static final String RANDOMIZE_MOVE_ACCURACIES = "randomizeMoveAccuracies";
     public static final String RANDOMIZE_MOVE_PPS = "randomizeMovePPs";

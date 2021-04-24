@@ -27,6 +27,9 @@ public class TrainerPokemon {
 
     public Pokemon pokemon;
     public int level;
+
+    // Nickname is not actually supported by any mainline games
+    // This just assists with internal testing
     private String nickname;
 
     public int move1;

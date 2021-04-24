@@ -27,6 +27,7 @@ package com.dabomstew.pkrandom.settings;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
 
@@ -52,6 +53,7 @@ public interface SettingsOption<T> {
         private PredicatePair[] matches;
         private IntStream validInts;
         private Integer[] validGenerations;
+        private List validItems;
 
         public Builder(String name, Object value) {
             this.name = name;
@@ -73,6 +75,11 @@ public interface SettingsOption<T> {
             return this;
         }
 
+        public Builder addValidItems(Object... validItems) {
+            this.validItems = Arrays.asList(validItems);
+            return this;
+        }
+
         public SettingsOptionComposite build() {
             if (value instanceof Boolean) {
                 return new SettingsOptionComposite<Boolean>(new BooleanSettingsOption(name, (Boolean)value, matches, validGenerations));
@@ -84,8 +91,11 @@ public interface SettingsOption<T> {
                 return new SettingsOptionComposite<int[]>(new IntArraySettingsOption(name, (int[])value, validInts, matches, validGenerations));
             } else if (value instanceof Integer) {
                 return new SettingsOptionComposite<Integer>(new IntSettingsOption(name, (Integer)value, validInts, matches, validGenerations));
+            } else if (value instanceof List) {
+                return new SettingsOptionComposite<List>(new ListSettingsOption(name, (List)value, matches, validItems, validGenerations));
             } else {
-                throw new RuntimeException(value.getClass() + " has no supported factory.");
+                String className = value == null ? "Null" : value.getClass().toString();
+                throw new RuntimeException(className + " has no supported factory.");
             }
         }
     }
@@ -239,6 +249,46 @@ class IntSettingsOption extends AbstractSettingsOption<Integer> {
             setItem(allowedInts[random.nextInt(allowedInts.length)]);
         } 
     } 
+}
+
+/**
+ * WARNING
+ * Due to the untyped nature of this class, there is no type safety available. If you
+ * have an illegal element in your allowedItems parameter, it will be allowed regardless
+ * of what it is. This means if you are expecting a list of Pokemon but provide
+ * TrainerPokemon, these will be allowed even though they are not compatible, thus
+ * pushing the error further along in the code. Best case scenario is a NoOp, worst
+ * case is an application crash with a gibberish error.
+ */
+class ListSettingsOption<T> extends AbstractSettingsOption<List<T>> {
+
+    private List<T> allowedItems;
+
+    public ListSettingsOption(String name, List<T> value, PredicatePair[] matches, List<T> allowedItems,
+        Integer[] validGenerations) {
+        super(name, value, matches, validGenerations);
+        if (allowedItems == null) {
+            throw new IllegalArgumentException("ListSettingsOption must contain a non-null allowedItems");
+        }
+        this.allowedItems = allowedItems;
+    }
+
+    @Override
+    public void randomValue(Random random, Integer generationOfRom) {
+        if (validGenerations.contains(generationOfRom)) {
+            try {
+                List<T> randomValues = defaultValue.getClass().newInstance();
+                for(T obj : allowedItems) {
+                    if (random.nextBoolean()) {
+                        randomValues.add(obj);
+                    }
+                }
+                setItem(randomValues);
+            } catch (InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        } 
+    }
 }
 
 class GenRestrictionsSettingsOption extends AbstractSettingsOption<GenRestrictions> {

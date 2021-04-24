@@ -248,5 +248,34 @@ public enum Type {
         }
         List<Type> checkList = STRONG_AGAINST.get(checkType.ordinal());
         return checkList.subList(0, maxNum > checkList.size() ? checkList.size() : maxNum);
-    } 
+    }
+
+    public static int typesToInt(List<Type> types) {
+        if (types == null || types.size() > 32) {
+            // No can do
+            return 0;
+        }
+        int initial = 0;
+        int state = 1;
+        for (Type t : VALUES) {
+            initial |= types.contains(t) ? state : 0;
+            state *= 2;
+        }
+        return initial;
+    }
+
+    public static List<Type> intToTypes(int types) {
+        if (types == 0) {
+            return null;
+        }
+        List<Type> typesList = new ArrayList<Type>();
+        int state = 1;
+        for(int i = 0; i < VALUES.size(); i++) {
+            if ((types & state) > 0) {
+                typesList.add(VALUES.get(i));
+            }
+            state *= 2;
+        }
+        return typesList;
+    }
 }

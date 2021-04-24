@@ -4,14 +4,19 @@ import static org.junit.Assert.*;
 import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.dabomstew.pkrandom.MiscTweak;
+import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.settings.Settings;
 
+import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.JButtonFixture;
 import org.assertj.swing.fixture.JCheckBoxFixture;
+import org.assertj.swing.fixture.JListFixture;
 import org.assertj.swing.fixture.JRadioButtonFixture;
 import org.assertj.swing.fixture.JSliderFixture;
 import org.junit.Test;
@@ -330,8 +335,8 @@ public class SettingsTest extends AbstractUIBase {
         assertTrue("Trainers should be set to TYPE THEMED but was not", settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED);
         String setttingsString = settings.toString();
         settings = Settings.fromString(setttingsString);        
-        assertFalse("Gym Type Theme was not false after reloading settings 5", settings.isGymTypeTheme());
-        assertTrue("Trainers was not TYPE THEME after reloading settings 5", settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED);
+        assertFalse("Gym Type Theme was not false after reloading settings TYPE THEME", settings.isGymTypeTheme());
+        assertTrue("Trainers was not TYPE THEME after reloading settings TYPE THEME", settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED);
     }
 
     /**
@@ -487,10 +492,170 @@ public class SettingsTest extends AbstractUIBase {
         settingsReloadCount++;
     }
 
+    @Test(timeout = 10000)
+    public void TestStarterTypeFilter() throws IOException {
+        int settingsReloadCount = 0;
+        JRadioButtonFixture unchangedStarterRBFixture = getRadioButtonByName("spUnchangedRB");
+        JRadioButtonFixture randomStarterRBFixture = getRadioButtonByName("spRandomRB");
+        JCheckBoxFixture seTriangleCBFixture = getCheckBoxByName("spSETriangleCB");
+        JButtonFixture filterTypesButtonFixture = getButtonByName("spTypeFilterButton");
+
+        // Sanity check - Should not be enabled
+        Settings settings = this.mainWindow.getCurrentSettings();
+        assertTrue("Starters should be set to UNCHANGED but was not", settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
+        assertFalse("Starter Type Filter should not be enabled yet", filterTypesButtonFixture.isEnabled());
+        assertTrue("Starter Types should initialze as null", settings.getStarterTypes() == null);
+        // Sanity check - Should not fail with 0 options
+        String settingsString = settings.toString();
+        settings = Settings.fromString(settingsString);
+        assertTrue("Starter Types was not null after reloading settings " + settingsReloadCount, settings.getStarterTypes() == null);
+        assertTrue("Starters was not UNCHANGED after reloading settings " + settingsReloadCount,
+            settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
+        settingsReloadCount++;
+
+        //Turn randomStarterRB on
+        clickRBAndWait(randomStarterRBFixture);
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue("Starters should be set to RANDOM but was not", settings.getStartersMod() == Settings.StartersMod.RANDOM);
+        assertTrue("Starter Type Filter should be enabled now", filterTypesButtonFixture.isEnabled());
+        assertTrue("Starter Types should still be null", settings.getStarterTypes() == null);
+        settingsString = settings.toString();
+        settings = Settings.fromString(settingsString);
+        assertTrue("Starter Types was not null after reloading settings " + settingsReloadCount, settings.getStarterTypes() == null);
+        assertTrue("Starters was not RANDOM after reloading settings " + settingsReloadCount,
+            settings.getStartersMod() == Settings.StartersMod.RANDOM);
+        settingsReloadCount++;
+
+        // Select the first and last item from Type Filter
+        filterTypesButtonFixture.requireVisible().requireEnabled().click();
+        DialogFixture typeFilterDialog = getDialogByClass(TypeFilterDialog.class);
+        JListFixture typeCheckboxList = getListByName("typeCheckboxList");
+        JButtonFixture filterOkButton = getButtonByName("okButton");
+        typeCheckboxList.selectItem(0);
+        typeCheckboxList.selectItem(typeCheckboxList.contents().length-1);
+        filterOkButton.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue("Type filter dialog was not closed", typeFilterDialog.requireNotVisible() != null);
+        assertTrue("Starter types did not include NORMAL and DARK",
+            settings.getStarterTypes().containsAll(Arrays.asList(Type.NORMAL, Type.DARK)));
+        settingsString = settings.toString();
+        settings = Settings.fromString(settingsString);
+        assertTrue("Starter Types did not include NORMAL and DARK after reloading settings " + settingsReloadCount,
+            settings.getStarterTypes().containsAll(Arrays.asList(Type.NORMAL, Type.DARK)));
+        assertTrue("Starters was not RANDOM after reloading settings " + settingsReloadCount,
+            settings.getStartersMod() == Settings.StartersMod.RANDOM);
+        settingsReloadCount++;
+        
+        // Reopen and assert choices do not change when clicking cancel
+        filterTypesButtonFixture.requireVisible().requireEnabled().click();
+        typeFilterDialog = getDialogByClass(TypeFilterDialog.class);
+        typeCheckboxList = getListByName("typeCheckboxList");
+        JButtonFixture filterCancelButton = getButtonByName("cancelButton");
+        // Only select the first item in the list to make the state different than prior
+        typeCheckboxList.selectItem(0);
+        filterCancelButton.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue("Type filter dialog was not closed", typeFilterDialog.requireNotVisible() != null);
+        // Cancel should restore to prior state and not new state
+        assertTrue("Starter types did not include NORMAL and DARK",
+        settings.getStarterTypes().containsAll(Arrays.asList(Type.NORMAL, Type.DARK)));
+        settingsString = settings.toString();
+        settings = Settings.fromString(settingsString);
+        assertTrue("Starter Types did not include NORMAL and DARK after reloading settings " + settingsReloadCount,
+            settings.getStarterTypes().containsAll(Arrays.asList(Type.NORMAL, Type.DARK)));
+        assertTrue("Starters was not RANDOM after reloading settings " + settingsReloadCount,
+            settings.getStartersMod() == Settings.StartersMod.RANDOM);
+        settingsReloadCount++;
+
+        // Turn SETriangle on - should diable Type Filter and null starterTypes
+        clickCBAndWait(seTriangleCBFixture);
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue("Starters should be set to RANDOM but was not", settings.getStartersMod() == Settings.StartersMod.RANDOM);
+        assertFalse("Starter Type Filter should be disabled now", filterTypesButtonFixture.isEnabled());
+        assertTrue("Starter Types should be null again", settings.getStarterTypes() == null);
+        settingsString = settings.toString();
+        settings = Settings.fromString(settingsString);
+        assertTrue("Starter Types was not null after reloading settings " + settingsReloadCount, settings.getStarterTypes() == null);
+        assertTrue("Starters was not RANDOM after reloading settings " + settingsReloadCount,
+            settings.getStartersMod() == Settings.StartersMod.RANDOM);
+        settingsReloadCount++;
+        // Deselect SETriangle
+        clickCBAndWait(seTriangleCBFixture);
+
+        // Assert select all chooses everything
+        filterTypesButtonFixture.requireVisible().requireEnabled().click();
+        typeFilterDialog = getDialogByClass(TypeFilterDialog.class);
+        typeCheckboxList = getListByName("typeCheckboxList");
+        filterOkButton = getButtonByName("okButton");
+        JButtonFixture filterSelectAllButton = getButtonByName("selectAllButton");
+        int typeSize = typeCheckboxList.contents().length;
+        filterSelectAllButton.requireVisible().requireEnabled().click();
+        filterOkButton.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue("Type filter dialog was not closed", typeFilterDialog.requireNotVisible() != null);
+        List<Type> starterTypes1 = settings.getStarterTypes();
+        Type.getTypes(typeSize).forEach(type -> assertTrue("Missing " + type + " from starter types",
+            starterTypes1.contains(type)));
+        settingsString = settings.toString();
+        settings = Settings.fromString(settingsString);
+        List<Type> starterTypes2 = settings.getStarterTypes();
+        Type.getTypes(typeSize).forEach(type -> assertTrue("Missing " + type + " from starter types after reload",
+            starterTypes2.contains(type)));
+        assertTrue("Starters was not RANDOM after reloading settings " + settingsReloadCount,
+            settings.getStartersMod() == Settings.StartersMod.RANDOM);
+        settingsReloadCount++;
+
+        // Assert deselect all sets starterTypes to null
+        filterTypesButtonFixture.requireVisible().requireEnabled().click();
+        typeFilterDialog = getDialogByClass(TypeFilterDialog.class);
+        typeCheckboxList = getListByName("typeCheckboxList");
+        filterOkButton = getButtonByName("okButton");
+        JButtonFixture filterDeselectAllButton = getButtonByName("deselectAllButton");
+        typeSize = typeCheckboxList.contents().length;
+        filterDeselectAllButton.requireVisible().requireEnabled().click();
+        filterOkButton.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue("Type filter dialog was not closed", typeFilterDialog.requireNotVisible() != null);
+        assertTrue("Starter types shoudl be null again", settings.getStarterTypes() == null);
+        settingsString = settings.toString();
+        settings = Settings.fromString(settingsString);
+        assertTrue("Starter Types was not null after reloading settings " + settingsReloadCount, settings.getStarterTypes() == null);
+        assertTrue("Starters was not RANDOM after reloading settings " + settingsReloadCount,
+            settings.getStartersMod() == Settings.StartersMod.RANDOM);
+        settingsReloadCount++;
+
+        // Turn unchangedStarterRB on
+        // Populate starter types first
+        filterTypesButtonFixture.requireVisible().requireEnabled().click();
+        typeFilterDialog = getDialogByClass(TypeFilterDialog.class);
+        typeCheckboxList = getListByName("typeCheckboxList");
+        filterOkButton = getButtonByName("okButton");
+        typeCheckboxList.selectItem(0);
+        typeCheckboxList.selectItem(typeCheckboxList.contents().length-1);
+        filterOkButton.requireVisible().requireEnabled().click();
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue("Type filter dialog was not closed", typeFilterDialog.requireNotVisible() != null);
+        assertTrue("Starter types did not include NORMAL and DARK",
+            settings.getStarterTypes().containsAll(Arrays.asList(Type.NORMAL, Type.DARK)));
+        // Now turn unchangedStarterRB on
+        clickRBAndWait(unchangedStarterRBFixture);
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue("Starters should be set to UNCHANGED but was not",
+            settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
+        assertFalse("Starter Type Filter should be disabled now", filterTypesButtonFixture.isEnabled());
+        assertTrue("Starter Types should be null again", settings.getStarterTypes() == null);
+        settingsString = settings.toString();
+        settings = Settings.fromString(settingsString);
+        assertTrue("Starter Types was not null after reloading settings " + settingsReloadCount, settings.getStarterTypes() == null);
+        assertTrue("Starters was not UNCHANGED after reloading settings " + settingsReloadCount,
+            settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
+        settingsReloadCount++;
+    }
+
     /**
      * Captures a common sequence of a checkbox being enabled or disabled based on radio button selection
      * 
-     * @param defaultRB - The radio button fixture that disables the checkbox (usually the one that's on by default)
+     * @param defaultRB - The radio button fixture that disables the checkbox (must be the one that's on by default)
      * @param triggerRB - The radio button fixture that enables the checkbox
      * @param checkboxToTest - The checkbox fixture that is being tested
      * @param settingsCheckboxFunction - The method in Settings.java that refers to the state of the checkbox
@@ -575,6 +740,15 @@ public class SettingsTest extends AbstractUIBase {
      */
     private void clickRBAndWait(JRadioButtonFixture rbFixture) {
         rbFixture.requireVisible().requireEnabled().click();
+        await().until(() -> this.mainWindow.isUIUpdated());
+    }
+
+    /**
+     * Clicks a JCheckBox and waits for the UI to update before completing
+     * @param cbFixture - The fixture representing the radio button to click
+     */
+    private void clickCBAndWait(JCheckBoxFixture cbFixture) {
+        cbFixture.requireVisible().requireEnabled().click();
         await().until(() -> this.mainWindow.isUIUpdated());
     }
 }

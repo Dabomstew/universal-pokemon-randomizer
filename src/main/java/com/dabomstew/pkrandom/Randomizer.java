@@ -563,7 +563,12 @@ public class Randomizer {
             } else if (settings.getStartersMod() == Settings.StartersMod.RANDOM) {
                 int starterCount = romHandler.isYellow() ? 2 : 3;
                 List<Pokemon> starters = new ArrayList<Pokemon>();
-                ArrayList<Type> typeArr = getSETriangleTypes();
+                List<Type> typeArr;
+                if (settings.isStartersSETriangle()) {
+                    typeArr = getSETriangleTypes();
+                } else {
+                    typeArr = settings.getStarterTypes();
+                }
                 selectRandomStarter(starterCount, starters, () -> romHandler.randomStarterPokemon(
                     settings.isStartersNoSplit(), settings.isStartersUniqueTypes(), 
                     settings.isStartersBaseEvoOnly(),

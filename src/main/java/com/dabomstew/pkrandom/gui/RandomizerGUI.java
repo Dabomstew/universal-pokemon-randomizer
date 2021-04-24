@@ -112,6 +112,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
     private OperationDialog opDialog;
     private List<JCheckBox> tweakCheckboxes;
+    private List<com.dabomstew.pkrandom.pokemon.Type> starterTypes;
     private boolean presetMode;
     private GenRestrictions currentRestrictions;
     private LayoutManager noTweaksLayout;
@@ -683,6 +684,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private void initialiseState() {
         this.romHandler = null;
         this.currentRestrictions = null;
+        this.starterTypes = null;
         this.websiteLinkLabel.setText("<html><a href=\"" + SysConstants.WEBSITE_URL + "\">" + SysConstants.WEBSITE_URL
                 + "</a>");
         initialFormState();
@@ -794,6 +796,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.spBaseEvoCB.setSelected(false);
         this.spSETriangleCB.setEnabled(false);
         this.spSETriangleCB.setSelected(false);
+        this.spTypeFilterButton.setEnabled(false);
 
         this.mdRandomAccuracyCB.setEnabled(false);
         this.mdRandomAccuracyCB.setSelected(false);
@@ -1101,6 +1104,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private void romLoaded() {
         try {
             this.currentRestrictions = null;
+            this.starterTypes = null;
             this.riRomNameLabel.setText(this.romHandler.getROMName());
             this.riRomCodeLabel.setText(this.romHandler.getROMCode());
             this.riRomSupportLabel.setText(bundle.getString("RandomizerGUI.romSupportPrefix") + " "
@@ -1206,7 +1210,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.tpGlobalSwapRB.setEnabled(true);
             this.tpLevelModifierCB.setEnabled(true);
             this.tpForceFullyEvolvedCB.setEnabled(true);
-            this.spTypeFilterButton.setEnabled(true);
             this.tnRandomizeCB.setEnabled(romHandler.canChangeTrainerText());
             this.tcnRandomizeCB.setEnabled(romHandler.canChangeTrainerText());
             this.tnRandomizeCB.setVisible(romHandler.canChangeTrainerText());
@@ -1401,6 +1404,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.spExactEvoCB.setEnabled(true);
             this.spRandomSlider.setEnabled(true);
             this.spSETriangleCB.setEnabled(true);
+            this.spNoSplitCB.setEnabled(true);           
+            if (this.spSETriangleCB.isSelected()) {
+                this.spTypeFilterButton.setEnabled(false);
+                this.starterTypes = null;
+            } else {
+                this.spTypeFilterButton.setEnabled(true);
+            }
         } else {
             this.spUniqueTypesCB.setSelected(false);
             this.spUniqueTypesCB.setEnabled(false);
@@ -1414,6 +1424,18 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.spRandomSlider.setValue(this.spRandomSlider.getMinimum());
             this.spSETriangleCB.setEnabled(false);
             this.spSETriangleCB.setSelected(false);
+            this.spTypeFilterButton.setEnabled(false);
+            this.spNoSplitCB.setEnabled(false);
+            this.spNoSplitCB.setSelected(false);
+
+            this.starterTypes = null;
+        }
+
+        if (this.spBSTLimitCB.isSelected()) {
+            this.spBSTLimitSlider.setEnabled(true);
+        } else {
+            this.spBSTLimitSlider.setEnabled(false);
+            this.spBSTLimitSlider.setValue(this.spBSTLimitSlider.getMinimum());
         }
         
         if (this.pbsChangesUnchangedRB.isSelected()) {
@@ -1435,21 +1457,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
         } else {
             this.spHeldItemsBanBadCB.setEnabled(false);
             this.spHeldItemsBanBadCB.setSelected(false);
-        }
-        
-
-        if (this.spRandomRB.isSelected()) {
-            this.spNoSplitCB.setEnabled(true);
-        } else {
-            this.spNoSplitCB.setEnabled(false);
-            this.spNoSplitCB.setSelected(false);
-        }
-
-        if (this.spBSTLimitCB.isSelected()) {
-            this.spBSTLimitSlider.setEnabled(true);
-        } else {
-            this.spBSTLimitSlider.setEnabled(false);
-            this.spBSTLimitSlider.setValue(this.spBSTLimitSlider.getMinimum());
         }
 
         if (this.paRandomizeRB.isSelected()) {
@@ -2027,6 +2034,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.currentRestrictions.limitToGen(this.romHandler.generationOfPokemon());
         }
 
+        this.starterTypes = settings.getStarterTypes();
+
         int mtsSelected = settings.getCurrentMiscTweaks();
         int mtCount = MiscTweak.allTweaks.size();
 
@@ -2171,6 +2180,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setBanBadRandomFieldItems(fiBanBadCB.isSelected());
 
         settings.setCurrentRestrictions(currentRestrictions);
+        settings.setStarterTypes(starterTypes);
 
         int currentMiscTweaks = 0;
         int mtCount = MiscTweak.allTweaks.size();
@@ -2530,13 +2540,16 @@ public class RandomizerGUI extends javax.swing.JFrame {
     }// GEN-LAST:event_pokeLimitBtnActionPerformed
 
     private void spTypeFilterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_spTypeFilterButtonActionPerformed
-        // TODO: Pass allowed starter types into filter dialog
-        // otherwise it clears the selection each time, which
-        // could be annoying
-        TypeFilterDialog tfd = new TypeFilterDialog(this, this.romHandler.getTypesInGame());
+        TypeFilterDialog tfd = new TypeFilterDialog(this, this.starterTypes,
+            this.romHandler.getTypesInGame());
         if (tfd.pressedOK()) {
-            //this.allowedStarterTypes = tfd.getChoice();
-            tfd.getChoice().forEach(System.out::println);
+            this.starterTypes = tfd.getChoice();
+            // If no types are selected and OK is pressed
+            // reset starterTypes to null, thus allowing
+            // all types
+            if (this.starterTypes.size() == 0) {
+                this.starterTypes = null;
+            }
         }
     }//GEN-LAST:event_spTypeFilterButtonActionPerformed
 
@@ -2650,6 +2663,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private void spRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spRandomRBActionPerformed
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_spRandomRBActionPerformed
+
+    private void spSETriangleCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spSETriangleCBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_spSETriangleCBActionPerformed
 
     private void wpRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpRandomRBActionPerformed
         this.enableOrDisableSubControls();
@@ -3823,6 +3840,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
         spSETriangleCB.setToolTipText(bundle.getString("RandomizerGUI.spSETriangleCB.toolTipText")); // NOI18N
         spSETriangleCB.setEnabled(false);
         spSETriangleCB.setName(bundle.getString("RandomizerGUI.spSETriangleCB.name")); // NOI18N
+        spSETriangleCB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                spSETriangleCBActionPerformed(evt);
+            }
+        });
 
         spTypeFilterButton.setText(bundle.getString("RandomizerGUI.spTypeFilterButton.text")); // NOI18N
         spTypeFilterButton.setToolTipText(bundle.getString("RandomizerGUI.spTypeFilterButton.toolTipText")); // NOI18N
