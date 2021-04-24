@@ -2181,11 +2181,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 trainer[3] = (byte) numPokes;
 
                 if (doubleBattleMode) {
-                    if (tr.isBoss() || tr.isImportant()) {
-                        if (!tr.skipImportant()) {
-                            if (trainer[2] == 0) {
-                                trainer[16] |= 2;
-                            }
+                    if (!tr.skipImportant()) {
+                        if (trainer[16] == 0) {
+                            trainer[16] |= 3;
                         }
                     }
                 }
@@ -2251,6 +2249,54 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     offset += doubleBattleFixPrefix.length() / 2; // because it was a prefix
                     arm9[offset] = (byte) 0xE0;
                 }
+
+                String doubleBattleFlagReturnPrefix = romEntry.getString("DoubleBattleFlagReturnPrefix");
+                String doubleBattleWalkingPrefix1 = romEntry.getString("DoubleBattleWalkingPrefix1");
+                String doubleBattleWalkingPrefix2 = romEntry.getString("DoubleBattleWalkingPrefix2");
+                String doubleBattleTextBoxPrefix = romEntry.getString("DoubleBattleTextBoxPrefix");
+
+                // After getting the double battle flag, return immediately instead of converting it to a 1 for
+                // non-zero values/0 for zero
+                offset = find(arm9, doubleBattleFlagReturnPrefix);
+                if (offset > 0) {
+                    offset += doubleBattleFlagReturnPrefix.length() / 2; // because it was a prefix
+                    writeWord(arm9, offset, 0xBD08);
+                }
+
+                // Instead of doing "double trainer walk" for nonzero values, do it only for value == 2
+                offset = find(arm9, doubleBattleWalkingPrefix1);
+                if (offset > 0) {
+                    offset += doubleBattleWalkingPrefix1.length() / 2; // because it was a prefix
+                    arm9[offset] = (byte) 0x2;      // cmp r0, #0x2
+                    arm9[offset+3] = (byte) 0xD0;   // beq DOUBLE_TRAINER_WALK
+                }
+
+                // Instead of checking if the value was exactly 1 after checking that it was nonzero, check that it's
+                // 2 again lol
+                offset = find(arm9, doubleBattleWalkingPrefix2);
+                if (offset > 0) {
+                    offset += doubleBattleWalkingPrefix2.length() / 2; // because it was a prefix
+                    arm9[offset] = (byte) 0x2;
+                }
+
+                // Once again, compare a value to 2 instead of just checking that it's nonzero
+                offset = find(arm9, doubleBattleTextBoxPrefix);
+                if (offset > 0) {
+                    offset += doubleBattleTextBoxPrefix.length() / 2; // because it was a prefix
+                    writeWord(arm9, offset, 0x46C0);
+                    writeWord(arm9, offset+2, 0x2802);
+                    arm9[offset+5] = (byte) 0xD0;
+                }
+
+                // This NARC has some data that controls how text boxes are handled at the end of a trainer battle.
+                // Changing this byte from 4 -> 0 makes it check if the "double battle" flag is exactly 2 instead of
+                // checking "flag & 2", which makes the single trainer double battles use the single battle
+                // handling (since we set their flag to 3 instead of 2)
+                NARCArchive battleSkillSubSeq = readNARC(romEntry.getString("BattleSkillSubSeq"));
+                byte[] trainerEndFile = battleSkillSubSeq.files.get(romEntry.getInt("TrainerEndFileNumber"));
+                trainerEndFile[romEntry.getInt("TrainerEndTextBoxOffset")] = 0;
+                writeNARC(romEntry.getString("BattleSkillSubSeq"), battleSkillSubSeq);
+
             }
         } catch (IOException ex) {
             throw new RandomizerIOException(ex);
