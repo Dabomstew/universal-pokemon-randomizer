@@ -666,6 +666,121 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public void legendaryEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels, boolean noLegendaries) {
+        checkPokemonRestrictions();
+        List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
+
+        // New: randomize the order encounter sets are randomized in.
+        // Leads to less predictable results for various modifiers.
+        // Need to keep the original ordering around for saving though.
+        List<EncounterSet> scrambledEncounters = new ArrayList<EncounterSet>(currentEncounters);
+        Collections.shuffle(scrambledEncounters, this.random);
+
+        List<Pokemon> banned = this.bannedForWildEncounters();
+        // Assume EITHER catch em all OR type themed OR match strength for now
+        if (catchEmAll) {
+
+            List<Pokemon> allPokes = new ArrayList<Pokemon>(onlyLegendaryList);
+            allPokes.removeAll(banned);
+            for (EncounterSet area : scrambledEncounters) {
+                List<Pokemon> pickablePokemon = allPokes;
+                if (area.bannedPokemon.size() > 0) {
+                    pickablePokemon = new ArrayList<Pokemon>(allPokes);
+                    pickablePokemon.removeAll(area.bannedPokemon);
+                }
+                for (Encounter enc : area.encounters) {
+                    // Pick a random pokemon
+                    if (pickablePokemon.size() == 0) {
+                        // Only banned pokes are left, ignore them and pick
+                        // something else for now.
+                        List<Pokemon> tempPickable = new ArrayList<Pokemon>(onlyLegendaryList);
+                        tempPickable.removeAll(banned);
+                        tempPickable.removeAll(area.bannedPokemon);
+                        if (tempPickable.size() == 0) {
+                            throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon!");
+                        }
+                        int picked = this.random.nextInt(tempPickable.size());
+                        enc.pokemon = tempPickable.get(picked);
+                    } else {
+                        // Picked this Pokemon, remove it
+                        int picked = this.random.nextInt(pickablePokemon.size());
+                        enc.pokemon = pickablePokemon.get(picked);
+                        pickablePokemon.remove(picked);
+                        if (allPokes != pickablePokemon) {
+                            allPokes.remove(enc.pokemon);
+                        }
+                        if (allPokes.size() == 0) {
+                            // Start again
+                            allPokes.addAll(onlyLegendaryList);
+                            allPokes.removeAll(banned);
+                            if (pickablePokemon != allPokes) {
+                                pickablePokemon.addAll(allPokes);
+                                pickablePokemon.removeAll(area.bannedPokemon);
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (typeThemed) {
+            Map<Type, List<Pokemon>> cachedPokeLists = new TreeMap<Type, List<Pokemon>>();
+            for (EncounterSet area : scrambledEncounters) {
+                List<Pokemon> possiblePokemon = null;
+                int iterLoops = 0;
+                while (possiblePokemon == null && iterLoops < 10000) {
+                    Type areaTheme = randomType();
+                    if (!cachedPokeLists.containsKey(areaTheme)) {
+                        List<Pokemon> pType = pokemonOfType(areaTheme, noLegendaries == false);
+                        pType.removeAll(banned);
+                        cachedPokeLists.put(areaTheme, pType);
+                    }
+                    possiblePokemon = cachedPokeLists.get(areaTheme);
+                    if (area.bannedPokemon.size() > 0) {
+                        possiblePokemon = new ArrayList<Pokemon>(possiblePokemon);
+                        possiblePokemon.removeAll(area.bannedPokemon);
+                    }
+                    if (possiblePokemon.size() == 0) {
+                        // Can't use this type for this area
+                        possiblePokemon = null;
+                    }
+                    iterLoops++;
+                }
+                if (possiblePokemon == null) {
+                    throw new RandomizationException("Could not randomize an area in a reasonable amount of attempts.");
+                }
+                for (Encounter enc : area.encounters) {
+                    // Pick a random themed pokemon
+                    enc.pokemon = possiblePokemon.get(this.random.nextInt(possiblePokemon.size()));
+                }
+            }
+        } else if (usePowerLevels) {
+            List<Pokemon> allowedPokes = new ArrayList<Pokemon>(onlyLegendaryList);
+            allowedPokes.removeAll(banned);
+            for (EncounterSet area : scrambledEncounters) {
+                List<Pokemon> localAllowed = allowedPokes;
+                if (area.bannedPokemon.size() > 0) {
+                    localAllowed = new ArrayList<Pokemon>(allowedPokes);
+                    localAllowed.removeAll(area.bannedPokemon);
+                }
+                for (Encounter enc : area.encounters) {
+                    enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null);
+                }
+            }
+        } else {
+            // Entirely random
+            for (EncounterSet area : scrambledEncounters) {
+                for (Encounter enc : area.encounters) {
+                    enc.pokemon = this.randomLegendaryPokemon();
+                    while (banned.contains(enc.pokemon) || area.bannedPokemon.contains(enc.pokemon)) {
+                        enc.pokemon = this.randomLegendaryPokemon();
+                    }
+                }
+            }
+        }
+
+        setEncounters(useTimeOfDay, currentEncounters);
+    }
+
+    @Override
     public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
             boolean usePowerLevels, boolean noLegendaries) {
         checkPokemonRestrictions();
@@ -1059,6 +1174,43 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Save it all up
         this.setTrainers(currentTrainers);
     }
+
+
+    @Override
+    public void legendaryTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
+            boolean noEarlyWonderGuard, int levelModifier) {
+        checkPokemonRestrictions();
+        List<Trainer> currentTrainers = this.getTrainers();
+
+        // New: randomize the order trainers are randomized in.
+        // Leads to less predictable results for various modifiers.
+        // Need to keep the original ordering around for saving though.
+        List<Trainer> scrambledTrainers = new ArrayList<Trainer>(currentTrainers);
+        Collections.shuffle(scrambledTrainers, this.random);
+
+        cachedReplacementLists = new TreeMap<Type, List<Pokemon>>();
+        cachedAllList = new ArrayList<Pokemon>(onlyLegendaryList);
+
+        // Fully random is easy enough - randomize then worry about rival
+        // carrying starter at the end
+        for (Trainer t : scrambledTrainers) {
+            if (t.tag != null && t.tag.equals("IRIVAL")) {
+                continue; // skip
+            }
+            for (TrainerPokemon tp : t.pokemon) {
+                boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
+                tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, null, false, wgAllowed);
+                tp.resetMoves = true;
+                if (levelModifier != 0) {
+                    tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
+                }
+            }
+        }
+
+        // Save it all up
+        this.setTrainers(currentTrainers);
+    }
+
 
     @Override
     public void rivalCarriesStarter() {
@@ -1959,6 +2111,56 @@ public abstract class AbstractRomHandler implements RomHandler {
         this.setStaticPokemon(replacements);
     }
 
+
+    @Override
+    public void randomizeStaticPokemonAllLegendaries(boolean allLegends) {
+        // Load
+        checkPokemonRestrictions();
+        List<Pokemon> currentStaticPokemon = this.getStaticPokemon();
+        List<Pokemon> replacements = new ArrayList<Pokemon>();
+        List<Pokemon> banned = this.bannedForStaticPokemon();
+
+        if (allLegends) {
+            List<Pokemon> legendariesLeft = new ArrayList<Pokemon>(onlyLegendaryList);
+            List<Pokemon> nonlegsLeft = new ArrayList<Pokemon>(onlyLegendaryList);
+            legendariesLeft.removeAll(banned);
+            nonlegsLeft.removeAll(banned);
+            for (int i = 0; i < currentStaticPokemon.size(); i++) {
+                Pokemon old = currentStaticPokemon.get(i);
+                Pokemon newPK;
+                if (old.isLegendary()) {
+                    newPK = legendariesLeft.remove(this.random.nextInt(legendariesLeft.size()));
+                    if (legendariesLeft.size() == 0) {
+                        legendariesLeft.addAll(onlyLegendaryList);
+                        legendariesLeft.removeAll(banned);
+                    }
+                } else {
+                    newPK = nonlegsLeft.remove(this.random.nextInt(nonlegsLeft.size()));
+                    if (nonlegsLeft.size() == 0) {
+                        nonlegsLeft.addAll(onlyLegendaryList);
+                        nonlegsLeft.removeAll(banned);
+                    }
+                }
+                replacements.add(newPK);
+            }
+        } else {
+            List<Pokemon> pokemonLeft = new ArrayList<Pokemon>(mainPokemonList);
+            pokemonLeft.removeAll(banned);
+            for (int i = 0; i < currentStaticPokemon.size(); i++) {
+                Pokemon newPK = pokemonLeft.remove(this.random.nextInt(pokemonLeft.size()));
+                if (pokemonLeft.size() == 0) {
+                    pokemonLeft.addAll(mainPokemonList);
+                    pokemonLeft.removeAll(banned);
+                }
+                replacements.add(newPK);
+            }
+        }
+
+        // Save
+        this.setStaticPokemon(replacements);
+    }
+
+
     @Override
     public void randomizeTMMoves(boolean noBroken, boolean preserveField, double goodDamagingProbability) {
         // Pick some random TM moves.
@@ -2735,6 +2937,111 @@ public abstract class AbstractRomHandler implements RomHandler {
         // things that the game doesn't support should just be ignored
         this.setIngameTrades(trades);
     }
+
+
+    @Override
+    public void randomizeIngameTradeLegends(boolean randomizeRequest, boolean randomNickname, boolean randomOT,
+            boolean randomStats, boolean randomItem, CustomNamesSet customNames) {
+        checkPokemonRestrictions();
+        // Process trainer names
+        List<String> trainerNames = new ArrayList<String>();
+        // Check for the file
+        if (randomOT) {
+            int maxOT = this.maxTradeOTNameLength();
+            for (String trainername : customNames.getTrainerNames()) {
+                int len = this.internalStringLength(trainername);
+                if (len <= maxOT && !trainerNames.contains(trainername)) {
+                    trainerNames.add(trainername);
+                }
+            }
+        }
+
+        // Process nicknames
+        List<String> nicknames = new ArrayList<String>();
+        // Check for the file
+        if (randomNickname) {
+            int maxNN = this.maxTradeNicknameLength();
+            for (String nickname : customNames.getPokemonNicknames()) {
+                int len = this.internalStringLength(nickname);
+                if (len <= maxNN && !nicknames.contains(nickname)) {
+                    nicknames.add(nickname);
+                }
+            }
+        }
+
+        // get old trades
+        List<IngameTrade> trades = this.getIngameTrades();
+        List<Pokemon> usedRequests = new ArrayList<Pokemon>();
+        List<Pokemon> usedGivens = new ArrayList<Pokemon>();
+        List<String> usedOTs = new ArrayList<String>();
+        List<String> usedNicknames = new ArrayList<String>();
+        ItemList possibleItems = this.getAllowedItems();
+
+        int nickCount = nicknames.size();
+        int trnameCount = trainerNames.size();
+
+        for (IngameTrade trade : trades) {
+            // pick new given pokemon
+            Pokemon oldgiven = trade.givenPokemon;
+            Pokemon given = onlyLegendaryList.get(this.random.nextInt(onlyLegendaryList.size()));
+            while (usedGivens.contains(given)) {
+                given = onlyLegendaryList.get(this.random.nextInt(onlyLegendaryList.size()));
+            }
+            usedGivens.add(given);
+            trade.givenPokemon = given;
+
+            // requested pokemon?
+            if (oldgiven == trade.requestedPokemon) {
+                // preserve trades for the same pokemon
+                trade.requestedPokemon = given;
+            } else if (randomizeRequest) {
+                Pokemon request = onlyLegendaryList.get(this.random.nextInt(onlyLegendaryList.size()));
+                while (usedRequests.contains(request) || request == given) {
+                    request = onlyLegendaryList.get(this.random.nextInt(onlyLegendaryList.size()));
+                }
+                usedRequests.add(request);
+                trade.requestedPokemon = request;
+            }
+
+            // nickname?
+            if (randomNickname && nickCount > usedNicknames.size()) {
+                String nickname = nicknames.get(this.random.nextInt(nickCount));
+                while (usedNicknames.contains(nickname)) {
+                    nickname = nicknames.get(this.random.nextInt(nickCount));
+                }
+                usedNicknames.add(nickname);
+                trade.nickname = nickname;
+            } else if (trade.nickname.equalsIgnoreCase(oldgiven.name)) {
+                // change the name for sanity
+                trade.nickname = trade.givenPokemon.name;
+            }
+
+            if (randomOT && trnameCount > usedOTs.size()) {
+                String ot = trainerNames.get(this.random.nextInt(trnameCount));
+                while (usedOTs.contains(ot)) {
+                    ot = trainerNames.get(this.random.nextInt(trnameCount));
+                }
+                usedOTs.add(ot);
+                trade.otName = ot;
+                trade.otId = this.random.nextInt(65536);
+            }
+
+            if (randomStats) {
+                int maxIV = this.hasDVs() ? 16 : 32;
+                for (int i = 0; i < trade.ivs.length; i++) {
+                    trade.ivs[i] = this.random.nextInt(maxIV);
+                }
+            }
+
+            if (randomItem) {
+                trade.item = possibleItems.randomItem(this.random);
+            }
+        }
+
+        // things that the game doesn't support should just be ignored
+        this.setIngameTrades(trades);
+    }
+
 
     @Override
     public void condenseLevelEvolutions(int maxLevel, int maxIntermediateLevel) {

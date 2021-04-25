@@ -35,6 +35,7 @@ import java.util.TreeMap;
 
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
+import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.IngameTrade;
 import com.dabomstew.pkrandom.pokemon.Move;
 import com.dabomstew.pkrandom.pokemon.MoveLearnt;
@@ -297,6 +298,11 @@ public class Randomizer {
                     settings.isTrainersMatchTypingDistribution(), settings.isTrainersBlockLegendaries(),
                     settings.isTrainersBlockEarlyWonderGuard(),
                     settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
+        } else if (settings.getTrainersMod() == Settings.TrainersMod.ALL_LEGENDARIES) {
+            romHandler.legendaryTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
+            settings.isTrainersMatchTypingDistribution(),
+            settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
+            settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
         }
 
         if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)
@@ -382,6 +388,13 @@ public class Randomizer {
             romHandler.game1to1Encounters(settings.isUseTimeBasedEncounters(),
                     settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
                     settings.isBlockWildLegendaries());
+            break;
+        case LEGENDARIES:
+            romHandler.legendaryEncounters(settings.isUseTimeBasedEncounters(), 
+            settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL,
+            settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS,
+            settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
+            !settings.isBlockWildLegendaries());
             break;
         default:
             break;
@@ -489,6 +502,10 @@ public class Randomizer {
             romHandler.randomizeIngameTrades(true, settings.isRandomizeInGameTradesNicknames(),
                     settings.isRandomizeInGameTradesOTs(), settings.isRandomizeInGameTradesIVs(),
                     settings.isRandomizeInGameTradesItems(), settings.getCustomNames());
+        } else if (settings.getInGameTradesMod() == Settings.InGameTradesMod.RANDOM_ALL_LEGENDS) {
+            romHandler.randomizeIngameTradeLegends(true, settings.isRandomizeInGameTradesNicknames(),
+            settings.isRandomizeInGameTradesOTs(), settings.isRandomizeInGameTradesIVs(),
+            settings.isRandomizeInGameTradesItems(), settings.getCustomNames());
         }
 
         if (!(settings.getInGameTradesMod() == Settings.InGameTradesMod.UNCHANGED)) {
@@ -666,6 +683,24 @@ public class Randomizer {
                 }
                 romHandler.setStarters(starters);
                 log.println();
+            } else if (settings.getStartersMod() == Settings.StartersMod.RANDOM_LEGENDARIES) {
+                // Randomise
+                log.println("--Random Legendary Starters--");
+                int starterCount = 3;
+                if (romHandler.isYellow()) {
+                    starterCount = 2;
+                }
+                List<Pokemon> starters = new ArrayList<Pokemon>();
+                for (int i = 0; i < starterCount; i++) {
+                    Pokemon pkmn = romHandler.randomLegendaryPokemon();
+                    while (starters.contains(pkmn)) {
+                        pkmn = romHandler.randomLegendaryPokemon();
+                    }
+                    log.println("Set starter " + (i + 1) + " to " + pkmn.name);
+                    starters.add(pkmn);
+                }
+                romHandler.setStarters(starters);
+                log.println();
             }
             if (settings.isRandomizeStartersHeldItems() && !(romHandler instanceof Gen1RomHandler)) {
                 romHandler.randomizeStarterHeldItems(settings.isBanBadRandomStarterHeldItems());
@@ -748,6 +783,8 @@ public class Randomizer {
                 romHandler.randomizeStaticPokemon(true);
             } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.COMPLETELY_RANDOM) {
                 romHandler.randomizeStaticPokemon(false);
+            } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.ALL_LEGENDARIES) {
+                romHandler.randomizeStaticPokemonAllLegendaries(true);
             }
             List<Pokemon> newStatics = romHandler.getStaticPokemon();
             if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED) {

@@ -83,7 +83,7 @@ public class Settings {
     private boolean banNegativeAbilities;
 
     public enum StartersMod {
-        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS
+        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS, RANDOM_LEGENDARIES
     }
 
     private StartersMod startersMod = StartersMod.UNCHANGED;
@@ -131,7 +131,7 @@ public class Settings {
     private int movesetsGoodDamagingPercent = 0;
 
     public enum TrainersMod {
-        UNCHANGED, RANDOM, TYPE_THEMED
+        UNCHANGED, RANDOM, TYPE_THEMED, ALL_LEGENDARIES
     }
 
     private TrainersMod trainersMod = TrainersMod.UNCHANGED;
@@ -148,7 +148,7 @@ public class Settings {
     private int trainersLevelModifier = 0; // -50 ~ 50
 
     public enum WildPokemonMod {
-        UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING
+        UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING, LEGENDARIES
     }
 
     public enum WildPokemonRestrictionMod {
@@ -165,7 +165,7 @@ public class Settings {
     private boolean banBadRandomWildPokemonHeldItems;
 
     public enum StaticPokemonMod {
-        UNCHANGED, RANDOM_MATCHING, COMPLETELY_RANDOM
+        UNCHANGED, RANDOM_MATCHING, COMPLETELY_RANDOM, ALL_LEGENDARIES
     }
 
     private StaticPokemonMod staticPokemonMod = StaticPokemonMod.UNCHANGED;
@@ -204,7 +204,7 @@ public class Settings {
     private MoveTutorsCompatibilityMod moveTutorsCompatibilityMod = MoveTutorsCompatibilityMod.UNCHANGED;
 
     public enum InGameTradesMod {
-        UNCHANGED, RANDOMIZE_GIVEN, RANDOMIZE_GIVEN_AND_REQUESTED
+        UNCHANGED, RANDOMIZE_GIVEN, RANDOMIZE_GIVEN_AND_REQUESTED, RANDOM_ALL_LEGENDS
     }
 
     private InGameTradesMod inGameTradesMod = InGameTradesMod.UNCHANGED;
@@ -274,6 +274,7 @@ public class Settings {
         // 4: starter pokemon stuff
         out.write(makeByteSelected(startersMod == StartersMod.CUSTOM, startersMod == StartersMod.COMPLETELY_RANDOM,
                 startersMod == StartersMod.UNCHANGED, startersMod == StartersMod.RANDOM_WITH_TWO_EVOLUTIONS,
+                startersMod == StartersMod.RANDOM_LEGENDARIES,
                 randomizeStartersHeldItems, banBadRandomStarterHeldItems));
 
         // @5 dropdowns
@@ -292,7 +293,7 @@ public class Settings {
         // 13 trainer pokemon
         // changed 160
         out.write(makeByteSelected(trainersUsePokemonOfSimilarStrength, trainersMod == TrainersMod.RANDOM,
-                rivalCarriesStarterThroughout, trainersMod == TrainersMod.TYPE_THEMED, trainersMatchTypingDistribution,
+                rivalCarriesStarterThroughout, trainersMod == TrainersMod.TYPE_THEMED, trainersMod == TrainersMod.ALL_LEGENDARIES,
                 trainersMod == TrainersMod.UNCHANGED, trainersBlockLegendaries, trainersBlockEarlyWonderGuard));
 
         // 14 trainer pokemon force evolutions
@@ -301,6 +302,7 @@ public class Settings {
         // 15 wild pokemon
         out.write(makeByteSelected(wildPokemonRestrictionMod == WildPokemonRestrictionMod.CATCH_EM_ALL,
                 wildPokemonMod == WildPokemonMod.AREA_MAPPING,
+                wildPokemonMod == WildPokemonMod.LEGENDARIES,
                 wildPokemonRestrictionMod == WildPokemonRestrictionMod.NONE,
                 wildPokemonRestrictionMod == WildPokemonRestrictionMod.TYPE_THEME_AREAS,
                 wildPokemonMod == WildPokemonMod.GLOBAL_MAPPING, wildPokemonMod == WildPokemonMod.RANDOM,
@@ -316,7 +318,8 @@ public class Settings {
         // 17 static pokemon
         out.write(makeByteSelected(staticPokemonMod == StaticPokemonMod.UNCHANGED,
                 staticPokemonMod == StaticPokemonMod.RANDOM_MATCHING,
-                staticPokemonMod == StaticPokemonMod.COMPLETELY_RANDOM));
+                staticPokemonMod == StaticPokemonMod.COMPLETELY_RANDOM,
+                staticPokemonMod == StaticPokemonMod.ALL_LEGENDARIES));
 
         // 18 tm randomization
         // new stuff 162
@@ -347,7 +350,7 @@ public class Settings {
         // new 150
         // 23 in game trades
         out.write(makeByteSelected(inGameTradesMod == InGameTradesMod.RANDOMIZE_GIVEN_AND_REQUESTED,
-                inGameTradesMod == InGameTradesMod.RANDOMIZE_GIVEN, randomizeInGameTradesItems,
+                inGameTradesMod == InGameTradesMod.RANDOMIZE_GIVEN, inGameTradesMod == InGameTradesMod.RANDOM_ALL_LEGENDS, inGameTradesItems,
                 randomizeInGameTradesIVs, randomizeInGameTradesNicknames, randomizeInGameTradesOTs,
                 inGameTradesMod == InGameTradesMod.UNCHANGED));
 
@@ -448,7 +451,8 @@ public class Settings {
         settings.setStartersMod(restoreEnum(StartersMod.class, data[4], 2, // UNCHANGED
                 0, // CUSTOM
                 1, // COMPLETELY_RANDOM
-                3 // RANDOM_WITH_TWO_EVOLUTIONS
+                3, // RANDOM_WITH_TWO_EVOLUTIONS
+                6 // RANDOM_LEGENDARIES
         ));
         settings.setRandomizeStartersHeldItems(restoreState(data[4], 4));
         settings.setBanBadRandomStarterHeldItems(restoreState(data[4], 5));
@@ -470,7 +474,8 @@ public class Settings {
         // changed 160
         settings.setTrainersMod(restoreEnum(TrainersMod.class, data[13], 5, // UNCHANGED
                 1, // RANDOM
-                3 // TYPE_THEMED
+                3, // TYPE_THEMED
+                8 // ALL_LEGENDARIES
         ));
         settings.setTrainersUsePokemonOfSimilarStrength(restoreState(data[13], 0));
         settings.setRivalCarriesStarterThroughout(restoreState(data[13], 2));
@@ -484,7 +489,8 @@ public class Settings {
         settings.setWildPokemonMod(restoreEnum(WildPokemonMod.class, data[15], 6, // UNCHANGED
                 5, // RANDOM
                 1, // AREA_MAPPING
-                4 // GLOBAL_MAPPING
+                4, // GLOBAL_MAPPING
+                7 // LEGENDARIES
         ));
         settings.setWildPokemonRestrictionMod(getEnum(WildPokemonRestrictionMod.class, restoreState(data[15], 2), // NONE
                 restoreState(data[16], 2), // SIMILAR_STRENGTH
@@ -502,7 +508,8 @@ public class Settings {
 
         settings.setStaticPokemonMod(restoreEnum(StaticPokemonMod.class, data[17], 0, // UNCHANGED
                 1, // RANDOM_MATCHING
-                2 // COMPLETELY_RANDOM
+                2, // COMPLETELY_RANDOM
+                3 // ALL_LEGENDARIES
         ));
 
         settings.setTmsMod(restoreEnum(TMsMod.class, data[18], 4, // UNCHANGED
@@ -537,7 +544,8 @@ public class Settings {
         // new 150
         settings.setInGameTradesMod(restoreEnum(InGameTradesMod.class, data[23], 6, // UNCHANGED
                 1, // RANDOMIZE_GIVEN
-                0 // RANDOMIZE_GIVEN_AND_REQUESTED
+                0, // RANDOMIZE_GIVEN_AND_REQUESTED
+                7 // RANDOM_ALL_LEGENDARIES
         ));
         settings.setRandomizeInGameTradesItems(restoreState(data[23], 2));
         settings.setRandomizeInGameTradesIVs(restoreState(data[23], 3));

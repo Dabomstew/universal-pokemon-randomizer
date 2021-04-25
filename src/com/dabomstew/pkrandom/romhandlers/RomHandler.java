@@ -153,6 +153,8 @@ public interface RomHandler {
 
     public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries);
 
+    public void legendaryEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels, boolean noLegendaries);
+
     public boolean hasTimeBasedEncounters();
 
     public List<Pokemon> bannedForWildEncounters();
@@ -167,6 +169,9 @@ public interface RomHandler {
 
     public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
             boolean noEarlyWonderGuard, int levelModifier);
+
+    public void legendaryTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
+        boolean noEarlyWonderGuard, int levelModifier);
 
     public void rivalCarriesStarter();
 
@@ -226,6 +231,8 @@ public interface RomHandler {
     public boolean setStaticPokemon(List<Pokemon> staticPokemon);
 
     public void randomizeStaticPokemon(boolean legendForLegend);
+
+    public void randomizeStaticPokemonAllLegendaries(boolean allLegends);
 
     public boolean canChangeStaticPokemon();
 
@@ -378,6 +385,9 @@ public interface RomHandler {
     public void setIngameTrades(List<IngameTrade> trades);
 
     public void randomizeIngameTrades(boolean randomizeRequest, boolean randomNickname, boolean randomOT,
+            boolean randomStats, boolean randomItem, CustomNamesSet customNames);
+
+    public void randomizeIngameTradeLegends(boolean randomizeRequest, boolean randomNickname, boolean randomOT,
             boolean randomStats, boolean randomItem, CustomNamesSet customNames);
 
     public boolean hasDVs();
