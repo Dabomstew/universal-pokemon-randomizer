@@ -1627,51 +1627,51 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         // Grab the *real* pointer to data
         int dataOffset = readPointer(offset + 4);
 
-        if (romEntry.romCode.equals("MBDN"))
-        {
-            Encounter enc;
-
-            enc = encounters.encounters.get(0);
-            writeWord(dataOffset + 0 * 4 + 2, pokedexToInternal[enc.pokemon.number]);
-
-            enc = encounters.encounters.get(1);
-            writeWord(dataOffset + 1 * 4 + 2, pokedexToInternal[enc.pokemon.number]);
-
-            enc = encounters.encounters.get(2);
-            writeWord(dataOffset + 2 * 4 + 2, pokedexToInternal[enc.pokemon.number]);
-            writeWord(dataOffset + 4 * 4 + 2, pokedexToInternal[enc.pokemon.number]);
-
-            enc = encounters.encounters.get(3);
-            writeWord(dataOffset + 3 * 4 + 2, pokedexToInternal[enc.pokemon.number]);
-
-            enc = encounters.encounters.get(4);
-            writeWord(dataOffset + 5 * 4 + 2, pokedexToInternal[enc.pokemon.number]);
-            writeWord(dataOffset + 7 * 4 + 2, pokedexToInternal[enc.pokemon.number]);
-            writeWord(dataOffset + 9 * 4 + 2, pokedexToInternal[enc.pokemon.number]);
-
-            enc = encounters.encounters.get(5);
-            writeWord(dataOffset + 6 * 4 + 2, pokedexToInternal[enc.pokemon.number]);
-            writeWord(dataOffset + 8 * 4 + 2, pokedexToInternal[enc.pokemon.number]);
-
-            return;
-        }
-
         if (romEntry.romCode.equals("SPDC")) // Emerald speedchoice
         {
             numOfEntries = 2;
         }
+        else if (romEntry.romCode.equals("MBDN"))
+        {
+            numOfEntries = 6;
+        }
         // Write the entries
         for (int i = 0; i < numOfEntries; i++) {
             Encounter enc = encounters.encounters.get(i);
-            // min, max, species, species
-            writeWord(dataOffset + i * 4 + 2, pokedexToInternal[enc.pokemon.number]);
-            // Speedchoice duplication.. 4 extra times
-            if (romEntry.romCode.equals("SPDC")) // Emerald speedchoice
+            if (romEntry.romCode.equals("MBDN"))
             {
-                writeWord(dataOffset + (i + numOfEntries) * 4 + 2, pokedexToInternal[enc.pokemon.number]);
-                writeWord(dataOffset + (i + numOfEntries * 2) * 4 + 2, pokedexToInternal[enc.pokemon.number]);
-                writeWord(dataOffset + (i + numOfEntries * 3) * 4 + 2, pokedexToInternal[enc.pokemon.number]);
-                writeWord(dataOffset + (i + numOfEntries * 4) * 4 + 2, pokedexToInternal[enc.pokemon.number]);
+                // OLD:   0 1
+                // GOOD:  2 3 2
+                // SUPER: 4 5 4 5 4
+                switch (i)
+                {
+                    case 2:
+                        writeWord(dataOffset + (i + 2) * 4 + 2, pokedexToInternal[enc.pokemon.number]);
+                    case 0:
+                    case 1:
+                    case 3:
+                        writeWord(dataOffset + i * 4 + 2, pokedexToInternal[enc.pokemon.number]);
+                        break;
+                    case 4:
+                        writeWord(dataOffset + (i + 5) * 4 + 2, pokedexToInternal[enc.pokemon.number]);
+                    case 5:
+                        writeWord(dataOffset + (i + 3) * 4 + 2, pokedexToInternal[enc.pokemon.number]);
+                        writeWord(dataOffset + (i + 1) * 4 + 2, pokedexToInternal[enc.pokemon.number]);
+                        break;
+                }
+            }
+            else
+            {
+                // min, max, species, species
+                writeWord(dataOffset + i * 4 + 2, pokedexToInternal[enc.pokemon.number]);
+                // Speedchoice duplication.. 4 extra times
+                if (romEntry.romCode.equals("SPDC")) // Emerald speedchoice
+                {
+                    writeWord(dataOffset + (i + numOfEntries) * 4 + 2, pokedexToInternal[enc.pokemon.number]);
+                    writeWord(dataOffset + (i + numOfEntries * 2) * 4 + 2, pokedexToInternal[enc.pokemon.number]);
+                    writeWord(dataOffset + (i + numOfEntries * 3) * 4 + 2, pokedexToInternal[enc.pokemon.number]);
+                    writeWord(dataOffset + (i + numOfEntries * 4) * 4 + 2, pokedexToInternal[enc.pokemon.number]);
+                }
             }
         }
     }
