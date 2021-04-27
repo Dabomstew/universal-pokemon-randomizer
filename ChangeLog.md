@@ -51,7 +51,7 @@
  * Gen 3 and Gen 4 Feebas can now evolve by happiness when removing impossible evolutions
  * Gen 5 and Gen 6 move updates can be applied independently of one another
  * Black/White Cilan, Chili, Cress now have types that are superior to the player's chosen starter
- * As an additional option to the previous change, players can opt for a defensively resistant opponent. For instance, Magnemite would normally face a Ground type, but this option makes the Gym use an Electric type as Electric resists both Electric and Steel.
+   * As an additional option to the previous change, players can opt for a defensively resistant opponent. For instance, Magnemite would normally face a Ground type, but this option makes the Gym use an Electric type as Electric resists both Electric and Steel.
  * Modified the following sections of Gen 5 Black/White in-game text to match choices
    * Striaton City Gym leaders will use their true types when using type-theming on Gym Leaders, or use generic terms when completely random
    * Nacrene City Gym Guy will use true type and appropriate weakness when using type-theming on Gym Leaders, or use generic terms when completely random
@@ -88,3 +88,7 @@
 * Trainers can now have pokemon swapped in a global 1 for 1, similar to the global mapping option of Wild Pokemon
    * Gym type theming is respected by prioritizing type consistency over global swap mapping. This should create a fresher game experience by making route trainers adhere to global swap rules while making gyms, elite 4, champion, and other themed teams stick to one type.
 * Fix Wild Global 1-to-1 replacement erroring when restricting generation pokemon to correctly use all pokemon as replacable rather than just those that are allowed
+* Starter Pokemon can now be filtered to only allow certain types (particularly useful for monoruns)
+* Elite 4, Champion, and Uber class trainers can be buffed to only use Legendary and BIG Pokemon (BIG is 590+ BST (490+ Gen1) or 190+ in one stat)
+   * Generally not advised until Gen 3 since the pool of Pokemon will be really small (7 in Gen 1, 16 Gen 2, 30+ Gen 3 and higher)
+   * This also works with type theming (global or gym) and global swap

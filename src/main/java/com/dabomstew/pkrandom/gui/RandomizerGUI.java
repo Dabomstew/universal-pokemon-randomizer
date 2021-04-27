@@ -854,8 +854,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpLevelModifierCB.setEnabled(false);
         this.tpLevelModifierSlider.setEnabled(false);
         this.tpRandomHeldItemCB.setEnabled(false);
-        this.tpRandomHeldItemCB.setVisible(false);
+        this.tpRandomHeldItemCB.setVisible(true);
         this.tpGymTypeThemeCB.setEnabled(false);
+        this.tpBuffEliteCB.setEnabled(false);
 
         this.tpUnchangedRB.setSelected(true);
         this.tpPowerLevelsCB.setSelected(false);
@@ -870,6 +871,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpLevelModifierSlider.setValue(0);
         this.tpRandomHeldItemCB.setSelected(false);
         this.tpGymTypeThemeCB.setSelected(false);
+        this.tpBuffEliteCB.setSelected(false);
 
         this.tnRandomizeCB.setEnabled(false);
         this.tcnRandomizeCB.setEnabled(false);
@@ -1500,12 +1502,15 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.tpForceFullyEvolvedCB.setSelected(false);
             this.tpLevelModifierCB.setEnabled(false);
             this.tpLevelModifierCB.setSelected(false);
+            this.tpBuffEliteCB.setEnabled(false);
+            this.tpBuffEliteCB.setSelected(false);
         } else {
             this.tpPowerLevelsCB.setEnabled(true);
             this.tpNoLegendariesCB.setEnabled(true);
             this.tpNoEarlyShedinjaCB.setEnabled(true);
             this.tpForceFullyEvolvedCB.setEnabled(true);
             this.tpLevelModifierCB.setEnabled(true);
+            this.tpBuffEliteCB.setEnabled(true);
         }
 
         if (this.tpRandomRB.isSelected() || this.tpGlobalSwapRB.isSelected()) {
@@ -1957,6 +1962,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpForceFullyEvolvedSlider.setValue(settings.getTrainersForceFullyEvolvedLevel());
         this.tpLevelModifierCB.setSelected(settings.isTrainersLevelModified());
         this.tpLevelModifierSlider.setValue(settings.getTrainersLevelModifier());
+        this.tpBuffEliteCB.setSelected(settings.isTrainersBuffElite());
 
         this.wpARCatchEmAllRB
                 .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL);
@@ -2136,6 +2142,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setTrainersForceFullyEvolvedLevel(tpForceFullyEvolvedSlider.getValue());
         settings.setTrainersLevelModified(tpLevelModifierCB.isSelected());
         settings.setTrainersLevelModifier(tpLevelModifierSlider.getValue());
+        settings.setTrainersBuffElite(tpBuffEliteCB.isSelected());
 
         settings.setWildPokemonMod(wpUnchangedRB.isSelected(), wpRandomRB.isSelected(), wpArea11RB.isSelected(),
                 wpGlobalRB.isSelected());

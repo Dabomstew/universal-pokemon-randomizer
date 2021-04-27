@@ -32,13 +32,13 @@ XXToo much workXXTrainer Class Names should be gender based (Rich Boy woman not 
 **Randomize trainer held items (limit to battle tower stuff)
 **Type theme gyms with random trainers route trainers (keep gym trainers consistent)
 XXROM LENGTH VIOLATIONXXExtra Challenge Mode - All leaders have 6 pokemon
-Extra E4 Challenge - Legendaries / BST of at least 600
+**Extra E4 Challenge - Legendaries / BST of at least 600
 XXToo much workXXSignature Move - All leaders have a signature move on all pokes (same as TM?)
 XXNot SupportedXXAll leader/rival pokemon are nicknamed
 XXToo much workXXType by ace (one of dual type, or if mono type, keeps mono) (keep type but change team)
 XXToo much workXXRSE Gen 3 - Patch both Arco and Mach
 XXToo much workXXRedo code to use PokemonSet
-Explicit type starter selection (filter in/out one or more) (option for one from each)
+**Explicit type starter selection (filter in/out one or more) (option for one from each)
 **Checkbox if super-effective starter order (FLYING > FIGHTING > ROCK)
 XXToo much workXXTM text updates for Gen 5 (use new names)
 Trainer pokemon evolve at appropriate level (if at level, evolve. if not, unevolve. non-level base off bst)
@@ -58,6 +58,8 @@ Change TypeFormDialog to add names for the Dialog, and all components (labels, l
 All versions to 190
 Update settings updater
 Verify docs
+Update premade settings
+Move options around so non-visible options are at bottom (particularly trainer and starter)
 Build exe and zip into github
 
 Java output to excel

@@ -248,6 +248,7 @@ public class Randomizer {
             settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED,
             settings.getTrainersMod() == Settings.TrainersMod.GLOBAL_MAPPING, 
             settings.isGymTypeTheme(), settings.isTrainersRandomHeldItem(),
+            settings.isTrainersBuffElite(),
             settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
         }
 

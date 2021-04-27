@@ -53,6 +53,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     protected Map<String, Type> groupTypesMap = new HashMap<String, Type>();
     private HashMap<Pokemon, Pokemon> trainerTranslateMap;
     private PokemonSet cachedReplacementLists;
+    private PokemonSet cachedEliteReplacementLists;
 
     /* Constructor */
     public AbstractRomHandler(Random random) {
@@ -1118,7 +1119,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void randomizeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
         boolean noEarlyWonderGuard, boolean useResistantType, boolean typeTheme, boolean globalSwap,
-        boolean gymTypeTheme, boolean randomHeldItem, int levelModifier) {
+        boolean gymTypeTheme, boolean randomHeldItem, boolean buffElite, int levelModifier) {
 
         checkPokemonRestrictions();
         if (globalSwap) {
@@ -1135,12 +1136,15 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         cachedReplacementLists = new PokemonSet();
         cachedReplacementLists.addAll(noLegendaries ? noLegendaryList : mainPokemonList);
+        cachedEliteReplacementLists = new PokemonSet();
+        cachedEliteReplacementLists.addAll(mainPokemonList.stream()
+            .filter(pk -> pk.isBigPoke(isGen1()) || pk.isLegendary()).collect(Collectors.toList()));
         typeWeightings = new TreeMap<Type, Integer>();
         totalTypeWeighting = 0;
 
         // Attempt to type theme tagged trainers. If gym type theming and type theming are false, set this to empty
         Set<Trainer> assignedTrainers = gymTypeTheme || typeTheme ? assignTaggedTrainerTypeThemes(scrambledTrainers, weightByFrequency, noLegendaries, 
-            noEarlyWonderGuard, usePowerLevels, useResistantType, randomHeldItem, levelModifier) : Collections.emptySet();
+            noEarlyWonderGuard, usePowerLevels, useResistantType, randomHeldItem, buffElite, levelModifier) : Collections.emptySet();
 
         // Fully random is easy enough - randomize then worry about rival
         // carrying starter at the end
@@ -1150,14 +1154,25 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
 
             if (!assignedTrainers.contains(t)) {
-                // If type theming is true, pick a type. Otherwise null skips the type restriction
-                Type typeForTrainer = typeTheme ? pickType(weightByFrequency, noLegendaries) : null;
-                for (TrainerPokemon tp : t.getPokemon()) {
-                    boolean shedAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
-                    tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForTrainer, noLegendaries,
-                            shedAllowed);
-                    tp.resetMoves = true;
-                    applyChangeToTrainerPoke(tp, randomHeldItem, levelModifier);
+                if (buffElite && t.getTag() != null &&
+                    (t.getTag().startsWith("ELITE") 
+                    || t.getTag().startsWith("CHAMPION")
+                    || t.getTag().startsWith("UBER"))) {
+                    for (TrainerPokemon tp : t.getPokemon()) {
+                        tp.pokemon = pickEliteReplacement(tp.pokemon, null);
+                        tp.resetMoves = true;
+                        applyChangeToTrainerPoke(tp, randomHeldItem, levelModifier);
+                    }
+                } else {
+                    // If type theming is true, pick a type. Otherwise null skips the type restriction
+                    Type typeForTrainer = typeTheme ? pickType(weightByFrequency, noLegendaries) : null;
+                    for (TrainerPokemon tp : t.getPokemon()) {
+                        boolean shedAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
+                        tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForTrainer, noLegendaries,
+                                shedAllowed);
+                        tp.resetMoves = true;
+                        applyChangeToTrainerPoke(tp, randomHeldItem, levelModifier);
+                    }
                 }
             }
         }
@@ -1169,7 +1184,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     // Type theme each tagged trainer
     private Set<Trainer> assignTaggedTrainerTypeThemes(List<Trainer> currentTrainers, boolean weightByFrequency, boolean noLegendaries, boolean noEarlyWonderGuard,
-        boolean usePowerLevels, boolean useResistantType, boolean randomHeldItem, int levelModifier) {
+        boolean usePowerLevels, boolean useResistantType, boolean randomHeldItem, boolean buffElite, int levelModifier) {
         // Construct groupings for types
         Set<Trainer> assignedTrainers = new TreeSet<Trainer>();
         Map<String, List<Trainer>> groups = new TreeMap<String, List<Trainer>>();
@@ -1219,24 +1234,36 @@ public abstract class AbstractRomHandler implements RomHandler {
                 usedGymTypes.add(typeForGroup);
             }
             if (group.startsWith("ELITE")) {
-                while (usedEliteTypes.contains(typeForGroup)) {
+                while (usedEliteTypes.contains(typeForGroup) || (buffElite
+                    && cachedEliteReplacementLists.sizeByType(typeForGroup) == 0)) {
                     typeForGroup = pickType(weightByFrequency, noLegendaries);
                 }
                 usedEliteTypes.add(typeForGroup);
             }
             if (group.equals("CHAMPION") || group.startsWith("UBER")) {
-                while (usedUberTypes.contains(typeForGroup)) {
+                while (usedUberTypes.contains(typeForGroup) || (buffElite
+                && cachedEliteReplacementLists.sizeByType(typeForGroup) == 0)) {
                     typeForGroup = pickType(weightByFrequency, noLegendaries);
                 }
                 usedUberTypes.add(typeForGroup);
             }
             // Themed groups just have a theme, no special criteria
             for (Trainer t : trainersInGroup) {
-                for (TrainerPokemon tp : t.getPokemon()) {
-                    boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
-                    tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForGroup, noLegendaries, wgAllowed);
-                    tp.resetMoves = true;
-                    applyChangeToTrainerPoke(tp, randomHeldItem, levelModifier);
+                if (buffElite && (t.getTag().startsWith("ELITE") 
+                    || t.getTag().startsWith("CHAMPION")
+                    || t.getTag().startsWith("UBER"))) {
+                    for (TrainerPokemon tp : t.getPokemon()) {
+                        tp.pokemon = pickEliteReplacement(tp.pokemon, typeForGroup);
+                        tp.resetMoves = true;
+                        applyChangeToTrainerPoke(tp, randomHeldItem, levelModifier);
+                    }
+                } else {
+                    for (TrainerPokemon tp : t.getPokemon()) {
+                        boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
+                        tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForGroup, noLegendaries, wgAllowed);
+                        tp.resetMoves = true;
+                        applyChangeToTrainerPoke(tp, randomHeldItem, levelModifier);
+                    }
                 }
             }
             groupTypesMap.put(group, typeForGroup);
@@ -1287,6 +1314,34 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         return assignedTrainers;
+    }
+
+    private Pokemon pickEliteReplacement(Pokemon current, Type type) {
+        List<Pokemon> pickFrom = cachedEliteReplacementLists.getPokes();
+        Pokemon chosenPoke = null;
+
+        if (trainerTranslateMap != null && trainerTranslateMap.containsKey(current)) {
+            chosenPoke = trainerTranslateMap.get(current);
+            // Stats and type take priority over global swap
+            if ((type == null || chosenPoke.primaryType == type || chosenPoke.secondaryType == type) &&
+                (chosenPoke.isBigPoke(isGen1()) || chosenPoke.isLegendary())) {
+                return chosenPoke;
+            }
+        }
+
+        if (type != null) {
+            pickFrom = cachedEliteReplacementLists.getPokesByType().get(type);
+        }
+
+        chosenPoke = pickFrom.get(this.random.nextInt(pickFrom.size()));
+
+        // Don't override original selections
+        // Prevent conflicts from replacing global swap
+        if (trainerTranslateMap != null && !trainerTranslateMap.containsKey(current)) {
+            trainerTranslateMap.put(current, chosenPoke);
+        }
+
+        return chosenPoke;   
     }
 
     @Override

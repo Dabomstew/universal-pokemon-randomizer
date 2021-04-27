@@ -93,6 +93,7 @@ public class SettingsConstants {
     public static final String TRAINERS_LEVEL_MODIFIED = "trainersLevelModified";
     public static final String TRAINERS_LEVEL_MODIFIER = "trainersLevelModifier";
     public static final String TRAINERS_RANDOM_HELD_ITEM = "trainersRandomHeldItem";
+    public static final String TRAINERS_BUFF_ELITE = "trainersBuffElite";
     public static final String GYM_TYPE_THEME = "gymTypeTheme";
     public static final String WILD_POKEMON_MOD = "wildPokemonMod";
     public static final String WILD_POKEMON_RESTRICTION_MOD = "wildPokemonRestrictionMod";

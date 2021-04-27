@@ -141,7 +141,7 @@ public class Gen3Test {
         doReturn(Gen3RomHandler.getRomFromSupportedRom("Ruby (U)")).when(romhandler).getRomEntry();
         doReturn(mock(Map.class)).when(romhandler).getTemplateData();
         resetDataModel(romhandler);
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, true, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, true, false, 0);
         for (Trainer t : romhandler.getTrainers()) {
             for (TrainerPokemon tp : t.getPokemon()) {
                 assertTrue(tp.heldItem + " was not in Gen 3 allowed items.", 

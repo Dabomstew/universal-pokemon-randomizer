@@ -343,6 +343,9 @@ public class Settings {
             new SettingsOption.Builder(SettingsConstants.TRAINERS_LEVEL_MODIFIER, 0)
             .addMatches(new PredicatePair(trainersLevelModified, PredicatePair.BOOLEAN_TRUE))
             .addValidInts(SettingsConstants.LEVEL_MODIFIER_MINIMUM_INT, SettingsConstants.LEVEL_MODIFIER_MAXIMUM_INT));
+        SettingsOptionComposite trainersBuffElite = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.TRAINERS_BUFF_ELITE, false)
+            .addMatches(new PredicatePair(trainersMod, PredicatePair.ENUM_NOT_UNCHANGED)));
 
         // Wild Pokemon
         SettingsOptionComposite wildPokemonMod = SettingsOptionFactory.createSettingsOption(
@@ -719,7 +722,8 @@ public class Settings {
             settingsMap.getValue(SettingsConstants.ALLOW_LOW_LEVEL_EVOLVED_TYPES),
             settingsMap.getValue(SettingsConstants.TRAINERS_RANDOM_HELD_ITEM),
             settingsMap.getValue(SettingsConstants.GYM_TYPE_THEME),
-            settingsMap.getValue(SettingsConstants.TRAINERS_MOD) == TrainersMod.GLOBAL_MAPPING));
+            settingsMap.getValue(SettingsConstants.TRAINERS_MOD) == TrainersMod.GLOBAL_MAPPING,
+            settingsMap.getValue(SettingsConstants.TRAINERS_BUFF_ELITE)));
 
         // @ 41 Evolution overflow
         out.write(makeByteSelected(
@@ -969,6 +973,7 @@ public class Settings {
         settings.setAllowLowLevelEvolvedTypes(restoreState(data[40], 1));
         settings.setTrainersRandomHeldItem(restoreState(data[40], 2));
         settings.setGymTypeTheme(restoreState(data[40], 3));
+        settings.setTrainersBuffElite(restoreState(data[40], 5));
 
         settings.setEvosChangeMethod(restoreState(data[41], 0));
         
@@ -1754,6 +1759,15 @@ public class Settings {
 
     public Settings setTrainersLevelModifier(int trainersLevelModifier) {
         settingsMap.putValue(SettingsConstants.TRAINERS_LEVEL_MODIFIER, trainersLevelModifier);
+        return this;
+    }
+
+    public boolean isTrainersBuffElite() {
+        return settingsMap.getValue(SettingsConstants.TRAINERS_BUFF_ELITE);
+    }
+
+    public Settings setTrainersBuffElite(boolean trainersBuffElite) {
+        settingsMap.putValue(SettingsConstants.TRAINERS_BUFF_ELITE, trainersBuffElite);
         return this;
     }
 

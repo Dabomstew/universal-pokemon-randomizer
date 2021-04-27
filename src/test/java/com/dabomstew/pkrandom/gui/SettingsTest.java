@@ -653,6 +653,37 @@ public class SettingsTest extends AbstractUIBase {
     }
 
     /**
+     * Selecting anything except "UNCHANGED" enables the Buff Elite checkbox
+     * Toggles the Buff Elite checkbox
+     * Selecting "UNCHANGED" disables the Buff Elite checkbox and resets state to false
+     * Verifies settings can be stored and loaded with no error and preserve state
+     * @throws IOException
+     */
+    @Test(timeout = 8000)
+    public void TestTrainersBuffElite() throws IOException {
+        JRadioButtonFixture unchangedTrainerRBFixture = getRadioButtonByName("tpUnchangedRB");
+        JRadioButtonFixture randomTrainerRBFixture = getRadioButtonByName("tpRandomRB");
+        JRadioButtonFixture typeThemeTrainerRBFixture = getRadioButtonByName("tpTypeThemeRB");
+        JRadioButtonFixture globalSwapTrainerRBFixture = getRadioButtonByName("tpGlobalSwapRB");
+        JCheckBoxFixture buffEliteCBFixture = getCheckBoxByName("tpBuffEliteCB");
+
+        // Check basic case of UNCHANGED and RANDOM
+        TestCheckboxBasedOnRadioButton(unchangedTrainerRBFixture, randomTrainerRBFixture, buffEliteCBFixture, (settings) -> settings.isTrainersBuffElite(),
+            (trainersMod) -> trainersMod == Settings.TrainersMod.UNCHANGED, (trainersMod) -> trainersMod == Settings.TrainersMod.RANDOM,
+            (settings) -> settings.getTrainersMod(), "Trainers");
+
+        // Check case of TYPE THEME
+        TestCheckboxBasedOnRadioButton(unchangedTrainerRBFixture, typeThemeTrainerRBFixture, buffEliteCBFixture, (settings) -> settings.isTrainersBuffElite(),
+            (trainersMod) -> trainersMod == Settings.TrainersMod.UNCHANGED, (trainersMod) -> trainersMod == Settings.TrainersMod.TYPE_THEMED,
+            (settings) -> settings.getTrainersMod(), "Trainers");
+
+        // Check case of GLOBAL SWAP
+        TestCheckboxBasedOnRadioButton(unchangedTrainerRBFixture, globalSwapTrainerRBFixture, buffEliteCBFixture, (settings) -> settings.isTrainersBuffElite(),
+            (trainersMod) -> trainersMod == Settings.TrainersMod.UNCHANGED, (trainersMod) -> trainersMod == Settings.TrainersMod.GLOBAL_MAPPING,
+            (settings) -> settings.getTrainersMod(), "Trainers");
+    }
+
+    /**
      * Captures a common sequence of a checkbox being enabled or disabled based on radio button selection
      * 
      * @param defaultRB - The radio button fixture that disables the checkbox (must be the one that's on by default)

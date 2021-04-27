@@ -83,7 +83,7 @@ public class AbstractRomTest {
         // **************************
         // Test offensive selection
         // **************************
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, false, 0);
         ArrayList<Trainer> newTrainers = trainerCap.getValue();
         // Get gym1Type
         for (Trainer t : newTrainers.stream().filter(t -> t.getTag() != null)
@@ -158,7 +158,7 @@ public class AbstractRomTest {
         // **************************
         // Test defensive selection
         // **************************
-        romhandler.randomizeTrainerPokes(false, false, false, false, true, false, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, true, false, false, true, false, false, 0);
         newTrainers = trainerCap.getValue();
         // Get gym1Type
         for (Trainer t : newTrainers.stream().filter(t -> t.getTag() != null)
@@ -263,7 +263,7 @@ public class AbstractRomTest {
         for(Trainer t : romhandler.getTrainers()) {
             originalTrainer.add(new Trainer(t));
         }
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, true, false, false, 0);
         ArrayList<Trainer> newTrainers = trainerCap.getValue();
         // Get gym1Type
         for (Trainer t : newTrainers.stream().filter(t -> t.getTag() != null)
@@ -401,7 +401,7 @@ public class AbstractRomTest {
         for(Trainer t : romhandler.getTrainers()) {
             originalTrainer.add(new Trainer(t));
         }
-        romhandler.randomizeTrainerPokes(false, false, false, false, true, false, true, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, true, false, true, true, false, false, 0);
         newTrainers = trainerCap.getValue();
         // Get gym1Type
         for (Trainer t : newTrainers.stream().filter(t -> t.getTag() != null)
@@ -635,7 +635,7 @@ public class AbstractRomTest {
         //**************************
         // Test Striaton offense selection
         //**************************
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, false, 0);
         romhandler.randomizeStaticPokemon(false);
         Map<String, Type> taggedTypes = romhandler.getTaggedGroupTypes();
 
@@ -699,7 +699,7 @@ public class AbstractRomTest {
         //**************************
         // Test Striaton defense selection
         //**************************
-        romhandler.randomizeTrainerPokes(false, false, false, false, true, false, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, true, false, false, true, false, false, 0);
         romhandler.randomizeStaticPokemon(false);
         taggedTypes = romhandler.getTaggedGroupTypes();
 
@@ -891,7 +891,7 @@ public class AbstractRomTest {
         HashSet<Type> trainerType = new HashSet<Type>();
         TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler);
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, true, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, true, false, false, false, false, 0);
         for (Trainer t : romhandler.getTrainers()) {
             for (TrainerPokemon tp : t.getPokemon()) {
                 // Initialize the set
@@ -924,7 +924,7 @@ public class AbstractRomTest {
         TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler);
         HashSet<Type> trainerType;
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, false, 0);
         for (Trainer t : romhandler.getTrainers()) {
             // Skip anyone that is not tagged
             // Skip CHILI, CRESS, CILAN due to unique requirements to have different types
@@ -1001,7 +1001,7 @@ public class AbstractRomTest {
         for(Trainer t : romhandler.getTrainers()) {
             originalTrainer.add(new Trainer(t));
         }
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, false, false, 0);
         for (int i = 0; i < trainerCap.getValue().size(); i++) {
             Trainer newT = trainerCap.getValue().get(i);
             Trainer oldT = originalTrainer.get(i);
@@ -1041,7 +1041,7 @@ public class AbstractRomTest {
         for(Trainer t : romhandler.getTrainers()) {
             originalTrainer.add(new Trainer(t));
         }
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, true, false, false, 0);
         // Reverse order so tagged trainers are last, preventing them from caching the wrong pokemon
         for (int i = trainerCap.getValue().size()-1; i >= 0 ; i--) {
             Trainer newT = trainerCap.getValue().get(i);
@@ -1215,6 +1215,152 @@ public class AbstractRomTest {
         }
     }
 
+    @Test
+    public void TestTrainersBuffElite() {
+        HashMap<Pokemon, Pokemon> pokemonSwap = new HashMap<Pokemon, Pokemon>(Gen5Constants.pokemonCount + 1);
+        HashSet<Type> trainerType;
+        ArrayList<Trainer> originalTrainer = new ArrayList();
+        TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
+        resetDataModel(romhandler);
+        doNothing().when(romhandler).setTrainers(trainerCap.capture());
+        
+        /*************************
+         * Buff Elite standalone *
+         *************************/
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, true, 0);
+        for (Trainer t : trainerCap.getValue()) {
+            // Skip anyone that is not tagged
+            if (t.getTag() != null && (t.getTag().startsWith("ELITE") 
+                || t.getTag().startsWith("CHAMPION") 
+                || t.getTag().startsWith("UBER"))) {
+                    for (TrainerPokemon tp : t.getPokemon()) {
+                        assertTrue("Pokemon was not a legendary and did not qualify as BIG: " + tp.getPokemon(),
+                            tp.getPokemon().isLegendary() || tp.getPokemon().isBigPoke(false));
+                    }
+            }  
+        }
+
+        /*****************************
+         * Buff Elite and Type Theme *
+         *****************************/
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, true, false, false, false, true, 0);
+        for (Trainer t : romhandler.getTrainers()) {
+            // Skip anyone that is not tagged
+            if (t.getTag() != null && (t.getTag().startsWith("ELITE") 
+                || t.getTag().startsWith("CHAMPION") 
+                || t.getTag().startsWith("UBER"))) {
+                trainerType = new HashSet<Type>();
+                for (TrainerPokemon tp : t.getPokemon()) {
+                    // Initialize the set
+                    if (trainerType.size() == 0) {
+                        trainerType.add(tp.pokemon.primaryType);
+                        if (tp.pokemon.secondaryType != null) {
+                            trainerType.add(tp.pokemon.secondaryType);
+                        }
+                    }
+                    // Only keep the shared type
+                    else {
+                        HashSet<Type> intersect = new HashSet<Type>();
+                        intersect.add(tp.pokemon.primaryType);
+                        if (tp.pokemon.secondaryType != null) {
+                            intersect.add(tp.pokemon.secondaryType);
+                        }
+                        trainerType.retainAll(intersect);
+                    }
+                    assertTrue("Pokemon was not a legendary and did not qualify as BIG: " + tp.getPokemon(),
+                        tp.getPokemon().isLegendary() || tp.getPokemon().isBigPoke(false));
+                }
+                // Test for 2 since there could be only 1 pokemon with 2 types, or all pokemon
+                // share the same 2 types even though the gym only requires 1 of those types
+                assertTrue("More than 2 types found - " + Arrays.toString(trainerType.toArray()),
+                    trainerType.size() < 3);
+
+                // Test to make sure at least 1 type was found
+                assertTrue("Less than 1 type found - " + Arrays.toString(trainerType.toArray()),
+                trainerType.size() > 0);
+            }
+        }
+
+        /******************************
+         * Buff Elite and Global Swap *
+         ******************************/
+        for(Trainer t : romhandler.getTrainers()) {
+            originalTrainer.add(new Trainer(t));
+        }
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, true, false, false, true, 0);
+        for (int i = 0; i < trainerCap.getValue().size(); i++) {
+            Trainer newT = trainerCap.getValue().get(i);
+            Trainer oldT = originalTrainer.get(i);
+            assertTrue("Trainer did not match name. Make sure the trainer list is ordered the same",
+                newT.getName().equals(oldT.getName()));
+            Collections.sort(newT.getPokemon(), (o1, o2) -> o1.getNickname().compareTo(o2.getNickname()));
+            Collections.sort(oldT.getPokemon(), (o1, o2) -> o1.getNickname().compareTo(o2.getNickname()));
+            // Skip anyone that is not tagged
+            if (newT.getTag() != null && (newT.getTag().startsWith("ELITE") 
+                || newT.getTag().startsWith("CHAMPION") 
+                || newT.getTag().startsWith("UBER"))) {
+                for (int j = 0; j < newT.getPokemon().size(); j++) {
+                    TrainerPokemon newTp = newT.getPokemon().get(j);
+                    TrainerPokemon oldTp = oldT.getPokemon().get(j);
+                    // Initialize the set
+                    if (pokemonSwap.containsKey(oldTp.pokemon)) {
+                        Pokemon cached = pokemonSwap.get(oldTp.pokemon);
+                        assertTrue("Pokemon did not match the replacement - " +
+                            oldTp.pokemon.number + " gave " + cached.number + " but newTp was " +
+                            newTp.pokemon.number + ", which is not legendary or BIG",
+                            cached.equals(newTp.pokemon) || newTp.pokemon.isLegendary() 
+                            || newTp.pokemon.isBigPoke(false));
+                    } else {
+                        pokemonSwap.put(oldTp.pokemon, newTp.pokemon);
+                    }
+                    assertTrue("Pokemon was not a legendary and did not qualify as BIG: " + newTp.getPokemon(),
+                        newTp.getPokemon().isLegendary() || newTp.getPokemon().isBigPoke(false));
+                }
+            }
+        }
+
+        /*********************************
+         * Buff Elite and Gym Type Theme *
+         **********************************/
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, true, 0);
+        for (Trainer t : romhandler.getTrainers()) {
+            // Skip anyone that is not tagged
+            if (t.getTag() != null && (t.getTag().startsWith("ELITE") 
+                || t.getTag().startsWith("CHAMPION") 
+                || t.getTag().startsWith("UBER"))) {
+                trainerType = new HashSet<Type>();
+                for (TrainerPokemon tp : t.getPokemon()) {
+                    // Initialize the set
+                    if (trainerType.size() == 0) {
+                        trainerType.add(tp.pokemon.primaryType);
+                        if (tp.pokemon.secondaryType != null) {
+                            trainerType.add(tp.pokemon.secondaryType);
+                        }
+                    }
+                    // Only keep the shared type
+                    else {
+                        HashSet<Type> intersect = new HashSet<Type>();
+                        intersect.add(tp.pokemon.primaryType);
+                        if (tp.pokemon.secondaryType != null) {
+                            intersect.add(tp.pokemon.secondaryType);
+                        }
+                        trainerType.retainAll(intersect);
+                    }
+                    assertTrue("Pokemon was not a legendary and did not qualify as BIG: " + tp.getPokemon(),
+                        tp.getPokemon().isLegendary() || tp.getPokemon().isBigPoke(false));
+                }
+                // Test for 2 since there could be only 1 pokemon with 2 types, or all pokemon
+                // share the same 2 types even though the gym only requires 1 of those types
+                assertTrue("More than 2 types found - " + Arrays.toString(trainerType.toArray()),
+                    trainerType.size() < 3);
+
+                // Test to make sure at least 1 type was found
+                assertTrue("Less than 1 type found - " + Arrays.toString(trainerType.toArray()),
+                trainerType.size() > 0);
+            }
+        }
+    }
+
     /**
      * Function for granular modification of data model
      */
@@ -1239,7 +1385,8 @@ public class AbstractRomTest {
                 }
             }
         }
-        for(String tag: new String[]{"GYM1", "CILAN", "CHILI", "CRESS"}) {
+        for(String tag: new String[]{"GYM1", "CILAN", "CHILI", "CRESS", "ELITE1", "ELITE2", "ELITE3",
+            "ELITE4", "CHAMPION", "UBER1", "UBER2", "UBER3"}) {
             Trainer t = new Trainer();
             t.setTag(tag);
             t.setName(tag);
