@@ -54,6 +54,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private HashMap<Pokemon, Pokemon> trainerTranslateMap;
     private PokemonSet cachedReplacementLists;
     private PokemonSet cachedEliteReplacementLists;
+    private List<Type> typeInGame;
 
     /* Constructor */
     public AbstractRomHandler(Random random) {
@@ -514,17 +515,17 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public int getTypeSize() {
-        return 17;
+    public List<Type> getTypesInGame() {
+        if (typeInGame == null) {
+            typeInGame = Arrays.asList(Type.values()).stream().filter(t -> isTypeInGame(t))
+                .collect(Collectors.toList());
+        }
+        return typeInGame;
     }
 
     @Override
     public Type randomType() {
-        Type t = Type.randomType(this.random);
-        while (!typeInGame(t)) {
-            t = Type.randomType(this.random);
-        }
-        return t;
+        return getTypesInGame().get(this.random.nextInt(getTypesInGame().size()));
     }
 
     @Override
@@ -577,7 +578,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                             }
                             typeList.add(e.to.secondaryType);
                         }
-                        List<Type> typeList2 = Type.getTypes(getTypeSize()).stream().filter(t -> !typeList.contains(t))
+                        List<Type> typeList2 = getTypesInGame().stream().filter(t -> !typeList.contains(t))
                                 .collect(Collectors.toList());
                         evTo.primaryType = typeList2.get(AbstractRomHandler.this.random.nextInt(typeList2.size() - 1));
                     }
@@ -613,7 +614,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void shufflePokemonTypes() {
         List<Pokemon> allPokes = this.getPokemon();
-        List<Type> allTypes = new ArrayList<Type>(Type.getTypes(getTypeSize()));
+        List<Type> allTypes = new ArrayList<Type>(getTypesInGame());
         Collections.shuffle(allTypes, this.random);
         Type.setShuffledList(allTypes);
 
@@ -625,7 +626,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        this.getTemplateData().put("typeList", Type.getTypes(this.getTypeSize()));
+        this.getTemplateData().put("typeList", getTypesInGame());
         this.getTemplateData().put("shuffledTypes", Type.getShuffledList());
     }
 
@@ -671,7 +672,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 }
                                 typeList.add(e.to.secondaryType);
                             }
-                            List<Type> typeList2 = Type.getTypes(getTypeSize()).stream()
+                            List<Type> typeList2 = getTypesInGame().stream()
                                     .filter(t -> !typeList.contains(t)).collect(Collectors.toList());
                             evTo.primaryType = typeList2
                                     .get(AbstractRomHandler.this.random.nextInt(typeList2.size() - 1));
@@ -3744,7 +3745,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (totalTypeWeighting == 0) {
             // Determine weightings
             for (Type t : Type.values()) {
-                if (typeInGame(t)) {
+                if (isTypeInGame(t)) {
                     int pkWithTyping = pokemonOfType(t, noLegendaries).size();
                     typeWeightings.put(t, pkWithTyping);
                     totalTypeWeighting += pkWithTyping;
@@ -4275,14 +4276,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public boolean typeInGame(Type type) {
+    public boolean isTypeInGame(Type type) {
         return type.isHackOnly == false;
-    }
-    
-    @Override
-    public List<Type> getTypesInGame() {
-        return Arrays.asList(Type.values()).stream().filter(t -> typeInGame(t))
-                .collect(Collectors.toList());
     }
 
     @Override

@@ -1099,12 +1099,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public int getTypeSize() {
-        return 15;
-    }
-
-    @Override
-    public boolean typeInGame(Type type) {
+    public boolean isTypeInGame(Type type) {
         if (type.isHackOnly == false && (type != Type.DARK && type != Type.STEEL)) {
             return true;
         }

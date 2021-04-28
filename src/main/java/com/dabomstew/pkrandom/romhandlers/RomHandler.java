@@ -133,9 +133,7 @@ public interface RomHandler {
     // straightforward except for gen1 where dark&steel are excluded.
     public Type randomType();
 
-    public int getTypeSize();
-
-    public boolean typeInGame(Type type);
+    public boolean isTypeInGame(Type type);
     
     public List<Type> getTypesInGame();
 
