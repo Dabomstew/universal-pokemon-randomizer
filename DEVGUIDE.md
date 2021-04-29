@@ -6,7 +6,7 @@ It's probably not an issue with the test, but with your environment.
 There is a known bug where running AssertJ Swing causes the mouse to fail to locate the correct screen position. https://github.com/assertj/assertj-swing/issues/235
 Running the tests individually usually works. 
 You can also try commenting out the line that says `this.frame.moveTo(new Point(10, 10));` in AbstractUIBase. 
-If neither of these works, then try running the test by hand and see if it's actually detecting broken functionality.
+If neither of these works, then try running the test by hand (perform the steps manually) and see if it's actually detecting broken functionality.
 If it is, congratulations! You found a bug that you need to fix.
 
 # How do I write a test for SettingsTest?
@@ -18,10 +18,11 @@ Each test should attempt to cover the following cases
 * Sanity Check - Initialized state has no selections made (unless it's a default like "unchanged")
 * Toggle on - Setting is active and state of `isSelected` is true
 * Toggle off - Setting is inactive and state of `isSelected` is false
-* Enabled when parent control is selected - Setting is enabled and state of `isSelected` is false (it's available not not chosen yet)
+* Enabled when parent control is selected - Setting is enabled and state of `isSelected` is false (it's available just not chosen yet)
 * Disabled when parent control is unselected - Setting is disabled and state of `isSelected` is false (any choice is removed)
 * Saving settings is successful - No error when making the settings striing
 * Loading settings is successful - Any state saved is restored correctly and no loading errors
+
 If you have a less common radio button or slider, adjust the above criteria to exercise any conditions this could cover.
 It may be worthwhile to divide a test case into multiple functions. This is perfectly acceptable.
 
@@ -76,14 +77,30 @@ You will also need to edit the `Settings.java` and `RandomizerGUI.java` files to
 settings you create. 
 
 ## Settings.java
-Add a variable to represent your new option. This will likely be a `private boolean`.
-Also create 2 functions, 1 to get the value of this variable (most likely a `public boolean`), 
-and 1 to set it (most likely a `public Settings`).
+Add a variable to represent your new option under the Settings constructor. All new SettingsOptions
+are created through SettingsOptionFactory using the SettingsOption Builder object to ensure
+dependencies are updated. The only two mandatory fields are a name and default value (this is
+the value the setting will start with). Other methods exist on Builder to enable specifying
+extra details, like which integer values are allowed for an integer setting.
 
-Locate the appropriate byte to put your option under. If the byte already has 8 options,
-you will need to locate an overflow area, or create one yourself. If you make a new byte,
-you will need to update `LENGTH_OF_SETTINGS_DATA` to match the new byte location. This
-MUST be the last byte being written or read.
+A series of PredicatePairs may also be provided. Each PredicatePair specifies a parent object
+and a value that it must have for your setting to be allowed to be changed. For instance, you
+cannot select "Rival Carries Starter" unless either the Starters are changed or Trainers are
+changed. There are a number of other examples for whatever you're trying to make.
+
+Add the name of the variable to SettingsConstants. This enables easy reference to it in the
+SettingsMap. You should have already done this while making the settings option above.
+
+Also create 2 functions, 1 to get the value of this variable (most likely a `public boolean`), 
+and 1 to set it (most likely a `public Settings`). These will get the value from the
+SettingsMap based on the SettingsConstants name, or set a value to it.
+
+In the `toString` method of Settings, locate the appropriate byte to put your option under.
+If the byte already has 8 options, you will need to locate an overflow area, or create one
+yourself. If you make a new byte, you will need to update `LENGTH_OF_SETTINGS_DATA` to match
+the new byte location. This MUST be the last byte being written or read.
+
+Do the same but for the `fromString` method of Settings.
 
 If you have a number, it will need to conform to the binary number system.
 For example, one byte can contain a value in the range of -128 to 127. Two bytes (a short)
@@ -110,20 +127,18 @@ the function to call `this.enableOrDisableSubControls()`.
 
 ## Misc Tweaks
 As stated before, Misc Tweak options are dynamically generated based on the values present
-in the `allTweaks` list of `MiscTweak.java`. Simply add your option to the list, doubling
-the value of the last option present in the list (e.g. if the last option's first argument
-is `4096`, yours must be `8192`). This enables the Misc Tweak to be saved to the proper bit and
-not interfere with any other setting. 
+in the `allTweaks` list of `MiscTweak.java`. Simply add your option to the end of the list.
+This ensures it is given a new byte number that will not conflict with previous settings.
 
 You will also need to manually add the `toolTipText` and `name` to `Bundle.properties`
 as these are required fields in the constructor. The format must be `CodeTweaks.<field>.name`
-and `CodeTweaks.<field>.toolTipText` where <field> is the 2nd argument provided in the
-Misc Tewak constructor. Remember that you must start the `toolTipText` value with `<html>`.
+and `CodeTweaks.<field>.toolTipText` where `<field>` is the 1st argument provided in the
+Misc Tweak constructor. Remember that you must start the `toolTipText` value with `<html>`.
 See other Misc Tweaks for examples.
 
 As the enabling and disabling is handled elsewhere, the only thing left is to add the misc
 tweak to the list of options for whichever generation your tweak applies to. Open the
-RomHandler, edit the `miscTweaksAvailable` function and add the tweak to the `available`
-field. Then update the `applyMiscTweak` function to perform the desired modification.
+appropriate RomHandler, edit the `miscTweaksAvailable` function and add the tweak to the
+`available` field. Then update the `applyMiscTweak` function to perform the desired modification.
 It is recommended to make a function that does this to enable future enhancements and
 easier unit testing.

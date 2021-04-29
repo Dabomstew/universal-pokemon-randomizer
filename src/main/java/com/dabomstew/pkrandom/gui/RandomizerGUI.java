@@ -2396,7 +2396,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     ps.println("ROM: " + romHandler.getROMName());
                     ps.println("Code: " + romHandler.getROMCode());
                     ps.println("Reported Support Level: " + romHandler.getSupportLevel());
-                    ps.println("Settings String: " + getCurrentSettings().toString());
+                    ps.println("Settings String: " + Settings.VERSION + getCurrentSettings().toString());
                     ps.println("Random Seed: " + RandomSource.getSeed());
                     ps.println();
                 } catch (Exception ex2) {

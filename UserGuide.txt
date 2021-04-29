@@ -1,6 +1,6 @@
 Universal Pokemon Randomizer 1.9.0
 by Dabomstew, 2012-16
-by brentspector, 2019-20
+by brentspector, 2019-21
 
 Homepage: http://pokehacks.dabomstew.com/randomizer/index.php
 Source: https://github.com/brentspector/universal-pokemon-randomizer
@@ -121,6 +121,44 @@ When using a premade seed and settings string, the "CustomNames.rncn" file must 
 stored in the same directory/folder as the JAR or EXE. Failure to do so will result 
 in default custom names being used, which may lead to unexpected consequences.
 
+Settings Included
+-----------------
+If you're not sure what you want to do, this randomizer has some preconfigurations
+you can select in the SETTINGS folder. 
+Open the randomizer and click "Load Settings" at the top, then select one of the
+files in the SETTINGS folder.
+Any settings loaded can be modified on an individual basis if there are adjustments
+that are desired.
+
+* Balanced - Removes trade evolutions, removes broken moves, randomizes starters
+  within reason, randomizes trainers within reason, randomizes wild pokemon 
+  within reason, randomizes static pokemon, randomize given pokemon in trades, and
+  randomize hidden hallows (gen 5).
+* Classic - Fewer changes than Balanced. Removes trade evolutions, randomizes
+  starters within reason and requires a super effective triangle, and
+  randomizes hidden hallows (gen 5).
+* Fresh Experience - Randomizes the game in ways that freshen up the experience
+  without impacting the vanilla aspects of the game. Removes trade evolutions,
+  randomizes starters within reason, global swap trainer pokemon, type theme
+  gyms and elite 4, randomize held items where applicable, global swap wild
+  pokemon with similar strength, randomize static pokemon, randomize TMs and
+  Move Tutors, randomize given pokemon in trades as well as their held item, and
+  shuffles items found in the field.
+* Enhanced Experience - Like Fresh Experience, but randomizes abilities, offers a
+  larger selection of starters, forces trainer pokemon to be fully evolved by 40,
+  gives trainers a 10% level boost, buffs the elite 4, forces TMs and Tutors to have
+  20% good damaging moves, randomizes field items, and sets the text to fast.
+* Randomizer Race - Sets the game to Race Mode, which disables log generation.
+  Standardizes all EXP curves to make training speed equal, removes broken moves,
+  remove trade evolutions, lowers evolution requirements, randomizes starters with
+  no restrictions, randomizes trainers within reason, randomizes wild pokemon,
+  randomizes static pokemon, randomizes TMs and Move Tutors, randomizes given
+  and asked pokemon in trades, randomizes field items, randomizes hidden hallows
+  (gen 5), and bans Lucky Egg.
+* Super Randomizer Race - Like Randomizer Race, but even more random. Randomizes
+  pokemon BST, randomizes pokemon abilities, randomizes pokemon types, randomizes
+  evolutions, randomizes move power, accuracy, pp, types, and category, in addition
+  to everything Randomizer Race already does. 
 
 Games/ROMs supported
 --------------------

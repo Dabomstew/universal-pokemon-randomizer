@@ -34,9 +34,16 @@ import com.dabomstew.pkrandom.settings.Settings.TrainersMod;
 import com.dabomstew.pkrandom.settings.Settings.TypesMod;
 
 public class PredicatePair {
+    // These are used if the setting depends on a boolean (like checkbox)
     public static final Predicate<Boolean> BOOLEAN_TRUE = (item) -> item.equals(true);
     public static final Predicate<Boolean> BOOLEAN_FALSE = (item) -> item.equals(false);
+
+    // Used for any Enum (radio button) where it can be anything except the default (unchanged)
     public static final Predicate<Enum> ENUM_NOT_UNCHANGED = (item) -> !isEnumDefault(item);
+
+    // Specific enum states. More selective than "anything but unchanged"
+    // Add more as needed. Do not change existing ones unless a new radio button
+    // option is added that should be part of that group
     public static final Predicate<StartersMod> STARTERS_MOD_CUSTOM = (item) ->
         item == StartersMod.CUSTOM;
     public static final Predicate<StartersMod> STARTERS_MOD_RANDOM = (item) ->
@@ -69,8 +76,9 @@ public class PredicatePair {
         return parent;
     }
 
-    // Determine if the enum is the same value as the first value of the enum
-    // The first value is assumed to always be "UNCHANGED"
+    /** Determine if the enum is the same value as the first value of the enum.
+    *** The first value is assumed to always be "UNCHANGED"
+    */
     private static boolean isEnumDefault(Enum value) {
         Enum[] values = value.getClass().getEnumConstants();
         return value == values[0];

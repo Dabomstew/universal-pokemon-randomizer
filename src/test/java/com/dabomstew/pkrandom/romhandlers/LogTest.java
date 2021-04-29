@@ -683,10 +683,11 @@ public class LogTest {
 
     @Test
     public void TestTypeShuffle() {
-        RomHandler romhandler = spy(new Gen1RomHandler(new Random()));
+        RomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler, 250);
         romhandler.shufflePokemonTypes();
         assertEquals(romhandler.getTemplateData().get("shuffledTypes"), Type.getShuffledList());
+        assertTrue("No types were found in the shuffled list.", Type.getShuffledList().size() > 0);
     }
 
     @Test

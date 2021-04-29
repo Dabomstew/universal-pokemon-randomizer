@@ -55,10 +55,10 @@ XXToo much workXXAdd PokemonEmerald Party Randomizer
 **Change type size and pickType to use the new type list
 
 Change TypeFormDialog to add names for the Dialog, and all components (labels, list, buttons)
-All versions to 190
-Update settings updater
-Verify docs
-Update premade settings
+**All versions to 190
+**Update settings updater
+**Verify docs
+**Update premade settings
 Move options around so non-visible options are at bottom (particularly trainer and starter)
 Build exe and zip into github
 
